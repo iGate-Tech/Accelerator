@@ -16,7 +16,10 @@ services:
       - APP_URL=${APP_URL}
       - REDIS_URL=redis://redis:6379
     depends_on:
-      - redis
+      redis:
+        condition: service_healthy
+    networks:
+      - accelerator-network
     restart: unless-stopped
 
   redis:
@@ -25,7 +28,18 @@ services:
       - "6379:6379"
     volumes:
       - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - accelerator-network
     restart: unless-stopped
 
 volumes:
   redis_data:
+
+networks:
+  accelerator-network:
+    driver: bridge

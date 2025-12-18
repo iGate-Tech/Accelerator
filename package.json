@@ -21,7 +21,7 @@
   "license": "ISC",
   "type": "module",
   "engines": {
-    "node": ">=20.0.0"
+    "node": ">=22.12.0"
   },
   "bugs": {
     "url": "https://github.com/AR-92/accelerator/issues"

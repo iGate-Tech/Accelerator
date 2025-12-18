@@ -69,14 +69,10 @@
     </button>
 
     <!-- Language Switcher -->
-    <div class="flex items-center ml-4">
-      <button id="lang-en" class="px-2 py-1 text-xs font-medium rounded-l-md bg-primary text-primary-foreground" onclick="switchLanguage('en')">
-        EN
-      </button>
-      <button id="lang-ar" class="px-2 py-1 text-xs font-medium rounded-r-md bg-muted text-muted-foreground hover:bg-primary hover:text-primary-foreground" onclick="switchLanguage('ar')">
-        AR
-      </button>
-    </div>
+    <button id="lang-switcher" class="flex items-center gap-1 ml-4 px-2 py-1 text-xs font-medium rounded-md bg-muted text-muted-foreground hover:bg-primary hover:text-primary-foreground" onclick="switchLanguage()">
+      {{{icon "languages" class="h-4 w-4"}}}
+      <span id="lang-text">EN</span>
+    </button>
 
     <!-- Notification Button -->
     <a href="/notification"
@@ -371,28 +367,22 @@
     }
   };
 
-  function switchLanguage(lang) {
-    // Set the language in localStorage
-    localStorage.setItem('language', lang);
-
-    // Update button styles
-    const enBtn = document.getElementById('lang-en');
-    const arBtn = document.getElementById('lang-ar');
-    if (lang === 'en') {
-      enBtn.classList.remove('bg-muted', 'text-muted-foreground', 'hover:bg-primary', 'hover:text-primary-foreground');
-      enBtn.classList.add('bg-primary', 'text-primary-foreground');
-      arBtn.classList.remove('bg-primary', 'text-primary-foreground');
-      arBtn.classList.add('bg-muted', 'text-muted-foreground', 'hover:bg-primary', 'hover:text-primary-foreground');
-    } else {
-      arBtn.classList.remove('bg-muted', 'text-muted-foreground', 'hover:bg-primary', 'hover:text-primary-foreground');
-      arBtn.classList.add('bg-primary', 'text-primary-foreground');
-      enBtn.classList.remove('bg-primary', 'text-primary-foreground');
-      enBtn.classList.add('bg-muted', 'text-muted-foreground', 'hover:bg-primary', 'hover:text-primary-foreground');
-    }
+  function switchLanguage() {
+    const currentLang = localStorage.getItem('language') || 'en';
+    const newLang = currentLang === 'en' ? 'ar' : 'en';
+    localStorage.setItem('language', newLang);
+    updateLangSwitcher(newLang);
 
     // Here you would implement the actual language switching logic
     // For example, reload the page or update content dynamically
-    console.log('Language switched to:', lang);
+    console.log('Language switched to:', newLang);
+  }
+
+  function updateLangSwitcher(lang) {
+    const textSpan = document.getElementById('lang-text');
+    if (textSpan) {
+      textSpan.textContent = lang.toUpperCase();
+    }
   }
 
   document.addEventListener('DOMContentLoaded', () => {
@@ -403,9 +393,9 @@
             'dark'; if (isDark) { document.documentElement.classList.add('dark'); }
     updateThemeIcon(isDark);
 
-    // Load saved language and update buttons
+    // Load saved language and update switcher
     const savedLang = localStorage.getItem('language') || 'en';
-    switchLanguage(savedLang);
+    updateLangSwitcher(savedLang);
 
     // Load credit balance on page load
     loadNavCreditBalance();

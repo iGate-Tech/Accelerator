@@ -22,6 +22,7 @@
           <span class="nav-text">Dashboard</span>
         </a>
       </div>
+      {{#if (eq user.profile.package_type "enterprise")}}
       <div id="nav-portfolio-item" class="flex flex-col items-center justify-center group">
         <div class="border-t-4 border-primary w-6 rounded-md opacity-0 group-hover:opacity-100"></div>
         <a href="/portfolios"
@@ -29,6 +30,7 @@
           <span class="nav-text">Portfolio</span>
         </a>
       </div>
+      {{/if}}
       <div class="flex flex-col items-center justify-center group">
         <div class="border-t-4 border-primary w-6 rounded-md opacity-0 group-hover:opacity-100"></div>
         <a href="/voting-reward"
@@ -116,6 +118,7 @@
                </div>
              </a>
               <div class="bg-border -mx-1 my-1 h-px"></div>
+              {{#if (eq user.profile.package_type "enterprise")}}
               <a id="grid-portfolio-link" href="/portfolios"
                 class="relative flex cursor-default select-none items-center rounded-sm px-2 py-2 text-sm outline-none transition-colors hover:bg-primary-100 hover:text-primary-900">
 
@@ -129,6 +132,7 @@
                   <span class="text-xs text-muted-foreground">Team collaboration platform</span>
                 </div>
               </a>
+              {{/if}}
             <div class="bg-border -mx-1 my-1 h-px"></div>
              <a href="/models/business"
                class="relative flex cursor-default select-none items-center rounded-sm px-2 py-2 text-sm outline-none transition-colors hover:bg-primary-100 hover:text-primary-900">
@@ -311,15 +315,10 @@
 
        if (response.ok) {
          const data = await response.json();
-         console.log('API response data:', data);
          const creditElement = document.getElementById('nav-credit-balance');
          if (creditElement) {
            creditElement.textContent = `${data.balance} Credits`;
          }
-         // Store package_type for conditional nav
-         window.userPackageType = data.package_type;
-         // Show/hide portfolio links based on package
-         updatePortfolioVisibility(data.package_type);
        }
          // Store package_type for conditional nav
          window.userPackageType = data.package_type;
@@ -337,19 +336,7 @@
     }
   };
 
-  // Function to show/hide portfolio navigation items based on package type
-  function updatePortfolioVisibility(packageType) {
-    const navPortfolioItem = document.getElementById('nav-portfolio-item');
-    const gridPortfolioLink = document.getElementById('grid-portfolio-link');
-    const isEnterprise = packageType && packageType.toLowerCase() === 'enterprise';
-    console.log('Portfolio visibility check:', { packageType, isEnterprise });
-    if (navPortfolioItem) {
-      navPortfolioItem.style.display = isEnterprise ? '' : 'none';
-    }
-    if (gridPortfolioLink) {
-      gridPortfolioLink.style.display = isEnterprise ? '' : 'none';
-    }
-  }
+
 
   // Load notification indicator
   window.loadNotificationIndicator = async function () {

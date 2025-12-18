@@ -1,5 +1,5 @@
 // Buy Credits JavaScript
-function buyPackage(packageId) {
+function _buyPackage(packageId) {
   // Show loading state
   const button = event.target;
   if (button) {

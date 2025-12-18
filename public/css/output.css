@@ -833,20 +833,17 @@
   .h-\[1px\] {
     height: 1px;
   }
-  .h-\[24px\] {
-    height: 24px;
-  }
   .h-\[28px\] {
     height: 28px;
   }
   .h-\[30px\] {
     height: 30px;
   }
+  .h-\[48px\] {
+    height: 48px;
+  }
   .h-\[300px\] {
     height: 300px;
-  }
-  .h-\[400px\] {
-    height: 400px;
   }
   .h-\[500px\] {
     height: 500px;
@@ -995,8 +992,8 @@
   .w-96 {
     width: calc(var(--spacing) * 96);
   }
-  .w-\[24px\] {
-    width: 24px;
+  .w-\[48px\] {
+    width: 48px;
   }
   .w-\[75\%\] {
     width: 75%;
@@ -1441,9 +1438,6 @@
     :where(& > :not(:last-child)) {
       border-color: var(--color-border);
     }
-  }
-  .place-self-center {
-    place-self: center;
   }
   .self-center {
     align-self: center;

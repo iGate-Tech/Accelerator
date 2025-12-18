@@ -626,6 +626,9 @@
   .mt-\[-3px\] {
     margin-top: -3px;
   }
+  .mt-\[300px\] {
+    margin-top: 300px;
+  }
   .mt-auto {
     margin-top: auto;
   }
@@ -878,9 +881,6 @@
   .max-h-96 {
     max-height: calc(var(--spacing) * 96);
   }
-  .max-h-\[70vh\] {
-    max-height: 70vh;
-  }
   .min-h-12 {
     min-height: calc(var(--spacing) * 12);
   }
@@ -1012,9 +1012,6 @@
   }
   .w-\[200px\] {
     width: 200px;
-  }
-  .w-\[350px\] {
-    width: 350px;
   }
   .w-\[400px\] {
     width: 400px;

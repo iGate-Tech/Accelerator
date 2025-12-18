@@ -22,6 +22,16 @@
     <a href="#pricing" class="text-xs font-medium text-white/50 hover:text-white transition-colors">Pricing</a>
   </div>
 
+  <!-- Language Switcher -->
+  <div class="hidden md:flex items-center mr-4">
+    <button id="lang-en" class="px-2 py-1 text-xs font-medium rounded-l-md bg-white text-black" onclick="switchLanguage('en')">
+      EN
+    </button>
+    <button id="lang-ar" class="px-2 py-1 text-xs font-medium rounded-r-md bg-white/50 text-white hover:bg-white hover:text-black" onclick="switchLanguage('ar')">
+      AR
+    </button>
+  </div>
+
   <!-- Action Buttons -->
   <div class="flex gap-2">
 
@@ -32,3 +42,36 @@
     </a>
   </div>
 </nav>
+
+<script>
+  function switchLanguage(lang) {
+    // Set the language in localStorage
+    localStorage.setItem('language', lang);
+
+    // Update button styles
+    const enBtn = document.getElementById('lang-en');
+    const arBtn = document.getElementById('lang-ar');
+    if (lang === 'en') {
+      enBtn.classList.remove('bg-white/50', 'text-white', 'hover:bg-white', 'hover:text-black');
+      enBtn.classList.add('bg-white', 'text-black');
+      arBtn.classList.remove('bg-white', 'text-black');
+      arBtn.classList.add('bg-white/50', 'text-white', 'hover:bg-white', 'hover:text-black');
+    } else {
+      arBtn.classList.remove('bg-white/50', 'text-white', 'hover:bg-white', 'hover:text-black');
+      arBtn.classList.add('bg-white', 'text-black');
+      enBtn.classList.remove('bg-white', 'text-black');
+      enBtn.classList.add('bg-white/50', 'text-white', 'hover:bg-white', 'hover:text-black');
+    }
+
+    // Here you would implement the actual language switching logic
+    // For example, reload the page or update content dynamically
+    // For now, just log it
+    console.log('Language switched to:', lang);
+  }
+
+  // Load saved language on page load
+  document.addEventListener('DOMContentLoaded', () => {
+    const savedLang = localStorage.getItem('language') || 'en';
+    switchLanguage(savedLang);
+  });
+</script>

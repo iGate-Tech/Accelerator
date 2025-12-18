@@ -68,6 +68,16 @@
         }}}</span>
     </button>
 
+    <!-- Language Switcher -->
+    <div class="flex items-center ml-4">
+      <button id="lang-en" class="px-2 py-1 text-xs font-medium rounded-l-md bg-primary text-primary-foreground" onclick="switchLanguage('en')">
+        EN
+      </button>
+      <button id="lang-ar" class="px-2 py-1 text-xs font-medium rounded-r-md bg-muted text-muted-foreground hover:bg-primary hover:text-primary-foreground" onclick="switchLanguage('ar')">
+        AR
+      </button>
+    </div>
+
     <!-- Notification Button -->
     <a href="/notification"
       class="ml-4 self-center w-6 h-6 text-muted-foreground hover:text-primary rounded-full cursor-pointer font-medium border-0 flex items-center justify-center relative">
@@ -361,6 +371,30 @@
     }
   };
 
+  function switchLanguage(lang) {
+    // Set the language in localStorage
+    localStorage.setItem('language', lang);
+
+    // Update button styles
+    const enBtn = document.getElementById('lang-en');
+    const arBtn = document.getElementById('lang-ar');
+    if (lang === 'en') {
+      enBtn.classList.remove('bg-muted', 'text-muted-foreground', 'hover:bg-primary', 'hover:text-primary-foreground');
+      enBtn.classList.add('bg-primary', 'text-primary-foreground');
+      arBtn.classList.remove('bg-primary', 'text-primary-foreground');
+      arBtn.classList.add('bg-muted', 'text-muted-foreground', 'hover:bg-primary', 'hover:text-primary-foreground');
+    } else {
+      arBtn.classList.remove('bg-muted', 'text-muted-foreground', 'hover:bg-primary', 'hover:text-primary-foreground');
+      arBtn.classList.add('bg-primary', 'text-primary-foreground');
+      enBtn.classList.remove('bg-primary', 'text-primary-foreground');
+      enBtn.classList.add('bg-muted', 'text-muted-foreground', 'hover:bg-primary', 'hover:text-primary-foreground');
+    }
+
+    // Here you would implement the actual language switching logic
+    // For example, reload the page or update content dynamically
+    console.log('Language switched to:', lang);
+  }
+
   document.addEventListener('DOMContentLoaded', () => {
     const savedTheme =
       localStorage.getItem('theme'); const systemPrefersDark =
@@ -368,6 +402,10 @@
           savedTheme || (systemPrefersDark ? 'dark' : 'light'); const isDark = theme ===
             'dark'; if (isDark) { document.documentElement.classList.add('dark'); }
     updateThemeIcon(isDark);
+
+    // Load saved language and update buttons
+    const savedLang = localStorage.getItem('language') || 'en';
+    switchLanguage(savedLang);
 
     // Load credit balance on page load
     loadNavCreditBalance();

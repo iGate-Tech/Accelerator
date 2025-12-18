@@ -68,6 +68,13 @@
         }}}</span>
     </button>
 
+    <!-- Notification Button -->
+    <a href="/notification"
+      class="ml-4 self-center w-6 h-6 text-muted-foreground hover:text-primary rounded-full cursor-pointer font-medium border-0 flex items-center justify-center relative">
+      {{{icon "bell" class="h-5 w-5"}}}
+      <span id="nav-notification-indicator" class="absolute -top-1 -right-1 h-2 w-2 bg-red-500 rounded-full hidden"></span>
+    </a>
+
     <!-- Grid Menu -->
     <div class="relative self-center" id="grid-menu">
       <button onclick="toggleGridMenu()"
@@ -223,19 +230,9 @@
             {{{icon "plus-circle" class="h-4 w-4 shrink-0"}}}
 
             Add Payment Method
-          </a>
+            </a>
 
-           <!-- Notifications -->
-           <a href="/notification"
-             class="w-full relative flex cursor-default select-none items-center gap-2 rounded-sm px-2 py-2 text-sm text-left outline-none transition-colors hover:bg-primary-100 hover:text-primary-900">
-
-             {{{icon "bell" class="h-4 w-4 shrink-0"}}}
-             <span id="notification-indicator" class="absolute -top-1 -right-1 h-2 w-2 bg-red-500 rounded-full hidden"></span>
-
-             Notifications
-           </a>
-
-          <!-- User Activity -->
+            <!-- User Activity -->
           <a href="/user-activity"
             class="w-full relative flex cursor-default select-none items-center gap-2 rounded-sm px-2 py-2 text-sm text-left outline-none transition-colors hover:bg-primary-100 hover:text-primary-900">
 
@@ -382,17 +379,17 @@
         credentials: 'same-origin'
       });
 
-      if (response.ok) {
-        const data = await response.json();
-        const indicator = document.getElementById('notification-indicator');
-        if (indicator) {
-          if (data.count > 0) {
-            indicator.classList.remove('hidden');
-          } else {
-            indicator.classList.add('hidden');
-          }
-        }
-      }
+       if (response.ok) {
+         const data = await response.json();
+         const indicator = document.getElementById('nav-notification-indicator');
+         if (indicator) {
+           if (data.count > 0) {
+             indicator.classList.remove('hidden');
+           } else {
+             indicator.classList.add('hidden');
+           }
+         }
+       }
     } catch (error) {
       console.error('Error loading notification count:', error);
     }

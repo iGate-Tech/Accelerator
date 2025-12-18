@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
-    "dev": "concurrently \"npm run watch-css\" \"nodemon index.js\"",
+    "check-redis": "bash -c 'if ! docker ps | grep -q redis-dev; then docker run -d -p 6379:6379 --name redis-dev redis:alpine; fi'",
+    "dev": "npm run check-redis && concurrently \"npm run watch-css\" \"nodemon index.js\"",
     "build": "npm run build-css",
     "build-css": "npx @tailwindcss/cli -i public/css/input.css -o public/css/output.css",
     "watch-css": "npx @tailwindcss/cli -i public/css/input.css -o public/css/output.css --watch",

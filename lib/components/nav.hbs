@@ -22,7 +22,7 @@
           <span class="nav-text">Dashboard</span>
         </a>
       </div>
-               {{#if (eq user.package_type "enterprise")}}
+      {{#if (eq user.profile.package_type "enterprise")}}
       <div id="nav-portfolio-item" class="flex flex-col items-center justify-center group">
         <div class="border-t-4 border-primary w-6 rounded-md opacity-0 group-hover:opacity-100"></div>
         <a href="/portfolios"
@@ -118,7 +118,7 @@
                </div>
              </a>
              <div class="bg-border -mx-1 my-1 h-px"></div>
-      {{#if (eq user.package_type "enterprise")}}
+               {{#if (eq user.profile.package_type "enterprise")}}
               <a id="grid-portfolio-link" href="/portfolios"
                 class="relative flex cursor-default select-none items-center rounded-sm px-2 py-2 text-sm outline-none transition-colors hover:bg-primary-100 hover:text-primary-900">
 

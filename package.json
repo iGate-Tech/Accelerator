@@ -6,9 +6,10 @@
   "scripts": {
     "start": "node index.js",
     "dev": "concurrently \"npm run watch-css\" \"nodemon index.js\"",
+    "build": "npm run build-css",
     "build-css": "npx @tailwindcss/cli -i public/css/input.css -o public/css/output.css",
     "watch-css": "npx @tailwindcss/cli -i public/css/input.css -o public/css/output.css --watch",
-    "lint": "echo \"Linting not configured yet\" && exit 0",
+    "lint": "eslint . --ext .js",
     "format": "prettier --write ."
   },
   "repository": {
@@ -44,6 +45,7 @@
     "@tailwindcss/postcss": "^4.1.17",
     "autoprefixer": "^10.4.22",
     "concurrently": "^9.2.1",
+    "eslint": "^9.39.2",
     "nodemon": "^3.1.11",
     "postcss": "^8.5.6",
     "postcss-cli": "^11.0.1",

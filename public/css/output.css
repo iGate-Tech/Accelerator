@@ -1564,8 +1564,16 @@
   .rounded-xl {
     border-radius: var(--radius-xl);
   }
+  .rounded-l-md {
+    border-top-left-radius: var(--radius-md);
+    border-bottom-left-radius: var(--radius-md);
+  }
   .rounded-tl-sm {
     border-top-left-radius: var(--radius-sm);
+  }
+  .rounded-r-md {
+    border-top-right-radius: var(--radius-md);
+    border-bottom-right-radius: var(--radius-md);
   }
   .rounded-tr-sm {
     border-top-right-radius: var(--radius-sm);
@@ -3910,6 +3918,13 @@
       }
     }
   }
+  .hover\:bg-primary {
+    &:hover {
+      @media (hover: hover) {
+        background-color: var(--color-primary);
+      }
+    }
+  }
   .hover\:bg-primary-100 {
     &:hover {
       @media (hover: hover) {
@@ -4162,6 +4177,13 @@
     &:hover {
       @media (hover: hover) {
         color: var(--color-primary-900);
+      }
+    }
+  }
+  .hover\:text-primary-foreground {
+    &:hover {
+      @media (hover: hover) {
+        color: var(--color-primary-foreground);
       }
     }
   }

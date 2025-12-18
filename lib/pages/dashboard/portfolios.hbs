@@ -156,7 +156,7 @@
             <div class="flex items-start justify-between mb-4">
               <div class="flex-1">
                 <h3 class="text-lg font-semibold text-foreground mb-1">{{name}}</h3>
-                <p class="text-sm text-muted-foreground line-clamp-2">{{description}}</p>
+                 <p class="text-sm text-muted-foreground line-clamp-2 w-full break-words">{{description}}</p>
               </div>
                {{#if isOwner}}
                <div class="flex items-center gap-2 ml-4">
@@ -658,7 +658,7 @@
         <div class="flex items-start justify-between mb-4">
           <div class="flex-1">
             <h3 class="text-lg font-semibold text-foreground mb-1">${portfolio.name}</h3>
-            <p class="text-sm text-muted-foreground line-clamp-2">${portfolio.description || ''}</p>
+             <p class="text-sm text-muted-foreground line-clamp-2 w-full break-words">${portfolio.description || ''}</p>
           </div>
           <div class="flex items-center gap-2 ml-4">
             <button class="btn btn-ghost btn-sm" onclick="editPortfolio('${portfolio.id}')" title="Edit Portfolio">

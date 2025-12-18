@@ -309,12 +309,18 @@
         credentials: 'same-origin'
       });
 
-      if (response.ok) {
-        const data = await response.json();
-        const creditElement = document.getElementById('nav-credit-balance');
-        if (creditElement) {
-          creditElement.textContent = `${data.balance} Credits`;
-        }
+       if (response.ok) {
+         const data = await response.json();
+         console.log('API response data:', data);
+         const creditElement = document.getElementById('nav-credit-balance');
+         if (creditElement) {
+           creditElement.textContent = `${data.balance} Credits`;
+         }
+         // Store package_type for conditional nav
+         window.userPackageType = data.package_type;
+         // Show/hide portfolio links based on package
+         updatePortfolioVisibility(data.package_type);
+       }
          // Store package_type for conditional nav
          window.userPackageType = data.package_type;
          // Show/hide portfolio links based on package
@@ -335,7 +341,8 @@
   function updatePortfolioVisibility(packageType) {
     const navPortfolioItem = document.getElementById('nav-portfolio-item');
     const gridPortfolioLink = document.getElementById('grid-portfolio-link');
-    const isEnterprise = packageType === 'enterprise';
+    const isEnterprise = packageType && packageType.toLowerCase() === 'enterprise';
+    console.log('Portfolio visibility check:', { packageType, isEnterprise });
     if (navPortfolioItem) {
       navPortfolioItem.style.display = isEnterprise ? '' : 'none';
     }

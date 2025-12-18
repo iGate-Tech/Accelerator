@@ -10,7 +10,8 @@
     "build-css": "npx @tailwindcss/cli -i public/css/input.css -o public/css/output.css",
     "watch-css": "npx @tailwindcss/cli -i public/css/input.css -o public/css/output.css --watch",
     "lint": "eslint . --ext .js",
-    "format": "prettier --write ."
+    "format": "prettier --write .",
+    "deploy": "git push origin staging:main"
   },
   "repository": {
     "type": "git",

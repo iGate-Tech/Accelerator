@@ -1079,6 +1079,9 @@
   .max-w-\[280px\] {
     max-width: 280px;
   }
+  .max-w-\[400px\] {
+    max-width: 400px;
+  }
   .max-w-\[600px\] {
     max-width: 600px;
   }
@@ -1108,6 +1111,9 @@
   }
   .min-w-\[140px\] {
     min-width: 140px;
+  }
+  .min-w-\[600px\] {
+    min-width: 600px;
   }
   .min-w-\[900px\] {
     min-width: 900px;

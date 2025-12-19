@@ -132,12 +132,7 @@
               <h2 class="text-xl font-semibold text-foreground">Recent Reward Transactions</h2>
               <a href="#" class="btn btn-ghost text-sm" onclick="loadMoreTransactions()">
                 View All
-                <svg class="lucide lucide-arrow-right" xmlns="http://www.w3.org/2000/svg" width="14" height="14"
-                  viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                  stroke-linejoin="round">
-                  <path d="M5 12h14"></path>
-                  <path d="m12 5 7 7-7 7"></path>
-                </svg>
+                {{{icon 'arrow-right' class='' size='14'}}}
               </a>
             </div>
             <div id="reward-transactions" class="space-y-4" hx-get="/api/voting-rewards/transactions?limit=10&offset=0" hx-trigger="load, refresh-transactions" hx-target="this" hx-swap="innerHTML">
@@ -158,12 +153,7 @@
                <h2 class="text-xl font-semibold text-foreground">Recent Voting Activity</h2>
                <a href="/explore-idea" class="btn btn-ghost text-sm">
                 Vote on More Ideas
-                <svg class="lucide lucide-arrow-right" xmlns="http://www.w3.org/2000/svg" width="14" height="14"
-                  viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                  stroke-linejoin="round">
-                  <path d="M5 12h14"></path>
-                  <path d="m12 5 7 7-7 7"></path>
-                </svg>
+                {{{icon 'arrow-right' class='' size='14'}}}
               </a>
             </div>
             <div id="voting-activity" class="space-y-4" hx-get="/api/voting-rewards/activity?limit=10&offset=0" hx-trigger="load, refresh-activity" hx-target="this" hx-swap="innerHTML">

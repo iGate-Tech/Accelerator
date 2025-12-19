@@ -22,11 +22,18 @@
     <a href="#pricing" class="text-xs font-medium text-white/50 hover:text-white transition-colors">Pricing</a>
   </div>
 
-  <!-- Language Switcher -->
-  <button id="lang-switcher" class="hidden md:flex items-center gap-1 mr-4 px-2 py-1 text-xs font-medium rounded-md bg-white/50 text-white hover:bg-white hover:text-black" onclick="switchLanguage()">
-    {{{icon "languages" class="h-4 w-4"}}}
-    <span id="lang-text">EN</span>
-  </button>
+<!-- Theme Toggle -->
+   <button id="theme-toggle" class="hidden md:flex items-center gap-1 mr-4 px-2 py-1 text-xs font-medium rounded-md bg-white/50 text-white hover:bg-white hover:text-black" onclick="toggleTheme()">
+     <span id="theme-icon-light" class="hidden">{{{icon "sun" class="h-4 w-4"}}}</span>
+     <span id="theme-icon-dark">{{{icon "moon" class="h-4 w-4"}}}</span>
+     <span id="theme-text">Dark</span>
+   </button>
+
+   <!-- Language Switcher -->
+   <button id="lang-switcher" class="hidden md:flex items-center gap-1 mr-4 px-2 py-1 text-xs font-medium rounded-md bg-white/50 text-white hover:bg-white hover:text-black" onclick="switchLanguage()">
+     {{{icon "languages" class="h-4 w-4"}}}
+     <span id="lang-text">EN</span>
+   </button>
 
   <!-- Action Buttons -->
   <div class="flex gap-2">
@@ -40,27 +47,60 @@
 </nav>
 
 <script>
-  function switchLanguage() {
-    const currentLang = localStorage.getItem('language') || 'en';
-    const newLang = currentLang === 'en' ? 'ar' : 'en';
-    localStorage.setItem('language', newLang);
-    updateLangSwitcher(newLang);
+   function toggleTheme() {
+     const html = document.documentElement;
+     html.classList.toggle('dark');
+     const isDark = html.classList.contains('dark');
+     localStorage.setItem('theme', isDark ? 'dark' : 'light');
+     updateThemeToggle(isDark);
+   }
 
-    // Here you would implement the actual language switching logic
-    // For example, reload the page or update content dynamically
-    console.log('Language switched to:', newLang);
-  }
+   function updateThemeToggle(isDark) {
+     const lightIcon = document.getElementById('theme-icon-light');
+     const darkIcon = document.getElementById('theme-icon-dark');
+     const text = document.getElementById('theme-text');
 
-  function updateLangSwitcher(lang) {
-    const textSpan = document.getElementById('lang-text');
-    if (textSpan) {
-      textSpan.textContent = lang.toUpperCase();
-    }
-  }
+     if (lightIcon && darkIcon && text) {
+       if (isDark) {
+         lightIcon.classList.remove('hidden');
+         darkIcon.classList.add('hidden');
+         text.textContent = 'Light';
+       } else {
+         darkIcon.classList.remove('hidden');
+         lightIcon.classList.add('hidden');
+         text.textContent = 'Dark';
+       }
+     }
+   }
 
-  // Load saved language on page load
-  document.addEventListener('DOMContentLoaded', () => {
-    const savedLang = localStorage.getItem('language') || 'en';
-    updateLangSwitcher(savedLang);
-  });
-</script>
+   function switchLanguage() {
+     const currentLang = localStorage.getItem('language') || 'en';
+     const newLang = currentLang === 'en' ? 'ar' : 'en';
+     localStorage.setItem('language', newLang);
+     updateLangSwitcher(newLang);
+
+     // Here you would implement the actual language switching logic
+     // For example, reload the page or update content dynamically
+     console.log('Language switched to:', newLang);
+   }
+
+   function updateLangSwitcher(lang) {
+     const textSpan = document.getElementById('lang-text');
+     if (textSpan) {
+       textSpan.textContent = lang.toUpperCase();
+     }
+   }
+
+   // Load saved theme and language on page load
+   document.addEventListener('DOMContentLoaded', () => {
+     const savedTheme = localStorage.getItem('theme') || 'light';
+     const savedLang = localStorage.getItem('language') || 'en';
+
+     if (savedTheme === 'dark') {
+       document.documentElement.classList.add('dark');
+     }
+
+     updateThemeToggle(savedTheme === 'dark');
+     updateLangSwitcher(savedLang);
+   });
+ </script>

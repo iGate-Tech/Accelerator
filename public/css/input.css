@@ -72,6 +72,80 @@
   --color-ring: var(--color-primary);
 }
 
+/* Light mode explicitly */
+:root:not(.dark) {
+  /* Primary Palette (Purple) */
+  --color-primary-50: hsl(290 20% 96%);
+  --color-primary-100: hsl(290 35% 92%);
+  --color-primary-200: hsl(290 48% 82%);
+  --color-primary-300: hsl(290 58% 70%);
+  --color-primary-400: hsl(290 64% 58%);
+  --color-primary: hsl(290 64% 43%);
+  --color-primary-600: hsl(290 68% 36%);
+  --color-primary-700: hsl(290 72% 28%);
+  --color-primary-800: hsl(290 72% 20%);
+  --color-primary-900: hsl(290 72% 14%);
+  --color-primary-content: hsl(290 20% 96%);
+
+  /* Secondary (Analogous Purple-Blue) */
+  --color-secondary: hsl(260 56% 44%);
+  --color-secondary-content: hsl(260 36% 92%);
+
+  /* Accent (Professional Blue) */
+  --color-accent: hsl(200 56% 43%);
+  --color-accent-content: hsl(200 36% 92%);
+
+  /* Neutral (Grays based on primary lightness) */
+  --color-neutral: hsl(290 10% 50%);
+  --color-neutral-content: hsl(290 10% 95%);
+  --color-neutral-muted: hsl(290 8% 40%);
+  --color-neutral-border: hsl(290 8% 88%);
+
+  /* Base (Whites/Blacks) */
+  --color-base-100: hsl(0 0% 100%);
+  --color-base-200: hsl(0 0% 98%);
+  --color-base-300: hsl(0 0% 96%);
+  --color-base-content: hsl(290 10% 10%);
+
+  /* Additional */
+  --color-background: var(--color-base-100);
+  --color-foreground: var(--color-base-content);
+  --color-input: var(--color-base-300);
+  --color-muted-foreground: var(--color-neutral);
+  --color-ring: var(--color-primary);
+  --color-muted: var(--color-base-200);
+
+  /* Semantic */
+  --color-info: hsl(217 91% 60%);
+  --color-info-content: hsl(217 91% 95%);
+  --color-success: hsl(142 76% 36%);
+  --color-success-content: hsl(142 76% 95%);
+  --color-warning: hsl(38 92% 50%);
+  --color-warning-content: hsl(38 92% 95%);
+  --color-error: hsl(0 84% 60%);
+  --color-yellow: hsl(45 86% 58%);
+  --color-yellow-content: hsl(45 86% 10%);
+
+  /* Grid color */
+  --grid-color: rgba(0, 0, 0, 0.03);
+
+  /* Shadcn/UI variables */
+  --color-card: var(--color-base-100);
+  --color-card-foreground: var(--color-base-content);
+  --color-popover: var(--color-base-100);
+  --color-popover-foreground: var(--color-base-content);
+  --color-primary-foreground: var(--color-primary-content);
+  --color-secondary-foreground: var(--color-secondary-content);
+  --color-muted-foreground: var(--color-neutral);
+  --color-accent-foreground: var(--color-accent-content);
+  --color-destructive: var(--color-error);
+  --color-destructive-foreground: var(--color-error-content);
+  --color-border: var(--color-base-300);
+  --color-input: var(--color-base-300);
+  --color-ring: var(--color-primary);
+}
+
+/* Dark mode */
 .dark {
   /* Primary Palette (Darker Purple) */
   --color-primary-50: hsl(290 64% 10%);

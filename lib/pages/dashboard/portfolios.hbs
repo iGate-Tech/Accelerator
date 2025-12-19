@@ -13,12 +13,7 @@
         </div>
         <div class="flex items-center gap-2">
           <button class="btn btn-primary" onclick="openCreatePortfolioModal()">
-            <svg class="lucide lucide-plus w-4 h-4 mr-2" xmlns="http://www.w3.org/2000/svg" width="16" height="16"
-              viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-              stroke-linejoin="round">
-              <path d="M5 12h14"></path>
-              <path d="M12 5v14"></path>
-            </svg>
+            {{{icon 'plus' class='w-4 h-4 mr-2' size='16'}}}
             Create Portfolio
           </button>
         </div>
@@ -31,23 +26,15 @@
           <div class="flex items-center gap-3">
             <div class="flex-1 max-w-md relative">
               <div class="relative">
-                <svg class="lucide lucide-search absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <circle cx="11" cy="11" r="8"></circle>
-                  <path d="m21 21-4.35-4.35"></path>
-                </svg>
+                {{{icon 'search' class='absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground' size='16'}}}
                 <input type="text" id="portfolio-search" placeholder="Search portfolios..." class="input w-full pl-10 pr-10" oninput="filterPortfolios()">
                 <button type="button" id="portfolio-search-clear" class="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground hover:text-foreground opacity-0 transition-opacity duration-200" onclick="clearPortfolioSearch()" style="display: none;">
-                  <svg class="lucide lucide-x w-4 h-4" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M18 6L6 18"></path>
-                    <path d="M6 6l12 12"></path>
-                  </svg>
+                  {{{icon 'x' class='w-4 h-4' size='16'}}}
                 </button>
               </div>
             </div>
             <div class="flex items-center gap-2">
-              <svg class="lucide lucide-filter w-4 h-4 text-muted-foreground" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <polygon points="22,3 2,3 10,12.46 10,19 14,21 14,12.46 22,3"/>
-              </svg>
+              {{{icon 'filter' class='w-4 h-4 text-muted-foreground' size='16'}}}
               <select id="portfolio-sort" class="select w-auto min-w-0" onchange="sortPortfolios()">
                 <option value="newest">Newest</option>
                 <option value="oldest">Oldest</option>
@@ -68,12 +55,7 @@
               <div class="bg-primary/20 rounded-lg">
                 <div class="w-10 h-10 bg-primary/20 rounded-lg relative">
                   <div class="flex items-center justify-center w-9 h-9 bg-primary rounded-lg absolute top-0.5 left-0.5">
-                    <svg class="lucide lucide-archive w-4 h-4 text-primary-foreground" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                      <rect width="20" height="5" x="2" y="3" rx="1"/>
-                      <path d="M4 8v11a2 2 0 0 0 2 2h2"/>
-                      <path d="M20 8v11a2 2 0 0 1-2 2h-2"/>
-                      <path d="m9 12 2 2 4-4"/>
-                    </svg>
+{{{icon 'archive' class='w-4 h-4 text-primary-foreground' size='16'}}}
                   </div>
                 </div>
               </div>
@@ -91,11 +73,7 @@
               <div class="bg-secondary/20 rounded-lg">
                 <div class="w-10 h-10 bg-secondary/20 rounded-lg relative">
                   <div class="flex items-center justify-center w-9 h-9 bg-secondary rounded-lg absolute top-0.5 left-0.5">
-                    <svg class="lucide lucide-lightbulb w-4 h-4 text-secondary-foreground" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                      <path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"/>
-                      <path d="M9 18h6"/>
-                      <path d="M10 22h4"/>
-                    </svg>
+                    {{{icon 'lightbulb' class='w-4 h-4 text-secondary-foreground' size='16'}}}
                   </div>
                 </div>
               </div>
@@ -113,10 +91,7 @@
               <div class="bg-success/20 rounded-lg">
                 <div class="w-10 h-10 bg-success/20 rounded-lg relative">
                   <div class="flex items-center justify-center w-9 h-9 bg-success rounded-lg absolute top-0.5 left-0.5">
-                    <svg class="lucide lucide-trending-up w-4 h-4 text-success-foreground" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                      <path d="M16 7h6v6"/>
-                      <path d="m22 7-8.5 8.5-5-5L2 17"/>
-                    </svg>
+{{{icon 'trending-up' class='w-4 h-4 text-success-foreground' size='16'}}}
                   </div>
                 </div>
               </div>
@@ -134,12 +109,7 @@
               <div class="bg-primary/20 rounded-lg">
                 <div class="w-10 h-10 bg-primary/20 rounded-lg relative">
                   <div class="flex items-center justify-center w-9 h-9 bg-primary rounded-lg absolute top-0.5 left-0.5">
-                    <svg class="lucide lucide-users w-4 h-4 text-primary-foreground" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                      <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
-                      <path d="M16 3.128a4 4 0 0 1 0 7.744"/>
-                      <path d="M22 21v-2a4 4 0 0 0-3-3.87"/>
-                      <circle cx="9" cy="7" r="4"/>
-                    </svg>
+                    {{{icon 'users' class='w-4 h-4 text-primary-foreground' size='16'}}}
                   </div>
                 </div>
               </div>
@@ -161,17 +131,10 @@
                {{#if isOwner}}
                <div class="flex items-center gap-2 ml-4">
                  <button class="btn btn-ghost btn-sm" onclick="editPortfolio('{{id}}')" title="Edit Portfolio">
-                   <svg class="lucide lucide-edit w-4 h-4" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                     <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
-                     <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
-                   </svg>
+{{{icon 'edit' class='w-4 h-4' size='14'}}}
                  </button>
                  <button class="btn btn-ghost btn-sm text-destructive hover:text-destructive" onclick="deletePortfolio('{{id}}')" title="Delete Portfolio">
-                   <svg class="lucide lucide-trash w-4 h-4" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                     <path d="M3 6h18"/>
-                     <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/>
-                     <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>
-                   </svg>
+{{{icon 'trash' class='w-4 h-4' size='14'}}}
                  </button>
                </div>
                {{else}}
@@ -208,12 +171,7 @@
             {{#if teamMembers}}
             <div class="mb-4">
               <div class="flex items-center gap-2 mb-2">
-                <svg class="lucide lucide-users w-4 h-4 text-muted-foreground" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
-                  <path d="M16 3.128a4 4 0 0 1 0 7.744"/>
-                  <path d="M22 21v-2a4 4 0 0 0-3-3.87"/>
-                  <circle cx="9" cy="7" r="4"/>
-                </svg>
+{{{icon 'users' class='w-4 h-4 text-muted-foreground' size='14'}}}
                 <span class="text-sm text-muted-foreground">Team ({{teamMembers.length}})</span>
               </div>
               <div class="flex -space-x-2">
@@ -233,18 +191,12 @@
               <!-- Action Buttons -->
               <div class="flex gap-2">
                 <a href="/portfolios/{{id}}" class="btn btn-outline btn-sm {{#if (or isOwner (eq memberRole "editor"))}}flex-1{{else}}w-full{{/if}}">
-                  <svg class="lucide lucide-eye w-4 h-4 mr-1" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/>
-                    <circle cx="12" cy="12" r="3"/>
-                  </svg>
+{{{icon 'eye' class='w-4 h-4 mr-1' size='14'}}}
                   View
                 </a>
                 {{#if (or isOwner (eq memberRole "editor"))}}
                 <a href="/portfolios/{{id}}/ideas" class="btn btn-outline btn-sm flex-1">
-                  <svg class="lucide lucide-plus w-4 h-4 mr-1" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M5 12h14"/>
-                    <path d="M12 5v14"/>
-                  </svg>
+{{{icon 'plus' class='w-4 h-4 mr-1' size='14'}}}
                   Add Ideas
                 </a>
                 {{/if}}
@@ -256,20 +208,12 @@
           <div class="col-span-full">
             <div class="bg-card rounded-lg border border-border p-12 text-center">
               <div class="w-16 h-16 bg-muted rounded-full flex items-center justify-center mx-auto mb-4">
-                <svg class="lucide lucide-archive text-muted-foreground" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <rect width="20" height="5" x="2" y="3" rx="1"/>
-                  <path d="M4 8v11a2 2 0 0 0 2 2h2"/>
-                  <path d="M20 8v11a2 2 0 0 1-2 2h-2"/>
-                  <path d="m9 12 2 2 4-4"/>
-                </svg>
+{{{icon 'archive' class='text-muted-foreground' size='24'}}}
               </div>
               <h3 class="text-lg font-medium text-foreground mb-2">No portfolios yet</h3>
               <p class="text-muted-foreground mb-6">Create your first portfolio to organize and track your business ideas</p>
               <button class="btn btn-primary" onclick="openCreatePortfolioModal()">
-                <svg class="lucide lucide-plus w-4 h-4 mr-2" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M5 12h14"/>
-                  <path d="M12 5v14"/>
-                </svg>
+{{{icon 'plus' class='w-4 h-4 mr-2' size='16'}}}
                 Create Your First Portfolio
               </button>
             </div>
@@ -336,10 +280,7 @@
       <div class="flex items-center justify-between mb-4">
         <h3 class="text-lg font-semibold text-foreground">Create New Portfolio</h3>
         <button class="btn btn-ghost btn-sm" onclick="closeCreatePortfolioModal()">
-          <svg class="lucide lucide-x w-4 h-4" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M18 6L6 18"/>
-            <path d="M6 6l12 12"/>
-          </svg>
+          {{{icon 'x' class='w-4 h-4' size='14'}}}
         </button>
       </div>
 
@@ -370,10 +311,7 @@
       <div class="flex items-center justify-between mb-4">
         <h3 class="text-lg font-semibold text-foreground">Edit Portfolio</h3>
         <button class="btn btn-ghost btn-sm" onclick="closeEditPortfolioModal()">
-          <svg class="lucide lucide-x w-4 h-4" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M18 6L6 18"/>
-            <path d="M6 6l12 12"/>
-          </svg>
+          {{{icon 'x' class='w-4 h-4' size='14'}}}
         </button>
       </div>
 
@@ -391,7 +329,7 @@
 
           <div>
             <label for="edit-portfolio-color" class="block text-sm font-medium text-foreground mb-1">Color Theme</label>
-            <input type="color" id="edit-portfolio-color" name="color" class="input input-bordered w-full h-12" value="#3B82F6">
+            <input type="color" id="edit-portfolio-color" name="color" class="input input-bordered w-full h-12" value="#3b82f6">
           </div>
 
           <div class="flex gap-3 pt-4">
@@ -466,7 +404,7 @@
     // Populate edit modal
     document.getElementById('edit-portfolio-name').value = portfolio.name;
     document.getElementById('edit-portfolio-description').value = portfolio.description || '';
-    document.getElementById('edit-portfolio-color').value = portfolio.color || '#3B82F6';
+    document.getElementById('edit-portfolio-color').value = portfolio.color || '#3b82f6';
 
     // Show edit modal
     document.getElementById('edit-portfolio-modal').style.display = 'flex';
@@ -612,11 +550,7 @@
         <div class="col-span-full">
           <div class="bg-card rounded-lg border border-border p-12 text-center">
             <div class="w-16 h-16 bg-muted rounded-full flex items-center justify-center mx-auto mb-4">
-              <svg class="lucide lucide-search-x text-muted-foreground" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M13.5 8.5 21 16"/>
-                <path d="m21 8.5-7.5 7.5"/>
-                <circle cx="10.5" cy="10.5" r="7.5"/>
-              </svg>
+{{{icon 'search-x' class='text-muted-foreground' size='24'}}}
             </div>
             <h3 class="text-lg font-medium text-muted-foreground mb-2">No portfolios found</h3>
             <p class="text-sm text-muted-foreground">Try adjusting your search terms</p>
@@ -631,20 +565,12 @@
         <div class="col-span-full">
           <div class="bg-card rounded-lg border border-border p-12 text-center">
             <div class="w-16 h-16 bg-muted rounded-full flex items-center justify-center mx-auto mb-4">
-              <svg class="lucide lucide-archive text-muted-foreground" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <rect width="20" height="5" x="2" y="3" rx="1"/>
-                <path d="M4 8v11a2 2 0 0 0 2 2h2"/>
-                <path d="M20 8v11a2 2 0 0 1-2 2h-2"/>
-                <path d="m9 12 2 2 4-4"/>
-              </svg>
+{{{icon 'archive' class='text-muted-foreground' size='24'}}}
             </div>
             <h3 class="text-lg font-medium text-foreground mb-2">No portfolios yet</h3>
             <p class="text-muted-foreground mb-6">Create your first portfolio to organize and track your business ideas</p>
             <button class="btn btn-primary" onclick="openCreatePortfolioModal()">
-              <svg class="lucide lucide-plus w-4 h-4 mr-2" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M5 12h14"/>
-                <path d="M12 5v14"/>
-              </svg>
+              {{{icon 'plus' class='w-4 h-4 mr-2' size='16'}}}
               Create Your First Portfolio
             </button>
           </div>
@@ -662,17 +588,10 @@
           </div>
           <div class="flex items-center gap-2 ml-4">
             <button class="btn btn-ghost btn-sm" onclick="editPortfolio('${portfolio.id}')" title="Edit Portfolio">
-              <svg class="lucide lucide-edit w-4 h-4" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
-                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
-              </svg>
+              {{{icon 'edit' class='w-4 h-4' size='14'}}}
             </button>
             <button class="btn btn-ghost btn-sm text-destructive hover:text-destructive" onclick="deletePortfolio('${portfolio.id}')" title="Delete Portfolio">
-              <svg class="lucide lucide-trash w-4 h-4" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M3 6h18"/>
-                <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/>
-                <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>
-              </svg>
+              {{{icon 'trash' class='w-4 h-4' size='14'}}}
             </button>
           </div>
         </div>
@@ -703,17 +622,11 @@
         <!-- Action Buttons -->
         <div class="flex gap-2">
           <a href="/portfolios/${portfolio.id}" class="btn btn-outline btn-sm flex-1">
-            <svg class="lucide lucide-eye w-4 h-4 mr-1" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/>
-              <circle cx="12" cy="12" r="3"/>
-            </svg>
+            {{{icon 'eye' class='w-4 h-4 mr-1' size='14'}}}
             View
           </a>
           <a href="/portfolios/${portfolio.id}/ideas" class="btn btn-outline btn-sm flex-1">
-            <svg class="lucide lucide-plus w-4 h-4 mr-1" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M5 12h14"/>
-              <path d="M12 5v14"/>
-            </svg>
+            {{{icon 'plus' class='w-4 h-4 mr-1' size='14'}}}
             Add Ideas
           </a>
         </div>

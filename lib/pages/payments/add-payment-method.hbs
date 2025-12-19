@@ -21,10 +21,7 @@
                 <input type="radio" name="cardType" value="credit" class="sr-only peer" checked>
                 <div class="p-4 border-2 border-border rounded-lg cursor-pointer peer-checked:border-primary peer-checked:bg-primary/5 hover:border-primary/50 transition-colors">
                   <div class="flex items-center gap-3">
-                    <svg class="lucide lucide-credit-card w-6 h-6 text-primary" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                      <rect width="20" height="14" x="2" y="5" rx="2"></rect>
-                      <line x1="2" x2="22" y1="10" y2="10"></line>
-                    </svg>
+                    {{{icon 'credit-card' class='w-6 h-6 text-primary' size='24'}}}
                     <div>
                       <div class="font-medium text-foreground">Credit Card</div>
                       <div class="text-sm text-muted-foreground">Visa, Mastercard, etc.</div>
@@ -36,10 +33,7 @@
                 <input type="radio" name="cardType" value="debit" class="sr-only peer">
                 <div class="p-4 border-2 border-border rounded-lg cursor-pointer peer-checked:border-primary peer-checked:bg-primary/5 hover:border-primary/50 transition-colors">
                   <div class="flex items-center gap-3">
-                    <svg class="lucide lucide-credit-card w-6 h-6 text-primary" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                      <rect width="20" height="14" x="2" y="5" rx="2"></rect>
-                      <line x1="2" x2="22" y1="10" y2="10"></line>
-                    </svg>
+                    {{{icon 'credit-card' class='w-6 h-6 text-primary' size='24'}}}
                     <div>
                       <div class="font-medium text-foreground">Debit Card</div>
                       <div class="text-sm text-muted-foreground">Bank debit cards</div>
@@ -51,10 +45,7 @@
                 <input type="radio" name="cardType" value="paypal" class="sr-only peer">
                 <div class="p-4 border-2 border-border rounded-lg cursor-pointer peer-checked:border-primary peer-checked:bg-primary/5 hover:border-primary/50 transition-colors">
                   <div class="flex items-center gap-3">
-                    <svg class="lucide lucide-wallet w-6 h-6 text-primary" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                      <path d="M19 7V4a1 1 0 0 0-1-1H5a2 2 0 0 0 0 4h15a1 1 0 0 1 1 1v4h-3a2 2 0 0 1 0-4H8"></path>
-                      <path d="M3 5v14a2 2 0 0 0 2 2h15a1 1 0 0 0 1-1v-4"></path>
-                    </svg>
+                    {{{icon 'wallet' class='w-6 h-6 text-primary' size='24'}}}
                     <div>
                       <div class="font-medium text-foreground">PayPal</div>
                       <div class="text-sm text-muted-foreground">PayPal account</div>
@@ -140,10 +131,7 @@
           <!-- Security Notice -->
           <div class="bg-muted/50 rounded-lg p-4">
             <div class="flex items-start gap-3">
-              <svg class="lucide lucide-shield-check w-5 h-5 text-success mt-0.5" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10"></path>
-                <path d="m9 12 2 2 4-4"></path>
-              </svg>
+              {{{icon 'shield-check' class='w-5 h-5 text-success mt-0.5' size='20'}}}
               <div>
                 <h4 class="font-medium text-foreground">Secure Payment</h4>
                 <p class="text-sm text-muted-foreground">Your payment information is encrypted and secure. We use industry-standard security measures to protect your data.</p>

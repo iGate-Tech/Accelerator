@@ -45,14 +45,7 @@
      <!-- Credit Balance -->
     <div class="hidden md:flex items-center gap-2 px-3 py-2 ml-4">
 
-      <svg class="lucide lucide-coins w-5 h-5 text-primary" xmlns="http://www.w3.org/2000/svg" width="16" height="16"
-        viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-        stroke-linejoin="round">
-        <circle cx="8" cy="8" r="6"></circle>
-        <path d="M18.09 10.37A6 6 0 1 1 10.34 18"></path>
-        <path d="M7 6h1v4"></path>
-        <path d="m16.71 13.88.7.71-2.82 2.82"></path>
-      </svg>
+      {{{icon 'coins' class='w-5 h-5 text-primary' size='16'}}}
 
        <span id="nav-credit-balance" class="text-sm font-medium">{{user.profile.credit_balance}} Credits</span>
     </div>
@@ -86,19 +79,7 @@
       <button onclick="toggleGridMenu()"
         class="ml-4 text-muted-foreground hover:text-primary rounded-full p-2 cursor-pointer font-medium border-0">
 
-        <svg class="lucide lucide-grip w-4 h-4" xmlns="http://www.w3.org/2000/svg" width="16" height="16"
-          viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-          stroke-linejoin="round">
-          <circle cx="12" cy="5" r="1"></circle>
-          <circle cx="19" cy="5" r="1"></circle>
-          <circle cx="5" cy="5" r="1"></circle>
-          <circle cx="12" cy="12" r="1"></circle>
-          <circle cx="19" cy="12" r="1"></circle>
-          <circle cx="5" cy="12" r="1"></circle>
-          <circle cx="12" cy="19" r="1"></circle>
-          <circle cx="19" cy="19" r="1"></circle>
-          <circle cx="5" cy="19" r="1"></circle>
-        </svg>
+        {{{icon 'grip' class='w-4 h-4' size='16'}}}
 
       </button>
 
@@ -235,13 +216,7 @@
           <a hx-post="/auth/logout"
             class="w-full relative flex cursor-default select-none items-center gap-2 rounded-sm px-2 py-2 text-sm text-left outline-none transition-colors text-error hover:bg-error/10">
 
-            <svg class="lucide lucide-log-out h-4 w-4 shrink-0" xmlns="http://www.w3.org/2000/svg" width="16"
-              height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-              stroke-linejoin="round">
-              <path d="m16 17 5-5-5-5"></path>
-              <path d="M21 12H9"></path>
-              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
-            </svg>
+{{{icon 'log-out' class='h-4 w-4 shrink-0' size='16'}}}
 
             Log out
           </a>

@@ -8,12 +8,7 @@
                     <a href="/new-idea" title="New Project" onclick="closeMobileSidebar()"
                         class="flex items-center px-3 py-2 rounded-md text-muted-foreground hover:bg-primary/10 hover:text-primary">
 
-                        <svg class="lucide lucide-plus w-4 h-4 mr-3" xmlns="http://www.w3.org/2000/svg" width="16"
-                            height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                            stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M5 12h14"></path>
-                            <path d="M12 5v14"></path>
-                        </svg>
+                        {{{icon 'plus' class='w-4 h-4 mr-3' size='16'}}}
 
                         <span class="font-medium sidebar-text" style="display: flex;">New Project</span>
                     </a>
@@ -22,12 +17,7 @@
                     <a href="/explore-idea" title="Explore Ideas" onclick="closeMobileSidebar()"
                         class="flex items-center px-3 py-2 rounded-md text-muted-foreground hover:bg-primary/10 hover:text-primary">
 
-                        <svg class="lucide lucide-search w-4 h-4 mr-3" xmlns="http://www.w3.org/2000/svg" width="16"
-                            height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                            stroke-linecap="round" stroke-linejoin="round">
-                            <path d="m21 21-4.34-4.34"></path>
-                            <circle cx="11" cy="11" r="8"></circle>
-                        </svg>
+                        {{{icon 'search' class='w-4 h-4 mr-3' size='16'}}}
 
                         <span class="font-medium sidebar-text" style="display: flex;">Explore Ideas</span>
                     </a>
@@ -37,33 +27,17 @@
                 <summary
                     class="px-3 py-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider flex items-center gap-2 cursor-pointer">
 
-                    <svg class="lucide lucide-folder w-3.5 h-3.5" xmlns="http://www.w3.org/2000/svg" width="14"
-                        height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                        stroke-linecap="round" stroke-linejoin="round">
-                        <path
-                            d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z">
-                        </path>
-                    </svg>
+                    {{{icon 'folder' class='w-3.5 h-3.5' size='14'}}}
 
                     All Projects
-                    <svg class="lucide lucide-chevron-right w-4 h-4 ml-auto transition-transform duration-200 group-open:rotate-90"
-                        xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="m9 18 6-6-6-6" />
-                    </svg>
+                    {{{icon 'chevron-right' class='w-4 h-4 ml-auto transition-transform duration-200 group-open:rotate-90' size='24'}}}
                 </summary>
                 <div class="relative my-5">
-                  <svg class="lucide lucide-search absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <circle cx="11" cy="11" r="8"></circle>
-                    <path d="m21 21-4.35-4.35"></path>
-                  </svg>
+                  {{{icon 'search' class='absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground' size='16'}}}
                   <input type="text" id="project-search" placeholder="Search projects..."
                       class="w-full text-sm border border-input rounded-md bg-card text-foreground pl-10 pr-10 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/40 transition-all duration-200">
                   <button type="button" id="project-search-clear" class="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground hover:text-foreground opacity-0 transition-opacity duration-200" onclick="clearProjectSearch()" style="display: none;">
-                    <svg class="lucide lucide-x w-4 h-4" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                      <path d="M18 6L6 18"></path>
-                      <path d="M6 6l12 12"></path>
-                    </svg>
+                    {{{icon 'x' class='w-4 h-4' size='16'}}}
                   </button>
                 </div>
                 <ul class="space-y-1 overflow-y-auto h-[calc(100vh-370px)]">
@@ -72,17 +46,7 @@
                         <a href="/models/idea?ideaId={{id}}" title="{{title}}"
                             class="flex items-center px-3 py-1 text-sm text-muted-foreground rounded-md hover:bg-primary/10 hover:text-primary transition-colors">
 
-                            <svg class="lucide lucide-file-text w-4 h-4 mr-3" xmlns="http://www.w3.org/2000/svg"
-                                width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <path
-                                    d="M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z">
-                                </path>
-                                <path d="M14 2v5a1 1 0 0 0 1 1h5"></path>
-                                <path d="M10 9H8"></path>
-                                <path d="M16 13H8"></path>
-                                <path d="M16 17H8"></path>
-                            </svg>
+                            {{{icon 'file-text' class='w-4 h-4 mr-3' size='16'}}}
 
                             <span class="text-xs sidebar-text" style="display: flex;">{{title}}</span>
                         </a>
@@ -99,12 +63,7 @@
                 <div class="flex justify-between">
                     <span class="truncate text-xs text-muted-foreground user-email">{{user.email}}</span>
 
-                    <svg class="lucide lucide-credit-card h-4 w-4 shrink-0" xmlns="http://www.w3.org/2000/svg"
-                        width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                        stroke-linecap="round" stroke-linejoin="round">
-                        <rect width="20" height="14" x="2" y="5" rx="2"></rect>
-                        <line x1="2" x2="22" y1="10" y2="10"></line>
-                    </svg>
+                    {{{icon 'credit-card' class='h-4 w-4 shrink-0' size='16'}}}
 
                 </div>
                 <!-- Separator -->

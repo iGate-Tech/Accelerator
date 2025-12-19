@@ -1,8 +1,8 @@
 <!-- Main Content -->
 <main id="hero"
-   class="container lg:px-12 lg:pt-0 min-h-[1100px] flex flex-col lg:flex-row z-10 mr-auto ml-auto pt-0 pr-6 pl-6 relative items-center">
+    class="container lg:px-12 lg:pt-0 min-h-[900px] flex flex-col lg:flex-row z-10 mr-auto ml-auto pt-0 pr-6 pl-6 relative items-center">
   <!-- Left Column: Copy -->
-  <div class="lg:w-1/2 flex flex-col lg:py-0 lg:mt-0 w-full mt-16 pt-12 pb-20 justify-center">
+  <div class="lg:w-1/2 flex flex-col lg:py-0 lg:mt-0 w-full mt-20 pt-12 pb-20 justify-center">
     <h4 class="text-xs font-mono tracking-[0.2em] text-white/40 uppercase mb-8 flex items-center gap-2">
       <span class="relative flex h-2 w-2">
         <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-brand-purple opacity-75"></span>
@@ -11,25 +11,25 @@
       AI-Powered Platform
     </h4>
 
-    <h1 class="lg:text-7xl leading-[1.1] text-brand-purple text-glow text-5xl italic tracking-tight font-serif mb-6">
+    <h1 class="lg:text-7xl leading-[1.1] text-brand-purple text-glow text-5xl italic tracking-tight font-serif mb-8">
       Build Your Startup <br />
       <span class="text-white opacity-90">with AI Precision.</span>
     </h1>
 
-    <p class="font-sans text-xl lg:text-2xl font-light text-white/70 leading-relaxed tracking-tight max-w-xl mb-12">
+    <p class="font-sans text-xl lg:text-2xl font-light text-white/70 leading-relaxed tracking-tight max-w-xl mb-10">
       Complete AI-powered platform designed to help individuals, startups,
       and organizations create, model, and launch new business ideas. Guides users through the entire startup-building lifecycle: AI Idea Creation, Idea Modeling, Business Model Generation, Financial Modeling, Legal/Marketing/Team Models, and Pitch Deck Creation. Includes a credit-based creator economy where users buy credits to generate AI models, publish ideas, and earn from community votes.
     </p>
 
     <div class="flex flex-col sm:flex-row gap-6 gap-x-6 gap-y-6 items-start sm:items-center">
       <!-- Animated Shiny CTA Button -->
-      <button class="shiny-cta focus:outline-none">
+      <button class="shiny-cta focus:outline-none text-base">
         <span>Start Building</span>
       </button>
 
       <!-- Gradient Pill Button with Icon (Dark Gray) -->
       <button
-        class="hover:bg-white/10 hover:text-white transition-all flex text-sm font-medium text-slate-300 bg-white/5 rounded-full pt-3 pr-6 pb-3 pl-6 gap-x-2 gap-y-2 items-center group"
+        class="hover:bg-white/10 hover:text-white transition-all flex text-sm font-medium text-slate-300 bg-white/5 rounded-full pt-3 pr-6 pb-3 pl-6 gap-x-3 gap-y-2 items-center group"
         style="
               box-shadow:
                 0 4px 20px rgba(0, 0, 0, 0.5),
@@ -59,35 +59,45 @@
   <!-- Right Column: Abstract UI Visualization with Sonar -->
   <div class="lg:w-1/2 lg:h-[800px] flex w-full h-[500px] relative perspective-1000 items-center justify-center">
     <svg class="absolute inset-0 w-full h-full pointer-events-none z-10 overflow-visible" viewBox="0 0 600 600">
-      <defs></defs>
+      <defs>
+         <linearGradient id="beam-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
+           <stop offset="0%" stop-color="hsl(var(--color-brand-purple))" />
+           <stop offset="50%" stop-color="hsl(var(--color-brand-purple))" />
+           <stop offset="100%" stop-color="hsl(var(--color-brand-purple))" />
+         </linearGradient>
+         <radialGradient id="center-glow" cx="50%" cy="50%" r="50%">
+           <stop offset="0%" stop-color="hsl(var(--color-brand-purple) / 0.3)" />
+           <stop offset="100%" stop-color="hsl(var(--color-brand-purple) / 0.05)" />
+         </radialGradient>
+       </defs>
 
       <!-- Connecting Beams -->
       <!-- Group 1 -->
       <g>
         <path d="M -50 150 C 100 150, 100 300, 300 300" fill="none" stroke="white" stroke-width="1"
           class="opacity-[0.08]"></path>
-        <path d="M -50 150 C 100 150, 100 300, 300 300" fill="none" stroke="#9E28B5" stroke-width="1.5"
+        <path d="M -50 150 C 100 150, 100 300, 300 300" fill="none" stroke="url(#beam-gradient)" stroke-width="1.5"
           class="beam-line animate-beam opacity-60"></path>
       </g>
       <!-- Group 2 -->
       <g>
         <path d="M -50 450 C 100 450, 100 300, 300 300" fill="none" stroke="white" stroke-width="1"
           class="opacity-[0.08]"></path>
-        <path d="M -50 450 C 100 450, 100 300, 300 300" fill="none" stroke="#9E28B5" stroke-width="1.5"
+        <path d="M -50 450 C 100 450, 100 300, 300 300" fill="none" stroke="url(#beam-gradient)" stroke-width="1.5"
           class="beam-line animate-beam opacity-60" style="animation-delay: -1s"></path>
       </g>
       <!-- Group 3 -->
       <g>
         <path d="M 650 100 C 500 100, 500 300, 300 300" fill="none" stroke="white" stroke-width="1"
           class="opacity-[0.08]"></path>
-        <path d="M 650 100 C 500 100, 500 300, 300 300" fill="none" stroke="#9E28B5" stroke-width="1.5"
+        <path d="M 650 100 C 500 100, 500 300, 300 300" fill="none" stroke="url(#beam-gradient)" stroke-width="1.5"
           class="beam-line animate-beam opacity-60" style="animation-delay: -2s"></path>
       </g>
       <!-- Group 4 -->
       <g>
         <path d="M 650 500 C 500 500, 500 300, 300 300" fill="none" stroke="white" stroke-width="1"
           class="opacity-[0.08]"></path>
-        <path d="M 650 500 C 500 500, 500 300, 300 300" fill="none" stroke="#9E28B5" stroke-width="1.5"
+        <path d="M 650 500 C 500 500, 500 300, 300 300" fill="none" stroke="url(#beam-gradient)" stroke-width="1.5"
           class="beam-line animate-beam opacity-60" style="animation-delay: -1.5s"></path>
       </g>
 
@@ -97,10 +107,10 @@
         <circle r="120" fill="url(#center-glow)" class="animate-pulse"></circle>
 
         <!-- Sonar Waves -->
-        <circle r="20" fill="none" stroke="#9E28B5" stroke-width="1" opacity="0.5" class="animate-sonar"></circle>
-        <circle r="20" fill="none" stroke="#9E28B5" stroke-width="1" opacity="0.5" class="animate-sonar delay-1000">
+        <circle r="20" fill="none" stroke="url(#beam-gradient)" stroke-width="1" opacity="0.5" class="animate-sonar"></circle>
+        <circle r="20" fill="none" stroke="url(#beam-gradient)" stroke-width="1" opacity="0.5" class="animate-sonar delay-1000">
         </circle>
-        <circle r="20" fill="none" stroke="#9E28B5" stroke-width="1" opacity="0.5" class="animate-sonar delay-2000">
+        <circle r="20" fill="none" stroke="url(#beam-gradient)" stroke-width="1" opacity="0.5" class="animate-sonar delay-2000">
         </circle>
 
         <!-- Technical Rings -->
@@ -109,7 +119,7 @@
           class="animate-spin-slow"></circle>
 
         <!-- Inner Dashed Ring Reverse -->
-        <circle r="45" fill="none" stroke="#9E28B5" stroke-opacity="0.2" stroke-width="1" stroke-dasharray="4 6"
+        <circle r="45" fill="none" stroke="url(#beam-gradient)" stroke-opacity="0.2" stroke-width="1" stroke-dasharray="4 6"
           class="animate-spin-slow-reverse"></circle>
 
         <!-- Crosshair Markers -->
@@ -121,8 +131,8 @@
         </g>
 
         <!-- Core -->
-        <circle r="8" fill="#0A0A0A" stroke="#9E28B5" stroke-width="2"></circle>
-        <circle r="4" fill="#9E28B5" class="animate-pulse-fast"></circle>
+        <circle r="8" fill="black" stroke="url(#beam-gradient)" stroke-width="2"></circle>
+        <circle r="4" fill="url(#beam-gradient)" class="animate-pulse-fast"></circle>
       </g>
     </svg>
 
@@ -186,7 +196,7 @@
             style="color: rgb(255, 255, 255); width: 124px; height: 28px" class="w-[124px] h-[28px]" aria-hidden="true"
             role="img" data-icon="logos:vercel" data-logos="airbrake" data-icon-set="logos" data-icon-replaced="true"
             stroke-width="2">
-            <g fill="#ffffff">
+            <g fill="currentColor">
               <path fill-opacity=".6"
                 d="m33.83 8.897l6.176 18.062l-10.965 31.634a78.3 78.3 0 0 0 13.112 1.02a83 83 0 0 0 9.038-.475l3.768 11.744c-4.066.411-8.5.709-12.75.709a122 122 0 0 1-16.88-1.219l-6.254 18.332H0L29.835 8.897z">
               </path>
@@ -216,7 +226,7 @@
             style="color: rgb(255, 255, 255); width: 124px; height: 28px" class="w-[124px] h-[28px]" aria-hidden="true"
             role="img" data-icon="logos:vercel" data-logos="airbrake" data-icon-set="logos" data-icon-replaced="true"
             stroke-width="2">
-            <g fill="#ffffff" class="">
+            <g fill="currentColor" class="">
               <path fill-opacity=".6"
                 d="m33.83 8.897l6.176 18.062l-10.965 31.634a78.3 78.3 0 0 0 13.112 1.02a83 83 0 0 0 9.038-.475l3.768 11.744c-4.066.411-8.5.709-12.75.709a122 122 0 0 1-16.88-1.219l-6.254 18.332H0L29.835 8.897z">
               </path>
@@ -245,7 +255,7 @@
 
       <!-- Trusted By Label -->
       <div
-        class="flex items-center gap-3 text-white/30 text-xs font-mono shrink-0 relative z-10 bg-[#030303] pl-4 lg:bg-transparent lg:pl-0">
+        class="flex items-center gap-3 text-white/30 text-xs font-mono shrink-0 relative z-10 bg-background pl-4 lg:bg-transparent lg:pl-0">
         <span class="text-white tracking-wide">[ <span class="text-brand-purple">✓</span> ] TRUSTED BY INDUSTRY
           LEADERS</span>
       </div>

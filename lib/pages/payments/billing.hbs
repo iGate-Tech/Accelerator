@@ -34,12 +34,7 @@
               <div class="bg-success/20 rounded-lg">
                 <div class="w-10 h-10 bg-success/20 rounded-lg relative">
                   <div class="flex items-center justify-center w-9 h-9 bg-success rounded-lg absolute top-0.5 left-0.5">
-                    <svg class="lucide lucide-coins w-4 h-4 text-white" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                      <circle cx="8" cy="8" r="6"></circle>
-                      <path d="M18.09 10.37A6 6 0 1 1 10.34 18"></path>
-                      <path d="M7 6h1v4"></path>
-                      <path d="m16.71 13.88.7.71-2.82 2.82"></path>
-                    </svg>
+                    {{{icon 'coins' class='w-4 h-4 text-white' size='16'}}}
                   </div>
                 </div>
               </div>
@@ -61,10 +56,7 @@
               <div class="bg-primary/20 rounded-lg">
                 <div class="w-10 h-10 bg-primary/20 rounded-lg relative">
                   <div class="flex items-center justify-center w-9 h-9 bg-primary rounded-lg absolute top-0.5 left-0.5">
-                    <svg class="lucide lucide-trending-up w-4 h-4 text-white" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                      <path d="M16 7h6v6"></path>
-                      <path d="m22 7-8.5 8.5-5-5L2 17"></path>
-                    </svg>
+                    {{{icon 'trending-up' class='w-4 h-4 text-white' size='16'}}}
                   </div>
                 </div>
               </div>
@@ -86,12 +78,7 @@
               <div class="bg-secondary/20 rounded-lg">
                 <div class="w-10 h-10 bg-secondary/20 rounded-lg relative">
                   <div class="flex items-center justify-center w-9 h-9 bg-secondary rounded-lg absolute top-0.5 left-0.5">
-                    <svg class="lucide lucide-package w-4 h-4 text-white" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                      <path d="m7.5 4.27 9 5.15"></path>
-                      <path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"></path>
-                      <path d="m3.3 7 8.7 5 8.7-5"></path>
-                      <path d="M12 22V12"></path>
-                    </svg>
+                    {{{icon 'package' class='w-4 h-4 text-white' size='16'}}}
                   </div>
                 </div>
               </div>
@@ -119,10 +106,7 @@
               <div class="bg-warning/20 rounded-lg">
                 <div class="w-10 h-10 bg-warning/20 rounded-lg relative">
                   <div class="flex items-center justify-center w-9 h-9 bg-warning rounded-lg absolute top-0.5 left-0.5">
-                    <svg class="lucide lucide-clock w-4 h-4 text-white" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                      <circle cx="12" cy="12" r="10"></circle>
-                      <polyline points="12,6 12,12 16,14"></polyline>
-                    </svg>
+                    {{{icon 'clock' class='w-4 h-4 text-white' size='16'}}}
                   </div>
                 </div>
               </div>
@@ -170,31 +154,15 @@
                   <div class="flex items-center">
                     <div class="flex-shrink-0 w-8 h-8 {{#if (eq transaction_type "reward_earned")}}bg-yellow/10{{else if (eq transaction_type "credit_purchase")}}bg-green/10{{else if (eq transaction_type "ai_generation")}}bg-blue/10{{else if (eq transaction_type "report_generation")}}bg-purple/10{{else if (eq transaction_type "billing")}}bg-primary/10{{else}}bg-gray/10{{/if}} rounded-full flex items-center justify-center mr-3">
                       {{#if (eq transaction_type "reward_earned")}}
-                        <svg class="w-4 h-4 text-yellow-600" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                          <path d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"></path>
-                        </svg>
+                        {{{icon 'dollar-sign' class='w-4 h-4 text-yellow-600' size='16'}}}
                       {{else if (eq transaction_type "credit_purchase")}}
-                        <svg class="w-4 h-4 text-green-600" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                          <circle cx="8" cy="8" r="6"></circle>
-                          <path d="M18.09 10.37A6 6 0 1 1 10.34 18"></path>
-                          <path d="M7 6h1v4"></path>
-                          <path d="m16.71 13.88.7.71-2.82 2.82"></path>
-                        </svg>
+                        {{{icon 'coins' class='w-4 h-4 text-green-600' size='16'}}}
                       {{else if (eq transaction_type "billing")}}
-                        <svg class="w-4 h-4 text-primary" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                          <rect width="18" height="18" x="3" y="4" rx="2" ry="2"></rect>
-                          <line x1="16" x2="16" y1="2" y2="6"></line>
-                          <line x1="8" x2="8" y1="2" y2="6"></line>
-                          <line x1="3" x2="21" y1="10" y2="10"></line>
-                        </svg>
+                        {{{icon 'credit-card' class='w-4 h-4 text-primary' size='16'}}}
                       {{else if (eq transaction_type "ai_generation")}}
-                        <svg class="w-4 h-4 text-blue-600" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                          <path d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
-                        </svg>
+                        {{{icon 'brain' class='w-4 h-4 text-blue-600' size='16'}}}
                       {{else}}
-                        <svg class="w-4 h-4 text-gray-600" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                          <path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                        </svg>
+                        {{{icon 'file' class='w-4 h-4 text-gray-600' size='16'}}}
                       {{/if}}
                     </div>
                     <div>
@@ -264,19 +232,11 @@
                   <div class="flex items-center gap-2">
                     {{#if (eq transaction_type "billing")}}
                       <button class="text-primary hover:text-primary/80" title="Download Invoice">
-                        <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                          <polyline points="7,10 12,15 17,10"></polyline>
-                          <line x1="12" x2="12" y1="15" y2="3"></line>
-                        </svg>
+                        {{{icon 'download' class='w-4 h-4' size='16'}}}
                       </button>
                     {{/if}}
                     <button class="text-muted-foreground hover:text-foreground" title="View Details">
-                      <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <circle cx="12" cy="12" r="1"></circle>
-                        <circle cx="12" cy="5" r="1"></circle>
-                        <circle cx="12" cy="19" r="1"></circle>
-                      </svg>
+                      {{{icon 'more-horizontal' class='w-4 h-4' size='16'}}}
                     </button>
                   </div>
                 </td>
@@ -325,10 +285,7 @@
           </div>
           <div class="h-64 flex items-center justify-center bg-muted/20 rounded-lg">
             <div class="text-center">
-              <svg class="w-12 h-12 text-muted-foreground mx-auto mb-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M3 3v18h18"></path>
-                <path d="m19 9-5 5-4-4-3 3"></path>
-              </svg>
+              {{{icon 'bar-chart-2' class='w-12 h-12 text-muted-foreground mx-auto mb-4' size='24'}}}
               <p class="text-muted-foreground">Usage chart visualization</p>
               <p class="text-sm text-muted-foreground mt-1">Integration with charting library needed</p>
             </div>

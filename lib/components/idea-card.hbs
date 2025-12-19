@@ -1,22 +1,31 @@
 
 <div class="flex relative w-[500px] h-fit flex-col gap-1 items-start p-4 mb-4 cursor-pointer group-item-btns overflow-hidden border rounded-md border-border bg-card hover:shadow-lg dark:hover:shadow-primary focus:outline-none"
     onclick="toggleCardDetails(this)"
-    data-id="{{id}}" data-status="{{status}}" data-type="{{category}}"
-    data-favorite="{{is_favorite}}">
-     <button data-populate-id="{{id}}"
-         class="absolute top-2 right-2 text-muted-foreground hover:text-primary cursor-pointer">
+    data-id="{{id}}" data-status="{{overall_status}}" data-type="{{category}}"
+    data-favorite="{{is_favorite}}" data-created-at="{{created_at}}" data-updated-at="{{updated_at}}"
+    data-rating="{{rating}}">
+      <button data-favorite-id="{{id}}"
+          class="absolute top-2 right-2 text-muted-foreground hover:text-red-500 cursor-pointer favorite-btn {{#if is_favorite}}text-red-500{{/if}}"
+          title="Toggle Favorite">
 
-         {{{icon 'copy' class='w-4 h-4'}}}
+          {{{icon 'heart' class='w-4 h-4 {{#if is_favorite}}fill-current{{/if}}'}}
 
-     </button>
+      </button>
 
-     <button onclick="window.location.href='/idea/{{id}}'"
-         class="absolute top-2 right-10 px-2 py-0.5 bg-secondary/10 text-foreground text-xs rounded-md border border-secondary/40 cursor-pointer hover:bg-secondary/20"
-         title="View Full Details">
+      <button data-populate-id="{{id}}"
+          class="absolute top-2 right-10 text-muted-foreground hover:text-primary cursor-pointer">
 
-         Full Screen
+          {{{icon 'copy' class='w-4 h-4'}}}
 
-     </button>
+      </button>
+
+      <button onclick="window.location.href='/idea/{{id}}'"
+          class="absolute top-2 right-20 px-2 py-0.5 bg-secondary/10 text-foreground text-xs rounded-md border border-secondary/40 cursor-pointer hover:bg-secondary/20"
+          title="View Full Details">
+
+          Full Screen
+
+      </button>
     <div class="w-full">
         <span
             class="text-ellipsis break-words line-clamp-2 text-sm text-foreground font-medium">{{title}}</span>

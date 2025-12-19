@@ -480,6 +480,9 @@
   .right-10 {
     right: calc(var(--spacing) * 10);
   }
+  .right-20 {
+    right: calc(var(--spacing) * 20);
+  }
   .right-\[10\%\] {
     right: 10%;
   }
@@ -2606,6 +2609,9 @@
   }
   .bg-center {
     background-position: center;
+  }
+  .fill-current {
+    fill: currentcolor;
   }
   .fill-red-500 {
     fill: var(--color-red-500);

@@ -227,7 +227,7 @@
         }
     </style>
     <form id="new-project-form" class="flex m-auto max-w-[750px] min-w-[750px] flex-col gap-1 w-full" method="post"
-        action="/projects/new">
+        action="/new-idea">
         <!-- CSRF Token (Important for security) -->
         <input type="hidden" name="_csrf" value="">
 
@@ -295,6 +295,23 @@
                         </div>
                     </div>
 
+
+                    <!-- Privacy setting -->
+                    <div class="px-3 pb-2">
+                        <div class="flex items-center gap-2">
+                            <label class="text-xs text-muted-foreground">Visibility:</label>
+                            <div class="flex items-center gap-4">
+                                <label class="flex items-center gap-1 cursor-pointer">
+                                    <input type="radio" name="privacy" value="public" checked class="text-primary">
+                                    <span class="text-xs text-muted-foreground">Public</span>
+                                </label>
+                                <label class="flex items-center gap-1 cursor-pointer">
+                                    <input type="radio" name="privacy" value="private" class="text-primary">
+                                    <span class="text-xs text-muted-foreground">Private</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
 
                     <!-- toolbar -->
                     <div class="px-3 flex gap-2 items-center">
@@ -1019,6 +1036,7 @@
             const category = categorySpan.textContent.trim() || 'Category';
             const description = descriptionTextarea.value;
             const tags = Array.from(document.querySelectorAll('.tag-lskjsdb span[contenteditable]')).map(span => span.textContent.trim()).filter(tag => tag);
+            const privacy = document.querySelector('input[name="privacy"]:checked')?.value || 'public';
 
             // Show loading state
             submitButton.disabled = true;
@@ -1042,7 +1060,8 @@
                         prompt: description,
                         title,
                         category,
-                        tags: JSON.stringify(tags)
+                        tags,
+                        privacy
                     })
                 });
 

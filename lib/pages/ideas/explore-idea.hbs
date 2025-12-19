@@ -8,12 +8,224 @@
         </p>
     </div>
 
+    <!-- Search and Filter Controls -->
+    <div class="bg-card rounded-lg p-6 mb-8 border border-border">
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <!-- Search Input -->
+            <div class="md:col-span-2">
+                <label for="search-input" class="block text-sm font-medium text-foreground mb-2">Search</label>
+                <div class="relative">
+                    <input type="text" id="search-input" placeholder="Search ideas..."
+                           class="w-full pl-10 pr-4 py-2 border border-input rounded-md bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary">
+                    {{{icon 'search' class='absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground'}}}
+                </div>
+            </div>
+
+            <!-- Category Filter -->
+            <div>
+                <label for="category-filter" class="block text-sm font-medium text-foreground mb-2">Category</label>
+                <select id="category-filter" class="w-full px-3 py-2 border border-input rounded-md bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary">
+                    <option value="">All Categories</option>
+                    {{#each categories}}
+                    <option value="{{this}}">{{this}}</option>
+                    {{/each}}
+                </select>
+            </div>
+
+            <!-- Sort Options -->
+            <div>
+                <label for="sort-select" class="block text-sm font-medium text-foreground mb-2">Sort By</label>
+                <select id="sort-select" class="w-full px-3 py-2 border border-input rounded-md bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary">
+                    <option value="newest">Newest First</option>
+                    <option value="oldest">Oldest First</option>
+                    <option value="rating">Highest Rated</option>
+                    <option value="title">Title A-Z</option>
+                </select>
+            </div>
+        </div>
+    </div>
+
     <!-- Ideas Grid Section -->
-    <div class="flex gap-4">
+    <div id="ideas-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {{#each ideas}}
         {{> idea-card .}}
         {{/each}}
     </div>
+
+    <!-- No Results Message -->
+    <div id="no-results" class="hidden text-center py-12">
+        <div class="inline-flex items-center justify-center w-16 h-16 bg-muted rounded-2xl mb-6">
+            {{{icon 'search-x' class='w-8 h-8 text-muted-foreground'}}}
+        </div>
+        <h3 class="text-xl font-semibold text-foreground mb-2">No ideas found</h3>
+        <p class="text-muted-foreground">Try adjusting your search criteria</p>
+    </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('search-input');
+    const categoryFilter = document.getElementById('category-filter');
+    const sortSelect = document.getElementById('sort-select');
+    const ideasContainer = document.getElementById('ideas-container');
+    const noResults = document.getElementById('no-results');
+
+    // Store original ideas data
+    const originalIdeas = Array.from(ideasContainer.children);
+    let filteredIdeas = [...originalIdeas];
+
+    function filterAndSortIdeas() {
+        const searchTerm = searchInput.value.toLowerCase().trim();
+        const selectedCategory = categoryFilter.value;
+        const sortBy = sortSelect.value;
+
+        // Filter ideas
+        filteredIdeas = originalIdeas.filter(idea => {
+            const ideaData = JSON.parse(idea.dataset.idea || '{}');
+            const title = ideaData.title || '';
+            const description = ideaData.description || '';
+            const category = ideaData.category || '';
+            const tags = ideaData.tags || [];
+
+            // Search filter
+            const matchesSearch = searchTerm === '' ||
+                title.toLowerCase().includes(searchTerm) ||
+                description.toLowerCase().includes(searchTerm) ||
+                tags.some(tag => tag.toLowerCase().includes(searchTerm));
+
+            // Category filter
+            const matchesCategory = selectedCategory === '' || category === selectedCategory;
+
+            return matchesSearch && matchesCategory;
+        });
+
+        // Sort ideas
+        filteredIdeas.sort((a, b) => {
+            const aData = JSON.parse(a.dataset.idea || '{}');
+            const bData = JSON.parse(b.dataset.idea || '{}');
+
+            switch (sortBy) {
+                case 'oldest':
+                    return new Date(aData.created_at) - new Date(bData.created_at);
+                case 'rating':
+                    return (bData.rating || 0) - (aData.rating || 0);
+                case 'title':
+                    return (aData.title || '').localeCompare(bData.title || '');
+                case 'newest':
+                default:
+                    return new Date(bData.updated_at || bData.created_at) - new Date(aData.updated_at || aData.created_at);
+            }
+        });
+
+        // Update display
+        updateDisplay();
+    }
+
+    function updateDisplay() {
+        // Clear container
+        ideasContainer.innerHTML = '';
+
+        if (filteredIdeas.length === 0) {
+            noResults.classList.remove('hidden');
+            ideasContainer.classList.add('hidden');
+        } else {
+            noResults.classList.add('hidden');
+            ideasContainer.classList.remove('hidden');
+
+            // Add filtered ideas
+            filteredIdeas.forEach(idea => {
+                ideasContainer.appendChild(idea);
+            });
+        }
+    }
+
+    // Add event listeners
+    searchInput.addEventListener('input', filterAndSortIdeas);
+    categoryFilter.addEventListener('change', filterAndSortIdeas);
+    sortSelect.addEventListener('change', filterAndSortIdeas);
+
+    // Store idea data in dataset for filtering
+    originalIdeas.forEach(idea => {
+        const ideaData = {
+            id: idea.dataset.id,
+            title: idea.querySelector('.line-clamp-2')?.textContent || '',
+            description: idea.querySelector('.card-details .markdown-content')?.textContent || '',
+            category: idea.dataset.type || '',
+            tags: Array.from(idea.querySelectorAll('.bg-secondary\\/10')).map(tag => tag.textContent.trim()),
+            created_at: idea.dataset.created_at,
+            updated_at: idea.dataset.updated_at,
+            rating: parseFloat(idea.dataset.rating) || 0
+        };
+        idea.dataset.idea = JSON.stringify(ideaData);
+    });
+
+    // Handle favorite button clicks
+    document.addEventListener('click', async function(e) {
+        const favoriteBtn = e.target.closest('[data-favorite-id]');
+        if (favoriteBtn) {
+            e.stopPropagation(); // Prevent card click
+
+            const ideaId = favoriteBtn.dataset.favoriteId;
+            const heartIcon = favoriteBtn.querySelector('.lucide');
+
+            try {
+                const response = await fetch(`/api/ideas/${ideaId}/favorite`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    // Toggle heart appearance
+                    if (result.is_favorite) {
+                        favoriteBtn.classList.add('text-red-500');
+                        heartIcon.classList.add('fill-current');
+                        showToastMessage('Added to favorites', 'success');
+                    } else {
+                        favoriteBtn.classList.remove('text-red-500');
+                        heartIcon.classList.remove('fill-current');
+                        showToastMessage('Removed from favorites', 'info');
+                    }
+
+                    // Update the data-favorite attribute
+                    favoriteBtn.closest('.group-item-btns').dataset.favorite = result.is_favorite;
+                } else {
+                    showToastMessage(result.error || 'Failed to update favorite', 'error');
+                }
+            } catch (error) {
+                console.error('Favorite error:', error);
+                showToastMessage('Failed to update favorite', 'error');
+            }
+        }
+    });
+
+    // Add showToastMessage function if not already available
+    function showToastMessage(message, type) {
+        if (typeof window.showToast === 'function') {
+            return window.showToast(message, type);
+        } else if (typeof window.showSuccessToast === 'function' && type === 'success') {
+            return window.showSuccessToast('Success', message);
+        } else if (typeof window.showErrorToast === 'function' && type === 'error') {
+            return window.showErrorToast('Error', message);
+        } else if (typeof window.showWarningToast === 'function' && type === 'warning') {
+            return window.showWarningToast('Warning', message);
+        } else if (typeof window.showInfoToast === 'function' && type === 'info') {
+            return window.showInfoToast('Info', message);
+        } else {
+            // Fallback: try to find toast container and create simple toast
+            const container = document.getElementById('toast-container');
+            if (container) {
+                const toast = document.createElement('div');
+                toast.className = `toast toast-${type} p-4 rounded-lg border shadow-lg max-w-sm bg-card text-card-foreground border-border`;
+                toast.textContent = message;
+                container.appendChild(toast);
+                setTimeout(() => toast.remove(), 5000);
+            }
+        }
+    }
+});
+</script>

@@ -1,6 +1,6 @@
 <!-- Navigation: Pill Shaped & Floating -->
 <nav
-  class="fixed -translate-x-1/2 flex transition-all duration-300 hover:border-white/20 bg-gradient-to-br from-white/10 to-white/0 w-full lg:w-fit max-w-[90vw] z-50 rounded-full ring-white/10 ring-1 pt-1.5 pr-1.5 pb-1.5 pl-4 top-6 left-1/2 shadow-2xl backdrop-blur-xl items-center justify-between">
+  class="fixed -translate-x-1/2 flex transition-all duration-300 hover:border-white/20 dark:hover:border-white/20 bg-gradient-to-br from-gray-50 to-white dark:from-white/10 dark:to-white/0 w-full lg:w-fit max-w-[90vw] z-50 rounded-full ring-gray-200 dark:ring-white/10 ring-1 pt-1.5 pr-1.5 pb-1.5 pl-4 top-6 left-1/2 shadow-2xl backdrop-blur-xl items-center justify-between">
   <!-- Logo Area -->
   <div class="flex gap-2.5 items-center mr-8">
     <div class="relative flex items-center justify-center">
@@ -12,25 +12,25 @@
           fill="currentColor" />
       </svg>
     </div>
-    <span class="font-sans font-medium text-base tracking-tight text-white">Accelerator</span>
+    <span class="font-sans font-medium text-base tracking-tight text-gray-900 dark:text-white">Accelerator</span>
   </div>
 
   <!-- Links (Hidden on small screens) -->
   <div class="hidden md:flex items-center gap-6 mr-8">
-    <a href="#hero" class="text-xs font-medium text-white/50 hover:text-white transition-colors">Home</a>
-    <a href="#features" class="text-xs font-medium text-white/50 hover:text-white transition-colors">Features</a>
-    <a href="#pricing" class="text-xs font-medium text-white/50 hover:text-white transition-colors">Pricing</a>
+    <a href="#hero" class="text-xs font-medium text-gray-600 dark:text-white/50 hover:text-gray-900 dark:hover:text-white transition-colors">Home</a>
+    <a href="#features" class="text-xs font-medium text-gray-600 dark:text-white/50 hover:text-gray-900 dark:hover:text-white transition-colors">Features</a>
+    <a href="#pricing" class="text-xs font-medium text-gray-600 dark:text-white/50 hover:text-gray-900 dark:hover:text-white transition-colors">Pricing</a>
   </div>
 
 <!-- Theme Toggle -->
-   <button id="theme-toggle" class="hidden md:flex items-center gap-1 mr-4 px-2 py-1 text-xs font-medium rounded-md bg-white/50 text-white hover:bg-white hover:text-black" onclick="toggleTheme()">
+    <button id="theme-toggle" class="hidden md:flex items-center gap-1 mr-4 px-2 py-1 text-xs font-medium rounded-md bg-gray-200 dark:bg-white/50 text-gray-900 dark:text-white hover:bg-gray-300 dark:hover:bg-white hover:text-gray-900 dark:hover:text-black" onclick="toggleTheme()">
      <span id="theme-icon-light" class="hidden">{{{icon "sun" class="h-4 w-4"}}}</span>
      <span id="theme-icon-dark">{{{icon "moon" class="h-4 w-4"}}}</span>
      <span id="theme-text">Dark</span>
    </button>
 
    <!-- Language Switcher -->
-   <button id="lang-switcher" class="hidden md:flex items-center gap-1 mr-4 px-2 py-1 text-xs font-medium rounded-md bg-white/50 text-white hover:bg-white hover:text-black" onclick="switchLanguage()">
+    <button id="lang-switcher" class="hidden md:flex items-center gap-1 mr-4 px-2 py-1 text-xs font-medium rounded-md bg-gray-200 dark:bg-white/50 text-gray-900 dark:text-white hover:bg-gray-300 dark:hover:bg-white hover:text-gray-900 dark:hover:text-black" onclick="switchLanguage()">
      {{{icon "languages" class="h-4 w-4"}}}
      <span id="lang-text">EN</span>
    </button>
@@ -39,7 +39,7 @@
   <div class="flex gap-2">
 
     <a href="/auth/login"
-      class="flex gap-2 hover:bg-brand-purple transition-colors group text-xs font-semibold text-black bg-white rounded-full pt-2 pr-4 pb-2 pl-4 gap-x-2 gap-y-2 items-center flex-none">
+      class="flex gap-2 hover:bg-brand-purple transition-colors group text-xs font-semibold text-gray-900 dark:text-black bg-gray-50 dark:bg-white rounded-full pt-2 pr-4 pb-2 pl-4 gap-x-2 gap-y-2 items-center flex-none">
       Start Building
       {{{icon "arrow-right" size="1em" class="group-hover:translate-x-0.5 transition-transform"}}}
     </a>
@@ -91,16 +91,18 @@
      }
    }
 
-   // Load saved theme and language on page load
-   document.addEventListener('DOMContentLoaded', () => {
-     const savedTheme = localStorage.getItem('theme') || 'light';
-     const savedLang = localStorage.getItem('language') || 'en';
+    // Load saved theme and language on page load
+    document.addEventListener('DOMContentLoaded', () => {
+      const savedTheme = localStorage.getItem('theme');
+      const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      const theme = savedTheme || (systemPrefersDark ? 'dark' : 'light');
+      const isDark = theme === 'dark';
 
-     if (savedTheme === 'dark') {
-       document.documentElement.classList.add('dark');
-     }
+      if (isDark) {
+        document.documentElement.classList.add('dark');
+      }
 
-     updateThemeToggle(savedTheme === 'dark');
-     updateLangSwitcher(savedLang);
-   });
+      updateThemeToggle(isDark);
+      updateLangSwitcher(localStorage.getItem('language') || 'en');
+    });
  </script>

@@ -237,3 +237,76 @@
   </div>
 </nav>
 
+<script>
+  function toggleTheme() {
+    const html = document.documentElement;
+    html.classList.toggle('dark');
+    const isDark = html.classList.contains('dark');
+    localStorage.setItem('theme', isDark ? 'dark' : 'light');
+    updateThemeToggle(isDark);
+  }
+
+  function updateThemeToggle(isDark) {
+    const lightIcon = document.getElementById('theme-icon-light');
+    const darkIcon = document.getElementById('theme-icon-dark');
+    if (lightIcon && darkIcon) {
+      if (isDark) {
+        lightIcon.classList.add('hidden');
+        darkIcon.classList.remove('hidden');
+      } else {
+        darkIcon.classList.add('hidden');
+        lightIcon.classList.remove('hidden');
+      }
+    }
+  }
+
+  function switchLanguage() {
+    const currentLang = localStorage.getItem('language') || 'en';
+    const newLang = currentLang === 'en' ? 'ar' : 'en';
+    localStorage.setItem('language', newLang);
+    updateLangSwitcher(newLang);
+    // Here you would implement the actual language switching logic
+    // For example, reload the page or update content dynamically
+    console.log('Language switched to:', newLang);
+  }
+
+  function updateLangSwitcher(lang) {
+    const textSpan = document.getElementById('lang-text');
+    if (textSpan) {
+      textSpan.textContent = lang.toUpperCase();
+    }
+  }
+
+  function toggleGridMenu() {
+    const dropdown = document.getElementById('grid-dropdown');
+    if (dropdown) {
+      const isVisible = !dropdown.classList.contains('hidden');
+      if (isVisible) {
+        dropdown.classList.add('hidden');
+        dropdown.classList.add('invisible');
+        dropdown.classList.add('opacity-0');
+      } else {
+        dropdown.classList.remove('hidden');
+        dropdown.classList.remove('invisible');
+        dropdown.classList.remove('opacity-0');
+      }
+    }
+  }
+
+  function toggleUserMenu() {
+    const dropdown = document.getElementById('admin-user-dropdown');
+    if (dropdown) {
+      const isVisible = !dropdown.classList.contains('hidden');
+      if (isVisible) {
+        dropdown.classList.add('hidden');
+        dropdown.classList.add('invisible');
+        dropdown.classList.add('opacity-0');
+      } else {
+        dropdown.classList.remove('hidden');
+        dropdown.classList.remove('invisible');
+        dropdown.classList.remove('opacity-0');
+      }
+    }
+  }
+</script>
+

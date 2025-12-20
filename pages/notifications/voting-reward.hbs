@@ -231,4 +231,35 @@
   </div>
 </main>
 
+ <script>
+function voteOnIdea(ideaId) {
+  // Simple implementation: prompt for rating and submit
+  const rating = prompt('Enter your rating (1-5):', '5');
+  if (rating && rating >= 1 && rating <= 5) {
+    fetch('/api/votes', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        idea_id: ideaId,
+        rating: parseInt(rating)
+      })
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.success) {
+        showToast('Vote submitted successfully!', 'success');
+        // Refresh the ideas list
+        htmx.trigger('#available-ideas', 'refresh-ideas');
+      } else {
+        showToast(data.error || 'Failed to vote', 'error');
+      }
+    })
+    .catch(error => {
+      console.error('Vote error:', error);
+      showToast('Failed to submit vote', 'error');
+    });
+  }
+}
 </script>

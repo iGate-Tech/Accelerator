@@ -230,6 +230,7 @@
         action="/new-idea">
         <!-- CSRF Token (Important for security) -->
         <input type="hidden" name="_csrf" value="">
+        <input type="hidden" name="privacy" id="privacy-hidden" value="public">
 
         <div class="flex flex-col w-full">
             <div class="">
@@ -298,16 +299,13 @@
 
                     <!-- Privacy setting -->
                     <div class="px-3 pb-2">
-                        <div class="flex items-center gap-2">
+                        <div class="flex items-center gap-3">
                             <label class="text-xs text-muted-foreground">Visibility:</label>
-                            <div class="flex items-center gap-4">
-                                <label class="flex items-center gap-1 cursor-pointer">
-                                    <input type="radio" name="privacy" value="public" checked class="text-primary">
-                                    <span class="text-xs text-muted-foreground">Public</span>
-                                </label>
-                                <label class="flex items-center gap-1 cursor-pointer">
-                                    <input type="radio" name="privacy" value="private" class="text-primary">
-                                    <span class="text-xs text-muted-foreground">Private</span>
+                            <div class="flex items-center gap-2">
+                                <span class="text-xs text-muted-foreground" id="privacy-label">Public</span>
+                                <label class="relative inline-flex items-center cursor-pointer">
+                                    <input type="checkbox" id="privacy-toggle" class="sr-only peer">
+                                    <div class="w-9 h-5 bg-muted-foreground/20 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-primary/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-primary"></div>
                                 </label>
                             </div>
                         </div>
@@ -459,6 +457,23 @@
 
         descriptionTextarea.addEventListener('input', updateCharCounter);
         updateCharCounter();
+
+        // Initialize privacy toggle
+        const privacyToggle = document.getElementById('privacy-toggle');
+        const privacyLabel = document.getElementById('privacy-label');
+        const privacyHidden = document.getElementById('privacy-hidden');
+
+        function updatePrivacyDisplay() {
+            const isPrivate = privacyToggle.checked;
+            privacyLabel.textContent = isPrivate ? 'Private' : 'Public';
+            privacyLabel.className = `text-xs ${isPrivate ? 'text-orange-600' : 'text-green-600'}`;
+            privacyHidden.value = isPrivate ? 'private' : 'public';
+        }
+
+        if (privacyToggle && privacyLabel && privacyHidden) {
+            privacyToggle.addEventListener('change', updatePrivacyDisplay);
+            updatePrivacyDisplay(); // Initialize display
+        }
 
         // Ensure textarea height is adjusted for pre-filled content
         setTimeout(() => {
@@ -879,95 +894,190 @@
             });
         }
 
-        // Auto fill with AI
+        // Intelligent auto-fill with AI suggestions
         const autoFillBtn = document.querySelector('[aria-label="Auto fill with AI"]');
         if (autoFillBtn) {
             autoFillBtn.addEventListener('click', async function (e) {
                 e.preventDefault();
+
+                // Collect current form data
+                const currentTitle = titleSpan.textContent.trim();
+                const currentCategory = categorySpan.textContent.trim();
                 const currentDescription = descriptionTextarea.value.trim();
-                if (!currentDescription) {
-                    showToastMessage('Please enter a description first', 'warning');
+                const currentTags = Array.from(document.querySelectorAll('.tag-lskjsdb span[contenteditable]')).map(span => span.textContent.trim()).filter(tag => tag);
+
+                const formData = {
+                    title: currentTitle !== 'Untitled' ? currentTitle : '',
+                    category: currentCategory !== 'Category' ? currentCategory : '',
+                    description: currentDescription,
+                    tags: currentTags,
+                };
+
+                // Check if we have any data to work with
+                const hasData = Object.values(formData).some(value =>
+                    Array.isArray(value) ? value.length > 0 : value.trim().length > 0
+                );
+
+                if (!hasData) {
+                    showToastMessage('Please fill at least one field to get AI suggestions', 'warning');
                     return;
                 }
+
                 setButtonLoading(autoFillBtn, true);
                 try {
-                    showToastMessage('Auto filling with AI...', 'info');
-                    const result = await callAIApi('auto-fill', { description: currentDescription });
-                    if (result.error) {
-                        showToastMessage('AI error: ' + result.error, 'error');
-                    } else {
-                        const currentTitle = titleSpan.textContent.trim();
-                        const currentCategory = categorySpan.textContent.trim();
-                        const currentTags = Array.from(document.querySelectorAll('.tag-lskjsdb span[contenteditable]')).map(span => span.textContent.trim()).filter(tag => tag);
+                    showToastMessage('Getting AI suggestions...', 'info');
 
-                        let filledCount = 0;
+                    const response = await fetch('/api/ai/suggest-autofill', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            formData,
+                            context: 'idea_creation'
+                        }),
+                        credentials: 'same-origin'
+                    });
 
-                        // Fill title if missing or default
-                        if (!currentTitle || currentTitle === 'Untitled') {
-                            titleSpan.innerHTML = result.title || '';
-                            filledCount++;
-                        }
+                    const result = await response.json();
 
-                        // Fill category if missing or default
-                        if (!currentCategory || currentCategory === 'Category') {
-                            categorySpan.innerHTML = result.category || '';
-                            filledCount++;
-                        }
-
-                        // Fill description if too small or missing
-                        if (!currentDescription || currentDescription.length < 100) {
-        const randomIdeaBtn = document.querySelector('[aria-label="Generate random idea"]');
-
-        waitForMarked(() => {
-                                descriptionTextarea.dataset.originalContent = result.description || '';
-                                descriptionTextarea.value = result.description || '';
-                                const displayDivFill = document.getElementById('assistant-prompt-display');
-                                const processedContent = (result.description || '').replace(/\n/g, '\n\n');
-                                displayDivFill.innerHTML = marked.parse(processedContent, { breaks: true });
-                                displayDivFill.style.display = 'block';
-                                descriptionTextarea.style.display = 'none';
-                            });
-                            updateCharCounter();
-                            filledCount++;
-                        }
-
-                        // Fill tags if none exist
-                        if (currentTags.length === 0) {
-                            if (result.tags && result.tags.length > 0) {
-                                addTagsFromArray(result.tags);
-                                filledCount++;
-                            } else {
-                                // If auto-fill didn't provide tags, try add-tags API
-                                try {
-                                    const tagsResult = await callAIApi('add-tags', { description: currentDescription });
-                                    if (tagsResult.tags && tagsResult.tags.length > 0) {
-                                        addTagsFromArray(tagsResult.tags);
-                                        filledCount++;
-                                        showToastMessage('10 credits deducted for additional AI usage', 'warning');
-                                    }
-                                } catch (tagsError) {
-                                    console.error('Add tags error:', tagsError);
-                                }
-                            }
-                        }
-
-                        if (filledCount > 0) {
-                            showToastMessage('Form auto filled successfully', 'success');
-                            showToastMessage('10 credits deducted for AI usage', 'warning');
-                            if (typeof window.loadNavCreditBalance === 'function') {
-                                window.loadNavCreditBalance();
-                            }
-                        } else {
-                            showToastMessage('All fields are already complete', 'info');
-                        }
+                    if (!result.success) {
+                        throw new Error(result.error || 'AI suggestions failed');
                     }
+
+                    // Show suggestions in a modal/overlay
+                    showAutoFillSuggestions(result.suggestions, result.confidence, result.reasoning);
+
+                    showToastMessage('AI suggestions ready! Review and apply them below.', 'success');
+                    showToastMessage(`${result.credits_deducted || 8} credits deducted`, 'warning');
+
+                    if (typeof window.loadNavCreditBalance === 'function') {
+                        window.loadNavCreditBalance();
+                    }
+
                 } catch (error) {
-                    console.error('Auto fill error:', error);
-                    showToastMessage('Network error. Please try again.', 'error');
+                    console.error('Auto-fill suggestions error:', error);
+                    showToastMessage(error.message || 'Failed to get AI suggestions. Please try again.', 'error');
                 } finally {
                     setButtonLoading(autoFillBtn, false);
                 }
             });
+        }
+
+        // Function to show auto-fill suggestions
+        function showAutoFillSuggestions(suggestions, confidence, reasoning) {
+            // Remove any existing suggestion overlay
+            const existingOverlay = document.querySelector('.autofill-suggestions-overlay');
+            if (existingOverlay) {
+                existingOverlay.remove();
+            }
+
+            // Create suggestions overlay
+            const overlay = document.createElement('div');
+            overlay.className = 'autofill-suggestions-overlay fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4';
+            overlay.innerHTML = `
+                <div class="bg-card border border-border rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+                    <div class="p-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <div>
+                                <h3 class="text-lg font-semibold text-foreground">AI Suggestions</h3>
+                                <p class="text-sm text-muted-foreground mt-1">${reasoning}</p>
+                                <div class="flex items-center gap-2 mt-2">
+                                    <div class="text-xs text-muted-foreground">Confidence:</div>
+                                    <div class="flex-1 bg-muted rounded-full h-2">
+                                        <div class="bg-primary h-2 rounded-full" style="width: ${Math.round(confidence * 100)}%"></div>
+                                    </div>
+                                    <div class="text-xs font-medium">${Math.round(confidence * 100)}%</div>
+                                </div>
+                            </div>
+                            <button class="text-muted-foreground hover:text-destructive text-xl" onclick="this.closest('.autofill-suggestions-overlay').remove()">×</button>
+                        </div>
+
+                        <div class="space-y-4">
+                            ${Object.entries(suggestions).map(([field, value]) => `
+                                <div class="border border-border rounded-lg p-4">
+                                    <div class="flex items-center justify-between mb-2">
+                                        <label class="text-sm font-medium text-foreground capitalize">${field.replace('_', ' ')}:</label>
+                                        <button class="apply-suggestion btn btn-primary btn-xs px-3 py-1" data-field="${field}">
+                                            Apply
+                                        </button>
+                                    </div>
+                                    <div class="text-sm text-muted-foreground bg-muted/50 p-3 rounded-md">
+                                        ${Array.isArray(value) ? value.map(tag => `<span class="inline-block bg-primary/10 text-primary px-2 py-1 rounded text-xs mr-1">${tag}</span>`).join('') : value}
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+
+                        <div class="flex justify-end gap-2 mt-6">
+                            <button class="btn btn-outline px-4 py-2" onclick="this.closest('.autofill-suggestions-overlay').remove()">
+                                Close
+                            </button>
+                            <button class="btn btn-primary px-4 py-2 apply-all">
+                                Apply All Suggestions
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            document.body.appendChild(overlay);
+
+            // Handle apply individual suggestions
+            overlay.querySelectorAll('.apply-suggestion').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const field = this.dataset.field;
+                    const value = suggestions[field];
+                    applySuggestion(field, value);
+                    this.textContent = 'Applied';
+                    this.className = 'btn btn-success btn-xs px-3 py-1';
+                    this.disabled = true;
+                });
+            });
+
+            // Handle apply all
+            overlay.querySelector('.apply-all').addEventListener('click', function() {
+                Object.entries(suggestions).forEach(([field, value]) => {
+                    applySuggestion(field, value);
+                });
+                overlay.remove();
+                showToastMessage('All suggestions applied successfully!', 'success');
+            });
+        }
+
+        // Function to apply a suggestion to the form
+        function applySuggestion(field, value) {
+            switch (field) {
+                case 'title':
+                    if (!titleSpan.textContent.trim() || titleSpan.textContent.trim() === 'Untitled') {
+                        titleSpan.innerHTML = value;
+                    }
+                    break;
+                case 'category':
+                    if (!categorySpan.textContent.trim() || categorySpan.textContent.trim() === 'Category') {
+                        categorySpan.innerHTML = value;
+                    }
+                    break;
+                case 'description':
+                    if (!descriptionTextarea.value.trim() || descriptionTextarea.value.trim().length < 50) {
+                        waitForMarked(() => {
+                            descriptionTextarea.dataset.originalContent = value;
+                            descriptionTextarea.value = value;
+                            const displayDiv = document.getElementById('assistant-prompt-display');
+                            const processedContent = value.replace(/\n/g, '\n\n');
+                            displayDiv.innerHTML = marked.parse(processedContent, { breaks: true });
+                            displayDiv.style.display = 'block';
+                            descriptionTextarea.style.display = 'none';
+                        });
+                        updateCharCounter();
+                    }
+                    break;
+                case 'tags':
+                    if (Array.isArray(value) && value.length > 0 && document.querySelectorAll('.tag-lskjsdb').length === 0) {
+                        addTagsFromArray(value);
+                    }
+                    break;
+            }
         }
 
         // Improve with AI
@@ -1036,7 +1146,7 @@
             const category = categorySpan.textContent.trim() || 'Category';
             const description = descriptionTextarea.value;
             const tags = Array.from(document.querySelectorAll('.tag-lskjsdb span[contenteditable]')).map(span => span.textContent.trim()).filter(tag => tag);
-            const privacy = document.querySelector('input[name="privacy"]:checked')?.value || 'public';
+                            const privacy = document.getElementById('privacy-hidden').value;
 
             // Show loading state
             submitButton.disabled = true;

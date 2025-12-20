@@ -71,7 +71,34 @@
           </label>
           <textarea id="prompt" name="prompt" rows="3"
             class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
-            placeholder="Describe what kind of idea you're looking for... (e.g., 'something in healthcare', 'tech for education', 'sustainable products', or leave blank for completely random)"></textarea>
+            placeholder="Describe what kind of idea you're looking for... (e.g., 'something in healthcare', 'tech for education', 'sustainable products', 'AI-powered solutions', or leave blank for completely random)"></textarea>
+        </div>
+
+        <!-- Quick Inspiration Buttons -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">
+            Quick Inspiration
+          </label>
+          <div class="grid grid-cols-2 md:grid-cols-3 gap-2">
+            <button type="button" class="quick-prompt-btn px-3 py-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-sm rounded-lg border border-indigo-200 transition-colors" data-prompt="AI-powered solutions for everyday problems">
+              🤖 AI & Tech
+            </button>
+            <button type="button" class="quick-prompt-btn px-3 py-2 bg-green-50 hover:bg-green-100 text-green-700 text-sm rounded-lg border border-green-200 transition-colors" data-prompt="Sustainable and eco-friendly business ideas">
+              🌱 Sustainability
+            </button>
+            <button type="button" class="quick-prompt-btn px-3 py-2 bg-blue-50 hover:bg-blue-100 text-blue-700 text-sm rounded-lg border border-blue-200 transition-colors" data-prompt="Healthcare innovation and medical technology">
+              🏥 Healthcare
+            </button>
+            <button type="button" class="quick-prompt-btn px-3 py-2 bg-purple-50 hover:bg-purple-100 text-purple-700 text-sm rounded-lg border border-purple-200 transition-colors" data-prompt="Education technology and learning platforms">
+              📚 Education
+            </button>
+            <button type="button" class="quick-prompt-btn px-3 py-2 bg-orange-50 hover:bg-orange-100 text-orange-700 text-sm rounded-lg border border-orange-200 transition-colors" data-prompt="Financial technology and fintech solutions">
+              💰 FinTech
+            </button>
+            <button type="button" class="quick-prompt-btn px-3 py-2 bg-pink-50 hover:bg-pink-100 text-pink-700 text-sm rounded-lg border border-pink-200 transition-colors" data-prompt="Entertainment and gaming industry innovations">
+              🎮 Entertainment
+            </button>
+          </div>
         </div>
 
         <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
@@ -100,7 +127,7 @@
               {{{ icon 'zap' class='w-4 h-4 text-yellow-600' }}}
             </div>
             <div>
-              <h4 class="text-sm font-semibold text-yellow-900">Cost: 10 Credits</h4>
+              <h4 class="text-sm font-semibold text-yellow-900">Cost: 20 Credits</h4>
               <p class="text-sm text-yellow-800">Your current balance: <span class="font-semibold">{{userCredits}} credits</span></p>
             </div>
           </div>
@@ -109,7 +136,7 @@
         <div class="flex gap-4">
           <button type="submit"
             class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-4 px-6 rounded-lg transition-all duration-300 transform hover:scale-105 flex items-center justify-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
-            {{#if (lt userCredits 10)}}disabled{{/if}}>
+            {{#if (lt userCredits 20)}}disabled{{/if}}>
             <span>Generate Random Idea</span>
             {{#if (gte userCredits 10)}}
               {{{ icon 'sparkles' class='w-5 h-5' }}}
@@ -118,7 +145,7 @@
         </div>
       </form>
 
-      {{#if (lt userCredits 10)}}
+      {{#if (lt userCredits 20)}}
       <div class="mt-6 text-center">
         <a href="/buy-credits" class="text-indigo-600 hover:text-indigo-800 font-semibold">
           Need more credits? Buy credits →
@@ -154,6 +181,38 @@
         <p class="text-gray-600 text-sm">Save ideas and get validation from the community</p>
       </div>
     </div>
+
+    <script>
+      // Handle quick prompt buttons
+      document.querySelectorAll('.quick-prompt-btn').forEach(button => {
+        button.addEventListener('click', function() {
+          const prompt = this.dataset.prompt;
+          const textarea = document.getElementById('prompt');
+
+          // Clear existing content and set new prompt
+          textarea.value = prompt;
+          textarea.focus();
+
+          // Highlight the button temporarily
+          this.classList.add('ring-2', 'ring-offset-2', 'ring-indigo-500');
+          setTimeout(() => {
+            this.classList.remove('ring-2', 'ring-offset-2', 'ring-indigo-500');
+          }, 1000);
+
+          // Scroll to the textarea
+          textarea.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        });
+      });
+
+      // Auto-resize textarea
+      const textarea = document.getElementById('prompt');
+      if (textarea) {
+        textarea.addEventListener('input', function() {
+          this.style.height = 'auto';
+          this.style.height = Math.min(this.scrollHeight, 120) + 'px';
+        });
+      }
+    </script>
 
   </div>
 </div>

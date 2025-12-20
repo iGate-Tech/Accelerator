@@ -902,22 +902,153 @@
          let chatHistory = [];
          // isChatOpen and chatContainer already declared above
 
-         const chatBtn = form.querySelector('[aria-label="Chat with AI about Requirements"]');
-         const chatMessages = questionCard.querySelector('#{{id}}-chat-messages');
-         const chatInput = questionCard.querySelector('#{{id}}-chat-input');
-         const chatCharCounter = questionCard.querySelector('#{{id}}-chat-char-counter');
+          const chatBtn = form.querySelector('[aria-label="Chat with AI about Requirements"]');
+          const chatMessages = questionCard.querySelector('#{{id}}-chat-messages');
+          const chatInput = questionCard.querySelector('#{{id}}-chat-input');
+          const chatCharCounter = questionCard.querySelector('#{{id}}-chat-char-counter');
 
+          // Single-question chat implementation
+          chatBtn.addEventListener('click', () => {
+            const existingChat = questionCard.querySelector('.single-question-chat');
+            if (existingChat) {
+              existingChat.remove();
+              return;
+            }
 
+            // Create single-question chat interface
+            const chatInterface = document.createElement('div');
+            chatInterface.className = 'single-question-chat mt-4 p-4 bg-card border border-border rounded-lg';
+            chatInterface.innerHTML = `
+              <div class="flex items-center justify-between mb-3">
+                <h4 class="text-sm font-medium text-foreground">Ask AI a Question</h4>
+                <button class="text-muted-foreground hover:text-destructive text-sm" onclick="this.closest('.single-question-chat').remove()">×</button>
+              </div>
+              <div class="space-y-3">
+                <textarea
+                  placeholder="Ask a specific question about this section..."
+                  class="w-full p-3 text-sm border border-input rounded-md bg-background resize-none"
+                  rows="3"
+                  maxlength="500"
+                ></textarea>
+                <div class="flex items-center justify-between">
+                  <span class="text-xs text-muted-foreground">5 credits per question</span>
+                  <button class="btn btn-primary btn-sm px-4 py-2" disabled>
+                    <span class="inline">Ask AI</span>
+                  </button>
+                </div>
+              </div>
+            `;
 
-           // Toggle chat visibility
-            chatBtn.addEventListener('click', () => {
-                isChatOpen = !isChatOpen;
-                chatContainer.classList.toggle('hidden', !isChatOpen);
+            // Insert after the toolbar
+            const toolbar = chatBtn.closest('.flex');
+            toolbar.insertAdjacentElement('afterend', chatInterface);
 
-                if (isChatOpen) {
-                    renderChatMessages();
-                }
+            const textarea = chatInterface.querySelector('textarea');
+            const askBtn = chatInterface.querySelector('button:last-child');
+            const charCount = chatInterface.querySelector('.text-xs');
+
+            // Enable/disable button based on input
+            textarea.addEventListener('input', () => {
+              const hasContent = textarea.value.trim().length > 0;
+              askBtn.disabled = !hasContent;
+              askBtn.classList.toggle('btn-primary', hasContent);
+              askBtn.classList.toggle('btn-secondary', !hasContent);
+
+              // Update character count
+              const remaining = 500 - textarea.value.length;
+              charCount.textContent = `${remaining} characters left`;
+              charCount.className = `text-xs ${remaining < 50 ? 'text-orange-600' : 'text-muted-foreground'}`;
             });
+
+            // Handle ask button click
+            askBtn.addEventListener('click', async () => {
+              const question = textarea.value.trim();
+              if (!question) return;
+
+              // Show loading state
+              askBtn.disabled = true;
+              askBtn.innerHTML = '<span class="animate-spin">⟳</span> Thinking...';
+
+              try {
+                const response = await fetch('/api/ai/ask', {
+                  method: 'POST',
+                  headers: {
+                    'Content-Type': 'application/json',
+                  },
+                  body: JSON.stringify({
+                    question,
+                    context: descriptionTextarea.value,
+                    model: window.currentModel || 'idea',
+                    section: '{{id}}',
+                    ideaId: window.currentIdeaId
+                  }),
+                  credentials: 'same-origin'
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                  // Replace chat interface with answer
+                  chatInterface.innerHTML = `
+                    <div class="flex items-center justify-between mb-3">
+                      <h4 class="text-sm font-medium text-foreground">AI Answer</h4>
+                      <button class="text-muted-foreground hover:text-destructive text-sm" onclick="this.closest('.single-question-chat').remove()">×</button>
+                    </div>
+                    <div class="bg-muted/50 p-3 rounded-md">
+                      <p class="text-sm text-foreground whitespace-pre-wrap">${result.answer}</p>
+                    </div>
+                    <div class="mt-2 text-xs text-muted-foreground">
+                      5 credits deducted • Ask another question anytime
+                    </div>
+                  `;
+
+                  // Update credit display if function exists
+                  if (typeof window.loadNavCreditBalance === 'function') {
+                    window.loadNavCreditBalance();
+                  }
+                } else {
+                  throw new Error(result.error || 'AI request failed');
+                }
+              } catch (error) {
+                console.error('AI question error:', error);
+
+                // Show error state
+                chatInterface.innerHTML = `
+                  <div class="flex items-center justify-between mb-3">
+                    <h4 class="text-sm font-medium text-destructive">Error</h4>
+                    <button class="text-muted-foreground hover:text-destructive text-sm" onclick="this.closest('.single-question-chat').remove()">×</button>
+                  </div>
+                  <div class="bg-destructive/10 p-3 rounded-md">
+                    <p class="text-sm text-destructive">${error.message || 'Failed to get AI response. Please try again.'}</p>
+                  </div>
+                `;
+
+                // Reset button after a delay
+                setTimeout(() => {
+                  chatInterface.innerHTML = `
+                    <div class="flex items-center justify-between mb-3">
+                      <h4 class="text-sm font-medium text-foreground">Ask AI a Question</h4>
+                      <button class="text-muted-foreground hover:text-destructive text-sm" onclick="this.closest('.single-question-chat').remove()">×</button>
+                    </div>
+                    <div class="space-y-3">
+                      <textarea
+                        placeholder="Ask a specific question about this section..."
+                        class="w-full p-3 text-sm border border-input rounded-md bg-background resize-none"
+                        rows="3"
+                        maxlength="500"
+                      >${question}</textarea>
+                      <div class="flex items-center justify-between">
+                        <span class="text-xs text-muted-foreground">500 characters left</span>
+                        <button class="btn btn-primary btn-sm px-4 py-2">
+                          <span class="inline">Ask AI</span>
+                        </button>
+                      </div>
+                    </div>
+                  `;
+                }, 3000);
+              }
+            });
+          });
 
         // Auto-resize chat input
         function autoResizeChatInput() {

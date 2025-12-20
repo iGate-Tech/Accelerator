@@ -6,12 +6,12 @@
       <!-- Welcome Header -->
       <div class="flex items-center justify-between">
         <div class="grid gap-1">
-          <h1 class="font-heading text-3xl font-semibold text-foreground">
-            Welcome back, {{user.profile.name}}! 👋
-          </h1>
-          <p class="text-lg text-muted-foreground">
-            {{t 'dashboard.overview.subtitle'}}
-          </p>
+           <h1 class="font-heading text-3xl font-semibold text-foreground">
+             {{t 'dashboard.overview.welcome_back' name=user.profile.name}}
+           </h1>
+           <p class="text-lg text-muted-foreground">
+             {{t 'dashboard.overview.subtitle'}}
+           </p>
         </div>
         <div class="flex items-center gap-2">
           <a href="/new-idea" class="btn btn-primary">
@@ -36,16 +36,16 @@
               </div>
             </div>
           </div>
-          <div class="flex items-center gap-1 text-sm font-medium text-muted-foreground mt-3">
-            <span class="text-success">{{stats.ideas.completed}} completed</span>
-          </div>
+           <div class="flex items-center gap-1 text-sm font-medium text-muted-foreground mt-3">
+             <span class="text-success">{{stats.ideas.completed}} {{t 'dashboard.overview.completed'}}</span>
+           </div>
         </div>
 
         <!-- Completion Rate Card -->
         <div class="bg-card rounded-lg border border-border p-6 text-card-foreground shadow-sm">
           <div class="flex items-center justify-between">
             <div class="flex flex-col gap-1">
-              <h3 class="text-sm font-medium text-muted-foreground">Completion Rate</h3>
+               <h3 class="text-sm font-medium text-muted-foreground">{{t 'dashboard.overview.completion_rate'}}</h3>
               <p class="text-2xl font-semibold text-foreground">{{stats.ideas.completionRate}}%</p>
             </div>
             <div class="bg-success/20 rounded-lg p-2">

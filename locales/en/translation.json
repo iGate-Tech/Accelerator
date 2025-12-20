@@ -95,9 +95,13 @@
         "manage_portfolios": "Manage Portfolios",
         "settings": "Settings",
         "activity_created_idea": "Created a new idea",
-        "activity_cast_vote": "Cast a vote on an idea",
-        "activity_completed_model": "Completed a model section",
-        "activity_updated_section": "Updated model section",
+         "activity_cast_vote": "Cast a vote on an idea",
+         "activity_completed_model": "Completed a model section",
+         "activity_updated_section": "Updated model section",
+         "welcome_back": "Welcome back, {{name}}! 👋",
+         "subtitle": "Here's an overview of your startup journey",
+         "new_idea": "New Idea",
+         "completed": "completed"
         "activity_selected_package": "Selected a package plan",
         "activity_completed_profile": "Completed profile setup"
       },

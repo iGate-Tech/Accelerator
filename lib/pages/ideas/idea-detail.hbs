@@ -4,9 +4,7 @@
     <!-- Back Navigation -->
     <div class="mb-6">
       <a href="/explore-idea" class="inline-flex items-center text-primary hover:text-primary/80 transition-colors">
-        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
-        </svg>
+{{{icon 'arrow-left' class='w-5 h-5 mr-2' size='24'}}}
         Back to Explore Ideas
       </a>
     </div>
@@ -30,10 +28,7 @@
         <div class="flex items-center justify-center space-x-4 mb-6">
           <div class="flex items-center space-x-1">
             {{#each (range 1 5)}}
-            <svg class="w-6 h-6 {{#if (gte ../idea.rating this)}}text-yellow-400{{else}}text-muted-foreground{{/if}}"
-                 fill="currentColor" viewBox="0 0 24 24">
-              <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
-            </svg>
+{{{icon 'star' class='w-6 h-6 {{#if (gte ../idea.rating this)}}text-yellow-400{{else}}text-muted-foreground{{/if}}' }}}
             {{/each}}
           </div>
           <span class="text-lg font-semibold text-foreground">{{idea.rating}}</span>
@@ -78,9 +73,7 @@
         {{#if (eq idea.user_id user.id)}}
         <div class="text-center mb-6">
           <a href="/models/idea?ideaId={{idea.id}}" class="btn btn-primary">
-            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
-            </svg>
+{{{icon 'edit' class='w-4 h-4 mr-2'}}}
             Continue Editing in Models
           </a>
         </div>
@@ -156,17 +149,13 @@
           <button type="submit" id="submit-vote-btn"
             class="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-semibold py-4 px-6 rounded-lg transition-all duration-300 transform hover:scale-105 flex items-center justify-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed">
             <span>Submit Your Vote</span>
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-            </svg>
+{{{icon 'check' class='w-5 h-5'}}}
           </button>
         </form>
 
         <div id="vote-result" class="mt-6 text-center hidden">
           <div class="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-4">
-            <svg class="w-8 h-8 text-green-600 dark:text-green-400 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-            </svg>
+{{{icon 'check-circle' class='w-8 h-8 text-green-600 dark:text-green-400 mx-auto mb-2'}}}
             <h3 class="text-lg font-semibold text-green-900 dark:text-green-100 mb-1">Vote Submitted!</h3>
             <p class="text-green-800 dark:text-green-200">Thank you for your feedback. The updated rating is now <strong id="new-rating"></strong> stars.</p>
           </div>
@@ -233,9 +222,7 @@ document.getElementById('vote-form')?.addEventListener('submit', async (e) => {
       btn.disabled = false;
       btn.innerHTML = `
         <span>Submit Your Vote</span>
-        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-        </svg>
+{{{icon 'check' class='w-5 h-5'}}}
       `;
     }
   } catch (error) {

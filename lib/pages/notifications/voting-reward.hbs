@@ -12,9 +12,7 @@
         </div>
         <div class="flex items-center gap-2">
           <button id="refresh-dashboard-btn" class="btn btn-outline btn-primary px-3 py-1.5 rounded-full" hx-get="/api/voting-rewards/refresh" hx-trigger="click" hx-target="body" hx-swap="none" hx-on:htmx:after-request="htmx.trigger('body', 'refresh-stats'); htmx.trigger('body', 'refresh-transactions'); htmx.trigger('body', 'refresh-activity'); htmx.trigger('body', 'refresh-notifications'); htmx.trigger('body', 'refresh-ideas')">
-            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
-            </svg>
+{{{icon 'rotate-ccw' class='w-4 h-4 mr-2'}}}
             Refresh
           </button>
         </div>

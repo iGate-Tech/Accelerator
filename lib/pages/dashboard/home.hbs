@@ -118,7 +118,7 @@
               {{#each stats.ideas.recent}}
               <div class="flex items-start gap-3 p-3 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors">
                 <div class="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center flex-shrink-0">
-                  {{#if (eq overall_status "completed"}}
+                  {{#if (eq overall_status "completed")}}
                     {{{icon 'check-circle' class='w-5 h-5 text-success' size='20'}}}
                   {{else if (gt completion_percentage 50)}}
                     {{{icon 'clock' class='w-5 h-5 text-warning' size='20'}}}
@@ -166,7 +166,7 @@
               {{#each stats.activity}}
               <div class="flex items-start gap-3">
                 <div class="w-8 h-8 bg-primary/10 rounded-full flex items-center justify-center flex-shrink-0">
-                  {{#if (eq action_type "idea_created"}}
+                   {{#if (eq action_type "idea_created")}}
                     {{{icon 'plus' class='w-4 h-4 text-primary' size='16'}}}
                   {{else if (eq action_type "vote_cast")}}
                     {{{icon 'star' class='w-4 h-4 text-yellow-500' size='16'}}}
@@ -210,7 +210,7 @@
       </div>
 
       <!-- Portfolio Overview (Enterprise only) -->
-      {{#if (eq user.profile.package_type "enterprise"}}
+      {{#if (eq user.profile.package_type "enterprise")}}
       <div class="bg-card rounded-lg border border-border p-6">
         <div class="flex items-center justify-between mb-6">
           <h2 class="text-xl font-semibold text-foreground">Portfolio Overview</h2>

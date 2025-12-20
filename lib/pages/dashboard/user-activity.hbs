@@ -44,7 +44,7 @@
              <div class="activity-item bg-card rounded-full border border-border p-4" data-action-type="{{action_type}}">
               <div class="flex items-start gap-4">
                 <div class="flex-shrink-0">
-                   <div class="w-10 h-10 {{#if (eq action_type "login"}}bg-primary/20{{else if (eq action_type "create")}}bg-success/20{{else if (eq action_type "idea_created")}}bg-accent/20{{else if (eq action_type "profile_completed")}}bg-secondary/20{{else}}bg-neutral/20{{/if}} rounded-full flex items-center justify-center">
+                    <div class="w-10 h-10 {{#if (eq action_type "login")}}bg-primary/20{{else if (eq action_type "create")}}bg-success/20{{else if (eq action_type "idea_created")}}bg-accent/20{{else if (eq action_type "profile_completed")}}bg-secondary/20{{else}}bg-neutral/20{{/if}} rounded-full flex items-center justify-center">
                      {{#if (eq action_type "login")}}
                        {{{icon "log-in" class="text-primary"}}}
                      {{else if (eq action_type "create")}}
@@ -64,7 +64,7 @@
                       {{#if (eq action_type "login")}}
                         Logged in to account
                       {{else if (eq action_type "create")}}
-                        {{#if (eq entity_type "account"}}Account created{{else}}Created {{entity_type}}{{/if}}
+                        {{#if (eq entity_type "account")}}Account created{{else}}Created {{entity_type}}{{/if}}
                       {{else if (eq action_type "idea_created")}}
                         Created new idea
                       {{else if (eq action_type "profile_completed")}}

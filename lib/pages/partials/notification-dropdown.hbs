@@ -4,15 +4,15 @@
     <div class="relative {{#unless is_read}}bg-primary/5{{/unless}} rounded-sm">
       <a href="#" class="flex cursor-default select-none items-start rounded-sm px-3 py-3 text-sm outline-none transition-colors hover:bg-primary/10" onclick="markAsRead('{{id}}')">
         <div class="flex-shrink-0 mr-3 mt-0.5">
-          {{#if (eq type "vote_received")}}
+          {{#if (eq type "vote_received"}}
             <div class="w-8 h-8 bg-yellow-100 rounded-full flex items-center justify-center">
               {{{icon "star" class="h-4 w-4 text-yellow-600"}}}
             </div>
-          {{else if (eq type "reward_earned")}}
+          {{else if (eq type "reward_earned"}}
             <div class="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
               {{{icon "coins" class="h-4 w-4 text-green-600"}}}
             </div>
-          {{else if (eq type "idea_shared")}}
+          {{else if (eq type "idea_shared"}}
             <div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
               {{{icon "share" class="h-4 w-4 text-blue-600"}}}
             </div>

@@ -132,7 +132,7 @@
              <div>
                <span class="text-lg font-semibold capitalize">{{profile.package_type}}</span>
                <span class="text-sm text-muted-foreground ml-2">
-                 {{#if (eq profile.package_type "free")}}
+                 {{#if (eq profile.package_type "free"}}
                    Free Plan
                  {{else}}
                    ${{profile.package_type}}/month
@@ -158,7 +158,7 @@
              <div class="space-y-3">
                <div class="flex items-center">
                  <input type="radio" id="free" name="package_type" value="free"
-                        {{#if (eq profile.package_type "free")}}checked{{/if}}
+                        {{#if (eq profile.package_type "free"}}checked{{/if}}
                         class="h-4 w-4 text-primary focus:ring-primary border-input">
                  <label for="free" class="ml-3 block text-sm">
                    <span class="font-medium">Free</span> - Vote on ideas, limited features (50 credits)
@@ -166,7 +166,7 @@
                </div>
                <div class="flex items-center">
                  <input type="radio" id="student" name="package_type" value="student"
-                        {{#if (eq profile.package_type "student")}}checked{{/if}}
+                        {{#if (eq profile.package_type "student"}}checked{{/if}}
                         class="h-4 w-4 text-primary focus:ring-primary border-input">
                  <label for="student" class="ml-3 block text-sm">
                    <span class="font-medium">Student - $9.99/month</span> - Create ideas, models, reports (500 credits)
@@ -174,7 +174,7 @@
                </div>
                <div class="flex items-center">
                  <input type="radio" id="enterprise" name="package_type" value="enterprise"
-                        {{#if (eq profile.package_type "enterprise")}}checked{{/if}}
+                        {{#if (eq profile.package_type "enterprise"}}checked{{/if}}
                         class="h-4 w-4 text-primary focus:ring-primary border-input">
                  <label for="enterprise" class="ml-3 block text-sm">
                    <span class="font-medium">Enterprise - $29.99/month</span> - Team features, analytics (2000 credits)

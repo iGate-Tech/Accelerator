@@ -190,11 +190,11 @@
 
               <!-- Action Buttons -->
               <div class="flex gap-2">
-                <a href="/portfolios/{{id}}" class="btn btn-outline btn-sm {{#if (or isOwner (eq memberRole "editor"))}}flex-1{{else}}w-full{{/if}}">
+                <a href="/portfolios/{{id}}" class="btn btn-outline btn-sm {{#if (or isOwner (eq memberRole "editor")}}flex-1{{else}}w-full{{/if}}">
 {{{icon 'eye' class='w-4 h-4 mr-1' size='14'}}}
                   View
                 </a>
-                {{#if (or isOwner (eq memberRole "editor"))}}
+                {{#if (or isOwner (eq memberRole "editor")}}
                 <a href="/portfolios/{{id}}/ideas" class="btn btn-outline btn-sm flex-1">
 {{{icon 'plus' class='w-4 h-4 mr-1' size='14'}}}
                   Add Ideas

@@ -1,6 +1,6 @@
 {{> progress-bar activeStep=activeStep ideaId=ideaId}}
 
-{{> model-header title=pageTitle description=(t "models.financial.overview")
+{{> model-header title=pageTitle description= (t "models.financial.overview")
 ratingStars="★★★★★" ratingValue="5.0" voteCount="0 votes" category=ideaCategory tags=ideaTags}}
 
 {{> model-progress data='[
@@ -58,20 +58,20 @@ ratingStars="★★★★★" ratingValue="5.0" voteCount="0 votes" category=ide
     <div class="sections-container">
         <!-- KPI Collection Section -->
         <div id="kpi-collection" class="section mb-6">
-            <h2 class="text-xl font-semibold mb-4 text-foreground">{{t "models.financial.kpi_collection"}}</h2>
-            <p class="text-muted-foreground mb-6">{{t "models.financial.kpi_description"}}</p>
+            <h2 class="text-xl font-semibold mb-4 text-foreground">(t "models.financial.kpi_collection")</h2>
+            <p class="text-muted-foreground mb-6">(t "models.financial.kpi_description")</p>
             <div class="relative">
                 <div class="absolute left-4 top-0 bottom-0 w-0.5 bg-border"></div>
                  <div class="flex items-start gap-4 mb-6">
                      <div class="w-8 h-8 bg-primary rounded-full flex items-center justify-center text-sm font-bold relative z-10">1</div>
                      <div class="flex-1">
-                          {{> question-block id="kpi-collection-q1" step="1" question=(t "models.financial.track_kpis") placeholder=(t "models.financial.track_kpis_help")}}
+                          {{> question-block id="kpi-collection-q1" step="1" question=(t "models.financial.track_kpis") placeholder=(t "models.financial.track_kpis_help")
                      </div>
                  </div>
                 <div class="flex items-start gap-4">
                     <div class="w-8 h-8  rounded-full flex items-center justify-center text-sm font-bold relative z-10">{{{icon 'check-circle' class='w-8 h-8 text-success' size='32'}}}</div>
                     <div class="flex-1">
-                        {{> move-next-block message="{{t "models.financial.section_completed"}}" buttonText="{{t "models.financial.move_next"}}"}}
+                        {{> move-next-block message="(t "models.financial.section_completed")" buttonText="(t "models.financial.move_next")"}}
                     </div>
                 </div>
             </div>
@@ -79,8 +79,8 @@ ratingStars="★★★★★" ratingValue="5.0" voteCount="0 votes" category=ide
 
         <!-- Revenue Assumptions Section -->
         <div id="revenue-assumptions" class="section mb-6" style="display: none;">
-            <h2 class="text-xl font-semibold mb-4 text-foreground">{{t "models.financial.revenue_assumptions"}}</h2>
-            <p class="text-muted-foreground mb-6">{{t "models.financial.revenue_description"}}</p>
+            <h2 class="text-xl font-semibold mb-4 text-foreground">(t "models.financial.revenue_assumptions")</h2>
+            <p class="text-muted-foreground mb-6">(t "models.financial.revenue_description")</p>
             <div class="relative">
                 <div class="absolute left-4 top-0 bottom-0 w-0.5 bg-border"></div>
                  <div class="flex items-start gap-4 mb-6">
@@ -92,7 +92,7 @@ ratingStars="★★★★★" ratingValue="5.0" voteCount="0 votes" category=ide
                 <div class="flex items-start gap-4">
                     <div class="w-8 h-8  rounded-full flex items-center justify-center text-sm font-bold relative z-10">{{{icon 'check-circle' class='w-8 h-8 text-success' size='32'}}}</div>
                     <div class="flex-1">
-                        {{> move-next-block message="{{t "models.financial.section_completed"}}" buttonText="{{t "models.financial.move_next"}}"}}
+                        {{> move-next-block message="(t "models.financial.section_completed")" buttonText="(t "models.financial.move_next")"}}
                     </div>
                 </div>
             </div>
@@ -100,8 +100,8 @@ ratingStars="★★★★★" ratingValue="5.0" voteCount="0 votes" category=ide
 
         <!-- Revenue Streams Section -->
         <div id="revenue-streams" class="section mb-6" style="display: none;">
-            <h2 class="text-xl font-semibold mb-4 text-foreground">{{t "models.financial.revenue_streams"}}</h2>
-            <p class="text-muted-foreground mb-6">{{t "models.financial.revenue_streams_description"}}</p>
+            <h2 class="text-xl font-semibold mb-4 text-foreground">(t "models.financial.revenue_streams")</h2>
+            <p class="text-muted-foreground mb-6">(t "models.financial.revenue_streams_description")</p>
             <div class="relative">
                 <div class="absolute left-4 top-0 bottom-0 w-0.5 bg-border"></div>
                  <div class="flex items-start gap-4 mb-6">
@@ -113,7 +113,7 @@ ratingStars="★★★★★" ratingValue="5.0" voteCount="0 votes" category=ide
                 <div class="flex items-start gap-4">
                     <div class="w-8 h-8  rounded-full flex items-center justify-center text-sm font-bold relative z-10">{{{icon 'check-circle' class='w-8 h-8 text-success' size='32'}}}</div>
                     <div class="flex-1">
-                        {{> move-next-block message="{{t "models.financial.section_completed"}}" buttonText="{{t "models.financial.move_next"}}"}}
+                        {{> move-next-block message="(t "models.financial.section_completed")" buttonText="(t "models.financial.move_next")"}}
                     </div>
                 </div>
             </div>
@@ -121,8 +121,8 @@ ratingStars="★★★★★" ratingValue="5.0" voteCount="0 votes" category=ide
 
         <!-- COGS Section -->
         <div id="cogs" class="section mb-6" style="display: none;">
-            <h2 class="text-xl font-semibold mb-4 text-foreground">{{t "models.financial.cogs"}}</h2>
-            <p class="text-muted-foreground mb-6">{{t "models.financial.cogs_description"}}</p>
+            <h2 class="text-xl font-semibold mb-4 text-foreground">(t "models.financial.cogs")</h2>
+            <p class="text-muted-foreground mb-6">(t "models.financial.cogs_description")</p>
             <div class="relative">
                 <div class="absolute left-4 top-0 bottom-0 w-0.5 bg-border"></div>
                  <div class="flex items-start gap-4 mb-6">
@@ -134,7 +134,7 @@ ratingStars="★★★★★" ratingValue="5.0" voteCount="0 votes" category=ide
                 <div class="flex items-start gap-4">
                     <div class="w-8 h-8  rounded-full flex items-center justify-center text-sm font-bold relative z-10">{{{icon 'check-circle' class='w-8 h-8 text-success' size='32'}}}</div>
                     <div class="flex-1">
-                        {{> move-next-block message="{{t "models.financial.section_completed"}}" buttonText="{{t "models.financial.move_next"}}"}}
+                        {{> move-next-block message="(t "models.financial.section_completed")" buttonText="(t "models.financial.move_next")"}}
                     </div>
                 </div>
             </div>
@@ -142,8 +142,8 @@ ratingStars="★★★★★" ratingValue="5.0" voteCount="0 votes" category=ide
 
         <!-- Opex Section -->
         <div id="opex" class="section mb-6" style="display: none;">
-            <h2 class="text-xl font-semibold mb-4 text-foreground">{{t "models.financial.opex"}}</h2>
-            <p class="text-muted-foreground mb-6">{{t "models.financial.opex_description"}}</p>
+            <h2 class="text-xl font-semibold mb-4 text-foreground">(t "models.financial.opex")</h2>
+            <p class="text-muted-foreground mb-6">(t "models.financial.opex_description")</p>
             <div class="relative">
                 <div class="absolute left-4 top-0 bottom-0 w-0.5 bg-border"></div>
                  <div class="flex items-start gap-4 mb-6">
@@ -155,7 +155,7 @@ ratingStars="★★★★★" ratingValue="5.0" voteCount="0 votes" category=ide
                 <div class="flex items-start gap-4">
                     <div class="w-8 h-8  rounded-full flex items-center justify-center text-sm font-bold relative z-10">{{{icon 'check-circle' class='w-8 h-8 text-success' size='32'}}}</div>
                     <div class="flex-1">
-                        {{> move-next-block message="{{t "models.financial.section_completed"}}" buttonText="{{t "models.financial.move_next"}}"}}
+                        {{> move-next-block message="(t "models.financial.section_completed")" buttonText="(t "models.financial.move_next")"}}
                     </div>
                 </div>
             </div>
@@ -163,8 +163,8 @@ ratingStars="★★★★★" ratingValue="5.0" voteCount="0 votes" category=ide
 
         <!-- Capex Section -->
         <div id="capex" class="section mb-6" style="display: none;">
-            <h2 class="text-xl font-semibold mb-4 text-foreground">{{t "models.financial.capex"}}</h2>
-            <p class="text-muted-foreground mb-6">{{t "models.financial.capex_description"}}</p>
+            <h2 class="text-xl font-semibold mb-4 text-foreground">(t "models.financial.capex")</h2>
+            <p class="text-muted-foreground mb-6">(t "models.financial.capex_description")</p>
             <div class="relative">
                 <div class="absolute left-4 top-0 bottom-0 w-0.5 bg-border"></div>
                  <div class="flex items-start gap-4 mb-6">
@@ -176,7 +176,7 @@ ratingStars="★★★★★" ratingValue="5.0" voteCount="0 votes" category=ide
                 <div class="flex items-start gap-4">
                     <div class="w-8 h-8  rounded-full flex items-center justify-center text-sm font-bold relative z-10">{{{icon 'check-circle' class='w-8 h-8 text-success' size='32'}}}</div>
                     <div class="flex-1">
-                        {{> move-next-block message="{{t "models.financial.section_completed"}}" buttonText="{{t "models.financial.move_next"}}"}}
+                        {{> move-next-block message="(t "models.financial.section_completed")" buttonText="(t "models.financial.move_next")"}}
                     </div>
                 </div>
             </div>
@@ -184,8 +184,8 @@ ratingStars="★★★★★" ratingValue="5.0" voteCount="0 votes" category=ide
 
         <!-- Financial Statements Section -->
         <div id="financial-statements" class="section mb-6" style="display: none;">
-            <h2 class="text-xl font-semibold mb-4 text-foreground">{{t "models.financial.financial_statements"}}</h2>
-            <p class="text-muted-foreground mb-6">{{t "models.financial.financial_description"}}</p>
+            <h2 class="text-xl font-semibold mb-4 text-foreground">(t "models.financial.financial_statements")</h2>
+            <p class="text-muted-foreground mb-6">(t "models.financial.financial_description")</p>
             <div class="relative">
                 <div class="absolute left-4 top-0 bottom-0 w-0.5 bg-border"></div>
                  <div class="flex items-start gap-4 mb-6">
@@ -197,7 +197,7 @@ ratingStars="★★★★★" ratingValue="5.0" voteCount="0 votes" category=ide
                 <div class="flex items-start gap-4">
                     <div class="w-8 h-8  rounded-full flex items-center justify-center text-sm font-bold relative z-10">{{{icon 'check-circle' class='w-8 h-8 text-success' size='32'}}}</div>
                     <div class="flex-1">
-                        {{> move-next-block message="{{t "models.financial.section_completed"}}" buttonText="{{t "models.financial.move_next"}}"}}
+                        {{> move-next-block message="(t "models.financial.section_completed")" buttonText="(t "models.financial.move_next")"}}
                     </div>
                 </div>
             </div>
@@ -205,8 +205,8 @@ ratingStars="★★★★★" ratingValue="5.0" voteCount="0 votes" category=ide
 
         <!-- Financial Ratios Section -->
         <div id="financial-ratios" class="section mb-6" style="display: none;">
-            <h2 class="text-xl font-semibold mb-4 text-foreground">{{t "models.financial.financial_ratios"}}</h2>
-            <p class="text-muted-foreground mb-6">{{t "models.financial.ratios_description"}}</p>
+            <h2 class="text-xl font-semibold mb-4 text-foreground">(t "models.financial.financial_ratios")</h2>
+            <p class="text-muted-foreground mb-6">(t "models.financial.ratios_description")</p>
             <div class="relative">
                 <div class="absolute left-4 top-0 bottom-0 w-0.5 bg-border"></div>
                  <div class="flex items-start gap-4 mb-6">
@@ -218,7 +218,7 @@ ratingStars="★★★★★" ratingValue="5.0" voteCount="0 votes" category=ide
                 <div class="flex items-start gap-4">
                     <div class="w-8 h-8  rounded-full flex items-center justify-center text-sm font-bold relative z-10">{{{icon 'check-circle' class='w-8 h-8 text-success' size='32'}}}</div>
                     <div class="flex-1">
-                        {{> move-next-block message="{{t "models.financial.complete_financial"}}" buttonText="{{t "models.financial.complete_financial_button"}}"}}
+                        {{> move-next-block message="(t "models.financial.complete_financial")" buttonText="(t "models.financial.complete_financial_button")"}}
                     </div>
                 </div>
             </div>

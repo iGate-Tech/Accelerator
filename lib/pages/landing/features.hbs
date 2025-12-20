@@ -15,16 +15,16 @@
       <span class="relative inline-flex rounded-full h-2 w-2 bg-brand-purple"></span>
     </span>
      <span class="text-xs font-mono text-brand-purple uppercase tracking-[0.2em] font-medium">
-       {{t "landing.features.badge"}}</span>
+       (t "landing.features.badge")</span>
   </div>
 
    <h2 class="text-5xl md:text-6xl lg:text-7xl font-serif font-medium tracking-tight text-gray-900 dark:text-white mb-6">
-     {{t "landing.features.title_ai_powered"}} <br />
-     <span class="text-gray-600 dark:text-white/60">{{t "landing.features.title_effortless"}}</span>
+     (t "landing.features.title_ai_powered") <br />
+     <span class="text-gray-600 dark:text-white/60">(t "landing.features.title_effortless")</span>
    </h2>
 
    <p class="text-xl text-gray-700 dark:text-white/60 leading-relaxed max-w-2xl font-light tracking-tight mb-10">
-     {{t "landing.features.description"}}
+     (t "landing.features.description")
    </p>
 
 
@@ -33,7 +33,7 @@
 <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 z-10 w-full max-w-7xl relative gap-x-8 gap-y-8">
   <!-- Script for Flashlight Effect -->
   <script>
-    document.querySelectorAll(".spotlight-card").forEach((card) => {
+    document.querySelectorAll(".spotlight-card".forEach((card) => {
       card.addEventListener("mousemove", (e) => {
         const rect = card.getBoundingClientRect();
         const x = e.clientX - rect.left;
@@ -78,10 +78,10 @@
     </div>
 
      <h3 class="text-2xl font-semibold tracking-tight text-gray-900 dark:text-white mb-4 relative z-10">
-       {{t "landing.features.card1_title"}}
+       (t "landing.features.card1_title")
      </h3>
      <p class="text-base text-gray-600 dark:text-white/50 leading-relaxed mb-12 relative z-10 font-light">
-       {{t "landing.features.card1_desc"}}
+       (t "landing.features.card1_desc")
      </p>
 
     <!-- Visual: Chat/Terminal UI -->
@@ -103,10 +103,10 @@
         <div
           class="self-end max-w-[90%] bg-gray-100 dark:bg-white/10 backdrop-blur-sm rounded-2xl rounded-tr-sm p-4 border border-gray-200 dark:border-white/5 animate-[fadeIn_1s_ease-out]">
            <p class="text-xs text-gray-800 dark:text-white/90 font-light leading-relaxed">
-             {{t "landing.features.card1_example"}}
-             <span class="text-gray-900 dark:text-white font-medium">{{t "landing.features.card1_saas"}}</span>.
-             {{t "landing.features.card1_focus"}}
-             <span class="text-brand-purple">{{t "landing.features.card1_ai_productivity"}}</span>.
+             (t "landing.features.card1_example")
+             <span class="text-gray-900 dark:text-white font-medium">(t "landing.features.card1_saas")</span>.
+             (t "landing.features.card1_focus")
+             <span class="text-brand-purple">(t "landing.features.card1_ai_productivity")</span>.
            </p>
         </div>
 
@@ -115,10 +115,10 @@
           class="self-start max-w-[90%] bg-gray-50 dark:bg-white/[0.03] backdrop-blur-md rounded-2xl rounded-tl-sm p-5 border border-gray-200 dark:border-white/10 relative overflow-hidden group-hover:border-brand-purple/20 transition-colors duration-500">
           <div class="flex items-center gap-2 mb-3 text-brand-purple font-mono text-[10px] uppercase tracking-wider">
              {{{icon 'sparkles' class='lucide-sparkles' size='14'}}}
-             {{t "landing.features.card1_ai_name"}}
+             (t "landing.features.card1_ai_name")
            </div>
            <p class="mb-4 text-xs text-gray-700 dark:text-white/80 font-light">
-             {{t "landing.features.card1_analyzing"}}
+             (t "landing.features.card1_analyzing")
            </p>
 
           <!-- Progress Bar -->
@@ -126,8 +126,8 @@
             <div class="bg-brand-purple h-full w-[85%] animate-[pulse_2s_infinite]"></div>
           </div>
            <div class="flex justify-between text-[10px] text-brand-purple/60 font-mono">
-             <span>{{t "landing.features.card1_generating"}}</span>
-             <span>{{t "landing.features.card1_ideas"}}</span>
+             <span>(t "landing.features.card1_generating")</span>
+             <span>(t "landing.features.card1_ideas")</span>
            </div>
         </div>
       </div>
@@ -177,11 +177,11 @@
           {{{icon 'zap' class='lucide lucide-zap text-brand-purple relative z-10' size='24'}}}
         </div>
          <h3 class="text-2xl font-semibold tracking-tight text-white group-hover:text-white transition-colors">
-           {{t "landing.features.card2_title"}}
+           (t "landing.features.card2_title")
          </h3>
        </div>
        <p class="text-base text-white/50 leading-relaxed mb-12 font-light group-hover:text-white/70 transition-colors">
-         {{t "landing.features.card2_desc"}}
+         (t "landing.features.card2_desc")
        </p>
 
       <!-- Visual: Hero-Inspired Orbit &amp; Sonar -->
@@ -281,7 +281,7 @@
             </span>
              <div
                class="text-[10px] text-white/40 font-mono tracking-widest uppercase group-hover:text-white/70 transition-colors">
-               {{t "landing.features.card2_network_active"}}
+               (t "landing.features.card2_network_active")
              </div>
           </div>
         </div>
@@ -319,10 +319,10 @@
             "></div>
 
      <h3 class="text-2xl font-semibold tracking-tight text-gray-900 dark:text-white mb-4 relative z-10">
-       {{t "landing.features.card3_title"}}
+       (t "landing.features.card3_title")
      </h3>
      <p class="text-base text-gray-600 dark:text-white/50 leading-relaxed mb-12 relative z-10 font-light">
-       {{t "landing.features.card3_desc"}}
+       (t "landing.features.card3_desc")
      </p>
 
     <!-- Visual: Dashboard UI -->
@@ -332,7 +332,7 @@
       <div class="flex justify-between items-center pb-4 border-b border-white/5">
         <div class="flex items-center gap-2">
           <span class="w-2 h-2 rounded-full bg-emerald-500 shadow-none"></span>
-           <span class="text-xs text-white/50 font-mono uppercase tracking-wider">{{t "landing.features.card3_model_version"}}</span>
+           <span class="text-xs text-white/50 font-mono uppercase tracking-wider">(t "landing.features.card3_model_version")</span>
         </div>
         <div class="flex -space-x-2">
           <div
@@ -353,8 +353,8 @@
       <!-- Approval Slider -->
       <div class="relative py-1">
          <div class="flex justify-between text-[10px] text-white/40 mb-2 font-mono uppercase">
-           <span class="">{{t "landing.features.card3_allocation_limit"}}</span>
-           <span class="text-brand-purple">{{t "landing.features.card3_approved"}}</span>
+           <span class="">(t "landing.features.card3_allocation_limit")</span>
+           <span class="text-brand-purple">(t "landing.features.card3_approved")</span>
          </div>
         <div class="w-full h-2 bg-white/10 rounded-full relative flex items-center">
           <div class="absolute left-0 h-full w-[75%] bg-white/80 rounded-full"></div>
@@ -366,7 +366,7 @@
           <!-- Tooltip -->
            <div
              class="absolute left-[75%] -top-9 -translate-x-1/2 bg-black border border-white/10 text-white text-[10px] px-2.5 py-1.5 rounded shadow-lg whitespace-nowrap animate-bounce">
-             {{t "landing.features.card3_signed_by"}}
+             (t "landing.features.card3_signed_by")
             <div
               class="absolute bottom-[-4px] left-1/2 -translate-x-1/2 w-2 h-2 bg-black border-r border-b border-white/10 transform rotate-45">
             </div>
@@ -379,12 +379,12 @@
         <div
           class="flex items-center justify-center gap-2 p-3 rounded-lg bg-white/5 border border-white/5 hover:bg-white/10 transition-colors cursor-pointer">
            {{{icon 'history' class='lucide lucide-history text-white/40' size='14'}}}
-           <span class="text-xs text-white/60 font-medium">{{t "landing.features.card3_audit_log"}}</span>
+           <span class="text-xs text-white/60 font-medium">(t "landing.features.card3_audit_log")</span>
          </div>
          <div
            class="flex items-center justify-center gap-2 p-3 rounded-lg bg-brand-purple/10 border border-brand-purple/20 cursor-pointer hover:bg-brand-purple/20 transition-colors">
            {{{icon 'check-circle' class='lucide lucide-check-circle text-brand-purple' size='14'}}}
-           <span class="text-xs text-brand-purple font-medium">{{t "landing.features.card3_approve_tx"}}</span>
+           <span class="text-xs text-brand-purple font-medium">(t "landing.features.card3_approve_tx")</span>
         </div>
       </div>
     </div>

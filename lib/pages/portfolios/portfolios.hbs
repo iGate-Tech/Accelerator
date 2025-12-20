@@ -129,9 +129,9 @@
                                 Color Theme
                             </label>
                             <div class="grid grid-cols-6 gap-2">
-                                {{#each (array "#3B82F6" "#EF4444" "#10B981" "#F59E0B" "#8B5CF6" "#EC4899")}}
+                                {{#each (array "#3B82F6" "#EF4444" "#10B981" "#F59E0B" "#8B5CF6" "#EC4899"}}
                                 <label class="cursor-pointer">
-                                    <input type="radio" name="color" value="{{this}}" class="sr-only peer" {{#if (eq this "#3B82F6")}}checked{{/if}}>
+                                    <input type="radio" name="color" value="{{this}}" class="sr-only peer" {{#if (eq this "#3B82F6"}}checked{{/if}}>
                                     <div class="w-8 h-8 rounded-full border-2 border-border peer-checked:border-primary flex items-center justify-center">
                                         <div class="w-6 h-6 rounded-full" style="background-color: {{this}}"></div>
                                     </div>

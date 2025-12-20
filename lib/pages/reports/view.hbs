@@ -19,11 +19,11 @@
         <div class="flex items-center justify-between">
           <div class="flex items-center space-x-4">
             <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
-              {{#if (eq report.report_type "business-plan")}}
+              {{#if (eq report.report_type "business-plan"}}
                 {{{ icon 'building-2' class='w-6 h-6 text-blue-600' }}}
-              {{else if (eq report.report_type "pitch-deck")}}
+              {{else if (eq report.report_type "pitch-deck"}}
                 {{{ icon 'presentation' class='w-6 h-6 text-blue-600' }}}
-              {{else if (eq report.report_type "valuation")}}
+              {{else if (eq report.report_type "valuation"}}
                 {{{ icon 'dollar-sign' class='w-6 h-6 text-blue-600' }}}
               {{/if}}
             </div>

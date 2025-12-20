@@ -58,17 +58,13 @@
           <button type="submit" id="submit-vote-btn"
             class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-4 px-6 rounded-lg transition-all duration-300 transform hover:scale-105 flex items-center justify-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed">
             <span>Submit Your Vote</span>
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-            </svg>
+            {{{icon "check" class="w-5 h-5"}}}
           </button>
         </form>
 
         <div id="vote-result" class="mt-6 text-center hidden">
           <div class="bg-green-50 border border-green-200 rounded-lg p-4">
-            <svg class="w-8 h-8 text-green-600 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-            </svg>
+            {{{icon "check-circle" class="w-8 h-8 text-green-600 mx-auto mb-2"}}}
             <h3 class="text-lg font-semibold text-green-900 mb-1">Vote Submitted!</h3>
             <p class="text-green-800">Thank you for your feedback. The updated rating is now <strong id="new-rating"></strong> stars.</p>
           </div>

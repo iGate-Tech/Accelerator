@@ -2,37 +2,37 @@
   <div class="flex items-center gap-2 sm:gap-4">
     <div class="h-6 w-6 ml-1 mr-4 sm:mr-6 text-primary"><img src="/images/favicon.svg" class="h-full w-full" /></div>
 
-    <div class="hidden md:flex items-center gap-2 sm:gap-4">
-      <div class="flex flex-col items-center justify-center group">
-        <div class="border-t-4 border-primary w-6 rounded-md opacity-0 group-hover:opacity-100"></div>
-        <a href="/new-idea"
-          class="text-muted-foreground font-medium text-sm leading-[2.7] group-hover:text-foreground hover:text-foreground group-hover:font-medium hover:font-medium">
-          <span class="nav-text">Projects</span>
-        </a>
-      </div>
-      <div class="flex flex-col items-center justify-center group">
-        <div class="border-t-4 border-primary w-6 rounded-md opacity-0 group-hover:opacity-100"></div>
-        <a href="/dashboard"
-          class="text-muted-foreground font-medium text-sm leading-[2.7] group-hover:text-foreground hover:text-foreground group-hover:font-medium hover:font-medium">
-          <span class="nav-text">Dashboard</span>
-        </a>
-      </div>
-      {{#if (eq user.profile.package_type "enterprise")}}
-      <div id="nav-portfolio-item" class="flex flex-col items-center justify-center group">
-        <div class="border-t-4 border-primary w-6 rounded-md opacity-0 group-hover:opacity-100"></div>
-        <a href="/portfolios"
-          class="text-muted-foreground font-medium text-sm leading-[2.7] group-hover:text-foreground hover:text-foreground group-hover:font-medium hover:font-medium">
-          <span class="nav-text">Portfolio</span>
-        </a>
-      </div>
-      {{/if}}
-      <div class="flex flex-col items-center justify-center group">
-        <div class="border-t-4 border-primary w-6 rounded-md opacity-0 group-hover:opacity-100"></div>
-        <a href="/voting-reward"
-          class="text-muted-foreground font-medium text-sm leading-[2.7] group-hover:text-foreground hover:text-foreground group-hover:font-medium hover:font-medium focus:outline-none">
-          <span class="nav-text">Voting &amp; Rewards</span>
-        </a>
-      </div>
+     <div class="hidden md:flex items-center gap-2 sm:gap-4">
+       <div class="flex flex-col items-center justify-center group">
+         <div class="border-t-4 border-primary w-6 rounded-md{{#if (eq activeNav 'projects')}} opacity-100{{else}} opacity-0 group-hover:opacity-100{{/if}}"></div>
+         <a href="/new-idea"
+           class="text-{{#if (eq activeNav 'projects')}}primary{{else}}muted-foreground group-hover:text-foreground hover:text-foreground{{/if}} font-medium text-sm leading-[2.7] group-hover:font-medium hover:font-medium">
+           <span class="nav-text">Projects</span>
+         </a>
+       </div>
+       <div class="flex flex-col items-center justify-center group">
+         <div class="border-t-4 border-primary w-6 rounded-md{{#if (eq activeNav 'dashboard')}} opacity-100{{else}} opacity-0 group-hover:opacity-100{{/if}}"></div>
+         <a href="/dashboard"
+           class="text-{{#if (eq activeNav 'dashboard')}}primary{{else}}muted-foreground group-hover:text-foreground hover:text-foreground{{/if}} font-medium text-sm leading-[2.7] group-hover:font-medium hover:font-medium">
+           <span class="nav-text">Dashboard</span>
+         </a>
+       </div>
+       {{#if (eq user.profile.package_type "enterprise")}}
+       <div id="nav-portfolio-item" class="flex flex-col items-center justify-center group">
+         <div class="border-t-4 border-primary w-6 rounded-md{{#if (eq activeNav 'portfolios')}} opacity-100{{else}} opacity-0 group-hover:opacity-100{{/if}}"></div>
+         <a href="/portfolios"
+           class="text-{{#if (eq activeNav 'portfolios')}}primary{{else}}muted-foreground group-hover:text-foreground hover:text-foreground{{/if}} font-medium text-sm leading-[2.7] group-hover:font-medium hover:font-medium">
+           <span class="nav-text">Portfolio</span>
+         </a>
+       </div>
+       {{/if}}
+       <div class="flex flex-col items-center justify-center group">
+         <div class="border-t-4 border-primary w-6 rounded-md{{#if (eq activeNav 'voting')}} opacity-100{{else}} opacity-0 group-hover:opacity-100{{/if}}"></div>
+         <a href="/voting-reward"
+           class="text-{{#if (eq activeNav 'voting')}}primary{{else}}muted-foreground group-hover:text-foreground hover:text-foreground{{/if}} font-medium text-sm leading-[2.7] group-hover:font-medium hover:font-medium focus:outline-none">
+           <span class="nav-text">Voting &amp; Rewards</span>
+         </a>
+       </div>
     </div>
   </div>
   <div class="flex items-center">
@@ -104,8 +104,8 @@
                 </div>
               </a>
               <div class="bg-border -mx-1 my-1 h-px"></div>
-              <a href="/explore-ideas"
-                class="relative flex cursor-default select-none items-center rounded-sm px-2 py-2 text-sm outline-none transition-colors hover:bg-primary-100 hover:text-primary-900">
+               <a href="/explore-idea"
+                 class="relative flex cursor-default select-none items-center rounded-sm px-2 py-2 text-sm outline-none transition-colors hover:bg-primary-100 hover:text-primary-900">
 
                 <div class="flex flex-col">
                   <span class="flex">{{{icon 'search' class='mr-2 h-4 w-4' size='16'}}}Explore Ideas</span>

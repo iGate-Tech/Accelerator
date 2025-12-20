@@ -1,0 +1,20 @@
+<div class="container mx-auto px-4 py-8">
+  <h1 class="text-2xl font-bold mb-6">Voting & Rewards</h1>
+
+  {{#if voting_history}}
+  <div class="space-y-4">
+    {{#each voting_history}}
+    <div class="bg-card border border-border rounded-md p-4">
+      <p class="text-foreground">You voted on "{{idea_title}}" - Earned {{points}} points</p>
+      <span class="text-sm text-muted-foreground">{{voted_at_formatted}}</span>
+    </div>
+    {{/each}}
+  </div>
+  <div class="mt-8">
+    <h2 class="text-xl font-semibold mb-4">Total Rewards</h2>
+    <p class="text-lg">You have {{total_points}} points</p>
+  </div>
+  {{else}}
+  <p class="text-muted-foreground">No voting history yet.</p>
+  {{/if}}
+</div>

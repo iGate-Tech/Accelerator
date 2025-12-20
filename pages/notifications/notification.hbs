@@ -1,0 +1,23 @@
+<div class="container mx-auto px-4 py-8">
+  <h1 class="text-2xl font-bold mb-6">Notifications</h1>
+
+  {{#if notifications}}
+  <div class="space-y-4">
+    {{#each notifications}}
+    <div class="bg-card border border-border rounded-md p-4">
+      <div class="flex items-start justify-between">
+        <div class="flex-1">
+          <p class="text-foreground">{{message}}</p>
+          <span class="text-sm text-muted-foreground">{{created_at_formatted}}</span>
+        </div>
+        {{#if unread}}
+        <span class="bg-primary text-primary-foreground text-xs px-2 py-1 rounded-full">New</span>
+        {{/if}}
+      </div>
+    </div>
+    {{/each}}
+  </div>
+  {{else}}
+  <p class="text-muted-foreground">No notifications yet.</p>
+  {{/if}}
+</div>

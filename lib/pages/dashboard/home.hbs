@@ -1,285 +1,318 @@
-<style>
-  body {
-    background-color: var(--color-background);
-    color: var(--color-foreground);
-    -webkit-font-smoothing: antialiased;
-  }
+<!-- Dashboard Home Page -->
+<main class="flex-1 overflow-auto bg-background">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
+    <div class="flex flex-col gap-6 mt-6">
 
-  .text-glow {
-    text-shadow: 0 0 25px color-mix(in oklab, var(--color-brand-purple), transparent 60%);
-  }
+      <!-- Welcome Header -->
+      <div class="flex items-center justify-between">
+        <div class="grid gap-1">
+          <h1 class="font-heading text-3xl font-semibold text-foreground">
+            Welcome back, {{user.profile.name}}! 👋
+          </h1>
+          <p class="text-lg text-muted-foreground">
+            Here's what's happening with your startup journey today
+          </p>
+        </div>
+        <div class="flex items-center gap-2">
+          <a href="/new-idea" class="btn btn-primary">
+            {{{icon 'plus' class='' size='16'}}}
+            New Idea
+          </a>
+        </div>
+      </div>
 
-  .grid-bg {
-    background-size: 100px 200px;
-    background-image:
-      linear-gradient(to right,
-        var(--grid-color) 1px,
-        transparent 1px),
-      linear-gradient(to bottom,
-        var(--grid-color) 1px,
-        transparent 1px);
-    mask-image: radial-gradient(circle at center,
-        black 40%,
-        transparent 100%);
-  }
+      <!-- Quick Stats Row -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <!-- Ideas Card -->
+        <div class="bg-card rounded-lg border border-border p-6 text-card-foreground shadow-sm">
+          <div class="flex items-center justify-between">
+            <div class="flex flex-col gap-1">
+              <h3 class="text-sm font-medium text-muted-foreground">Total Ideas</h3>
+              <p class="text-2xl font-semibold text-foreground">{{stats.ideas.total}}</p>
+            </div>
+            <div class="bg-primary/20 rounded-lg p-2">
+              <div class="w-8 h-8 bg-primary/20 rounded-lg relative flex items-center justify-center">
+                {{{icon 'lightbulb' class='w-5 h-5 text-primary' size='20'}}}
+              </div>
+            </div>
+          </div>
+          <div class="flex items-center gap-1 text-sm font-medium text-muted-foreground mt-3">
+            <span class="text-success">{{stats.ideas.completed}} completed</span>
+          </div>
+        </div>
 
-  .monotone-logo {
-    filter: grayscale(100%) brightness(150%) contrast(0.5);
-    opacity: 0.5;
-    transition: opacity 0.3s ease;
-  }
+        <!-- Completion Rate Card -->
+        <div class="bg-card rounded-lg border border-border p-6 text-card-foreground shadow-sm">
+          <div class="flex items-center justify-between">
+            <div class="flex flex-col gap-1">
+              <h3 class="text-sm font-medium text-muted-foreground">Completion Rate</h3>
+              <p class="text-2xl font-semibold text-foreground">{{stats.ideas.completionRate}}%</p>
+            </div>
+            <div class="bg-success/20 rounded-lg p-2">
+              <div class="w-8 h-8 bg-success/20 rounded-lg relative flex items-center justify-center">
+                {{{icon 'trending-up' class='w-5 h-5 text-success' size='20'}}}
+              </div>
+            </div>
+          </div>
+          <div class="flex items-center gap-1 text-sm font-medium text-muted-foreground mt-3">
+            <span class="text-muted-foreground">Keep up the great work!</span>
+          </div>
+        </div>
 
-  .monotone-logo:hover {
-    opacity: 1;
-    filter: grayscale(100%) brightness(200%);
-  }
+        <!-- Credits Card -->
+        <div class="bg-card rounded-lg border border-border p-6 text-card-foreground shadow-sm">
+          <div class="flex items-center justify-between">
+            <div class="flex flex-col gap-1">
+              <h3 class="text-sm font-medium text-muted-foreground">Credits</h3>
+              <p class="text-2xl font-semibold text-foreground">{{stats.credits.currentBalance}}</p>
+            </div>
+            <div class="bg-yellow-500/20 rounded-lg p-2">
+              <div class="w-8 h-8 bg-yellow-500/20 rounded-lg relative flex items-center justify-center">
+                {{{icon 'dollar-sign' class='w-5 h-5 text-yellow-500' size='20'}}}
+              </div>
+            </div>
+          </div>
+          <div class="flex items-center gap-1 text-sm font-medium text-muted-foreground mt-3">
+            <a href="/buy-credits" class="text-primary hover:underline">Buy more credits</a>
+          </div>
+        </div>
 
-  .beam-line {
-    stroke-dasharray: 80 1000;
-    stroke-linecap: round;
-  }
+        <!-- Package Status Card -->
+        <div class="bg-card rounded-lg border border-border p-6 text-card-foreground shadow-sm">
+          <div class="flex items-center justify-between">
+            <div class="flex flex-col gap-1">
+              <h3 class="text-sm font-medium text-muted-foreground">Package</h3>
+              <p class="text-lg font-semibold text-foreground capitalize">{{user.profile.package_type}}</p>
+            </div>
+            <div class="bg-accent/20 rounded-lg p-2">
+              <div class="w-8 h-8 bg-accent/20 rounded-lg relative flex items-center justify-center">
+                {{{icon 'star' class='w-5 h-5 text-accent' size='20'}}}
+              </div>
+            </div>
+          </div>
+          <div class="flex items-center gap-1 text-sm font-medium text-muted-foreground mt-3">
+            {{#if (eq user.profile.package_type 'free')}}
+              <a href="/upgrade-package" class="text-primary hover:underline">Upgrade plan</a>
+            {{else}}
+              <span class="text-success">Active</span>
+            {{/if}}
+          </div>
+        </div>
+      </div>
 
-  /* Custom Keyframes for SVG Sonar */
-  @keyframes sonar-wave {
-    0% {
-      r: 10px;
-      opacity: 0.8;
-      stroke-width: 1px;
-    }
+      <!-- Main Content Grid -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
 
-    100% {
-      r: 80px;
-      opacity: 0;
-      stroke-width: 0px;
-    }
-  }
+        <!-- Recent Ideas -->
+        <div class="bg-card rounded-lg border border-border p-6">
+          <div class="flex items-center justify-between mb-4">
+            <h2 class="text-xl font-semibold text-foreground">Recent Ideas</h2>
+            <a href="/ideas" class="btn btn-ghost text-sm">
+              View All
+              {{{icon 'arrow-right' class='' size='14'}}}
+            </a>
+          </div>
 
-  .animate-sonar {
-    animation: sonar-wave 3s cubic-bezier(0, 0, 0.2, 1) infinite;
-  }
+          {{#if stats.ideas.recent.length}}
+            <div class="space-y-4">
+              {{#each stats.ideas.recent}}
+              <div class="flex items-start gap-3 p-3 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors">
+                <div class="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center flex-shrink-0">
+                  {{#if (eq overall_status "completed")}}
+                    {{{icon 'check-circle' class='w-5 h-5 text-success' size='20'}}}
+                  {{else if (gt completion_percentage 50)}}
+                    {{{icon 'clock' class='w-5 h-5 text-warning' size='20'}}}
+                  {{else}}
+                    {{{icon 'lightbulb' class='w-5 h-5 text-primary' size='20'}}}
+                  {{/if}}
+                </div>
+                <div class="flex-1 min-w-0">
+                  <h3 class="font-medium text-foreground truncate">{{title}}</h3>
+                  <div class="flex items-center gap-2 mt-1">
+                    <div class="w-full bg-muted rounded-full h-1.5">
+                      <div class="bg-primary h-1.5 rounded-full transition-all duration-300" style="width: {{completion_percentage}}%"></div>
+                    </div>
+                    <span class="text-xs text-muted-foreground whitespace-nowrap">{{completion_percentage}}%</span>
+                  </div>
+                  <p class="text-xs text-muted-foreground mt-1">{{formatDate created_at}}</p>
+                </div>
+              </div>
+              {{/each}}
+            </div>
+          {{else}}
+            <div class="text-center py-8">
+              <div class="w-16 h-16 bg-muted rounded-full flex items-center justify-center mx-auto mb-4">
+                {{{icon 'lightbulb' class='text-muted-foreground' size='24'}}}
+              </div>
+              <h3 class="text-lg font-medium text-foreground mb-2">No ideas yet</h3>
+              <p class="text-muted-foreground mb-4">Start your entrepreneurial journey by creating your first idea</p>
+              <a href="/new-idea" class="btn btn-primary">Create Your First Idea</a>
+            </div>
+          {{/if}}
+        </div>
 
-  .delay-1000 {
-    animation-delay: 1s;
-  }
+        <!-- Activity Feed -->
+        <div class="bg-card rounded-lg border border-border p-6">
+          <div class="flex items-center justify-between mb-4">
+            <h2 class="text-xl font-semibold text-foreground">Recent Activity</h2>
+            <a href="/user-activity" class="btn btn-ghost text-sm">
+              View All
+              {{{icon 'arrow-right' class='' size='14'}}}
+            </a>
+          </div>
 
-  .delay-2000 {
-    animation-delay: 2s;
-  }
+          {{#if stats.activity.length}}
+            <div class="space-y-4">
+              {{#each stats.activity}}
+              <div class="flex items-start gap-3">
+                <div class="w-8 h-8 bg-primary/10 rounded-full flex items-center justify-center flex-shrink-0">
+                  {{#if (eq action_type "idea_created")}}
+                    {{{icon 'plus' class='w-4 h-4 text-primary' size='16'}}}
+                  {{else if (eq action_type "vote_cast")}}
+                    {{{icon 'star' class='w-4 h-4 text-yellow-500' size='16'}}}
+                  {{else if (eq action_type "model_completed")}}
+                    {{{icon 'check-circle' class='w-4 h-4 text-success' size='16'}}}
+                  {{else if (eq action_type "report_generated")}}
+                    {{{icon 'file-text' class='w-4 h-4 text-blue-500' size='16'}}}
+                  {{else}}
+                    {{{icon 'activity' class='w-4 h-4 text-muted-foreground' size='16'}}}
+                  {{/if}}
+                </div>
+                <div class="flex-1">
+                  <p class="text-sm text-foreground">
+                    {{#if (eq action_type "idea_created")}}
+                      You created a new idea
+                    {{else if (eq action_type "vote_cast")}}
+                      You cast a vote on an idea
+                    {{else if (eq action_type "model_completed")}}
+                      You completed a model section
+                    {{else if (eq action_type "report_generated")}}
+                      You generated a report
+                    {{else}}
+                      {{action_type}}
+                    {{/if}}
+                  </p>
+                  <p class="text-xs text-muted-foreground">{{formatDate created_at}}</p>
+                </div>
+              </div>
+              {{/each}}
+            </div>
+          {{else}}
+            <div class="text-center py-8">
+              <div class="w-16 h-16 bg-muted rounded-full flex items-center justify-center mx-auto mb-4">
+                {{{icon 'activity' class='text-muted-foreground' size='24'}}}
+              </div>
+              <h3 class="text-lg font-medium text-foreground mb-2">No activity yet</h3>
+              <p class="text-muted-foreground">Your recent actions will appear here</p>
+            </div>
+          {{/if}}
+        </div>
+      </div>
 
-  /* Shiny CTA Button CSS */
-  @property --gradient-angle {
-    syntax: "<angle>";
-    initial-value: 0deg;
-    inherits: false;
-  }
+      <!-- Portfolio Overview (Enterprise only) -->
+      {{#if (eq user.profile.package_type "enterprise")}}
+      <div class="bg-card rounded-lg border border-border p-6">
+        <div class="flex items-center justify-between mb-6">
+          <h2 class="text-xl font-semibold text-foreground">Portfolio Overview</h2>
+          <a href="/portfolios" class="btn btn-ghost text-sm">
+            Manage Portfolios
+            {{{icon 'arrow-right' class='' size='14'}}}
+          </a>
+        </div>
 
-  @property --gradient-angle-offset {
-    syntax: "<angle>";
-    initial-value: 0deg;
-    inherits: false;
-  }
+        {{#if stats.portfolios}}
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {{#each stats.portfolios}}
+            <div class="bg-muted/30 rounded-lg p-4">
+              <h3 class="font-medium text-foreground mb-2">{{name}}</h3>
+              <div class="space-y-2 text-sm">
+                <div class="flex justify-between">
+                  <span class="text-muted-foreground">Ideas:</span>
+                  <span class="font-medium">{{ideaCount}}</span>
+                </div>
+                <div class="flex justify-between">
+                  <span class="text-muted-foreground">Completed:</span>
+                  <span class="font-medium text-success">{{completedIdeas}}</span>
+                </div>
+                <div class="flex justify-between">
+                  <span class="text-muted-foreground">Progress:</span>
+                  <span class="font-medium">{{avgCompletion}}%</span>
+                </div>
+              </div>
+              <div class="w-full bg-muted rounded-full h-2 mt-3">
+                <div class="bg-primary h-2 rounded-full transition-all duration-300" style="width: {{avgCompletion}}%"></div>
+              </div>
+            </div>
+            {{/each}}
+          </div>
+        {{else}}
+          <div class="text-center py-8">
+            <div class="w-16 h-16 bg-muted rounded-full flex items-center justify-center mx-auto mb-4">
+              {{{icon 'archive' class='text-muted-foreground' size='24'}}}
+            </div>
+            <h3 class="text-lg font-medium text-foreground mb-2">No portfolios yet</h3>
+            <p class="text-muted-foreground mb-4">Create portfolios to organize and track multiple startup ideas</p>
+            <a href="/portfolios" class="btn btn-primary">Create Portfolio</a>
+          </div>
+        {{/if}}
+      </div>
+      {{/if}}
 
-  @property --gradient-percent {
-    syntax: "<percentage>";
-    initial-value: 20%;
-    inherits: false;
-  }
+      <!-- Quick Actions -->
+      <div class="bg-card rounded-lg border border-border p-6">
+        <h2 class="text-xl font-semibold text-foreground mb-4">Quick Actions</h2>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <a href="/new-idea" class="flex flex-col items-center p-4 rounded-lg bg-primary/5 hover:bg-primary/10 transition-colors">
+            <div class="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mb-2">
+              {{{icon 'plus' class='w-6 h-6 text-primary' size='24'}}}
+            </div>
+            <span class="text-sm font-medium text-center">New Idea</span>
+          </a>
 
-  @property --gradient-shine {
-    syntax: "<color>";
-    initial-value: hsl(var(--color-brand-purple));
-    inherits: false;
-  }
+          <a href="/explore-ideas" class="flex flex-col items-center p-4 rounded-lg bg-secondary/5 hover:bg-secondary/10 transition-colors">
+            <div class="w-12 h-12 bg-secondary/10 rounded-full flex items-center justify-center mb-2">
+              {{{icon 'search' class='w-6 h-6 text-secondary' size='24'}}}
+            </div>
+            <span class="text-sm font-medium text-center">Explore Ideas</span>
+          </a>
 
-.shiny-cta {
-    --gradient-angle: 0deg;
-    --gradient-angle-offset: 0deg;
-    --gradient-percent: 20%;
-    --gradient-shine: hsl(var(--color-brand-purple));
-    --shadow-size: 2px;
-    position: relative;
-    overflow: hidden;
-    border-radius: 9999px;
-    padding: 1.25rem 2.5rem;
-    font-size: 1rem;
-    line-height: 1.2;
-    font-weight: 500;
-    color: var(--color-foreground);
-    background:
-      linear-gradient(var(--color-background), var(--color-background)) padding-box,
-      conic-gradient(from calc(var(--gradient-angle) - var(--gradient-angle-offset)),
-        transparent 0%,
-        hsl(var(--color-brand-purple)) 5%,
-        var(--gradient-shine) 15%,
-        hsl(var(--color-brand-purple)) 30%,
-        transparent 40%,
-        transparent 100%) border-box;
-    border: 2px solid transparent;
-    box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--color-border), transparent 20%);
-    outline: none;
-    transition:
-      --gradient-angle-offset 800ms cubic-bezier(0.25, 1, 0.5, 1),
-      --gradient-percent 800ms cubic-bezier(0.25, 1, 0.5, 1),
-      --gradient-shine 800ms cubic-bezier(0.25, 1, 0.5, 1);
-    cursor: pointer;
-    isolation: isolate;
-    outline-offset: 4px;
-    font-family: "Inter", "Helvetica Neue", sans-serif;
-    z-index: 0;
-    animation: border-spin 2.5s linear infinite;
-  }
+          <a href="/random-idea" class="flex flex-col items-center p-4 rounded-lg bg-accent/5 hover:bg-accent/10 transition-colors">
+            <div class="w-12 h-12 bg-accent/10 rounded-full flex items-center justify-center mb-2">
+              {{{icon 'shuffle' class='w-6 h-6 text-accent' size='24'}}}
+            </div>
+            <span class="text-sm font-medium text-center">Random Idea</span>
+          </a>
 
-  @keyframes border-spin {
-    to {
-      --gradient-angle: 360deg;
-    }
-  }
-
-  .shiny-cta:active {
-    transform: translateY(1px);
-  }
-
-  .shiny-cta::before {
-    content: "";
-    pointer-events: none;
-    position: absolute;
-    left: 50%;
-    top: 50%;
-    transform: translate(-50%, -50%);
-    z-index: 0;
-    --size: calc(100% - 6px);
-    --position: 2px;
-    --space: 4px;
-    width: var(--size);
-    height: var(--size);
-    background: radial-gradient(circle at var(--position) var(--position),
-        white 0.5px,
-        transparent 0) padding-box;
-    background-size: var(--space) var(--space);
-    background-repeat: space;
-    mask-image: conic-gradient(from calc(var(--gradient-angle) + 45deg),
-        black,
-        transparent 10% 90%,
-        black);
-    border-radius: inherit;
-    opacity: 0.4;
-    pointer-events: none;
-  }
-
-  .shiny-cta::after {
-    content: "";
-    pointer-events: none;
-    position: absolute;
-    left: 50%;
-    top: 50%;
-    transform: translate(-50%, -50%);
-    z-index: 1;
-    width: 100%;
-    aspect-ratio: 1;
-    background: linear-gradient(-50deg, transparent, #9e28b5, transparent);
-    mask-image: radial-gradient(circle at bottom, transparent 40%, black);
-    opacity: 0.6;
-    animation: shimmer 4s linear infinite;
-    animation-play-state: running;
-  }
-
-  .shiny-cta span {
-    position: relative;
-    z-index: 2;
-    display: inline-block;
-  }
-
-  .shiny-cta span::before {
-    content: "";
-    pointer-events: none;
-    position: absolute;
-    left: 50%;
-    top: 50%;
-    transform: translate(-50%, -50%);
-    z-index: -1;
-    --size: calc(100% + 1rem);
-    width: var(--size);
-    height: var(--size);
-    box-shadow: inset 0 -1ex 2rem 4px #9e28b5;
-    opacity: 0;
-    border-radius: inherit;
-    transition: opacity 800ms cubic-bezier(0.25, 1, 0.5, 1);
-    animation: breathe 4.5s linear infinite;
-  }
-
-  @keyframes shimmer {
-    to {
-      transform: translate(-50%, -50%) rotate(360deg);
-    }
-  }
-
-  @keyframes breathe {
-
-    0%,
-    100% {
-      transform: translate(-50%, -50%) scale(1);
-    }
-
-    50% {
-      transform: translate(-50%, -50%) scale(1.2);
-    }
-  }
-
-  /* Shared Border Gradient for Secondary Button */
-  [style*="--border-gradient"]::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    padding: 1px;
-    border-radius: var(--border-radius-before, inherit);
-    -webkit-mask:
-      linear-gradient(#fff 0 0) content-box,
-      linear-gradient(#fff 0 0);
-    -webkit-mask-composite: xor;
-    mask-composite: exclude;
-    background: var(--border-gradient);
-    pointer-events: none;
-  }
-</style>
-
-<!-- Background (component) -->
-<div class="aura-background-component top-0 w-full h-screen -z-10 fixed" data-alpha-mask="80" style="
-        mask-image: linear-gradient(
-          transparent,
-          black 0%,
-          black 80%,
-          transparent
-        );
-      ">
-  <div class="aura-background-component top-0 w-full -z-10 absolute h-full">
-    <div data-us-project="FixNvEwvWwbu3QX9qC3F" class="absolute w-full h-full left-0 top-0 -z-10"
-      style="filter: hue-rotate(100deg)"></div>
-    <script type="text/javascript">
-      !(function () {
-        if (!window.UnicornStudio) {
-          window.UnicornStudio = { isInitialized: !1 };
-          var i = document.createElement("script");
-          ((i.src =
-            "https://cdn.jsdelivr.net/gh/hiunicornstudio/unicornstudio.js@v1.4.29/dist/unicornStudio.umd.js"),
-            (i.onload = function () {
-              window.UnicornStudio.isInitialized ||
-                (UnicornStudio.init(),
-                  (window.UnicornStudio.isInitialized = !0));
-            }),
-            (document.head || document.body).appendChild(i));
-        }
-      })();
-    </script>
+          <a href="/reports" class="flex flex-col items-center p-4 rounded-lg bg-success/5 hover:bg-success/10 transition-colors">
+            <div class="w-12 h-12 bg-success/10 rounded-full flex items-center justify-center mb-2">
+              {{{icon 'file-text' class='w-6 h-6 text-success' size='24'}}}
+            </div>
+            <span class="text-sm font-medium text-center">Generate Report</span>
+          </a>
+        </div>
+      </div>
+    </div>
   </div>
-</div>
+</main>
 
+<!-- Dashboard Home JavaScript -->
+<script>
+  // Initialize real-time updates for dashboard home
+  document.addEventListener('DOMContentLoaded', function() {
+    // Subscribe to credit updates
+    if (window.Realtime) {
+      window.Realtime.subscribe('credit_update', function(data) {
+        // Update credit balance display
+        const creditElements = document.querySelectorAll('.credit-balance');
+        creditElements.forEach(el => {
+          el.textContent = data.balance;
+        });
+      });
 
- {{> landing/nav}}
- {{> landing/hero}}
- {{> landing/features}}
- {{> landing/pricing}}
- {{> landing/credits}}
- {{> landing/success-stories}}
- {{> landing/launch-scale}}
- {{> landing/cta}}
- {{> landing/footer}}
+      window.Realtime.subscribe('activity', function(data) {
+        // Could add real-time activity updates here
+        console.log('New activity:', data);
+      });
+    }
+  });
+</script>

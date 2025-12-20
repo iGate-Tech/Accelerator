@@ -9,10 +9,8 @@
         </p>
       </div>
 
-      <form hx-post="/auth/login" hx-target="#auth-response" hx-swap="innerHTML"
-        hx-on:htmx:before-request="showSpinner()" hx-on:htmx:after-request="hideSpinner()"
-        class="grid gap-4 text-center">
-        <input type="hidden" name="_csrf" value="{{csrf}}" />
+      <form action="/auth/login" method="post" class="grid gap-4 text-center">
+
         <div class="grid gap-2 text-left">
           <label
             class="text-sm font-medium leading-none text-foreground peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
@@ -36,21 +34,9 @@
               Forgot your password?
             </a>
           </div>
-          <div class="relative">
             <input type="password" name="password"
-              class="flex h-9 w-full rounded-md border border-input/80 bg-transparent px-3 py-1 pr-10 text-sm text-foreground shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+              class="flex h-9 w-full rounded-md border border-input/80 bg-transparent px-3 py-1 text-sm text-foreground shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
               id="password" placeholder="Enter your password" required="" />
-            <button type="button"
-              class="absolute inset-y-0 right-0 pr-3 flex items-center text-muted-foreground hover:text-foreground"
-              onclick="togglePassword()">
-              <span id="eye-open">
-                {{{icon "eye" class="w-4 h-4"}}}
-              </span>
-              <span id="eye-closed" class="hidden">
-                {{{icon "eye-off" class="w-4 h-4"}}}
-              </span>
-            </button>
-          </div>
         </div>
 
         <div class="flex items-center space-x-2">
@@ -68,13 +54,7 @@
         <div class="w-full">
           <button type="submit" id="login-button" class="shiny-cta text-center bg-card"
             style="padding: 0.5rem 1rem; width: 200px; margin: 0 auto;">
-            <span>
-              <span id="login-text">Login</span>
-              <span id="login-spinner" class="ml-2">{{{icon
-                "loader-2"
-                class="animate-spin h-4 w-4"
-                }}}</span>
-            </span>
+Login
           </button>
         </div>
 
@@ -92,4 +72,3 @@
  </div>
 </div>
 
-<div id="auth-response"></div>

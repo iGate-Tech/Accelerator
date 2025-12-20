@@ -1,6 +1,6 @@
 {{> progress-bar activeStep=activeStep ideaId=ideaId}}
 
-{{> model-header title=pageTitle description=(i18n "models.financial.overview")
+{{> model-header title=pageTitle description=(t "models.financial.overview")
 ratingStars="★★★★★" ratingValue="5.0" voteCount="0 votes" category=ideaCategory tags=ideaTags}}
 
 {{> model-progress data='[
@@ -65,7 +65,7 @@ ratingStars="★★★★★" ratingValue="5.0" voteCount="0 votes" category=ide
                  <div class="flex items-start gap-4 mb-6">
                      <div class="w-8 h-8 bg-primary rounded-full flex items-center justify-center text-sm font-bold relative z-10">1</div>
                      <div class="flex-1">
-                          {{> question-block id="kpi-collection-q1" step="1" question=(i18n "models.financial.track_kpis") placeholder=(i18n "models.financial.track_kpis_help")}}
+                          {{> question-block id="kpi-collection-q1" step="1" question=(t "models.financial.track_kpis") placeholder=(t "models.financial.track_kpis_help")}}
                      </div>
                  </div>
                 <div class="flex items-start gap-4">

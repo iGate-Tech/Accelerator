@@ -3,19 +3,19 @@
     <div class="flex flex-col gap-4 lg:gap-6 mt-6">
       <div class="flex items-center justify-between">
         <div class="grid gap-1">
-          <h1 class="font-heading text-3xl font-semibold text-foreground">
-            Dashboard Overview
-          </h1>
-          <p class="text-lg text-muted-foreground">
-            Monitor progress and key metrics across all scales
-          </p>
+           <h1 class="font-heading text-3xl font-semibold text-foreground">
+             {{t 'dashboard.overview.title'}}
+           </h1>
+           <p class="text-lg text-muted-foreground">
+             {{t 'dashboard.overview.description'}}
+           </p>
         </div>
         <div class="flex items-center gap-2">
           <button class="btn btn-primary">
 
-            {{{icon 'plus' class='' size='16'}}}
+             {{{icon 'plus' class='' size='16'}}}
 
-            New Project
+             {{t 'dashboard.overview.new_project'}}
           </button>
         </div>
        </div>
@@ -32,8 +32,8 @@
          <div class="rounded-lg bg-card px-4 py-6 text-card-foreground shadow-sm border border-border">
            <div class="flex items-center justify-between px-3 py-1">
              <div class="flex flex-col gap-1">
-               <h3 class="text-sm font-medium text-muted-foreground">Total Ideas</h3>
-               <p class="text-2xl font-semibold text-foreground">{{stats.ideas.total}}</p>
+                <h3 class="text-sm font-medium text-muted-foreground">{{t 'dashboard.overview.total_ideas'}}</h3>
+                <p class="text-2xl font-semibold text-foreground">{{stats.ideas.total}}</p>
              </div>
             <div>
               <div class="bg-primary/20 rounded-lg">
@@ -51,15 +51,15 @@
 
             {{{icon 'trending-up' class='w-5 h-4' size='16'}}}
 
-            <span class="text-success">+2</span>
-            Since last month
+             <span class="text-success">+2</span>
+             {{t 'dashboard.overview.since_last_month'}}
           </p>
         </div>
          <div class="rounded-lg bg-card px-4 py-6 text-card-foreground shadow-sm border border-border">
            <div class="flex items-center justify-between px-3 py-1">
              <div class="flex flex-col gap-1">
-               <h3 class="text-sm font-medium text-muted-foreground">Completed Ideas</h3>
-               <p class="text-2xl font-semibold text-foreground">{{stats.ideas.completed}}</p>
+                <h3 class="text-sm font-medium text-muted-foreground">{{t 'dashboard.overview.completed_ideas'}}</h3>
+                <p class="text-2xl font-semibold text-foreground">{{stats.ideas.completed}}</p>
              </div>
             <div>
               <div class="bg-secondary/20 rounded-lg">
@@ -78,15 +78,15 @@
 
             {{{icon 'trending-up' class='w-5 h-4' size='16'}}}
 
-            <span class="text-success">+8</span>
-            Since last month
+             <span class="text-success">+8</span>
+             {{t 'dashboard.overview.since_last_month'}}
           </p>
         </div>
          <div class="rounded-lg bg-card px-4 py-6 text-card-foreground shadow-sm border border-border">
            <div class="flex items-center justify-between px-3 py-1">
              <div class="flex flex-col gap-1">
-               <h3 class="text-sm font-medium text-muted-foreground">Credit Balance</h3>
-               <p class="text-2xl font-semibold text-foreground">{{stats.credits.currentBalance}}</p>
+                <h3 class="text-sm font-medium text-muted-foreground">{{t 'dashboard.overview.credit_balance'}}</h3>
+                <p class="text-2xl font-semibold text-foreground">{{stats.credits.currentBalance}}</p>
              </div>
             <div>
               <div class="bg-primary/20 rounded-lg">
@@ -104,15 +104,15 @@
 
             {{{icon 'trending-up' class='w-5 h-4' size='16'}}}
 
-            <span class="text-success">+3</span>
-            Since last month
+             <span class="text-success">+3</span>
+             {{t 'dashboard.overview.since_last_month'}}
           </p>
         </div>
          <div class="rounded-lg bg-card px-4 py-6 text-card-foreground shadow-sm border border-border">
            <div class="flex items-center justify-between px-3 py-1">
              <div class="flex flex-col gap-1">
-               <h3 class="text-sm font-medium text-muted-foreground">Completion Rate</h3>
-               <p class="text-2xl font-semibold text-foreground">{{stats.ideas.completionRate}}%</p>
+                <h3 class="text-sm font-medium text-muted-foreground">{{t 'dashboard.overview.completion_rate'}}</h3>
+                <p class="text-2xl font-semibold text-foreground">{{stats.ideas.completionRate}}%</p>
              </div>
             <div>
               <div class="bg-success/20 rounded-lg">
@@ -130,15 +130,15 @@
 
             {{{icon 'trending-up' class='w-5 h-4' size='16'}}}
 
-            <span class="text-success">+25%</span>
-            Since last month
+             <span class="text-success">+25%</span>
+             {{t 'dashboard.overview.since_last_month'}}
           </p>
         </div>
          <div class="rounded-lg bg-card px-4 py-6 text-card-foreground shadow-sm border border-border">
            <div class="flex items-center justify-between px-3 py-1">
              <div class="flex flex-col gap-1">
-               <h3 class="text-sm font-medium text-muted-foreground">Average Rating</h3>
-               <p class="text-2xl font-semibold text-foreground">{{stats.ideas.averageRating}}★</p>
+                <h3 class="text-sm font-medium text-muted-foreground">{{t 'dashboard.overview.average_rating'}}</h3>
+                <p class="text-2xl font-semibold text-foreground">{{stats.ideas.averageRating}}★</p>
              </div>
             <div>
               <div class="bg-primary/20 rounded-lg">
@@ -156,8 +156,8 @@
 
             {{{icon 'trending-up' class='w-5 h-4' size='16'}}}
 
-            <span class="text-success">+15%</span>
-            Since last month
+             <span class="text-success">+15%</span>
+             {{t 'dashboard.overview.since_last_month'}}
           </p>
         </div>
       </div>
@@ -168,11 +168,11 @@
           <div>
             <div class="bg-card rounded-lg border border-border p-6">
               <div class="flex items-center justify-between mb-4">
-                <h2 class="text-xl font-semibold text-foreground">Recent Activity</h2>
-                <a href="/user-activity" class="btn btn-ghost text-sm">
-                  View All
-                  {{{icon 'arrow-right' class='' size='14'}}}
-                </a>
+                 <h2 class="text-xl font-semibold text-foreground">{{t 'dashboard.overview.recent_activity'}}</h2>
+                 <a href="/user-activity" class="btn btn-ghost text-sm">
+                   {{t 'dashboard.overview.view_all'}}
+                   {{{icon 'arrow-right' class='' size='14'}}}
+                 </a>
               </div>
               <div class="space-y-4">
                 {{#if stats.activity.length}}
@@ -191,21 +191,21 @@
                     </div>
                     <div class="flex-1">
                       <p class="text-sm text-foreground">
-                        {{#if (eq action_type "idea_created")}}
-                          Created a new idea
-                        {{else if (eq action_type "vote_cast")}}
-                          Cast a vote on an idea
-                        {{else if (eq action_type "model_completed")}}
-                          Completed a model section
-                        {{else if (eq action_type "model_section_updated")}}
-                          Updated model section
-                        {{else if (eq action_type "package_selected")}}
-                          Selected a package plan
-                        {{else if (eq action_type "profile_completed")}}
-                          Completed profile setup
-                        {{else}}
-                          {{action_type}}
-                        {{/if}}
+                         {{#if (eq action_type "idea_created")}}
+                           {{t 'dashboard.overview.activity_created_idea'}}
+                         {{else if (eq action_type "vote_cast")}}
+                           {{t 'dashboard.overview.activity_cast_vote'}}
+                         {{else if (eq action_type "model_completed")}}
+                           {{t 'dashboard.overview.activity_completed_model'}}
+                         {{else if (eq action_type "model_section_updated")}}
+                           {{t 'dashboard.overview.activity_updated_section'}}
+                         {{else if (eq action_type "package_selected")}}
+                           {{t 'dashboard.overview.activity_selected_package'}}
+                         {{else if (eq action_type "profile_completed")}}
+                           {{t 'dashboard.overview.activity_completed_profile'}}
+                         {{else}}
+                           {{action_type}}
+                         {{/if}}
                       </p>
                       <p class="text-xs text-muted-foreground">{{formatDate created_at}}</p>
                     </div>
@@ -216,9 +216,9 @@
                     <div class="w-16 h-16 bg-muted rounded-full flex items-center justify-center mx-auto mb-4">
 {{{icon 'activity' class='text-muted-foreground' size='24'}}}
                     </div>
-                    <h3 class="text-lg font-medium text-foreground mb-2">No activity yet</h3>
-                    <p class="text-muted-foreground mb-4">Start creating ideas to see your activity here</p>
-                    <a href="/new-idea" class="btn btn-primary">Create Your First Idea</a>
+                     <h3 class="text-lg font-medium text-foreground mb-2">{{t 'dashboard.overview.no_activity'}}</h3>
+                     <p class="text-muted-foreground mb-4">{{t 'dashboard.overview.start_creating'}}</p>
+                     <a href="/new-idea" class="btn btn-primary">{{t 'dashboard.overview.create_first_idea'}}</a>
                   </div>
                 {{/if}}
               </div>
@@ -231,24 +231,24 @@
           <div class="space-y-6">
             <!-- Credit Balance -->
             <div class="bg-card rounded-lg border border-border p-6">
-              <div class="flex items-center justify-between mb-4">
-                <h2 class="text-xl font-semibold text-foreground">Credit Balance</h2>
-                <a href="/buy-credits" class="btn btn-ghost text-sm">
-                  Buy Credits
-                  {{{icon 'arrow-right' class='' size='14'}}}
-                </a>
-              </div>
+               <div class="flex items-center justify-between mb-4">
+                 <h2 class="text-xl font-semibold text-foreground">{{t 'dashboard.overview.credit_balance'}}</h2>
+                 <a href="/buy-credits" class="btn btn-ghost text-sm">
+                   {{t 'dashboard.overview.buy_credits'}}
+                   {{{icon 'arrow-right' class='' size='14'}}}
+                 </a>
+               </div>
               <div class="text-center">
                 <div class="text-3xl font-bold text-primary mb-2">{{stats.credits.currentBalance}}</div>
-                <p class="text-sm text-muted-foreground mb-4">Available Credits</p>
+                 <p class="text-sm text-muted-foreground mb-4">{{t 'dashboard.overview.available_credits'}}</p>
                 <div class="grid grid-cols-2 gap-4 text-sm">
                   <div>
-                    <span class="text-muted-foreground">Earned (30d)</span>
-                    <div class="font-semibold text-green-600">+{{stats.credits.earned30d}}</div>
-                  </div>
-                  <div>
-                    <span class="text-muted-foreground">Spent (30d)</span>
-                    <div class="font-semibold text-red-600">-{{stats.credits.spent30d}}</div>
+                     <span class="text-muted-foreground">{{t 'dashboard.overview.earned_30d'}}</span>
+                     <div class="font-semibold text-green-600">+{{stats.credits.earned30d}}</div>
+                   </div>
+                   <div>
+                     <span class="text-muted-foreground">{{t 'dashboard.overview.spent_30d'}}</span>
+                     <div class="font-semibold text-red-600">-{{stats.credits.spent30d}}</div>
                   </div>
                 </div>
               </div>
@@ -256,7 +256,7 @@
 
             <!-- Model Progress -->
           <div class="bg-card rounded-lg border border-border p-6">
-            <h2 class="text-xl font-semibold text-foreground mb-4">Model Progress</h2>
+             <h2 class="text-xl font-semibold text-foreground mb-4">{{t 'dashboard.overview.model_progress'}}</h2>
             <div class="space-y-4">
               {{#each stats.models}}
                 <div class="flex items-center justify-between">
@@ -277,49 +277,48 @@
           </div>
             <!-- Quick Stats -->
             <div class="bg-card rounded-lg border border-border p-6">
-              <h2 class="text-xl font-semibold text-foreground mb-4">Quick Stats</h2>
+               <h2 class="text-xl font-semibold text-foreground mb-4">{{t 'dashboard.overview.quick_stats'}}</h2>
               <div class="space-y-3">
                 <div class="flex items-center justify-between">
-                  <span class="text-sm text-muted-foreground">Ideas Created</span>
-                  <span class="text-sm font-medium text-foreground">{{stats.ideas.total}}</span>
-                </div>
-                <div class="flex items-center justify-between">
-                  <span class="text-sm text-muted-foreground">Votes Given</span>
-                  <span class="text-sm font-medium text-foreground">{{stats.votes.totalGiven}}</span>
-                </div>
-                <div class="flex items-center justify-between">
-                  <span class="text-sm text-muted-foreground">Completion Rate</span>
-                  <span class="text-sm font-medium text-foreground">{{stats.ideas.completionRate}}%</span>
-                </div>
-                <div class="flex items-center justify-between">
-                  <span class="text-sm text-muted-foreground">Avg Rating</span>
-                  <span class="text-sm font-medium text-foreground">{{stats.ideas.averageRating}}★</span>
+                   <span class="text-sm text-muted-foreground">{{t 'dashboard.overview.ideas_created'}}</span>
+                   <span class="text-sm font-medium text-foreground">{{stats.ideas.total}}</span>
+                 </div>
+                 <div class="flex items-center justify-between">
+                   <span class="text-sm text-muted-foreground">{{t 'dashboard.overview.votes_given'}}</span>
+                   <span class="text-sm font-medium text-foreground">{{stats.votes.totalGiven}}</span>
+                 </div>
+                 <div class="flex items-center justify-between">
+                   <span class="text-sm text-muted-foreground">{{t 'dashboard.overview.completion_rate'}}</span>
+                   <span class="text-sm font-medium text-foreground">{{stats.ideas.completionRate}}%</span>
+                 </div>
+                 <div class="flex items-center justify-between">
+                   <span class="text-sm text-muted-foreground">{{t 'dashboard.overview.avg_rating'}}</span>
+                   <span class="text-sm font-medium text-foreground">{{stats.ideas.averageRating}}★</span>
                 </div>
               </div>
             </div>
 
             <!-- Quick Actions -->
             <div class="bg-card rounded-lg border border-border p-6">
-              <h2 class="text-xl font-semibold text-foreground mb-4">Quick Actions</h2>
+               <h2 class="text-xl font-semibold text-foreground mb-4">{{t 'dashboard.overview.quick_actions'}}</h2>
               <div class="grid grid-cols-1 gap-3">
                 <a href="/new-idea" class="btn btn-outline w-full justify-start">
-                  {{{icon 'plus' class='' size='14'}}}
-                  Create New Idea
-                </a>
-                <a href="/explore-ideas" class="btn btn-outline w-full justify-start">
-                  {{{icon 'search' class='' size='14'}}}
-                  Explore Ideas
-                </a>
+                   {{{icon 'plus' class='' size='14'}}}
+                   {{t 'dashboard.overview.create_new_idea'}}
+                 </a>
+                 <a href="/explore-ideas" class="btn btn-outline w-full justify-start">
+                   {{{icon 'search' class='' size='14'}}}
+                   {{t 'dashboard.overview.explore_ideas'}}
+                 </a>
 
                 {{#if (eq user.package_type 'enterprise')}}
                 <a href="/portfolios" class="btn btn-outline w-full justify-start">
-                  {{{icon 'archive' class='' size='14'}}}
-                  Manage Portfolios
-                </a>
-                {{/if}}
-                <a href="/settings" class="btn btn-outline w-full justify-start">
-                  {{{icon 'settings' class='' size='14'}}}
-                  Settings
+                   {{{icon 'archive' class='' size='14'}}}
+                   {{t 'dashboard.overview.manage_portfolios'}}
+                 </a>
+                 <a href="/settings" class="btn btn-outline w-full justify-start">
+                   {{{icon 'settings' class='' size='14'}}}
+                   {{t 'dashboard.overview.settings'}}
                 </a>
               </div>
             </div>

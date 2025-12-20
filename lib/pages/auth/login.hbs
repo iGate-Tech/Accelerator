@@ -3,40 +3,39 @@
   <div class="flex items-center">
     <div class="flex flex-col items-center justify-center h-full gap-6 w-[400px] mx-auto bg-card shadow-primary rounded-lg p-6 border border-input">
       <div class="grid gap-2 text-center">
-        <h1 class="text-3xl font-bold text-foreground text-glow text-center">Login</h1>
-        <p class="text-balance text-muted-foreground">
-          Enter your email below to login to your account
-        </p>
+         <h1 class="text-3xl font-bold text-foreground text-glow text-center">{{t 'auth.login.title'}}</h1>
+         <p class="text-balance text-muted-foreground">
+           {{t 'auth.login.description'}}
+         </p>
       </div>
 
       <form action="/auth/login" method="post" class="grid gap-4 text-center">
 
         <div class="grid gap-2 text-left">
-          <label
-            class="text-sm font-medium leading-none text-foreground peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-            for="email">
-            Email
-          </label>
-          <input type="email" name="email"
-            class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm text-foreground shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
-            id="email" placeholder="m@example.com" required="" />
+           <label
+             class="text-sm font-medium leading-none text-foreground peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+             for="email">
+             {{t 'auth.login.email_label'}}
+           </label>
+           <input type="email" name="email"
+             class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm text-foreground shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+             id="email" placeholder="{{t 'auth.login.email_placeholder'}}" required="" />
         </div>
 
         <div class="grid gap-2 text-left">
           <div class="flex items-center gap-6">
-            <label
-              class="text-sm font-medium leading-none text-foreground peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-              for="password">
-              Password
-            </label>
-            <a class="ml-auto inline-block text-sm underline text-muted-foreground hover:text-foreground focus:outline-none monotone-logo"
-              href="/auth/forgot-password">
-              Forgot your password?
-            </a>
-          </div>
-            <input type="password" name="password"
-              class="flex h-9 w-full rounded-md border border-input/80 bg-transparent px-3 py-1 text-sm text-foreground shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
-              id="password" placeholder="Enter your password" required="" />
+             <label
+               class="text-sm font-medium leading-none text-foreground peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+               for="password">
+               {{t 'auth.login.password_label'}}
+             </label>
+             <a class="ml-auto inline-block text-sm underline text-muted-foreground hover:text-foreground focus:outline-none monotone-logo"
+               href="/auth/forgot-password">
+               {{t 'auth.login.forgot_password'}}
+             </a>
+             <input type="password" name="password"
+               class="flex h-9 w-full rounded-md border border-input/80 bg-transparent px-3 py-1 text-sm text-foreground shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+               id="password" placeholder="{{t 'auth.login.password_placeholder'}}" required="" />
         </div>
 
         <div class="flex items-center space-x-2">
@@ -44,26 +43,26 @@
             <input class="h-4 w-4 appearance-none rounded-full border border-input/80 checked:bg-primary checked:border-primary peer" id="remember" name="remember" type="checkbox" />
 {{{icon 'check' class='absolute inset-0 w-4 h-4 text-white scale-75 peer-checked:block hidden'}}}
           </div>
-          <label
-            class="text-sm font-medium leading-none text-foreground peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-            for="remember">
-            Remember me for 30 days
-          </label>
+           <label
+             class="text-sm font-medium leading-none text-foreground peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+             for="remember">
+             {{t 'auth.login.remember_me'}}
+           </label>
         </div>
 
         <div class="w-full">
           <button type="submit" id="login-button" class="shiny-cta text-center bg-card"
             style="padding: 0.5rem 1rem; width: 200px; margin: 0 auto;">
-Login
+ {{t 'auth.login.login_button'}}
           </button>
         </div>
 
       </form>
 
       <div class="mt-4 text-center text-sm text-muted-foreground">
-        Don't have an account?
-        <a class="underline text-muted-foreground hover:text-foreground focus:outline-none monotone-logo"
-          href="/auth/signup">Sign up</a>
+         {{t 'auth.login.no_account'}}
+         <a class="underline text-muted-foreground hover:text-foreground focus:outline-none monotone-logo"
+           href="/auth/signup">{{t 'auth.login.sign_up'}}</a>
       </div>
     </div>
    </div>

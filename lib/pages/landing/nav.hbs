@@ -29,11 +29,11 @@
      <span id="theme-text">Dark</span>
    </button>
 
-   <!-- Language Switcher -->
-    <button id="lang-switcher" class="hidden md:flex items-center gap-1 mr-4 px-2 py-1 text-xs font-medium rounded-md bg-gray-200 dark:bg-white/50 text-gray-900 dark:text-white hover:bg-gray-300 dark:hover:bg-white hover:text-gray-900 dark:hover:text-black" onclick="switchLanguage()">
-     {{{icon "languages" class="h-4 w-4"}}}
-     <span id="lang-text">EN</span>
-   </button>
+    <!-- Language Switcher -->
+     <button id="lang-switcher" class="hidden md:flex items-center gap-1 mr-4 px-2 py-1 text-xs font-medium rounded-md bg-gray-200 dark:bg-white/50 text-gray-900 dark:text-white hover:bg-gray-300 dark:hover:bg-white hover:text-gray-900 dark:hover:text-black" onclick="switchLanguage()">
+      {{{icon "languages" class="h-4 w-4"}}}
+      <span id="lang-text">{{#if (eq lng 'ar')}}AR{{else}}EN{{/if}}</span>
+    </button>
 
   <!-- Action Buttons -->
   <div class="flex gap-2">
@@ -73,16 +73,15 @@
      }
    }
 
-   function switchLanguage() {
-     const currentLang = localStorage.getItem('language') || 'en';
-     const newLang = currentLang === 'en' ? 'ar' : 'en';
-     localStorage.setItem('language', newLang);
-     updateLangSwitcher(newLang);
+  async function switchLanguage() {
+    const currentLang = localStorage.getItem('language') || 'en';
+    const newLang = currentLang === 'en' ? 'ar' : 'en';
+    localStorage.setItem('language', newLang);
+    updateLangSwitcher(newLang);
 
-     // Here you would implement the actual language switching logic
-     // For example, reload the page or update content dynamically
-     console.log('Language switched to:', newLang);
-   }
+    // Reload the page with the new language prefix
+    window.location.href = `/${newLang}`;
+  }
 
    function updateLangSwitcher(lang) {
      const textSpan = document.getElementById('lang-text');
@@ -103,6 +102,6 @@
       }
 
       updateThemeToggle(isDark);
-      updateLangSwitcher(localStorage.getItem('language') || 'en');
+       updateLangSwitcher('{{lng}}');
     });
  </script>

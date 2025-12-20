@@ -1,9 +1,9 @@
 <div class="flex flex-col ">
     <!-- Header -->
     <header class="w-full flex flex-col items-center gap-2 mb-2">
-        <h1 class="text-4xl font-sans font-light text-foreground mb-10">
-            What problem are you trying to solve?
-        </h1>
+         <h1 class="text-4xl font-sans font-light text-foreground mb-10">
+             {{t 'ideas.new.question'}}
+         </h1>
     </header>
 
     <!-- Form / Input area -->
@@ -241,12 +241,12 @@
                         <div class="flex flex-wrap gap-1">
                             <span
                                 class="inline-flex items-center gap-1 px-2 py-1 bg-muted text-muted-foreground border border-border text-xs rounded-full focus:outline-none focus:bg-accent">
-                                <i contenteditable="true" id="title" class="text-foreground">Untitled</i>
+                                 <i contenteditable="true" id="title" class="text-foreground">{{t 'ideas.new.untitled'}}</i>
                                 {{{icon 'square-pen' class='w-3 h-3' size='12'}}}
                             </span>
                             <span
                                 class="inline-flex items-center gap-1 px-2 py-1 bg-muted text-muted-foreground border border-border text-xs rounded-full focus:outline-none focus:bg-accent">
-                                <i contenteditable="true" id="category">Category</i>
+                                 <i contenteditable="true" id="category">{{t 'ideas.new.category'}}</i>
                                 {{{icon 'square-pen' class='w-3 h-3' size='12'}}}
                             </span>
                         </div>
@@ -258,7 +258,7 @@
                             project requirements</label>
                         <div id="assistant-prompt-display" class="w-full rounded-md border border-input bg-background px-3 py-2 text-base text-foreground min-h-[2.5rem] cursor-pointer overflow-visible markdown-content" style="display: none;"></div>
                          <textarea id="assistant-prompt" name="prompt"
-                             placeholder="Describe your project requirements..."
+                              placeholder="{{t 'ideas.new.describe_requirements'}}"
                              aria-label="Describe your project requirements" aria-describedby="prompt-help char-counter"
                              class="flex w-full rounded-md border-0 bg-transparent p-0 pt-[1px] text-base text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0"
                              required=""
@@ -278,8 +278,8 @@
                        border border-success/40 cursor-pointer
                     text-xs rounded-full">
 
-{{{icon 'plus' class='w-3 h-3' size='12'}}}
-                                Add more
+ {{{icon 'plus' class='w-3 h-3' size='12'}}}
+                                 {{t 'ideas.new.add_more'}}
                             </span>
 
                             <!-- Remove all -->
@@ -289,8 +289,8 @@
                        border border-destructive/40
                      text-xs rounded-full cursor-pointer" style="display: none;">
 
-                                {{{icon 'trash' class='w-3 h-3' size='12'}}}
-                                Remove all
+ {{{icon 'trash' class='w-3 h-3' size='12'}}}
+                                 {{t 'ideas.new.remove_all'}}
                             </span>
 
                         </div>
@@ -300,9 +300,9 @@
                     <!-- Privacy setting -->
                     <div class="px-3 pb-2">
                         <div class="flex items-center gap-3">
-                            <label class="text-xs text-muted-foreground">Visibility:</label>
+                             <label class="text-xs text-muted-foreground">{{t 'ideas.new.visibility'}}</label>
                             <div class="flex items-center gap-2">
-                                <span class="text-xs text-muted-foreground" id="privacy-label">Public</span>
+                                <span class="text-xs text-muted-foreground" id="privacy-label">{{t 'ideas.new.public'}}</span>
                                 <label class="relative inline-flex items-center cursor-pointer">
                                     <input type="checkbox" id="privacy-toggle" class="sr-only peer">
                                     <div class="w-9 h-5 bg-muted-foreground/20 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-primary/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-primary"></div>
@@ -318,84 +318,75 @@
                             <button type="button" aria-label="Generate title with AI" title="Generate title with AI"
                                 class="rounded-full border border-border inline-flex items-center justify-center gap-1 cursor-pointer text-xs text-muted-foreground hover:bg-primary-100 hover:text-primary-900 px-2 py-1 shrink-0 transition-all duration-300 group">
 
-{{{icon 'type' class='w-4 h-4' size='16'}}}
+ {{{icon 'type' class='w-4 h-4' size='16'}}}
 
-                                <span class="hidden group-hover:inline transition-all duration-200">Generate
-                                    Title with AI</span>
+                                 <span class="hidden group-hover:inline transition-all duration-200">{{t 'ideas.new.generate_title_ai'}}</span>
                             </button>
 
                             <!-- Add category with AI -->
                             <button type="button" aria-label="Add category with AI" title="Add category with AI"
                                 class="rounded-full border border-border inline-flex items-center justify-center gap-1 cursor-pointer text-xs text-muted-foreground hover:bg-primary-100 hover:text-primary-900 px-2 py-1 shrink-0 transition-all duration-300 group">
 
-                                {{{icon 'folder' class='w-4 h-4' size='16'}}}
+ {{{icon 'folder' class='w-4 h-4' size='16'}}}
 
-                                <span class="hidden group-hover:inline transition-all duration-200">Add
-                                    Category with AI</span>
+                                 <span class="hidden group-hover:inline transition-all duration-200">{{t 'ideas.new.add_category_ai'}}</span>
                             </button>
 
                             <!-- Improve with AI -->
                             <button type="button" aria-label="Improve with AI" title="Improve with AI"
                                 class="rounded-full border border-border inline-flex items-center justify-center gap-1 cursor-pointer text-xs text-muted-foreground hover:bg-primary-100 hover:text-primary-900 px-2 py-1 shrink-0 transition-all duration-300 group">
 
-                                {{{icon 'lightbulb' class='w-4 h-4' size='16'}}}
+ {{{icon 'lightbulb' class='w-4 h-4' size='16'}}}
 
-                                <span class="hidden group-hover:inline transition-all duration-200">Improve
-                                    Description with AI</span>
+                                 <span class="hidden group-hover:inline transition-all duration-200">{{t 'ideas.new.improve_description_ai'}}</span>
                             </button>
 
                             <!-- Add tags with AI -->
                             <button type="button" aria-label="Add tags with AI" title="Add tags with AI"
                                 class="rounded-full border border-border inline-flex items-center justify-center gap-1 cursor-pointer text-xs text-muted-foreground hover:bg-primary-100 hover:text-primary-900 px-2 py-1 shrink-0 transition-all duration-300 group">
 
-{{{icon 'tag' class='w-4 h-4' size='16'}}}
+ {{{icon 'tag' class='w-4 h-4' size='16'}}}
 
-                                <span class="hidden group-hover:inline transition-all duration-200">Add
-                                    Tags with AI</span>
+                                 <span class="hidden group-hover:inline transition-all duration-200">{{t 'ideas.new.add_tags_ai'}}</span>
                             </button>
 
                             <!-- Auto fill with AI -->
                             <button type="button" aria-label="Auto fill with AI" title="Auto fill with AI"
                                 class="rounded-full border border-border inline-flex items-center justify-center gap-1 cursor-pointer text-xs text-muted-foreground hover:bg-primary-100 hover:text-primary-900 px-2 py-1 shrink-0 transition-all duration-300 group">
 
-                                {{{icon 'wand-sparkles' class='w-4 h-4' size='16'}}}
+ {{{icon 'wand-sparkles' class='w-4 h-4' size='16'}}}
 
-                                <span class="hidden group-hover:inline transition-all duration-200">Auto
-                                    Fill with AI</span>
+                                 <span class="hidden group-hover:inline transition-all duration-200">{{t 'ideas.new.auto_fill_ai'}}</span>
                             </button>
 
                             <!-- Generate random idea -->
                             <button type="button" aria-label="Generate random idea" title="Generate random idea"
                                 class="rounded-full border border-border inline-flex items-center justify-center gap-1 cursor-pointer text-xs text-muted-foreground hover:bg-primary-100 hover:text-primary-900 px-2 py-1 shrink-0 transition-all duration-300 group">
 
-{{{icon 'shuffle' class='w-4 h-4' size='16'}}}
+ {{{icon 'shuffle' class='w-4 h-4' size='16'}}}
 
-                                <span class="hidden group-hover:inline transition-all duration-200">Random
-                                    Idea with AI</span>
+                                 <span class="hidden group-hover:inline transition-all duration-200">{{t 'ideas.new.random_idea_ai'}}</span>
                             </button>
 
                             <!-- Reset form -->
                             <button type="button" aria-label="Reset form" title="Reset form"
                                 class="rounded-full border border-border inline-flex items-center justify-center gap-1 cursor-pointer text-xs text-muted-foreground hover:bg-primary-100 hover:text-primary-900 px-2 py-1 shrink-0 transition-all duration-300 group">
 
-{{{icon 'rotate-ccw' class='w-4 h-4' size='16'}}}
+ {{{icon 'rotate-ccw' class='w-4 h-4' size='16'}}}
 
-                                <span class="hidden group-hover:inline transition-all duration-200">Reset
-                                    Form</span>
+                                 <span class="hidden group-hover:inline transition-all duration-200">{{t 'ideas.new.reset_form'}}</span>
                             </button>
                         </div>
 
                         <!-- Submit button on the right -->
                         <div class="min-w-0 flex gap-2 ml-auto flex-shrink items-center">
-                            <span id="char-counter" class="text-xs text-red-500/60 mr-2" aria-live="polite">Characters:
-                                0 / 2000</span>
+                             <span id="char-counter" class="text-xs text-red-500/60 mr-2" aria-live="polite">{{t 'ideas.new.characters'}}</span>
                             <button type="submit" aria-label="Create project" title="Create project"
                                 class="rounded-full border border-border inline-flex items-center justify-center gap-1 cursor-pointer text-xs text-muted-foreground hover:bg-primary-100 hover:text-primary-900 px-2 py-1 shrink-0 transition-all duration-300 group">
 
-{{{icon 'plus' class='w-4 h-4' size='16'}}}
+ {{{icon 'plus' class='w-4 h-4' size='16'}}}
 
-                                <span class="hidden group-hover:inline transition-all duration-200">Create
-                                    Project</span>
+                                 <span class="hidden group-hover:inline transition-all duration-200">{{t 'ideas.new.create_project'}}</span>
                             </button>
                         </div>
                     </div>

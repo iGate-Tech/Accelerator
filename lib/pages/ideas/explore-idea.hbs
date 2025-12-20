@@ -1,10 +1,10 @@
 <div class="p-20">
     <div class="grid gap-1  mb-12">
         <h1 class="font-heading text-3xl font-semibold text-foreground">
-            Explore Ideas
+            {{t 'ideas.explore.title'}}
         </h1>
         <p class="text-lg text-muted-foreground">
-            Explore other people ideas here
+            {{t 'ideas.explore.description'}}
         </p>
     </div>
 
@@ -13,9 +13,9 @@
         <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
             <!-- Search Input -->
             <div class="md:col-span-2">
-                <label for="search-input" class="block text-sm font-medium text-foreground mb-2">Search</label>
+                <label for="search-input" class="block text-sm font-medium text-foreground mb-2">{{t 'ideas.explore.search'}}</label>
                 <div class="relative">
-                    <input type="text" id="search-input" placeholder="Search ideas..."
+                     <input type="text" id="search-input" placeholder="{{t 'ideas.explore.search_placeholder'}}"
                            class="w-full pl-10 pr-4 py-2 border border-input rounded-md bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary">
                     {{{icon 'search' class='absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground'}}}
                 </div>
@@ -23,9 +23,9 @@
 
             <!-- Category Filter -->
             <div>
-                <label for="category-filter" class="block text-sm font-medium text-foreground mb-2">Category</label>
+                 <label for="category-filter" class="block text-sm font-medium text-foreground mb-2">{{t 'ideas.explore.category'}}</label>
                 <select id="category-filter" class="w-full px-3 py-2 border border-input rounded-md bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary">
-                    <option value="">All Categories</option>
+                     <option value="">{{t 'ideas.explore.all_categories'}}</option>
                     {{#each categories}}
                     <option value="{{this}}">{{this}}</option>
                     {{/each}}
@@ -34,12 +34,12 @@
 
             <!-- Sort Options -->
             <div>
-                <label for="sort-select" class="block text-sm font-medium text-foreground mb-2">Sort By</label>
+                 <label for="sort-select" class="block text-sm font-medium text-foreground mb-2">{{t 'ideas.explore.sort_by'}}</label>
                 <select id="sort-select" class="w-full px-3 py-2 border border-input rounded-md bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary">
-                    <option value="newest">Newest First</option>
-                    <option value="oldest">Oldest First</option>
-                    <option value="rating">Highest Rated</option>
-                    <option value="title">Title A-Z</option>
+                     <option value="newest">{{t 'ideas.explore.newest_first'}}</option>
+                     <option value="oldest">{{t 'ideas.explore.oldest_first'}}</option>
+                     <option value="rating">{{t 'ideas.explore.highest_rated'}}</option>
+                     <option value="title">{{t 'ideas.explore.title_az'}}</option>
                 </select>
             </div>
         </div>
@@ -57,8 +57,8 @@
         <div class="inline-flex items-center justify-center w-16 h-16 bg-muted rounded-2xl mb-6">
             {{{icon 'search-x' class='w-8 h-8 text-muted-foreground'}}}
         </div>
-        <h3 class="text-xl font-semibold text-foreground mb-2">No ideas found</h3>
-        <p class="text-muted-foreground">Try adjusting your search criteria</p>
+         <h3 class="text-xl font-semibold text-foreground mb-2">{{t 'ideas.explore.no_ideas_found'}}</h3>
+         <p class="text-muted-foreground">{{t 'ideas.explore.try_adjusting_search'}}</p>
     </div>
 </div>
 

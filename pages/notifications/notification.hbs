@@ -1,23 +1,39 @@
-<div class="container mx-auto px-4 py-8">
-  <h1 class="text-2xl font-bold mb-6">Notifications</h1>
-
-  {{#if notifications}}
-  <div class="space-y-4">
-    {{#each notifications}}
-    <div class="bg-card border border-border rounded-md p-4">
-      <div class="flex items-start justify-between">
-        <div class="flex-1">
-          <p class="text-foreground">{{message}}</p>
-          <span class="text-sm text-muted-foreground">{{created_at_formatted}}</span>
+<main id="notification-main-content" class="flex-1 overflow-auto bg-background">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
+    <div class="flex flex-col gap-4 lg:gap-6 mt-6">
+      <div class="flex items-center justify-between">
+        <div class="grid gap-1">
+          <h1 class="font-heading text-3xl font-semibold text-foreground">
+            Notifications
+          </h1>
+          <p class="text-lg text-muted-foreground">
+            Stay updated with the latest alerts and messages
+          </p>
         </div>
-        {{#if unread}}
-        <span class="bg-primary text-primary-foreground text-xs px-2 py-1 rounded-full">New</span>
-        {{/if}}
+      <div class="flex items-center gap-2">
+            <button id="mark-all-read-btn" class="btn btn-outline btn-primary px-3 py-1.5 rounded-full">
+              Mark All as Read
+            </button>
+         </div>
       </div>
+
+      <!-- Notification List -->
+      <div id="notifications-list" class="space-y-4">
+        <div id="loading-notifications" class="text-center py-8">
+          <div class="inline-flex items-center gap-2 text-muted-foreground">
+            {{{icon "loader" class="animate-spin w-4 h-4"}}}
+            Loading notifications...
+          </div>
+        </div>
+      </div>
+
+      <!-- Load More -->
+       <div class="text-center py-4">
+         <button class="btn btn-outline btn-primary px-3 py-1.5 rounded-full">
+           Load More Notifications
+         </button>
+       </div>
     </div>
-    {{/each}}
   </div>
-  {{else}}
-  <p class="text-muted-foreground">No notifications yet.</p>
-  {{/if}}
-</div>
+
+</main>

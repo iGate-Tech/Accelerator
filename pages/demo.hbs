@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Accelerator Frontend Demo</title>
+
+    <!-- Preload critical resources -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    <!-- Framework CSS -->
+    <link rel="stylesheet" href="/css/output.css">
+
+    <!-- HTMX -->
+    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+
+    <!-- Framework JavaScript -->
+    <script src="/js/framework.js"></script>
+    <script src="/js/toast.js"></script>
+    <script src="/js/ai-chat.js"></script>
+    <script src="/js/auto-fill.js"></script>
+    <script src="/js/file-upload.js"></script>
+    <script src="/js/realtime.js"></script>
+</head>
+<body class="bg-background text-foreground min-h-screen">
+    <!-- Navigation -->
+    <nav class="bg-base-100 border-b border-base-300 px-4 py-3">
+        <div class="max-w-7xl mx-auto flex items-center justify-between">
+            <div class="flex items-center space-x-4">
+                <h1 class="text-xl font-bold text-primary">Accelerator Demo</h1>
+                <div class="hidden md:flex items-center space-x-6">
+                    <a href="#framework" class="nav-link text-base-content hover:text-primary transition-colors">Framework</a>
+                    <a href="#chat" class="nav-link text-base-content hover:text-primary transition-colors">AI Chat</a>
+                    <a href="#forms" class="nav-link text-base-content hover:text-primary transition-colors">Forms</a>
+                    <a href="#upload" class="nav-link text-base-content hover:text-primary transition-colors">Upload</a>
+                    <a href="#realtime" class="nav-link text-base-content hover:text-primary transition-colors">Real-time</a>
+                </div>
+            </div>
+            <div class="flex items-center space-x-4">
+                <div class="credit-balance badge badge-primary">1000 credits</div>
+                <div class="notification-badge hidden bg-error text-white rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold">0</div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto px-4 py-8 space-y-16">
+
+        <!-- Framework Demo -->
+        <section id="framework" class="space-y-8">
+            <div class="text-center">
+                <h2 class="text-3xl font-bold text-base-content mb-4">Framework Features</h2>
+                <p class="text-muted-foreground max-w-2xl mx-auto">
+                    Core utilities, HTMX integration, modal system, and form enhancements
+                </p>
+            </div>
+
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Modal Demo -->
+                <div class="card">
+                    <div class="card-body">
+                        <h3 class="card-title">Modal System</h3>
+                        <p class="text-sm text-muted-foreground mb-4">Click to see the modal system in action</p>
+                        <button class="btn btn-primary w-full" onclick="showModalDemo()">Open Modal</button>
+                    </div>
+                </div>
+
+                <!-- Toast Demo -->
+                <div class="card">
+                    <div class="card-body">
+                        <h3 class="card-title">Toast Notifications</h3>
+                        <p class="text-sm text-muted-foreground mb-4">Test different toast types</p>
+                        <div class="space-y-2">
+                            <button class="btn btn-success btn-sm w-full" onclick="showToast('Success message!', 'success')">Success</button>
+                            <button class="btn btn-error btn-sm w-full" onclick="showToast('Error message!', 'error')">Error</button>
+                            <button class="btn btn-warning btn-sm w-full" onclick="showToast('Warning message!', 'warning')">Warning</button>
+                            <button class="btn btn-info btn-sm w-full" onclick="showToast('Info message!', 'info')">Info</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Utility Demo -->
+                <div class="card">
+                    <div class="card-body">
+                        <h3 class="card-title">Utilities</h3>
+                        <p class="text-sm text-muted-foreground mb-4">Copy to clipboard and other utilities</p>
+                        <button class="btn btn-secondary w-full" onclick="copyDemo()">Copy Text</button>
+                        <div class="mt-2 text-xs text-muted-foreground">Click to copy: accelerator@example.com</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- AI Chat Demo -->
+        <section id="chat" class="space-y-8">
+            <div class="text-center">
+                <h2 class="text-3xl font-bold text-base-content mb-4">AI Chat Interface</h2>
+                <p class="text-muted-foreground max-w-2xl mx-auto">
+                    Real-time AI conversations with file uploads and voice input
+                </p>
+            </div>
+
+            <div class="max-w-2xl mx-auto">
+                <div id="ai-chat-container"></div>
+            </div>
+        </section>
+
+        <!-- Forms Demo -->
+        <section id="forms" class="space-y-8">
+            <div class="text-center">
+                <h2 class="text-3xl font-bold text-base-content mb-4">Smart Forms</h2>
+                <p class="text-muted-foreground max-w-2xl mx-auto">
+                    Auto-fill, validation, and intelligent suggestions
+                </p>
+            </div>
+
+            <div class="max-w-2xl mx-auto">
+                <form class="space-y-6" data-validate>
+                    <!-- Idea Creation Form -->
+                    <div class="card">
+                        <div class="card-body">
+                            <h3 class="card-title">Create New Idea</h3>
+
+                            <div class="space-y-4">
+                                <div>
+                                    <label class="block text-sm font-medium mb-2">Title</label>
+                                    <input
+                                        type="text"
+                                        name="title"
+                                        class="input w-full"
+                                        data-autofill-on-focus="/api/ai/generate-title"
+                                        data-field-name="title"
+                                        placeholder="Enter idea title"
+                                    >
+                                </div>
+
+                                <div>
+                                    <label class="block text-sm font-medium mb-2">Category</label>
+                                    <select name="category" class="select w-full" data-autofill-on-focus="/api/ai/generate-category" data-field-name="category">
+                                        <option value="">Select category</option>
+                                        <option value="Technology">Technology</option>
+                                        <option value="Healthcare">Healthcare</option>
+                                        <option value="Finance">Finance</option>
+                                        <option value="Education">Education</option>
+                                        <option value="E-commerce">E-commerce</option>
+                                        <option value="Entertainment">Entertainment</option>
+                                        <option value="Social">Social</option>
+                                        <option value="Environment">Environment</option>
+                                        <option value="Other">Other</option>
+                                    </select>
+                                </div>
+
+                                <div>
+                                    <label class="block text-sm font-medium mb-2">Description</label>
+                                    <textarea
+                                        name="description"
+                                        rows="4"
+                                        class="textarea w-full"
+                                        data-validate="required,min:10"
+                                        placeholder="Describe your startup idea in detail..."
+                                    ></textarea>
+                                </div>
+
+                                <div>
+                                    <label class="block text-sm font-medium mb-2">Tags</label>
+                                    <input
+                                        type="text"
+                                        name="tags"
+                                        class="input w-full"
+                                        placeholder="Enter tags separated by commas"
+                                    >
+                                </div>
+                            </div>
+
+                            <div class="card-actions">
+                                <button type="button" class="btn btn-outline btn-neutral" onclick="clearForm(this.form)">Clear</button>
+                                <button
+                                    type="button"
+                                    class="btn btn-primary"
+                                    data-autofill-trigger="/api/ai/auto-fill"
+                                    data-autofill-action="suggest"
+                                    data-context="idea_creation"
+                                >
+                                    Auto-Fill
+                                </button>
+                                <button type="submit" class="btn btn-success">Create Idea</button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </section>
+
+        <!-- File Upload Demo -->
+        <section id="upload" class="space-y-8">
+            <div class="text-center">
+                <h2 class="text-3xl font-bold text-base-content mb-4">File Upload</h2>
+                <p class="text-muted-foreground max-w-2xl mx-auto">
+                    Drag & drop file uploads with progress tracking and validation
+                </p>
+            </div>
+
+            <div class="max-w-2xl mx-auto space-y-6">
+                <!-- Avatar Upload -->
+                <div class="card">
+                    <div class="card-body">
+                        <h3 class="card-title">Avatar Upload</h3>
+                        <div id="avatar-upload"></div>
+                    </div>
+                </div>
+
+                <!-- Document Upload -->
+                <div class="card">
+                    <div class="card-body">
+                        <h3 class="card-title">Document Upload</h3>
+                        <div id="document-upload"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Real-time Demo -->
+        <section id="realtime" class="space-y-8">
+            <div class="text-center">
+                <h2 class="text-3xl font-bold text-base-content mb-4">Real-time Updates</h2>
+                <p class="text-muted-foreground max-w-2xl mx-auto">
+                    WebSocket and polling-based real-time features
+                </p>
+            </div>
+
+            <div class="grid md:grid-cols-2 gap-6 max-w-4xl mx-auto">
+                <!-- Activity Feed -->
+                <div class="card">
+                    <div class="card-body">
+                        <h3 class="card-title">Activity Feed</h3>
+                        <div class="activity-feed space-y-2 max-h-64 overflow-y-auto">
+                            <div class="text-sm text-muted-foreground text-center py-4">
+                                No recent activity
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Credit Balance -->
+                <div class="card">
+                    <div class="card-body">
+                        <h3 class="card-title">Credit Balance</h3>
+                        <div class="space-y-4">
+                            <div class="flex items-center justify-between">
+                                <span class="text-sm font-medium">Current Balance</span>
+                                <span class="text-2xl font-bold text-primary credit-balance">1000</span>
+                            </div>
+                            <div class="w-full bg-base-200 rounded-full h-2">
+                                <div class="bg-primary h-2 rounded-full credit-progress" data-max-credits="1000" style="width: 100%"></div>
+                            </div>
+                            <p class="text-xs text-muted-foreground">Credits remaining for AI features</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-base-100 border-t border-base-300 mt-16">
+        <div class="max-w-7xl mx-auto px-4 py-8">
+            <div class="text-center text-muted-foreground">
+                <p>&copy; 2024 Accelerator. Built with modern web technologies.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Demo Scripts -->
+    <script>
+        // Initialize components when DOM is ready
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeDemo();
+        });
+
+        function initializeDemo() {
+            // Initialize AI Chat
+            const chat = Accelerator.AIChat.init('#ai-chat-container', {
+                endpoint: '/api/ai/chat',
+                placeholder: 'Ask me about your startup idea...',
+                enableVoice: true,
+                enableFileUpload: true
+            });
+
+            // Initialize File Uploads
+            Accelerator.FileUpload.init('#avatar-upload', {
+                endpoint: '/api/upload/avatar',
+                maxFiles: 1,
+                allowedTypes: ['image/*'],
+                showPreview: true,
+                context: 'avatar'
+            });
+
+            Accelerator.FileUpload.init('#document-upload', {
+                endpoint: '/api/upload/document',
+                multiple: true,
+                allowedTypes: ['image/*', 'application/pdf', 'text/*'],
+                showPreview: true,
+                context: 'document'
+            });
+
+            // Subscribe to real-time events
+            Accelerator.Realtime.subscribe('notification', function(data) {
+                console.log('Real-time notification:', data);
+            });
+
+            Accelerator.Realtime.subscribe('activity', function(data) {
+                console.log('Real-time activity:', data);
+            });
+
+            Accelerator.Realtime.subscribe('credit_update', function(data) {
+                console.log('Credit update:', data);
+            });
+        }
+
+        // Demo functions
+        function showModalDemo() {
+            const content = `
+                <h3 class="text-lg font-semibold mb-4">Modal Demo</h3>
+                <p class="mb-4">This is a modal dialog powered by the Accelerator framework.</p>
+                <div class="bg-info/10 p-4 rounded-lg mb-4">
+                    <p class="text-sm text-info">✨ Features include:</p>
+                    <ul class="text-sm mt-2 space-y-1">
+                        <li>• HTMX integration</li>
+                        <li>• Form validation</li>
+                        <li>• Real-time updates</li>
+                        <li>• AI chat interfaces</li>
+                    </ul>
+                </div>
+                <div class="flex justify-end space-x-3">
+                    <button class="btn btn-outline btn-neutral" onclick="Accelerator.Modal.hide('${Accelerator.Utils.generateId('modal')}')">Close</button>
+                    <button class="btn btn-primary" onclick="showToast('Modal action performed!', 'success')">Action</button>
+                </div>
+            `;
+
+            Accelerator.Modal.show(content, { size: 'md', closable: true });
+        }
+
+        function copyDemo() {
+            Accelerator.Utils.copyToClipboard('accelerator@example.com').then(result => {
+                if (result.success) {
+                    showToast('Email copied to clipboard!', 'success');
+                } else {
+                    showToast('Failed to copy email', 'error');
+                }
+            });
+        }
+
+        function clearForm(form) {
+            form.reset();
+            // Clear any auto-fill suggestions
+            const suggestions = form.querySelectorAll('.tag-suggestion, .title-suggestion');
+            suggestions.forEach(el => el.remove());
+        }
+
+        // Smooth scrolling for navigation
+        document.querySelectorAll('.nav-link').forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                const targetId = this.getAttribute('href');
+                Accelerator.Utils.scrollToElement(targetId, 80);
+            });
+        });
+
+        // Add some demo activity
+        setTimeout(() => {
+            Accelerator.Realtime.handleActivityUpdate({
+                action_type: 'create',
+                description: 'Demo activity: User created a new idea',
+                created_at: new Date().toISOString()
+            });
+        }, 2000);
+
+        setTimeout(() => {
+            Accelerator.Realtime.handleActivityUpdate({
+                action_type: 'report_generated',
+                description: 'Demo activity: Business plan generated',
+                created_at: new Date().toISOString()
+            });
+        }, 5000);
+    </script>
+</body>
+</html>

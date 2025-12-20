@@ -1,20 +1,234 @@
-<div class="container mx-auto px-4 py-8">
-  <h1 class="text-2xl font-bold mb-6">Voting & Rewards</h1>
+<main id="voting-reward-main-content" class="flex-1 overflow-auto bg-background">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
+    <div class="flex flex-col gap-4 lg:gap-6 mt-6">
+      <div class="flex items-center justify-between">
+        <div class="grid gap-1">
+          <h1 class="font-heading text-3xl font-semibold text-foreground">
+            Voting Rewards Dashboard
+          </h1>
+          <p class="text-lg text-muted-foreground">
+            Track your votes, earn credits, and monitor reward distribution
+          </p>
+        </div>
+        <div class="flex items-center gap-2">
+          <button id="refresh-dashboard-btn" class="btn btn-outline btn-primary px-3 py-1.5 rounded-full" hx-get="/api/voting-rewards/refresh" hx-trigger="click" hx-target="body" hx-swap="none" hx-on:htmx:after-request="htmx.trigger('body', 'refresh-stats'); htmx.trigger('body', 'refresh-transactions'); htmx.trigger('body', 'refresh-activity'); htmx.trigger('body', 'refresh-notifications'); htmx.trigger('body', 'refresh-ideas')">
+{{{icon 'rotate-ccw' class='w-4 h-4 mr-2'}}}
+            Refresh
+          </button>
+        </div>
+      </div>
 
-  {{#if voting_history}}
-  <div class="space-y-4">
-    {{#each voting_history}}
-    <div class="bg-card border border-border rounded-md p-4">
-      <p class="text-foreground">You voted on "{{idea_title}}" - Earned {{points}} points</p>
-      <span class="text-sm text-muted-foreground">{{voted_at_formatted}}</span>
+       <!-- Key Metrics Grid -->
+        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-4">
+        <!-- Credit Balance -->
+        <div class="rounded-lg bg-card px-4 py-6 text-card-foreground shadow-sm border border-border">
+          <div class="flex items-center justify-between px-3 py-1">
+            <div class="flex flex-col gap-1">
+              <h3 class="text-sm font-medium text-muted-foreground">Credit Balance</h3>
+               <p class="text-2xl font-semibold text-foreground" id="credit-balance">{{profile.credit_balance}}</p>
+            </div>
+            <div>
+            <div class="bg-primary/20 rounded-lg">
+              <div class="w-10 h-10 bg-primary/20 rounded-lg relative">
+                <div class="flex items-center justify-center w-9 h-9 bg-primary rounded-lg absolute top-0.5 left-0.5">
+                    {{{icon "coins" class="w-4 h-4 text-primary-foreground"}}}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <p class="flex items-center gap-1 text-sm font-medium text-muted-foreground mt-2">
+             <span class="text-success" id="earned-30d">+{{stats.earned30d}}</span>
+            Earned (30d)
+          </p>
+        </div>
+
+        <!-- Total Votes Given -->
+        <div class="rounded-lg bg-card px-4 py-6 text-card-foreground shadow-sm border border-border">
+          <div class="flex items-center justify-between px-3 py-1">
+            <div class="flex flex-col gap-1">
+              <h3 class="text-sm font-medium text-muted-foreground">Votes Given</h3>
+              <p class="text-2xl font-semibold text-foreground" id="votes-given">Loading...</p>
+            </div>
+            <div>
+            <div class="bg-info/20 rounded-lg">
+              <div class="w-10 h-10 bg-info/20 rounded-lg relative">
+                <div class="flex items-center justify-center w-9 h-9 bg-info rounded-lg absolute top-0.5 left-0.5">
+                    {{{icon "star" class="w-4 h-4 text-info-foreground"}}}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <p class="flex items-center gap-1 text-sm font-medium text-muted-foreground mt-2">
+             <span class="text-success" id="rewarding-votes">{{stats.rewardingVotes}}</span>
+            Rewarding votes
+          </p>
+        </div>
+
+        <!-- Rewards Earned -->
+        <div class="rounded-lg bg-card px-4 py-6 text-card-foreground shadow-sm border border-border">
+          <div class="flex items-center justify-between px-3 py-1">
+            <div class="flex flex-col gap-1">
+              <h3 class="text-sm font-medium text-muted-foreground">Rewards Earned</h3>
+              <p class="text-2xl font-semibold text-foreground" id="total-earned">Loading...</p>
+            </div>
+            <div>
+            <div class="bg-success/20 rounded-lg">
+              <div class="w-10 h-10 bg-success/20 rounded-lg relative">
+                <div class="flex items-center justify-center w-9 h-9 bg-success rounded-lg absolute top-0.5 left-0.5">
+                    {{{icon "check-circle" class="w-4 h-4 text-success-foreground"}}}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <p class="flex items-center gap-1 text-sm font-medium text-muted-foreground mt-2">
+            <span class="text-success" id="earned-30d-amount">+0</span>
+            Credits (30d)
+          </p>
+        </div>
+
+        <!-- Success Rate -->
+        <div class="rounded-lg bg-card px-4 py-6 text-card-foreground shadow-sm border border-border">
+          <div class="flex items-center justify-between px-3 py-1">
+            <div class="flex flex-col gap-1">
+              <h3 class="text-sm font-medium text-muted-foreground">Success Rate</h3>
+              <p class="text-2xl font-semibold text-foreground" id="success-rate">Loading...</p>
+            </div>
+            <div>
+            <div class="bg-warning/20 rounded-lg">
+              <div class="w-10 h-10 bg-warning/20 rounded-lg relative">
+                <div class="flex items-center justify-center w-9 h-9 bg-warning rounded-lg absolute top-0.5 left-0.5">
+                    {{{icon "bar-chart-3" class="w-4 h-4 text-warning-foreground"}}}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <p class="flex items-center gap-1 text-sm font-medium text-muted-foreground mt-2">
+            Ideas validated
+          </p>
+        </div>
+      </div>
+
+      <!-- Main Content Grid -->
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Recent Rewards & Activity -->
+        <div class="lg:col-span-2">
+          <!-- Reward Transactions -->
+          <div class="bg-card rounded-lg border border-border p-6 mb-6">
+            <div class="flex items-center justify-between mb-4">
+              <h2 class="text-xl font-semibold text-foreground">Recent Reward Transactions</h2>
+              <a href="#" class="btn btn-ghost text-sm" onclick="loadMoreTransactions()">
+                View All
+                {{{icon 'arrow-right' class='' size='14'}}}
+              </a>
+            </div>
+            <div id="reward-transactions" class="space-y-4" hx-get="/api/voting-rewards/transactions?limit=10&offset=0" hx-trigger="load, refresh-transactions" hx-target="this" hx-swap="innerHTML">
+              <div class="text-center py-8">
+                <div class="inline-flex items-center gap-2 text-muted-foreground">
+                  {{{icon "loader" class="animate-spin w-4 h-4"}}}
+                  Loading reward transactions...
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Voting Activity -->
+          <div class="bg-card rounded-lg border border-border p-6">
+            <div class="flex items-center justify-between mb-4">
+               <h2 class="text-xl font-semibold text-foreground">Recent Voting Activity</h2>
+               <a href="/explore-idea" class="btn btn-ghost text-sm">
+                Vote on More Ideas
+                {{{icon 'arrow-right' class='' size='14'}}}
+              </a>
+            </div>
+            <div id="voting-activity" class="space-y-4" hx-get="/api/voting-rewards/activity?limit=10&offset=0" hx-trigger="load, refresh-activity" hx-target="this" hx-swap="innerHTML">
+              <div class="text-center py-8">
+                <div class="inline-flex items-center gap-2 text-muted-foreground">
+                  {{{icon "loader" class="animate-spin w-4 h-4"}}}
+                  Loading voting activity...
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Sidebar -->
+        <div class="space-y-6">
+          <!-- Reward Notifications -->
+          <div class="bg-card rounded-lg border border-border p-6">
+            <div class="flex items-center justify-between mb-4">
+              <h2 class="text-xl font-semibold text-foreground">Reward Notifications</h2>
+            </div>
+            <div id="reward-notifications" class="space-y-4" hx-get="/api/notifications?type=reward_earned&limit=5" hx-trigger="load, refresh-notifications" hx-target="this" hx-swap="innerHTML">
+              <div class="text-center py-4">
+                <div class="inline-flex items-center gap-2 text-muted-foreground">
+                  {{{icon "loader" class="animate-spin w-4 h-4"}}}
+                  Loading notifications...
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Available Ideas to Vote -->
+          <div class="bg-card rounded-lg border border-border p-6">
+            <div class="flex items-center justify-between mb-4">
+               <h2 class="text-xl font-semibold text-foreground">Ideas to Vote On</h2>
+               <a href="/explore-idea" class="btn btn-ghost text-sm">
+                Explore All
+              </a>
+            </div>
+            <div id="available-ideas" class="space-y-4" hx-get="/api/ideas?votable=true&limit=5" hx-trigger="load, refresh-ideas" hx-target="this" hx-swap="innerHTML">
+              <div class="text-center py-4">
+                <div class="inline-flex items-center gap-2 text-muted-foreground">
+                  {{{icon "loader" class="animate-spin w-4 h-4"}}}
+                  Loading ideas...
+                </div>
+              </div>
+            </div>
+          </div>
+
+            <!-- Quick Actions -->
+           <div class="bg-card rounded-lg border border-border p-6">
+             <h2 class="text-xl font-semibold text-foreground mb-4">Quick Actions</h2>
+             <div class="grid grid-cols-1 gap-3">
+                <a href="/explore-idea" class="flex items-center gap-3 w-full px-4 py-3 text-sm font-medium text-foreground bg-background border border-border rounded-lg hover:bg-accent hover:text-accent-foreground transition-colors">
+                 <div class="flex-shrink-0 w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center">
+                   <svg class="w-4 h-4 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                   </svg>
+                 </div>
+                 <span class="flex-1">Vote on Ideas</span>
+                 <div class="flex-shrink-0">
+                    {{{icon "chevron-right" class="w-4 h-4 text-muted-foreground"}}}
+                 </div>
+               </a>
+               <a href="/new-idea" class="flex items-center gap-3 w-full px-4 py-3 text-sm font-medium text-foreground bg-background border border-border rounded-lg hover:bg-accent hover:text-accent-foreground transition-colors">
+                 <div class="flex-shrink-0 w-8 h-8 bg-secondary/50 rounded-lg flex items-center justify-center">
+                    {{{icon "plus" class="w-4 h-4 text-secondary-foreground"}}}
+                 </div>
+                 <span class="flex-1">Create Idea</span>
+                 <div class="flex-shrink-0">
+                    {{{icon "chevron-right" class="w-4 h-4 text-muted-foreground"}}}
+                 </div>
+               </a>
+               <a href="/buy-credits" class="flex items-center gap-3 w-full px-4 py-3 text-sm font-medium text-foreground bg-background border border-border rounded-lg hover:bg-accent hover:text-accent-foreground transition-colors">
+                 <div class="flex-shrink-0 w-8 h-8 bg-success/10 rounded-lg flex items-center justify-center">
+                    {{{icon "credit-card" class="w-4 h-4 text-success"}}}
+                 </div>
+                 <span class="flex-1">Buy Credits</span>
+                 <div class="flex-shrink-0">
+                    {{{icon "chevron-right" class="w-4 h-4 text-muted-foreground"}}}
+                 </div>
+               </a>
+             </div>
+           </div>
+        </div>
+      </div>
     </div>
-    {{/each}}
   </div>
-  <div class="mt-8">
-    <h2 class="text-xl font-semibold mb-4">Total Rewards</h2>
-    <p class="text-lg">You have {{total_points}} points</p>
-  </div>
-  {{else}}
-  <p class="text-muted-foreground">No voting history yet.</p>
-  {{/if}}
-</div>
+</main>
+
+</script>

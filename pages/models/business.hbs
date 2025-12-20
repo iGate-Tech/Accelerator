@@ -1,0 +1,318 @@
+{{> progress-bar activeStep=activeStep ideaId=ideaId}}
+
+{{> model-header title=pageTitle description="Comprehensive business development and validation overview"
+ratingStars="★★★★★" ratingValue="5.0" voteCount="0 votes" category=ideaCategory tags=ideaTags}}
+
+{{> model-progress data='[
+  {
+    "id": "product-section",
+    "fullLabel": "1. Product Section",
+    "shortLabel": "1.",
+    "position": 0
+  },
+  {
+    "id": "market-section",
+    "fullLabel": "2. Market Section",
+    "shortLabel": "2.",
+    "position": 16.67
+  },
+  {
+    "id": "competition-analysis",
+    "fullLabel": "3. Competition Analysis",
+    "shortLabel": "3.",
+    "position": 33.33
+  },
+  {
+    "id": "risk-register",
+    "fullLabel": "4. Risk Register",
+    "shortLabel": "4.",
+    "position": 50
+  },
+  {
+    "id": "value-proposition",
+    "fullLabel": "5. Value Proposition",
+    "shortLabel": "5.",
+    "position": 66.67
+  },
+  {
+    "id": "cost-revenue",
+    "fullLabel": "6. Cost & Revenue",
+    "shortLabel": "6.",
+    "position": 83.33
+  },
+  {
+    "id": "exit-strategy",
+    "fullLabel": "7. Exit Strategy",
+    "shortLabel": "7.",
+    "position": 100
+  }
+]'}}
+
+ <main class="flex flex-col mx-auto items-center justify-center">
+     <div class="sections-container">
+
+         <!-- Product Section -->
+         <div id="product-section" class="section mb-6">
+             <h2 class="text-xl font-semibold mb-4 text-foreground">Product Section</h2>
+             <p class="text-muted-foreground mb-6">Define your product and business fundamentals.</p>
+             <div class="relative">
+                 <div class="absolute left-4 top-0 bottom-0 w-0.5 bg-border"></div>
+                 <div class="flex items-start gap-4 mb-6">
+                       <div class="w-8 h-8 bg-primary rounded-full flex items-center justify-center text-sm font-bold relative z-10">1</div>
+                       <div class="flex-1">
+                           {{> question-block id="product-section-q1" step="1" question="Define the core function of your product." placeholder="This section defines your product's core function. Explain what your product primarily does and how it solves customer problems. AI can help generate ideas or refine your description. Use this section to clearly articulate your product's main purpose. Chat with AI to find your perfect wording or learn more about product positioning."}}
+                       </div>
+                   </div>
+                 <div class="flex items-start gap-4 mb-6">
+                       <div class="w-8 h-8 bg-primary rounded-full flex items-center justify-center text-sm font-bold relative z-10">2</div>
+                       <div class="flex-1">
+                           {{> question-block id="product-section-q2" step="2" question="List your key business activities." placeholder="This section covers your key business activities. List the most important actions your business must take to create and deliver your product or service. AI can suggest common activities based on your industry. Use this section to outline your operational core. Chat with AI to get industry-specific suggestions or refine your list."}}
+                       </div>
+                   </div>
+                <div class="flex items-start gap-4 mb-6">
+                      <div class="w-8 h-8 bg-primary rounded-full flex items-center justify-center text-sm font-bold relative z-10">3</div>
+                      <div class="flex-1">
+                           {{> question-block id="product-section-q3" step="3" question="Identify your key resources." placeholder="This section identifies your key resources. Include physical items, intellectual property, human resources, and financial resources you need or have. AI can help categorize and prioritize your resources. Use this section to assess your resource requirements. Chat with AI to learn about resource planning or get examples for your industry."}}
+                      </div>
+                  </div>
+                <div class="flex items-start gap-4 mb-6">
+                      <div class="w-8 h-8 bg-primary rounded-full flex items-center justify-center text-sm font-bold relative z-10">4</div>
+                      <div class="flex-1">
+                           {{> question-block id="product-section-q4" step="4" question="Who are your key partners?" placeholder="This section lists your key partners. Include suppliers, distributors, or strategic alliances that enhance your capabilities. AI can suggest potential partnership types. Use this section to map your business ecosystem. Chat with AI to explore partnership opportunities or understand partnership strategies."}}
+                      </div>
+                  </div>
+                <div class="flex items-start gap-4">
+                    <div class="w-8 h-8  rounded-full flex items-center justify-center text-sm font-bold relative z-10">{{{icon 'check-circle' class='w-8 h-8 text-success' size='32'}}}</div>
+                    <div class="flex-1">
+                        {{> move-next-block message="You have successfully completed this section of the business model." buttonText="Move to Next Section"}}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Value Proposition Section -->
+        <div id="market-section" class="section mb-6" style="display: none;">
+            <h2 class="text-xl font-semibold mb-4 text-foreground">Market Section</h2>
+            <p class="text-muted-foreground mb-6">Analyze your target market and market size.</p>
+            <div class="relative">
+                <div class="absolute left-4 top-0 bottom-0 w-0.5 bg-border"></div>
+                  <div class="flex items-start gap-4 mb-6">
+                      <div class="w-8 h-8 bg-primary rounded-full flex items-center justify-center text-sm font-bold relative z-10">1</div>
+                      <div class="flex-1">
+                           {{> question-block id="market-section-q1" step="5" question="What category does your product fit into?" placeholder="This section categorizes your product. Specify if it's SaaS, platform, or other type to understand industry context. AI can help classify your product accurately. Use this section for market positioning. Chat with AI to learn about product categories or get classification help."}}
+                      </div>
+                  </div>
+                  <div class="flex items-start gap-4 mb-6">
+                      <div class="w-8 h-8 bg-primary rounded-full flex items-center justify-center text-sm font-bold relative z-10">2</div>
+                      <div class="flex-1">
+                           {{> question-block id="market-section-q2" step="6" question="Who is your target market?" placeholder="This section defines your target market. Describe the customers who would benefit most from your product, including demographics and needs. AI can help refine your target audience. Use this section for customer segmentation. Chat with AI to develop detailed customer personas or understand market targeting."}}
+                      </div>
+                  </div>
+                  <div class="flex items-start gap-4 mb-6">
+                      <div class="w-8 h-8 bg-primary rounded-full flex items-center justify-center text-sm font-bold relative z-10">3</div>
+                      <div class="flex-1">
+                           {{> question-block id="market-section-q3" step="7" question="What is your target geographic area?" placeholder="This section specifies your geographic focus. Define where you plan to operate - specific countries, regions, or globally. AI can suggest expansion strategies. Use this section for geographic planning. Chat with AI to learn about market entry strategies or geographic considerations."}}
+                      </div>
+                  </div>
+                  <div class="flex items-start gap-4 mb-6">
+                      <div class="w-8 h-8 bg-primary rounded-full flex items-center justify-center text-sm font-bold relative z-10">4</div>
+                      <div class="flex-1">
+                           {{> question-block id="market-section-q4" step="8" question="Estimate your TAM (Total Addressable Market)." placeholder="This section estimates your TAM. Calculate the total market size for your product type in your region. AI can help with market size calculations. Use this section for market opportunity assessment. Chat with AI to learn TAM calculation methods or get industry benchmarks."}}
+                      </div>
+                  </div>
+                  <div class="flex items-start gap-4 mb-6">
+                      <div class="w-8 h-8 bg-primary rounded-full flex items-center justify-center text-sm font-bold relative z-10">5</div>
+                      <div class="flex-1">
+                           {{> question-block id="market-section-q5" step="9" question="Estimate your SAM (Serviceable Addressable Market)." placeholder="This section estimates your SAM. Determine the portion of TAM you can actually serve with current capabilities. AI can guide market segmentation. Use this section for realistic market sizing. Chat with AI to understand SAM vs TAM differences or get calculation help."}}
+                      </div>
+                  </div>
+                  <div class="flex items-start gap-4 mb-6">
+                      <div class="w-8 h-8 bg-primary rounded-full flex items-center justify-center text-sm font-bold relative z-10">6</div>
+                      <div class="flex-1">
+                           {{> question-block id="market-section-q6" step="10" question="Estimate your SOM (Serviceable Obtainable Market)." placeholder="This section estimates your SOM. Calculate the realistic market share you can capture in the first few years. AI can help with competitive analysis. Use this section for achievable market goals. Chat with AI to learn about market penetration strategies or SOM estimation."}}
+                      </div>
+                  </div>
+                <div class="flex items-start gap-4">
+                    <div class="w-8 h-8  rounded-full flex items-center justify-center text-sm font-bold relative z-10">{{{icon 'check-circle' class='w-8 h-8 text-success' size='32'}}}</div>
+                    <div class="flex-1">
+                        {{> move-next-block message="You have successfully completed this section of the business model." buttonText="Move to Next Section"}}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+         <!-- Competition Analysis Section -->
+         <div id="competition-analysis" class="section mb-6" style="display: none;">
+             <h2 class="text-xl font-semibold mb-4 text-foreground">Competition Analysis</h2>
+             <p class="text-muted-foreground mb-6">Analyze your competitive landscape.</p>
+             <div class="relative">
+                 <div class="absolute left-4 top-0 bottom-0 w-0.5 bg-border"></div>
+                 <div class="flex items-start gap-4 mb-6">
+                       <div class="w-8 h-8 bg-primary rounded-full flex items-center justify-center text-sm font-bold relative z-10">1</div>
+                       <div class="flex-1">
+                           {{> question-block id="competition-analysis-q1" step="11" question="Who are your key competitors?" placeholder="This section identifies your key competitors. List main players in your market offering similar solutions. AI can help research competitors. Use this section for competitive intelligence. Chat with AI to discover competitors or analyze competitive landscape."}}
+                       </div>
+                   </div>
+                   <div class="flex items-start gap-4 mb-6">
+                       <div class="w-8 h-8 bg-primary rounded-full flex items-center justify-center text-sm font-bold relative z-10">2</div>
+                       <div class="flex-1">
+                           {{> question-block id="competition-analysis-q2" step="12" question="What is their market share?" placeholder="This section analyzes competitor market share. Estimate how much of the market each competitor holds. AI can help with market share research. Use this section for competitive positioning. Chat with AI to learn market share analysis or get industry data."}}
+                       </div>
+                   </div>
+                  <div class="flex items-start gap-4 mb-6">
+                      <div class="w-8 h-8 bg-primary rounded-full flex items-center justify-center text-sm font-bold relative z-10">3</div>
+                      <div class="flex-1">
+                           {{> question-block id="competition-analysis-q3" step="13" question="What is the competition level in your market?" placeholder="This section assesses competition level. Determine if competition is high, medium, or low in your market. AI can help evaluate competitive intensity. Use this section for strategy planning. Chat with AI to understand competition levels or get market analysis."}}
+                      </div>
+                  </div>
+                  <div class="flex items-start gap-4 mb-6">
+                      <div class="w-8 h-8 bg-primary rounded-full flex items-center justify-center text-sm font-bold relative z-10">4</div>
+                      <div class="flex-1">
+                           {{> question-block id="competition-analysis-q4" step="14" question="What are your penetration opportunities?" placeholder="This section identifies penetration opportunities. Find advantages or underserved niches over competitors. AI can suggest differentiation strategies. Use this section for competitive advantages. Chat with AI to discover market gaps or competitive opportunities."}}
+                      </div>
+                  </div>
+                  <div class="flex items-start gap-4 mb-6">
+                      <div class="w-8 h-8 bg-primary rounded-full flex items-center justify-center text-sm font-bold relative z-10">5</div>
+                      <div class="flex-1">
+                           {{> question-block id="competition-analysis-q5" step="15" question="What market challenges might you face?" placeholder="This section identifies market challenges. Consider switching costs, integration issues, or data privacy concerns. AI can help anticipate market barriers. Use this section for risk assessment. Chat with AI to learn about common market challenges or mitigation strategies."}}
+                      </div>
+                  </div>
+                <div class="flex items-start gap-4">
+                    <div class="w-8 h-8  rounded-full flex items-center justify-center text-sm font-bold relative z-10">{{{icon 'check-circle' class='w-8 h-8 text-success' size='32'}}}</div>
+                    <div class="flex-1">
+                        {{> move-next-block message="You have successfully completed this section of the business model." buttonText="Move to Next Section"}}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+         <!-- Risk Register Section -->
+         <div id="risk-register" class="section mb-6" style="display: none;">
+             <h2 class="text-xl font-semibold mb-4 text-foreground">Risk Register</h2>
+             <p class="text-muted-foreground mb-6">Identify and assess business risks.</p>
+             <div class="relative">
+                 <div class="absolute left-4 top-0 bottom-0 w-0.5 bg-border"></div>
+                 <div class="flex items-start gap-4 mb-6">
+                       <div class="w-8 h-8 bg-primary rounded-full flex items-center justify-center text-sm font-bold relative z-10">1</div>
+                       <div class="flex-1">
+                           {{> question-block id="risk-register-q1" step="16" question="Identify your business risks." placeholder="This section identifies business risks. Think about technical, market, or operational problems that could occur. AI can help brainstorm potential risks. Use this section for risk management planning. Chat with AI to learn about risk identification or get industry-specific risk examples."}}
+                       </div>
+                   </div>
+                   <div class="flex items-start gap-4 mb-6">
+                       <div class="w-8 h-8 bg-primary rounded-full flex items-center justify-center text-sm font-bold relative z-10">2</div>
+                       <div class="flex-1">
+                           {{> question-block id="risk-register-q2" step="17" question="Categorize your risks by type." placeholder="This section categorizes risks. Distribute risks into technical, market, and operational categories with percentage estimates. AI can help with risk categorization. Use this section for risk prioritization. Chat with AI to understand risk categories or get categorization assistance."}}
+                       </div>
+                   </div>
+                  <div class="flex items-start gap-4 mb-6">
+                      <div class="w-8 h-8 bg-primary rounded-full flex items-center justify-center text-sm font-bold relative z-10">3</div>
+                      <div class="flex-1">
+                           {{> question-block id="risk-register-q3" step="18" question="What's your overall risk level?" placeholder="This section assesses overall risk level. Based on all risks, determine if it's low, medium, medium-high, or high. AI can help evaluate risk severity. Use this section for risk mitigation planning. Chat with AI to learn about risk assessment or get risk level guidance."}}
+                      </div>
+                  </div>
+                <div class="flex items-start gap-4">
+                    <div class="w-8 h-8  rounded-full flex items-center justify-center text-sm font-bold relative z-10">{{{icon 'check-circle' class='w-8 h-8 text-success' size='32'}}}</div>
+                    <div class="flex-1">
+                        {{> move-next-block message="You have successfully completed this section of the business model." buttonText="Move to Next Section"}}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+         <!-- Value Proposition Section -->
+         <div id="value-proposition" class="section mb-6" style="display: none;">
+             <h2 class="text-xl font-semibold mb-4 text-foreground">Value Proposition</h2>
+             <p class="text-muted-foreground mb-6">Define customer value and benefits.</p>
+             <div class="relative">
+                 <div class="absolute left-4 top-0 bottom-0 w-0.5 bg-border"></div>
+                 <div class="flex items-start gap-4 mb-6">
+                       <div class="w-8 h-8 bg-primary rounded-full flex items-center justify-center text-sm font-bold relative z-10">1</div>
+                       <div class="flex-1">
+                           {{> question-block id="value-proposition-q1" step="19" question="What is the customer job?" placeholder="This section defines the customer job. Identify the core problem your customer is trying to solve. AI can help articulate customer needs. Use this section for value proposition foundation. Chat with AI to understand customer jobs or get problem definition help."}}
+                       </div>
+                   </div>
+                   <div class="flex items-start gap-4 mb-6">
+                       <div class="w-8 h-8 bg-primary rounded-full flex items-center justify-center text-sm font-bold relative z-10">2</div>
+                       <div class="flex-1">
+                           {{> question-block id="value-proposition-q2" step="20" question="What are the customer pains?" placeholder="This section identifies customer pains. List problems or frustrations customers experience. AI can help identify pain points. Use this section for problem-solution fit. Chat with AI to discover customer pain points or learn pain point analysis."}}
+                       </div>
+                   </div>
+                  <div class="flex items-start gap-4 mb-6">
+                      <div class="w-8 h-8 bg-primary rounded-full flex items-center justify-center text-sm font-bold relative z-10">3</div>
+                      <div class="flex-1">
+                           {{> question-block id="value-proposition-q3" step="21" question="What are the customer gains?" placeholder="This section defines customer gains. List benefits or positive outcomes customers hope to achieve. AI can help articulate desired outcomes. Use this section for value creation. Chat with AI to understand customer gains or get outcome identification help."}}
+                      </div>
+                  </div>
+                  <div class="flex items-start gap-4 mb-6">
+                      <div class="w-8 h-8 bg-primary rounded-full flex items-center justify-center text-sm font-bold relative z-10">4</div>
+                      <div class="flex-1">
+                           {{> question-block id="value-proposition-q4" step="22" question="What are the solution components?" placeholder="This section lists solution components. Identify key features or elements that address pains and deliver gains. AI can help define solution features. Use this section for product feature mapping. Chat with AI to learn about solution components or get feature ideation help."}}
+                      </div>
+                  </div>
+                <div class="flex items-start gap-4">
+                    <div class="w-8 h-8  rounded-full flex items-center justify-center text-sm font-bold relative z-10">{{{icon 'check-circle' class='w-8 h-8 text-success' size='32'}}}</div>
+                    <div class="flex-1">
+                        {{> move-next-block message="You have successfully completed this section of the business model." buttonText="Move to Next Section"}}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+         <!-- Cost & Revenue Section -->
+         <div id="cost-revenue" class="section mb-6" style="display: none;">
+             <h2 class="text-xl font-semibold mb-4 text-foreground">Cost & Revenue</h2>
+             <p class="text-muted-foreground mb-6">Analyze costs and revenue streams.</p>
+             <div class="relative">
+                 <div class="absolute left-4 top-0 bottom-0 w-0.5 bg-border"></div>
+                 <div class="flex items-start gap-4 mb-6">
+                       <div class="w-8 h-8 bg-primary rounded-full flex items-center justify-center text-sm font-bold relative z-10">1</div>
+                       <div class="flex-1">
+                           {{> question-block id="cost-revenue-q1" step="23" question="What are your key costs?" placeholder="This section identifies key costs. Include fixed and variable costs for delivering your product. AI can help categorize costs. Use this section for financial planning. Chat with AI to learn about cost structures or get cost estimation help."}}
+                       </div>
+                   </div>
+                   <div class="flex items-start gap-4 mb-6">
+                       <div class="w-8 h-8 bg-primary rounded-full flex items-center justify-center text-sm font-bold relative z-10">2</div>
+                       <div class="flex-1">
+                           {{> question-block id="cost-revenue-q2" step="24" question="What are your revenue streams?" placeholder="This section lists revenue streams. Describe how you'll make money from your product. AI can suggest monetization strategies. Use this section for revenue modeling. Chat with AI to explore revenue models or get pricing strategy advice."}}
+                       </div>
+                   </div>
+                  <div class="flex items-start gap-4 mb-6">
+                      <div class="w-8 h-8 bg-primary rounded-full flex items-center justify-center text-sm font-bold relative z-10">3</div>
+                      <div class="flex-1">
+                           {{> question-block id="cost-revenue-q3" step="25" question="What are your financial projections?" placeholder="This section provides financial projections. Estimate revenue, costs, and profitability over 3-5 years. AI can help with projection calculations. Use this section for financial forecasting. Chat with AI to learn financial projection methods or get projection assistance."}}
+                      </div>
+                  </div>
+                <div class="flex items-start gap-4">
+                    <div class="w-8 h-8  rounded-full flex items-center justify-center text-sm font-bold relative z-10">{{{icon 'check-circle' class='w-8 h-8 text-success' size='32'}}}</div>
+                    <div class="flex-1">
+                        {{> move-next-block message="You have successfully completed this section of the business model." buttonText="Move to Next Section"}}
+                    </div>
+                </div>
+            </div>
+         </div>
+
+         <!-- Exit Strategy Section -->
+         <div id="exit-strategy" class="section mb-6" style="display: none;">
+             <h2 class="text-xl font-semibold mb-4 text-foreground">Exit Strategy</h2>
+             <p class="text-muted-foreground mb-6">Plan your business exit.</p>
+             <div class="relative">
+                 <div class="absolute left-4 top-0 bottom-0 w-0.5 bg-border"></div>
+                 <div class="flex items-start gap-4 mb-6">
+                       <div class="w-8 h-8 bg-primary rounded-full flex items-center justify-center text-sm font-bold relative z-10">1</div>
+                       <div class="flex-1">
+                           {{> question-block id="exit-strategy-q1" step="26" question="What is your exit strategy?" placeholder="This section defines your exit strategy. Consider acquisition, IPO, or other options for realizing returns. AI can help evaluate exit options. Use this section for long-term planning. Chat with AI to learn about exit strategies or get exit planning guidance."}}
+                       </div>
+                   </div>
+                 <div class="flex items-start gap-4">
+                     <div class="w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold relative z-10">{{{icon 'check-circle' class='w-8 h-8 text-success' size='32'}}}</div>
+                     <div class="flex-1">
+                         {{> move-next-block message="You have successfully completed the entire business model." buttonText="Complete Business Model"}}
+                     </div>
+                 </div>
+             </div>
+          </div>
+
+</main>
+
+<div class=" h-[300px]"></div>
+

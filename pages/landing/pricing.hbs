@@ -1,46 +1,158 @@
-<section id="pricing" class="py-16 bg-white">
-  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-    <div class="text-center mb-16">
-      <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Simple, Transparent Pricing</h2>
-      <p class="text-xl text-gray-600">Choose the plan that fits your needs</p>
+<!-- Pricing Section -->
+<div id="pricing" class="py-24 relative z-10 mx-auto max-w-7xl">
+  <!-- Section Header -->
+  <div class="text-center mb-12 mx-auto max-w-3xl">
+    <div class="flex items-center gap-3 mb-8 px-4 py-1.5 rounded-full border border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-white/5 backdrop-blur-sm w-fit mx-auto">
+      <span class="flex h-2 w-2 relative">
+        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-purple-500 opacity-75"></span>
+        <span class="relative inline-flex rounded-full h-2 w-2 bg-purple-500"></span>
+      </span>
+      <span class="text-xs font-mono text-purple-500 uppercase tracking-[0.2em] font-medium">
+        Pricing Plans</span>
     </div>
-    <div class="grid md:grid-cols-3 gap-8">
-      <div class="bg-gray-50 p-8 rounded-lg border">
-        <h3 class="text-2xl font-bold text-gray-900 mb-4">Starter</h3>
-        <p class="text-4xl font-bold text-gray-900 mb-2">$0<span class="text-lg font-normal">/month</span></p>
-        <p class="text-gray-600 mb-6">Perfect for getting started</p>
-        <ul class="space-y-2 mb-8">
-          <li class="flex items-center">{{{icon 'check' class='w-5 h-5 text-green-500 mr-2'}}}5 AI generations</li>
-          <li class="flex items-center">{{{icon 'check' class='w-5 h-5 text-green-500 mr-2'}}}Basic templates</li>
-          <li class="flex items-center">{{{icon 'check' class='w-5 h-5 text-green-500 mr-2'}}}Email support</li>
-        </ul>
-        <a href="/auth/signup" class="block w-full bg-gray-900 text-white text-center py-3 rounded-lg font-semibold hover:bg-gray-800">Get Started</a>
+
+    <h2 class="text-5xl md:text-6xl lg:text-7xl font-serif font-medium tracking-tight text-gray-900 dark:text-white mb-6">
+      Choose Your
+      <span class="text-gray-600 dark:text-white/60">Acceleration Path</span>
+    </h2>
+
+    <p class="text-xl text-gray-700 dark:text-white/60 leading-relaxed max-w-2xl mx-auto font-light tracking-tight mb-8">
+      Flexible pricing designed for startups at every stage. Get started with our AI-powered tools and scale as you grow.
+    </p>
+  </div>
+
+  <!-- Pricing Cards -->
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+    <!-- Basic Plan -->
+    <div class="relative flex flex-col p-8 rounded-3xl border border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-white/[0.02] backdrop-blur-sm hover:border-purple-500/20 transition-all duration-300 group">
+      <div class="mb-6">
+        <h3 class="text-2xl font-semibold text-gray-900 dark:text-white mb-2">Starter</h3>
+        <p class="text-gray-600 dark:text-white/60 text-sm">Perfect for students and early-stage ideas</p>
       </div>
-      <div class="bg-blue-600 text-white p-8 rounded-lg border-4 border-blue-300 relative">
-        <div class="absolute -top-4 left-1/2 transform -translate-x-1/2 bg-blue-300 text-blue-900 px-4 py-1 rounded-full text-sm font-semibold">Most Popular</div>
-        <h3 class="text-2xl font-bold mb-4">Professional</h3>
-        <p class="text-4xl font-bold mb-2">$29<span class="text-lg font-normal">/month</span></p>
-        <p class="text-blue-100 mb-6">For serious entrepreneurs</p>
-        <ul class="space-y-2 mb-8">
-          <li class="flex items-center">{{{icon 'check' class='w-5 h-5 text-blue-300 mr-2'}}}Unlimited AI generations</li>
-          <li class="flex items-center">{{{icon 'check' class='w-5 h-5 text-blue-300 mr-2'}}}All templates</li>
-          <li class="flex items-center">{{{icon 'check' class='w-5 h-5 text-blue-300 mr-2'}}}Priority support</li>
-          <li class="flex items-center">{{{icon 'check' class='w-5 h-5 text-blue-300 mr-2'}}}Advanced analytics</li>
-        </ul>
-        <a href="/auth/signup" class="block w-full bg-white text-blue-600 text-center py-3 rounded-lg font-semibold hover:bg-gray-100">Start Free Trial</a>
+
+      <div class="mb-8">
+        <div class="flex items-baseline">
+          <span class="text-4xl font-bold text-gray-900 dark:text-white">$0</span>
+          <span class="text-gray-600 dark:text-white/60 ml-2">/month</span>
+        </div>
+        <p class="text-gray-500 dark:text-white/40 text-xs mt-2">Free forever</p>
       </div>
-      <div class="bg-gray-50 p-8 rounded-lg border">
-        <h3 class="text-2xl font-bold text-gray-900 mb-4">Enterprise</h3>
-        <p class="text-4xl font-bold text-gray-900 mb-2">$99<span class="text-lg font-normal">/month</span></p>
-        <p class="text-gray-600 mb-6">For growing teams</p>
-        <ul class="space-y-2 mb-8">
-          <li class="flex items-center">{{{icon 'check' class='w-5 h-5 text-green-500 mr-2'}}}Everything in Professional</li>
-          <li class="flex items-center">{{{icon 'check' class='w-5 h-5 text-green-500 mr-2'}}}Team collaboration tools</li>
-          <li class="flex items-center">{{{icon 'check' class='w-5 h-5 text-green-500 mr-2'}}}Dedicated account manager</li>
-          <li class="flex items-center">{{{icon 'check' class='w-5 h-5 text-green-500 mr-2'}}}Custom integrations</li>
-        </ul>
-        <a href="/auth/signup" class="block w-full bg-gray-900 text-white text-center py-3 rounded-lg font-semibold hover:bg-gray-800">Contact Sales</a>
+
+      <ul class="space-y-4 mb-8 flex-grow">
+        <li class="flex items-center text-gray-700 dark:text-white/80 text-sm">
+{{{icon 'check' class='w-4 h-4 text-green-500 mr-3' size='24'}}}
+          AI Idea Generation (5 ideas/month)
+        </li>
+        <li class="flex items-center text-gray-700 dark:text-white/80 text-sm">
+{{{icon 'check' class='w-4 h-4 text-green-500 mr-3' size='24'}}}
+          Basic Idea Modeling
+        </li>
+        <li class="flex items-center text-gray-700 dark:text-white/80 text-sm">
+{{{icon 'check' class='w-4 h-4 text-green-500 mr-3' size='24'}}}
+          Community Access
+        </li>
+      </ul>
+
+      <button class="w-full py-3 px-6 rounded-full bg-gray-200 dark:bg-white/10 hover:bg-gray-300 dark:hover:bg-white/20 text-gray-900 dark:text-white font-medium transition-colors">
+        Get Started Free
+      </button>
+    </div>
+
+    <!-- Pro Plan -->
+    <div class="relative flex flex-col p-8 rounded-3xl border-2 border-purple-500/50 bg-gradient-to-b from-purple-500/10 to-transparent backdrop-blur-sm hover:border-purple-500 transition-all duration-300 group">
+      <div class="absolute -top-4 left-1/2 transform -translate-x-1/2">
+        <span class="bg-purple-500 text-black text-xs font-bold px-3 py-1 rounded-full">Most Popular</span>
       </div>
+
+      <div class="mb-6">
+        <h3 class="text-2xl font-semibold text-gray-900 dark:text-white mb-2">Professional</h3>
+        <p class="text-gray-600 dark:text-white/60 text-sm">For growing startups</p>
+      </div>
+
+      <div class="mb-8">
+        <div class="flex items-baseline">
+          <span class="text-4xl font-bold text-gray-900 dark:text-white">$29</span>
+          <span class="text-gray-600 dark:text-white/60 ml-2">/month</span>
+        </div>
+        <p class="text-gray-500 dark:text-white/40 text-xs mt-2">Billed monthly</p>
+      </div>
+
+      <ul class="space-y-4 mb-8 flex-grow">
+        <li class="flex items-center text-gray-700 dark:text-white/80 text-sm">
+{{{icon 'check' class='w-4 h-4 text-green-500 mr-3' size='24'}}}
+          Unlimited AI Idea Generation
+        </li>
+        <li class="flex items-center text-gray-700 dark:text-white/80 text-sm">
+{{{icon 'check' class='w-4 h-4 text-green-500 mr-3' size='24'}}}
+          Advanced Business Modeling
+        </li>
+        <li class="flex items-center text-gray-700 dark:text-white/80 text-sm">
+{{{icon 'check' class='w-4 h-4 text-green-500 mr-3' size='24'}}}
+          Financial Projections
+        </li>
+        <li class="flex items-center text-gray-700 dark:text-white/80 text-sm">
+{{{icon 'check' class='w-4 h-4 text-green-500 mr-3' size='24'}}}
+          Team & Marketing Plans
+        </li>
+        <li class="flex items-center text-gray-700 dark:text-white/80 text-sm">
+{{{icon 'check' class='w-4 h-4 text-green-500 mr-3' size='24'}}}
+          Priority Support
+        </li>
+      </ul>
+
+      <button class="w-full py-3 px-6 rounded-full bg-purple-500 hover:bg-purple-600 text-black font-medium transition-colors">
+        Start Pro Trial
+      </button>
+    </div>
+
+    <!-- Enterprise Plan -->
+    <div class="relative flex flex-col p-8 rounded-3xl border border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-white/[0.02] backdrop-blur-sm hover:border-purple-500/20 transition-all duration-300 group">
+      <div class="mb-6">
+        <h3 class="text-2xl font-semibold text-gray-900 dark:text-white mb-2">Enterprise</h3>
+        <p class="text-gray-600 dark:text-white/60 text-sm">For scaling companies</p>
+      </div>
+
+      <div class="mb-8">
+        <div class="flex items-baseline">
+          <span class="text-4xl font-bold text-gray-900 dark:text-white">$99</span>
+          <span class="text-gray-600 dark:text-white/60 ml-2">/month</span>
+        </div>
+        <p class="text-gray-500 dark:text-white/40 text-xs mt-2">Custom pricing available</p>
+      </div>
+
+      <ul class="space-y-4 mb-8 flex-grow">
+        <li class="flex items-center text-gray-700 dark:text-white/80 text-sm">
+{{{icon 'check' class='w-4 h-4 text-green-500 mr-3' size='24'}}}
+          Everything in Professional
+        </li>
+        <li class="flex items-center text-gray-700 dark:text-white/80 text-sm">
+{{{icon 'check' class='w-4 h-4 text-green-500 mr-3' size='24'}}}
+          Custom AI Models
+        </li>
+        <li class="flex items-center text-gray-700 dark:text-white/80 text-sm">
+{{{icon 'check' class='w-4 h-4 text-green-500 mr-3' size='24'}}}
+          API Access
+        </li>
+        <li class="flex items-center text-gray-700 dark:text-white/80 text-sm">
+{{{icon 'check' class='w-4 h-4 text-green-500 mr-3' size='24'}}}
+          Dedicated Account Manager
+        </li>
+        <li class="flex items-center text-gray-700 dark:text-white/80 text-sm">
+{{{icon 'check' class='w-4 h-4 text-green-500 mr-3' size='24'}}}
+          White-label Solutions
+        </li>
+      </ul>
+
+      <button class="w-full py-3 px-6 rounded-full bg-gray-200 dark:bg-white/10 hover:bg-gray-300 dark:hover:bg-white/20 text-gray-900 dark:text-white font-medium transition-colors">
+        Contact Sales
+      </button>
     </div>
   </div>
-</section>
+
+  <!-- FAQ or Additional Info -->
+  <div class="text-center mt-16">
+    <p class="text-gray-600 dark:text-white/60 text-sm">
+      All plans include a 14-day free trial. No credit card required for Starter plan.
+    </p>
+  </div>
+</div>

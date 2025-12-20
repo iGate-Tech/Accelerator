@@ -1,53 +1,128 @@
-<div class="min-h-screen bg-base-100">
-  <div class="max-w-4xl mx-auto px-4 py-8">
-    <div class="text-center mb-8">
-      <h1 class="text-3xl font-bold text-foreground mb-2">Welcome to Accelerator!</h1>
-      <p class="text-muted-foreground">Let's get you started with a quick tour</p>
-    </div>
+<div class="w-full min-h-screen flex flex-col lg:flex-row items-center justify-center">
+  <div class="flex items-center">
+    <div class="flex flex-col items-center justify-center h-full gap-6 w-full max-w-6xl mx-auto px-6">
 
-    <div class="grid md:grid-cols-2 gap-8 mb-8">
-      <div class="bg-card border border-border rounded-lg p-6">
-        <div class="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mb-4">
-          <span class="text-primary font-bold text-xl">1</span>
+      <!-- Header Section -->
+      <div class="grid gap-2 text-center mb-8">
+        <div class="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-primary to-secondary rounded-2xl mb-6 shadow-lg">
+{{{icon 'book-open' class="w-10 h-10 text-primary-foreground"}}}
         </div>
-        <h3 class="text-xl font-semibold mb-2">Create Your First Idea</h3>
-        <p class="text-muted-foreground mb-4">Start by creating a new idea in your dashboard. Describe your concept and let our AI help you develop it.</p>
-        <a href="/new-idea" class="text-primary hover:underline">Create Idea →</a>
+        <h1 class="text-4xl font-bold bg-gradient-to-r from-foreground via-primary to-secondary bg-clip-text text-transparent">
+          Welcome to Accelerator!
+        </h1>
+        <p class="text-lg text-muted-foreground max-w-2xl">
+          Let's take a quick tour of your startup journey platform. We'll show you everything you need to know to get started.
+        </p>
       </div>
 
-      <div class="bg-card border border-border rounded-lg p-6">
-        <div class="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mb-4">
-          <span class="text-primary font-bold text-xl">2</span>
+      <!-- Progress Section -->
+      <div class="w-full max-w-2xl mb-8">
+        <div class="flex justify-between items-center mb-4">
+          <span class="text-sm font-medium text-muted-foreground">Tutorial Progress</span>
+          <span class="text-sm font-medium text-muted-foreground" id="progress-text">1 of 5 steps</span>
         </div>
-        <h3 class="text-xl font-semibold mb-2">Explore AI Models</h3>
-        <p class="text-muted-foreground mb-4">Use our AI-powered models to generate business plans, financial projections, and marketing strategies.</p>
-        <a href="/models/business" class="text-primary hover:underline">Try Models →</a>
+        <div class="w-full bg-muted rounded-full h-3 mb-6">
+          <div class="bg-gradient-to-r from-primary to-secondary h-3 rounded-full transition-all duration-500" id="progress-bar" style="width: 20%"></div>
+        </div>
+
+        <!-- Step Indicators -->
+        <div class="flex justify-center space-x-3">
+          <div class="w-3 h-3 bg-primary rounded-full transition-all duration-300" data-step="1"></div>
+          <div class="w-3 h-3 bg-muted rounded-full transition-all duration-300" data-step="2"></div>
+          <div class="w-3 h-3 bg-muted rounded-full transition-all duration-300" data-step="3"></div>
+          <div class="w-3 h-3 bg-muted rounded-full transition-all duration-300" data-step="4"></div>
+          <div class="w-3 h-3 bg-muted rounded-full transition-all duration-300" data-step="5"></div>
+        </div>
       </div>
 
-      <div class="bg-card border border-border rounded-lg p-6">
-        <div class="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mb-4">
-          <span class="text-primary font-bold text-xl">3</span>
+      <!-- Tutorial Content Container -->
+      <div class="bg-card/95 backdrop-blur-sm rounded-3xl shadow-2xl border border-border/50 p-8 md:p-12 w-full max-w-4xl min-h-[500px] transition-all duration-500" id="tutorial-step">
+        <!-- Step content will be loaded here by JavaScript -->
+        <div class="text-center py-12">
+          <div class="inline-flex items-center justify-center w-16 h-16 bg-primary/10 rounded-2xl mb-6">
+{{{icon 'book-open' class="w-8 h-8 text-primary"}}}
+          </div>
+          <p class="text-muted-foreground">Loading tutorial...</p>
         </div>
-        <h3 class="text-xl font-semibold mb-2">Connect with Community</h3>
-        <p class="text-muted-foreground mb-4">Share your ideas, get feedback, and collaborate with other entrepreneurs in our community.</p>
-        <a href="/explore-idea" class="text-primary hover:underline">Explore Ideas →</a>
       </div>
 
-      <div class="bg-card border border-border rounded-lg p-6">
-        <div class="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mb-4">
-          <span class="text-primary font-bold text-xl">4</span>
-        </div>
-        <h3 class="text-xl font-semibold mb-2">Track Your Progress</h3>
-        <p class="text-muted-foreground mb-4">Monitor your idea's development, set milestones, and celebrate your achievements.</p>
-        <a href="/dashboard" class="text-primary hover:underline">View Dashboard →</a>
-      </div>
-    </div>
+      <!-- Navigation Buttons -->
+      <div class="flex justify-between items-center w-full max-w-4xl mt-8">
+        <button id="prev-step" class="px-8 py-3 border border-border text-foreground hover:bg-muted rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-transparent flex items-center space-x-2">
+{{{icon 'chevron-left' class="w-4 h-4"}}}
+          <span>Previous</span>
+        </button>
 
-    <div class="text-center">
-      <a href="/dashboard" class="bg-primary hover:bg-primary/90 text-primary-foreground py-3 px-8 rounded-lg font-medium transition inline-block">
-        Start Building
-      </a>
-      <p class="text-sm text-muted-foreground mt-4">Need help? Check out our <a href="/help" class="text-primary hover:underline">help center</a></p>
+        <div class="text-center">
+          <div class="text-sm text-muted-foreground mb-2">Step <span id="current-step">1</span> of <span id="total-steps">5</span></div>
+        </div>
+
+        <button id="next-step" class="px-8 py-3 bg-primary text-primary-foreground hover:bg-primary/90 rounded-xl transition-colors flex items-center space-x-2 shadow-lg">
+          <span>Next</span>
+{{{icon 'chevron-right' class="w-4 h-4"}}}
+        </button>
+      </div>
+
+      <!-- Completion Section (Hidden by default) -->
+      <div class="bg-card/95 backdrop-blur-sm rounded-3xl shadow-2xl border border-border/50 p-8 md:p-12 w-full max-w-4xl hidden" id="tutorial-complete">
+        <!-- Background decoration -->
+        <div class="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-primary/20 to-secondary/20 rounded-full -mr-16 -mt-16"></div>
+        <div class="absolute bottom-0 left-0 w-24 h-24 bg-gradient-to-br from-accent/20 to-primary/20 rounded-full -ml-12 -mb-12"></div>
+
+        <div class="relative text-center">
+          <div class="inline-flex items-center justify-center w-24 h-24 bg-gradient-to-br from-emerald-600 to-teal-600 rounded-3xl mb-8 shadow-xl">
+{{{icon 'check' class="w-12 h-12 text-white"}}}
+          </div>
+
+          <h2 class="text-4xl font-bold bg-gradient-to-r from-foreground via-primary to-secondary bg-clip-text text-transparent mb-6">
+            Tutorial Complete!
+          </h2>
+
+          <p class="text-xl text-muted-foreground mb-10 max-w-2xl mx-auto leading-relaxed">
+            Congratulations! You've completed the Accelerator tutorial. You're now ready to start building amazing startups.
+            Remember, you can always revisit this tutorial from your settings.
+          </p>
+
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+            <div class="text-center">
+              <div class="w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
+{{{icon 'lightbulb' class="w-8 h-8 text-white"}}}
+              </div>
+              <h3 class="font-semibold text-foreground mb-2">Create Ideas</h3>
+              <p class="text-sm text-muted-foreground">Start with your first startup concept</p>
+            </div>
+
+            <div class="text-center">
+              <div class="w-16 h-16 bg-gradient-to-br from-green-500 to-green-600 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
+{{{icon 'users' class="w-8 h-8 text-white"}}}
+              </div>
+              <h3 class="font-semibold text-foreground mb-2">Get Feedback</h3>
+              <p class="text-sm text-muted-foreground">Share and validate with community</p>
+            </div>
+
+            <div class="text-center">
+              <div class="w-16 h-16 bg-gradient-to-br from-purple-500 to-purple-600 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
+{{{icon 'building' class="w-8 h-8 text-white"}}}
+              </div>
+              <h3 class="font-semibold text-foreground mb-2">Build Models</h3>
+              <p class="text-sm text-muted-foreground">Create comprehensive business plans</p>
+            </div>
+          </div>
+
+          <form method="POST" action="/onboarding/tutorial">
+            <input type="hidden" name="_csrf" value="{{{csrf}}}" />
+            <button type="submit" class="w-full bg-gradient-to-r from-primary via-secondary to-accent hover:from-primary/90 hover:via-secondary/90 hover:to-accent/90 text-primary-foreground font-bold py-5 px-8 rounded-2xl transition-all duration-300 transform hover:scale-105 shadow-2xl hover:shadow-3xl flex items-center justify-center space-x-3 text-lg">
+              <span>Let's Build Something Amazing!</span>
+{{{icon 'trending-up' class="w-6 h-6"}}}
+            </button>
+          </form>
+
+          <p class="text-sm text-muted-foreground mt-6">
+            Need help? Visit our <a href="#" class="text-primary hover:text-primary/80 font-medium transition-colors">help center</a> or contact <a href="#" class="text-primary hover:text-primary/80 font-medium transition-colors">support</a>.
+          </p>
+        </div>
+      </div>
     </div>
   </div>
+
 </div>

@@ -1,0 +1,179 @@
+{{> progress-bar activeStep=activeStep ideaId=ideaId}}
+
+{{> model-header title=pageTitle description="Comprehensive funding strategy and investment overview"
+ratingStars="★★★★★" ratingValue="5.0" voteCount="0 votes" category=ideaCategory tags=ideaTags}}
+
+{{> model-progress data='[
+  {
+    "id": "funding-goal",
+    "fullLabel": "1. Funding Goal",
+    "shortLabel": "1.",
+    "position": 0
+  },
+  {
+    "id": "funding-allocation",
+    "fullLabel": "2. Funding Allocation",
+    "shortLabel": "2.",
+    "position": 25
+  },
+  {
+    "id": "revenue-model",
+    "fullLabel": "3. Revenue Model",
+    "shortLabel": "3.",
+    "position": 50
+  },
+  {
+    "id": "investor-roi",
+    "fullLabel": "4. Investor ROI",
+    "shortLabel": "4.",
+    "position": 75
+  },
+  {
+    "id": "cap-table",
+    "fullLabel": "5. Cap Table",
+    "shortLabel": "5.",
+    "position": 100
+  }
+]'}}
+
+<main class="flex flex-col mx-auto items-center justify-center">
+    <div class="sections-container">
+        <!-- Funding Goal Section -->
+        <div id="funding-goal" class="section mb-6">
+            <h2 class="text-xl font-semibold mb-4 text-foreground">Funding Goal</h2>
+            <p class="text-muted-foreground mb-6">Determine your funding requirements.</p>
+            <div class="relative">
+                <div class="absolute left-4 top-0 bottom-0 w-0.5 bg-border"></div>
+                 <div class="flex items-start gap-4 mb-6">
+                     <div class="w-8 h-8 bg-primary rounded-full flex items-center justify-center text-sm font-bold relative z-10">1</div>
+                     <div class="flex-1">
+                          {{> question-block id="funding-goal-q1" step="1" question="How much total funding are you seeking?" placeholder="This section determines your funding requirements. Specify total funding amount with stage-based ranges. AI can recommend appropriate amounts. Use this section for fundraising planning. Chat with AI to understand funding amounts or get stage-appropriate guidance."}}
+                     </div>
+                 </div>
+                 <div class="flex items-start gap-4 mb-6">
+                     <div class="w-8 h-8 bg-primary rounded-full flex items-center justify-center text-sm font-bold relative z-10">2</div>
+                     <div class="flex-1">
+                          {{> question-block id="funding-goal-q2" step="2" question="What type of funding are you targeting?" placeholder="This section specifies funding types. Choose equity, debt, grant, or crowdfunding based on your needs. AI can suggest optimal funding types. Use this section for funding strategy. Chat with AI to learn about funding types or get recommendation help."}}
+                     </div>
+                 </div>
+                <div class="flex items-start gap-4">
+                    <div class="w-8 h-8  rounded-full flex items-center justify-center text-sm font-bold relative z-10">{{{icon 'check-circle' class='w-8 h-8 text-success' size='32'}}}</div>
+                    <div class="flex-1">
+                        {{> move-next-block message="You have successfully completed this section of the funding model." buttonText="Move to Next Section"}}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Funding Allocation Section -->
+        <div id="funding-allocation" class="section mb-6" style="display: none;">
+            <h2 class="text-xl font-semibold mb-4 text-foreground">Funding Allocation</h2>
+            <p class="text-muted-foreground mb-6">Plan how to use your funds.</p>
+            <div class="relative">
+                <div class="absolute left-4 top-0 bottom-0 w-0.5 bg-border"></div>
+                 <div class="flex items-start gap-4 mb-6">
+                     <div class="w-8 h-8 bg-primary rounded-full flex items-center justify-center text-sm font-bold relative z-10">1</div>
+                     <div class="flex-1">
+                          {{> question-block id="funding-allocation-q1" step="3" question="How will the funding be allocated?" placeholder="This section plans funding allocation. Break down how funds will be used across product, marketing, hiring, operations. AI can suggest recommended allocations. Use this section for budget planning. Chat with AI to learn allocation strategies or get industry benchmarks."}}
+                     </div>
+                 </div>
+                <div class="flex items-start gap-4">
+                    <div class="w-8 h-8  rounded-full flex items-center justify-center text-sm font-bold relative z-10">{{{icon 'check-circle' class='w-8 h-8 text-success' size='32'}}}</div>
+                    <div class="flex-1">
+                        {{> move-next-block message="You have successfully completed this section of the funding model." buttonText="Move to Next Section"}}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Revenue Model Section -->
+        <div id="revenue-model" class="section mb-6" style="display: none;">
+            <h2 class="text-xl font-semibold mb-4 text-foreground">Revenue Model</h2>
+            <p class="text-muted-foreground mb-6">Define your revenue strategy.</p>
+            <div class="relative">
+                <div class="absolute left-4 top-0 bottom-0 w-0.5 bg-border"></div>
+                 <div class="flex items-start gap-4 mb-6">
+                     <div class="w-8 h-8 bg-primary rounded-full flex items-center justify-center text-sm font-bold relative z-10">1</div>
+                     <div class="flex-1">
+                          {{> question-block id="revenue-model-q1" step="4" question="What are your revenue streams?" placeholder="This section details your revenue streams. List subscription, commission, licensing, hardware sales, services, ads. AI can help identify revenue opportunities. Use this section for investor presentations. Chat with AI to explore revenue diversification or get monetization ideas."}}
+                     </div>
+                 </div>
+                 <div class="flex items-start gap-4 mb-6">
+                     <div class="w-8 h-8 bg-primary rounded-full flex items-center justify-center text-sm font-bold relative z-10">2</div>
+                     <div class="flex-1">
+                          {{> question-block id="revenue-model-q2" step="5" question="How do you price your product?" placeholder="This section defines your pricing strategy. Choose monthly subscription, per user, tiered plans, usage-based, or custom pricing. AI can recommend pricing models. Use this section for pricing strategy. Chat with AI to learn pricing strategies or get competitive pricing analysis."}}
+                     </div>
+                 </div>
+                 <div class="flex items-start gap-4 mb-6">
+                     <div class="w-8 h-8 bg-primary rounded-full flex items-center justify-center text-sm font-bold relative z-10">3</div>
+                     <div class="flex-1">
+                          {{> question-block id="revenue-model-q3" step="6" question="What is your market size?" placeholder="This section estimates your market size. AI can automatically calculate TAM/SAM/SOM if unknown. Use this section for market opportunity assessment. Chat with AI to understand market sizing or get calculation assistance."}}
+                     </div>
+                 </div>
+                <div class="flex items-start gap-4">
+                    <div class="w-8 h-8  rounded-full flex items-center justify-center text-sm font-bold relative z-10">{{{icon 'check-circle' class='w-8 h-8 text-success' size='32'}}}</div>
+                    <div class="flex-1">
+                        {{> move-next-block message="You have successfully completed this section of the funding model." buttonText="Move to Next Section"}}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Investor ROI Section -->
+        <div id="investor-roi" class="section mb-6" style="display: none;">
+            <h2 class="text-xl font-semibold mb-4 text-foreground">Investor ROI</h2>
+            <p class="text-muted-foreground mb-6">Calculate returns for investors.</p>
+            <div class="relative">
+                <div class="absolute left-4 top-0 bottom-0 w-0.5 bg-border"></div>
+                 <div class="flex items-start gap-4 mb-6">
+                     <div class="w-8 h-8 bg-primary rounded-full flex items-center justify-center text-sm font-bold relative z-10">1</div>
+                     <div class="flex-1">
+                          {{> question-block id="investor-roi-q1" step="7" question="What valuation are you targeting?" placeholder="This section sets your target valuation. AI can recommend valuations based on revenue multiples. Use this section for investor negotiations. Chat with AI to learn valuation methods or get industry comparisons."}}
+                     </div>
+                 </div>
+                 <div class="flex items-start gap-4 mb-6">
+                     <div class="w-8 h-8 bg-primary rounded-full flex items-center justify-center text-sm font-bold relative z-10">2</div>
+                     <div class="flex-1">
+                          {{> question-block id="investor-roi-q2" step="8" question="What is your preferred exit method?" placeholder="This section defines your exit strategy. Choose acquisition, IPO, strategic merger, or secondary sale. AI can recommend based on your business. Use this section for investor ROI planning. Chat with AI to understand exit options or get exit strategy advice."}}
+                     </div>
+                 </div>
+                <div class="flex items-start gap-4">
+                    <div class="w-8 h-8  rounded-full flex items-center justify-center text-sm font-bold relative z-10">{{{icon 'check-circle' class='w-8 h-8 text-success' size='32'}}}</div>
+                    <div class="flex-1">
+                        {{> move-next-block message="You have successfully completed this section of the funding model." buttonText="Move to Next Section"}}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Cap Table Section -->
+        <div id="cap-table" class="section mb-6" style="display: none;">
+            <h2 class="text-xl font-semibold mb-4 text-foreground">Cap Table</h2>
+            <p class="text-muted-foreground mb-6">Outline ownership structure.</p>
+            <div class="relative">
+                <div class="absolute left-4 top-0 bottom-0 w-0.5 bg-border"></div>
+                 <div class="flex items-start gap-4 mb-6">
+                     <div class="w-8 h-8 bg-primary rounded-full flex items-center justify-center text-sm font-bold relative z-10">1</div>
+                     <div class="flex-1">
+                          {{> question-block id="cap-table-q1" step="9" question="Confirm your future funding rounds." placeholder="This section plans future funding rounds. Choose seed to Series A, pre-seed to seed, or custom schedules. AI can suggest appropriate rounds. Use this section for dilution planning. Chat with AI to learn funding round structures or get sequencing advice."}}
+                     </div>
+                 </div>
+                 <div class="flex items-start gap-4 mb-6">
+                     <div class="w-8 h-8 bg-primary rounded-full flex items-center justify-center text-sm font-bold relative z-10">2</div>
+                     <div class="flex-1">
+                          {{> question-block id="cap-table-q2" step="10" question="Provide details for your cap table." placeholder="This section builds your capitalization table. Provide founder ownership, investor ownership, option pool percentages. AI can suggest default structures. Use this section for equity management. Chat with AI to understand cap tables or get structure recommendations."}}
+                     </div>
+                 </div>
+                <div class="flex items-start gap-4">
+                    <div class="w-8 h-8  rounded-full flex items-center justify-center text-sm font-bold relative z-10">{{{icon 'check-circle' class='w-8 h-8 text-success' size='32'}}}</div>
+                    <div class="flex-1">
+                        {{> move-next-block message="You have successfully completed the entire funding model." buttonText="Complete Funding Model"}}
+                    </div>
+                </div>
+            </div>
+        </div>
+     </div>
+</main>
+
+<div class=" h-[300px]"></div>
+

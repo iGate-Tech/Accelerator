@@ -380,6 +380,9 @@
   .relative {
     position: relative;
   }
+  .static {
+    position: static;
+  }
   .sticky {
     position: sticky;
   }
@@ -4736,6 +4739,11 @@
   .xl\:grid-cols-5 {
     @media (width >= 80rem) {
       grid-template-columns: repeat(5, minmax(0, 1fr));
+    }
+  }
+  .rtl\:flex-row-reverse {
+    &:where(:dir(rtl), [dir="rtl"], [dir="rtl"] *) {
+      flex-direction: row-reverse;
     }
   }
   .dark\:border-green-800 {

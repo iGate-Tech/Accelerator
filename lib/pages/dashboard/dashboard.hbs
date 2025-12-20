@@ -179,8 +179,8 @@
                   {{#each stats.activity}}
                   <div class="flex items-start gap-3 p-3 rounded-lg bg-muted/30">
                     <div class="w-8 h-8 bg-primary/10 rounded-full flex items-center justify-center">
-                      {{#if (eq action_type "idea_created"}}
-{{{icon 'lightbulb' class='w-4 h-4 text-primary'}}}
+                      {{#if (eq action_type "idea_created")}}
+                        {{{icon 'lightbulb' class='w-4 h-4 text-primary'}}}
                       {{else if (eq action_type "vote_cast")}}
 {{{icon 'star' class='w-4 h-4 text-yellow-500'}}}
                          {{else if (eq action_type "model_completed")}}

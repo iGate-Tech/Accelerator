@@ -322,8 +322,14 @@
     }
   }
 
+  function normalizeLanguage(lang) {
+    if (!lang) return 'en';
+    const normalized = lang.toLowerCase().split('-')[0]; // Get primary language code
+    return ['en', 'ar'].includes(normalized) ? normalized : 'en';
+  }
+
   async function switchLanguage() {
-    const currentLang = localStorage.getItem('language') || 'en';
+    const currentLang = normalizeLanguage(localStorage.getItem('language') || 'en');
     const newLang = currentLang === 'en' ? 'ar' : 'en';
     localStorage.setItem('language', newLang);
     updateLangSwitcher(newLang);
@@ -347,8 +353,8 @@
       console.error('Error syncing language with server:', error);
     }
 
-    // Reload the page to apply new language
-    window.location.reload();
+    // Reload the page with language query param to ensure it's applied
+    window.location.href = `/?lng=${newLang}`;
   }
 
   function updateLangSwitcher(lang) {
@@ -360,7 +366,7 @@
 
   // Initialize language display on page load
   document.addEventListener('DOMContentLoaded', function() {
-    const serverLang = '{{lng}}';
+    const serverLang = normalizeLanguage('{{lng}}');
     localStorage.setItem('language', serverLang);
     updateLangSwitcher(serverLang);
   });

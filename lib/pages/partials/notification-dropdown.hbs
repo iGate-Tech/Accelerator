@@ -1,4 +1,5 @@
 {{#if notifications}}
+  <div class="space-y-1">
   {{#each notifications}}
     <div class="relative {{#unless is_read}}bg-primary/5{{/unless}} rounded-sm">
       <a href="#" class="flex cursor-default select-none items-start rounded-sm px-3 py-3 text-sm outline-none transition-colors hover:bg-primary/10" onclick="markAsRead('{{id}}')">
@@ -33,6 +34,7 @@
       </a>
     </div>
   {{/each}}
+  </div>
   <div class="border-t border-border mt-2 pt-2">
     <a href="/notification" class="flex items-center justify-center w-full px-3 py-2 text-sm font-medium text-primary hover:text-primary-foreground hover:bg-primary rounded-md transition-colors">
       {{{icon "arrow-right" class="mr-2 h-4 w-4"}}}

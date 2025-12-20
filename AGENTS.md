@@ -31,6 +31,22 @@ Key bd commands for project management:
 
 Always run `bd sync` and `git push` at session end per mandatory workflow.
 
+## Coding Agent Integration with bd
+
+The coding agent (e.g., opencode) MUST use bd for ALL task and issue management to ensure seamless integration with the project's workflow. Do NOT use internal todo systems like todowrite/todoread; bd is the authoritative source.
+
+### Task Management Guidelines:
+
+- **Creating Tasks:** Use `bd create --title="Task Description" --type=task --priority=<0-4>` for any new tasks or multi-step work. Parse the issue ID from output for future references.
+- **Reading Tasks:** Use `bd list` or `bd ready` to view available work instead of internal reads.
+- **Updating Status:** Use `bd update <id> --status=in_progress` when starting work, and `bd update <id> --status=completed` when done (but do not close yet).
+- **Completing Tasks:** Use `bd close <id>` only after full verification.
+- **Pre-Completion Check:** Before declaring "all tasks done," run `bd list --status=open` and ensure no open issues remain. If any exist, continue working.
+- **Dependencies:** Use `bd dep add` for task dependencies if needed.
+- **Session End:** Always enforce the mandatory workflow below, including `bd sync`.
+
+This ensures universal use of bd, with no silos between the coding agent and project tracking.
+
 ## Landing the Plane (Session Completion)
 
 **When ending a work session**, you MUST complete ALL steps below. Work is NOT complete until `git push` succeeds.

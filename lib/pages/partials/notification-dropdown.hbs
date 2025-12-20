@@ -1,7 +1,7 @@
 {{#if notifications}}
   {{#each notifications}}
-    <div class="relative {{#unless is_read}}bg-accent/50{{/unless}} rounded-sm">
-      <a href="#" class="flex cursor-default select-none items-start rounded-sm px-3 py-3 text-sm outline-none transition-colors hover:bg-primary/10 hover:text-primary-900" onclick="markAsRead('{{id}}')">
+    <div class="relative {{#unless is_read}}bg-primary/5{{/unless}} rounded-sm">
+      <a href="#" class="flex cursor-default select-none items-start rounded-sm px-3 py-3 text-sm outline-none transition-colors hover:bg-primary/10" onclick="markAsRead('{{id}}')">
         <div class="flex-shrink-0 mr-3 mt-0.5">
           {{#if (eq type "vote_received")}}
             <div class="w-8 h-8 bg-yellow-100 rounded-full flex items-center justify-center">

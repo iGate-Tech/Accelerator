@@ -190,16 +190,16 @@
 
               <!-- Action Buttons -->
               <div class="flex gap-2">
-                <a href="/portfolios/{{id}}" class="btn btn-outline btn-sm {{#if (or isOwner (eq memberRole "editor")}}flex-1{{else}}w-full{{/if}}">
-{{{icon 'eye' class='w-4 h-4 mr-1' size='14'}}}
-                  View
-                </a>
-                {{#if (or isOwner (eq memberRole "editor")}}
-                <a href="/portfolios/{{id}}/ideas" class="btn btn-outline btn-sm flex-1">
-{{{icon 'plus' class='w-4 h-4 mr-1' size='14'}}}
-                  Add Ideas
-                </a>
-                {{/if}}
+                  <a href="/portfolios/{{id}}" class="btn btn-outline btn-sm {{#if (or isOwner (eq memberRole "editor"))}}flex-1{{else}}w-full{{/if}}">
+ {{{icon 'eye' class='w-4 h-4 mr-1' size='14'}}}
+                   {{t 'dashboard.portfolios.view'}}
+                 </a>
+                  {{#if (or isOwner (eq memberRole "editor"))}}
+                 <a href="/portfolios/{{id}}/ideas" class="btn btn-outline btn-sm flex-1">
+ {{{icon 'plus' class='w-4 h-4 mr-1' size='14'}}}
+                   {{t 'dashboard.portfolios.add_ideas'}}
+                 </a>
+                 {{/if}}
               </div>
           </div>
           {{/each}}
@@ -210,12 +210,12 @@
               <div class="w-16 h-16 bg-muted rounded-full flex items-center justify-center mx-auto mb-4">
 {{{icon 'archive' class='text-muted-foreground' size='24'}}}
               </div>
-              <h3 class="text-lg font-medium text-foreground mb-2">No portfolios yet</h3>
-              <p class="text-muted-foreground mb-6">Create your first portfolio to organize and track your business ideas</p>
-              <button class="btn btn-primary" onclick="openCreatePortfolioModal()">
-{{{icon 'plus' class='w-4 h-4 mr-2' size='16'}}}
-                Create Your First Portfolio
-              </button>
+               <h3 class="text-lg font-medium text-foreground mb-2">{{t 'dashboard.portfolios.no_portfolios'}}</h3>
+               <p class="text-muted-foreground mb-6">{{t 'dashboard.portfolios.create_first'}}</p>
+               <button class="btn btn-primary" onclick="openCreatePortfolioModal()">
+ {{{icon 'plus' class='w-4 h-4 mr-2' size='16'}}}
+                 {{t 'dashboard.portfolios.create_first_btn'}}
+               </button>
             </div>
           </div>
         {{/if}}
@@ -224,11 +224,11 @@
       <!-- Analytics Section -->
       {{#if portfolios}}
       <div class="bg-card rounded-lg border border-border p-6">
-        <h2 class="text-xl font-semibold text-foreground mb-6">Portfolio Analytics</h2>
+         <h2 class="text-xl font-semibold text-foreground mb-6">{{t 'dashboard.portfolios.portfolio_analytics'}}</h2>
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <!-- Completion Rates Chart -->
           <div>
-            <h3 class="text-lg font-medium text-foreground mb-4">Completion Rates by Portfolio</h3>
+             <h3 class="text-lg font-medium text-foreground mb-4">{{t 'dashboard.portfolios.completion_rates'}}</h3>
             <div class="space-y-3">
               {{#each portfolios}}
               <div class="flex items-center gap-3">
@@ -248,7 +248,7 @@
 
           <!-- Portfolio Distribution -->
           <div>
-            <h3 class="text-lg font-medium text-foreground mb-4">Ideas Distribution</h3>
+             <h3 class="text-lg font-medium text-foreground mb-4">{{t 'dashboard.portfolios.ideas_distribution'}}</h3>
             <div class="space-y-3">
               {{#each portfolios}}
               <div class="flex items-center justify-between">
@@ -257,7 +257,7 @@
                   <span class="text-sm text-foreground">{{name}}</span>
                 </div>
                 <div class="flex items-center gap-2">
-                  <span class="text-sm text-muted-foreground">{{ideaCount}} ideas</span>
+                   <span class="text-sm text-muted-foreground">{{ideaCount}} {{t 'dashboard.portfolios.ideas_text'}}</span>
                   <div class="w-16 bg-muted rounded-full h-2">
                     <div class="bg-primary h-2 rounded-full" style="width: {{#if (gt ../stats.portfolios.totalIdeas 0)}}{{math (divide ideaCount ../stats.portfolios.totalIdeas) 100}}%{{else}}0%{{/if}}"></div>
                   </div>
@@ -278,7 +278,7 @@
 <div id="create-portfolio-modal" class="fixed inset-0 bg-black/50 hidden z-50 flex items-center justify-center p-4" style="display: none;">
     <div class="bg-card rounded-lg border border-border p-6 w-full max-w-md">
       <div class="flex items-center justify-between mb-4">
-        <h3 class="text-lg font-semibold text-foreground">Create New Portfolio</h3>
+         <h3 class="text-lg font-semibold text-foreground">{{t 'dashboard.portfolios.modal_create_title'}}</h3>
         <button class="btn btn-ghost btn-sm" onclick="closeCreatePortfolioModal()">
           {{{icon 'x' class='w-4 h-4' size='14'}}}
         </button>
@@ -287,18 +287,18 @@
       <form id="create-portfolio-form" onsubmit="createPortfolio(event)">
         <div class="space-y-4">
           <div>
-            <label for="portfolio-name" class="block text-sm font-medium text-foreground mb-1">Portfolio Name</label>
-            <input type="text" id="portfolio-name" name="name" required class="input input-bordered w-full" placeholder="e.g., Tech Startup Ideas">
+             <label for="portfolio-name" class="block text-sm font-medium text-foreground mb-1">{{t 'dashboard.portfolios.name_label'}}</label>
+             <input type="text" id="portfolio-name" name="name" required class="input input-bordered w-full" placeholder="{{t 'dashboard.portfolios.name_placeholder'}}">
           </div>
 
           <div>
-            <label for="portfolio-description" class="block text-sm font-medium text-foreground mb-1">Description</label>
-            <textarea id="portfolio-description" name="description" rows="3" class="textarea textarea-bordered w-full" placeholder="Describe what this portfolio is about..."></textarea>
+             <label for="portfolio-description" class="block text-sm font-medium text-foreground mb-1">{{t 'dashboard.portfolios.description_label'}}</label>
+             <textarea id="portfolio-description" name="description" rows="3" class="textarea textarea-bordered w-full" placeholder="{{t 'dashboard.portfolios.desc_placeholder'}}"></textarea>
           </div>
 
           <div class="flex gap-3 pt-4">
-            <button type="button" class="btn btn-outline flex-1" onclick="closeCreatePortfolioModal()">Cancel</button>
-             <button type="submit" class="btn btn-primary flex-1">Create Portfolio</button>
+             <button type="button" class="btn btn-outline flex-1" onclick="closeCreatePortfolioModal()">{{t 'dashboard.portfolios.cancel'}}</button>
+              <button type="submit" class="btn btn-primary flex-1">{{t 'dashboard.portfolios.create_portfolio'}}</button>
            </div>
          </div>
        </form>
@@ -309,7 +309,7 @@
 <div id="edit-portfolio-modal" class="fixed inset-0 bg-black/50 hidden z-50 flex items-center justify-center p-4" style="display: none;">
     <div class="bg-card rounded-lg border border-border p-6 w-full max-w-md">
       <div class="flex items-center justify-between mb-4">
-        <h3 class="text-lg font-semibold text-foreground">Edit Portfolio</h3>
+         <h3 class="text-lg font-semibold text-foreground">{{t 'dashboard.portfolios.modal_edit_title'}}</h3>
         <button class="btn btn-ghost btn-sm" onclick="closeEditPortfolioModal()">
           {{{icon 'x' class='w-4 h-4' size='14'}}}
         </button>
@@ -318,13 +318,13 @@
       <form id="edit-portfolio-form" onsubmit="updatePortfolio(event)">
         <div class="space-y-4">
           <div>
-            <label for="edit-portfolio-name" class="block text-sm font-medium text-foreground mb-1">Portfolio Name</label>
-            <input type="text" id="edit-portfolio-name" name="name" required class="input input-bordered w-full" placeholder="e.g., Tech Startup Ideas">
+             <label for="edit-portfolio-name" class="block text-sm font-medium text-foreground mb-1">{{t 'dashboard.portfolios.name_label'}}</label>
+             <input type="text" id="edit-portfolio-name" name="name" required class="input input-bordered w-full" placeholder="{{t 'dashboard.portfolios.name_placeholder'}}">
           </div>
 
           <div>
-            <label for="edit-portfolio-description" class="block text-sm font-medium text-foreground mb-1">Description</label>
-            <textarea id="edit-portfolio-description" name="description" rows="3" class="textarea textarea-bordered w-full" placeholder="Describe what this portfolio is about..."></textarea>
+             <label for="edit-portfolio-description" class="block text-sm font-medium text-foreground mb-1">{{t 'dashboard.portfolios.description_label'}}</label>
+             <textarea id="edit-portfolio-description" name="description" rows="3" class="textarea textarea-bordered w-full" placeholder="{{t 'dashboard.portfolios.desc_placeholder'}}"></textarea>
           </div>
 
           <div>
@@ -333,8 +333,8 @@
           </div>
 
           <div class="flex gap-3 pt-4">
-            <button type="button" class="btn btn-outline flex-1" onclick="closeEditPortfolioModal()">Cancel</button>
-             <button type="submit" class="btn btn-primary flex-1">Update Portfolio</button>
+             <button type="button" class="btn btn-outline flex-1" onclick="closeEditPortfolioModal()">{{t 'dashboard.portfolios.cancel'}}</button>
+              <button type="submit" class="btn btn-primary flex-1">{{t 'dashboard.portfolios.update_portfolio'}}</button>
            </div>
          </div>
        </form>

@@ -53,9 +53,21 @@
                  <div class="absolute left-4 top-0 bottom-0 w-0.5 bg-border"></div>
                  <div class="flex items-start gap-4 mb-6">
                      <div class="w-8 h-8 bg-primary rounded-full flex items-center justify-center text-sm font-bold relative z-10">0</div>
-                     <div class="flex-1">
-                           {{> question-block id="executive-summary-q1" step="0" question="Provide an executive summary of your startup idea." placeholder="This section creates your executive summary. Write a concise overview of your idea, including the problem, solution, market opportunity, and unique value proposition. AI can help craft compelling summaries. Use this section for idea overview. Chat with AI to refine your executive summary or get writing assistance." description=executiveSummaryQ1 form="false" modelType="idea" section="executive-summary" ideaId=ideaId}}
-                     </div>
+                      <div class="flex-1">
+                            {{> question-block id="executive-summary-q1" step="0" question="Provide an executive summary of your startup idea." placeholder="This section creates your executive summary. Write a concise overview of your idea, including the problem, solution, market opportunity, and unique value proposition. AI can help craft compelling summaries. Use this section for idea overview. Chat with AI to refine your executive summary or get writing assistance." description=executiveSummaryQ1 form="false" modelType="idea" section="executive-summary" ideaId=ideaId}}
+                            <!-- AI Executive Summary Generator -->
+                            <div class="mt-4 p-4 bg-primary/5 rounded-lg border border-primary/20">
+                              <div class="flex items-center justify-between mb-2">
+                                <h4 class="text-sm font-medium text-primary">AI Executive Summary Generator</h4>
+                                <span class="text-xs text-muted-foreground">10 credits</span>
+                              </div>
+                              <p class="text-xs text-muted-foreground mb-3">Generate a professional executive summary based on your idea details</p>
+                              <button type="button" id="generate-executive-summary" class="btn btn-primary btn-sm">
+                                {{{icon 'wand-sparkles' class='w-4 h-4 mr-2' size='16'}}}
+                                Generate Executive Summary
+                              </button>
+                            </div>
+                      </div>
                  </div>
                  <div class="flex items-start gap-4">
 <div class="w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold relative z-10">{{{icon 'check-circle' class='w-8 h-8 text-success' size='32'}}}</div>
@@ -300,6 +312,49 @@
     }
 
     window.populateIdea = {{{populateIdeaJson}}};
+
+    // Executive Summary Generation
+    document.getElementById('generate-executive-summary')?.addEventListener('click', async function() {
+        const button = this;
+        const originalText = button.innerHTML;
+
+        try {
+            button.disabled = true;
+            button.innerHTML = '{{{icon "loader" class="w-4 h-4 mr-2 animate-spin" size="16"}}} Generating...';
+
+            const response = await fetch('/api/ai/executive-summary', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    ideaId: '{{ideaId}}'
+                })
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                // Update the textarea with the generated summary
+                const textarea = document.querySelector('#executive-summary-q1-assistant-prompt');
+                if (textarea) {
+                    textarea.value = data.executive_summary;
+                    textarea.dispatchEvent(new Event('input', { bubbles: true }));
+                }
+
+                // Show success message
+                showToast('Executive summary generated successfully!', 'success');
+            } else {
+                showToast(data.error || 'Failed to generate executive summary', 'error');
+            }
+        } catch (error) {
+            console.error('Executive summary generation error:', error);
+            showToast('An error occurred while generating the executive summary', 'error');
+        } finally {
+            button.disabled = false;
+            button.innerHTML = originalText;
+        }
+    });
 
 </script>
 

@@ -86,33 +86,4 @@
             </div>
         </a>
     </div>
-    <script>
-        function filterProjects() {
-            const query = document.getElementById('project-search').value.toLowerCase();
-            const lis = document.querySelectorAll('#sidebar details ul li');
-            lis.forEach(li => {
-                const title = li.querySelector('.sidebar-text').textContent.toLowerCase();
-                li.style.display = title.includes(query) ? '' : 'none';
-            });
-
-            // Show/hide clear button
-            const clearButton = document.getElementById('project-search-clear');
-            if (query.length > 0) {
-                clearButton.style.display = 'block';
-                setTimeout(() => clearButton.classList.remove('opacity-0'), 10);
-            } else {
-                clearButton.classList.add('opacity-0');
-                setTimeout(() => clearButton.style.display = 'none', 200);
-            }
-        }
-
-        function clearProjectSearch() {
-            const searchInput = document.getElementById('project-search');
-            searchInput.value = '';
-            filterProjects();
-            searchInput.focus();
-        }
-
-        document.getElementById('project-search').addEventListener('input', filterProjects);
-    </script>
 </div>

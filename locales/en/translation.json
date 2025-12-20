@@ -223,7 +223,11 @@
         "complete": "Complete",
         "overall_progress": "Overall Progress",
         "team": "Team",
-        "portfolio_name": "Portfolio"
+        "portfolio_name": "Portfolio",
+        "total_portfolios": "Total Portfolios",
+        "active_ideas": "Active Ideas",
+        "avg_completion": "Avg Completion",
+        "team_members": "Team Members"
       },
       "user_activity": {
         "title": "User Activity",

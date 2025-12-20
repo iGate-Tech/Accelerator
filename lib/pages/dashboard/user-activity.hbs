@@ -60,33 +60,33 @@
                 </div>
                 <div class="flex-1 min-w-0">
                   <div class="flex items-center justify-between">
-                    <h3 class="text-sm font-medium text-foreground">
-                      {{#if (eq action_type "login")}}
-                        Logged in to account
-                      {{else if (eq action_type "create")}}
-                        {{#if (eq entity_type "account")}}Account created{{else}}Created {{entity_type}}{{/if}}
-                      {{else if (eq action_type "idea_created")}}
-                        Created new idea
-                      {{else if (eq action_type "profile_completed")}}
-                        Completed profile setup
-                      {{else}}
-                        {{action_type}} {{entity_type}}
-                      {{/if}}
-                    </h3>
+                     <h3 class="text-sm font-medium text-foreground">
+                       {{#if (eq action_type "login")}}
+                         {{t 'dashboard.user_activity.logged_in'}}
+                       {{else if (eq action_type "create")}}
+                         {{#if (eq entity_type "account")}}{{t 'dashboard.user_activity.account_created'}}{{else}}{{t 'dashboard.user_activity.created_entity' entity=entity_type}}{{/if}}
+                       {{else if (eq action_type "idea_created")}}
+                         {{t 'dashboard.user_activity.created_idea'}}
+                       {{else if (eq action_type "profile_completed")}}
+                         {{t 'dashboard.user_activity.profile_setup'}}
+                       {{else}}
+                         {{action_type}} {{entity_type}}
+                       {{/if}}
+                     </h3>
                     <span class="text-xs text-muted-foreground">{{formatDate created_at "time"}}</span>
                   </div>
                   {{#if details}}
-                  <p class="text-sm text-muted-foreground mt-1">
-                    {{#if (eq action_type "login")}}
-                      {{#if details.description}}{{details.description}}{{else}}Successful login{{/if}}
-                    {{else if (eq action_type "idea_created")}}
-                      {{#if details.title}}"{{details.title}}"{{/if}}
-                    {{else if details.description}}
-                      {{details.description}}
-                    {{else}}
-                      Activity details
-                    {{/if}}
-                  </p>
+                   <p class="text-sm text-muted-foreground mt-1">
+                     {{#if (eq action_type "login")}}
+                       {{#if details.description}}{{details.description}}{{else}}{{t 'dashboard.user_activity.successful_login'}}{{/if}}
+                     {{else if (eq action_type "idea_created")}}
+                       {{#if details.title}}"{{details.title}}"{{/if}}
+                     {{else if details.description}}
+                       {{details.description}}
+                     {{else}}
+                       {{t 'dashboard.user_activity.activity_details'}}
+                     {{/if}}
+                   </p>
                   {{/if}}
                 </div>
               </div>
@@ -102,17 +102,17 @@
           <div class="w-16 h-16 bg-muted rounded-full flex items-center justify-center mx-auto mb-4">
             {{{icon "activity" class="w-8 h-8 text-muted-foreground"}}}
           </div>
-          <h3 class="text-lg font-medium text-foreground mb-2">No activity yet</h3>
-          <p class="text-muted-foreground">Your activity log will appear here as you use the platform.</p>
+           <h3 class="text-lg font-medium text-foreground mb-2">{{t 'dashboard.user_activity.no_activity'}}</h3>
+           <p class="text-muted-foreground">{{t 'dashboard.user_activity.activity_placeholder'}}</p>
         </div>
         {{/if}}
       </div>
 
       <!-- Load More -->
       <div class="text-center py-4">
-        <button class="btn btn-outline btn-primary px-3 py-1.5 rounded-full">
-          Load More Activity
-        </button>
+         <button class="btn btn-outline btn-primary px-3 py-1.5 rounded-full">
+           {{t 'dashboard.user_activity.load_more'}}
+         </button>
       </div>
     </div>
   </div>

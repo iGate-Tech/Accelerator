@@ -36,8 +36,8 @@
                 <p class="text-2xl font-bold text-foreground">
                     ${{price}}
                 </p>
-                <p class="text-sm text-muted-foreground">{{credits}} credits</p>
-                <p class="text-xs text-muted-foreground">{{divide (multiply price 100) credits}}¢ per credit</p>
+                 <p class="text-sm text-muted-foreground">{{credits}} {{t 'payments.buy_credits.credits_label'}}</p>
+                 <p class="text-xs text-muted-foreground">{{divide (multiply price 100) credits}}¢ {{t 'payments.buy_credits.per_credit'}}</p>
             </div>
 
             <div class="space-y-2 mb-6">

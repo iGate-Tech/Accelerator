@@ -181,9 +181,9 @@
                     <div class="w-8 h-8 bg-primary/10 rounded-full flex items-center justify-center">
                       {{#if (eq action_type "idea_created"}}
 {{{icon 'lightbulb' class='w-4 h-4 text-primary'}}}
-                      {{else if (eq action_type "vote_cast"}}
+                      {{else if (eq action_type "vote_cast")}}
 {{{icon 'star' class='w-4 h-4 text-yellow-500'}}}
-                      {{else if (eq action_type "model_completed"}}
+                         {{else if (eq action_type "model_completed")}}
 {{{icon 'check-circle' class='w-4 h-4 text-green-500'}}}
                       {{else}}
 {{{icon 'book-open' class='w-4 h-4 text-blue-500'}}}
@@ -193,15 +193,15 @@
                       <p class="text-sm text-foreground">
                          {{#if (eq action_type "idea_created"}}
                            {{t 'dashboard.overview.activity_created_idea'}}
-                         {{else if (eq action_type "vote_cast"}}
+                         {{else if (eq action_type "vote_cast")}}
                            {{t 'dashboard.overview.activity_cast_vote'}}
-                         {{else if (eq action_type "model_completed"}}
+                      {{else if (eq action_type "model_completed")}}
                            {{t 'dashboard.overview.activity_completed_model'}}
-                         {{else if (eq action_type "model_section_updated"}}
+                         {{else if (eq action_type "model_section_updated")}}
                            {{t 'dashboard.overview.activity_updated_section'}}
-                         {{else if (eq action_type "package_selected"}}
+                         {{else if (eq action_type "package_selected")}}
                            {{t 'dashboard.overview.activity_selected_package'}}
-                         {{else if (eq action_type "profile_completed"}}
+                         {{else if (eq action_type "profile_completed")}}
                            {{t 'dashboard.overview.activity_completed_profile'}}
                          {{else}}
                            {{action_type}}

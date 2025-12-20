@@ -168,11 +168,11 @@
                 <div class="w-8 h-8 bg-primary/10 rounded-full flex items-center justify-center flex-shrink-0">
                   {{#if (eq action_type "idea_created"}}
                     {{{icon 'plus' class='w-4 h-4 text-primary' size='16'}}}
-                  {{else if (eq action_type "vote_cast"}}
+                  {{else if (eq action_type "vote_cast")}}
                     {{{icon 'star' class='w-4 h-4 text-yellow-500' size='16'}}}
-                  {{else if (eq action_type "model_completed"}}
+                    {{else if (eq action_type "model_completed")}}
                     {{{icon 'check-circle' class='w-4 h-4 text-success' size='16'}}}
-                  {{else if (eq action_type "report_generated"}}
+                    {{else if (eq action_type "report_generated")}}
                     {{{icon 'file-text' class='w-4 h-4 text-blue-500' size='16'}}}
                   {{else}}
                     {{{icon 'activity' class='w-4 h-4 text-muted-foreground' size='16'}}}
@@ -180,13 +180,13 @@
                 </div>
                 <div class="flex-1">
                   <p class="text-sm text-foreground">
-                    {{#if (eq action_type "idea_created"}}
+                  {{#if (eq action_type "idea_created")}}
                       You created a new idea
-                    {{else if (eq action_type "vote_cast"}}
+                    {{else if (eq action_type "vote_cast")}}
                       You cast a vote on an idea
-                    {{else if (eq action_type "model_completed"}}
+                  {{else if (eq action_type "model_completed")}}
                       You completed a model section
-                    {{else if (eq action_type "report_generated"}}
+                  {{else if (eq action_type "report_generated")}}
                       You generated a report
                     {{else}}
                       {{action_type}}

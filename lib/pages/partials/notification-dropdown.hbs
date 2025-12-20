@@ -1,0 +1,27 @@
+{{#if notifications}}
+  {{#each notifications}}
+    <a href="#" class="relative flex cursor-default select-none items-center rounded-sm px-2 py-2 text-sm outline-none transition-colors hover:bg-primary-100 hover:text-primary-900" onclick="markAsRead('{{id}}')">
+      <div class="flex flex-col">
+        <span class="flex">
+          {{#if (eq type "vote_received")}}
+            {{{icon "star" class="mr-2 h-4 w-4 text-yellow-500"}}}
+          {{else if (eq type "reward_earned")}}
+            {{{icon "coins" class="mr-2 h-4 w-4 text-green-500"}}}
+          {{else if (eq type "idea_shared")}}
+            {{{icon "share" class="mr-2 h-4 w-4 text-blue-500"}}}
+          {{else}}
+            {{{icon "bell" class="mr-2 h-4 w-4 text-gray-500"}}}
+          {{/if}}
+          {{message}}
+        </span>
+        <span class="text-xs text-muted-foreground">{{moment created_at format="MMM D, h:mm A"}}</span>
+      </div>
+    </a>
+  {{/each}}
+  <div class="bg-border -mx-1 my-1 h-px"></div>
+  <a href="/notification" class="relative flex cursor-default select-none items-center rounded-sm px-2 py-2 text-sm outline-none transition-colors hover:bg-primary-100 hover:text-primary-900">
+    <span class="flex">{{{icon "arrow-right" class="mr-2 h-4 w-4"}}}View All Notifications</span>
+  </a>
+{{else}}
+  <div class="px-2 py-2 text-sm text-muted-foreground">No new notifications</div>
+{{/if}}

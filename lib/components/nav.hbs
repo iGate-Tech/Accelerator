@@ -62,12 +62,29 @@
       <span id="lang-text">EN</span>
     </button>
 
-    <!-- Notification Button -->
-    <a href="/notification"
-      class="ml-4 self-center w-6 h-6 text-muted-foreground hover:text-primary rounded-full cursor-pointer font-medium border-0 flex items-center justify-center relative">
-      {{{icon "bell" class="h-5 w-5"}}}
-      <span id="nav-notification-indicator" class="absolute -top-1 -right-1 h-2 w-2 bg-red-500 rounded-full hidden"></span>
-    </a>
+    <!-- Notification Menu -->
+    <div class="relative self-center" id="notification-menu">
+      <button onclick="toggleNotificationMenu()"
+        class="ml-4 text-muted-foreground hover:text-primary rounded-full p-2 cursor-pointer font-medium border-0 relative">
+
+        {{{icon 'bell' class='w-4 h-4' size='16'}}}
+        <span id="nav-notification-indicator" class="absolute -top-1 -right-1 h-2 w-2 bg-red-500 rounded-full hidden"></span>
+
+      </button>
+
+      <!-- Notification Dropdown -->
+      <div
+        class="absolute right-0 mt-2 w-[300px] bg-popover backdrop-blur-sm border border-input/80 rounded-md shadow-xl z-30 transition-all duration-200 opacity-0 invisible hidden"
+        id="notification-dropdown">
+        <div class="p-1">
+          <div class="px-2 py-1 text-sm font-medium text-muted-foreground">Notifications</div>
+          <div class="bg-border -mx-1 my-1 h-px"></div>
+          <div hx-get="/api/notifications/dropdown" hx-trigger="revealed" hx-target="this" hx-swap="innerHTML">
+            <div class="px-2 py-2 text-sm text-muted-foreground">Loading...</div>
+          </div>
+        </div>
+      </div>
+    </div>
 
     <!-- Grid Menu -->
     <div class="relative self-center" id="grid-menu">
@@ -306,6 +323,42 @@
         dropdown.classList.remove('invisible');
         dropdown.classList.remove('opacity-0');
       }
+    }
+  }
+
+  function toggleNotificationMenu() {
+    const dropdown = document.getElementById('notification-dropdown');
+    if (dropdown) {
+      const isVisible = !dropdown.classList.contains('hidden');
+      if (isVisible) {
+        dropdown.classList.add('hidden');
+        dropdown.classList.add('invisible');
+        dropdown.classList.add('opacity-0');
+      } else {
+        dropdown.classList.remove('hidden');
+        dropdown.classList.remove('invisible');
+        dropdown.classList.remove('opacity-0');
+      }
+    }
+  }
+
+  async function markAsRead(notificationId) {
+    try {
+      const response = await fetch(`/api/notifications/${notificationId}/read`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+      if (response.ok) {
+        // Refresh the dropdown
+        htmx.trigger('#notification-dropdown', 'revealed');
+      } else {
+        showToast('Failed to mark as read', 'error');
+      }
+    } catch (error) {
+      console.error('Mark as read error:', error);
+      showToast('Failed to mark as read', 'error');
     }
   }
 </script>

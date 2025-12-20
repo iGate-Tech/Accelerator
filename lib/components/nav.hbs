@@ -5,31 +5,31 @@
      <div class="hidden md:flex items-center gap-2 sm:gap-4">
        <div class="flex flex-col items-center justify-center group">
          <div class="border-t-4 border-primary w-6 rounded-md{{#if (eq activeNav 'projects')}} opacity-100{{else}} opacity-0 group-hover:opacity-100{{/if}}"></div>
-         <a href="/new-idea"
-           class="text-{{#if (eq activeNav 'projects')}}primary{{else}}muted-foreground group-hover:text-foreground hover:text-foreground{{/if}} font-medium text-sm leading-[2.7] group-hover:font-medium hover:font-medium">
+          <a href="/new-idea"
+            class="text-{{#if (eq activeNav 'projects')}}primary{{else}}muted-foreground group-hover:text-foreground hover:text-foreground{{/if}} text-sm leading-[2.7]">
             <span class="nav-text">{{t 'nav.projects'}}</span>
          </a>
        </div>
        <div class="flex flex-col items-center justify-center group">
          <div class="border-t-4 border-primary w-6 rounded-md{{#if (eq activeNav 'dashboard')}} opacity-100{{else}} opacity-0 group-hover:opacity-100{{/if}}"></div>
-         <a href="/dashboard"
-           class="text-{{#if (eq activeNav 'dashboard')}}primary{{else}}muted-foreground group-hover:text-foreground hover:text-foreground{{/if}} font-medium text-sm leading-[2.7] group-hover:font-medium hover:font-medium">
+          <a href="/dashboard"
+            class="text-{{#if (eq activeNav 'dashboard')}}primary{{else}}muted-foreground group-hover:text-foreground hover:text-foreground{{/if}} text-sm leading-[2.7]">
             <span class="nav-text">{{t 'nav.dashboard'}}</span>
          </a>
        </div>
        {{#if (eq user.profile.package_type "enterprise")}}
        <div id="nav-portfolio-item" class="flex flex-col items-center justify-center group">
          <div class="border-t-4 border-primary w-6 rounded-md{{#if (eq activeNav 'portfolios')}} opacity-100{{else}} opacity-0 group-hover:opacity-100{{/if}}"></div>
-         <a href="/portfolios"
-           class="text-{{#if (eq activeNav 'portfolios')}}primary{{else}}muted-foreground group-hover:text-foreground hover:text-foreground{{/if}} font-medium text-sm leading-[2.7] group-hover:font-medium hover:font-medium">
+          <a href="/portfolios"
+            class="text-{{#if (eq activeNav 'portfolios')}}primary{{else}}muted-foreground group-hover:text-foreground hover:text-foreground{{/if}} text-sm leading-[2.7]">
             <span class="nav-text">{{t 'nav.portfolio'}}</span>
          </a>
        </div>
        {{/if}}
        <div class="flex flex-col items-center justify-center group">
          <div class="border-t-4 border-primary w-6 rounded-md{{#if (eq activeNav 'voting')}} opacity-100{{else}} opacity-0 group-hover:opacity-100{{/if}}"></div>
-         <a href="/voting-reward"
-           class="text-{{#if (eq activeNav 'voting')}}primary{{else}}muted-foreground group-hover:text-foreground hover:text-foreground{{/if}} font-medium text-sm leading-[2.7] group-hover:font-medium hover:font-medium focus:outline-none">
+          <a href="/voting-reward"
+            class="text-{{#if (eq activeNav 'voting')}}primary{{else}}muted-foreground group-hover:text-foreground hover:text-foreground{{/if}} text-sm leading-[2.7] focus:outline-none">
             <span class="nav-text">{{t 'nav.voting_rewards'}}</span>
          </a>
        </div>
@@ -42,12 +42,12 @@
 
       {{{icon 'coins' class='w-5 h-5 text-primary' size='16'}}}
 
-        <span id="nav-credit-balance" class="text-sm font-medium">{{user.profile.credit_balance}} {{t 'nav.credits'}}</span>
+        <span id="nav-credit-balance" class="text-sm">{{user.profile.credit_balance}} {{t 'nav.credits'}}</span>
     </div>
 
     <!-- Theme Toggle Button -->
     <button id="theme-toggle"
-      class="ml-4 self-center w-6 h-6 text-muted-foreground hover:text-primary rounded-full cursor-pointer font-medium border-0"
+      class="ml-4 self-center w-6 h-6 text-muted-foreground hover:text-primary rounded-full cursor-pointer border-0"
       onclick="toggleTheme()">
       <span id="theme-icon-light">{{{icon "sun" class="h-5 w-5"}}}</span>
       <span id="theme-icon-dark" class="hidden">{{{icon
@@ -57,7 +57,7 @@
     </button>
 
     <!-- Language Switcher -->
-    <button id="lang-switcher" class="flex items-center gap-1 ml-4 px-2 py-1 text-xs font-medium rounded-md bg-muted text-muted-foreground hover:bg-primary hover:text-primary-foreground" onclick="switchLanguage()">
+    <button id="lang-switcher" class="flex items-center gap-1 ml-4 px-2 py-1 text-xs rounded-md bg-muted text-muted-foreground hover:bg-primary hover:text-primary-foreground" onclick="switchLanguage()">
       {{{icon "languages" class="h-4 w-4"}}}
        <span id="lang-text">{{#if (eq lng 'ar')}}AR{{else}}EN{{/if}}</span>
     </button>
@@ -65,7 +65,7 @@
     <!-- Notification Menu -->
     <div class="relative self-center" id="notification-menu">
       <button onclick="toggleNotificationMenu()"
-        class="ml-4 text-muted-foreground hover:text-primary rounded-full p-2 cursor-pointer font-medium border-0 relative">
+        class="ml-4 text-muted-foreground hover:text-primary rounded-full p-2 cursor-pointer border-0 relative">
 
         {{{icon 'bell' class='w-4 h-4' size='16'}}}
         <span id="nav-notification-indicator" class="absolute -top-1 -right-1 h-2 w-2 bg-red-500 rounded-full{{#unless unreadCount}} hidden{{/unless}}"></span>
@@ -77,7 +77,7 @@
          class="absolute {{#if (eq lng 'ar')}}left-0{{else}}right-0{{/if}} mt-2 w-[350px] bg-popover backdrop-blur-sm border border-input/80 rounded-lg shadow-xl z-30 transition-all duration-200 opacity-0 invisible hidden"
          id="notification-dropdown">
         <div class="p-1">
-          <div class="px-2 py-1 text-sm font-medium text-muted-foreground">{{t 'nav.notifications'}}</div>
+          <div class="px-2 py-1 text-sm text-muted-foreground">{{t 'nav.notifications'}}</div>
           <div class="bg-border -mx-1 my-1 h-px"></div>
           {{#if notifications}}
             <div class="space-y-1">
@@ -104,7 +104,7 @@
                     {{/if}}
                   </div>
                   <div class="flex-1 min-w-0">
-                    <p class="text-sm font-medium text-foreground leading-5 {{#if is_read}}text-muted-foreground{{/if}}">{{truncate message 80}}</p>
+                    <p class="text-sm text-foreground leading-5 {{#if is_read}}text-muted-foreground{{/if}}">{{truncate message 80}}</p>
                     <p class="text-xs text-muted-foreground mt-1">{{moment created_at format="MMM D, h:mm A"}}</p>
                   </div>
                   {{#unless is_read}}
@@ -117,7 +117,7 @@
             {{/each}}
             </div>
             <div class="border-t border-border mt-2 pt-2">
-               <a href="/notifications" class="flex items-center justify-center w-full px-3 py-2 text-sm font-medium text-primary hover:text-primary-foreground hover:bg-primary rounded-md transition-colors">
+               <a href="/notifications" class="flex items-center justify-center w-full px-3 py-2 text-sm text-primary hover:text-primary-foreground hover:bg-primary rounded-md transition-colors">
                   {{{icon "arrow-right" class="mr-2 h-4 w-4"}}}
                   {{t 'nav.view_all_notifications'}}
                </a>
@@ -137,7 +137,7 @@
     <!-- Grid Menu -->
     <div class="relative self-center" id="grid-menu">
       <button onclick="toggleGridMenu()"
-        class="ml-4 text-muted-foreground hover:text-primary rounded-full p-2 cursor-pointer font-medium border-0">
+        class="ml-4 text-muted-foreground hover:text-primary rounded-full p-2 cursor-pointer border-0">
 
         {{{icon 'grip' class='w-4 h-4' size='16'}}}
 
@@ -148,7 +148,7 @@
          class="absolute {{#if (eq lng 'ar')}}left-0{{else}}right-0{{/if}} mt-2 w-[200px] bg-popover backdrop-blur-sm border border-input/80 rounded-md shadow-xl z-30 transition-all duration-200 opacity-0 invisible hidden"
          id="grid-dropdown">
         <div class="p-1">
-          <div class="px-2 py-1 text-sm font-medium text-muted-foreground">{{t 'nav.quick_access'}}</div>
+          <div class="px-2 py-1 text-sm text-muted-foreground">{{t 'nav.quick_access'}}</div>
           <div class="bg-border -mx-1 my-1 h-px"></div>
           <div role="group" class="p-1">
              <a href="/dashboard"
@@ -232,7 +232,7 @@
      class="w-full mb-2 relative flex cursor-default select-none items-center gap-3 rounded-sm px-3 py-3 text-sm text-left outline-none transition-colors bg-primary-50 hover:bg-primary-100 hover:text-primary-900">
      <div class="flex-1 min-w-0">
          <div class="flex items-center justify-between mb-1">
-             <span class="truncate font-medium user-name text-foreground">{{user.profile.name}}</span>
+              <span class="truncate user-name text-foreground">{{user.profile.name}}</span>
              {{{icon 'settings' class='h-4 w-4 text-muted-foreground shrink-0' size='16'}}}
          </div>
          <div class="truncate text-xs text-muted-foreground user-email mb-1">{{user.email}}</div>

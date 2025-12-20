@@ -10,13 +10,13 @@
             Welcome back, {{user.profile.name}}! 👋
           </h1>
           <p class="text-lg text-muted-foreground">
-            Here's what's happening with your startup journey today
+            {{t 'dashboard.overview.subtitle'}}
           </p>
         </div>
         <div class="flex items-center gap-2">
           <a href="/new-idea" class="btn btn-primary">
             {{{icon 'plus' class='' size='16'}}}
-            New Idea
+            {{t 'dashboard.overview.new_idea'}}
           </a>
         </div>
       </div>
@@ -27,7 +27,7 @@
         <div class="bg-card rounded-lg border border-border p-6 text-card-foreground shadow-sm">
           <div class="flex items-center justify-between">
             <div class="flex flex-col gap-1">
-              <h3 class="text-sm font-medium text-muted-foreground">Total Ideas</h3>
+              <h3 class="text-sm font-medium text-muted-foreground">{{t 'dashboard.overview.total_ideas'}}</h3>
               <p class="text-2xl font-semibold text-foreground">{{stats.ideas.total}}</p>
             </div>
             <div class="bg-primary/20 rounded-lg p-2">

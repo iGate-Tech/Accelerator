@@ -5,16 +5,16 @@
       <div class="flex items-center justify-between">
         <div class="grid gap-1">
           <h1 class="font-heading text-3xl font-semibold text-foreground">
-            Portfolio Management
+            {{t 'dashboard.portfolios.title'}}
           </h1>
           <p class="text-lg text-muted-foreground">
-            Organize and track your business ideas across multiple portfolios
+            {{t 'dashboard.portfolios.description'}}
           </p>
         </div>
         <div class="flex items-center gap-2">
           <button class="btn btn-primary" onclick="openCreatePortfolioModal()">
             {{{icon 'plus' class='w-4 h-4 mr-2' size='16'}}}
-            Create Portfolio
+            {{t 'dashboard.portfolios.create_portfolio'}}
           </button>
         </div>
       </div>
@@ -27,7 +27,7 @@
             <div class="flex-1 max-w-md relative">
               <div class="relative">
                 {{{icon 'search' class='absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground' size='16'}}}
-                <input type="text" id="portfolio-search" placeholder="Search portfolios..." class="input w-full pl-10 pr-10" oninput="filterPortfolios()">
+                <input type="text" id="portfolio-search" placeholder="{{t 'dashboard.portfolios.search_placeholder'}}" class="input w-full pl-10 pr-10" oninput="filterPortfolios()">
                 <button type="button" id="portfolio-search-clear" class="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground hover:text-foreground opacity-0 transition-opacity duration-200" onclick="clearPortfolioSearch()" style="display: none;">
                   {{{icon 'x' class='w-4 h-4' size='16'}}}
                 </button>
@@ -36,11 +36,11 @@
             <div class="flex items-center gap-2">
               {{{icon 'filter' class='w-4 h-4 text-muted-foreground' size='16'}}}
               <select id="portfolio-sort" class="select w-auto min-w-0" onchange="sortPortfolios()">
-                <option value="newest">Newest</option>
-                <option value="oldest">Oldest</option>
-                <option value="name">Name A-Z</option>
-                <option value="ideas">Most Ideas</option>
-                <option value="completion">Highest Completion</option>
+                <option value="newest">{{t 'dashboard.portfolios.sort_newest'}}</option>
+                <option value="oldest">{{t 'dashboard.portfolios.sort_oldest'}}</option>
+                <option value="name">{{t 'dashboard.portfolios.sort_name'}}</option>
+                <option value="ideas">{{t 'dashboard.portfolios.sort_ideas'}}</option>
+                <option value="completion">{{t 'dashboard.portfolios.sort_completion'}}</option>
               </select>
             </div>
           </div>

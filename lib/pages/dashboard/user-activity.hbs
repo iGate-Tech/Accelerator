@@ -4,26 +4,26 @@
       <div class="flex items-center justify-between">
         <div class="grid gap-1">
           <h1 class="font-heading text-3xl font-semibold text-foreground">
-            User Activity
+            {{t 'dashboard.user_activity.title'}}
           </h1>
           <p class="text-lg text-muted-foreground">
-            Track your recent actions and account activity
+            {{t 'dashboard.user_activity.description'}}
           </p>
         </div>
         <div class="flex items-center gap-2">
           <button class="btn btn-outline btn-primary px-3 py-1.5 rounded-full">
-            Export Activity
+            {{t 'dashboard.user_activity.export'}}
           </button>
         </div>
       </div>
 
       <!-- Activity Filters -->
       <div class="flex flex-wrap gap-2" id="activity-filters">
-        <button class="filter-btn btn btn-primary active rounded-full" data-filter="all">All</button>
-        <button class="filter-btn btn btn-outline btn-primary rounded-full" data-filter="login">Logins</button>
-        <button class="filter-btn btn btn-outline btn-primary rounded-full" data-filter="idea_created">Ideas</button>
-        <button class="filter-btn btn btn-outline btn-primary rounded-full" data-filter="profile_completed">Profile</button>
-        <button class="filter-btn btn btn-outline btn-primary rounded-full" data-filter="create">Account</button>
+        <button class="filter-btn btn btn-primary active rounded-full" data-filter="all">{{t 'dashboard.user_activity.filter_all'}}</button>
+        <button class="filter-btn btn btn-outline btn-primary rounded-full" data-filter="login">{{t 'dashboard.user_activity.filter_logins'}}</button>
+        <button class="filter-btn btn btn-outline btn-primary rounded-full" data-filter="idea_created">{{t 'dashboard.user_activity.filter_ideas'}}</button>
+        <button class="filter-btn btn btn-outline btn-primary rounded-full" data-filter="profile_completed">{{t 'dashboard.user_activity.filter_profile'}}</button>
+        <button class="filter-btn btn btn-outline btn-primary rounded-full" data-filter="create">{{t 'dashboard.user_activity.filter_account'}}</button>
       </div>
 
       <!-- Activity Timeline -->

@@ -1,10 +1,10 @@
 <div class="p-8 max-w-4xl mx-auto">
   <div class="grid gap-1 mb-8">
     <h1 class="font-heading text-3xl font-semibold text-foreground">
-      Settings
+      {{t 'dashboard.settings.title'}}
     </h1>
     <p class="text-lg text-muted-foreground">
-      Manage your profile and account settings
+      {{t 'dashboard.settings.description'}}
     </p>
   </div>
 
@@ -12,12 +12,12 @@
      <!-- Profile Section -->
      <div class="space-y-6">
        <div class="rounded-md bg-card p-6 text-card-foreground border border-input/80">
-         <h2 class="text-xl font-semibold mb-4">Profile Information</h2>
+          <h2 class="text-xl font-semibold mb-4">{{t 'dashboard.settings.profile_info'}}</h2>
 
          <form method="POST" action="/settings/profile" enctype="multipart/form-data">
            <!-- Avatar Upload -->
            <div class="mb-4">
-             <label class="block text-sm font-medium text-foreground mb-2">Avatar</label>
+              <label class="block text-sm font-medium text-foreground mb-2">{{t 'dashboard.settings.avatar'}}</label>
              <div class="flex items-center gap-4">
                <img src="{{#if profile.avatar_url}}{{profile.avatar_url}}{{else}}/images/avatar.png{{/if}}"
                     class="w-16 h-16 rounded-full object-cover border-2 border-input"
@@ -25,18 +25,18 @@
                <div>
                  <input type="file" name="avatar" id="avatar-upload" accept="image/*"
                         class="hidden" onchange="previewAvatar(this)">
-                 <label for="avatar-upload"
-                        class="px-4 py-2 bg-primary text-primary-foreground rounded-md cursor-pointer hover:bg-primary/90 transition-colors text-sm">
-                   Change Avatar
-                 </label>
-                 <p class="text-xs text-muted-foreground mt-1">Max 5MB, JPG/PNG/WebP</p>
+                  <label for="avatar-upload"
+                         class="px-4 py-2 bg-primary text-primary-foreground rounded-md cursor-pointer hover:bg-primary/90 transition-colors text-sm">
+                    {{t 'dashboard.settings.change_avatar'}}
+                  </label>
+                  <p class="text-xs text-muted-foreground mt-1">{{t 'dashboard.settings.max_5mb'}}</p>
                </div>
              </div>
            </div>
 
            <!-- Name -->
            <div class="mb-4">
-             <label for="name" class="block text-sm font-medium text-foreground mb-2">Name</label>
+              <label for="name" class="block text-sm font-medium text-foreground mb-2">{{t 'dashboard.settings.name'}}</label>
              <input type="text" id="name" name="name" value="{{profile.name}}"
                     class="w-full px-3 py-2 border border-input rounded-md bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                     placeholder="Your full name">
@@ -44,10 +44,10 @@
 
            <!-- Role -->
            <div class="mb-4">
-             <label for="role" class="block text-sm font-medium text-foreground mb-2">Role</label>
+              <label for="role" class="block text-sm font-medium text-foreground mb-2">{{t 'dashboard.settings.role'}}</label>
              <input type="text" id="role" name="role" value="{{profile.role}}"
                     class="w-full px-3 py-2 border border-input rounded-md bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-                    placeholder="e.g. Entrepreneur, Developer, Student">
+                     placeholder="{{t 'dashboard.settings.role_placeholder'}}">
            </div>
 
            <!-- Bio -->

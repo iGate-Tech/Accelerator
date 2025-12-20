@@ -2,10 +2,10 @@
   <div class="p-20">
     <div class="grid gap-1 mb-12">
         <h1 class="font-heading text-3xl font-semibold text-foreground">
-            Buy Credits
+            {{t 'payments.buy_credits.title'}}
         </h1>
         <p class="text-lg text-muted-foreground">
-            Purchase additional credits for AI features
+            {{t 'payments.buy_credits.description'}}
         </p>
     </div>
 
@@ -13,9 +13,9 @@
     <div class="mb-8">
         <div class="rounded-md bg-card px-6 py-5 text-card-foreground border-2 border-input/80 max-w-xs">
             <div class="text-center">
-                <div class="text-sm text-muted-foreground mb-1">Current Balance</div>
+                <div class="text-sm text-muted-foreground mb-1">{{t 'payments.buy_credits.current_balance'}}</div>
                 <div class="text-2xl font-bold text-foreground">{{currentBalance}}</div>
-                <div class="text-sm text-muted-foreground">credits available</div>
+                <div class="text-sm text-muted-foreground">{{t 'payments.buy_credits.credits_available'}}</div>
             </div>
         </div>
     </div>
@@ -27,7 +27,7 @@
         <div class="rounded-md bg-card px-6 py-5 text-card-foreground border-2 border-input/80 {{#if (eq @index 1)}}border-primary relative{{/if}}">
             {{#if (eq @index 1)}}
             <div class="absolute -top-3 left-1/2 transform -translate-x-1/2">
-                <span class="bg-primary text-primary-foreground text-xs px-3 py-1 rounded-md">Most Popular</span>
+                <span class="bg-primary text-primary-foreground text-xs px-3 py-1 rounded-md">{{t 'payments.buy_credits.most_popular'}}</span>
             </div>
             {{/if}}
 
@@ -43,15 +43,15 @@
             <div class="space-y-2 mb-6">
                 <div class="flex items-center gap-2 text-sm">
 {{{icon 'check' class='w-4 h-4 text-green-600'}}}
-                    Instant delivery
+                    {{t 'payments.buy_credits.instant_delivery'}}
                 </div>
                 <div class="flex items-center gap-2 text-sm">
 {{{icon 'check' class='w-4 h-4 text-green-600'}}}
-                    No expiration
+                    {{t 'payments.buy_credits.no_expiration'}}
                 </div>
                 <div class="flex items-center gap-2 text-sm">
 {{{icon 'check' class='w-4 h-4 text-green-600'}}}
-                    Use for any AI feature
+                    {{t 'payments.buy_credits.use_for_any'}}
                 </div>
             </div>
 
@@ -59,7 +59,7 @@
                 <input type="hidden" name="_csrf" value="{{csrf}}" />
                 <input type="hidden" name="package_id" value="{{id}}" />
                 <button type="submit" class="w-full {{#if (eq @index 1)}}bg-primary text-primary-foreground hover:bg-primary/90{{else}}border border-input/80 text-foreground hover:bg-muted{{/if}} px-4 py-2 rounded-md transition-colors">
-                    Buy {{name}} Package
+                    {{t 'payments.buy_credits.buy_package'}} {{name}} {{t 'payments.billing.package'}}
                 </button>
             </form>
         </div>
@@ -70,42 +70,42 @@
         <div class="w-16 h-16 bg-muted rounded-full flex items-center justify-center mx-auto mb-4">
             {{{ icon 'package' class='w-8 h-8 text-muted-foreground' }}}
         </div>
-        <h3 class="text-lg font-medium text-foreground mb-2">No Credit Packages Available</h3>
-        <p class="text-muted-foreground">Credit packages are currently being configured. Please check back later.</p>
+        <h3 class="text-lg font-medium text-foreground mb-2">{{t 'payments.buy_credits.no_packages'}}</h3>
+        <p class="text-muted-foreground">{{t 'payments.buy_credits.packages_configured'}}</p>
     </div>
     {{/if}}
 
     <!-- Usage Guide -->
     <div class="mt-12 rounded-md bg-card px-6 py-5 text-card-foreground border-2 border-input/80">
-        <h2 class="text-xl font-semibold text-foreground mb-4">How Credits Work</h2>
+        <h2 class="text-xl font-semibold text-foreground mb-4">{{t 'payments.buy_credits.how_credits_work'}}</h2>
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             <div class="text-center">
                 <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center mx-auto mb-2">
 {{{icon 'lightbulb' class='w-5 h-5 text-blue-600'}}}
                 </div>
-                <h3 class="font-medium text-foreground mb-1">AI Generations</h3>
-                <p class="text-sm text-muted-foreground">10 credits per model section</p>
+                <h3 class="font-medium text-foreground mb-1">{{t 'payments.buy_credits.ai_generations'}}</h3>
+                <p class="text-sm text-muted-foreground">{{t 'payments.buy_credits.ai_generations_desc'}}</p>
             </div>
             <div class="text-center">
                 <div class="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center mx-auto mb-2">
 {{{icon 'file-text' class='w-5 h-5 text-green-600'}}}
                 </div>
-                <h3 class="font-medium text-foreground mb-1">Reports</h3>
-                <p class="text-sm text-muted-foreground">50 credits per report</p>
+                <h3 class="font-medium text-foreground mb-1">{{t 'payments.buy_credits.reports'}}</h3>
+                <p class="text-sm text-muted-foreground">{{t 'payments.buy_credits.reports_desc'}}</p>
             </div>
             <div class="text-center">
                 <div class="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center mx-auto mb-2">
 {{{icon 'lightbulb' class='w-5 h-5 text-purple-600'}}}
                 </div>
-                <h3 class="font-medium text-foreground mb-1">AI Features</h3>
-                <p class="text-sm text-muted-foreground">10 credits per use</p>
+                <h3 class="font-medium text-foreground mb-1">{{t 'payments.buy_credits.ai_features'}}</h3>
+                <p class="text-sm text-muted-foreground">{{t 'payments.buy_credits.ai_features_desc'}}</p>
             </div>
             <div class="text-center">
                 <div class="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center mx-auto mb-2">
 {{{icon 'trending-up' class='w-5 h-5 text-orange-600'}}}
                 </div>
-                <h3 class="font-medium text-foreground mb-1">Voting Rewards</h3>
-                <p class="text-sm text-muted-foreground">5 credits distributed per idea</p>
+                <h3 class="font-medium text-foreground mb-1">{{t 'payments.buy_credits.voting_rewards'}}</h3>
+                <p class="text-sm text-muted-foreground">{{t 'payments.buy_credits.voting_rewards_desc'}}</p>
             </div>
         </div>
     </div>

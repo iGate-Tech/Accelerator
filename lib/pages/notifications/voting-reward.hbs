@@ -4,10 +4,10 @@
         <div class="flex items-center justify-between">
           <div class="grid gap-1">
             <h1 class="font-heading text-3xl font-semibold text-foreground">
-              Voting Rewards Dashboard
+              {{t 'voting_rewards.title'}}
             </h1>
             <p class="text-lg text-muted-foreground">
-              Track your votes, earn credits, and monitor reward distribution
+              {{t 'voting_rewards.description'}}
             </p>
           </div>
         </div>
@@ -18,7 +18,7 @@
         <div class="rounded-lg bg-card px-4 py-6 text-card-foreground shadow-sm border border-border">
           <div class="flex items-center justify-between px-3 py-1">
             <div class="flex flex-col gap-1">
-              <h3 class="text-sm font-medium text-muted-foreground">Credit Balance</h3>
+              <h3 class="text-sm font-medium text-muted-foreground">{{t 'voting_rewards.credit_balance'}}</h3>
                <p class="text-2xl font-semibold text-foreground" id="credit-balance">{{profile.credit_balance}}</p>
             </div>
             <div>
@@ -33,7 +33,7 @@
           </div>
           <p class="flex items-center gap-1 text-sm font-medium text-muted-foreground mt-2">
              <span class="text-success" id="earned-30d">+{{stats.earned30d}}</span>
-            Earned (30d)
+            {{t 'voting_rewards.earned_30d'}}
           </p>
         </div>
 
@@ -41,7 +41,7 @@
         <div class="rounded-lg bg-card px-4 py-6 text-card-foreground shadow-sm border border-border">
           <div class="flex items-center justify-between px-3 py-1">
             <div class="flex flex-col gap-1">
-              <h3 class="text-sm font-medium text-muted-foreground">Votes Given</h3>
+              <h3 class="text-sm font-medium text-muted-foreground">{{t 'voting_rewards.votes_given'}}</h3>
                <p class="text-2xl font-semibold text-foreground" id="votes-given">{{stats.votesGiven}}</p>
             </div>
             <div>
@@ -56,7 +56,7 @@
           </div>
           <p class="flex items-center gap-1 text-sm font-medium text-muted-foreground mt-2">
              <span class="text-success" id="rewarding-votes">{{stats.rewardingVotes}}</span>
-            Rewarding votes
+            {{t 'voting_rewards.rewarding_votes'}}
           </p>
         </div>
 
@@ -64,7 +64,7 @@
         <div class="rounded-lg bg-card px-4 py-6 text-card-foreground shadow-sm border border-border">
           <div class="flex items-center justify-between px-3 py-1">
             <div class="flex flex-col gap-1">
-              <h3 class="text-sm font-medium text-muted-foreground">Rewards Earned</h3>
+              <h3 class="text-sm font-medium text-muted-foreground">{{t 'voting_rewards.rewards_earned'}}</h3>
                <p class="text-2xl font-semibold text-foreground" id="total-earned">{{stats.rewardsEarned}}</p>
             </div>
             <div>
@@ -79,7 +79,7 @@
           </div>
           <p class="flex items-center gap-1 text-sm font-medium text-muted-foreground mt-2">
              <span class="text-success" id="earned-30d-amount">+{{stats.earned30d}}</span>
-            Credits (30d)
+            {{t 'voting_rewards.credits_30d'}}
           </p>
         </div>
 
@@ -87,7 +87,7 @@
         <div class="rounded-lg bg-card px-4 py-6 text-card-foreground shadow-sm border border-border">
           <div class="flex items-center justify-between px-3 py-1">
             <div class="flex flex-col gap-1">
-              <h3 class="text-sm font-medium text-muted-foreground">Success Rate</h3>
+              <h3 class="text-sm font-medium text-muted-foreground">{{t 'voting_rewards.success_rate'}}</h3>
                <p class="text-2xl font-semibold text-foreground" id="success-rate">{{stats.successRate}}%</p>
             </div>
             <div>
@@ -101,7 +101,7 @@
             </div>
           </div>
           <p class="flex items-center gap-1 text-sm font-medium text-muted-foreground mt-2">
-            Ideas validated
+            {{t 'voting_rewards.ideas_validated'}}
           </p>
         </div>
       </div>
@@ -113,9 +113,9 @@
           <!-- Reward Transactions -->
           <div class="bg-card rounded-lg border border-border p-6 mb-6">
             <div class="flex items-center justify-between mb-4">
-              <h2 class="text-xl font-semibold text-foreground">Recent Reward Transactions</h2>
+              <h2 class="text-xl font-semibold text-foreground">{{t 'voting_rewards.recent_transactions'}}</h2>
               <a href="#" class="btn btn-ghost text-sm" onclick="loadMoreTransactions()">
-                View All
+                {{t 'voting_rewards.view_all'}}
                 {{{icon 'arrow-right' class='' size='14'}}}
               </a>
             </div>
@@ -130,7 +130,7 @@
                          </svg>
                        </div>
                        <div>
-                         <p class="text-sm font-medium text-foreground">{{#if (eq transaction_type 'reward_earned')}}Reward earned from voting{{else}}Reward distributed{{/if}}</p>
+                          <p class="text-sm font-medium text-foreground">{{#if (eq transaction_type 'reward_earned')}}{{t 'voting_rewards.reward_earned'}}{{else}}{{t 'voting_rewards.reward_distributed'}}{{/if}}</p>
                          <p class="text-xs text-muted-foreground">{{formatDate created_at}}</p>
                        </div>
                      </div>
@@ -144,8 +144,8 @@
                    <div class="w-16 h-16 bg-muted rounded-full flex items-center justify-center mx-auto mb-4">
                      {{{icon 'coins' class='text-muted-foreground' size='24'}}}
                    </div>
-                   <h3 class="text-lg font-medium text-foreground mb-2">No reward transactions yet</h3>
-                   <p class="text-muted-foreground">Earn rewards by voting on ideas that reach validation threshold</p>
+                    <h3 class="text-lg font-medium text-foreground mb-2">{{t 'voting_rewards.no_transactions'}}</h3>
+                    <p class="text-muted-foreground">{{t 'voting_rewards.earn_rewards'}}</p>
                  </div>
                {{/if}}
              </div>
@@ -154,9 +154,9 @@
           <!-- Voting Activity -->
           <div class="bg-card rounded-lg border border-border p-6">
             <div class="flex items-center justify-between mb-4">
-               <h2 class="text-xl font-semibold text-foreground">Recent Voting Activity</h2>
+               <h2 class="text-xl font-semibold text-foreground">{{t 'voting_rewards.recent_activity'}}</h2>
                <a href="/explore-idea" class="btn btn-ghost text-sm">
-                Vote on More Ideas
+                {{t 'voting_rewards.vote_more'}}
                 {{{icon 'arrow-right' class='' size='14'}}}
               </a>
             </div>
@@ -171,10 +171,10 @@
                      </div>
                      <div class="flex-1">
                        <p class="text-sm text-foreground">
-                         {{#if (eq action_type 'vote_cast')}}Voted on{{else}}Earned reward for{{/if}} <strong>"{{ideas.title}}"</strong>
+                          {{#if (eq action_type 'vote_cast')}}{{t 'voting_rewards.voted_on'}}{{else}}{{t 'voting_rewards.earned_reward_for'}}{{/if}} <strong>"{{ideas.title}}"</strong>
                        </p>
                        <p class="text-xs text-muted-foreground">{{formatDate created_at}}</p>
-                       {{#if details.reward_amount}}<p class="text-xs text-success font-medium">+{{details.reward_amount}} credits earned</p>{{/if}}
+                        {{#if details.reward_amount}}<p class="text-xs text-success font-medium">+{{details.reward_amount}} {{t 'voting_rewards.credits_earned'}}</p>{{/if}}
                      </div>
                    </div>
                  {{/each}}
@@ -183,9 +183,9 @@
                    <div class="w-16 h-16 bg-muted rounded-full flex items-center justify-center mx-auto mb-4">
                      {{{icon 'star' class='text-muted-foreground' size='24'}}}
                    </div>
-                   <h3 class="text-lg font-medium text-foreground mb-2">No voting activity yet</h3>
-                   <p class="text-muted-foreground mb-4">Start voting on public ideas to earn rewards</p>
-                   <a href="/explore-idea" class="btn btn-primary">Explore Ideas</a>
+                    <h3 class="text-lg font-medium text-foreground mb-2">{{t 'voting_rewards.no_activity'}}</h3>
+                    <p class="text-muted-foreground mb-4">{{t 'voting_rewards.start_voting'}}</p>
+                    <a href="/explore-idea" class="btn btn-primary">{{t 'voting_rewards.explore_ideas'}}</a>
                  </div>
                {{/if}}
              </div>
@@ -197,7 +197,7 @@
           <!-- Reward Notifications -->
           <div class="bg-card rounded-lg border border-border p-6">
             <div class="flex items-center justify-between mb-4">
-              <h2 class="text-xl font-semibold text-foreground">Reward Notifications</h2>
+              <h2 class="text-xl font-semibold text-foreground">{{t 'voting_rewards.reward_notifications'}}</h2>
             </div>
              <div id="reward-notifications" class="space-y-4">
                {{#if rewardNotifications.length}}
@@ -209,7 +209,7 @@
                  {{/each}}
                {{else}}
                  <div class="text-center py-4">
-                   <p class="text-sm text-muted-foreground">No reward notifications</p>
+                    <p class="text-sm text-muted-foreground">{{t 'voting_rewards.no_reward_notifications'}}</p>
                  </div>
                {{/if}}
              </div>
@@ -218,9 +218,9 @@
           <!-- Available Ideas to Vote -->
           <div class="bg-card rounded-lg border border-border p-6">
             <div class="flex items-center justify-between mb-4">
-               <h2 class="text-xl font-semibold text-foreground">Ideas to Vote On</h2>
+               <h2 class="text-xl font-semibold text-foreground">{{t 'voting_rewards.ideas_to_vote'}}</h2>
                <a href="/explore-idea" class="btn btn-ghost text-sm">
-                Explore All
+                {{t 'voting_rewards.explore_all'}}
               </a>
             </div>
              <div id="available-ideas" class="space-y-4">
@@ -237,17 +237,17 @@
                            </svg>
                            <span class="text-xs text-muted-foreground">{{average_rating}}</span>
                          </div>
-                         <button onclick="voteOnIdea('{{id}}')" class="btn btn-primary btn-sm">
-                           Vote
-                         </button>
+                          <button onclick="voteOnIdea('{{id}}')" class="btn btn-primary btn-sm">
+                            {{t 'voting_rewards.vote'}}
+                          </button>
                        </div>
                      </div>
                    </div>
                  {{/each}}
                {{else}}
                  <div class="text-center py-4">
-                   <p class="text-sm text-muted-foreground">No votable ideas available</p>
-                   <a href="/explore-idea" class="text-sm text-primary hover:underline">Explore more ideas</a>
+                    <p class="text-sm text-muted-foreground">{{t 'voting_rewards.no_votable_ideas'}}</p>
+                    <a href="/explore-idea" class="text-sm text-primary hover:underline">{{t 'voting_rewards.explore_more'}}</a>
                  </div>
                {{/if}}
              </div>
@@ -255,7 +255,7 @@
 
             <!-- Quick Actions -->
            <div class="bg-card rounded-lg border border-border p-6">
-             <h2 class="text-xl font-semibold text-foreground mb-4">Quick Actions</h2>
+              <h2 class="text-xl font-semibold text-foreground mb-4">{{t 'voting_rewards.quick_actions'}}</h2>
              <div class="grid grid-cols-1 gap-3">
                 <a href="/explore-idea" class="flex items-center gap-3 w-full px-4 py-3 text-sm font-medium text-foreground bg-background border border-border rounded-lg hover:bg-accent hover:text-accent-foreground transition-colors">
                  <div class="flex-shrink-0 w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center">
@@ -263,7 +263,7 @@
                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                    </svg>
                  </div>
-                 <span class="flex-1">Vote on Ideas</span>
+                  <span class="flex-1">{{t 'voting_rewards.vote_on_ideas'}}</span>
                  <div class="flex-shrink-0">
                     {{{icon "chevron-right" class="w-4 h-4 text-muted-foreground"}}}
                  </div>
@@ -272,7 +272,7 @@
                  <div class="flex-shrink-0 w-8 h-8 bg-secondary/50 rounded-lg flex items-center justify-center">
                     {{{icon "plus" class="w-4 h-4 text-secondary-foreground"}}}
                  </div>
-                 <span class="flex-1">Create Idea</span>
+                  <span class="flex-1">{{t 'voting_rewards.create_idea'}}</span>
                  <div class="flex-shrink-0">
                     {{{icon "chevron-right" class="w-4 h-4 text-muted-foreground"}}}
                  </div>
@@ -281,7 +281,7 @@
                  <div class="flex-shrink-0 w-8 h-8 bg-success/10 rounded-lg flex items-center justify-center">
                     {{{icon "credit-card" class="w-4 h-4 text-success"}}}
                  </div>
-                 <span class="flex-1">Buy Credits</span>
+                  <span class="flex-1">{{t 'voting_rewards.buy_credits'}}</span>
                  <div class="flex-shrink-0">
                     {{{icon "chevron-right" class="w-4 h-4 text-muted-foreground"}}}
                  </div>

@@ -13,8 +13,8 @@
         </div>
 
         <div class="flex items-center justify-between text-sm flex-1">
-            <span class="truncate text-xs text-muted-foreground self-center flex-1 nav-current-plan-name">{{capitalize user.profile.package_type}} Plan</span>
-            <span class="truncate text-xs text-muted-foreground self-center nav-current-plan-details">{{#if (eq user.profile.package_type "free")}}Free{{else}}${{user.profile.package_type}} /month{{/if}}</span>
+            <span class="truncate text-xs text-muted-foreground self-center flex-1 nav-current-plan-name">{{capitalize user.profile.package_type}} {{t 'nav.plan'}}</span>
+            <span class="truncate text-xs text-muted-foreground self-center nav-current-plan-details">{{#if (eq user.profile.package_type "free")}}{{t 'nav.free'}}{{else}}${{user.profile.package_type}} {{t 'payments.upgrade.month'}}{{/if}}</span>
         </div>
     </div>
 </a>

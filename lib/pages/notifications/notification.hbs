@@ -4,15 +4,15 @@
       <div class="flex items-center justify-between">
         <div class="grid gap-1">
           <h1 class="font-heading text-3xl font-semibold text-foreground">
-            Notifications
+            {{t 'notifications.title'}}
           </h1>
           <p class="text-lg text-muted-foreground">
-            Stay updated with the latest alerts and messages
+            {{t 'notifications.description'}}
           </p>
         </div>
       <div class="flex items-center gap-2">
             <button id="mark-all-read-btn" class="btn btn-outline btn-primary px-3 py-1.5 rounded-full">
-              Mark All as Read
+              {{t 'notifications.mark_all_read'}}
             </button>
          </div>
       </div>
@@ -39,9 +39,9 @@
                    <p class="text-xs text-muted-foreground mt-1">{{moment created_at format="MMM D, YYYY h:mm A"}}</p>
                  </div>
                  {{#unless is_read}}
-                   <button class="btn btn-sm btn-ghost text-muted-foreground hover:text-primary" onclick="markAsRead('{{id}}')">
-                     Mark as Read
-                   </button>
+                    <button class="btn btn-sm btn-ghost text-muted-foreground hover:text-primary" onclick="markAsRead('{{id}}')">
+                      {{t 'notifications.mark_as_read'}}
+                    </button>
                  {{/unless}}
                </div>
              </div>
@@ -50,7 +50,7 @@
            <div class="text-center py-8">
              <div class="inline-flex items-center gap-2 text-muted-foreground">
                {{{icon "bell-off" class="w-4 h-4"}}}
-               No notifications yet
+                {{t 'notifications.no_notifications'}}
              </div>
            </div>
          {{/if}}
@@ -58,9 +58,9 @@
 
       <!-- Load More -->
        <div class="text-center py-4">
-         <button class="btn btn-outline btn-primary px-3 py-1.5 rounded-full">
-           Load More Notifications
-         </button>
+          <button class="btn btn-outline btn-primary px-3 py-1.5 rounded-full">
+            {{t 'notifications.load_more'}}
+          </button>
        </div>
      </div>
    </div>

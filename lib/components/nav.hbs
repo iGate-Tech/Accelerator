@@ -117,16 +117,19 @@
             {{/each}}
             </div>
             <div class="border-t border-border mt-2 pt-2">
-              <a href="/notification" class="flex items-center justify-center w-full px-3 py-2 text-sm font-medium text-primary hover:text-primary-foreground hover:bg-primary rounded-md transition-colors">
-                 {{{icon "arrow-right" class="mr-2 h-4 w-4"}}}
-                 {{t 'nav.view_all_notifications'}}
-              </a>
+               <a href="/notifications" class="flex items-center justify-center w-full px-3 py-2 text-sm font-medium text-primary hover:text-primary-foreground hover:bg-primary rounded-md transition-colors">
+                  {{{icon "arrow-right" class="mr-2 h-4 w-4"}}}
+                  {{t 'nav.view_all_notifications'}}
+               </a>
             </div>
-          {{else}}
-            <div hx-get="/api/notifications/dropdown" hx-trigger="revealed" hx-target="this" hx-swap="innerHTML">
-              <div class="px-2 py-2 text-sm text-muted-foreground">{{t 'common.loading'}}</div>
-            </div>
-          {{/if}}
+           {{else}}
+             <div class="px-3 py-6 text-center">
+               <div class="w-12 h-12 bg-muted rounded-full flex items-center justify-center mx-auto mb-3">
+                 {{{icon "bell-off" class="h-6 w-6 text-muted-foreground"}}}
+               </div>
+               <p class="text-sm text-muted-foreground">{{t 'nav.no_notifications'}}</p>
+             </div>
+           {{/if}}
         </div>
       </div>
     </div>
@@ -224,8 +227,27 @@
         id="admin-user-dropdown">
         <div class="p-2">
 
-          <!-- User profile section -->
-          {{> user-info-link}}
+           <!-- User profile section -->
+           <a href="/settings"
+    class="w-full mb-2 relative flex cursor-default select-none items-center gap-2 rounded-sm px-2 py-2 text-sm text-left outline-none transition-colors bg-primary-50 hover:bg-primary-100 hover:text-primary-900">
+    <div class="grid flex-1 text-left text-sm leading-tight">
+        <div class="flex flex-1">
+            <div>
+
+                <span class="truncate font-medium user-name">{{user.profile.name}}</span>
+                <span class="truncate text-xs text-muted-foreground user-email">{{user.email}}</span>
+            </div>
+
+{{{icon 'settings' class='h-4 w-4 shrink-0' size='16'}}}
+
+        </div>
+
+        <div class="flex items-center justify-between text-sm flex-1">
+            <span class="truncate text-xs text-muted-foreground self-center flex-1 nav-current-plan-name">{{capitalize user.profile.package_type}} {{t 'nav.plan'}}</span>
+            <span class="truncate text-xs text-muted-foreground self-center nav-current-plan-details">{{#if (eq user.profile.package_type "free")}}{{t 'nav.free'}}{{else}}${{user.profile.package_type}} {{t 'payments.upgrade.month'}}{{/if}}</span>
+        </div>
+    </div>
+</a>
 
 
 
@@ -299,144 +321,5 @@
   </div>
 </nav>
 
-<script>
-  function toggleTheme() {
-    const html = document.documentElement;
-    html.classList.toggle('dark');
-    const isDark = html.classList.contains('dark');
-    localStorage.setItem('theme', isDark ? 'dark' : 'light');
-    updateThemeToggle(isDark);
-  }
 
-  function updateThemeToggle(isDark) {
-    const lightIcon = document.getElementById('theme-icon-light');
-    const darkIcon = document.getElementById('theme-icon-dark');
-    if (lightIcon && darkIcon) {
-      if (isDark) {
-        lightIcon.classList.add('hidden');
-        darkIcon.classList.remove('hidden');
-      } else {
-        darkIcon.classList.add('hidden');
-        lightIcon.classList.remove('hidden');
-      }
-    }
-  }
-
-  function normalizeLanguage(lang) {
-    if (!lang) return 'en';
-    const normalized = lang.toLowerCase().split('-')[0]; // Get primary language code
-    return ['en', 'ar'].includes(normalized) ? normalized : 'en';
-  }
-
-  async function switchLanguage() {
-    const currentLang = normalizeLanguage(localStorage.getItem('language') || 'en');
-    const newLang = currentLang === 'en' ? 'ar' : 'en';
-    localStorage.setItem('language', newLang);
-    updateLangSwitcher(newLang);
-
-    // Sync language preference with server if user is authenticated
-    try {
-      const response = await fetch('/api/set-language', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ language: newLang }),
-      });
-
-      if (response.ok) {
-        console.log('Language preference synced with server');
-      } else {
-        console.warn('Failed to sync language with server');
-      }
-    } catch (error) {
-      console.error('Error syncing language with server:', error);
-    }
-
-    // Reload the page with language query param to ensure it's applied
-    window.location.href = `/?lng=${newLang}`;
-  }
-
-  function updateLangSwitcher(lang) {
-    const textSpan = document.getElementById('lang-text');
-    if (textSpan) {
-      textSpan.textContent = lang.toUpperCase();
-    }
-  }
-
-  // Initialize language display on page load
-  document.addEventListener('DOMContentLoaded', function() {
-    const serverLang = normalizeLanguage('{{lng}}');
-    localStorage.setItem('language', serverLang);
-    updateLangSwitcher(serverLang);
-  });
-
-  function toggleGridMenu() {
-    const dropdown = document.getElementById('grid-dropdown');
-    if (dropdown) {
-      const isVisible = !dropdown.classList.contains('hidden');
-      if (isVisible) {
-        dropdown.classList.add('hidden');
-        dropdown.classList.add('invisible');
-        dropdown.classList.add('opacity-0');
-      } else {
-        dropdown.classList.remove('hidden');
-        dropdown.classList.remove('invisible');
-        dropdown.classList.remove('opacity-0');
-      }
-    }
-  }
-
-  function toggleUserMenu() {
-    const dropdown = document.getElementById('admin-user-dropdown');
-    if (dropdown) {
-      const isVisible = !dropdown.classList.contains('hidden');
-      if (isVisible) {
-        dropdown.classList.add('hidden');
-        dropdown.classList.add('invisible');
-        dropdown.classList.add('opacity-0');
-      } else {
-        dropdown.classList.remove('hidden');
-        dropdown.classList.remove('invisible');
-        dropdown.classList.remove('opacity-0');
-      }
-    }
-  }
-
-  function toggleNotificationMenu() {
-    const dropdown = document.getElementById('notification-dropdown');
-    if (dropdown) {
-      const isVisible = !dropdown.classList.contains('hidden');
-      if (isVisible) {
-        dropdown.classList.add('hidden');
-        dropdown.classList.add('invisible');
-        dropdown.classList.add('opacity-0');
-      } else {
-        dropdown.classList.remove('hidden');
-        dropdown.classList.remove('invisible');
-        dropdown.classList.remove('opacity-0');
-      }
-    }
-  }
-
-  async function markAsRead(notificationId) {
-    try {
-      const response = await fetch(`/api/notifications/${notificationId}/read`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-      if (response.ok) {
-        // Refresh the dropdown
-        htmx.trigger('#notification-dropdown', 'revealed');
-      } else {
-        showToast('Failed to mark as read', 'error');
-      }
-    } catch (error) {
-      console.error('Mark as read error:', error);
-      showToast('Failed to mark as read', 'error');
-    }
-  }
-</script>
 

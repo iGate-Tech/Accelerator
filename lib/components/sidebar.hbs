@@ -10,7 +10,7 @@
 
                         {{{icon 'plus' class='w-4 h-4 mr-3' size='16'}}}
 
-                        <span class="font-medium sidebar-text" style="display: flex;">New Project</span>
+                        <span class="font-medium sidebar-text" style="display: flex;">{{t 'nav.new_idea'}}</span>
                     </a>
                 </li>
                 <li class="">
@@ -19,7 +19,7 @@
 
                         {{{icon 'heart' class='w-4 h-4 mr-3' size='16'}}}
 
-                        <span class="font-medium sidebar-text" style="display: flex;">My Favorites</span>
+                        <span class="font-medium sidebar-text" style="display: flex;">{{t 'ideas.favorites.title'}}</span>
                     </a>
                 </li>
                 <li class="">
@@ -28,7 +28,7 @@
 
                         {{{icon 'search' class='w-4 h-4 mr-3' size='16'}}}
 
-                        <span class="font-medium sidebar-text" style="display: flex;">Explore Ideas</span>
+                        <span class="font-medium sidebar-text" style="display: flex;">{{t 'nav.explore_ideas'}}</span>
                     </a>
                 </li>
             </ul>
@@ -38,7 +38,7 @@
 
                     {{{icon 'folder' class='w-3.5 h-3.5' size='14'}}}
 
-                    All Projects
+                    {{t 'nav.portfolio'}}
                     {{{icon 'chevron-right' class='w-4 h-4 ml-auto transition-transform duration-200 group-open:rotate-90' size='24'}}}
                 </summary>
                 <div class="relative my-5">
@@ -78,10 +78,10 @@
                 <!-- Separator -->
                 <div class="bg-border -mx-1 my-1 h-px"></div>
                 <div class="flex items-center justify-between text-sm flex-1">
-                    <span
-                        class="truncate text-xs text-muted-foreground self-center flex-1 nav-current-plan-name">{{capitalize user.profile.package_type}} Plan</span>
-                    <span
-                        class="truncate text-xs text-muted-foreground self-center nav-current-plan-details">{{#if (eq user.profile.package_type "free")}}Free{{else}}${{user.profile.package_type}} /month{{/if}}</span>
+                        <span
+                            class="truncate text-xs text-muted-foreground self-center flex-1 nav-current-plan-name">{{capitalize user.profile.package_type}} {{t 'nav.plan'}}</span>
+                        <span
+                            class="truncate text-xs text-muted-foreground self-center nav-current-plan-details">{{#if (eq user.profile.package_type "free")}}{{t 'nav.free'}}{{else}}${{user.profile.package_type}} {{t 'payments.upgrade.month'}}{{/if}}</span>
                 </div>
             </div>
         </a>

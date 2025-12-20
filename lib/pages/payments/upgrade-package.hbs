@@ -1,10 +1,10 @@
 <div class="p-20">
     <div class="grid gap-1  mb-12">
         <h1 class="font-heading text-3xl font-semibold text-foreground">
-            Upgrade Packages
+            {{t 'payments.upgrade.title'}}
         </h1>
         <p class="text-lg text-muted-foreground">
-            Manage your account packages
+            {{t 'payments.upgrade.description'}}
         </p>
     </div>
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -12,7 +12,7 @@
         <div class="rounded-md bg-card px-6 py-5 text-card-foreground border-2 {{#if (eq type "student")}}border-primary relative{{else}}border-input/80{{/if}}">
             {{#if (eq type "student")}}
             <div class="absolute -top-3 left-1/2 transform -translate-x-1/2">
-                <span class="bg-primary text-primary-foreground text-xs px-3 py-1 rounded-md">Most Popular</span>
+                <span class="bg-primary text-primary-foreground text-xs px-3 py-1 rounded-md">{{t 'payments.upgrade.most_popular'}}</span>
             </div>
             {{/if}}
             <div class="text-center mb-4">
@@ -20,7 +20,7 @@
                 <p class="text-2xl font-bold text-foreground">
                     ${{divide price_monthly 100}}
                     <span class="text-sm font-normal text-muted-foreground">
-                        /month
+                        {{t 'payments.upgrade.month'}}
                     </span>
                 </p>
             </div>
@@ -28,53 +28,53 @@
                 {{#if (eq type "free")}}
                     <li class="flex items-center gap-2 text-sm">
 {{{icon 'check' class='w-4 h-4 text-green-600'}}}
-                        Vote on public ideas
+                        {{t 'payments.upgrade.vote_public'}}
                     </li>
                     <li class="flex items-center gap-2 text-sm">
 {{{icon 'check' class='w-4 h-4 text-green-600'}}}
-                        View community content
+                        {{t 'payments.upgrade.view_community'}}
                     </li>
                     <li class="flex items-center gap-2 text-sm">
 {{{icon 'check' class='w-4 h-4 text-green-600'}}}
-                        {{credits_monthly}} credits for voting rewards
+                        {{credits_monthly}} {{t 'payments.upgrade.voting_rewards'}}
                     </li>
                 {{else if (eq type "student")}}
                     <li class="flex items-center gap-2 text-sm">
 {{{icon 'check' class='w-4 h-4 text-green-600'}}}
-                        Create and manage ideas
+                        {{t 'payments.upgrade.create_manage'}}
                     </li>
                     <li class="flex items-center gap-2 text-sm">
 {{{icon 'check' class='w-4 h-4 text-green-600'}}}
-                        Complete business models
+                        {{t 'payments.upgrade.complete_models'}}
                     </li>
                     <li class="flex items-center gap-2 text-sm">
 {{{icon 'check' class='w-4 h-4 text-green-600'}}}
-                        Generate reports
+                        {{t 'payments.upgrade.generate_reports'}}
                     </li>
                     <li class="flex items-center gap-2 text-sm">
 {{{icon 'check' class='w-4 h-4 text-green-600'}}}
-                        {{credits_monthly}} credits for AI features
+                        {{credits_monthly}} {{t 'payments.upgrade.ai_features'}}
                     </li>
                 {{else if (eq type "enterprise")}}
                     <li class="flex items-center gap-2 text-sm">
 {{{icon 'check' class='w-4 h-4 text-green-600'}}}
-                        All Student features
+                        {{t 'payments.upgrade.all_student'}}
                     </li>
                     <li class="flex items-center gap-2 text-sm">
 {{{icon 'check' class='w-4 h-4 text-green-600'}}}
-                        Portfolio grouping
+                        {{t 'payments.upgrade.portfolio_grouping'}}
                     </li>
                     <li class="flex items-center gap-2 text-sm">
 {{{icon 'check' class='w-4 h-4 text-green-600'}}}
-                        Advanced analytics
+                        {{t 'payments.upgrade.advanced_analytics'}}
                     </li>
                     <li class="flex items-center gap-2 text-sm">
 {{{icon 'check' class='w-4 h-4 text-green-600'}}}
-                        Team collaboration
+                        {{t 'payments.upgrade.team_collaboration'}}
                     </li>
                     <li class="flex items-center gap-2 text-sm">
 {{{icon 'check' class='w-4 h-4 text-green-600'}}}
-                        {{credits_monthly}} credits for AI features
+                        {{credits_monthly}} {{t 'payments.upgrade.ai_features'}}
                     </li>
                 {{/if}}
             </ul>
@@ -82,11 +82,11 @@
                 <input type="hidden" name="package_type" value="{{type}}">
                 {{#if (eq ../currentPackage type)}}
                     <button type="button" class="w-full px-4 py-2 bg-muted text-muted-foreground cursor-not-allowed rounded-md" disabled>
-                        Current Plan
+                        {{t 'payments.upgrade.current_plan'}}
                     </button>
                 {{else}}
                     <button type="submit" class="w-full {{#if (eq type "student")}}bg-primary text-primary-foreground hover:bg-primary/90{{else}}border border-input/80 text-foreground hover:bg-muted{{/if}} px-4 py-2 rounded-md transition-colors">
-                        {{#if (eq type "free")}}Select Free Plan{{else}}Upgrade to {{name}}{{/if}}
+                        {{#if (eq type "free")}}{{t 'payments.upgrade.select_free'}}{{else}}{{t 'payments.upgrade.upgrade_to'}} {{name}}{{/if}}
                     </button>
                 {{/if}}
             </form>

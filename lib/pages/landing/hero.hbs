@@ -8,23 +8,22 @@
         <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-brand-purple opacity-75"></span>
         <span class="relative inline-flex rounded-full h-2 w-2 bg-brand-purple"></span>
       </span>
-      AI-Powered Platform
+       {{t 'landing.hero_badge'}}
     </h4>
 
     <h1 class="lg:text-7xl leading-[1.1] text-brand-purple text-glow text-5xl italic tracking-tight font-serif mb-8">
-      Build Your Startup <br />
-      <span class="text-gray-900 dark:text-white opacity-90">with AI Precision.</span>
+       {{t 'landing.hero_title'}} <br />
+       <span class="text-gray-900 dark:text-white opacity-90">{{t 'landing.hero_title_suffix'}}</span>
     </h1>
 
     <p class="font-sans text-xl lg:text-2xl font-light text-gray-700 dark:text-white/70 leading-relaxed tracking-tight max-w-xl mb-10">
-      Complete AI-powered platform designed to help individuals, startups,
-      and organizations create, model, and launch new business ideas. Guides users through the entire startup-building lifecycle: AI Idea Creation, Idea Modeling, Business Model Generation, Financial Modeling, Legal/Marketing/Team Models, and Pitch Deck Creation. Includes a credit-based creator economy where users buy credits to generate AI models, publish ideas, and earn from community votes.
+{{t 'landing.hero_description'}}
     </p>
 
     <div class="flex flex-col sm:flex-row gap-6 gap-x-6 gap-y-6 items-start sm:items-center">
       <!-- Animated Shiny CTA Button -->
       <a href="/auth/signup" class="shiny-cta focus:outline-none text-base">
-        <span>Start Building</span>
+        <span>{{t 'landing.cta_start'}}</span>
       </a>
 
       <!-- Gradient Pill Button with Icon (Dark Gray) -->
@@ -44,7 +43,7 @@
               --border-radius-before: 9999px;
             ">
         <span class="text-sm font-medium tracking-tight">
-          View Ecosystem
+{{t 'landing.cta_view_ecosystem'}}
         </span>
         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
           stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"
@@ -138,12 +137,12 @@
 
     <!-- Floating Labels -->
     <div class="absolute top-[20%] lg:top-[25%] left-[10%] lg:left-[15%] flex flex-col items-end">
-      <span class="text-xs font-mono text-brand-purple tracking-widest mb-1 opacity-80">RAPID GENERATION</span>
+      <span class="text-xs font-mono text-brand-purple tracking-widest mb-1 opacity-80">{{t 'landing.visual_label_1'}}</span>
       <div class="h-[1px] w-12 bg-gradient-to-l from-brand-purple to-transparent"></div>
     </div>
 
     <div class="absolute bottom-[20%] lg:bottom-[25%] right-[10%] lg:right-[15%] flex flex-col items-start">
-      <span class="text-xs font-mono text-brand-purple tracking-widest mb-1 opacity-80">AI POWERED</span>
+      <span class="text-xs font-mono text-brand-purple tracking-widest mb-1 opacity-80">{{t 'landing.visual_label_2'}}</span>
       <div class="h-[1px] w-12 bg-gradient-to-r from-brand-purple to-transparent"></div>
     </div>
 
@@ -256,8 +255,7 @@
       <!-- Trusted By Label -->
       <div
         class="flex items-center gap-3 text-gray-500 dark:text-white/30 text-xs font-mono shrink-0 relative z-10 bg-background pl-4 lg:bg-transparent lg:pl-0">
-        <span class="text-gray-900 dark:text-white tracking-wide">[ <span class="text-brand-purple">✓</span> ] TRUSTED BY INDUSTRY
-          LEADERS</span>
+        <span class="text-gray-900 dark:text-white tracking-wide">{{t 'landing.trusted_by'}}</span>
       </div>
     </div>
   </section>

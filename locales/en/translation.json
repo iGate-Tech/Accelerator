@@ -30,5 +30,16 @@
   },
   "common": {
     "loading": "Loading..."
+  },
+  "landing": {
+    "hero_badge": "AI-Powered Platform",
+    "hero_title": "Build Your Startup",
+    "hero_title_suffix": "with AI Precision.",
+    "hero_description": "Complete AI-powered platform designed to help individuals, startups, and organizations create, model, and launch new business ideas. Guides users through the entire startup-building lifecycle: AI Idea Creation, Idea Modeling, Business Model Generation, Financial Modeling, Legal/Marketing/Team Models, and Pitch Deck Creation. Includes a credit-based creator economy where users buy credits to generate AI models, publish ideas, and earn from community votes.",
+    "cta_start": "Start Building",
+    "cta_view_ecosystem": "View Ecosystem",
+    "visual_label_1": "RAPID GENERATION",
+    "visual_label_2": "AI POWERED",
+    "trusted_by": "[ ✓ ] TRUSTED BY INDUSTRY LEADERS"
   }
 }

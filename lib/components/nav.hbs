@@ -59,7 +59,7 @@
     <!-- Language Switcher -->
     <button id="lang-switcher" class="flex items-center gap-1 ml-4 px-2 py-1 text-xs font-medium rounded-md bg-muted text-muted-foreground hover:bg-primary hover:text-primary-foreground" onclick="switchLanguage()">
       {{{icon "languages" class="h-4 w-4"}}}
-       <span id="lang-text">{{t 'nav.lang_en'}}</span>
+       <span id="lang-text">{{#if (eq lng 'ar')}}AR{{else}}EN{{/if}}</span>
     </button>
 
     <!-- Notification Menu -->
@@ -357,6 +357,13 @@
       textSpan.textContent = lang.toUpperCase();
     }
   }
+
+  // Initialize language display on page load
+  document.addEventListener('DOMContentLoaded', function() {
+    const serverLang = '{{lng}}';
+    localStorage.setItem('language', serverLang);
+    updateLangSwitcher(serverLang);
+  });
 
   function toggleGridMenu() {
     const dropdown = document.getElementById('grid-dropdown');

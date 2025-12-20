@@ -1,20 +1,20 @@
-<a href="/settings"
-    class="w-full mb-2 relative flex cursor-default select-none items-center gap-2 rounded-sm px-2 py-2 text-sm text-left outline-none transition-colors bg-primary-50 hover:bg-primary-100 hover:text-primary-900">
-    <div class="grid flex-1 text-left text-sm leading-tight">
-        <div class="flex flex-1">
-            <div>
-
-                <span class="truncate font-medium user-name">{{user.profile.name}}</span>
-                <span class="truncate text-xs text-muted-foreground user-email">{{user.email}}</span>
-            </div>
-
-{{{icon 'settings' class='h-4 w-4 shrink-0' size='16'}}}
-
+<a href="/settings" class="group flex items-center p-4 bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-md hover:border-primary-300 transition-all duration-200 cursor-pointer">
+    <div class="flex-shrink-0 mr-4">
+        <div class="p-2 bg-primary-50 rounded-full group-hover:bg-primary-100 transition-colors">
+            {{{icon 'settings' class='h-5 w-5 text-primary-600' size='20'}}}
         </div>
-
-        <div class="flex items-center justify-between text-sm flex-1">
-            <span class="truncate text-xs text-muted-foreground self-center flex-1 nav-current-plan-name">{{capitalize user.profile.package_type}} {{t 'nav.plan'}}</span>
-            <span class="truncate text-xs text-muted-foreground self-center nav-current-plan-details">{{#if (eq user.profile.package_type "free")}}{{t 'nav.free'}}{{else}}${{user.profile.package_type}} {{t 'payments.upgrade.month'}}{{/if}}</span>
+    </div>
+    <div class="flex-1 min-w-0">
+        <div class="flex items-center justify-between">
+            <div class="flex flex-col">
+                <span class="text-sm font-semibold text-gray-900 user-name">{{user.profile.name}}</span>
+                <span class="text-xs text-gray-500 user-email">{{user.email}}</span>
+            </div>
+            {{{icon 'chevron-right' class='h-4 w-4 text-gray-400 group-hover:text-primary-600 transition-colors' size='16'}}}
+        </div>
+        <div class="mt-2 flex items-center justify-between">
+            <span class="text-xs font-medium text-primary-700 nav-current-plan-name">{{capitalize user.profile.package_type}} {{t 'nav.plan'}}</span>
+            <span class="text-xs text-gray-500 nav-current-plan-details">{{#if (eq user.profile.package_type "free")}}{{t 'nav.free'}}{{else}}${{user.profile.package_type}}/{{t 'payments.upgrade.month'}}{{/if}}</span>
         </div>
     </div>
 </a>

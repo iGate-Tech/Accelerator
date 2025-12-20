@@ -73,9 +73,9 @@
       </button>
 
       <!-- Notification Dropdown -->
-      <div
-        class="absolute right-0 mt-2 w-[350px] bg-popover backdrop-blur-sm border border-input/80 rounded-lg shadow-xl z-30 transition-all duration-200 opacity-0 invisible hidden"
-        id="notification-dropdown">
+       <div
+         class="absolute {{#if (eq lng 'ar')}}left-0{{else}}right-0{{/if}} mt-2 w-[350px] bg-popover backdrop-blur-sm border border-input/80 rounded-lg shadow-xl z-30 transition-all duration-200 opacity-0 invisible hidden"
+         id="notification-dropdown">
         <div class="p-1">
           <div class="px-2 py-1 text-sm font-medium text-muted-foreground">{{t 'nav.notifications'}}</div>
           <div class="bg-border -mx-1 my-1 h-px"></div>
@@ -144,9 +144,9 @@
       </button>
 
       <!-- Grid Dropdown -->
-      <div
-        class="absolute right-0 mt-2 w-[200px] bg-popover backdrop-blur-sm border border-input/80 rounded-md shadow-xl z-30 transition-all duration-200 opacity-0 invisible hidden"
-        id="grid-dropdown">
+       <div
+         class="absolute {{#if (eq lng 'ar')}}left-0{{else}}right-0{{/if}} mt-2 w-[200px] bg-popover backdrop-blur-sm border border-input/80 rounded-md shadow-xl z-30 transition-all duration-200 opacity-0 invisible hidden"
+         id="grid-dropdown">
         <div class="p-1">
           <div class="px-2 py-1 text-sm font-medium text-muted-foreground">{{t 'nav.quick_access'}}</div>
           <div class="bg-border -mx-1 my-1 h-px"></div>
@@ -222,32 +222,25 @@
       </button>
 
       <!-- User Dropdown -->
-      <div
-        class="absolute right-0 mt-2 w-64 bg-base-100 border border-input rounded-md shadow-lg z-30 transition-all duration-200 opacity-0 invisible hidden"
-        id="admin-user-dropdown">
+       <div
+         class="absolute {{#if (eq lng 'ar')}}left-0{{else}}right-0{{/if}} mt-2 w-64 bg-base-100 border border-input rounded-md shadow-lg z-30 transition-all duration-200 opacity-0 invisible hidden"
+         id="admin-user-dropdown">
         <div class="p-2">
 
-           <!-- User profile section -->
-           <a href="/settings"
-    class="w-full mb-2 relative flex cursor-default select-none items-center gap-2 rounded-sm px-2 py-2 text-sm text-left outline-none transition-colors bg-primary-50 hover:bg-primary-100 hover:text-primary-900">
-    <div class="grid flex-1 text-left text-sm leading-tight">
-        <div class="flex flex-1">
-            <div>
-
-                <span class="truncate font-medium user-name">{{user.profile.name}}</span>
-                <span class="truncate text-xs text-muted-foreground user-email">{{user.email}}</span>
-            </div>
-
-{{{icon 'settings' class='h-4 w-4 shrink-0' size='16'}}}
-
-        </div>
-
-        <div class="flex items-center justify-between text-sm flex-1">
-            <span class="truncate text-xs text-muted-foreground self-center flex-1 nav-current-plan-name">{{capitalize user.profile.package_type}} {{t 'nav.plan'}}</span>
-            <span class="truncate text-xs text-muted-foreground self-center nav-current-plan-details">{{#if (eq user.profile.package_type "free")}}{{t 'nav.free'}}{{else}}${{user.profile.package_type}} {{t 'payments.upgrade.month'}}{{/if}}</span>
-        </div>
-    </div>
-</a>
+            <!-- User profile section -->
+            <a href="/settings"
+     class="w-full mb-2 relative flex cursor-default select-none items-center gap-3 rounded-sm px-3 py-3 text-sm text-left outline-none transition-colors bg-primary-50 hover:bg-primary-100 hover:text-primary-900">
+     <div class="flex-1 min-w-0">
+         <div class="flex items-center justify-between mb-1">
+             <span class="truncate font-medium user-name text-foreground">{{user.profile.name}}</span>
+             {{{icon 'settings' class='h-4 w-4 text-muted-foreground shrink-0' size='16'}}}
+         </div>
+         <div class="truncate text-xs text-muted-foreground user-email mb-1">{{user.email}}</div>
+         <div class="text-xs text-muted-foreground">
+             <span class="nav-current-plan-name">{{capitalize user.profile.package_type}} {{t 'nav.plan'}}</span>
+         </div>
+     </div>
+ </a>
 
 
 

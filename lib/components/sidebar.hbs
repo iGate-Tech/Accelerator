@@ -77,11 +77,8 @@
                 </div>
                 <!-- Separator -->
                 <div class="bg-border -mx-1 my-1 h-px"></div>
-                <div class="flex items-center justify-between text-sm flex-1">
-                        <span
-                            class="truncate text-xs text-muted-foreground self-center flex-1 nav-current-plan-name">{{capitalize user.profile.package_type}} {{t 'nav.plan'}}</span>
-                        <span
-                            class="truncate text-xs text-muted-foreground self-center nav-current-plan-details">{{#if (eq user.profile.package_type "free")}}{{t 'nav.free'}}{{else}}${{user.profile.package_type}} {{t 'payments.upgrade.month'}}{{/if}}</span>
+                 <div class="text-xs text-muted-foreground">
+                        <span class="nav-current-plan-name">{{capitalize user.profile.package_type}} {{t 'nav.plan'}}</span>
                 </div>
             </div>
         </a>

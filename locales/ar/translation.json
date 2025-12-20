@@ -1,1 +1,34 @@
-{}
+{
+  "nav": {
+    "projects": "المشاريع",
+    "dashboard": "لوحة التحكم",
+    "portfolio": "المحافظ",
+    "voting_rewards": "التصويت والمكافآت",
+    "credits": "الائتمانات",
+    "lang_en": "EN",
+    "lang_ar": "AR",
+    "notifications": "الإشعارات",
+    "quick_access": "الوصول السريع",
+    "dashboard_desc": "نظرة عامة على لوحة التحكم الرئيسية",
+    "new_idea": "فكرة جديدة",
+    "new_idea_desc": "إنشاء فكرة مشروع جديدة",
+    "explore_ideas": "استكشف الأفكار",
+    "explore_ideas_desc": "اكتشف الأفكار العامة",
+    "portfolios": "المحافظ",
+    "portfolios_desc": "منصة التعاون الجماعي",
+    "business_models": "نماذج الأعمال",
+    "business_models_desc": "أدوات إدارة الشركات الناشئة",
+    "activity": "النشاط",
+    "activity_desc": "عرض نشاطك الأخير",
+    "upgrade_package": "ترقية الحزمة",
+    "buy_credits": "شراء الائتمانات",
+    "billing": "الفوترة",
+    "add_payment_method": "إضافة طريقة دفع",
+    "user_activity": "نشاط المستخدم",
+    "logout": "تسجيل الخروج",
+    "view_all_notifications": "عرض جميع الإشعارات"
+  },
+  "common": {
+    "loading": "جارٍ التحميل..."
+  }
+}

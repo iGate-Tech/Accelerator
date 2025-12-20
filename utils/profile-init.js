@@ -13,6 +13,7 @@ export function createDefaultProfile(userId) {
     role: "",
     experience_level: "",
     goals: "",
+    language: "en",
     avatar_url: "/images/avatar.png",
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),

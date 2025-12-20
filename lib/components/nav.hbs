@@ -7,14 +7,14 @@
          <div class="border-t-4 border-primary w-6 rounded-md{{#if (eq activeNav 'projects')}} opacity-100{{else}} opacity-0 group-hover:opacity-100{{/if}}"></div>
          <a href="/new-idea"
            class="text-{{#if (eq activeNav 'projects')}}primary{{else}}muted-foreground group-hover:text-foreground hover:text-foreground{{/if}} font-medium text-sm leading-[2.7] group-hover:font-medium hover:font-medium">
-           <span class="nav-text">Projects</span>
+            <span class="nav-text">{{t 'nav.projects'}}</span>
          </a>
        </div>
        <div class="flex flex-col items-center justify-center group">
          <div class="border-t-4 border-primary w-6 rounded-md{{#if (eq activeNav 'dashboard')}} opacity-100{{else}} opacity-0 group-hover:opacity-100{{/if}}"></div>
          <a href="/dashboard"
            class="text-{{#if (eq activeNav 'dashboard')}}primary{{else}}muted-foreground group-hover:text-foreground hover:text-foreground{{/if}} font-medium text-sm leading-[2.7] group-hover:font-medium hover:font-medium">
-           <span class="nav-text">Dashboard</span>
+            <span class="nav-text">{{t 'nav.dashboard'}}</span>
          </a>
        </div>
        {{#if (eq user.profile.package_type "enterprise")}}
@@ -22,7 +22,7 @@
          <div class="border-t-4 border-primary w-6 rounded-md{{#if (eq activeNav 'portfolios')}} opacity-100{{else}} opacity-0 group-hover:opacity-100{{/if}}"></div>
          <a href="/portfolios"
            class="text-{{#if (eq activeNav 'portfolios')}}primary{{else}}muted-foreground group-hover:text-foreground hover:text-foreground{{/if}} font-medium text-sm leading-[2.7] group-hover:font-medium hover:font-medium">
-           <span class="nav-text">Portfolio</span>
+            <span class="nav-text">{{t 'nav.portfolio'}}</span>
          </a>
        </div>
        {{/if}}
@@ -30,7 +30,7 @@
          <div class="border-t-4 border-primary w-6 rounded-md{{#if (eq activeNav 'voting')}} opacity-100{{else}} opacity-0 group-hover:opacity-100{{/if}}"></div>
          <a href="/voting-reward"
            class="text-{{#if (eq activeNav 'voting')}}primary{{else}}muted-foreground group-hover:text-foreground hover:text-foreground{{/if}} font-medium text-sm leading-[2.7] group-hover:font-medium hover:font-medium focus:outline-none">
-           <span class="nav-text">Voting &amp; Rewards</span>
+            <span class="nav-text">{{t 'nav.voting_rewards'}}</span>
          </a>
        </div>
     </div>
@@ -42,7 +42,7 @@
 
       {{{icon 'coins' class='w-5 h-5 text-primary' size='16'}}}
 
-       <span id="nav-credit-balance" class="text-sm font-medium">{{user.profile.credit_balance}} Credits</span>
+        <span id="nav-credit-balance" class="text-sm font-medium">{{user.profile.credit_balance}} {{t 'nav.credits'}}</span>
     </div>
 
     <!-- Theme Toggle Button -->
@@ -59,7 +59,7 @@
     <!-- Language Switcher -->
     <button id="lang-switcher" class="flex items-center gap-1 ml-4 px-2 py-1 text-xs font-medium rounded-md bg-muted text-muted-foreground hover:bg-primary hover:text-primary-foreground" onclick="switchLanguage()">
       {{{icon "languages" class="h-4 w-4"}}}
-      <span id="lang-text">EN</span>
+       <span id="lang-text">{{t 'nav.lang_en'}}</span>
     </button>
 
     <!-- Notification Menu -->
@@ -77,7 +77,7 @@
         class="absolute right-0 mt-2 w-[350px] bg-popover backdrop-blur-sm border border-input/80 rounded-lg shadow-xl z-30 transition-all duration-200 opacity-0 invisible hidden"
         id="notification-dropdown">
         <div class="p-1">
-          <div class="px-2 py-1 text-sm font-medium text-muted-foreground">Notifications</div>
+          <div class="px-2 py-1 text-sm font-medium text-muted-foreground">{{t 'nav.notifications'}}</div>
           <div class="bg-border -mx-1 my-1 h-px"></div>
           {{#if notifications}}
             <div class="space-y-1">
@@ -118,13 +118,13 @@
             </div>
             <div class="border-t border-border mt-2 pt-2">
               <a href="/notification" class="flex items-center justify-center w-full px-3 py-2 text-sm font-medium text-primary hover:text-primary-foreground hover:bg-primary rounded-md transition-colors">
-                {{{icon "arrow-right" class="mr-2 h-4 w-4"}}}
-                View All Notifications
+                 {{{icon "arrow-right" class="mr-2 h-4 w-4"}}}
+                 {{t 'nav.view_all_notifications'}}
               </a>
             </div>
           {{else}}
             <div hx-get="/api/notifications/dropdown" hx-trigger="revealed" hx-target="this" hx-swap="innerHTML">
-              <div class="px-2 py-2 text-sm text-muted-foreground">Loading...</div>
+              <div class="px-2 py-2 text-sm text-muted-foreground">{{t 'common.loading'}}</div>
             </div>
           {{/if}}
         </div>
@@ -145,15 +145,15 @@
         class="absolute right-0 mt-2 w-[200px] bg-popover backdrop-blur-sm border border-input/80 rounded-md shadow-xl z-30 transition-all duration-200 opacity-0 invisible hidden"
         id="grid-dropdown">
         <div class="p-1">
-          <div class="px-2 py-1 text-sm font-medium text-muted-foreground">Quick Access</div>
+          <div class="px-2 py-1 text-sm font-medium text-muted-foreground">{{t 'nav.quick_access'}}</div>
           <div class="bg-border -mx-1 my-1 h-px"></div>
           <div role="group" class="p-1">
              <a href="/dashboard"
                class="relative flex cursor-default select-none items-center rounded-sm px-2 py-2 text-sm outline-none transition-colors hover:bg-primary-100 hover:text-primary-900">
 
                <div class="flex flex-col">
-                  <span class="flex">{{{icon 'layout-dashboard' class='mr-2 h-4 w-4' size='16'}}}Dashboard</span>
-                 <span class="text-xs text-muted-foreground">Main dashboard overview</span>
+                   <span class="flex">{{{icon 'layout-dashboard' class='mr-2 h-4 w-4' size='16'}}} {{t 'nav.dashboard'}}</span>
+                  <span class="text-xs text-muted-foreground">{{t 'nav.dashboard_desc'}}</span>
                </div>
              </a>
               <div class="bg-border -mx-1 my-1 h-px"></div>
@@ -161,8 +161,8 @@
                 class="relative flex cursor-default select-none items-center rounded-sm px-2 py-2 text-sm outline-none transition-colors hover:bg-primary-100 hover:text-primary-900">
 
                 <div class="flex flex-col">
-                  <span class="flex">{{{icon 'plus' class='mr-2 h-4 w-4' size='16'}}}New Idea</span>
-                  <span class="text-xs text-muted-foreground">Create a new project idea</span>
+                   <span class="flex">{{{icon 'plus' class='mr-2 h-4 w-4' size='16'}}} {{t 'nav.new_idea'}}</span>
+                   <span class="text-xs text-muted-foreground">{{t 'nav.new_idea_desc'}}</span>
                 </div>
               </a>
               <div class="bg-border -mx-1 my-1 h-px"></div>
@@ -170,8 +170,8 @@
                  class="relative flex cursor-default select-none items-center rounded-sm px-2 py-2 text-sm outline-none transition-colors hover:bg-primary-100 hover:text-primary-900">
 
                 <div class="flex flex-col">
-                  <span class="flex">{{{icon 'search' class='mr-2 h-4 w-4' size='16'}}}Explore Ideas</span>
-                  <span class="text-xs text-muted-foreground">Discover public ideas</span>
+                   <span class="flex">{{{icon 'search' class='mr-2 h-4 w-4' size='16'}}} {{t 'nav.explore_ideas'}}</span>
+                   <span class="text-xs text-muted-foreground">{{t 'nav.explore_ideas_desc'}}</span>
                 </div>
               </a>
               {{#if (eq user.profile.package_type "enterprise")}}
@@ -180,8 +180,8 @@
                 class="relative flex cursor-default select-none items-center rounded-sm px-2 py-2 text-sm outline-none transition-colors hover:bg-primary-100 hover:text-primary-900">
 
                 <div class="flex flex-col">
-                  <span class="flex">{{{icon 'archive' class='mr-2 h-4 w-4' size='16'}}}Portfolios</span>
-                  <span class="text-xs text-muted-foreground">Team collaboration platform</span>
+                   <span class="flex">{{{icon 'archive' class='mr-2 h-4 w-4' size='16'}}} {{t 'nav.portfolios'}}</span>
+                   <span class="text-xs text-muted-foreground">{{t 'nav.portfolios_desc'}}</span>
                 </div>
               </a>
               {{/if}}
@@ -190,8 +190,8 @@
                class="relative flex cursor-default select-none items-center rounded-sm px-2 py-2 text-sm outline-none transition-colors hover:bg-primary-100 hover:text-primary-900">
 
                <div class="flex flex-col">
-                  <span class="flex">{{{icon 'briefcase' class='mr-2 h-4 w-4' size='16'}}}Business Models</span>
-                 <span class="text-xs text-muted-foreground">Startup management tools</span>
+                   <span class="flex">{{{icon 'briefcase' class='mr-2 h-4 w-4' size='16'}}} {{t 'nav.business_models'}}</span>
+                  <span class="text-xs text-muted-foreground">{{t 'nav.business_models_desc'}}</span>
                </div>
              </a>
              <div class="bg-border -mx-1 my-1 h-px"></div>
@@ -199,8 +199,8 @@
                class="relative flex cursor-default select-none items-center rounded-sm px-2 py-2 text-sm outline-none transition-colors hover:bg-primary-100 hover:text-primary-900">
 
                <div class="flex flex-col">
-                  <span class="flex">{{{icon 'activity' class='mr-2 h-4 w-4' size='16'}}}Activity</span>
-                 <span class="text-xs text-muted-foreground">View your recent activity</span>
+                   <span class="flex">{{{icon 'activity' class='mr-2 h-4 w-4' size='16'}}} {{t 'nav.activity'}}</span>
+                  <span class="text-xs text-muted-foreground">{{t 'nav.activity_desc'}}</span>
                </div>
              </a>
              <div class="bg-border -mx-1 my-1 h-px"></div>
@@ -236,45 +236,45 @@
           <a href="/upgrade-package"
             class="w-full relative flex cursor-default select-none items-center gap-2 rounded-sm px-2 py-2 text-sm text-left outline-none transition-colors hover:bg-primary-100 hover:text-primary-900">
 
-            {{{icon "arrow-up-circle" class="h-4 w-4 shrink-0"}}}
+             {{{icon "arrow-up-circle" class="h-4 w-4 shrink-0"}}}
 
-            Upgrade Package
+             {{t 'nav.upgrade_package'}}
           </a>
 
           <!-- Buy Credits -->
           <a href="/buy-credits"
             class="w-full relative flex cursor-default select-none items-center gap-2 rounded-sm px-2 py-2 text-sm text-left outline-none transition-colors hover:bg-primary-100 hover:text-primary-900">
 
-            {{{icon "coins" class="h-4 w-4 shrink-0"}}}
+             {{{icon "coins" class="h-4 w-4 shrink-0"}}}
 
-            Buy Credits
+             {{t 'nav.buy_credits'}}
           </a>
 
           <!-- Billing -->
           <a href="/billing"
             class="w-full relative flex cursor-default select-none items-center gap-2 rounded-sm px-2 py-2 text-sm text-left outline-none transition-colors hover:bg-primary-100 hover:text-primary-900">
 
-            {{{icon "credit-card" class="h-4 w-4 shrink-0"}}}
+             {{{icon "credit-card" class="h-4 w-4 shrink-0"}}}
 
-            Billing
+             {{t 'nav.billing'}}
           </a>
 
           <!-- Add Payment Method -->
           <a href="/add-payment-method"
             class="w-full relative flex cursor-default select-none items-center gap-2 rounded-sm px-2 py-2 text-sm text-left outline-none transition-colors hover:bg-primary-100 hover:text-primary-900">
 
-            {{{icon "plus-circle" class="h-4 w-4 shrink-0"}}}
+             {{{icon "plus-circle" class="h-4 w-4 shrink-0"}}}
 
-            Add Payment Method
+             {{t 'nav.add_payment_method'}}
             </a>
 
             <!-- User Activity -->
           <a href="/user-activity"
             class="w-full relative flex cursor-default select-none items-center gap-2 rounded-sm px-2 py-2 text-sm text-left outline-none transition-colors hover:bg-primary-100 hover:text-primary-900">
 
-            {{{icon "activity" class="h-4 w-4 shrink-0"}}}
+             {{{icon "activity" class="h-4 w-4 shrink-0"}}}
 
-            User Activity
+             {{t 'nav.user_activity'}}
           </a>
 
           <!-- Separator -->
@@ -287,9 +287,9 @@
           <a hx-post="/auth/logout"
             class="w-full relative flex cursor-default select-none items-center gap-2 rounded-sm px-2 py-2 text-sm text-left outline-none transition-colors text-error hover:bg-error/10">
 
-{{{icon 'log-out' class='h-4 w-4 shrink-0' size='16'}}}
+ {{{icon 'log-out' class='h-4 w-4 shrink-0' size='16'}}}
 
-            Log out
+             {{t 'nav.logout'}}
           </a>
 
 
@@ -322,14 +322,33 @@
     }
   }
 
-  function switchLanguage() {
+  async function switchLanguage() {
     const currentLang = localStorage.getItem('language') || 'en';
     const newLang = currentLang === 'en' ? 'ar' : 'en';
     localStorage.setItem('language', newLang);
     updateLangSwitcher(newLang);
-    // Here you would implement the actual language switching logic
-    // For example, reload the page or update content dynamically
-    console.log('Language switched to:', newLang);
+
+    // Sync language preference with server if user is authenticated
+    try {
+      const response = await fetch('/api/set-language', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ language: newLang }),
+      });
+
+      if (response.ok) {
+        console.log('Language preference synced with server');
+      } else {
+        console.warn('Failed to sync language with server');
+      }
+    } catch (error) {
+      console.error('Error syncing language with server:', error);
+    }
+
+    // Reload the page to apply new language
+    window.location.reload();
   }
 
   function updateLangSwitcher(lang) {

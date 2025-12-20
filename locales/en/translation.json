@@ -1,1 +1,34 @@
-{}
+{
+  "nav": {
+    "projects": "Projects",
+    "dashboard": "Dashboard",
+    "portfolio": "Portfolio",
+    "voting_rewards": "Voting & Rewards",
+    "credits": "Credits",
+    "lang_en": "EN",
+    "lang_ar": "AR",
+    "notifications": "Notifications",
+    "quick_access": "Quick Access",
+    "dashboard_desc": "Main dashboard overview",
+    "new_idea": "New Idea",
+    "new_idea_desc": "Create a new project idea",
+    "explore_ideas": "Explore Ideas",
+    "explore_ideas_desc": "Discover public ideas",
+    "portfolios": "Portfolios",
+    "portfolios_desc": "Team collaboration platform",
+    "business_models": "Business Models",
+    "business_models_desc": "Startup management tools",
+    "activity": "Activity",
+    "activity_desc": "View your recent activity",
+    "upgrade_package": "Upgrade Package",
+    "buy_credits": "Buy Credits",
+    "billing": "Billing",
+    "add_payment_method": "Add Payment Method",
+    "user_activity": "User Activity",
+    "logout": "Log out",
+    "view_all_notifications": "View All Notifications"
+  },
+  "common": {
+    "loading": "Loading..."
+  }
+}

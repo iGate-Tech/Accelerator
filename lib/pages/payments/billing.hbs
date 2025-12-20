@@ -312,7 +312,7 @@
               <div>
                 <h3 class="font-medium text-foreground capitalize">{{profile.package_type}} Package</h3>
                 <p class="text-sm text-muted-foreground">
-                  {{#if (eq profile.package_type "free"}}
+              {{#if (eq profile.package_type "free")}}
                     Basic features included
                   {{else}}
                     ${{divide profile.package_price 100}}/month • {{profile.package_credits}} credits
@@ -346,9 +346,9 @@
             <!-- Actions -->
             <div class="flex gap-2">
               <a href="/upgrade-package" class="flex-1 px-4 py-2 bg-primary text-primary-foreground hover:bg-primary/90 rounded-md transition-colors text-center text-sm">
-                {{#if (eq profile.package_type "free"}}
+                {{#if (eq profile.package_type "free")}}
                   Upgrade Package
-                {{else if (eq profile.package_type "student"}}
+                {{else if (eq profile.package_type "student")}}
                   Upgrade to Enterprise
                 {{else}}
                   Manage Package

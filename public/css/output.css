@@ -1016,6 +1016,9 @@
   .w-\[300px\] {
     width: 300px;
   }
+  .w-\[350px\] {
+    width: 350px;
+  }
   .w-\[400px\] {
     width: 400px;
   }
@@ -1730,6 +1733,12 @@
     background-color: color-mix(in srgb, hsl(200 56% 43%) 20%, transparent);
     @supports (color: color-mix(in lab, red, red)) {
       background-color: color-mix(in oklab, var(--color-accent) 20%, transparent);
+    }
+  }
+  .bg-accent\/50 {
+    background-color: color-mix(in srgb, hsl(200 56% 43%) 50%, transparent);
+    @supports (color: color-mix(in lab, red, red)) {
+      background-color: color-mix(in oklab, var(--color-accent) 50%, transparent);
     }
   }
   .bg-amber-500\/10 {
@@ -2701,6 +2710,10 @@
   }
   .text-\[13px\] {
     font-size: 13px;
+  }
+  .leading-5 {
+    --tw-leading: calc(var(--spacing) * 5);
+    line-height: calc(var(--spacing) * 5);
   }
   .leading-\[1\.1\] {
     --tw-leading: 1.1;

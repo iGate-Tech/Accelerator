@@ -74,35 +74,52 @@
 
       <!-- Notification Dropdown -->
       <div
-        class="absolute right-0 mt-2 w-[300px] bg-popover backdrop-blur-sm border border-input/80 rounded-md shadow-xl z-30 transition-all duration-200 opacity-0 invisible hidden"
+        class="absolute right-0 mt-2 w-[350px] bg-popover backdrop-blur-sm border border-input/80 rounded-lg shadow-xl z-30 transition-all duration-200 opacity-0 invisible hidden"
         id="notification-dropdown">
         <div class="p-1">
           <div class="px-2 py-1 text-sm font-medium text-muted-foreground">Notifications</div>
           <div class="bg-border -mx-1 my-1 h-px"></div>
           {{#if notifications}}
             {{#each notifications}}
-              <a href="#" class="relative flex cursor-default select-none items-center rounded-sm px-2 py-2 text-sm outline-none transition-colors hover:bg-primary-100 hover:text-primary-900" onclick="markAsRead('{{id}}')">
-                <div class="flex flex-col">
-                  <span class="flex">
+              <div class="relative {{#unless is_read}}bg-accent/50{{/unless}} rounded-sm">
+                <a href="#" class="flex cursor-default select-none items-start rounded-sm px-3 py-3 text-sm outline-none transition-colors hover:bg-primary/10 hover:text-primary-900" onclick="markAsRead('{{id}}')">
+                  <div class="flex-shrink-0 mr-3 mt-0.5">
                     {{#if (eq type "vote_received")}}
-                      {{{icon "star" class="mr-2 h-4 w-4 text-yellow-500"}}}
+                      <div class="w-8 h-8 bg-yellow-100 rounded-full flex items-center justify-center">
+                        {{{icon "star" class="h-4 w-4 text-yellow-600"}}}
+                      </div>
                     {{else if (eq type "reward_earned")}}
-                      {{{icon "coins" class="mr-2 h-4 w-4 text-green-500"}}}
+                      <div class="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
+                        {{{icon "coins" class="h-4 w-4 text-green-600"}}}
+                      </div>
                     {{else if (eq type "idea_shared")}}
-                      {{{icon "share" class="mr-2 h-4 w-4 text-blue-500"}}}
+                      <div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                        {{{icon "share" class="h-4 w-4 text-blue-600"}}}
+                      </div>
                     {{else}}
-                      {{{icon "bell" class="mr-2 h-4 w-4 text-gray-500"}}}
+                      <div class="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center">
+                        {{{icon "bell" class="h-4 w-4 text-gray-600"}}}
+                      </div>
                     {{/if}}
-                    {{message}}
-                  </span>
-                  <span class="text-xs text-muted-foreground">{{moment created_at format="MMM D, h:mm A"}}</span>
-                </div>
-              </a>
+                  </div>
+                  <div class="flex-1 min-w-0">
+                    <p class="text-sm font-medium text-foreground leading-5 {{#if is_read}}text-muted-foreground{{/if}}">{{truncate message 80}}</p>
+                    <p class="text-xs text-muted-foreground mt-1">{{moment created_at format="MMM D, h:mm A"}}</p>
+                  </div>
+                  {{#unless is_read}}
+                    <div class="flex-shrink-0 ml-2">
+                      <div class="w-2 h-2 bg-primary rounded-full"></div>
+                    </div>
+                  {{/unless}}
+                </a>
+              </div>
             {{/each}}
-            <div class="bg-border -mx-1 my-1 h-px"></div>
-            <a href="/notification" class="relative flex cursor-default select-none items-center rounded-sm px-2 py-2 text-sm outline-none transition-colors hover:bg-primary-100 hover:text-primary-900">
-              <span class="flex">{{{icon "arrow-right" class="mr-2 h-4 w-4"}}}View All Notifications</span>
-            </a>
+            <div class="border-t border-border mt-2 pt-2">
+              <a href="/notification" class="flex items-center justify-center w-full px-3 py-2 text-sm font-medium text-primary hover:text-primary-foreground hover:bg-primary rounded-md transition-colors">
+                {{{icon "arrow-right" class="mr-2 h-4 w-4"}}}
+                View All Notifications
+              </a>
+            </div>
           {{else}}
             <div hx-get="/api/notifications/dropdown" hx-trigger="revealed" hx-target="this" hx-swap="innerHTML">
               <div class="px-2 py-2 text-sm text-muted-foreground">Loading...</div>

@@ -6,7 +6,7 @@ console.log(`🚀 Starting app on port ${config.port}...`);
 const server = app.listen(config.port, () => {
   console.log(`🚀 Server running at http://localhost:${config.port}`);
   console.log(`🌍 Environment: ${config.nodeEnv}`);
-  console.log(`📊 SSR + HTMX + Handlebars enabled`);
+  console.log(`📊 SSR-only rendering enabled`);
 });
 
 process.on("SIGTERM", () => {

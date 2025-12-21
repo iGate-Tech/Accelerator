@@ -33,20 +33,14 @@
     }
 
     .logo-path {
-      stroke-dasharray: 500;
+      stroke-dasharray: 500 500;
       stroke-dashoffset: 500;
-      animation: draw-logo 3s ease-in-out infinite;
+      animation: move-stroke 3s linear infinite;
     }
 
-    @keyframes draw-logo {
-      0% {
-        stroke-dashoffset: 500;
-      }
-      50% {
-        stroke-dashoffset: 0;
-      }
-      100% {
-        stroke-dashoffset: 500;
+    @keyframes move-stroke {
+      to {
+        stroke-dashoffset: -500;
       }
     }
   </style>

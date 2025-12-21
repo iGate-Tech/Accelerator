@@ -1,7 +1,7 @@
 /** @type {import('tailwindcss').Config} */
 export default {
   content: ["./lib/**/*.{js,hbs}"],
-  darkMode: "media",
+  darkMode: "class",
   theme: {
     extend: {
       fontFamily: {

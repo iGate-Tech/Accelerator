@@ -1,8 +1,9 @@
-   <div class="bg-background">
+    <div class="bg-background">
       <div class="bg-background flex min-h-svh flex-col items-center justify-center gap-6 p-6 md:p-10">
           <div class="w-full max-w-md">
             <div class="flex flex-col gap-6">
-                <form hx-post="/auth/signup" hx-on:submit="showLoadingFor4Seconds()">
+               <div id="alert-container" class="w-full max-w-md"></div>
+                <form hx-post="/auth/signup" hx-target="#alert-container" hx-swap="innerHTML" hx-on:htmx:before-request="clearAlerts()" hx-on:submit="showLoadingFor4Seconds()">
                   <div data-slot="field-group" class="group/field-group @container/field-group flex w-full flex-col gap-7 data-[slot=checkbox-group]:gap-3 [&>[data-slot=field-group]]:gap-4">
                      <div class="flex flex-col items-center gap-2 text-center">
                         <a href="#" class="flex flex-col items-center gap-2 font-medium">
@@ -11,7 +12,7 @@
                            </div>
                            <span class="sr-only">Accelerator</span>
                         </a>
-                        <h1 class="text-xl font-bold">{{t 'auth.signup.title'}}</h1>
+                        <h1 class="text-xl font-bold text-foreground">{{t 'auth.signup.title'}}</h1>
                         <p data-slot="field-description" class="text-muted-foreground text-sm leading-normal font-normal group-has-[[data-orientation=horizontal]]/field:text-balance last:mt-0 nth-last-2:-mt-1 [[data-variant=legend]+&]:-mt-1.5 [&>a:hover]:text-primary [&>a]:underline [&>a]:underline-offset-4">{{t 'auth.signup.have_account'}} <a href="/auth/login">{{t 'auth.signup.login'}}</a></p>
                      </div>
                      <div role="group" data-slot="field" data-orientation="vertical" class="group/field flex w-full gap-3 data-[invalid=true]:text-destructive flex-col [&>*]:w-full [&>.sr-only]:w-auto">
@@ -42,14 +43,14 @@
                               <input class="h-4 w-4 appearance-none rounded-full border border-input checked:bg-primary checked:border-primary peer" id="terms" name="terms" type="checkbox" required />
                               {{{icon 'check' class='absolute inset-0 w-4 h-4 text-foreground scale-75 peer-checked:block hidden'}}}
                            </div>
-                           <label class="text-sm font-medium leading-none text-foreground peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="terms">
+                            <label class="text-sm font-medium leading-none text-foreground peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="terms">
                               {{t 'auth.signup.terms_agree'}}
                               <a href="/terms" class="text-primary hover:text-primary-600 focus:outline-none monotone-logo">{{t 'auth.terms.title'}}</a>
                            </label>
                         </div>
                      </div>
                      <div role="group" data-slot="field" data-orientation="vertical" class="group/field flex w-full gap-3 data-[invalid=true]:text-destructive flex-col [&>*]:w-full [&>.sr-only]:w-auto">
-                         <button type="submit" class="shiny-cta text-center bg-card w-full mx-auto relative" style="padding: 0.5rem 1rem; margin: 0 auto;">
+                          <button type="submit" class="shiny-cta text-center bg-white dark:bg-black w-full mx-auto relative" style="padding: 0.5rem 1rem; margin: 0 auto;">
                            {{t 'auth.signup.sign_up_button'}}
                            <span class="htmx-indicator absolute inset-0 flex items-center justify-center">
                              {{{icon 'loader-2' class='animate-spin h-4 w-4'}}}
@@ -60,7 +61,7 @@
                         <div data-orientation="horizontal" role="none" data-slot="separator" class="bg-border shrink-0 data-[orientation=horizontal]:h-px data-[orientation=horizontal]:w-full data-[orientation=vertical]:h-full data-[orientation=vertical]:w-px absolute inset-0 top-1/2"></div>
                          <span class="bg-background text-muted-foreground relative mx-auto block w-fit px-2" data-slot="field-separator-content">{{t 'auth.login.or_separator'}}</span>
                      </div>
-<div role="group" data-slot="field" data-orientation="vertical" class="group/field w-full data-[invalid=true]:text-destructive flex-col [&amp;&gt;*]:w-full [&amp;&gt;.sr-only]:w-auto grid gap-4 sm:grid-cols-2"><button data-slot="button" data-variant="outline" data-size="default" class="w-full inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg:not([class*='size-'])]:size-3 shrink-0 [&amp;_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive border bg-background shadow-xs hover:bg-accent hover:text-accent-foreground dark:bg-input/30 dark:border-input dark:hover:bg-input/50 h-9 px-4 py-2 has-[&gt;svg]:px-3" type="button"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12.152 6.896c-.948 0-2.415-1.078-3.96-1.04-2.04.027-3.91 1.183-4.961 3.014-2.117 3.675-.546 9.103 1.519 12.09 1.013 1.454 2.208 3.09 3.792 3.039 1.52-.065 2.09-.987 3.935-.987 1.831 0 2.35.987 3.96.948 1.637-.026 2.676-1.48 3.676-2.948 1.156-1.688 1.636-3.325 1.662-3.415-.039-.013-3.182-1.221-3.22-4.857-.026-3.04 2.48-4.494 2.597-4.559-1.429-2.09-3.623-2.324-4.39-2.376-2-.156-3.675 1.09-4.61 1.09zM15.53 3.83c.843-1.012 1.4-2.427 1.245-3.83-1.207.052-2.662.805-3.532 1.818-.78.896-1.454 2.338-1.273 3.714 1.338.104 2.715-.688 3.559-1.701" fill="currentColor"></path></svg>{{t 'auth.login.continue_with_apple'}}</button><button data-slot="button" data-variant="outline" data-size="default" class="w-full inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg:not([class*='size-'])]:size-3 shrink-0 [&amp;_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive border bg-background shadow-xs hover:bg-accent hover:text-accent-foreground dark:bg-input/30 dark:border-input dark:hover:bg-input/50 h-9 px-4 py-2 has-[&gt;svg]:px-3" type="button"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12.48 10.92v3.28h7.84c-.24 1.84-.853 3.187-1.787 4.133-1.147 1.147-2.933 2.4-6.053 2.4-4.827 0-8.6-3.893-8.6-8.72s3.773-8.72 8.6-8.72c2.6 0 4.507 1.027 5.907 2.347l2.307-2.307C18.747 1.44 16.133 0 12.48 0 5.867 0 .307 5.387.307 12s5.56 12 12.173 12c3.573 0 6.267-1.173 8.373-3.36 2.16-2.16 2.84-5.213 2.84-7.667 0-.76-.053-1.467-.173-2.053H12.48z" fill="currentColor"></path></svg>{{t 'auth.login.continue_with_google'}}</button></div>
+<div role="group" data-slot="field" data-orientation="vertical" class="group/field w-full data-[invalid=true]:text-destructive flex-col [&amp;&gt;*]:w-full [&amp;&gt;.sr-only]:w-auto grid gap-4 sm:grid-cols-2"><button data-slot="button" data-variant="outline" data-size="default" class="w-full inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg:not([class*='size-'])]:size-3 shrink-0 [&amp;_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive border bg-background shadow-xs hover:bg-accent hover:text-accent-foreground dark:bg-input/30 dark:border-input dark:hover:bg-input/50 h-9 px-4 py-2 has-[&gt;svg]:px-3" type="button"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="h-5 w-5"><path d="M12.152 6.896c-.948 0-2.415-1.078-3.96-1.04-2.04.027-3.91 1.183-4.961 3.014-2.117 3.675-.546 9.103 1.519 12.09 1.013 1.454 2.208 3.09 3.792 3.039 1.52-.065 2.09-.987 3.935-.987 1.831 0 2.35.987 3.96.948 1.637-.026 2.676-1.48 3.676-2.948 1.156-1.688 1.636-3.325 1.662-3.415-.039-.013-3.182-1.221-3.22-4.857-.026-3.04 2.48-4.494 2.597-4.559-1.429-2.09-3.623-2.324-4.39-2.376-2-.156-3.675 1.09-4.61 1.09zM15.53 3.83c.843-1.012 1.4-2.427 1.245-3.83-1.207.052-2.662.805-3.532 1.818-.78.896-1.454 2.338-1.273 3.714 1.338.104 2.715-.688 3.559-1.701" fill="currentColor"></path></svg>{{t 'auth.login.continue_with_apple'}}</button><button data-slot="button" data-variant="outline" data-size="default" class="w-full inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg:not([class*='size-'])]:size-3 shrink-0 [&amp;_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive border bg-background shadow-xs hover:bg-accent hover:text-accent-foreground dark:bg-input/30 dark:border-input dark:hover:bg-input/50 h-9 px-4 py-2 has-[&gt;svg]:px-3" type="button"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="h-5 w-5"><path d="M12.48 10.92v3.28h7.84c-.24 1.84-.853 3.187-1.787 4.133-1.147 1.147-2.933 2.4-6.053 2.4-4.827 0-8.6-3.893-8.6-8.72s3.773-8.72 8.6-8.72c2.6 0 4.507 1.027 5.907 2.347l2.307-2.307C18.747 1.44 16.133 0 12.48 0 5.867 0 .307 5.387.307 12s5.56 12 12.173 12c3.573 0 6.267-1.173 8.373-3.36 2.16-2.16 2.84-5.213 2.84-7.667 0-.76-.053-1.467-.173-2.053H12.48z" fill="currentColor"></path></svg>{{t 'auth.login.continue_with_google'}}</button></div>
                   </div>
                </form>
                 <p data-slot="field-description" class="text-muted-foreground text-sm leading-normal font-normal group-has-[[data-orientation=horizontal]]/field:text-balance last:mt-0 nth-last-2:-mt-1 [[data-variant=legend]+&]:-mt-1.5 [&>a:hover]:text-primary [&>a]:underline [&>a]:underline-offset-4 px-6 text-center">{{{t 'auth.login.privacy_agreement'}}}</p>
@@ -68,14 +69,41 @@
          </div>
       </div>
    </div>
-   <script>
-   function togglePasswordVisibility() {
-      const input = document.getElementById('password');
-      const eyeIcon = document.getElementById('eye-icon');
-      const eyeOffIcon = document.getElementById('eye-off-icon');
-      const isPassword = input.type === 'password';
-      input.type = isPassword ? 'text' : 'password';
-      eyeIcon.classList.toggle('hidden', !isPassword);
-      eyeOffIcon.classList.toggle('hidden', isPassword);
-   }
-   </script>
+    <script>
+    function togglePasswordVisibility() {
+       const input = document.getElementById('password');
+       const eyeIcon = document.getElementById('eye-icon');
+       const eyeOffIcon = document.getElementById('eye-off-icon');
+       const isPassword = input.type === 'password';
+       input.type = isPassword ? 'text' : 'password';
+       eyeIcon.classList.toggle('hidden', !isPassword);
+       eyeOffIcon.classList.toggle('hidden', isPassword);
+    }
+
+    function clearAlerts() {
+       const container = document.getElementById('alert-container');
+       if (container) {
+         container.innerHTML = '';
+       }
+    }
+
+    // Auto-hide alerts after 5 seconds
+    function setupAlertAutoHide() {
+       setTimeout(() => {
+         const alerts = document.querySelectorAll('.alert-auto-hide');
+         alerts.forEach(alert => {
+           alert.classList.add('alert-hide');
+           setTimeout(() => alert.remove(), 300);
+         });
+       }, 5000);
+    }
+
+    // Observe for new alerts
+    const alertContainer = document.getElementById('alert-container');
+    if (alertContainer) {
+       const observer = new MutationObserver(() => {
+         setupAlertAutoHide();
+       });
+       observer.observe(alertContainer, { childList: true });
+    }
+    </script>

@@ -51,8 +51,8 @@
   {{#if styles}}{{styles}}{{/if}}
 </head>
 
-<body class="{{bodyClass}}
-      bg-base-100 pb-8">
+  <body class="{{bodyClass}}
+      bg-background pb-8">
   <button id="lang-toggle" class="absolute top-4 {{#if (eq lng 'ar')}}right-4{{else}}left-4{{/if}} text-foreground hover:text-muted-foreground transition-colors z-10 px-2 py-1 text-sm font-medium flex items-center">
     {{{icon 'languages' class='h-4 w-4 mr-1'}}}
     <span id="lang-text">EN</span>
@@ -118,9 +118,11 @@
       const savedTheme
         = localStorage.getItem('theme'); const systemPrefersDark =
           window.matchMedia('(prefers-color-scheme: dark)').matches; const theme =
-            savedTheme || (systemPrefersDark ? 'dark' : 'light'); const isDark = theme
+            'light';       const isDark = theme
               === 'dark'; if (isDark) {
                 document.documentElement.classList.add('dark');
+              } else {
+                document.documentElement.classList.remove('dark');
               } updateThemeIcon(isDark);
       updateLangText();
       document.getElementById('theme-toggle').addEventListener('click', toggleTheme);
@@ -129,45 +131,18 @@
     // Use the enhanced toast system from public/js/toast.js
     // The showToast function is already defined in toast.js
   </script>
-  <div id="toast-container" style="position: fixed; top: 5rem; right: 27rem; z-index: 9999; width: 400px; height: auto; pointer-events: none;"></div>
+   {{#if scripts}}{{scripts}}{{/if}}
+    <script>
+      function showLoadingFor4Seconds() {
+        const loading = document.getElementById('global-loading');
+        loading.style.display = 'block';
+        setTimeout(() => {
+          loading.style.display = 'none';
+        }, 4000);
+      }
+    </script>
 
-  {{#if scripts}}{{scripts}}{{/if}}
 
-   <script src="/js/toast.js"></script>
-   <script>
-     function showLoadingFor4Seconds() {
-       const loading = document.getElementById('global-loading');
-       loading.style.display = 'block';
-       setTimeout(() => {
-         loading.style.display = 'none';
-       }, 4000);
-     }
-
-     document.body.addEventListener('show-toast', function(evt) {
-       showToast(evt.detail.message, evt.detail.type);
-     });
-   </script>
-
-  {{#if flash.success}}
-  {{#each flash.success}}
-  <script>showToast({{{ json this}}}, 'success');</script>
-  {{/each}}
-  {{/if}}
-  {{#if flash.error}}
-  {{#each flash.error}}
-  <script>showToast({{{ json this}}}, 'error');</script>
-  {{/each}}
-  {{/if}}
-  {{#if flash.info}}
-  {{#each flash.info}}
-  <script>showToast({{{ json this}}}, 'info');</script>
-  {{/each}}
-  {{/if}}
-   {{#if flash.warning}}
-   {{#each flash.warning}}
-   <script>showToast({{{ json this}}}, 'warning');</script>
-   {{/each}}
-   {{/if}}
 
    <div id="global-loading">
      {{> loading}}

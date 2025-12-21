@@ -83,7 +83,9 @@
       "forgot_password": "Forgot password?",
       "login_button": "Login",
       "no_account": "Don't have an account?",
-      "sign_up": "Sign up"
+      "sign_up": "Sign up",
+      "continue_with_apple": "Continue with Apple",
+      "continue_with_google": "Continue with Google"
     },
     "signup": {
       "title": "Sign Up",

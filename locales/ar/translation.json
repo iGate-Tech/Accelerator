@@ -83,7 +83,9 @@
       "forgot_password": "نسيت كلمة المرور؟",
       "login_button": "تسجيل الدخول",
       "no_account": "ليس لديك حساب؟",
-      "sign_up": "التسجيل"
+      "sign_up": "التسجيل",
+      "continue_with_apple": "المتابعة باستخدام Apple",
+      "continue_with_google": "المتابعة باستخدام Google"
     },
     "signup": {
       "title": "التسجيل",

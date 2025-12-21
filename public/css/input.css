@@ -679,8 +679,8 @@
 
 @layer utilities {
   body {
-    background-color: #030303;
-    color: #ffffff;
+    background-color: var(--color-background);
+    color: var(--color-foreground);
     -webkit-font-smoothing: antialiased;
   }
 
@@ -987,17 +987,17 @@
 
 /* Track */
 ::-webkit-scrollbar-track {
-  background: #ffffff60;
+  background: hsl(var(--color-muted) / 0.6);
   border-radius: 10px;
 }
 
 /* Handle */
 ::-webkit-scrollbar-thumb {
-  background: #ffffffa2;
+  background: hsl(var(--color-muted-foreground) / 0.6);
   border-radius: 10px;
 }
 
 /* Handle on hover */
 ::-webkit-scrollbar-thumb:hover {
-  background: #555;
+  background: var(--color-muted-foreground);
 }

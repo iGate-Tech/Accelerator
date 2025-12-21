@@ -33,15 +33,20 @@
     }
 
     .logo-path {
-      animation: rotate-logo 2s linear infinite;
+      stroke-dasharray: 500;
+      stroke-dashoffset: 500;
+      animation: draw-logo 3s ease-in-out infinite;
     }
 
-    @keyframes rotate-logo {
-      from {
-        transform: rotate(0deg);
+    @keyframes draw-logo {
+      0% {
+        stroke-dashoffset: 500;
       }
-      to {
-        transform: rotate(360deg);
+      50% {
+        stroke-dashoffset: 0;
+      }
+      100% {
+        stroke-dashoffset: 500;
       }
     }
   </style>

@@ -6,10 +6,10 @@
     {{{icon 'sun' class='h-6 w-6' id='sun-icon'}}}
     {{{icon 'moon' class='h-6 w-6 hidden' id='moon-icon'}}}
   </button>
-  <div class="w-full min-h-screen flex flex-col items-center justify-center px-4" >
-     <img src="/images/accelerator_logo.svg" alt="Accelerator Logo" class="w-32 sm:w-40 my-6 sm:my-10" />
-   <div class="flex items-center">
-     <div class="flex flex-col items-center justify-center h-full gap-6 w-full max-w-[400px] mx-auto bg-card shadow-primary rounded-lg p-4 sm:p-6 border border-input">
+  <div class="w-full min-h-screen flex flex-col items-center justify-center" >
+     <div class="max-w-sm mx-auto px-3 sm:px-0 w-full relative">
+        <img src="/images/accelerator_logo.svg" alt="Accelerator Logo" class="w-32 sm:w-40 my-4 sm:my-8 mx-auto" />
+        <div class="flex flex-col items-center justify-center h-full gap-4 w-full mx-auto bg-card shadow-primary rounded-lg p-3 sm:p-5 border border-input">
       <div class="grid gap-2 text-center">
          <h1 class="text-3xl font-bold text-foreground text-glow text-center">{{t 'auth.signup.title'}}</h1>
          <p class="text-balance text-muted-foreground">
@@ -17,7 +17,7 @@
          </p>
       </div>
 
-      <form action="/auth/signup" method="post" class="grid gap-4 text-center">
+       <form action="/auth/signup" method="post" class="grid gap-3 text-center w-full">
 
         <div class="grid gap-2 text-left">
            <label
@@ -58,16 +58,16 @@
               for="password">
               {{t 'auth.signup.password_label'}}
             </label>
-             <input type="password" name="password"
-               class="flex h-9 w-full rounded-md border border-input/80 bg-transparent px-3 py-1 text-sm text-foreground shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
-               id="password" placeholder="{{t 'auth.signup.password_placeholder'}}" required="" />
+              <input type="password" name="password"
+                class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm text-foreground shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+                id="password" placeholder="{{t 'auth.signup.password_placeholder'}}" required="" />
          </div>
 
         <div class="flex items-center space-x-2">
-          <div class="relative">
-            <input class="h-4 w-4 appearance-none rounded-full border border-input/80 checked:bg-primary checked:border-primary peer" id="terms" name="terms" type="checkbox" required />
- {{{icon 'check' class='absolute inset-0 w-4 h-4 text-foreground scale-75 peer-checked:block hidden' size='24'}}}
-          </div>
+           <div class="relative">
+             <input class="h-4 w-4 appearance-none rounded-full border border-input checked:bg-primary checked:border-primary peer" id="terms" name="terms" type="checkbox" required />
+  {{{icon 'check' class='absolute inset-0 w-4 h-4 text-foreground scale-75 peer-checked:block hidden'}}}
+           </div>
            <label
              class="text-sm font-medium leading-none text-foreground peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
              for="terms">
@@ -77,7 +77,7 @@
         </div>
 
          <div class="w-full">
-           <button type="submit" class="shiny-cta text-center bg-card w-full sm:w-[200px] mx-auto"
+           <button type="submit" class="shiny-cta text-center bg-card w-full mx-auto"
              style="padding: 0.5rem 1rem; margin: 0 auto;">
               {{t 'auth.signup.sign_up_button'}}
            </button>
@@ -89,51 +89,9 @@
          {{t 'auth.signup.have_account'}}
          <a class="underline text-muted-foreground hover:text-foreground focus:outline-none monotone-logo"
            href="/auth/login">{{t 'auth.signup.login'}}</a>
-       </div>
-
-      </div>
-    </div>
-   <div class="mb-[200px]"></div>
+        </div>
+     </div>
   </div>
 
-<script>
-function toggleTheme() {
-  const html = document.documentElement;
-  html.classList.toggle('dark');
-  const isDark = html.classList.contains('dark');
-  localStorage.setItem('theme', isDark ? 'dark' : 'light');
-  updateThemeIcon();
-}
 
-function updateThemeIcon() {
-  const sunIcon = document.getElementById('sun-icon');
-  const moonIcon = document.getElementById('moon-icon');
-  const isDark = document.documentElement.classList.contains('dark');
-  sunIcon.classList.toggle('hidden', isDark);
-  moonIcon.classList.toggle('hidden', !isDark);
-}
-
-function toggleLanguage() {
-  const currentLng = document.documentElement.lang || 'en';
-  const newLng = currentLng === 'ar' ? 'en' : 'ar';
-  document.cookie = `i18next=${newLng}; path=/; max-age=31536000`;
-  window.location.reload();
-}
-
-function updateLangText() {
-  const currentLng = document.documentElement.lang || 'en';
-  document.getElementById('lang-text').textContent = currentLng.toUpperCase();
-}
-
-document.addEventListener('DOMContentLoaded', () => {
-  const savedTheme = localStorage.getItem('theme');
-  if (savedTheme === 'dark' || (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-    document.documentElement.classList.add('dark');
-  }
-  updateThemeIcon();
-  updateLangText();
-  document.getElementById('theme-toggle').addEventListener('click', toggleTheme);
-  document.getElementById('lang-toggle').addEventListener('click', toggleLanguage);
-});
-</script>
   </div>

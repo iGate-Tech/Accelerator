@@ -31,6 +31,24 @@
     #global-loading {
       display: block;
     }
+
+    .logo-path {
+      stroke-dasharray: 500;
+      stroke-dashoffset: 500;
+      animation: draw-logo 3s ease-in-out infinite;
+    }
+
+    @keyframes draw-logo {
+      0% {
+        stroke-dashoffset: 500;
+      }
+      50% {
+        stroke-dashoffset: 0;
+      }
+      100% {
+        stroke-dashoffset: 500;
+      }
+    }
   </style>
   {{#if styles}}{{styles}}{{/if}}
 </head>

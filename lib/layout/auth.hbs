@@ -33,12 +33,12 @@
     }
 
     .logo-path {
-      stroke-dasharray: 500 500;
+      stroke-dasharray: 500;
       stroke-dashoffset: 500;
-      animation: move-stroke 3s linear infinite;
+      animation: move-360 1s linear infinite;
     }
 
-    @keyframes move-stroke {
+    @keyframes move-360 {
       to {
         stroke-dashoffset: -500;
       }

@@ -1,9 +1,9 @@
-<div class="items-center flex flex-col mt-10" dir="{{#if (eq lng 'ar')}}rtl{{else}}ltr{{/if}}" style="direction: {{#if (eq lng 'ar')}}rtl{{else}}ltr{{/if}}; text-align: {{#if (eq lng 'ar')}}right{{else}}left{{/if}};"
-  <div class="">
-    <img src="/images/accelerator_logo.svg" alt="Accelerator Logo" class="w-40 mb-10"  />
-  </div>
-    <div class="">
-      <div class="grid gap-2 text-center mb-8">
+<div class="flex flex-col mt-10" dir="{{#if (eq lng 'ar')}}rtl{{else}}ltr{{/if}}" style="direction: {{#if (eq lng 'ar')}}rtl{{else}}ltr{{/if}}; text-align: {{#if (eq lng 'ar')}}right{{else}}left{{/if}};"
+    <div class="text-center">
+      <img src="/images/accelerator_logo.svg" alt="Accelerator Logo" class="w-40 mb-10 mx-auto"  />
+    </div>
+     <div class="max-w-4xl mx-auto">
+       <div class="grid gap-2 text-center mb-8">
          <h1 class="text-3xl font-bold text-foreground text-glow text-center">{{t 'auth.terms.title'}}</h1>
          <p class="text-balance text-muted-foreground">
           {{t 'auth.terms.description'}}

@@ -771,6 +771,10 @@
     width: calc(var(--spacing) * 24);
     height: calc(var(--spacing) * 24);
   }
+  .size-\[192px\] {
+    width: 192px;
+    height: 192px;
+  }
   .h-0\.5 {
     height: calc(var(--spacing) * 0.5);
   }

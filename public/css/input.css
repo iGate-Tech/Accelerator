@@ -405,6 +405,11 @@
     @apply text-yellow-800 dark:text-yellow-200;
   }
 
+  /* Sticky alerts */
+  .alert-sticky {
+    @apply fixed top-4 left-1/2 transform -translate-x-1/2 z-50 w-auto max-w-md;
+  }
+
   /* Auto-hide for alerts */
   .alert-auto-hide {
     animation: alert-fade-in 0.3s ease-out;

@@ -106,28 +106,33 @@
                 darkIcon.classList.add('hidden'); lightIcon.classList.remove('hidden');
               }
             }
+    } function normalizeLanguage(lang) {
+      if (!lang) return 'en';
+      const normalized = lang.toLowerCase().split('-')[0];
+      return ['en', 'ar'].includes(normalized) ? normalized : 'en';
     } function toggleLanguage() {
-      const currentLng = document.documentElement.lang || 'en';
-      const newLng = currentLng === 'ar' ? 'en' : 'ar';
-      document.cookie = `i18next=${newLng}; path=/; max-age=31536000`;
-      window.location.reload();
-    } function updateLangText() {
-      const currentLng = document.documentElement.lang || 'en';
-      document.getElementById('lang-text').textContent = currentLng.toUpperCase();
-    } document.addEventListener('DOMContentLoaded', () => {
-      const savedTheme
-        = localStorage.getItem('theme'); const systemPrefersDark =
-          window.matchMedia('(prefers-color-scheme: dark)').matches; const theme =
-            'light';       const isDark = theme
-              === 'dark'; if (isDark) {
-                document.documentElement.classList.add('dark');
-              } else {
-                document.documentElement.classList.remove('dark');
-              } updateThemeIcon(isDark);
-      updateLangText();
-      document.getElementById('theme-toggle').addEventListener('click', toggleTheme);
-      document.getElementById('lang-toggle').addEventListener('click', toggleLanguage);
-    });
+      const currentLng = normalizeLanguage(localStorage.getItem('language') || document.documentElement.lang || 'en');
+      const newLng = currentLng === 'en' ? 'ar' : 'en';
+      localStorage.setItem('language', newLng);
+      updateLangText(newLng);
+      window.location.href = `?lng=${newLng}`;
+    } function updateLangText(lang) {
+      document.getElementById('lang-text').textContent = lang.toUpperCase();
+     } document.addEventListener('DOMContentLoaded', () => {
+       const savedTheme
+         = localStorage.getItem('theme'); const systemPrefersDark =
+           window.matchMedia('(prefers-color-scheme: dark)').matches; const theme =
+             savedTheme || (systemPrefersDark ? 'dark' : 'light');       const isDark = theme
+               === 'dark'; if (isDark) {
+                 document.documentElement.classList.add('dark');
+               } else {
+                 document.documentElement.classList.remove('dark');
+               } updateThemeIcon(isDark);
+       const currentLang = normalizeLanguage(localStorage.getItem('language') || 'en');
+       updateLangText(currentLang);
+       document.getElementById('theme-toggle').addEventListener('click', toggleTheme);
+       document.getElementById('lang-toggle').addEventListener('click', toggleLanguage);
+     });
     // Use the enhanced toast system from public/js/toast.js
     // The showToast function is already defined in toast.js
   </script>

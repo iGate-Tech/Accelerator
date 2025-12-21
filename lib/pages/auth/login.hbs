@@ -67,15 +67,17 @@
 
     // Auto-hide alerts after 5 seconds
     function setupAlertAutoHide() {
-       setTimeout(() => {
-         const alerts = document.querySelectorAll('.alert-auto-hide');
-         alerts.forEach(alert => {
-           alert.classList.add('alert-hide');
-           setTimeout(() => alert.remove(), 300);
-         });
-       }, 5000);
+        setTimeout(() => {
+          const alerts = document.querySelectorAll('.alert-auto-hide');
+          alerts.forEach(alert => alert.remove());
+        }, 5000);
     }
 
-    // Alerts are added to body and auto-hide after 5 seconds
+    // Setup auto-hide for alerts added via HTMX
+    document.addEventListener('htmx:afterSwap', (event) => {
+      if (event.detail.target === document.body) {
+        setupAlertAutoHide();
+      }
+    });
     </script>
 

@@ -27,6 +27,14 @@
     #login-spinner {
       display: none;
     }
+
+    #global-loading {
+      display: none;
+    }
+
+    .htmx-request #global-loading {
+      display: flex;
+    }
   </style>
   {{#if styles}}{{styles}}{{/if}}
 </head>
@@ -135,11 +143,14 @@
   <script>showToast({{{ json this}}}, 'info');</script>
   {{/each}}
   {{/if}}
-  {{#if flash.warning}}
-  {{#each flash.warning}}
-  <script>showToast({{{ json this}}}, 'warning');</script>
-  {{/each}}
-  {{/if}}
-</body>
+   {{#if flash.warning}}
+   {{#each flash.warning}}
+   <script>showToast({{{ json this}}}, 'warning');</script>
+   {{/each}}
+   {{/if}}
 
+   <div id="global-loading" class="fixed inset-0 bg-white dark:bg-gray-900 flex items-center justify-center z-50">
+     <img src="/images/favicon.svg" alt="Loading" class="w-16 h-16 animate-pulse">
+   </div>
+</body>
 </html>

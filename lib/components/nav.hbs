@@ -298,21 +298,50 @@
 
 
 
-          <!-- Log out item -->
-          <a hx-post="/auth/logout"
-            class="w-full relative flex cursor-default select-none items-center gap-2 rounded-sm px-2 py-2 text-sm text-left outline-none transition-colors text-error hover:bg-error/10">
+           <!-- Log out item -->
+           <button onclick="showLogoutConfirm()"
+             class="w-full relative flex cursor-default select-none items-center gap-2 rounded-sm px-2 py-2 text-sm text-left outline-none transition-colors text-error hover:bg-error/10">
 
- {{{icon 'log-out' class='h-4 w-4 shrink-0' size='16'}}}
+  {{{icon 'log-out' class='h-4 w-4 shrink-0' size='16'}}}
 
-             {{t 'nav.logout'}}
-          </a>
+              {{t 'nav.logout'}}
+           </button>
 
 
         </div>
       </div>
-    </div>
-  </div>
-</nav>
+     </div>
+   </div>
+
+   <!-- Logout Confirmation Modal -->
+   <div id="logout-confirm-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+     <div class="bg-card border border-input rounded-lg shadow-lg p-6 max-w-sm w-full mx-4">
+       <div class="flex items-center gap-3 mb-4">
+         {{{icon 'alert-triangle' class='h-6 w-6 text-error'}}}
+         <h3 class="text-lg font-semibold text-foreground">{{t 'nav.logout'}}</h3>
+       </div>
+       <p class="text-muted-foreground mb-6">{{t 'nav.logout_confirm'}}</p>
+       <div class="flex gap-3 justify-end">
+         <button onclick="hideLogoutConfirm()" class="px-4 py-2 text-sm font-medium text-muted-foreground hover:text-foreground border border-input rounded-md">
+           {{t 'nav.cancel'}}
+         </button>
+         <button hx-post="/auth/logout" onclick="hideLogoutConfirm()" class="px-4 py-2 text-sm font-medium bg-error text-error-foreground rounded-md hover:bg-error/90">
+           {{t 'nav.logout'}}
+         </button>
+       </div>
+     </div>
+   </div>
+ </nav>
+
+<script>
+function showLogoutConfirm() {
+  document.getElementById('logout-confirm-modal').classList.remove('hidden');
+}
+
+function hideLogoutConfirm() {
+  document.getElementById('logout-confirm-modal').classList.add('hidden');
+}
+</script>
 
 
 

@@ -1,6 +1,6 @@
 {{> progress-bar activeStep=activeStep ideaId=ideaId}}
 
-{{> model-header title=pageTitle description= (t "models.legal.overview")
+{{> model-header title=pageTitle description=(t "models.legal.overview")
 ratingStars="★★★★★" ratingValue="5.0" voteCount="0 votes" category=ideaCategory tags=ideaTags}}
 
 {{> model-progress data='[
@@ -9,31 +9,31 @@ ratingStars="★★★★★" ratingValue="5.0" voteCount="0 votes" category=ide
     "fullLabel": "1. Company Structure",
     "shortLabel": "1.",
     "position": 0
-  },
+  }},
   {
     "id": "intellectual-property",
     "fullLabel": "2. Intellectual Property",
     "shortLabel": "2.",
     "position": 25
-  },
+  }},
   {
     "id": "contracts-agreements",
     "fullLabel": "3. Contracts & Agreements",
     "shortLabel": "3.",
     "position": 50
-  },
+  }},
   {
     "id": "compliance-regulations",
     "fullLabel": "4. Compliance & Regulations",
     "shortLabel": "4.",
     "position": 75
-  },
+  }},
   {
     "id": "cap-table-equity",
     "fullLabel": "5. Cap Table & Equity",
     "shortLabel": "5.",
     "position": 100
-  }
+  }}
 ]'}}
 
 <main class="flex flex-col mx-auto items-center justify-center">
@@ -63,9 +63,9 @@ ratingStars="★★★★★" ratingValue="5.0" voteCount="0 votes" category=ide
                      </div>
                  </div>
                 <div class="flex items-start gap-4">
-                    <div class="w-8 h-8  rounded-full flex items-center justify-center text-sm font-bold relative z-10">{{{icon 'check-circle' class='w-8 h-8 text-success' size='32'}}}</div>
+                    <div class="w-8 h-8  rounded-full flex items-center justify-center text-sm font-bold relative z-10">{{{icon 'check-circle' class='w-8 h-8 text-success' size='32'}}</div>
                     <div class="flex-1">
-                        {{> move-next-block message="(t "models.legal.section_completed")" buttonText="(t "models.legal.move_next")"}}
+                        {{> move-next-block message=(t "models.legal.section_completed") buttonText=(t "models.legal.move_next")}}
                     </div>
                 </div>
             </div>
@@ -90,9 +90,9 @@ ratingStars="★★★★★" ratingValue="5.0" voteCount="0 votes" category=ide
                      </div>
                  </div>
                 <div class="flex items-start gap-4">
-                    <div class="w-8 h-8  rounded-full flex items-center justify-center text-sm font-bold relative z-10">{{{icon 'check-circle' class='w-8 h-8 text-success' size='32'}}}</div>
+                    <div class="w-8 h-8  rounded-full flex items-center justify-center text-sm font-bold relative z-10">{{{icon 'check-circle' class='w-8 h-8 text-success' size='32'}}</div>
                     <div class="flex-1">
-                        {{> move-next-block message="(t "models.legal.section_completed")" buttonText="(t "models.legal.move_next")"}}
+                        {{> move-next-block message=(t "models.legal.section_completed") buttonText=(t "models.legal.move_next")}}
                     </div>
                 </div>
             </div>
@@ -111,9 +111,9 @@ ratingStars="★★★★★" ratingValue="5.0" voteCount="0 votes" category=ide
                      </div>
                  </div>
                 <div class="flex items-start gap-4">
-                    <div class="w-8 h-8  rounded-full flex items-center justify-center text-sm font-bold relative z-10">{{{icon 'check-circle' class='w-8 h-8 text-success' size='32'}}}</div>
+                    <div class="w-8 h-8  rounded-full flex items-center justify-center text-sm font-bold relative z-10">{{{icon 'check-circle' class='w-8 h-8 text-success' size='32'}}</div>
                     <div class="flex-1">
-                        {{> move-next-block message="(t "models.legal.section_completed")" buttonText="(t "models.legal.move_next")"}}
+                        {{> move-next-block message=(t "models.legal.section_completed") buttonText=(t "models.legal.move_next")}}
                     </div>
                 </div>
             </div>
@@ -132,9 +132,9 @@ ratingStars="★★★★★" ratingValue="5.0" voteCount="0 votes" category=ide
                      </div>
                  </div>
                 <div class="flex items-start gap-4">
-                    <div class="w-8 h-8  rounded-full flex items-center justify-center text-sm font-bold relative z-10">{{{icon 'check-circle' class='w-8 h-8 text-success' size='32'}}}</div>
+                    <div class="w-8 h-8  rounded-full flex items-center justify-center text-sm font-bold relative z-10">{{{icon 'check-circle' class='w-8 h-8 text-success' size='32'}}</div>
                     <div class="flex-1">
-                        {{> move-next-block message="(t "models.legal.section_completed")" buttonText="(t "models.legal.move_next")"}}
+                        {{> move-next-block message=(t "models.legal.section_completed") buttonText=(t "models.legal.move_next")}}
                     </div>
                 </div>
             </div>
@@ -171,9 +171,9 @@ ratingStars="★★★★★" ratingValue="5.0" voteCount="0 votes" category=ide
                      </div>
                  </div>
                 <div class="flex items-start gap-4">
-                    <div class="w-8 h-8  rounded-full flex items-center justify-center text-sm font-bold relative z-10">{{{icon 'check-circle' class='w-8 h-8 text-success' size='32'}}}</div>
+                    <div class="w-8 h-8  rounded-full flex items-center justify-center text-sm font-bold relative z-10">{{{icon 'check-circle' class='w-8 h-8 text-success' size='32'}}</div>
                     <div class="flex-1">
-                        {{> move-next-block message="(t "models.legal.complete_legal")" buttonText="(t "models.legal.complete_legal_button")"}}
+                        {{> move-next-block message=(t "models.legal.complete_legal") buttonText=(t "models.legal.complete_legal_button")}}
                     </div>
                 </div>
             </div>

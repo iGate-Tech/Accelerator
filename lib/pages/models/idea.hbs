@@ -1,7 +1,7 @@
 {{> progress-bar activeStep=activeStep ideaId=ideaId}}
 
 
-{{> model-header title=pageTitle description= (t "models.idea.overview")
+{{> model-header title=pageTitle description=(t "models.idea.overview")
  ratingStars="★★★★★" ratingValue="5.0" voteCount="0 votes" category=ideaCategory tags=ideaTags}}
 
 {{> model-progress data="[
@@ -10,37 +10,37 @@
     fullLabel: '0. Executive Summary',
     shortLabel: '0.',
     position: 0  
-  },
+  }},
   {
     id: 'problem-validation',
     fullLabel: '1. Problem Validation',
     shortLabel: '1.',
     position: 20
-  },
+  }},
   {
     id: 'solution-development',
     fullLabel: '2. Solution Development',
     shortLabel: '2.',
     position: 40
-  },
+  }},
   {
     id: 'customer-model',
     fullLabel: '3. Customer Model',
     shortLabel: '3.',
     position: 60
-  },
+  }},
   {
     id: 'branding',
     fullLabel: '4. Branding',
     shortLabel: '4.',
     position: 80
-  },
+  }},
   {
     id: 'ip-protection',
     fullLabel: '5. IP Protection',
     shortLabel: '5.',
     position: 100
-  }
+  }}
 ]" }}
 
 <main class="flex flex-col mx-auto items-center justify-center">
@@ -72,7 +72,7 @@
                  <div class="flex items-start gap-4">
 <div class="w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold relative z-10">{{{icon 'check-circle' class='w-8 h-8 text-success' size='32'}}}</div>
                      <div class="flex-1">
-                         {{> move-next-block message="(t "models.idea.section_completed")" buttonText="(t "models.idea.move_next")"}}
+                          {{> move-next-block message=(t "models.idea.section_completed") buttonText=(t "models.idea.move_next")}}
                      </div>
                  </div>
              </div>
@@ -109,17 +109,17 @@
                 <div class="flex items-start gap-4 mb-6">
                   <div class="w-8 h-8 bg-primary rounded-full flex items-center justify-center text-sm font-bold relative z-10">4</div>
                   <div class="flex-1">
-                            {{> question-block id="problem-validation-q4" step="4" question="Describe existing solutions." placeholder="This section analyzes existing solutions. Include direct competitors and workarounds with strengths, weaknesses, pricing. AI can help research alternatives. Use this section for competitive analysis. Chat with AI to discover solutions or get competitive intelligence." description=problemValidationQ4 modelType="idea" section="problem-validation" ideaId=ideaId}}
-                  </div>
-                </div>
-                <div class="flex items-start gap-4">
-                  <div class="w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold relative z-10">
-                    {{{icon 'check-circle' class='w-8 h-8 text-success' size='32'}}}
-                  </div>
-                  <div class="flex-1">
-                    {{> move-next-block message="(t "models.idea.section_completed")" buttonText="(t "models.idea.move_next")"}}
-                  </div>
-                </div>
+                             {{> question-block id="problem-validation-q4" step="4" question="Describe existing solutions." placeholder="This section analyzes existing solutions. Include direct competitors and workarounds with strengths, weaknesses, pricing. AI can help research alternatives. Use this section for competitive analysis. Chat with AI to discover solutions or get competitive intelligence." description=problemValidationQ4 modelType="idea" section="problem-validation" ideaId=ideaId}}
+                   </div>
+                 </div>
+                 <div class="flex items-start gap-4">
+                   <div class="w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold relative z-10">
+                     {{{icon 'check-circle' class='w-8 h-8 text-success' size='32'}}}
+                   </div>
+                   <div class="flex-1">
+                     {{> move-next-block message=(t "models.idea.section_completed") buttonText=(t "models.idea.move_next")}}
+                   </div>
+                 </div>
             </div>
         </div>
 
@@ -137,17 +137,17 @@
                 <div class="flex items-start gap-4 mb-6">
                   <div class="w-8 h-8 bg-primary rounded-full flex items-center justify-center text-sm font-bold relative z-10">2</div>
                   <div class="flex-1">
-                            {{> question-block id="solution-development-q2" step="6" question="Describe your solution." placeholder="This section describes your solution comprehensively. Explain how it works, key features, problem-solving approach. AI can help refine technical descriptions. Use this section for product explanation. Chat with AI to improve solution descriptions or get clarity assistance." description=solutionDevelopmentQ2 modelType="idea" section="solution-development" ideaId=ideaId}}
-                  </div>
-                </div>
-                <div class="flex items-start gap-4">
-                  <div class="w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold relative z-10">
-                    {{{icon 'check-circle' class='w-8 h-8 text-success' size='32'}}}
-                  </div>
-                  <div class="flex-1">
-                    {{> move-next-block message="(t "models.idea.section_completed")" buttonText="(t "models.idea.move_next")"}}
-                  </div>
-                </div>
+                             {{> question-block id="solution-development-q2" step="6" question="Describe your solution." placeholder="This section describes your solution comprehensively. Explain how it works, key features, problem-solving approach. AI can help refine technical descriptions. Use this section for product explanation. Chat with AI to improve solution descriptions or get clarity assistance." description=solutionDevelopmentQ2 modelType="idea" section="solution-development" ideaId=ideaId}}
+                   </div>
+                 </div>
+                 <div class="flex items-start gap-4">
+                   <div class="w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold relative z-10">
+                     {{{icon 'check-circle' class='w-8 h-8 text-success' size='32'}}}
+                   </div>
+                   <div class="flex-1">
+                     {{> move-next-block message=(t "models.idea.section_completed") buttonText=(t "models.idea.move_next")}}
+                   </div>
+                 </div>
             </div>
         </div>
 
@@ -207,17 +207,25 @@
                 <div class="flex items-start gap-4 mb-6">
                   <div class="w-8 h-8 bg-primary rounded-full flex items-center justify-center text-sm font-bold relative z-10">9</div>
                   <div class="flex-1">
-                           {{> question-block id="customer-model-q9" step="15" question="How will you maintain customer relationships?" placeholder="This section plans relationship maintenance. Include acquisition, onboarding, support, communication, retention strategies. AI can suggest relationship tactics. Use this section for customer lifecycle management. Chat with AI to learn relationship strategies or get retention ideas." description=customerModelQ9 modelType="idea" section="customer-model" ideaId=ideaId}}
+                             {{> question-block id="customer-model-q9" step="15" question="How will you maintain customer relationships?" placeholder="This section plans relationship maintenance. Include acquisition, onboarding, support, communication, retention strategies. AI can suggest relationship tactics. Use this section for customer lifecycle management. Chat with AI to learn relationship strategies or get retention ideas." description=customerModelQ9 modelType="idea" section="customer-model" ideaId=ideaId}}
+                    </div>
                   </div>
-                </div>
-                <div class="flex items-start gap-4">
-                  <div class="w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold relative z-10">
-                    {{{icon 'check-circle' class='w-8 h-8 text-success' size='32'}}}
-                  </div>
-                  <div class="flex-1">
-                    {{> move-next-block message="(t "models.idea.section_completed")" buttonText="(t "models.idea.move_next")"}}
-                  </div>
-                </div>
+                  <div class="flex items-start gap-4">
+                    <div class="w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold relative z-10">
+                      {{{icon 'check-circle' class='w-8 h-8 text-success' size='32'}}}
+                    </div>
+                  <div class="flex items-start gap-4">
+                    <div class="w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold relative z-10">
+                      {{{icon 'check-circle' class='w-8 h-8 text-success' size='32'}}}
+                    </div>
+                  <div class="flex items-start gap-4">
+                    <div class="w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold relative z-10">
+                      {{{icon 'check-circle' class='w-8 h-8 text-success' size='32'}}}
+                    </div>
+                    <div class="flex-1">
+                      {{> move-next-block message=(t "models.idea.section_completed") buttonText=(t "models.idea.move_next")}}
+                   </div>
+                 </div>
             </div>
         </div>
 
@@ -247,17 +255,25 @@
                 <div class="flex items-start gap-4 mb-6">
                   <div class="w-8 h-8 bg-primary rounded-full flex items-center justify-center text-sm font-bold relative z-10">4</div>
                   <div class="flex-1">
-                            {{> question-block id="branding-q4" step="19" question="Create a slogan for your brand." placeholder="This section creates your brand slogan. Make it short, memorable, communicating key benefit or USP. AI can help generate catchy slogans. Use this section for brand recall. Chat with AI to brainstorm slogans or learn slogan creation." description=brandingQ4 modelType="idea" section="branding" ideaId=ideaId}}
-                  </div>
-                </div>
-                <div class="flex items-start gap-4">
-                  <div class="w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold relative z-10">
-                    {{{icon 'check-circle' class='w-8 h-8 text-success' size='32'}}}
-                  </div>
-                  <div class="flex-1">
-                    {{> move-next-block message="(t "models.idea.section_completed")" buttonText="(t "models.idea.move_next")"}}
-                  </div>
-                </div>
+                             {{> question-block id="branding-q4" step="19" question="Create a slogan for your brand." placeholder="This section creates your brand slogan. Make it short, memorable, communicating key benefit or USP. AI can help generate catchy slogans. Use this section for brand recall. Chat with AI to brainstorm slogans or learn slogan creation." description=brandingQ4 modelType="idea" section="branding" ideaId=ideaId}}
+                   </div>
+                 </div>
+                 <div class="flex items-start gap-4">
+                   <div class="w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold relative z-10">
+                     {{{icon 'check-circle' class='w-8 h-8 text-success' size='32'}}}
+                   </div>
+                 <div class="flex items-start gap-4">
+                   <div class="w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold relative z-10">
+                     {{{icon 'check-circle' class='w-8 h-8 text-success' size='32'}}}
+                   </div>
+                  <div class="flex items-start gap-4">
+                    <div class="w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold relative z-10">
+                      {{{icon 'check-circle' class='w-8 h-8 text-success' size='32'}}}
+                    </div>
+                   <div class="flex-1">
+                     {{> move-next-block message=(t "models.idea.section_completed") buttonText=(t "models.idea.move_next")}}
+                   </div>
+                 </div>
             </div>
         </div>
 
@@ -283,13 +299,13 @@
                   <div class="flex-1">
                             {{> question-block id="ip-protection-q3" step="22" question="What IP elements are you protecting?" placeholder="This section lists protected IP elements. Detail what each is, value, protection method, competitive contribution. AI can help identify protectable IP. Use this section for IP asset management. Chat with AI to understand IP elements or get protection guidance." description=ipProtectionQ3 modelType="idea" section="ip-protection" ideaId=ideaId}}
                   </div>
-                </div>
-                <div class="flex items-start gap-4">
-                  <div class="w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold relative z-10">
-                    {{{icon 'check-circle' class='w-8 h-8 text-success' size='32'}}}
                   </div>
+                  <div class="flex items-start gap-4">
+                    <div class="w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold relative z-10">
+                      {{{icon 'check-circle' class='w-8 h-8 text-success' size='32'}}}
+                    </div>
                   <div class="flex-1">
-                    {{> move-next-block message="(t "models.idea.complete_idea")" buttonText="(t "models.idea.complete_idea_button")"}}
+                     {{> move-next-block message=(t "models.idea.complete_idea") buttonText=(t "models.idea.complete_idea_button")}}
                   </div>
                 </div>
             </div>

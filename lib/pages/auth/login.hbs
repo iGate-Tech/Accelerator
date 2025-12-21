@@ -1,7 +1,6 @@
  <div class="w-full min-h-screen flex flex-col items-center justify-center" >
     <img src="/images/accelerator_logo.svg" alt="Accelerator Logo" class="w-40 my-10" />
-  <div class="flex items-center">
-    <div class="flex flex-col items-center justify-center h-full gap-6 w-[400px] mx-auto bg-card shadow-primary rounded-lg p-6 border border-input">
+     <div class="flex flex-col items-center justify-center h-full gap-6 w-[400px] mx-auto bg-card shadow-primary rounded-lg p-6 border border-input">
       <div class="grid gap-2 text-center">
          <h1 class="text-3xl font-bold text-foreground text-glow text-center">{{t 'auth.login.title'}}</h1>
          <p class="text-balance text-muted-foreground">
@@ -23,20 +22,43 @@
         </div>
 
         <div class="grid gap-2 text-left">
-          <div class="flex items-center gap-6">
-             <label
-               class="text-sm font-medium leading-none text-foreground peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-               for="password">
-               {{t 'auth.login.password_label'}}
-             </label>
-             <a class="ml-auto inline-block text-sm underline text-muted-foreground hover:text-foreground focus:outline-none monotone-logo"
-               href="/auth/forgot-password">
-               {{t 'auth.login.forgot_password'}}
-             </a>
+           <div class="flex items-center gap-6">
+              <label
+                class="text-sm font-medium leading-none text-foreground peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                for="password">
+                {{t 'auth.login.password_label'}}
+              </label>
+              <a class="ml-auto inline-block text-sm underline text-muted-foreground hover:text-foreground focus:outline-none monotone-logo"
+                href="/auth/forgot-password">
+                {{t 'auth.login.forgot_password'}}
+              </a>
+           </div>
+           <div class="relative">
              <input type="password" name="password"
-               class="flex h-9 w-full rounded-md border border-input/80 bg-transparent px-3 py-1 text-sm text-foreground shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+               class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 pr-10 text-sm text-foreground shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
                id="password" placeholder="{{t 'auth.login.password_placeholder'}}" required="" />
-        </div>
+             <button type="button" onclick="togglePasswordVisibility()"
+               class="absolute right-2 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground">
+               {{{icon 'eye' class='h-4 w-4' id='eye-icon'}}}
+               {{{icon 'eye-off' class='h-4 w-4 hidden' id='eye-off-icon'}}}
+             </button>
+  </div>
+</div>
+
+<script>
+function togglePasswordVisibility() {
+  const input = document.getElementById('password');
+  const eyeIcon = document.getElementById('eye-icon');
+  const eyeOffIcon = document.getElementById('eye-off-icon');
+  const isPassword = input.type === 'password';
+  input.type = isPassword ? 'text' : 'password';
+  eyeIcon.classList.toggle('hidden', !isPassword);
+  eyeOffIcon.classList.toggle('hidden', isPassword);
+}
+</script>
+
+
+
 
         <div class="flex items-center space-x-2">
           <div class="relative">
@@ -51,11 +73,10 @@
         </div>
 
         <div class="w-full">
-          <button type="submit" id="login-button" class="shiny-cta text-center bg-card"
-            style="padding: 0.5rem 1rem; width: 200px; margin: 0 auto;">
- {{t 'auth.login.login_button'}}
-          </button>
-        </div>
+           <button type="submit" id="login-button" class="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2 w-[200px] mx-auto">
+  {{t 'auth.login.login_button'}}
+           </button>
+         </div>
 
       </form>
 
@@ -63,10 +84,8 @@
          {{t 'auth.login.no_account'}}
          <a class="underline text-muted-foreground hover:text-foreground focus:outline-none monotone-logo"
            href="/auth/signup">{{t 'auth.login.sign_up'}}</a>
-      </div>
-    </div>
-   </div>
-  <div class="mb-[200px]"></div>
+       </div>
+     </div>
 
  </div>
 </div>

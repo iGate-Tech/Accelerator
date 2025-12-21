@@ -1,6 +1,6 @@
 {{> progress-bar activeStep=activeStep ideaId=ideaId}}
 
-{{> model-header title=pageTitle description= (t "models.funding.overview")
+{{> model-header title=pageTitle description=(t "models.funding.overview")
 ratingStars="★★★★★" ratingValue="5.0" voteCount="0 votes" category=ideaCategory tags=ideaTags}}
 
 {{> model-progress data='[
@@ -9,31 +9,31 @@ ratingStars="★★★★★" ratingValue="5.0" voteCount="0 votes" category=ide
     "fullLabel": "1. Funding Goal",
     "shortLabel": "1.",
     "position": 0
-  },
+  }},
   {
     "id": "funding-allocation",
     "fullLabel": "2. Funding Allocation",
     "shortLabel": "2.",
     "position": 25
-  },
+  }},
   {
     "id": "revenue-model",
     "fullLabel": "3. Revenue Model",
     "shortLabel": "3.",
     "position": 50
-  },
+  }},
   {
     "id": "investor-roi",
     "fullLabel": "4. Investor ROI",
     "shortLabel": "4.",
     "position": 75
-  },
+  }},
   {
     "id": "cap-table",
     "fullLabel": "5. Cap Table",
     "shortLabel": "5.",
     "position": 100
-  }
+  }}
 ]'}}
 
 <main class="flex flex-col mx-auto items-center justify-center">
@@ -57,9 +57,9 @@ ratingStars="★★★★★" ratingValue="5.0" voteCount="0 votes" category=ide
                      </div>
                  </div>
                 <div class="flex items-start gap-4">
-                    <div class="w-8 h-8  rounded-full flex items-center justify-center text-sm font-bold relative z-10">{{{icon 'check-circle' class='w-8 h-8 text-success' size='32'}}}</div>
+                    <div class="w-8 h-8  rounded-full flex items-center justify-center text-sm font-bold relative z-10">{{{icon 'check-circle' class='w-8 h-8 text-success' size='32'}}</div>
                     <div class="flex-1">
-                        {{> move-next-block message="(t "models.funding.section_completed")" buttonText="(t "models.funding.move_next")"}}
+                        {{> move-next-block message=(t "models.funding.section_completed") buttonText=(t "models.funding.move_next")}}
                     </div>
                 </div>
             </div>
@@ -78,9 +78,9 @@ ratingStars="★★★★★" ratingValue="5.0" voteCount="0 votes" category=ide
                      </div>
                  </div>
                 <div class="flex items-start gap-4">
-                    <div class="w-8 h-8  rounded-full flex items-center justify-center text-sm font-bold relative z-10">{{{icon 'check-circle' class='w-8 h-8 text-success' size='32'}}}</div>
+                    <div class="w-8 h-8  rounded-full flex items-center justify-center text-sm font-bold relative z-10">{{{icon 'check-circle' class='w-8 h-8 text-success' size='32'}}</div>
                     <div class="flex-1">
-                        {{> move-next-block message="(t "models.funding.section_completed")" buttonText="(t "models.funding.move_next")"}}
+                        {{> move-next-block message=(t "models.funding.section_completed") buttonText=(t "models.funding.move_next")}}
                     </div>
                 </div>
             </div>
@@ -111,9 +111,9 @@ ratingStars="★★★★★" ratingValue="5.0" voteCount="0 votes" category=ide
                      </div>
                  </div>
                 <div class="flex items-start gap-4">
-                    <div class="w-8 h-8  rounded-full flex items-center justify-center text-sm font-bold relative z-10">{{{icon 'check-circle' class='w-8 h-8 text-success' size='32'}}}</div>
+                    <div class="w-8 h-8  rounded-full flex items-center justify-center text-sm font-bold relative z-10">{{{icon 'check-circle' class='w-8 h-8 text-success' size='32'}}</div>
                     <div class="flex-1">
-                        {{> move-next-block message="(t "models.funding.section_completed")" buttonText="(t "models.funding.move_next")"}}
+                        {{> move-next-block message=(t "models.funding.section_completed") buttonText=(t "models.funding.move_next")}}
                     </div>
                 </div>
             </div>
@@ -138,9 +138,9 @@ ratingStars="★★★★★" ratingValue="5.0" voteCount="0 votes" category=ide
                      </div>
                  </div>
                 <div class="flex items-start gap-4">
-                    <div class="w-8 h-8  rounded-full flex items-center justify-center text-sm font-bold relative z-10">{{{icon 'check-circle' class='w-8 h-8 text-success' size='32'}}}</div>
+                    <div class="w-8 h-8  rounded-full flex items-center justify-center text-sm font-bold relative z-10">{{{icon 'check-circle' class='w-8 h-8 text-success' size='32'}}</div>
                     <div class="flex-1">
-                        {{> move-next-block message="(t "models.funding.section_completed")" buttonText="(t "models.funding.move_next")"}}
+                        {{> move-next-block message=(t "models.funding.section_completed") buttonText=(t "models.funding.move_next")}}
                     </div>
                 </div>
             </div>
@@ -165,9 +165,9 @@ ratingStars="★★★★★" ratingValue="5.0" voteCount="0 votes" category=ide
                      </div>
                  </div>
                 <div class="flex items-start gap-4">
-                    <div class="w-8 h-8  rounded-full flex items-center justify-center text-sm font-bold relative z-10">{{{icon 'check-circle' class='w-8 h-8 text-success' size='32'}}}</div>
+                    <div class="w-8 h-8  rounded-full flex items-center justify-center text-sm font-bold relative z-10">{{{icon 'check-circle' class='w-8 h-8 text-success' size='32'}}</div>
                     <div class="flex-1">
-                        {{> move-next-block message="(t "models.funding.complete_funding")" buttonText="(t "models.funding.complete_funding_button")"}}
+                        {{> move-next-block message=(t "models.funding.complete_funding") buttonText=(t "models.funding.complete_funding_button")}}
                     </div>
                 </div>
             </div>

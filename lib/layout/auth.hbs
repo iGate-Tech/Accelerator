@@ -113,7 +113,12 @@
 
   {{#if scripts}}{{scripts}}{{/if}}
 
-  <script src="/js/toast.js"></script>
+   <script src="/js/toast.js"></script>
+   <script>
+     document.body.addEventListener('show-toast', function(evt) {
+       showToast(evt.detail.message, evt.detail.type);
+     });
+   </script>
 
   {{#if flash.success}}
   {{#each flash.success}}

@@ -85,7 +85,9 @@
       "no_account": "Don't have an account?",
       "sign_up": "Sign up",
       "continue_with_apple": "Continue with Apple",
-      "continue_with_google": "Continue with Google"
+      "continue_with_google": "Continue with Google",
+      "privacy_agreement": "By clicking continue, you agree to our <a href=\"/terms\">Terms of Service</a> and <a href=\"#\">Privacy Policy</a>.",
+      "or_separator": "Or"
     },
     "signup": {
       "title": "Sign Up",

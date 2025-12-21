@@ -84,8 +84,10 @@
       "login_button": "تسجيل الدخول",
       "no_account": "ليس لديك حساب؟",
       "sign_up": "التسجيل",
-      "continue_with_apple": "المتابعة باستخدام Apple",
-      "continue_with_google": "المتابعة باستخدام Google"
+      "continue_with_apple": "المتابعة باستخدام أبل",
+      "continue_with_google": "المتابعة باستخدام جوجل",
+      "privacy_agreement": "بالنقر على المتابعة، توافق على <a href=\"/terms\">شروط الخدمة</a> و <a href=\"#\">سياسة الخصوصية</a> الخاصة بنا.",
+      "or_separator": "أو"
     },
     "signup": {
       "title": "التسجيل",

@@ -1,97 +1,69 @@
-   <button id="lang-toggle" class="absolute top-4 {{#if (eq lng 'ar')}}right-4{{else}}left-4{{/if}} text-foreground hover:text-muted-foreground transition-colors z-10 px-2 py-1 text-sm font-medium flex items-center">
-     {{{icon 'languages' class='h-4 w-4 mr-1'}}}
-     <span id="lang-text">EN</span>
-   </button>
-   <button id="theme-toggle" class="absolute top-4 {{#if (eq lng 'ar')}}left-4{{else}}right-4{{/if}} text-foreground hover:text-muted-foreground transition-colors z-10">
-    {{{icon 'sun' class='h-6 w-6' id='sun-icon'}}}
-    {{{icon 'moon' class='h-6 w-6 hidden' id='moon-icon'}}}
-  </button>
-  <div class="w-full min-h-screen flex flex-col items-center justify-center" >
-     <div class="max-w-sm mx-auto px-3 sm:px-0 w-full relative">
-        <img src="/images/accelerator_logo.svg" alt="Accelerator Logo" class="w-32 sm:w-40 my-4 sm:my-8 mx-auto" />
-        <div class="flex flex-col items-center justify-center h-full gap-4 w-full mx-auto bg-card shadow-primary rounded-lg p-3 sm:p-5 border border-input">
-      <div class="grid gap-2 text-center">
-         <h1 class="text-3xl font-bold text-foreground text-glow text-center">{{t 'auth.signup.title'}}</h1>
-         <p class="text-balance text-muted-foreground">
-           {{t 'auth.signup.description'}}
-         </p>
+   <div class="bg-background">
+      <div class="bg-background flex min-h-svh flex-col items-center justify-center gap-6 p-6 md:p-10">
+         <div class="w-full max-w-sm">
+            <div class="flex flex-col gap-6">
+               <form action="/auth/signup" method="post">
+                  <div data-slot="field-group" class="group/field-group @container/field-group flex w-full flex-col gap-7 data-[slot=checkbox-group]:gap-3 [&>[data-slot=field-group]]:gap-4">
+                     <div class="flex flex-col items-center gap-2 text-center">
+                        <a href="#" class="flex flex-col items-center gap-2 font-medium">
+                           <div class="flex size-[192px] items-center justify-center rounded-md">
+                              <img src="/images/accelerator_logo.svg" alt="Accelerator Logo" class="size-[192px]" />
+                           </div>
+                           <span class="sr-only">Accelerator</span>
+                        </a>
+                        <h1 class="text-xl font-bold">{{t 'auth.signup.title'}}</h1>
+                        <p data-slot="field-description" class="text-muted-foreground text-sm leading-normal font-normal group-has-[[data-orientation=horizontal]]/field:text-balance last:mt-0 nth-last-2:-mt-1 [[data-variant=legend]+&]:-mt-1.5 [&>a:hover]:text-primary [&>a]:underline [&>a]:underline-offset-4">{{t 'auth.signup.have_account'}} <a href="/auth/login">{{t 'auth.signup.login'}}</a></p>
+                     </div>
+                     <div role="group" data-slot="field" data-orientation="vertical" class="group/field flex w-full gap-3 data-[invalid=true]:text-destructive flex-col [&>*]:w-full [&>.sr-only]:w-auto">
+                        <label data-slot="field-label" class="items-center text-sm font-medium select-none group-data-[disabled=true]:pointer-events-none group-data-[disabled=true]:opacity-50 peer-disabled:cursor-not-allowed peer-disabled:opacity-50 group/field-label peer/field-label flex w-fit gap-2 leading-snug group-data-[disabled=true]/field:opacity-50 has-[>[data-slot=field]]:w-full has-[>[data-slot=field]]:flex-col has-[>[data-slot=field]]:rounded-md has-[>[data-slot=field]]:border [&>*]:data-[slot=field]:p-4 has-data-[state=checked]:bg-primary/5 has-data-[state=checked]:border-primary dark:has-data-[state=checked]:bg-primary/10" for="email">{{t 'auth.signup.email_label'}}</label>
+                        <input type="email" name="email" data-slot="input" class="file:text-foreground placeholder:text-muted-foreground selection:bg-primary selection:text-primary-foreground dark:bg-input/30 border-input h-9 w-full min-w-0 rounded-md border bg-transparent px-3 py-1 text-base shadow-xs transition-[color,box-shadow] outline-none file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-sm file:font-medium disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive" id="email" placeholder="{{t 'auth.signup.email_placeholder'}}" required="">
+                     </div>
+                     <div role="group" data-slot="field" data-orientation="vertical" class="group/field flex w-full gap-3 data-[invalid=true]:text-destructive flex-col [&>*]:w-full [&>.sr-only]:w-auto">
+                        <label data-slot="field-label" class="items-center text-sm font-medium select-none group-data-[disabled=true]:pointer-events-none group-data-[disabled=true]:opacity-50 peer-disabled:cursor-not-allowed peer-disabled:opacity-50 group/field-label peer/field-label flex w-fit gap-2 leading-snug group-data-[disabled=true]/field:opacity-50 has-[>[data-slot=field]]:w-full has-[>[data-slot=field]]:flex-col has-[>[data-slot=field]]:rounded-md has-[>[data-slot=field]]:border [&>*]:data-[slot=field]:p-4 has-data-[state=checked]:bg-primary/5 has-data-[state=checked]:border-primary dark:has-data-[state=checked]:bg-primary/10" for="password">{{t 'auth.signup.password_label'}}</label>
+                        <div class="relative">
+                           <input type="password" name="password" data-slot="input" class="file:text-foreground placeholder:text-muted-foreground selection:bg-primary selection:text-primary-foreground dark:bg-input/30 border-input h-9 w-full min-w-0 rounded-md border bg-transparent px-3 py-1 pr-10 text-base shadow-xs transition-[color,box-shadow] outline-none file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-sm file:font-medium disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive" id="password" placeholder="{{t 'auth.signup.password_placeholder'}}" required="">
+                           <button type="button" onclick="togglePasswordVisibility()" class="absolute right-2 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground">
+                              {{{icon 'eye' class='h-4 w-4' id='eye-icon'}}}
+                              {{{icon 'eye-off' class='h-4 w-4 hidden' id='eye-off-icon'}}}
+                           </button>
+                        </div>
+                     </div>
+                     <div role="group" data-slot="field" data-orientation="vertical" class="group/field flex w-full gap-3 data-[invalid=true]:text-destructive flex-col [&>*]:w-full [&>.sr-only]:w-auto">
+                        <button type="submit" class="shiny-cta text-center bg-card w-full mx-auto" style="padding: 0.5rem 1rem; margin: 0 auto;">{{t 'auth.signup.sign_up_button'}}</button>
+                     </div>
+                     <div data-slot="field-separator" data-content="true" class="relative -my-2 h-5 text-sm group-data-[variant=outline]/field-group:-mb-2">
+                        <div data-orientation="horizontal" role="none" data-slot="separator" class="bg-border shrink-0 data-[orientation=horizontal]:h-px data-[orientation=horizontal]:w-full data-[orientation=vertical]:h-full data-[orientation=vertical]:w-px absolute inset-0 top-1/2"></div>
+                        <span class="bg-background text-muted-foreground relative mx-auto block w-fit px-2" data-slot="field-separator-content">Or</span>
+                     </div>
+                     <div role="group" data-slot="field" data-orientation="vertical" class="group/field w-full data-[invalid=true]:text-destructive flex-col [&>*]:w-full [&>.sr-only]:w-auto grid gap-4 sm:grid-cols-2">
+                        <button data-slot="button" data-variant="outline" data-size="default" class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive border bg-background shadow-xs hover:bg-accent hover:text-accent-foreground dark:bg-input/30 dark:border-input dark:hover:bg-input/50 h-9 px-4 py-2 has-[>svg]:px-3" type="button">
+                           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                              <path d="M12.152 6.896c-.948 0-2.415-1.078-3.96-1.04-2.04.027-3.91 1.183-4.961 3.014-2.117 3.675-.546 9.103 1.519 12.09 1.013 1.454 2.208 3.09 3.792 3.039 1.52-.065 2.09-.987 3.935-.987 1.831 0 2.35.987 3.96.948 1.637-.026 2.676-1.48 3.676-2.948 1.156-1.688 1.636-3.325 1.662-3.415-.039-.013-3.182-1.221-3.22-4.857-.026-3.04 2.48-4.494 2.597-4.559-1.429-2.09-3.623-2.324-4.39-2.376-2-.156-3.675 1.09-4.61 1.09zM15.53 3.83c.843-1.012 1.4-2.427 1.245-3.83-1.207.052-2.662.805-3.532 1.818-.78.896-1.454 2.338-1.273 3.714 1.338.104 2.715-.688 3.559-1.701" fill="currentColor"></path>
+                           </svg>
+                           Continue with Apple
+                        </button>
+                        <button data-slot="button" data-variant="outline" data-size="default" class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive border bg-background shadow-xs hover:bg-accent hover:text-accent-foreground dark:bg-input/30 dark:border-input dark:hover:bg-input/50 h-9 px-4 py-2 has-[>svg]:px-3" type="button">
+                           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                              <path d="M12.48 10.92v3.28h7.84c-.24 1.84-.853 3.187-1.787 4.133-1.147 1.147-2.933 2.4-6.053 2.4-4.827 0-8.6-3.893-8.6-8.72s3.773-8.72 8.6-8.72c2.6 0 4.507 1.027 5.907 2.347l2.307-2.307C18.747 1.44 16.133 0 12.48 0 5.867 0 .307 5.387.307 12s5.56 12 12.173 12c3.573 0 6.267-1.173 8.373-3.36 2.16-2.16 2.84-5.213 2.84-7.667 0-.76-.053-1.467-.173-2.053H12.48z" fill="currentColor"></path>
+                           </svg>
+                           Continue with Google
+                        </button>
+                     </div>
+                  </div>
+               </form>
+               <p data-slot="field-description" class="text-muted-foreground text-sm leading-normal font-normal group-has-[[data-orientation=horizontal]]/field:text-balance last:mt-0 nth-last-2:-mt-1 [[data-variant=legend]+&]:-mt-1.5 [&>a:hover]:text-primary [&>a]:underline [&>a]:underline-offset-4 px-6 text-center">By clicking continue, you agree to our <a href="/terms">Terms of Service</a> and <a href="#">Privacy Policy</a>.</p>
+            </div>
+         </div>
       </div>
-
-       <form action="/auth/signup" method="post" class="grid gap-3 text-center w-full">
-
-        <div class="grid gap-2 text-left">
-           <label
-             class="text-sm font-medium leading-none text-foreground peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-             for="firstName">
-             {{t 'auth.signup.first_name_label'}}
-           </label>
-           <input type="text" name="firstName"
-             class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm text-foreground shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
-             id="firstName" placeholder="{{t 'auth.signup.first_name_placeholder'}}" required="" />
-        </div>
-
-        <div class="grid gap-2 text-left">
-           <label
-             class="text-sm font-medium leading-none text-foreground peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-             for="lastName">
-             {{t 'auth.signup.last_name_label'}}
-           </label>
-           <input type="text" name="lastName"
-             class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm text-foreground shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
-             id="lastName" placeholder="{{t 'auth.signup.last_name_placeholder'}}" required="" />
-        </div>
-
-        <div class="grid gap-2 text-left">
-           <label
-             class="text-sm font-medium leading-none text-foreground peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-             for="email">
-             {{t 'auth.signup.email_label'}}
-           </label>
-           <input type="email" name="email"
-             class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm text-foreground shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
-             id="email" placeholder="{{t 'auth.signup.email_placeholder'}}" required="" />
-        </div>
-
-         <div class="grid gap-2 text-left">
-            <label
-              class="text-sm font-medium leading-none text-foreground peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-              for="password">
-              {{t 'auth.signup.password_label'}}
-            </label>
-              <input type="password" name="password"
-                class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm text-foreground shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
-                id="password" placeholder="{{t 'auth.signup.password_placeholder'}}" required="" />
-         </div>
-
-        <div class="flex items-center space-x-2">
-           <div class="relative">
-             <input class="h-4 w-4 appearance-none rounded-full border border-input checked:bg-primary checked:border-primary peer" id="terms" name="terms" type="checkbox" required />
-  {{{icon 'check' class='absolute inset-0 w-4 h-4 text-foreground scale-75 peer-checked:block hidden'}}}
-           </div>
-           <label
-             class="text-sm font-medium leading-none text-foreground peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-             for="terms">
-             {{t 'auth.signup.terms_agree'}}
-             <a href="/terms" class="text-primary hover:text-primary-600 focus:outline-none monotone-logo">{{t 'auth.terms.title'}}</a>
-           </label>
-        </div>
-
-         <div class="w-full">
-           <button type="submit" class="shiny-cta text-center bg-card w-full mx-auto"
-             style="padding: 0.5rem 1rem; margin: 0 auto;">
-              {{t 'auth.signup.sign_up_button'}}
-           </button>
-         </div>
-
-      </form>
-
-      <div class="mt-4 text-center text-sm text-muted-foreground">
-         {{t 'auth.signup.have_account'}}
-         <a class="underline text-muted-foreground hover:text-foreground focus:outline-none monotone-logo"
-           href="/auth/login">{{t 'auth.signup.login'}}</a>
-        </div>
-     </div>
-  </div>
-
-
-  </div>
+   </div>
+   <script>
+   function togglePasswordVisibility() {
+      const input = document.getElementById('password');
+      const eyeIcon = document.getElementById('eye-icon');
+      const eyeOffIcon = document.getElementById('eye-off-icon');
+      const isPassword = input.type === 'password';
+      input.type = isPassword ? 'text' : 'password';
+      eyeIcon.classList.toggle('hidden', !isPassword);
+      eyeOffIcon.classList.toggle('hidden', isPassword);
+   }
+   </script>

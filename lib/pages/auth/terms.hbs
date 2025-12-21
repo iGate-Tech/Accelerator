@@ -1,4 +1,4 @@
-<div class="items-center flex flex-col mt-10" dir="ltr">
+<div class="items-center flex flex-col mt-10" dir="{{#if (eq lng 'ar')}}rtl{{else}}ltr{{/if}}"
   <div class="">
     <img src="/images/accelerator_logo.svg" alt="Accelerator Logo" class="w-40 mb-10"  />
   </div>
@@ -105,8 +105,4 @@
         </div>
       </div>
     </div>
-</div>
-
-<script>
-  document.documentElement.setAttribute('dir', '{{lng}}' === 'ar' ? 'rtl' : 'ltr');
-</script>
+  </div>

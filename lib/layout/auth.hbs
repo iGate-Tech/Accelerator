@@ -29,6 +29,10 @@
     }
 
     #global-loading {
+      display: none;
+    }
+
+    .htmx-request #global-loading {
       display: block;
     }
 
@@ -131,6 +135,14 @@
 
    <script src="/js/toast.js"></script>
    <script>
+     function showLoadingFor4Seconds() {
+       const loading = document.getElementById('global-loading');
+       loading.style.display = 'block';
+       setTimeout(() => {
+         loading.style.display = 'none';
+       }, 4000);
+     }
+
      document.body.addEventListener('show-toast', function(evt) {
        showToast(evt.detail.message, evt.detail.type);
      });

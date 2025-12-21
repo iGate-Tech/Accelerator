@@ -2,7 +2,7 @@
       <div class="bg-background flex min-h-svh flex-col items-center justify-center gap-6 p-6 md:p-10">
           <div class="w-full max-w-md">
             <div class="flex flex-col gap-6">
-               <form action="/auth/signup" method="post">
+                <form hx-post="/auth/signup">
                   <div data-slot="field-group" class="group/field-group @container/field-group flex w-full flex-col gap-7 data-[slot=checkbox-group]:gap-3 [&>[data-slot=field-group]]:gap-4">
                      <div class="flex flex-col items-center gap-2 text-center">
                         <a href="#" class="flex flex-col items-center gap-2 font-medium">
@@ -49,7 +49,12 @@
                         </div>
                      </div>
                      <div role="group" data-slot="field" data-orientation="vertical" class="group/field flex w-full gap-3 data-[invalid=true]:text-destructive flex-col [&>*]:w-full [&>.sr-only]:w-auto">
-                        <button type="submit" class="shiny-cta text-center bg-card w-full mx-auto" style="padding: 0.5rem 1rem; margin: 0 auto;">{{t 'auth.signup.sign_up_button'}}</button>
+                         <button type="submit" class="shiny-cta text-center bg-card w-full mx-auto relative" style="padding: 0.5rem 1rem; margin: 0 auto;">
+                           {{t 'auth.signup.sign_up_button'}}
+                           <span class="htmx-indicator absolute inset-0 flex items-center justify-center">
+                             {{{icon 'loader-2' class='animate-spin h-4 w-4'}}}
+                           </span>
+                         </button>
                      </div>
                      <div data-slot="field-separator" data-content="true" class="relative -my-2 h-5 text-sm group-data-[variant=outline]/field-group:-mb-2">
                         <div data-orientation="horizontal" role="none" data-slot="separator" class="bg-border shrink-0 data-[orientation=horizontal]:h-px data-[orientation=horizontal]:w-full data-[orientation=vertical]:h-full data-[orientation=vertical]:w-px absolute inset-0 top-1/2"></div>

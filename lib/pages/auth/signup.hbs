@@ -3,7 +3,7 @@
           <div class="w-full max-w-md">
             <div class="flex flex-col gap-6">
                <div id="alert-container" class="w-full max-w-md"></div>
-                <form hx-post="/auth/signup" hx-target="#alert-container" hx-swap="innerHTML" hx-on:htmx:before-request="clearAlerts()" hx-on:submit="showLoadingFor4Seconds()">
+                 <form hx-post="/auth/signup" hx-target="body" hx-swap="beforeend" hx-on:htmx:before-request="clearAlerts()" hx-on:submit="showLoadingFor4Seconds()">
                   <div data-slot="field-group" class="group/field-group @container/field-group flex w-full flex-col gap-7 data-[slot=checkbox-group]:gap-3 [&>[data-slot=field-group]]:gap-4">
                      <div class="flex flex-col items-center gap-2 text-center">
                         <a href="#" class="flex flex-col items-center gap-2 font-medium">
@@ -81,10 +81,8 @@
     }
 
     function clearAlerts() {
-       const container = document.getElementById('alert-container');
-       if (container) {
-         container.innerHTML = '';
-       }
+        const alerts = document.querySelectorAll('.alert');
+        alerts.forEach(alert => alert.remove());
     }
 
     // Auto-hide alerts after 5 seconds
@@ -98,12 +96,5 @@
        }, 5000);
     }
 
-    // Observe for new alerts
-    const alertContainer = document.getElementById('alert-container');
-    if (alertContainer) {
-       const observer = new MutationObserver(() => {
-         setupAlertAutoHide();
-       });
-       observer.observe(alertContainer, { childList: true });
-    }
+    // Alerts are added to body and auto-hide after 5 seconds
     </script>

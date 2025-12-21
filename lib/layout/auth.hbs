@@ -33,7 +33,7 @@
     }
 
     .htmx-request #global-loading {
-      display: flex;
+      display: block;
     }
   </style>
   {{#if styles}}{{styles}}{{/if}}
@@ -149,8 +149,8 @@
    {{/each}}
    {{/if}}
 
-   <div id="global-loading" class="fixed inset-0 bg-white dark:bg-gray-900 flex items-center justify-center z-50">
-     <img src="/images/favicon.svg" alt="Loading" class="w-16 h-16 animate-pulse">
+   <div id="global-loading">
+     {{> loading}}
    </div>
 </body>
 </html>

@@ -173,9 +173,9 @@
   --color-neutral-content: hsl(290 10% 10%);
 
   /* Base (Inverted) */
-  --color-base-100: hsl(290 10% 5%);
-  --color-base-200: hsl(290 10% 10%);
-  --color-base-300: hsl(290 10% 15%);
+  --color-base-100: hsl(290 10% 3%);
+  --color-base-200: hsl(290 10% 8%);
+  --color-base-300: hsl(290 10% 13%);
   --color-base-content: hsl(290 10% 90%);
 
   /* Additional */

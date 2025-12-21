@@ -410,8 +410,7 @@
     @apply fixed top-4 left-1/2 transform -translate-x-1/2 z-[100] w-full max-w-sm;
   }
 
-  /* Auto-hide for alerts */
-  .alert-auto-hide {
+
     animation: alert-fade-in 0.3s ease-out;
   }
 
@@ -773,6 +772,8 @@
   .text-glow {
     text-shadow: 0 0 25px rgba(158, 40, 181, 0.4);
   }
+
+
 
   .grid-bg {
     background-size: 100px 100px;

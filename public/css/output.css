@@ -857,6 +857,9 @@
   .w-32 {
     width: calc(var(--spacing) * 32);
   }
+  .w-\[200px\] {
+    width: 200px;
+  }
   .w-\[900px\] {
     width: 900px;
   }
@@ -4241,11 +4244,6 @@
   .md\:w-64 {
     @media (width >= 48rem) {
       width: calc(var(--spacing) * 64);
-    }
-  }
-  .md\:w-\[200px\] {
-    @media (width >= 48rem) {
-      width: 200px;
     }
   }
   .md\:w-\[350px\] {

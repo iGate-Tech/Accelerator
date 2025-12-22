@@ -82,7 +82,7 @@
           <div class="flex items-center justify-between">
             <div class="flex flex-col gap-1">
               <h3 class="text-sm font-medium text-muted-foreground">Package</h3>
-              <p class="text-lg font-semibold text-foreground capitalize">{{user.profile.package_type}}</p>
+               <p class="text-lg font-semibold text-foreground">{{#if packageDetails}}{{packageDetails.name}}{{else}}{{capitalize user.profile.package_type}}{{/if}}</p>
             </div>
             <div class="bg-accent/20 rounded-lg p-2">
               <div class="w-8 h-8 bg-accent/20 rounded-lg relative flex items-center justify-center">

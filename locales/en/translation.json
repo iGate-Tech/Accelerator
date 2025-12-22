@@ -598,6 +598,7 @@
       "go_to_portfolios": "Go to Portfolios"
     },
     "new": {
+      "greeting": "Hi",
       "question": "What problem are you trying to solve?",
       "untitled": "Untitled",
       "category": "Category",
@@ -606,6 +607,10 @@
       "remove_all": "Remove all",
       "visibility": "Visibility:",
       "public": "Public",
+      "private": "Private",
+      "free": "Free",
+      "premium": "Premium",
+      "enterprise": "Enterprise",
       "generate_title_ai": "Generate title with AI",
       "add_category_ai": "Add category with AI",
       "improve_description_ai": "Improve description with AI",
@@ -613,7 +618,7 @@
       "auto_fill_ai": "Auto fill with AI",
       "random_idea_ai": "Random idea with AI",
       "reset_form": "Reset form",
-      "characters": "Characters: 0 / 2000",
+      "characters": "0 / 2000",
       "create_project": "Create Project"
     },
     "random": {

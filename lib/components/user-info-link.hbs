@@ -13,7 +13,7 @@
             {{{icon 'chevron-right' class='h-4 w-4 text-gray-400 group-hover:text-primary-600 transition-colors' size='16'}}}
         </div>
         <div class="mt-2 flex items-center justify-between">
-            <span class="text-xs text-primary-700 nav-current-plan-name">{{capitalize user.profile.package_type}} {{t 'nav.plan'}}</span>
+            <span class="text-xs text-primary-700 nav-current-plan-name">{{#if user.profile.packageName}}{{user.profile.packageName}} {{t 'nav.plan'}}{{else}}{{capitalize user.profile.package_type}} {{t 'nav.plan'}}{{/if}}</span>
             <span class="text-xs text-gray-500 nav-current-plan-details">{{#if (eq user.profile.package_type "free")}}{{t 'nav.free'}}{{else}}${{user.profile.package_type}}/{{t 'payments.upgrade.month'}}{{/if}}</span>
         </div>
     </div>

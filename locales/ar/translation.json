@@ -597,6 +597,7 @@
       "go_to_portfolios": "اذهب إلى المحافظ"
     },
     "new": {
+      "greeting": "مرحبا",
       "question": "ما المشكلة التي تحاول حلها؟",
       "untitled": "بدون عنوان",
       "category": "الفئة",
@@ -605,6 +606,10 @@
       "remove_all": "إزالة الكل",
       "visibility": "الرؤية:",
       "public": "عام",
+      "private": "خاص",
+      "free": "مجاني",
+      "premium": "مميز",
+      "enterprise": "مؤسسي",
       "generate_title_ai": "توليد العنوان بالذكاء الاصطناعي",
       "add_category_ai": "إضافة الفئة بالذكاء الاصطناعي",
       "improve_description_ai": "تحسين الوصف بالذكاء الاصطناعي",
@@ -612,7 +617,7 @@
       "auto_fill_ai": "ملء تلقائي بالذكاء الاصطناعي",
       "random_idea_ai": "فكرة عشوائية بالذكاء الاصطناعي",
       "reset_form": "إعادة تعيين النموذج",
-      "characters": "الأحرف: 0 / 2000",
+      "characters": "0 / 2000",
       "create_project": "إنشاء مشروع"
     },
     "random": {

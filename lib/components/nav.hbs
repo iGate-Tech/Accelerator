@@ -78,9 +78,9 @@
       </button>
 
       <!-- Notification Dropdown -->
-       <div
-         class="absolute {{#if (eq lng 'ar')}}left-0{{else}}right-0{{/if}} mt-2 w-[350px] bg-popover backdrop-blur-sm border border-input/80 rounded-lg shadow-xl z-30 transition-all duration-200 opacity-0 invisible hidden"
-         id="notification-dropdown">
+        <div
+          class="fixed md:absolute {{#if (eq lng 'ar')}}left-0{{else}}right-0{{/if}} mt-0 md:mt-2 w-full md:w-[350px] bg-popover backdrop-blur-sm border border-input/80 rounded-lg shadow-xl z-30 transition-all duration-200 opacity-0 invisible hidden"
+          id="notification-dropdown">
         <div class="p-1">
           <div class="px-2 py-1 text-sm text-muted-foreground">{{t 'nav.notifications'}}</div>
           <div class="bg-border -mx-1 my-1 h-px"></div>
@@ -149,9 +149,9 @@
       </button>
 
       <!-- Grid Dropdown -->
-       <div
-         class="absolute {{#if (eq lng 'ar')}}left-0{{else}}right-0{{/if}} mt-2 w-[200px] bg-popover backdrop-blur-sm border border-input/80 rounded-md shadow-xl z-30 transition-all duration-200 opacity-0 invisible hidden"
-         id="grid-dropdown">
+        <div
+          class="fixed md:absolute {{#if (eq lng 'ar')}}left-0{{else}}right-0{{/if}} mt-0 md:mt-2 w-full md:w-[200px] bg-popover backdrop-blur-sm border border-input/80 rounded-md shadow-xl z-30 transition-all duration-200 opacity-0 invisible hidden"
+          id="grid-dropdown">
         <div class="p-1">
           <div class="px-2 py-1 text-sm text-muted-foreground">{{t 'nav.quick_access'}}</div>
           <div class="bg-border -mx-1 my-1 h-px"></div>
@@ -227,9 +227,9 @@
       </button>
 
       <!-- User Dropdown -->
-       <div
-         class="absolute {{#if (eq lng 'ar')}}left-0{{else}}right-0{{/if}} mt-2 w-64 bg-base-100 border border-input rounded-md shadow-lg z-30 transition-all duration-200 opacity-0 invisible hidden"
-         id="admin-user-dropdown">
+        <div
+          class="fixed md:absolute {{#if (eq lng 'ar')}}left-0{{else}}right-0{{/if}} mt-0 md:mt-2 w-full md:w-64 bg-base-100 border border-input rounded-md shadow-lg z-30 transition-all duration-200 opacity-0 invisible hidden"
+          id="admin-user-dropdown">
         <div class="p-2">
 
             <!-- User profile section -->
@@ -242,7 +242,7 @@
          </div>
          <div class="truncate text-xs text-muted-foreground user-email mb-1">{{user.email}}</div>
          <div class="text-xs text-muted-foreground">
-             <span class="nav-current-plan-name">{{capitalize user.profile.package_type}} {{t 'nav.plan'}}</span>
+              <span class="nav-current-plan-name">{{#if user.profile.packageName}}{{user.profile.packageName}} {{t 'nav.plan'}}{{else}}{{capitalize user.profile.package_type}} {{t 'nav.plan'}}{{/if}}</span>
          </div>
      </div>
  </a>
@@ -348,12 +348,52 @@
             </a>
             {{/if}}
             <a href="/voting-reward" class="flex items-center gap-3 px-3 py-2 rounded-md text-muted-foreground hover:bg-primary/10 hover:text-primary" onclick="toggleMobileNav()">
-              {{{icon 'star' class="w-5 h-5"}}}
-              <span>{{t 'nav.voting_rewards'}}</span>
-            </a>
-           </div>
+               {{{icon 'star' class="w-5 h-5"}}}
+               <span>{{t 'nav.voting_rewards'}}</span>
+             </a>
+            </div>
 
-           <!-- Mobile User Section -->
+            {{#if projects}}
+            <div class="border-t border-input pt-4 mt-4">
+              <button onclick="toggleMobilePortfolio()" class="w-full flex items-center justify-between px-3 py-3 rounded-lg bg-muted/50 hover:bg-muted text-left">
+                <div class="flex items-center gap-3">
+                  {{{icon 'folder' class='w-5 h-5 text-primary'}}}
+                  <span class="font-medium text-foreground">{{t 'nav.portfolio'}}</span>
+                </div>
+                <div class="flex items-center">
+                  <span class="text-xs text-muted-foreground mr-2">{{projects.length}} projects</span>
+                  {{{icon 'chevron-down' class='w-4 h-4 transition-transform duration-200 chevron'}}}
+                </div>
+              </button>
+              <div id="mobile-portfolio-list-container" class="hidden mt-3 pl-4">
+                <div class="relative mb-3">
+                  <input type="text" id="mobile-project-search" placeholder="Search projects..." class="w-full text-sm border border-input rounded-lg bg-card text-foreground pl-10 pr-10 py-2 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/40">
+                  <div class="absolute left-3 top-1/2 transform -translate-y-1/2">
+                    {{{icon 'search' class='w-4 h-4 text-muted-foreground'}}}
+                  </div>
+                  <button type="button" id="mobile-project-search-clear" class="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground hover:text-foreground opacity-0 transition-opacity" onclick="clearMobileProjectSearch()">
+                    {{{icon 'x' class='w-4 h-4'}}}
+                  </button>
+                </div>
+                <div id="mobile-portfolio-list" class="space-y-2 max-h-48 overflow-y-auto">
+                  {{#each projects}}
+                  <a href="/models/idea?ideaId={{id}}" class="flex items-center gap-3 px-3 py-3 rounded-lg bg-card border border-input hover:bg-primary/5 hover:border-primary/20 transition-colors block" onclick="toggleMobileNav()">
+                    <div class="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center">
+                      {{{icon 'file-text' class='w-4 h-4 text-primary'}}}
+                    </div>
+                    <div class="flex-1 min-w-0">
+                      <p class="text-sm font-medium text-foreground truncate">{{title}}</p>
+                      <p class="text-xs text-muted-foreground">Idea</p>
+                    </div>
+                    {{{icon 'chevron-right' class='w-4 h-4 text-muted-foreground'}}}
+                  </a>
+                  {{/each}}
+                </div>
+              </div>
+            </div>
+            {{/if}}
+
+            <!-- Mobile User Section -->
           <div class="mt-8 pt-4 border-t border-input">
             <div class="flex items-center gap-3 mb-4">
               <img src="{{cond user.avatar_url user.avatar_url '/images/avatar.png'}}" alt="Avatar" class="w-10 h-10 rounded-full" />
@@ -428,6 +468,110 @@ function showLogoutConfirm() {
 
 function hideLogoutConfirm() {
   document.getElementById('logout-confirm-modal').classList.add('hidden');
+}
+
+// Close dropdowns when clicking outside
+document.addEventListener('click', function(event) {
+  const notificationDropdown = document.getElementById('notification-dropdown');
+  const notificationButton = document.getElementById('notification-menu').querySelector('button');
+  if (!notificationDropdown.classList.contains('hidden') && !notificationDropdown.contains(event.target) && !notificationButton.contains(event.target)) {
+    notificationDropdown.classList.add('opacity-0', 'invisible', 'hidden');
+  }
+
+  const gridDropdown = document.getElementById('grid-dropdown');
+  const gridButton = document.getElementById('grid-menu').querySelector('button');
+  if (!gridDropdown.classList.contains('hidden') && !gridDropdown.contains(event.target) && !gridButton.contains(event.target)) {
+    gridDropdown.classList.add('opacity-0', 'invisible', 'hidden');
+  }
+
+  const userDropdown = document.getElementById('admin-user-dropdown');
+  const userButton = document.getElementById('admin-user-menu-button');
+  if (!userDropdown.classList.contains('hidden') && !userDropdown.contains(event.target) && !userButton.contains(event.target)) {
+    userDropdown.classList.add('opacity-0', 'invisible', 'hidden');
+  }
+});
+
+// Mobile portfolio search
+function clearMobileProjectSearch() {
+  const input = document.getElementById('mobile-project-search');
+  input.value = '';
+  filterMobileProjects('');
+  const clearBtn = document.getElementById('mobile-project-search-clear');
+  clearBtn.style.opacity = '0';
+}
+
+function filterMobileProjects(query) {
+  const items = document.querySelectorAll('#mobile-portfolio-list a');
+  items.forEach(item => {
+    const text = item.textContent.toLowerCase();
+    if (text.includes(query.toLowerCase())) {
+      item.style.display = 'block';
+    } else {
+      item.style.display = 'none';
+    }
+  });
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+  const mobileSearchInput = document.getElementById('mobile-project-search');
+  if (mobileSearchInput) {
+    mobileSearchInput.addEventListener('input', function() {
+      const query = this.value;
+      filterMobileProjects(query);
+      const clearBtn = document.getElementById('mobile-project-search-clear');
+      if (query) {
+        clearBtn.style.opacity = '1';
+      } else {
+        clearBtn.style.opacity = '0';
+      }
+    });
+  }
+
+  const desktopSearchInput = document.getElementById('project-search');
+  if (desktopSearchInput) {
+    desktopSearchInput.addEventListener('input', function() {
+      const query = this.value;
+      filterProjects(query);
+      const clearBtn = document.getElementById('project-search-clear');
+      if (query) {
+        clearBtn.style.display = 'block';
+        clearBtn.style.opacity = '1';
+      } else {
+        clearBtn.style.display = 'none';
+        clearBtn.style.opacity = '0';
+      }
+    });
+  }
+});
+
+// Desktop portfolio search
+function clearProjectSearch() {
+  const input = document.getElementById('project-search');
+  input.value = '';
+  filterProjects('');
+  const clearBtn = document.getElementById('project-search-clear');
+  clearBtn.style.display = 'none';
+  clearBtn.style.opacity = '0';
+}
+
+function filterProjects(query) {
+  const items = document.querySelectorAll('#sidebar ul li');
+  items.forEach(item => {
+    const text = item.textContent.toLowerCase();
+    if (text.includes(query.toLowerCase())) {
+      item.style.display = 'block';
+    } else {
+      item.style.display = 'none';
+    }
+  });
+}
+
+// Toggle mobile portfolio list
+function toggleMobilePortfolio() {
+  const container = document.getElementById('mobile-portfolio-list-container');
+  container.classList.toggle('hidden');
+  const chevron = event.target.closest('button').querySelector('.chevron');
+  chevron.classList.toggle('rotate-180');
 }
 </script>
 

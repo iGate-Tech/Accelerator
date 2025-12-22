@@ -16,7 +16,7 @@
             </div>
             {{/if}}
             <div class="text-center mb-4">
-                <h3 class="text-lg font-semibold text-foreground">{{t (concat 'dashboard.payments.upgrade.' type '_plan')}}</h3>
+                <h3 class="text-lg font-semibold text-foreground">{{name}}</h3>
                 <p class="text-2xl font-bold text-foreground">
                     ${{divide price_monthly 100}}
                     <span class="text-sm font-normal text-muted-foreground">
@@ -86,7 +86,7 @@
                     </button>
                 {{else}}
                     <button type="submit" class="w-full {{#if (eq type "student")}}bg-primary text-primary-foreground hover:bg-primary/90{{else}}border border-input/80 text-foreground hover:bg-muted{{/if}} px-4 py-2 rounded-md transition-colors">
-                        {{#if (eq type "free")}}{{t 'dashboard.payments.upgrade.select_free'}}{{else}}{{t 'dashboard.payments.upgrade.upgrade_to'}} {{t (concat 'dashboard.payments.upgrade.' type '_plan')}}{{/if}}
+                        {{#if (eq type "free")}}{{t 'dashboard.payments.upgrade.select_free'}}{{else}}{{t 'dashboard.payments.upgrade.upgrade_to'}} {{name}}{{/if}}
                     </button>
                 {{/if}}
             </form>

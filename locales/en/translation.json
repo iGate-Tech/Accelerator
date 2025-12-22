@@ -1165,6 +1165,7 @@
         "theme_light": "Light",
         "start_building": "Start Building",
         "projects": "Projects",
+        "projects_desc": "Manage your startup projects",
         "dashboard": "Dashboard",
         "voting_rewards": "Voting Rewards",
         "credits": "Credits"

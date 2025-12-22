@@ -113,12 +113,23 @@
     return ['en', 'ar'].includes(normalized) ? normalized : 'en';
   }
 
-  document.addEventListener('DOMContentLoaded', function() {
-    const serverLang = normalizeLanguage('{{lng}}');
-    localStorage.setItem('language', serverLang);
-    updateLangSwitcher(serverLang);
-    updateThemeToggle(document.documentElement.classList.contains('dark'));
-  });
+   document.addEventListener('DOMContentLoaded', function() {
+     const serverLang = normalizeLanguage('{{lng}}');
+     localStorage.setItem('language', serverLang);
+     updateLangSwitcher(serverLang);
+
+     // Initialize theme
+     const savedTheme = localStorage.getItem('theme');
+     const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+     const theme = savedTheme || (systemPrefersDark ? 'dark' : 'light');
+     const isDark = theme === 'dark';
+     if (isDark) {
+       document.documentElement.classList.add('dark');
+     } else {
+       document.documentElement.classList.remove('dark');
+     }
+     updateThemeToggle(isDark);
+   });
 </script>
 
 <!-- Main Content -->

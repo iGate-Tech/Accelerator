@@ -150,7 +150,7 @@
 
       <!-- Grid Dropdown -->
       <div
-        class="absolute right-0 mt-2 w-[200px] bg-popover backdrop-blur-sm border border-input/80 rounded-md shadow-xl z-30 transition-all duration-200 opacity-0 invisible hidden"
+        class="fixed md:absolute {{#if (eq lng 'ar')}}left-0{{else}}right-0{{/if}} mt-0 md:mt-2 w-full md:w-[200px] bg-popover backdrop-blur-sm border border-input/80 rounded-lg shadow-xl z-30 transition-all duration-200 opacity-0 invisible hidden"
         id="grid-dropdown">
         <div class="p-1">
           <div class="px-2 py-1 text-sm font-medium text-muted-foreground">Quick Access</div>

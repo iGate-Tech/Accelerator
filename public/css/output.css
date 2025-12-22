@@ -3299,13 +3299,6 @@
       }
     }
   }
-  .hover\:text-error {
-    &:hover {
-      @media (hover: hover) {
-        color: var(--color-error);
-      }
-    }
-  }
   .hover\:text-foreground {
     &:hover {
       @media (hover: hover) {

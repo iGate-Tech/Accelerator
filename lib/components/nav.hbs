@@ -391,52 +391,7 @@
                 </div>
               </div>
             </div>
-            {{/if}}
-
-            <!-- Mobile User Section -->
-          <div class="mt-8 pt-4 border-t border-input">
-            <div class="flex items-center gap-3 mb-4">
-              <img src="{{cond user.avatar_url user.avatar_url '/images/avatar.png'}}" alt="Avatar" class="w-10 h-10 rounded-full" />
-              <div>
-                <div class="font-medium">{{user.name}}</div>
-                <div class="text-sm text-muted-foreground">{{user.email}}</div>
-              </div>
-            </div>
-            <div class="space-y-2">
-              <div class="flex items-center justify-between px-3 py-2 bg-muted rounded-md">
-                <span class="text-sm">{{t 'nav.credits'}}</span>
-                <span class="text-sm font-medium">{{user.profile.credit_balance}}</span>
-              </div>
-              <a href="/upgrade-package" class="flex items-center gap-3 px-3 py-2 rounded-md text-muted-foreground hover:bg-primary/10 hover:text-primary" onclick="toggleMobileNav()">
-                {{{icon 'credit-card' class="w-4 h-4"}}}
-                <span>{{t 'nav.upgrade_package'}}</span>
-              </a>
-              <a href="/buy-credits" class="flex items-center gap-3 px-3 py-2 rounded-md text-muted-foreground hover:bg-primary/10 hover:text-primary" onclick="toggleMobileNav()">
-                {{{icon 'coins' class="w-4 h-4"}}}
-                <span>{{t 'nav.buy_credits'}}</span>
-              </a>
-              <a href="/billing" class="flex items-center gap-3 px-3 py-2 rounded-md text-muted-foreground hover:bg-primary/10 hover:text-primary" onclick="toggleMobileNav()">
-                {{{icon 'file-text' class="w-4 h-4"}}}
-                <span>{{t 'nav.billing'}}</span>
-              </a>
-              <a href="/add-payment-method" class="flex items-center gap-3 px-3 py-2 rounded-md text-muted-foreground hover:bg-primary/10 hover:text-primary" onclick="toggleMobileNav()">
-                {{{icon 'credit-card' class="w-4 h-4"}}}
-                <span>{{t 'nav.add_payment_method'}}</span>
-              </a>
-              <a href="/user-activity" class="flex items-center gap-3 px-3 py-2 rounded-md text-muted-foreground hover:bg-primary/10 hover:text-primary" onclick="toggleMobileNav()">
-                {{{icon 'activity' class="w-4 h-4"}}}
-                <span>{{t 'nav.user_activity'}}</span>
-              </a>
-              <a href="/settings" class="flex items-center gap-3 px-3 py-2 rounded-md text-muted-foreground hover:bg-primary/10 hover:text-primary" onclick="toggleMobileNav()">
-                {{{icon 'settings' class="w-4 h-4"}}}
-                <span>{{t 'nav.settings'}}</span>
-              </a>
-              <button onclick="showLogoutConfirm(); toggleMobileNav()" class="flex items-center gap-3 px-3 py-2 rounded-md text-muted-foreground hover:bg-error/10 hover:text-error w-full text-left">
-                {{{icon 'log-out' class="w-4 h-4"}}}
-                <span>{{t 'nav.logout'}}</span>
-              </button>
-            </div>
-          </div>
+             {{/if}}
         </div>
       </div>
     </div>

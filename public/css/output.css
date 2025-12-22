@@ -761,9 +761,6 @@
   .h-\[calc\(100vh-4rem\)\] {
     height: calc(100vh - 4rem);
   }
-  .h-\[calc\(100vh-370px\)\] {
-    height: calc(100vh - 370px);
-  }
   .h-fit {
     height: fit-content;
   }
@@ -775,9 +772,6 @@
   }
   .max-h-32 {
     max-height: calc(var(--spacing) * 32);
-  }
-  .max-h-48 {
-    max-height: calc(var(--spacing) * 48);
   }
   .max-h-96 {
     max-height: calc(var(--spacing) * 96);

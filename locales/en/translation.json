@@ -844,6 +844,7 @@
       },
       "upgrade": {
         "title": "Upgrade Packages",
+        "subtitle": "Select the perfect plan to accelerate your startup journey",
         "description": "Manage your account packages",
         "most_popular": "Most Popular",
         "month": "/month",
@@ -861,9 +862,11 @@
         "portfolio_grouping": "Portfolio grouping",
         "advanced_analytics": "Advanced analytics",
         "team_collaboration": "Team collaboration",
+        "ai_powered_features": "AI-powered features",
         "current_plan": "Current Plan",
         "select_free": "Select Free Plan",
-        "upgrade_to": "Upgrade to {{name}}"
+        "upgrade_to": "Upgrade to",
+        "plan": "Plan"
       },
       "buy_credits": {
         "title": "Buy Credits",

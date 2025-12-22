@@ -1,94 +1,94 @@
 <main id="user-activity-main-content" class="flex-1 overflow-auto bg-background">
-  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
-    <div class="flex flex-col gap-4 lg:gap-6 mt-6">
-      <div class="flex items-center justify-between">
-        <div class="grid gap-1">
-          <h1 class="font-heading text-3xl font-semibold text-foreground">
-            {{t 'dashboard.user_activity.title'}}
-          </h1>
-          <p class="text-lg text-muted-foreground">
-            {{t 'dashboard.user_activity.description'}}
-          </p>
-        </div>
-        <div class="flex items-center gap-2">
-          <button class="btn btn-outline btn-primary px-3 py-1.5 rounded-full">
-            {{t 'dashboard.user_activity.export'}}
-          </button>
-        </div>
-      </div>
+   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
+     <div class="flex flex-col gap-4 lg:gap-6 mt-4 sm:mt-6">
+       <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+         <div class="grid gap-1">
+           <h1 class="font-heading text-2xl sm:text-3xl font-semibold text-foreground">
+             {{t 'dashboard.user_activity.title'}}
+           </h1>
+           <p class="text-base sm:text-lg text-muted-foreground">
+             {{t 'dashboard.user_activity.description'}}
+           </p>
+         </div>
+         <div class="flex items-center gap-2">
+           <button class="px-3 py-1.5 border border-input bg-background text-foreground hover:bg-accent hover:text-accent-foreground rounded-full transition-colors text-sm">
+             {{t 'dashboard.user_activity.export'}}
+           </button>
+         </div>
+       </div>
 
-      <!-- Activity Filters -->
-      <div class="flex flex-wrap gap-2" id="activity-filters">
-        <button class="filter-btn btn btn-primary active rounded-full" data-filter="all">{{t 'dashboard.user_activity.filter_all'}}</button>
-        <button class="filter-btn btn btn-outline btn-primary rounded-full" data-filter="login">{{t 'dashboard.user_activity.filter_logins'}}</button>
-        <button class="filter-btn btn btn-outline btn-primary rounded-full" data-filter="idea_created">{{t 'dashboard.user_activity.filter_ideas'}}</button>
-        <button class="filter-btn btn btn-outline btn-primary rounded-full" data-filter="profile_completed">{{t 'dashboard.user_activity.filter_profile'}}</button>
-        <button class="filter-btn btn btn-outline btn-primary rounded-full" data-filter="create">{{t 'dashboard.user_activity.filter_account'}}</button>
-      </div>
+       <!-- Activity Filters -->
+       <div class="flex flex-wrap gap-2" id="activity-filters">
+         <button class="filter-btn px-3 py-1.5 bg-primary text-primary-foreground hover:bg-primary/90 rounded-full transition-colors text-sm active" data-filter="all">{{t 'dashboard.user_activity.filter_all'}}</button>
+         <button class="filter-btn px-3 py-1.5 border border-input bg-background text-foreground hover:bg-accent hover:text-accent-foreground rounded-full transition-colors text-sm" data-filter="login">{{t 'dashboard.user_activity.filter_logins'}}</button>
+         <button class="filter-btn px-3 py-1.5 border border-input bg-background text-foreground hover:bg-accent hover:text-accent-foreground rounded-full transition-colors text-sm" data-filter="idea_created">{{t 'dashboard.user_activity.filter_ideas'}}</button>
+         <button class="filter-btn px-3 py-1.5 border border-input bg-background text-foreground hover:bg-accent hover:text-accent-foreground rounded-full transition-colors text-sm" data-filter="profile_completed">{{t 'dashboard.user_activity.filter_profile'}}</button>
+         <button class="filter-btn px-3 py-1.5 border border-input bg-background text-foreground hover:bg-accent hover:text-accent-foreground rounded-full transition-colors text-sm" data-filter="create">{{t 'dashboard.user_activity.filter_account'}}</button>
+       </div>
 
       <!-- Activity Timeline -->
       <div class="relative" id="activity-timeline">
         {{#if activities}}
-        <!-- Timeline line -->
-        <div class="absolute left-6 top-0 bottom-0 w-0.5 bg-border"></div>
+         <!-- Timeline line -->
+         <div class="absolute left-4 sm:left-6 top-0 bottom-0 w-0.5 bg-border"></div>
 
-        {{#each groupedActivities}}
-        <div class="mb-8">
-          <div class="flex items-center gap-4 mb-4">
-            {{{icon "clock" class="w-5 h-5 text-primary z-10"}}}
-            <h2 class="text-lg font-semibold text-foreground">{{@key}}</h2>
-          </div>
+         {{#each groupedActivities}}
+         <div class="mb-6 sm:mb-8">
+           <div class="flex items-center gap-3 sm:gap-4 mb-4">
+             {{{icon "clock" class="w-4 h-4 sm:w-5 sm:h-5 text-primary z-10"}}}
+             <h2 class="text-base sm:text-lg font-semibold text-foreground">{{@key}}</h2>
+           </div>
 
-          <div class="ml-12 space-y-4">
+           <div class="ml-8 sm:ml-12 space-y-3 sm:space-y-4">
             {{#each this}}
-             <div class="activity-item bg-card rounded-full border border-border p-4" data-action-type="{{action_type}}">
-              <div class="flex items-start gap-4">
-                <div class="flex-shrink-0">
-                    <div class="w-10 h-10 {{#if (eq action_type "login")}}bg-primary/20{{else if (eq action_type "create")}}bg-success/20{{else if (eq action_type "idea_created")}}bg-accent/20{{else if (eq action_type "profile_completed")}}bg-secondary/20{{else}}bg-neutral/20{{/if}} rounded-full flex items-center justify-center">
-                     {{#if (eq action_type "login")}}
-                       {{{icon "log-in" class="text-primary"}}}
-                     {{else if (eq action_type "create")}}
-                       {{{icon "plus" class="text-success"}}}
-                     {{else if (eq action_type "idea_created")}}
-                       {{{icon "lightbulb" class="text-accent"}}}
-                     {{else if (eq action_type "profile_completed")}}
-                       {{{icon "user" class="text-secondary"}}}
-                     {{else}}
-                       {{{icon "activity" class="text-neutral"}}}
-                     {{/if}}
-                  </div>
-                </div>
-                <div class="flex-1 min-w-0">
-                  <div class="flex items-center justify-between">
-                     <h3 class="text-sm font-medium text-foreground">
-                       {{#if (eq action_type "login")}}
-                         {{t 'dashboard.user_activity.logged_in'}}
-                       {{else if (eq action_type "create")}}
-                         {{#if (eq entity_type "account")}}{{t 'dashboard.user_activity.account_created'}}{{else}}{{t 'dashboard.user_activity.created_entity'}} {{entity_type}}{{/if}}
-                       {{else if (eq action_type "idea_created")}}
-                         {{t 'dashboard.user_activity.idea_created'}}
-                       {{else if (eq action_type "profile_completed")}}
-                         {{t 'dashboard.user_activity.profile_completed'}}
-                       {{else}}
-                         {{action_type}} {{entity_type}}
-                       {{/if}}
-                     </h3>
-                    <span class="text-xs text-muted-foreground">{{formatDate created_at "time"}}</span>
-                  </div>
-                  {{#if details}}
-                   <p class="text-sm text-muted-foreground mt-1">
-                     {{#if (eq action_type "login")}}
-                       {{#if details.description}}{{details.description}}{{else}}{{t 'dashboard.user_activity.successful_login'}}{{/if}}
-                     {{else if (eq action_type "idea_created")}}
-                       {{#if details.title}}"{{details.title}}"{{/if}}
-                     {{else if details.description}}
-                       {{details.description}}
-                     {{else}}
-                       {{t 'dashboard.user_activity.activity_details'}}
-                     {{/if}}
-                   </p>
-                  {{/if}}
-                </div>
+              <div class="activity-item bg-card rounded-lg border border-border p-3 sm:p-4" data-action-type="{{action_type}}">
+               <div class="flex items-start gap-3 sm:gap-4">
+                 <div class="flex-shrink-0">
+                     <div class="w-8 h-8 sm:w-10 sm:h-10 {{#if (eq action_type "login")}}bg-primary/20{{else if (eq action_type "create")}}bg-success/20{{else if (eq action_type "idea_created")}}bg-accent/20{{else if (eq action_type "profile_completed")}}bg-secondary/20{{else}}bg-neutral/20{{/if}} rounded-full flex items-center justify-center">
+                      {{#if (eq action_type "login")}}
+                        {{{icon "log-in" class="w-4 h-4 sm:w-5 sm:h-5 text-primary"}}}
+                      {{else if (eq action_type "create")}}
+                        {{{icon "plus" class="w-4 h-4 sm:w-5 sm:h-5 text-success"}}}
+                      {{else if (eq action_type "idea_created")}}
+                        {{{icon "lightbulb" class="w-4 h-4 sm:w-5 sm:h-5 text-accent"}}}
+                      {{else if (eq action_type "profile_completed")}}
+                        {{{icon "user" class="w-4 h-4 sm:w-5 sm:h-5 text-secondary"}}}
+                      {{else}}
+                        {{{icon "activity" class="w-4 h-4 sm:w-5 sm:h-5 text-neutral"}}}
+                      {{/if}}
+                   </div>
+                 </div>
+                 <div class="flex-1 min-w-0">
+                   <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1">
+                      <h3 class="text-sm font-medium text-foreground">
+                        {{#if (eq action_type "login")}}
+                          {{t 'dashboard.user_activity.logged_in'}}
+                        {{else if (eq action_type "create")}}
+                          {{#if (eq entity_type "account")}}{{t 'dashboard.user_activity.account_created'}}{{else}}{{t 'dashboard.user_activity.created_entity'}} {{entity_type}}{{/if}}
+                        {{else if (eq action_type "idea_created")}}
+                          {{t 'dashboard.user_activity.idea_created'}}
+                        {{else if (eq action_type "profile_completed")}}
+                          {{t 'dashboard.user_activity.profile_completed'}}
+                        {{else}}
+                          {{action_type}} {{entity_type}}
+                        {{/if}}
+                      </h3>
+                     <span class="text-xs text-muted-foreground">{{formatDate created_at "time"}}</span>
+                   </div>
+                   {{#if details}}
+                    <p class="text-sm text-muted-foreground mt-1">
+                      {{#if (eq action_type "login")}}
+                        {{#if details.description}}{{details.description}}{{else}}{{t 'dashboard.user_activity.successful_login'}}{{/if}}
+                      {{else if (eq action_type "idea_created")}}
+                        {{#if details.title}}"{{details.title}}"{{/if}}
+                      {{else if details.description}}
+                        {{details.description}}
+                      {{else}}
+                        {{t 'dashboard.user_activity.activity_details'}}
+                      {{/if}}
+                    </p>
+                   {{/if}}
+                 </div>
               </div>
             </div>
             {{/each}}
@@ -96,24 +96,24 @@
         </div>
         {{/each}}
 
-        {{else}}
-        <!-- No activity message -->
-        <div class="text-center py-12">
-          <div class="w-16 h-16 bg-muted rounded-full flex items-center justify-center mx-auto mb-4">
-            {{{icon "activity" class="w-8 h-8 text-muted-foreground"}}}
-          </div>
-           <h3 class="text-lg font-medium text-foreground mb-2">{{t 'dashboard.user_activity.no_activity'}}</h3>
-           <p class="text-muted-foreground">{{t 'dashboard.user_activity.activity_will_appear'}}</p>
-        </div>
-        {{/if}}
+         {{else}}
+         <!-- No activity message -->
+         <div class="text-center py-8 sm:py-12">
+           <div class="w-12 h-12 sm:w-16 sm:h-16 bg-muted rounded-full flex items-center justify-center mx-auto mb-4">
+             {{{icon "activity" class="w-6 h-6 sm:w-8 sm:h-8 text-muted-foreground"}}}
+           </div>
+            <h3 class="text-base sm:text-lg font-medium text-foreground mb-2">{{t 'dashboard.user_activity.no_activity'}}</h3>
+            <p class="text-sm sm:text-base text-muted-foreground">{{t 'dashboard.user_activity.activity_will_appear'}}</p>
+         </div>
+         {{/if}}
       </div>
 
-      <!-- Load More -->
-      <div class="text-center py-4">
-         <button class="btn btn-outline btn-primary px-3 py-1.5 rounded-full">
-           {{t 'dashboard.user_activity.load_more'}}
-         </button>
-      </div>
+       <!-- Load More -->
+       <div class="text-center py-4">
+          <button class="px-3 py-1.5 border border-input bg-background text-foreground hover:bg-accent hover:text-accent-foreground rounded-full transition-colors text-sm">
+            {{t 'dashboard.user_activity.load_more'}}
+          </button>
+       </div>
     </div>
   </div>
 

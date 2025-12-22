@@ -178,41 +178,76 @@
         }
       }
 
-      function toggleNotificationMenu() {
-        const dropdown = document.getElementById('notification-dropdown');
-        if (dropdown) {
-          const isVisible = !dropdown.classList.contains('hidden');
-          if (isVisible) {
-            dropdown.classList.add('hidden');
-            dropdown.classList.add('invisible');
-            dropdown.classList.add('opacity-0');
-          } else {
-            dropdown.classList.remove('hidden');
-            dropdown.classList.remove('invisible');
-            dropdown.classList.remove('opacity-0');
-          }
-        }
-      }
+       function toggleNotificationMenu() {
+         const dropdown = document.getElementById('notification-dropdown');
+         if (dropdown) {
+           const isVisible = !dropdown.classList.contains('hidden');
+           if (isVisible) {
+             dropdown.classList.add('hidden');
+             dropdown.classList.add('invisible');
+             dropdown.classList.add('opacity-0');
+           } else {
+             dropdown.classList.remove('hidden');
+             dropdown.classList.remove('invisible');
+             dropdown.classList.remove('opacity-0');
+           }
+         }
+       }
 
-      async function markAsRead(notificationId) {
-        try {
-          const response = await fetch(`/api/notifications/${notificationId}/read`, {
-            method: 'PUT',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-          });
-          if (response.ok) {
-            // Refresh the dropdown
-            htmx.trigger('#notification-dropdown', 'revealed');
-          } else {
-            showToast('Failed to mark as read', 'error');
-          }
-        } catch (error) {
-          console.error('Mark as read error:', error);
-          showToast('Failed to mark as read', 'error');
-        }
-      }
+       function toggleMobileNav() {
+         const menu = document.getElementById('mobile-nav-menu');
+         if (menu) {
+           const isOpen = !menu.classList.contains('hidden');
+           if (isOpen) {
+             menu.classList.add('hidden');
+           } else {
+             menu.classList.remove('hidden');
+           }
+         }
+       }
+
+       function showLogoutConfirm() {
+         const modal = document.getElementById('logout-confirm-modal');
+         if (modal) {
+           modal.classList.remove('hidden');
+         }
+       }
+
+       function hideLogoutConfirm() {
+         const modal = document.getElementById('logout-confirm-modal');
+         if (modal) {
+           modal.classList.add('hidden');
+         }
+       }
+
+       async function markAsRead(notificationId) {
+         try {
+           const response = await fetch(`/api/notifications/${notificationId}/read`, {
+             method: 'PUT',
+             headers: {
+               'Content-Type': 'application/json',
+             },
+           });
+           if (response.ok) {
+             // Refresh the dropdown
+             htmx.trigger('#notification-dropdown', 'revealed');
+           } else {
+             showToast('Failed to mark as read', 'error');
+           }
+         } catch (error) {
+           console.error('Mark as read error:', error);
+           showToast('Failed to mark as read', 'error');
+         }
+       }
+
+       // Close mobile nav on outside click
+       document.addEventListener('click', function(e) {
+         const menu = document.getElementById('mobile-nav-menu');
+         const toggleBtn = document.getElementById('mobile-nav-toggle');
+         if (menu && !menu.classList.contains('hidden') && !menu.contains(e.target) && (!toggleBtn || !toggleBtn.contains(e.target))) {
+           toggleMobileNav();
+         }
+       });
       </script>
 
     {{#if flash.success}}

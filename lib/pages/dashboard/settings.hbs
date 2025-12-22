@@ -1,203 +1,374 @@
-<div class="p-8 max-w-4xl mx-auto">
-  <div class="grid gap-1 mb-8">
-    <h1 class="font-heading text-3xl font-semibold text-foreground">
-      {{t 'dashboard.settings.title'}}
-    </h1>
-    <p class="text-lg text-muted-foreground">
-      {{t 'dashboard.settings.description'}}
-    </p>
-  </div>
 
-   <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-     <!-- Profile Section -->
-     <div class="space-y-6">
-       <div class="rounded-md bg-card p-6 text-card-foreground border border-input/80">
-          <h2 class="text-xl font-semibold mb-4">{{t 'dashboard.settings.profile_info'}}</h2>
 
-         <form method="POST" action="/settings/profile" enctype="multipart/form-data">
-           <!-- Avatar Upload -->
-           <div class="mb-4">
-              <label class="block text-sm font-medium text-foreground mb-2">{{t 'dashboard.settings.avatar'}}</label>
-             <div class="flex items-center gap-4">
-               <img src="{{#if profile.avatar_url}}{{profile.avatar_url}}{{else}}/images/avatar.png{{/if}}"
-                    class="w-16 h-16 rounded-full object-cover border-2 border-input"
-                    id="avatar-preview" alt="Current avatar">
-               <div>
-                 <input type="file" name="avatar" id="avatar-upload" accept="image/*"
-                        class="hidden" onchange="previewAvatar(this)">
-                  <label for="avatar-upload"
-                         class="px-4 py-2 bg-primary text-primary-foreground rounded-md cursor-pointer hover:bg-primary/90 transition-colors text-sm">
-                    {{t 'dashboard.settings.change_avatar'}}
-                  </label>
-                  <p class="text-xs text-muted-foreground mt-1">{{t 'dashboard.settings.max_5mb'}}</p>
-               </div>
-             </div>
-           </div>
+<div class="min-h-screen bg-gray-50 dark:bg-gray-900">
+  <div class="max-w-md mx-auto bg-white dark:bg-gray-800 min-h-screen shadow-lg">
 
-           <!-- Name -->
-           <div class="mb-4">
-              <label for="name" class="block text-sm font-medium text-foreground mb-2">{{t 'dashboard.settings.name'}}</label>
-             <input type="text" id="name" name="name" value="{{profile.name}}"
-                    class="w-full px-3 py-2 border border-input rounded-md bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-                    placeholder="Your full name">
-           </div>
-
-           <!-- Role -->
-           <div class="mb-4">
-              <label for="role" class="block text-sm font-medium text-foreground mb-2">{{t 'dashboard.settings.role'}}</label>
-             <input type="text" id="role" name="role" value="{{profile.role}}"
-                    class="w-full px-3 py-2 border border-input rounded-md bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-                     placeholder="{{t 'dashboard.settings.role_placeholder'}}">
-           </div>
-
-           <!-- Bio -->
-           <div class="mb-4">
-             <label for="bio" class="block text-sm font-medium text-foreground mb-2">Bio</label>
-             <textarea id="bio" name="bio" rows="3"
-                       class="w-full px-3 py-2 border border-input rounded-md bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-                       placeholder="Tell us about yourself">{{profile.preferences.bio}}</textarea>
-           </div>
-
-           <!-- Location -->
-           <div class="mb-4">
-             <label for="location" class="block text-sm font-medium text-foreground mb-2">Location</label>
-             <input type="text" id="location" name="location" value="{{profile.preferences.location}}"
-                    class="w-full px-3 py-2 border border-input rounded-md bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-                    placeholder="City, Country">
-           </div>
-
-           <!-- Website -->
-           <div class="mb-4">
-             <label for="website" class="block text-sm font-medium text-foreground mb-2">Website</label>
-             <input type="url" id="website" name="website" value="{{profile.preferences.website}}"
-                    class="w-full px-3 py-2 border border-input rounded-md bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-                    placeholder="https://yourwebsite.com">
-           </div>
-
-           <!-- Social Links -->
-           <div class="mb-6">
-             <label class="block text-sm font-medium text-foreground mb-2">Social Links</label>
-             <div id="social-links-container" class="space-y-3">
-               <!-- Predefined platforms -->
-               <div class="flex items-center gap-2">
-                 <span class="text-sm font-medium w-20">Twitter:</span>
-                 <input type="url" id="social-twitter" placeholder="https://twitter.com/username"
-                        class="flex-1 px-3 py-2 border border-input rounded-md bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary">
-               </div>
-               <div class="flex items-center gap-2">
-                 <span class="text-sm font-medium w-20">LinkedIn:</span>
-                 <input type="url" id="social-linkedin" placeholder="https://linkedin.com/in/username"
-                        class="flex-1 px-3 py-2 border border-input rounded-md bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary">
-               </div>
-               <div class="flex items-center gap-2">
-                 <span class="text-sm font-medium w-20">GitHub:</span>
-                 <input type="url" id="social-github" placeholder="https://github.com/username"
-                        class="flex-1 px-3 py-2 border border-input rounded-md bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary">
-               </div>
-               <div class="flex items-center gap-2">
-                 <span class="text-sm font-medium w-20">Instagram:</span>
-                 <input type="url" id="social-instagram" placeholder="https://instagram.com/username"
-                        class="flex-1 px-3 py-2 border border-input rounded-md bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary">
-               </div>
-               <div class="flex items-center gap-2">
-                 <span class="text-sm font-medium w-20">YouTube:</span>
-                 <input type="url" id="social-youtube" placeholder="https://youtube.com/@username"
-                        class="flex-1 px-3 py-2 border border-input rounded-md bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary">
-               </div>
-               <!-- Custom links will be added here -->
-             </div>
-             <button type="button" id="add-custom-link" class="mt-3 px-4 py-2 text-sm text-primary hover:text-primary/80 border border-primary rounded-md hover:bg-primary/5 transition-colors">
-               + Add Custom Link
-             </button>
-             <!-- Hidden textarea to store JSON -->
-             <textarea id="social_links" name="social_links" class="hidden"></textarea>
-           </div>
-
-           <button type="submit" class="w-full px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors">
-             Save Profile
-           </button>
-         </form>
-       </div>
-     </div>
-
-     <!-- Package & Account Section -->
-     <div class="space-y-6">
-       <div class="rounded-md bg-card p-6 text-card-foreground border border-input/80">
-         <h2 class="text-xl font-semibold mb-4">Package & Account</h2>
-
-         <!-- Current Package Info -->
-         <div class="mb-6 p-4 bg-muted rounded-md">
-           <h3 class="font-medium text-foreground mb-2">Current Package</h3>
-           <div class="flex items-center justify-between">
-             <div>
-               <span class="text-lg font-semibold capitalize">{{profile.package_type}}</span>
-               <span class="text-sm text-muted-foreground ml-2">
-                  {{#if (eq profile.package_type "free")}}
-                   Free Plan
-                 {{else}}
-                   ${{profile.package_type}}/month
-                 {{/if}}
-               </span>
-             </div>
-             <div class="text-right">
-               <div class="text-sm text-muted-foreground">Credits</div>
-               <div class="text-lg font-semibold">{{profile.credit_balance}}</div>
-             </div>
-           </div>
-           {{#if profile.package_expires}}
-           <div class="text-sm text-muted-foreground mt-2">
-             Expires: {{formatDate profile.package_expires}}
-           </div>
-           {{/if}}
-         </div>
-
-         <!-- Package Selection -->
-         <div class="mb-6">
-           <label class="block text-sm font-medium text-foreground mb-3">Change Package</label>
-           <form method="POST" action="/settings/package">
-             <div class="space-y-3">
-               <div class="flex items-center">
-                 <input type="radio" id="free" name="package_type" value="free"
-                        {{#if (eq profile.package_type "free")}}checked{{/if}}
-                        class="h-4 w-4 text-primary focus:ring-primary border-input">
-                 <label for="free" class="ml-3 block text-sm">
-                   <span class="font-medium">Free</span> - Vote on ideas, limited features (50 credits)
-                 </label>
-               </div>
-               <div class="flex items-center">
-                 <input type="radio" id="student" name="package_type" value="student"
-                        {{#if (eq profile.package_type "student")}}checked{{/if}}
-                        class="h-4 w-4 text-primary focus:ring-primary border-input">
-                 <label for="student" class="ml-3 block text-sm">
-                   <span class="font-medium">Student - $9.99/month</span> - Create ideas, models, reports (500 credits)
-                 </label>
-               </div>
-               <div class="flex items-center">
-                 <input type="radio" id="enterprise" name="package_type" value="enterprise"
-                        {{#if (eq profile.package_type "enterprise")}}checked{{/if}}
-                        class="h-4 w-4 text-primary focus:ring-primary border-input">
-                 <label for="enterprise" class="ml-3 block text-sm">
-                   <span class="font-medium">Enterprise - $29.99/month</span> - Team features, analytics (2000 credits)
-                 </label>
-               </div>
-             </div>
-             <button type="submit" class="mt-4 w-full px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors">
-               Update Package
-             </button>
-           </form>
-         </div>
-
-         <!-- Credit History -->
-         <div>
-           <h3 class="font-medium text-foreground mb-3">Recent Credit Activity</h3>
-           <div class="text-sm text-muted-foreground">
-             Credit history will be displayed here
-           </div>
-         </div>
-       </div>
+    <!-- Header -->
+    <div class="px-4 py-6 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
+      <h1 class="text-2xl font-semibold text-gray-900 dark:text-white">Settings</h1>
+      <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">Manage your account and preferences</p>
     </div>
+
+    <!-- Settings List -->
+    <div class="divide-y divide-gray-200 dark:divide-gray-700">
+
+      <!-- Account Section -->
+      <div class="px-4 py-2">
+        <div class="py-2">
+          <h2 class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider px-4">Account</h2>
+        </div>
+
+        <!-- Profile -->
+        <div class="flex items-center px-4 py-4 hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer transition-colors" onclick="toggleSection('profile')">
+          <div class="flex-shrink-0 w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center">
+            {{{icon 'user' class="w-4 h-4 text-white"}}}
+          </div>
+          <div class="ml-3 flex-1">
+            <div class="flex items-center justify-between">
+              <p class="text-base font-medium text-gray-900 dark:text-white">Profile Information</p>
+              <div class="flex items-center">
+                <span class="text-sm text-gray-500 dark:text-gray-400 mr-2">{{profile.name}}</span>
+                {{{icon 'chevron-right' class="w-5 h-5 text-gray-400 dark:text-gray-500"}}}
+              </div>
+            </div>
+            <p class="text-sm text-gray-500 dark:text-gray-400">Update your personal details</p>
+          </div>
+        </div>
+
+        <!-- Password -->
+        <div class="flex items-center px-4 py-4 hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer transition-colors">
+          <div class="flex-shrink-0 w-8 h-8 bg-green-500 rounded-lg flex items-center justify-center">
+            {{{icon 'lock' class="w-4 h-4 text-white"}}}
+          </div>
+          <div class="ml-3 flex-1">
+            <div class="flex items-center justify-between">
+              <p class="text-base font-medium text-gray-900 dark:text-white">Password</p>
+              {{{icon 'chevron-right' class="w-5 h-5 text-gray-400 dark:text-gray-500"}}}
+            </div>
+            <p class="text-sm text-gray-500 dark:text-gray-400">Change your password</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Billing Section -->
+      <div class="px-4 py-2">
+        <div class="py-2">
+          <h2 class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider px-4">Billing</h2>
+        </div>
+
+        <!-- Current Plan -->
+        <div class="flex items-center px-4 py-4 hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer transition-colors">
+          <div class="flex-shrink-0 w-8 h-8 bg-purple-500 rounded-lg flex items-center justify-center">
+            {{{icon 'credit-card' class="w-4 h-4 text-white"}}}
+          </div>
+          <div class="ml-3 flex-1">
+            <div class="flex items-center justify-between">
+              <p class="text-base font-medium text-gray-900 dark:text-white">{{capitalize profile.package_type}} Plan</p>
+              {{{icon 'chevron-right' class="w-5 h-5 text-gray-400 dark:text-gray-500"}}}
+            </div>
+            <p class="text-sm text-gray-500 dark:text-gray-400">{{profile.credit_balance}} credits available</p>
+          </div>
+        </div>
+
+        <!-- Billing History -->
+        <div class="flex items-center px-4 py-4 hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer transition-colors">
+          <div class="flex-shrink-0 w-8 h-8 bg-orange-500 rounded-lg flex items-center justify-center">
+            {{{icon 'receipt' class="w-4 h-4 text-white"}}}
+          </div>
+          <div class="ml-3 flex-1">
+            <div class="flex items-center justify-between">
+              <p class="text-base font-medium text-gray-900 dark:text-white">Billing History</p>
+              {{{icon 'chevron-right' class="w-5 h-5 text-gray-400 dark:text-gray-500"}}}
+            </div>
+            <p class="text-sm text-gray-500 dark:text-gray-400">View past transactions</p>
+          </div>
+        </div>
+
+        <!-- Payment Methods -->
+        <div class="flex items-center px-4 py-4 hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer transition-colors">
+          <div class="flex-shrink-0 w-8 h-8 bg-teal-500 rounded-lg flex items-center justify-center">
+            {{{icon 'credit-card' class="w-4 h-4 text-white"}}}
+          </div>
+          <div class="ml-3 flex-1">
+            <div class="flex items-center justify-between">
+              <p class="text-base font-medium text-gray-900 dark:text-white">Payment Methods</p>
+              {{{icon 'chevron-right' class="w-5 h-5 text-gray-400 dark:text-gray-500"}}}
+            </div>
+            <p class="text-sm text-gray-500 dark:text-gray-400">Manage cards and payment options</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Preferences Section -->
+      <div class="px-4 py-2">
+        <div class="py-2">
+          <h2 class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider px-4">Preferences</h2>
+        </div>
+
+        <!-- Theme -->
+        <div class="flex items-center px-4 py-4 hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer transition-colors" onclick="toggleTheme()">
+          <div class="flex-shrink-0 w-8 h-8 bg-indigo-500 rounded-lg flex items-center justify-center">
+            {{{icon 'sun' class="w-4 h-4 text-white" id="theme-icon-light"}}}
+            {{{icon 'moon' class="w-4 h-4 text-white hidden" id="theme-icon-dark"}}}
+          </div>
+          <div class="ml-3 flex-1">
+            <div class="flex items-center justify-between">
+              <p class="text-base font-medium text-gray-900 dark:text-white">Theme</p>
+              <span class="text-sm text-gray-500 dark:text-gray-400" id="theme-status">Light</span>
+            </div>
+            <p class="text-sm text-gray-500 dark:text-gray-400">Toggle between light and dark mode</p>
+          </div>
+        </div>
+
+        <!-- Language -->
+        <div class="flex items-center px-4 py-4 hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer transition-colors" onclick="switchLanguage()">
+          <div class="flex-shrink-0 w-8 h-8 bg-pink-500 rounded-lg flex items-center justify-center">
+            {{{icon 'languages' class="w-4 h-4 text-white"}}}
+          </div>
+          <div class="ml-3 flex-1">
+            <div class="flex items-center justify-between">
+              <p class="text-base font-medium text-gray-900 dark:text-white">Language</p>
+              <span class="text-sm text-gray-500 dark:text-gray-400" id="lang-display">{{#if (eq lng 'ar')}}العربية{{else}}English{{/if}}</span>
+            </div>
+            <p class="text-sm text-gray-500 dark:text-gray-400">Choose your preferred language</p>
+          </div>
+        </div>
+
+        <!-- Notifications -->
+        <div class="flex items-center px-4 py-4 hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer transition-colors">
+          <div class="flex-shrink-0 w-8 h-8 bg-red-500 rounded-lg flex items-center justify-center">
+            {{{icon 'bell' class="w-4 h-4 text-white"}}}
+          </div>
+          <div class="ml-3 flex-1">
+            <div class="flex items-center justify-between">
+              <p class="text-base font-medium text-gray-900 dark:text-white">Notifications</p>
+              {{{icon 'chevron-right' class="w-5 h-5 text-gray-400 dark:text-gray-500"}}}
+            </div>
+            <p class="text-sm text-gray-500 dark:text-gray-400">Manage notification preferences</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Support Section -->
+      <div class="px-4 py-2">
+        <div class="py-2">
+          <h2 class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider px-4">Support</h2>
+        </div>
+
+        <!-- Help -->
+        <div class="flex items-center px-4 py-4 hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer transition-colors">
+          <div class="flex-shrink-0 w-8 h-8 bg-cyan-500 rounded-lg flex items-center justify-center">
+            {{{icon 'help-circle' class="w-4 h-4 text-white"}}}
+          </div>
+          <div class="ml-3 flex-1">
+            <div class="flex items-center justify-between">
+              <p class="text-base font-medium text-gray-900 dark:text-white">Help & Support</p>
+              {{{icon 'chevron-right' class="w-5 h-5 text-gray-400 dark:text-gray-500"}}}
+            </div>
+            <p class="text-sm text-gray-500 dark:text-gray-400">Get help and contact support</p>
+          </div>
+        </div>
+
+        <!-- About -->
+        <div class="flex items-center px-4 py-4 hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer transition-colors">
+          <div class="flex-shrink-0 w-8 h-8 bg-gray-500 rounded-lg flex items-center justify-center">
+            {{{icon 'info' class="w-4 h-4 text-white"}}}
+          </div>
+          <div class="ml-3 flex-1">
+            <div class="flex items-center justify-between">
+              <p class="text-base font-medium text-gray-900 dark:text-white">About Accelerator</p>
+              {{{icon 'chevron-right' class="w-5 h-5 text-gray-400 dark:text-gray-500"}}}
+            </div>
+            <p class="text-sm text-gray-500 dark:text-gray-400">Version 1.0.0</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Account Actions -->
+      <div class="px-4 py-4">
+        <button class="w-full bg-red-500 text-white py-3 px-4 rounded-lg font-medium hover:bg-red-600 dark:hover:bg-red-700 transition-colors" onclick="showLogoutConfirm()">
+          Sign Out
+        </button>
+      </div>
+    </div>
+
+    <!-- Expandable Sections (Hidden by default) -->
+    <div id="profile-section" class="hidden bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 px-4 py-6">
+      <form method="POST" action="/settings/profile" enctype="multipart/form-data" class="space-y-6">
+        <input type="hidden" name="_csrf" value="{{csrf}}" />
+
+        <!-- Avatar -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Profile Picture</label>
+          <div class="flex items-center space-x-4">
+            <img src="{{#if profile.avatar_url}}{{profile.avatar_url}}{{else}}/images/avatar.png{{/if}}"
+                 class="w-16 h-16 rounded-full object-cover border-2 border-gray-300 dark:border-gray-600"
+                 id="avatar-preview" alt="Current avatar">
+            <div>
+              <input type="file" name="avatar" id="avatar-upload" accept="image/*" class="hidden" onchange="previewAvatar(this)">
+              <label for="avatar-upload" class="bg-blue-500 text-white px-4 py-2 rounded-lg cursor-pointer hover:bg-blue-600 dark:hover:bg-blue-700 text-sm transition-colors">
+                Change Photo
+              </label>
+              <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Max 5MB</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Name -->
+        <div>
+          <label for="name" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Full Name</label>
+          <input type="text" id="name" name="name" value="{{profile.name}}"
+                 class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 text-base"
+                 placeholder="Your full name">
+        </div>
+
+        <!-- Role -->
+        <div>
+          <label for="role" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Role</label>
+          <input type="text" id="role" name="role" value="{{profile.role}}"
+                 class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 text-base"
+                 placeholder="Your role">
+        </div>
+
+        <!-- Bio -->
+        <div>
+          <label for="bio" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Bio</label>
+          <textarea id="bio" name="bio" rows="3"
+                    class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 text-base"
+                    placeholder="Tell us about yourself">{{profile.preferences.bio}}</textarea>
+        </div>
+
+        <!-- Location -->
+        <div>
+          <label for="location" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Location</label>
+          <input type="text" id="location" name="location" value="{{profile.preferences.location}}"
+                 class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 text-base"
+                 placeholder="City, Country">
+        </div>
+
+        <!-- Website -->
+        <div>
+          <label for="website" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Website</label>
+          <input type="url" id="website" name="website" value="{{profile.preferences.website}}"
+                 class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 text-base"
+                 placeholder="https://yourwebsite.com">
+        </div>
+
+        <!-- Save Button -->
+        <div class="flex space-x-3 pt-4">
+          <button type="submit" class="flex-1 bg-blue-500 text-white py-3 px-4 rounded-lg font-medium hover:bg-blue-600 dark:hover:bg-blue-700 transition-colors">
+            Save Changes
+          </button>
+          <button type="button" onclick="toggleSection('profile')" class="flex-1 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 py-3 px-4 rounded-lg font-medium hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">
+            Cancel
+          </button>
+        </div>
+      </form>
+    </div>
+
   </div>
 </div>
+
+<script>
+function toggleSection(section) {
+  const sectionEl = document.getElementById(section + '-section');
+  if (sectionEl) {
+    sectionEl.classList.toggle('hidden');
+  }
+}
+
+function updateThemeStatus() {
+  const isDark = document.documentElement.classList.contains('dark');
+  const statusEl = document.getElementById('theme-status');
+  if (statusEl) {
+    statusEl.textContent = isDark ? 'Dark' : 'Light';
+  }
+  // Toggle theme icons
+  const lightIcon = document.getElementById('theme-icon-light');
+  const darkIcon = document.getElementById('theme-icon-dark');
+  if (lightIcon && darkIcon) {
+    if (isDark) {
+      lightIcon.classList.add('hidden');
+      darkIcon.classList.remove('hidden');
+    } else {
+      darkIcon.classList.add('hidden');
+      lightIcon.classList.remove('hidden');
+    }
+  }
+}
+
+// Define toggleTheme if not exists
+if (!window.toggleTheme) {
+  window.toggleTheme = function() {
+    document.documentElement.classList.toggle('dark');
+    // Dispatch custom event for other listeners
+    document.dispatchEvent(new CustomEvent('theme-change'));
+  };
+}
+
+// Update theme status on load and theme change
+document.addEventListener('DOMContentLoaded', updateThemeStatus);
+document.addEventListener('theme-change', updateThemeStatus);
+
+// Override the global toggleTheme to update status
+const originalToggleTheme = window.toggleTheme;
+window.toggleTheme = function() {
+  if (originalToggleTheme) originalToggleTheme();
+  updateThemeStatus();
+};
+
+// Normalize language function
+function normalizeLanguage(lang) {
+  return lang === 'ar' ? 'ar' : 'en';
+}
+
+// Switch language function
+function switchLanguage() {
+  const currentLang = localStorage.getItem('language') || 'en';
+  const newLang = currentLang === 'en' ? 'ar' : 'en';
+  localStorage.setItem('language', newLang);
+  updateLangDisplay();
+  // Optionally reload page or dispatch event
+  // window.location.reload();
+}
+
+// Update language display
+function updateLangDisplay() {
+  const langDisplay = document.getElementById('lang-display');
+  if (langDisplay) {
+    const currentLang = normalizeLanguage(localStorage.getItem('language') || 'en');
+    langDisplay.textContent = currentLang === 'ar' ? 'العربية' : 'English';
+  }
+}
+
+document.addEventListener('DOMContentLoaded', updateLangDisplay);
+
+// Preview avatar function
+function previewAvatar(input) {
+  if (input.files && input.files[0]) {
+    const file = input.files[0];
+    if (file.size > 5 * 1024 * 1024) { // 5MB limit
+      alert('File size must be less than 5MB');
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      const preview = document.getElementById('avatar-preview');
+      if (preview) {
+        preview.src = e.target.result;
+      }
+    };
+    reader.readAsDataURL(file);
+  }
+}
+
+// Logout confirmation
+function showLogoutConfirm() {
+  if (confirm('Are you sure you want to sign out?')) {
+    window.location.href = '/logout';
+  }
+}
+</script>
 
 <!-- Social links data for JavaScript -->
 

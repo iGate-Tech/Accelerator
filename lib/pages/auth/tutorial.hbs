@@ -1,0 +1,367 @@
+<div class="w-full min-h-screen flex flex-col lg:flex-row items-center justify-center">
+  <div class="flex items-center">
+    <div class="flex flex-col items-center justify-center h-full gap-6 w-full max-w-6xl mx-auto px-6">
+
+      <!-- Header Section -->
+      <div class="grid gap-2 text-center mb-8">
+        <div class="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-primary to-secondary rounded-2xl mb-6 shadow-lg">
+{{{icon 'book-open' class="w-10 h-10 text-primary-foreground"}}}
+        </div>
+        <h1 class="text-4xl font-bold bg-gradient-to-r from-foreground via-primary to-secondary bg-clip-text text-transparent">
+          Welcome to Accelerator!
+        </h1>
+        <p class="text-lg text-muted-foreground max-w-2xl">
+          Let's take a quick tour of your startup journey platform. We'll show you everything you need to know to get started.
+        </p>
+      </div>
+
+      <!-- Progress Section -->
+      <div class="w-full max-w-2xl mb-8">
+        <div class="flex justify-between items-center mb-4">
+          <span class="text-sm font-medium text-muted-foreground">Tutorial Progress</span>
+          <span class="text-sm font-medium text-muted-foreground" id="progress-text">1 of 5 steps</span>
+        </div>
+        <div class="w-full bg-muted rounded-full h-3 mb-6">
+          <div class="bg-gradient-to-r from-primary to-secondary h-3 rounded-full transition-all duration-500" id="progress-bar" style="width: 20%"></div>
+        </div>
+
+        <!-- Step Indicators -->
+        <div class="flex justify-center space-x-3">
+          <div class="w-3 h-3 bg-primary rounded-full transition-all duration-300" data-step="1"></div>
+          <div class="w-3 h-3 bg-muted rounded-full transition-all duration-300" data-step="2"></div>
+          <div class="w-3 h-3 bg-muted rounded-full transition-all duration-300" data-step="3"></div>
+          <div class="w-3 h-3 bg-muted rounded-full transition-all duration-300" data-step="4"></div>
+          <div class="w-3 h-3 bg-muted rounded-full transition-all duration-300" data-step="5"></div>
+        </div>
+      </div>
+
+      <!-- Tutorial Content Container -->
+      <div class="bg-card/95 backdrop-blur-sm rounded-3xl shadow-2xl border border-border/50 p-8 md:p-12 w-full max-w-4xl min-h-[500px] transition-all duration-500" id="tutorial-step">
+        <!-- Step content will be loaded here by JavaScript -->
+        <div class="text-center py-12">
+          <div class="inline-flex items-center justify-center w-16 h-16 bg-primary/10 rounded-2xl mb-6">
+{{{icon 'book-open' class="w-8 h-8 text-primary"}}}
+          </div>
+          <p class="text-muted-foreground">Loading tutorial...</p>
+        </div>
+      </div>
+
+      <!-- Navigation Buttons -->
+      <div class="flex justify-between items-center w-full max-w-4xl mt-8">
+        <button id="prev-step" class="px-8 py-3 border border-border text-foreground hover:bg-muted rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-transparent flex items-center space-x-2">
+{{{icon 'chevron-left' class="w-4 h-4"}}}
+          <span>Previous</span>
+        </button>
+
+        <div class="text-center">
+          <div class="text-sm text-muted-foreground mb-2">Step <span id="current-step">1</span> of <span id="total-steps">5</span></div>
+        </div>
+
+        <button id="next-step" class="px-8 py-3 bg-primary text-primary-foreground hover:bg-primary/90 rounded-xl transition-colors flex items-center space-x-2 shadow-lg">
+          <span>Next</span>
+{{{icon 'chevron-right' class="w-4 h-4"}}}
+        </button>
+      </div>
+
+      <!-- Completion Section (Hidden by default) -->
+      <div class="bg-card/95 backdrop-blur-sm rounded-3xl shadow-2xl border border-border/50 p-8 md:p-12 w-full max-w-4xl hidden" id="tutorial-complete">
+        <!-- Background decoration -->
+        <div class="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-primary/20 to-secondary/20 rounded-full -mr-16 -mt-16"></div>
+        <div class="absolute bottom-0 left-0 w-24 h-24 bg-gradient-to-br from-accent/20 to-primary/20 rounded-full -ml-12 -mb-12"></div>
+
+        <div class="relative text-center">
+          <div class="inline-flex items-center justify-center w-24 h-24 bg-gradient-to-br from-emerald-600 to-teal-600 rounded-3xl mb-8 shadow-xl">
+{{{icon 'check' class="w-12 h-12 text-white"}}}
+          </div>
+
+          <h2 class="text-4xl font-bold bg-gradient-to-r from-foreground via-primary to-secondary bg-clip-text text-transparent mb-6">
+            Tutorial Complete!
+          </h2>
+
+          <p class="text-xl text-muted-foreground mb-10 max-w-2xl mx-auto leading-relaxed">
+            Congratulations! You've completed the Accelerator tutorial. You're now ready to start building amazing startups.
+            Remember, you can always revisit this tutorial from your settings.
+          </p>
+
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+            <div class="text-center">
+              <div class="w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
+{{{icon 'lightbulb' class="w-8 h-8 text-white"}}}
+              </div>
+              <h3 class="font-semibold text-foreground mb-2">Create Ideas</h3>
+              <p class="text-sm text-muted-foreground">Start with your first startup concept</p>
+            </div>
+
+            <div class="text-center">
+              <div class="w-16 h-16 bg-gradient-to-br from-green-500 to-green-600 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
+{{{icon 'users' class="w-8 h-8 text-white"}}}
+              </div>
+              <h3 class="font-semibold text-foreground mb-2">Get Feedback</h3>
+              <p class="text-sm text-muted-foreground">Share and validate with community</p>
+            </div>
+
+            <div class="text-center">
+              <div class="w-16 h-16 bg-gradient-to-br from-purple-500 to-purple-600 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
+{{{icon 'building' class="w-8 h-8 text-white"}}}
+              </div>
+              <h3 class="font-semibold text-foreground mb-2">Build Models</h3>
+              <p class="text-sm text-muted-foreground">Create comprehensive business plans</p>
+            </div>
+          </div>
+
+          <form method="POST" action="/onboarding/tutorial">
+            <input type="hidden" name="_csrf" value="{{{csrf}}}" />
+            <button type="submit" class="w-full bg-gradient-to-r from-primary via-secondary to-accent hover:from-primary/90 hover:via-secondary/90 hover:to-accent/90 text-primary-foreground font-bold py-5 px-8 rounded-2xl transition-all duration-300 transform hover:scale-105 shadow-2xl hover:shadow-3xl flex items-center justify-center space-x-3 text-lg">
+              <span>Let's Build Something Amazing!</span>
+{{{icon 'trending-up' class="w-6 h-6"}}}
+            </button>
+          </form>
+
+          <p class="text-sm text-muted-foreground mt-6">
+            Need help? Visit our <a href="#" class="text-primary hover:text-primary/80 font-medium transition-colors">help center</a> or contact <a href="#" class="text-primary hover:text-primary/80 font-medium transition-colors">support</a>.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const tutorialSteps = [
+      {
+        title: "Welcome to Accelerator",
+        content: `
+          <div class="text-center">
+            <div class="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-blue-500 to-blue-600 rounded-3xl mb-8 shadow-xl">
+              🚀
+            </div>
+            <h3 class="text-2xl font-bold text-foreground mb-4">Your Startup Journey Begins Here</h3>
+            <p class="text-muted-foreground leading-relaxed max-w-2xl mx-auto">
+              Accelerator is your all-in-one platform for turning ideas into successful startups. Whether you're a first-time entrepreneur or a seasoned founder, we've got the tools to help you build, validate, and scale your business.
+            </p>
+          </div>
+        `,
+        tip: "💡 Pro tip: Start with a problem you personally care about solving."
+      },
+      {
+        title: "Create Your First Idea",
+        content: `
+          <div class="text-center">
+            <div class="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-green-500 to-green-600 rounded-3xl mb-8 shadow-xl text-4xl">
+              💡
+            </div>
+            <h3 class="text-2xl font-bold text-foreground mb-4">Turn Concepts into Reality</h3>
+            <p class="text-muted-foreground leading-relaxed max-w-2xl mx-auto mb-6">
+              Every great startup begins with an idea. Our AI-powered platform helps you develop comprehensive business models from simple concepts. Start by describing your idea in plain English.
+            </p>
+            <div class="bg-muted/50 rounded-2xl p-6 text-left max-w-2xl mx-auto">
+              <h4 class="font-semibold text-foreground mb-3">What you'll create:</h4>
+              <ul class="space-y-2 text-sm text-muted-foreground">
+                <li class="flex items-center">✅ Business concept & problem analysis</li>
+                <li class="flex items-center">✅ Market research & competitive analysis</li>
+                <li class="flex items-center">✅ Financial projections & revenue models</li>
+                <li class="flex items-center">✅ Marketing strategy & go-to-market plan</li>
+              </ul>
+            </div>
+          </div>
+        `,
+        tip: "💡 Pro tip: Focus on solving real problems for real people."
+      },
+      {
+        title: "Validate with the Community",
+        content: `
+          <div class="text-center">
+            <div class="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-purple-500 to-purple-600 rounded-3xl mb-8 shadow-xl text-4xl">
+              👥
+            </div>
+            <h3 class="text-2xl font-bold text-foreground mb-4">Get Feedback & Iterate</h3>
+            <p class="text-muted-foreground leading-relaxed max-w-2xl mx-auto mb-6">
+              Validation is key to startup success. Share your ideas with our community of entrepreneurs, investors, and experts. Get constructive feedback and refine your concept before investing time and money.
+            </p>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-2xl mx-auto">
+              <div class="bg-muted/50 rounded-2xl p-4">
+                <h5 class="font-semibold text-foreground mb-2">Community Feedback</h5>
+                <p class="text-sm text-muted-foreground">Get insights from experienced founders and industry experts.</p>
+              </div>
+              <div class="bg-muted/50 rounded-2xl p-4">
+                <h5 class="font-semibold text-foreground mb-2">Voting System</h5>
+                <p class="text-sm text-muted-foreground">See which ideas resonate most with potential users and investors.</p>
+              </div>
+            </div>
+          </div>
+        `,
+        tip: "💡 Pro tip: Early validation can save you months of development time."
+      },
+      {
+        title: "Build Comprehensive Models",
+        content: `
+          <div class="text-center">
+            <div class="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-orange-500 to-orange-600 rounded-3xl mb-8 shadow-xl text-4xl">
+              🏢
+            </div>
+            <h3 class="text-2xl font-bold text-foreground mb-4">From Idea to Business Plan</h3>
+            <p class="text-muted-foreground leading-relaxed max-w-2xl mx-auto mb-6">
+              Transform your validated idea into a complete business plan. Our AI generates detailed models covering everything from financial projections to marketing strategies and operational plans.
+            </p>
+            <div class="bg-muted/50 rounded-2xl p-6 max-w-2xl mx-auto">
+              <h4 class="font-semibold text-foreground mb-3">Complete Business Models Include:</h4>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                <div>
+                  <h5 class="font-medium text-foreground mb-2">📊 Financial Model</h5>
+                  <p class="text-muted-foreground">Revenue projections, cost structures, break-even analysis</p>
+                </div>
+                <div>
+                  <h5 class="font-medium text-foreground mb-2">🎯 Marketing Plan</h5>
+                  <p class="text-muted-foreground">Target audience, channels, messaging strategy</p>
+                </div>
+                <div>
+                  <h5 class="font-medium text-foreground mb-2">⚙️ Operations</h5>
+                  <p class="text-muted-foreground">Team structure, processes, technology stack</p>
+                </div>
+                <div>
+                  <h5 class="font-medium text-foreground mb-2">📈 Growth Strategy</h5>
+                  <p class="text-muted-foreground">Scaling plans, milestones, exit opportunities</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        `,
+        tip: "💡 Pro tip: A solid business model attracts investors and partners."
+      },
+      {
+        title: "Generate Reports & Pitch Decks",
+        content: `
+          <div class="text-center">
+            <div class="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-red-500 to-red-600 rounded-3xl mb-8 shadow-xl text-4xl">
+              📄
+            </div>
+            <h3 class="text-2xl font-bold text-foreground mb-4">Professional Presentation Materials</h3>
+            <p class="text-muted-foreground leading-relaxed max-w-2xl mx-auto mb-6">
+              Turn your business model into investor-ready documents. Generate professional business plans, pitch decks, and financial reports that tell your startup's story compellingly.
+            </p>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 max-w-2xl mx-auto">
+              <div class="text-center">
+                <div class="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center mx-auto mb-3 text-xl">
+                  📊
+                </div>
+                <h5 class="font-semibold text-foreground mb-1">Pitch Deck</h5>
+                <p class="text-xs text-muted-foreground">10-15 slides that capture investor attention</p>
+              </div>
+              <div class="text-center">
+                <div class="w-12 h-12 bg-gradient-to-br from-green-500 to-green-600 rounded-xl flex items-center justify-center mx-auto mb-3 text-xl">
+                  📝
+                </div>
+                <h5 class="font-semibold text-foreground mb-1">Business Plan</h5>
+                <p class="text-xs text-muted-foreground">Comprehensive 20-30 page document</p>
+              </div>
+              <div class="text-center">
+                <div class="w-12 h-12 bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl flex items-center justify-center mx-auto mb-3 text-xl">
+                  📈
+                </div>
+                <h5 class="font-semibold text-foreground mb-1">Financial Model</h5>
+                <p class="text-xs text-muted-foreground">5-year projections with scenarios</p>
+              </div>
+            </div>
+          </div>
+        `,
+        tip: "💡 Pro tip: Great presentation materials can make or break funding rounds."
+      }
+    ];
+
+    let currentStep = 0;
+    const totalSteps = tutorialSteps.length;
+
+    const tutorialStepEl = document.getElementById('tutorial-step');
+    const progressBarEl = document.getElementById('progress-bar');
+    const progressTextEl = document.getElementById('progress-text');
+    const currentStepEl = document.getElementById('current-step');
+    const totalStepsEl = document.getElementById('total-steps');
+    const prevBtn = document.getElementById('prev-step');
+    const nextBtn = document.getElementById('next-step');
+    const stepIndicators = document.querySelectorAll('[data-step]');
+    const tutorialCompleteEl = document.getElementById('tutorial-complete');
+
+    function updateUI() {
+      // Update progress
+      const progress = ((currentStep + 1) / totalSteps) * 100;
+      progressBarEl.style.width = `${progress}%`;
+      progressTextEl.textContent = `${currentStep + 1} of ${totalSteps} steps`;
+      currentStepEl.textContent = currentStep + 1;
+      totalStepsEl.textContent = totalSteps;
+
+      // Update step indicators
+      stepIndicators.forEach((indicator, index) => {
+        if (index === currentStep) {
+          indicator.classList.remove('bg-muted');
+          indicator.classList.add('bg-primary');
+        } else {
+          indicator.classList.remove('bg-primary');
+          indicator.classList.add('bg-muted');
+        }
+      });
+
+      // Update buttons
+      prevBtn.disabled = currentStep === 0;
+      prevBtn.classList.toggle('disabled', currentStep === 0);
+
+      if (currentStep === totalSteps - 1) {
+        nextBtn.innerHTML = `<span>Complete Tutorial</span> ✅`;
+      } else {
+        nextBtn.innerHTML = `<span>Next</span> ➡️`;
+      }
+    }
+
+    function showStep(stepIndex) {
+      const step = tutorialSteps[stepIndex];
+      tutorialStepEl.innerHTML = `
+        <div class="max-w-4xl mx-auto">
+          ${step.content}
+          <div class="mt-8 p-4 bg-primary/5 border border-primary/20 rounded-xl">
+            <p class="text-sm text-primary font-medium">${step.tip}</p>
+          </div>
+        </div>
+      `;
+    }
+
+    function nextStep() {
+      if (currentStep < totalSteps - 1) {
+        currentStep++;
+        showStep(currentStep);
+        updateUI();
+      } else {
+        // Complete tutorial
+        tutorialStepEl.classList.add('hidden');
+        tutorialCompleteEl.classList.remove('hidden');
+      }
+    }
+
+    function prevStep() {
+      if (currentStep > 0) {
+        currentStep--;
+        showStep(currentStep);
+        updateUI();
+      }
+    }
+
+    // Initialize
+    showStep(currentStep);
+    updateUI();
+
+    // Event listeners
+    nextBtn.addEventListener('click', nextStep);
+    prevBtn.addEventListener('click', prevStep);
+
+    // Keyboard navigation
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'ArrowRight' || e.key === ' ') {
+        e.preventDefault();
+        nextStep();
+      } else if (e.key === 'ArrowLeft') {
+        e.preventDefault();
+        prevStep();
+      }
+    });
+  });
+</script>

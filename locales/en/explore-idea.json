@@ -1,0 +1,19 @@
+{
+  "ideas": {
+    "explore": {
+      "title": "Explore Ideas",
+      "description": "Explore others' ideas here",
+      "search": "Search",
+      "search_placeholder": "Search in ideas...",
+      "category": "Category",
+      "all_categories": "All Categories",
+      "sort_by": "Sort by",
+      "newest_first": "Newest first",
+      "oldest_first": "Oldest first",
+      "highest_rated": "Highest rated",
+      "title_az": "Title A-Z",
+      "no_ideas_found": "No ideas found",
+      "try_adjusting_search": "Try adjusting your search criteria"
+    }
+  }
+}

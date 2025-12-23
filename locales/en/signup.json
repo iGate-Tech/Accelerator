@@ -1,0 +1,16 @@
+{
+  "title": "Sign Up",
+  "description": "Create your account to get started",
+  "first_name_label": "First Name",
+  "last_name_label": "Last Name",
+  "first_name_placeholder": "First Name",
+  "last_name_placeholder": "Last Name",
+  "email_label": "Email",
+  "password_label": "Password",
+  "email_placeholder": "m@example.com",
+  "password_placeholder": "Enter your password",
+  "terms_agree": "I agree to",
+  "sign_up_button": "Sign Up",
+  "have_account": "Already have an account?",
+  "login": "Login"
+}

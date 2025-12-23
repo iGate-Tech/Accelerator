@@ -1,0 +1,16 @@
+{
+  "title": "إنشاء حساب",
+  "description": "أنشئ حسابك لبدء الاستخدام",
+  "first_name_label": "الاسم الأول",
+  "last_name_label": "الاسم الأخير",
+  "first_name_placeholder": "الاسم الأول",
+  "last_name_placeholder": "الاسم الأخير",
+  "email_label": "البريد الإلكتروني",
+  "password_label": "كلمة المرور",
+  "email_placeholder": "m@example.com",
+  "password_placeholder": "أدخل كلمة المرور الخاصة بك",
+  "terms_agree": "أوافق على",
+  "sign_up_button": "إنشاء حساب",
+  "have_account": "لديك حساب بالفعل؟",
+  "login": "تسجيل الدخول"
+}

@@ -1,0 +1,22 @@
+{
+  "user_activity": {
+    "title": "نشاط المستخدم",
+    "description": "تتبع الإجراءات الأخيرة ونشاط الحساب",
+    "export": "تصدير النشاط",
+    "filter_all": "الكل",
+    "filter_logins": "عمليات الدخول",
+    "filter_ideas": "الأفكار",
+    "filter_profile": "الملف الشخصي",
+    "filter_account": "الحساب",
+    "logged_in": "تم تسجيل الدخول إلى الحساب",
+    "account_created": "تم إنشاء الحساب",
+    "created_entity": "تم إنشاء",
+    "idea_created": "تم إنشاء فكرة جديدة",
+    "profile_completed": "تم إكمال إعداد الملف الشخصي",
+    "activity_details": "تفاصيل النشاط",
+    "successful_login": "دخول ناجح",
+    "load_more": "تحميل المزيد من النشاط",
+    "no_activity": "لا يوجد نشاط بعد",
+    "activity_will_appear": "سجل النشاط الخاص بك سيظهر هنا عند استخدامك للمنصة."
+  }
+}

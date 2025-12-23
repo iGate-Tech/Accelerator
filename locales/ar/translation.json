@@ -122,9 +122,7 @@
       "description": "عرض تقاريرك المولدة",
       "generated_on": "تم التوليد في"
     }
-  }
-}
-    }
+   }
   },
   "models": {
     "business": {
@@ -868,7 +866,6 @@
         "voting_rewards": "مكافآت التصويت",
         "credits": "الائتمانات"
       }
-    }
   },
   "models": {
     "business": {

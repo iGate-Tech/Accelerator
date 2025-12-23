@@ -1,0 +1,15 @@
+{
+  "nav": {
+    "home": "الرئيسية",
+    "features": "الميزات",
+    "pricing": "التسعير",
+    "theme_dark": "داكن",
+    "theme_light": "فاتح",
+    "start_building": "ابدأ البناء",
+    "projects": "المشاريع",
+    "projects_desc": "إدارة مشاريعك الريادية",
+    "dashboard": "لوحة التحكم",
+    "voting_rewards": "مكافآت التصويت",
+    "credits": "الائتمانات"
+  }
+}

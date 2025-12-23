@@ -1,0 +1,17 @@
+{
+  "title": "تسجيل الدخول",
+  "description": "أدخل بريدك الإلكتروني أدناه لتسجيل الدخول إلى حسابك",
+  "email_label": "البريد الإلكتروني",
+  "password_label": "كلمة المرور",
+  "email_placeholder": "m@example.com",
+  "password_placeholder": "أدخل كلمة المرور الخاصة بك",
+  "remember_me": "تذكرني لمدة 30 يومًا",
+  "forgot_password": "نسيت كلمة المرور؟",
+  "login_button": "تسجيل الدخول",
+  "no_account": "ليس لديك حساب؟",
+  "sign_up": "إنشاء حساب",
+  "continue_with_apple": "المتابعة مع Apple",
+  "continue_with_google": "المتابعة مع Google",
+  "privacy_agreement": "بالنقر على المتابعة، أنت توافق على <a href=\"/terms\">شروط الخدمة</a> و <a href=\"/privacy\">سياسة الخصوصية</a> الخاصة بنا.",
+  "or_separator": "أو"
+}

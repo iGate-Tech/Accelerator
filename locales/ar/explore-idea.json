@@ -1,0 +1,19 @@
+{
+  "ideas": {
+    "explore": {
+      "title": "استكشف الأفكار",
+      "description": "استكشف أفكار الآخرين هنا",
+      "search": "البحث",
+      "search_placeholder": "البحث في الأفكار...",
+      "category": "الفئة",
+      "all_categories": "جميع الفئات",
+      "sort_by": "ترتيب حسب",
+      "newest_first": "الأحدث أولاً",
+      "oldest_first": "الأقدم أولاً",
+      "highest_rated": "الأعلى تقييماً",
+      "title_az": "العنوان أ-ي",
+      "no_ideas_found": "لم يتم العثور على أفكار",
+      "try_adjusting_search": "جرب تعديل معايير البحث الخاصة بك"
+    }
+  }
+}

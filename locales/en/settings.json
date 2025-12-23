@@ -1,0 +1,13 @@
+{
+  "settings": {
+    "title": "Settings",
+    "description": "Manage your account settings and preferences",
+    "profile_info": "Profile Information",
+    "avatar": "Avatar",
+    "change_avatar": "Change Avatar",
+    "max_5mb": "Maximum file size: 5MB",
+    "name": "Name",
+    "role": "Role",
+    "role_placeholder": "e.g., Entrepreneur, Developer, Designer"
+  }
+}

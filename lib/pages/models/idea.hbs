@@ -1,7 +1,7 @@
 {{> progress-bar activeStep=activeStep ideaId=ideaId}}
 
 
-{{> model-header title=pageTitle description=(t "models.idea.overview")
+{{> model-header title=pageTitle description=(t "idea.overview")
  ratingStars="★★★★★" ratingValue="5.0" voteCount="0 votes" category=ideaCategory tags=ideaTags}}
 
 {{> model-progress data="[
@@ -72,7 +72,7 @@
                  <div class="flex items-start gap-4">
 <div class="w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold relative z-10">{{{icon 'check-circle' class='w-8 h-8 text-success' size='32'}}}</div>
                      <div class="flex-1">
-                          {{> move-next-block message=(t "models.idea.section_completed") buttonText=(t "models.idea.move_next")}}
+                          {{> move-next-block message=(t "idea.section_completed") buttonText=(t "idea.move_next")}}
                      </div>
                  </div>
              </div>
@@ -117,7 +117,7 @@
                      {{{icon 'check-circle' class='w-8 h-8 text-success' size='32'}}}
                    </div>
                    <div class="flex-1">
-                     {{> move-next-block message=(t "models.idea.section_completed") buttonText=(t "models.idea.move_next")}}
+                     {{> move-next-block message=(t "idea.section_completed") buttonText=(t "idea.move_next")}}
                    </div>
                  </div>
             </div>
@@ -145,7 +145,7 @@
                      {{{icon 'check-circle' class='w-8 h-8 text-success' size='32'}}}
                    </div>
                    <div class="flex-1">
-                     {{> move-next-block message=(t "models.idea.section_completed") buttonText=(t "models.idea.move_next")}}
+                     {{> move-next-block message=(t "idea.section_completed") buttonText=(t "idea.move_next")}}
                    </div>
                  </div>
             </div>
@@ -223,7 +223,7 @@
                       {{{icon 'check-circle' class='w-8 h-8 text-success' size='32'}}}
                     </div>
                     <div class="flex-1">
-                      {{> move-next-block message=(t "models.idea.section_completed") buttonText=(t "models.idea.move_next")}}
+                      {{> move-next-block message=(t "idea.section_completed") buttonText=(t "idea.move_next")}}
                    </div>
                  </div>
             </div>
@@ -271,7 +271,7 @@
                       {{{icon 'check-circle' class='w-8 h-8 text-success' size='32'}}}
                     </div>
                    <div class="flex-1">
-                     {{> move-next-block message=(t "models.idea.section_completed") buttonText=(t "models.idea.move_next")}}
+                     {{> move-next-block message=(t "idea.section_completed") buttonText=(t "idea.move_next")}}
                    </div>
                  </div>
             </div>
@@ -305,7 +305,7 @@
                       {{{icon 'check-circle' class='w-8 h-8 text-success' size='32'}}}
                     </div>
                   <div class="flex-1">
-                     {{> move-next-block message=(t "models.idea.complete_idea") buttonText=(t "models.idea.complete_idea_button")}}
+                     {{> move-next-block message=(t "idea.complete_idea") buttonText=(t "idea.complete_idea_button")}}
                   </div>
                 </div>
             </div>

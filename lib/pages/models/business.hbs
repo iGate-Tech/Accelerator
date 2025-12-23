@@ -1,48 +1,48 @@
 {{> progress-bar activeStep=activeStep ideaId=ideaId}}
 
-{{> model-header title=pageTitle description=(t "models.business.overview")
+{{> model-header title=pageTitle description=(t "business.overview")
 ratingStars="★★★★★" ratingValue="5.0" voteCount="0 votes" category=ideaCategory tags=ideaTags}}
 
 {{> model-progress data='[
   {
     "id": "product-section",
-    "fullLabel": "1. {{t \"models.business.product_section\"}}",
+    "fullLabel": "1. {{t \"business.product_section\"}}",
     "shortLabel": "1.",
     "position": 0
   }},
   {
     "id": "market-section",
-    "fullLabel": "2. {{t \"models.business.market_section\"}}",
+    "fullLabel": "2. {{t \"business.market_section\"}}",
     "shortLabel": "2.",
     "position": 16.67
   }},
   {
     "id": "competition-analysis",
-    "fullLabel": "3. {{t \"models.business.competition_analysis\"}}",
+    "fullLabel": "3. {{t \"business.competition_analysis\"}}",
     "shortLabel": "3.",
     "position": 33.33
   }},
   {
     "id": "risk-register",
-    "fullLabel": "4. {{t \"models.business.risk_register\"}}",
+    "fullLabel": "4. {{t \"business.risk_register\"}}",
     "shortLabel": "4.",
     "position": 50
   }},
   {
     "id": "value-proposition",
-    "fullLabel": "5. {{t \"models.business.value_proposition\"}}",
+    "fullLabel": "5. {{t \"business.value_proposition\"}}",
     "shortLabel": "5.",
     "position": 66.67
   }},
   {
     "id": "cost-revenue",
-    "fullLabel": "6. {{t \"models.business.cost_revenue\"}}",
+    "fullLabel": "6. {{t \"business.cost_revenue\"}}",
     "shortLabel": "6.",
     "position": 83.33
   }},
   {
     "id": "exit-strategy",
-    "fullLabel": "7. {{t \"models.business.exit_strategy\"}}",
+    "fullLabel": "7. {{t \"business.exit_strategy\"}}",
     "shortLabel": "7.",
     "position": 100
   }}
@@ -60,31 +60,31 @@ ratingStars="★★★★★" ratingValue="5.0" voteCount="0 votes" category=ide
                  <div class="flex items-start gap-4 mb-6">
                        <div class="w-8 h-8 bg-primary rounded-full flex items-center justify-center text-sm font-bold relative z-10">1</div>
                        <div class="flex-1">
-                            {{> question-block id="product-section-q1" step="1" question=(t "models.business.core_function") placeholder=(t "models.business.core_function_help")
+                            {{> question-block id="product-section-q1" step="1" question=(t "business.core_function") placeholder=(t "business.core_function_help")
                        </div>
                    </div>
                  <div class="flex items-start gap-4 mb-6">
                        <div class="w-8 h-8 bg-primary rounded-full flex items-center justify-center text-sm font-bold relative z-10">2</div>
                        <div class="flex-1">
-                            {{> question-block id="product-section-q2" step="2" question=(t "models.business.key_activities") placeholder=(t "models.business.key_activities_help")
+                            {{> question-block id="product-section-q2" step="2" question=(t "business.key_activities") placeholder=(t "business.key_activities_help")
                        </div>
                    </div>
                 <div class="flex items-start gap-4 mb-6">
                       <div class="w-8 h-8 bg-primary rounded-full flex items-center justify-center text-sm font-bold relative z-10">3</div>
                       <div class="flex-1">
-                            {{> question-block id="product-section-q3" step="3" question=(t "models.business.key_resources") placeholder=(t "models.business.key_resources_help")
+                            {{> question-block id="product-section-q3" step="3" question=(t "business.key_resources") placeholder=(t "business.key_resources_help")
                       </div>
                   </div>
                 <div class="flex items-start gap-4 mb-6">
                       <div class="w-8 h-8 bg-primary rounded-full flex items-center justify-center text-sm font-bold relative z-10">4</div>
                       <div class="flex-1">
-                            {{> question-block id="product-section-q4" step="4" question=(t "models.business.key_partners") placeholder=(t "models.business.key_partners_help")
+                            {{> question-block id="product-section-q4" step="4" question=(t "business.key_partners") placeholder=(t "business.key_partners_help")
                       </div>
                   </div>
                 <div class="flex items-start gap-4">
                     <div class="w-8 h-8  rounded-full flex items-center justify-center text-sm font-bold relative z-10">{{{icon 'check-circle' class='w-8 h-8 text-success' size='32'}}</div>
                     <div class="flex-1">
-                        {{> move-next-block message=(t "models.business.section_completed") buttonText=(t "models.business.move_next")}}
+                        {{> move-next-block message=(t "business.section_completed") buttonText=(t "business.move_next")}}
                     </div>
                 </div>
             </div>
@@ -99,43 +99,43 @@ ratingStars="★★★★★" ratingValue="5.0" voteCount="0 votes" category=ide
                   <div class="flex items-start gap-4 mb-6">
                       <div class="w-8 h-8 bg-primary rounded-full flex items-center justify-center text-sm font-bold relative z-10">1</div>
                       <div class="flex-1">
-                            {{> question-block id="market-section-q1" step="5" question=(t "models.business.product_category") placeholder=(t "models.business.product_category_help")
+                            {{> question-block id="market-section-q1" step="5" question=(t "business.product_category") placeholder=(t "business.product_category_help")
                       </div>
                   </div>
                   <div class="flex items-start gap-4 mb-6">
                       <div class="w-8 h-8 bg-primary rounded-full flex items-center justify-center text-sm font-bold relative z-10">2</div>
                       <div class="flex-1">
-                            {{> question-block id="market-section-q2" step="6" question=(t "models.business.target_market") placeholder=(t "models.business.target_market_help")
+                            {{> question-block id="market-section-q2" step="6" question=(t "business.target_market") placeholder=(t "business.target_market_help")
                       </div>
                   </div>
                   <div class="flex items-start gap-4 mb-6">
                       <div class="w-8 h-8 bg-primary rounded-full flex items-center justify-center text-sm font-bold relative z-10">3</div>
                       <div class="flex-1">
-                            {{> question-block id="market-section-q3" step="7" question=(t "models.business.geographic_area") placeholder=(t "models.business.geographic_area_help")
+                            {{> question-block id="market-section-q3" step="7" question=(t "business.geographic_area") placeholder=(t "business.geographic_area_help")
                       </div>
                   </div>
                   <div class="flex items-start gap-4 mb-6">
                       <div class="w-8 h-8 bg-primary rounded-full flex items-center justify-center text-sm font-bold relative z-10">4</div>
                       <div class="flex-1">
-                            {{> question-block id="market-section-q4" step="8" question=(t "models.business.tam") placeholder=(t "models.business.tam_help")
+                            {{> question-block id="market-section-q4" step="8" question=(t "business.tam") placeholder=(t "business.tam_help")
                       </div>
                   </div>
                   <div class="flex items-start gap-4 mb-6">
                       <div class="w-8 h-8 bg-primary rounded-full flex items-center justify-center text-sm font-bold relative z-10">5</div>
                       <div class="flex-1">
-                            {{> question-block id="market-section-q5" step="9" question=(t "models.business.sam") placeholder=(t "models.business.sam_help")
+                            {{> question-block id="market-section-q5" step="9" question=(t "business.sam") placeholder=(t "business.sam_help")
                       </div>
                   </div>
                   <div class="flex items-start gap-4 mb-6">
                       <div class="w-8 h-8 bg-primary rounded-full flex items-center justify-center text-sm font-bold relative z-10">6</div>
                       <div class="flex-1">
-                            {{> question-block id="market-section-q6" step="10" question=(t "models.business.som") placeholder=(t "models.business.som_help")
+                            {{> question-block id="market-section-q6" step="10" question=(t "business.som") placeholder=(t "business.som_help")
                       </div>
                   </div>
                 <div class="flex items-start gap-4">
                     <div class="w-8 h-8  rounded-full flex items-center justify-center text-sm font-bold relative z-10">{{{icon 'check-circle' class='w-8 h-8 text-success' size='32'}}</div>
                     <div class="flex-1">
-                        {{> move-next-block message=(t "models.business.section_completed") buttonText=(t "models.business.move_next")}}
+                        {{> move-next-block message=(t "business.section_completed") buttonText=(t "business.move_next")}}
                     </div>
                 </div>
             </div>
@@ -150,37 +150,37 @@ ratingStars="★★★★★" ratingValue="5.0" voteCount="0 votes" category=ide
                  <div class="flex items-start gap-4 mb-6">
                        <div class="w-8 h-8 bg-primary rounded-full flex items-center justify-center text-sm font-bold relative z-10">1</div>
                        <div class="flex-1">
-                            {{> question-block id="competition-analysis-q1" step="11" question=(t "models.business.key_competitors") placeholder=(t "models.business.key_competitors_help")
+                            {{> question-block id="competition-analysis-q1" step="11" question=(t "business.key_competitors") placeholder=(t "business.key_competitors_help")
                        </div>
                    </div>
                    <div class="flex items-start gap-4 mb-6">
                        <div class="w-8 h-8 bg-primary rounded-full flex items-center justify-center text-sm font-bold relative z-10">2</div>
                        <div class="flex-1">
-                            {{> question-block id="competition-analysis-q2" step="12" question=(t "models.business.market_share") placeholder=(t "models.business.market_share_help")
+                            {{> question-block id="competition-analysis-q2" step="12" question=(t "business.market_share") placeholder=(t "business.market_share_help")
                        </div>
                    </div>
                   <div class="flex items-start gap-4 mb-6">
                       <div class="w-8 h-8 bg-primary rounded-full flex items-center justify-center text-sm font-bold relative z-10">3</div>
                       <div class="flex-1">
-                            {{> question-block id="competition-analysis-q3" step="13" question=(t "models.business.competition_level") placeholder=(t "models.business.competition_level_help")
+                            {{> question-block id="competition-analysis-q3" step="13" question=(t "business.competition_level") placeholder=(t "business.competition_level_help")
                       </div>
                   </div>
                   <div class="flex items-start gap-4 mb-6">
                       <div class="w-8 h-8 bg-primary rounded-full flex items-center justify-center text-sm font-bold relative z-10">4</div>
                       <div class="flex-1">
-                            {{> question-block id="competition-analysis-q4" step="14" question=(t "models.business.penetration_opportunities") placeholder=(t "models.business.penetration_opportunities_help")
+                            {{> question-block id="competition-analysis-q4" step="14" question=(t "business.penetration_opportunities") placeholder=(t "business.penetration_opportunities_help")
                       </div>
                   </div>
                   <div class="flex items-start gap-4 mb-6">
                       <div class="w-8 h-8 bg-primary rounded-full flex items-center justify-center text-sm font-bold relative z-10">5</div>
                       <div class="flex-1">
-                            {{> question-block id="competition-analysis-q5" step="15" question=(t "models.business.market_challenges") placeholder=(t "models.business.market_challenges_help")
+                            {{> question-block id="competition-analysis-q5" step="15" question=(t "business.market_challenges") placeholder=(t "business.market_challenges_help")
                       </div>
                   </div>
                 <div class="flex items-start gap-4">
                     <div class="w-8 h-8  rounded-full flex items-center justify-center text-sm font-bold relative z-10">{{{icon 'check-circle' class='w-8 h-8 text-success' size='32'}}</div>
                     <div class="flex-1">
-                        {{> move-next-block message=(t "models.business.section_completed") buttonText=(t "models.business.move_next")}}
+                        {{> move-next-block message=(t "business.section_completed") buttonText=(t "business.move_next")}}
                     </div>
                 </div>
             </div>
@@ -195,25 +195,25 @@ ratingStars="★★★★★" ratingValue="5.0" voteCount="0 votes" category=ide
                  <div class="flex items-start gap-4 mb-6">
                        <div class="w-8 h-8 bg-primary rounded-full flex items-center justify-center text-sm font-bold relative z-10">1</div>
                        <div class="flex-1">
-                            {{> question-block id="risk-register-q1" step="16" question=(t "models.business.business_risks") placeholder=(t "models.business.business_risks_help")
+                            {{> question-block id="risk-register-q1" step="16" question=(t "business.business_risks") placeholder=(t "business.business_risks_help")
                        </div>
                    </div>
                    <div class="flex items-start gap-4 mb-6">
                        <div class="w-8 h-8 bg-primary rounded-full flex items-center justify-center text-sm font-bold relative z-10">2</div>
                        <div class="flex-1">
-                            {{> question-block id="risk-register-q2" step="17" question=(t "models.business.categorize_risks") placeholder=(t "models.business.categorize_risks_help")
+                            {{> question-block id="risk-register-q2" step="17" question=(t "business.categorize_risks") placeholder=(t "business.categorize_risks_help")
                        </div>
                    </div>
                   <div class="flex items-start gap-4 mb-6">
                       <div class="w-8 h-8 bg-primary rounded-full flex items-center justify-center text-sm font-bold relative z-10">3</div>
                       <div class="flex-1">
-                            {{> question-block id="risk-register-q3" step="18" question=(t "models.business.overall_risk_level") placeholder=(t "models.business.overall_risk_level_help")
+                            {{> question-block id="risk-register-q3" step="18" question=(t "business.overall_risk_level") placeholder=(t "business.overall_risk_level_help")
                       </div>
                   </div>
                 <div class="flex items-start gap-4">
                     <div class="w-8 h-8  rounded-full flex items-center justify-center text-sm font-bold relative z-10">{{{icon 'check-circle' class='w-8 h-8 text-success' size='32'}}</div>
                     <div class="flex-1">
-                        {{> move-next-block message=(t "models.business.section_completed") buttonText=(t "models.business.move_next")}}
+                        {{> move-next-block message=(t "business.section_completed") buttonText=(t "business.move_next")}}
                     </div>
                 </div>
             </div>
@@ -228,31 +228,31 @@ ratingStars="★★★★★" ratingValue="5.0" voteCount="0 votes" category=ide
                  <div class="flex items-start gap-4 mb-6">
                        <div class="w-8 h-8 bg-primary rounded-full flex items-center justify-center text-sm font-bold relative z-10">1</div>
                        <div class="flex-1">
-                            {{> question-block id="value-proposition-q1" step="19" question=(t "models.business.customer_job") placeholder=(t "models.business.customer_job_help")
+                            {{> question-block id="value-proposition-q1" step="19" question=(t "business.customer_job") placeholder=(t "business.customer_job_help")
                        </div>
                    </div>
                    <div class="flex items-start gap-4 mb-6">
                        <div class="w-8 h-8 bg-primary rounded-full flex items-center justify-center text-sm font-bold relative z-10">2</div>
                        <div class="flex-1">
-                            {{> question-block id="value-proposition-q2" step="20" question=(t "models.business.customer_pains") placeholder=(t "models.business.customer_pains_help")
+                            {{> question-block id="value-proposition-q2" step="20" question=(t "business.customer_pains") placeholder=(t "business.customer_pains_help")
                        </div>
                    </div>
                   <div class="flex items-start gap-4 mb-6">
                       <div class="w-8 h-8 bg-primary rounded-full flex items-center justify-center text-sm font-bold relative z-10">3</div>
                       <div class="flex-1">
-                            {{> question-block id="value-proposition-q3" step="21" question=(t "models.business.customer_gains") placeholder=(t "models.business.customer_gains_help")
+                            {{> question-block id="value-proposition-q3" step="21" question=(t "business.customer_gains") placeholder=(t "business.customer_gains_help")
                       </div>
                   </div>
                   <div class="flex items-start gap-4 mb-6">
                       <div class="w-8 h-8 bg-primary rounded-full flex items-center justify-center text-sm font-bold relative z-10">4</div>
                       <div class="flex-1">
-                            {{> question-block id="value-proposition-q4" step="22" question=(t "models.business.solution_components") placeholder=(t "models.business.solution_components_help")
+                            {{> question-block id="value-proposition-q4" step="22" question=(t "business.solution_components") placeholder=(t "business.solution_components_help")
                       </div>
                   </div>
                 <div class="flex items-start gap-4">
                     <div class="w-8 h-8  rounded-full flex items-center justify-center text-sm font-bold relative z-10">{{{icon 'check-circle' class='w-8 h-8 text-success' size='32'}}</div>
                     <div class="flex-1">
-                        {{> move-next-block message=(t "models.business.section_completed") buttonText=(t "models.business.move_next")}}
+                        {{> move-next-block message=(t "business.section_completed") buttonText=(t "business.move_next")}}
                     </div>
                 </div>
             </div>
@@ -267,25 +267,25 @@ ratingStars="★★★★★" ratingValue="5.0" voteCount="0 votes" category=ide
                  <div class="flex items-start gap-4 mb-6">
                        <div class="w-8 h-8 bg-primary rounded-full flex items-center justify-center text-sm font-bold relative z-10">1</div>
                        <div class="flex-1">
-                            {{> question-block id="cost-revenue-q1" step="23" question=(t "models.business.key_costs") placeholder=(t "models.business.key_costs_help")
+                            {{> question-block id="cost-revenue-q1" step="23" question=(t "business.key_costs") placeholder=(t "business.key_costs_help")
                        </div>
                    </div>
                    <div class="flex items-start gap-4 mb-6">
                        <div class="w-8 h-8 bg-primary rounded-full flex items-center justify-center text-sm font-bold relative z-10">2</div>
                        <div class="flex-1">
-                            {{> question-block id="cost-revenue-q2" step="24" question=(t "models.business.revenue_streams") placeholder=(t "models.business.revenue_streams_help")
+                            {{> question-block id="cost-revenue-q2" step="24" question=(t "business.revenue_streams") placeholder=(t "business.revenue_streams_help")
                        </div>
                    </div>
                   <div class="flex items-start gap-4 mb-6">
                       <div class="w-8 h-8 bg-primary rounded-full flex items-center justify-center text-sm font-bold relative z-10">3</div>
                       <div class="flex-1">
-                            {{> question-block id="cost-revenue-q3" step="25" question=(t "models.business.financial_projections") placeholder=(t "models.business.financial_projections_help")
+                            {{> question-block id="cost-revenue-q3" step="25" question=(t "business.financial_projections") placeholder=(t "business.financial_projections_help")
                       </div>
                   </div>
                 <div class="flex items-start gap-4">
                     <div class="w-8 h-8  rounded-full flex items-center justify-center text-sm font-bold relative z-10">{{{icon 'check-circle' class='w-8 h-8 text-success' size='32'}}</div>
                     <div class="flex-1">
-                        {{> move-next-block message=(t "models.business.section_completed") buttonText=(t "models.business.move_next")}}
+                        {{> move-next-block message=(t "business.section_completed") buttonText=(t "business.move_next")}}
                     </div>
                 </div>
             </div>
@@ -300,13 +300,13 @@ ratingStars="★★★★★" ratingValue="5.0" voteCount="0 votes" category=ide
                  <div class="flex items-start gap-4 mb-6">
                        <div class="w-8 h-8 bg-primary rounded-full flex items-center justify-center text-sm font-bold relative z-10">1</div>
                        <div class="flex-1">
-                            {{> question-block id="exit-strategy-q1" step="26" question=(t "models.business.exit_strategy_question") placeholder=(t "models.business.exit_strategy_help")
+                            {{> question-block id="exit-strategy-q1" step="26" question=(t "business.exit_strategy_question") placeholder=(t "business.exit_strategy_help")
                        </div>
                    </div>
                  <div class="flex items-start gap-4">
                      <div class="w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold relative z-10">{{{icon 'check-circle' class='w-8 h-8 text-success' size='32'}}</div>
                      <div class="flex-1">
-                         {{> move-next-block message=(t "models.business.complete_business") buttonText=(t "models.business.complete_business_button")}}
+                         {{> move-next-block message=(t "business.complete_business") buttonText=(t "business.complete_business_button")}}
                      </div>
                  </div>
              </div>

@@ -1,54 +1,54 @@
 {{> progress-bar activeStep=activeStep ideaId=ideaId}}
 
-{{> model-header title=pageTitle description=(t "models.financial.overview")
+{{> model-header title=pageTitle description=(t "financial.overview")
 ratingStars="★★★★★" ratingValue="5.0" voteCount="0 votes" category=ideaCategory tags=ideaTags}}
 
 {{> model-progress data='[
   {
     "id": "kpi-collection",
-    "fullLabel": "1. {{t \"models.financial.kpi_collection\"}}",
+    "fullLabel": "1. {{t \"financial.kpi_collection\"}}",
     "shortLabel": "1.",
     "position": 0
   }},
   {
     "id": "revenue-assumptions",
-    "fullLabel": "2. {{t \"models.financial.revenue_assumptions\"}}",
+    "fullLabel": "2. {{t \"financial.revenue_assumptions\"}}",
     "shortLabel": "2.",
     "position": 14.29
   }},
   {
     "id": "revenue-streams",
-    "fullLabel": "3. {{t \"models.financial.revenue_streams\"}}",
+    "fullLabel": "3. {{t \"financial.revenue_streams\"}}",
     "shortLabel": "3.",
     "position": 28.57
   }},
   {
     "id": "cogs",
-    "fullLabel": "4. {{t \"models.financial.cogs\"}}",
+    "fullLabel": "4. {{t \"financial.cogs\"}}",
     "shortLabel": "4.",
     "position": 42.86
   }},
   {
     "id": "opex",
-    "fullLabel": "5. {{t \"models.financial.opex\"}}",
+    "fullLabel": "5. {{t \"financial.opex\"}}",
     "shortLabel": "5.",
     "position": 57.14
   }},
   {
     "id": "capex",
-    "fullLabel": "6. {{t \"models.financial.capex\"}}",
+    "fullLabel": "6. {{t \"financial.capex\"}}",
     "shortLabel": "6.",
     "position": 71.43
   }},
   {
     "id": "financial-statements",
-    "fullLabel": "7. {{t \"models.financial.financial_statements\"}}",
+    "fullLabel": "7. {{t \"financial.financial_statements\"}}",
     "shortLabel": "7.",
     "position": 85.71
   }},
   {
     "id": "financial-ratios",
-    "fullLabel": "8. {{t \"models.financial.financial_ratios\"}}",
+    "fullLabel": "8. {{t \"financial.financial_ratios\"}}",
     "shortLabel": "8.",
     "position": 100
   }}
@@ -65,13 +65,13 @@ ratingStars="★★★★★" ratingValue="5.0" voteCount="0 votes" category=ide
                  <div class="flex items-start gap-4 mb-6">
                      <div class="w-8 h-8 bg-primary rounded-full flex items-center justify-center text-sm font-bold relative z-10">1</div>
                      <div class="flex-1">
-                          {{> question-block id="kpi-collection-q1" step="1" question=(t "models.financial.track_kpis") placeholder=(t "models.financial.track_kpis_help")
+                          {{> question-block id="kpi-collection-q1" step="1" question=(t "financial.track_kpis") placeholder=(t "financial.track_kpis_help")
                      </div>
                  </div>
                 <div class="flex items-start gap-4">
                     <div class="w-8 h-8  rounded-full flex items-center justify-center text-sm font-bold relative z-10">{{{icon 'check-circle' class='w-8 h-8 text-success' size='32'}}</div>
                     <div class="flex-1">
-                        {{> move-next-block message=(t "models.financial.section_completed") buttonText=(t "models.financial.move_next")}}
+                        {{> move-next-block message=(t "financial.section_completed") buttonText=(t "financial.move_next")}}
                     </div>
                 </div>
             </div>
@@ -92,7 +92,7 @@ ratingStars="★★★★★" ratingValue="5.0" voteCount="0 votes" category=ide
                 <div class="flex items-start gap-4">
                     <div class="w-8 h-8  rounded-full flex items-center justify-center text-sm font-bold relative z-10">{{{icon 'check-circle' class='w-8 h-8 text-success' size='32'}}</div>
                     <div class="flex-1">
-                        {{> move-next-block message=(t "models.financial.section_completed") buttonText=(t "models.financial.move_next")}}
+                        {{> move-next-block message=(t "financial.section_completed") buttonText=(t "financial.move_next")}}
                     </div>
                 </div>
             </div>
@@ -113,7 +113,7 @@ ratingStars="★★★★★" ratingValue="5.0" voteCount="0 votes" category=ide
                 <div class="flex items-start gap-4">
                     <div class="w-8 h-8  rounded-full flex items-center justify-center text-sm font-bold relative z-10">{{{icon 'check-circle' class='w-8 h-8 text-success' size='32'}}</div>
                     <div class="flex-1">
-                        {{> move-next-block message=(t "models.financial.section_completed") buttonText=(t "models.financial.move_next")}}
+                        {{> move-next-block message=(t "financial.section_completed") buttonText=(t "financial.move_next")}}
                     </div>
                 </div>
             </div>
@@ -134,7 +134,7 @@ ratingStars="★★★★★" ratingValue="5.0" voteCount="0 votes" category=ide
                 <div class="flex items-start gap-4">
                     <div class="w-8 h-8  rounded-full flex items-center justify-center text-sm font-bold relative z-10">{{{icon 'check-circle' class='w-8 h-8 text-success' size='32'}}</div>
                     <div class="flex-1">
-                        {{> move-next-block message=(t "models.financial.section_completed") buttonText=(t "models.financial.move_next")}}
+                        {{> move-next-block message=(t "financial.section_completed") buttonText=(t "financial.move_next")}}
                     </div>
                 </div>
             </div>
@@ -155,7 +155,7 @@ ratingStars="★★★★★" ratingValue="5.0" voteCount="0 votes" category=ide
                 <div class="flex items-start gap-4">
                     <div class="w-8 h-8  rounded-full flex items-center justify-center text-sm font-bold relative z-10">{{{icon 'check-circle' class='w-8 h-8 text-success' size='32'}}</div>
                     <div class="flex-1">
-                        {{> move-next-block message=(t "models.financial.section_completed") buttonText=(t "models.financial.move_next")}}
+                        {{> move-next-block message=(t "financial.section_completed") buttonText=(t "financial.move_next")}}
                     </div>
                 </div>
             </div>
@@ -176,7 +176,7 @@ ratingStars="★★★★★" ratingValue="5.0" voteCount="0 votes" category=ide
                 <div class="flex items-start gap-4">
                     <div class="w-8 h-8  rounded-full flex items-center justify-center text-sm font-bold relative z-10">{{{icon 'check-circle' class='w-8 h-8 text-success' size='32'}}</div>
                     <div class="flex-1">
-                        {{> move-next-block message=(t "models.financial.section_completed") buttonText=(t "models.financial.move_next")}}
+                        {{> move-next-block message=(t "financial.section_completed") buttonText=(t "financial.move_next")}}
                     </div>
                 </div>
             </div>
@@ -197,7 +197,7 @@ ratingStars="★★★★★" ratingValue="5.0" voteCount="0 votes" category=ide
                 <div class="flex items-start gap-4">
                     <div class="w-8 h-8  rounded-full flex items-center justify-center text-sm font-bold relative z-10">{{{icon 'check-circle' class='w-8 h-8 text-success' size='32'}}</div>
                     <div class="flex-1">
-                        {{> move-next-block message=(t "models.financial.section_completed") buttonText=(t "models.financial.move_next")}}
+                        {{> move-next-block message=(t "financial.section_completed") buttonText=(t "financial.move_next")}}
                     </div>
                 </div>
             </div>
@@ -218,7 +218,7 @@ ratingStars="★★★★★" ratingValue="5.0" voteCount="0 votes" category=ide
                 <div class="flex items-start gap-4">
                     <div class="w-8 h-8  rounded-full flex items-center justify-center text-sm font-bold relative z-10">{{{icon 'check-circle' class='w-8 h-8 text-success' size='32'}}</div>
                     <div class="flex-1">
-                        {{> move-next-block message=(t "models.financial.complete_financial") buttonText=(t "models.financial.complete_financial_button")}}
+                        {{> move-next-block message=(t "financial.complete_financial") buttonText=(t "financial.complete_financial_button")}}
                     </div>
                 </div>
             </div>

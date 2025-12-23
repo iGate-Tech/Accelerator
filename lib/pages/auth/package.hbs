@@ -8,10 +8,10 @@
  {{{icon 'credit-card' class="w-8 h-8 sm:w-10 sm:h-10 text-white"}}}
          </div>
          <h1 class="text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground mb-4 sm:mb-6">
-           {{t 'dashboard.payments.upgrade.title'}}
+           {{t 'package.title'}}
          </h1>
          <p class="text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed">
-           {{t 'dashboard.payments.upgrade.subtitle'}}
+           {{t 'package.subtitle'}}
          </p>
        </div>
 
@@ -31,7 +31,7 @@
             <div class="text-center">
               <h3 class="text-xl sm:text-2xl font-bold text-foreground mb-2">{{name}} Plan</h3>
               <div class="text-3xl sm:text-4xl font-extrabold text-primary mb-1">${{price_monthly}}</div>
-              <div class="text-sm text-muted-foreground mb-4">{{t 'dashboard.payments.upgrade.month'}}</div>
+              <div class="text-sm text-muted-foreground mb-4">{{t 'package.month'}}</div>
               <div class="text-sm text-muted-foreground">{{credits_monthly}} {{t 'dashboard.payments.billing.credits'}} included</div>
             </div>
           </div>
@@ -56,7 +56,7 @@
                 <div class="w-6 h-6 bg-amber-500/10 rounded-full flex items-center justify-center flex-shrink-0">
 {{{icon 'lightbulb' class="w-4 h-4 text-amber-600 dark:text-amber-400"}}}
                 </div>
-                <span class="text-sm text-foreground">{{t 'dashboard.payments.upgrade.ai_powered_features'}}</span>
+                <span class="text-sm text-foreground">{{t 'package.ai_powered_features'}}</span>
               </div>
             </div>
 
@@ -64,7 +64,7 @@
               <input type="hidden" name="_csrf" value="{{csrf}}" />
               <input type="hidden" name="package_type" value="{{type}}" />
              <button type="submit" class="w-full bg-primary hover:bg-primary/90 text-white font-bold py-3 px-6 rounded-lg flex items-center justify-center space-x-2">
-                 <span>{{t 'dashboard.payments.upgrade.upgrade_to'}} {{name}} {{t 'dashboard.payments.upgrade.plan'}}</span>
+                 <span>{{t 'package.upgrade_to'}} {{name}} {{t 'package.plan'}}</span>
  {{{icon 'arrow-right' class="w-5 h-5"}}}
                </button>
             </form>

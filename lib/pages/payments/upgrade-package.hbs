@@ -1,10 +1,10 @@
 <div class="p-20">
     <div class="grid gap-1  mb-12">
         <h1 class="font-heading text-3xl font-semibold text-foreground">
-            {{t 'dashboard.payments.upgrade.title'}}
+            {{t 'upgrade-package.title'}}
         </h1>
         <p class="text-lg text-muted-foreground">
-            {{t 'dashboard.payments.upgrade.description'}}
+            {{t 'upgrade-package.description'}}
         </p>
     </div>
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -12,7 +12,7 @@
         <div class="rounded-md bg-card px-6 py-5 text-card-foreground border-2 {{#if (eq type "student")}}border-primary relative{{else}}border-input/80{{/if}}">
             {{#if (eq type "student")}}
             <div class="absolute -top-3 left-1/2 transform -translate-x-1/2">
-                <span class="bg-primary text-primary-foreground text-xs px-3 py-1 rounded-md">{{t 'dashboard.payments.upgrade.most_popular'}}</span>
+                <span class="bg-primary text-primary-foreground text-xs px-3 py-1 rounded-md">{{t 'upgrade-package.most_popular'}}</span>
             </div>
             {{/if}}
             <div class="text-center mb-4">
@@ -20,7 +20,7 @@
                 <p class="text-2xl font-bold text-foreground">
                     ${{divide price_monthly 100}}
                     <span class="text-sm font-normal text-muted-foreground">
-                        {{t 'dashboard.payments.upgrade.month'}}
+                        {{t 'upgrade-package.month'}}
                     </span>
                 </p>
             </div>
@@ -28,53 +28,53 @@
                 {{#if (eq type "free")}}
                     <li class="flex items-center gap-2 text-sm">
 {{{icon 'check' class='w-4 h-4 text-green-600'}}}
-                        {{t 'dashboard.payments.upgrade.vote_public'}}
+                        {{t 'upgrade-package.vote_public'}}
                     </li>
                     <li class="flex items-center gap-2 text-sm">
 {{{icon 'check' class='w-4 h-4 text-green-600'}}}
-                        {{t 'dashboard.payments.upgrade.view_community'}}
+                        {{t 'upgrade-package.view_community'}}
                     </li>
                     <li class="flex items-center gap-2 text-sm">
 {{{icon 'check' class='w-4 h-4 text-green-600'}}}
-                        {{credits_monthly}} {{t 'dashboard.payments.upgrade.voting_rewards'}}
+                        {{credits_monthly}} {{t 'upgrade-package.voting_rewards'}}
                     </li>
                 {{else if (eq type "student")}}
                     <li class="flex items-center gap-2 text-sm">
 {{{icon 'check' class='w-4 h-4 text-green-600'}}}
-                        {{t 'dashboard.payments.upgrade.create_manage'}}
+                        {{t 'upgrade-package.create_manage'}}
                     </li>
                     <li class="flex items-center gap-2 text-sm">
 {{{icon 'check' class='w-4 h-4 text-green-600'}}}
-                        {{t 'dashboard.payments.upgrade.complete_models'}}
+                        {{t 'upgrade-package.complete_models'}}
                     </li>
                     <li class="flex items-center gap-2 text-sm">
 {{{icon 'check' class='w-4 h-4 text-green-600'}}}
-                        {{t 'dashboard.payments.upgrade.generate_reports'}}
+                        {{t 'upgrade-package.generate_reports'}}
                     </li>
                     <li class="flex items-center gap-2 text-sm">
 {{{icon 'check' class='w-4 h-4 text-green-600'}}}
-                        {{credits_monthly}} {{t 'dashboard.payments.upgrade.ai_features'}}
+                        {{credits_monthly}} {{t 'upgrade-package.ai_features'}}
                     </li>
                 {{else if (eq type "enterprise")}}
                     <li class="flex items-center gap-2 text-sm">
 {{{icon 'check' class='w-4 h-4 text-green-600'}}}
-                        {{t 'dashboard.payments.upgrade.all_student'}}
+                        {{t 'upgrade-package.all_student'}}
                     </li>
                     <li class="flex items-center gap-2 text-sm">
 {{{icon 'check' class='w-4 h-4 text-green-600'}}}
-                        {{t 'dashboard.payments.upgrade.portfolio_grouping'}}
+                        {{t 'upgrade-package.portfolio_grouping'}}
                     </li>
                     <li class="flex items-center gap-2 text-sm">
 {{{icon 'check' class='w-4 h-4 text-green-600'}}}
-                        {{t 'dashboard.payments.upgrade.advanced_analytics'}}
+                        {{t 'upgrade-package.advanced_analytics'}}
                     </li>
                     <li class="flex items-center gap-2 text-sm">
 {{{icon 'check' class='w-4 h-4 text-green-600'}}}
-                        {{t 'dashboard.payments.upgrade.team_collaboration'}}
+                        {{t 'upgrade-package.team_collaboration'}}
                     </li>
                     <li class="flex items-center gap-2 text-sm">
 {{{icon 'check' class='w-4 h-4 text-green-600'}}}
-                        {{credits_monthly}} {{t 'dashboard.payments.upgrade.ai_features'}}
+                        {{credits_monthly}} {{t 'upgrade-package.ai_features'}}
                     </li>
                 {{/if}}
             </ul>
@@ -82,11 +82,11 @@
                 <input type="hidden" name="package_type" value="{{type}}">
                 {{#if (eq ../currentPackage type)}}
                     <button type="button" class="w-full px-4 py-2 bg-muted text-muted-foreground cursor-not-allowed rounded-md" disabled>
-                        {{t 'dashboard.payments.upgrade.current_plan'}}
+                        {{t 'upgrade-package.current_plan'}}
                     </button>
                 {{else}}
                     <button type="submit" class="w-full {{#if (eq type "student")}}bg-primary text-primary-foreground hover:bg-primary/90{{else}}border border-input/80 text-foreground hover:bg-muted{{/if}} px-4 py-2 rounded-md transition-colors">
-                        {{#if (eq type "free")}}{{t 'dashboard.payments.upgrade.select_free'}}{{else}}{{t 'dashboard.payments.upgrade.upgrade_to'}} {{name}}{{/if}}
+                        {{#if (eq type "free")}}{{t 'upgrade-package.select_free'}}{{else}}{{t 'upgrade-package.upgrade_to'}} {{name}}{{/if}}
                     </button>
                 {{/if}}
             </form>

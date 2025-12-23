@@ -2,10 +2,10 @@
    <div class="p-4 sm:p-6 md:p-8 lg:p-20">
      <div class="grid gap-1 mb-8 sm:mb-12">
          <h1 class="font-heading text-2xl sm:text-3xl font-semibold text-foreground">
-             {{t 'dashboard.payments.buy_credits.title'}}
+             {{t 'buy-credits.title'}}
          </h1>
          <p class="text-base sm:text-lg text-muted-foreground">
-             {{t 'dashboard.payments.buy_credits.description'}}
+             {{t 'buy-credits.description'}}
          </p>
      </div>
 
@@ -13,9 +13,9 @@
      <div class="mb-6 sm:mb-8">
          <div class="rounded-md bg-card px-4 sm:px-6 py-4 sm:py-5 text-card-foreground border-2 border-input/80 max-w-xs mx-auto sm:mx-0">
              <div class="text-center">
-                 <div class="text-sm text-muted-foreground mb-1">{{t 'dashboard.payments.buy_credits.current_balance'}}</div>
+                 <div class="text-sm text-muted-foreground mb-1">{{t 'buy-credits.current_balance'}}</div>
                  <div class="text-xl sm:text-2xl font-bold text-foreground">{{currentBalance}}</div>
-                 <div class="text-sm text-muted-foreground">{{t 'dashboard.payments.buy_credits.credits_available'}}</div>
+                 <div class="text-sm text-muted-foreground">{{t 'buy-credits.credits_available'}}</div>
              </div>
          </div>
      </div>
@@ -27,7 +27,7 @@
          <div class="rounded-md bg-card px-4 sm:px-6 py-4 sm:py-5 text-card-foreground border-2 border-input/80 {{#if (eq @index 1)}}border-primary relative{{/if}}">
              {{#if (eq @index 1)}}
              <div class="absolute -top-2 sm:-top-3 left-1/2 transform -translate-x-1/2">
-                 <span class="bg-primary text-primary-foreground text-xs px-2 sm:px-3 py-1 rounded-md">{{t 'dashboard.payments.buy_credits.most_popular'}}</span>
+                 <span class="bg-primary text-primary-foreground text-xs px-2 sm:px-3 py-1 rounded-md">{{t 'buy-credits.most_popular'}}</span>
              </div>
              {{/if}}
 
@@ -37,21 +37,21 @@
                      ${{price}}
                  </p>
                  <p class="text-sm text-muted-foreground">{{credits}} {{t 'dashboard.payments.billing.credits'}}</p>
-                 <p class="text-xs text-muted-foreground">{{divide (multiply price 100) credits}}¢ {{t 'dashboard.payments.buy_credits.per_credit'}}</p>
+                 <p class="text-xs text-muted-foreground">{{divide (multiply price 100) credits}}¢ {{t 'buy-credits.per_credit'}}</p>
              </div>
 
              <div class="space-y-2 mb-4 sm:mb-6">
                  <div class="flex items-center gap-2 text-xs sm:text-sm">
  {{{icon 'check' class='w-3 h-3 sm:w-4 sm:h-4 text-green-600'}}}
-                     {{t 'dashboard.payments.buy_credits.instant_delivery'}}
+                     {{t 'buy-credits.instant_delivery'}}
                  </div>
                  <div class="flex items-center gap-2 text-xs sm:text-sm">
  {{{icon 'check' class='w-3 h-3 sm:w-4 sm:h-4 text-green-600'}}}
-                     {{t 'dashboard.payments.buy_credits.no_expiration'}}
+                     {{t 'buy-credits.no_expiration'}}
                  </div>
                  <div class="flex items-center gap-2 text-xs sm:text-sm">
  {{{icon 'check' class='w-3 h-3 sm:w-4 sm:h-4 text-green-600'}}}
-                     {{t 'dashboard.payments.buy_credits.use_for_any'}}
+                     {{t 'buy-credits.use_for_any'}}
                  </div>
              </div>
 
@@ -59,7 +59,7 @@
                 <input type="hidden" name="_csrf" value="{{csrf}}" />
                 <input type="hidden" name="package_id" value="{{id}}" />
                  <button type="submit" class="w-full {{#if (eq @index 1)}}bg-primary text-primary-foreground hover:bg-primary/90{{else}}border border-input/80 text-foreground hover:bg-muted{{/if}} px-3 sm:px-4 py-2 rounded-md transition-colors text-sm sm:text-base">
-                     {{t 'dashboard.payments.buy_credits.buy_package'}} {{name}} {{t 'dashboard.payments.billing.package'}}
+                     {{t 'buy-credits.buy_package'}} {{name}} {{t 'dashboard.payments.billing.package'}}
                  </button>
             </form>
         </div>
@@ -70,42 +70,42 @@
          <div class="w-12 h-12 sm:w-16 sm:h-16 bg-muted rounded-full flex items-center justify-center mx-auto mb-4">
              {{{ icon 'package' class='w-6 h-6 sm:w-8 sm:h-8 text-muted-foreground' }}}
          </div>
-         <h3 class="text-base sm:text-lg font-medium text-foreground mb-2">{{t 'dashboard.payments.buy_credits.no_packages'}}</h3>
-         <p class="text-sm sm:text-base text-muted-foreground">{{t 'dashboard.payments.buy_credits.packages_configured'}}</p>
+         <h3 class="text-base sm:text-lg font-medium text-foreground mb-2">{{t 'buy-credits.no_packages'}}</h3>
+         <p class="text-sm sm:text-base text-muted-foreground">{{t 'buy-credits.packages_configured'}}</p>
      </div>
      {{/if}}
 
      <!-- Usage Guide -->
      <div class="mt-8 sm:mt-12 rounded-md bg-card px-4 sm:px-6 py-4 sm:py-5 text-card-foreground border-2 border-input/80">
-         <h2 class="text-lg sm:text-xl font-semibold text-foreground mb-4">{{t 'dashboard.payments.buy_credits.how_credits_work'}}</h2>
+         <h2 class="text-lg sm:text-xl font-semibold text-foreground mb-4">{{t 'buy-credits.how_credits_work'}}</h2>
          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
              <div class="text-center">
                  <div class="w-8 h-8 sm:w-10 sm:h-10 bg-blue-100 rounded-lg flex items-center justify-center mx-auto mb-2">
  {{{icon 'lightbulb' class='w-4 h-4 sm:w-5 sm:h-5 text-blue-600'}}}
                  </div>
-                 <h3 class="font-medium text-foreground mb-1 text-sm sm:text-base">{{t 'dashboard.payments.buy_credits.ai_generations'}}</h3>
-                 <p class="text-xs sm:text-sm text-muted-foreground">{{t 'dashboard.payments.buy_credits.ai_generations_desc'}}</p>
+                 <h3 class="font-medium text-foreground mb-1 text-sm sm:text-base">{{t 'buy-credits.ai_generations'}}</h3>
+                 <p class="text-xs sm:text-sm text-muted-foreground">{{t 'buy-credits.ai_generations_desc'}}</p>
              </div>
              <div class="text-center">
                  <div class="w-8 h-8 sm:w-10 sm:h-10 bg-green-100 rounded-lg flex items-center justify-center mx-auto mb-2">
  {{{icon 'file-text' class='w-4 h-4 sm:w-5 sm:h-5 text-green-600'}}}
                  </div>
-                 <h3 class="font-medium text-foreground mb-1 text-sm sm:text-base">{{t 'dashboard.payments.buy_credits.reports'}}</h3>
-                 <p class="text-xs sm:text-sm text-muted-foreground">{{t 'dashboard.payments.buy_credits.reports_desc'}}</p>
+                 <h3 class="font-medium text-foreground mb-1 text-sm sm:text-base">{{t 'buy-credits.reports'}}</h3>
+                 <p class="text-xs sm:text-sm text-muted-foreground">{{t 'buy-credits.reports_desc'}}</p>
              </div>
              <div class="text-center">
                  <div class="w-8 h-8 sm:w-10 sm:h-10 bg-purple-100 rounded-lg flex items-center justify-center mx-auto mb-2">
  {{{icon 'lightbulb' class='w-4 h-4 sm:w-5 sm:h-5 text-purple-600'}}}
                  </div>
-                 <h3 class="font-medium text-foreground mb-1 text-sm sm:text-base">{{t 'dashboard.payments.buy_credits.ai_features'}}</h3>
-                 <p class="text-xs sm:text-sm text-muted-foreground">{{t 'dashboard.payments.buy_credits.ai_features_desc'}}</p>
+                 <h3 class="font-medium text-foreground mb-1 text-sm sm:text-base">{{t 'buy-credits.ai_features'}}</h3>
+                 <p class="text-xs sm:text-sm text-muted-foreground">{{t 'buy-credits.ai_features_desc'}}</p>
              </div>
              <div class="text-center">
                  <div class="w-8 h-8 sm:w-10 sm:h-10 bg-orange-100 rounded-lg flex items-center justify-center mx-auto mb-2">
  {{{icon 'trending-up' class='w-4 h-4 sm:w-5 sm:h-5 text-orange-600'}}}
                  </div>
-                 <h3 class="font-medium text-foreground mb-1 text-sm sm:text-base">{{t 'dashboard.payments.buy_credits.voting_rewards'}}</h3>
-                 <p class="text-xs sm:text-sm text-muted-foreground">{{t 'dashboard.payments.buy_credits.voting_rewards_desc'}}</p>
+                 <h3 class="font-medium text-foreground mb-1 text-sm sm:text-base">{{t 'buy-credits.voting_rewards'}}</h3>
+                 <p class="text-xs sm:text-sm text-muted-foreground">{{t 'buy-credits.voting_rewards_desc'}}</p>
              </div>
         </div>
     </div>

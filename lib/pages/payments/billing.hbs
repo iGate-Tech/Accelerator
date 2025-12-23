@@ -89,7 +89,7 @@
                    {{#if (eq profile.package_type "free")}}
                      {{t 'billing.basic_features'}}
                    {{else}}
-                     ${{divide profile.package_price 100}}{{t 'dashboard.payments.upgrade.per_month'}}
+                     ${{divide profile.package_price 100}}{{t 'upgrade-package.per_month'}}
                    {{/if}}
              </span>
            </p>
@@ -317,7 +317,7 @@
                 {{#if (eq profile.package_type "free")}}
                       {{t 'billing.basic_features'}}
                     {{else}}
-                      ${{divide profile.package_price 100}}{{t 'dashboard.payments.upgrade.per_month'}} • {{profile.package_credits}} {{t 'billing.credits'}}
+                      ${{divide profile.package_price 100}}{{t 'upgrade-package.per_month'}} • {{profile.package_credits}} {{t 'billing.credits'}}
                     {{/if}}
                   </p>
                </div>

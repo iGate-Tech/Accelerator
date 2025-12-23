@@ -10,8 +10,17 @@
   "methodology2": "Discounted cash flow (DCF)",
   "methodology3": "Market size & opportunity assessment",
   "methodology4": "Risk-adjusted valuation ranges",
+  "methodology5": "Investment readiness evaluation",
   "generate_button": "Generate Valuation Report",
-  "cost_credits": "Cost: 25 credits",
-  "current_balance": "Current Balance",
-  "need_credits": "Need more credits? Buy credits →"
+  "cost_credits": "Cost: 50 Credits",
+  "current_balance": "Your current balance",
+  "no_ideas_title": "No Ideas Available",
+  "no_ideas_description": "Create your first idea to generate valuation reports",
+  "create_first_idea": "Create Your First Idea",
+  "features_multiple_methods": "Multiple Methods",
+  "features_multiple_methods_desc": "Comprehensive analysis using various valuation approaches",
+  "features_investment_ready": "Investment Ready",
+  "features_investment_ready_desc": "Professional reports suitable for investors and stakeholders",
+  "features_data_driven": "Data-Driven",
+  "features_data_driven_desc": "Evidence-based valuations with clear assumptions and methodology"
 }

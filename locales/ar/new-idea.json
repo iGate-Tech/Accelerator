@@ -1,0 +1,20 @@
+{
+  "greeting": "مرحبا",
+  "question": "ما هي فكرتك الكبيرة التالية؟",
+  "untitled": "مشروع بدون عنوان",
+  "category": "الفئة",
+  "public": "عام",
+  "private": "خاص",
+  "describe_requirements": "صف متطلبات مشروعك",
+  "add_more": "إضافة المزيد",
+  "remove_all": "إزالة الكل",
+  "generate_title_ai": "توليد العنوان بالذكاء الاصطناعي",
+  "add_category_ai": "إضافة الفئة بالذكاء الاصطناعي",
+  "improve_description_ai": "تحسين الوصف بالذكاء الاصطناعي",
+  "add_tags_ai": "إضافة العلامات بالذكاء الاصطناعي",
+  "auto_fill_ai": "الملء التلقائي بالذكاء الاصطناعي",
+  "random_idea_ai": "توليد فكرة عشوائية",
+  "reset_form": "إعادة تعيين النموذج",
+  "characters": "أحرف",
+  "create_project": "إنشاء المشروع"
+}

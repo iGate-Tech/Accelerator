@@ -31,5 +31,9 @@
   "logout": "Logout",
   "logout_confirm": "Are you sure you want to log out?",
   "cancel": "Cancel",
-  "view_all_notifications": "View All Notifications"
+  "view_all_notifications": "View All Notifications",
+  "quick_access": "Quick Access",
+  "dashboard_desc": "Main dashboard overview",
+  "portfolios_desc": "Team collaboration platform",
+  "business_models_desc": "Startup management tools"
 }

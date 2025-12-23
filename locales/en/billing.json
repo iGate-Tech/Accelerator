@@ -1,6 +1,6 @@
 {
-  "title": "Billing",
-  "description": "Description",
+  "title": "Billing & Payments",
+  "description": "Manage your billing, payments, and credit usage",
   "export_transactions": "Export Transactions",
   "add_payment_method": "Add Payment Method",
   "current_balance": "Current Balance",

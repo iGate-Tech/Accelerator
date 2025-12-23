@@ -1,0 +1,20 @@
+{
+  "greeting": "Hi",
+  "question": "what's your next big idea?",
+  "untitled": "Untitled Project",
+  "category": "Category",
+  "public": "Public",
+  "private": "Private",
+  "describe_requirements": "Describe your project requirements",
+  "add_more": "Add more",
+  "remove_all": "Remove all",
+  "generate_title_ai": "Generate title with AI",
+  "add_category_ai": "Add category with AI",
+  "improve_description_ai": "Improve description with AI",
+  "add_tags_ai": "Add tags with AI",
+  "auto_fill_ai": "Auto fill with AI",
+  "random_idea_ai": "Generate random idea",
+  "reset_form": "Reset form",
+  "characters": "characters",
+  "create_project": "Create project"
+}

@@ -1,7 +1,26 @@
 {
+  "title": "Pitch Deck Generator",
+  "subtitle": "Create compelling investor presentations with AI",
   "generate_title": "Generate Your Pitch Deck",
-  "description": "Create compelling pitch decks to attract investors",
+  "description": "Select an idea and let AI create an investor-ready pitch deck",
   "select_idea": "Select Idea",
+  "select_placeholder": "Choose an idea to generate pitch deck for...",
+  "whats_included": "What's Included",
+  "included1": "Problem & Solution slides",
+  "included2": "Market opportunity analysis",
+  "included3": "Financial projections",
+  "included4": "Team & competitive advantages",
+  "included5": "Investment ask & use of funds",
   "generate_button": "Generate Pitch Deck",
-  "cost_credits": "Cost: 30 credits"
+  "cost_credits": "Cost: 50 Credits",
+  "current_balance": "Your current balance",
+  "no_ideas_title": "No Ideas Available",
+  "no_ideas_description": "Create your first idea to generate pitch decks",
+  "create_first_idea": "Create Your First Idea",
+  "features_investor_ready": "Investor-Ready",
+  "features_investor_ready_desc": "Professional pitch decks that follow VC standards and best practices",
+  "features_data_driven": "Data-Driven",
+  "features_data_driven_desc": "Compelling metrics, market analysis, and financial projections",
+  "features_storytelling": "Storytelling",
+  "features_storytelling_desc": "Narrative-driven presentations that connect emotionally with investors"
 }

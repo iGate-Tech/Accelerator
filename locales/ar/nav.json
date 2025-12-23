@@ -31,5 +31,9 @@
   "logout": "تسجيل الخروج",
   "logout_confirm": "هل أنت متأكد أنك تريد تسجيل الخروج؟",
   "cancel": "إلغاء",
-  "view_all_notifications": "عرض جميع الإشعارات"
+  "view_all_notifications": "عرض جميع الإشعارات",
+  "quick_access": "الوصول السريع",
+  "dashboard_desc": "نظرة عامة على لوحة التحكم الرئيسية",
+  "portfolios_desc": "منصة التعاون الجماعي",
+  "business_models_desc": "أدوات إدارة الشركات الناشئة"
 }

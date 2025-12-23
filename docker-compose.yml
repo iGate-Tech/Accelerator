@@ -12,31 +12,13 @@ services:
       - SUPABASE_PUBLIC_KEY=${SUPABASE_PUBLIC_KEY}
       - OPENROUTER_API_KEY=${OPENROUTER_API_KEY}
       - APP_URL=${APP_URL}
-      - REDIS_URL=redis://redis:6380
-      - REDIS_HOST=redis
-      - REDIS_PORT=6380
     volumes:
       - sessions_data:/app/sessions
     networks:
       - accelerator-network
     restart: unless-stopped
 
-  redis:
-    image: redis:alpine
-    command: redis-server --port 6380
-    volumes:
-      - redis_data:/data
-    healthcheck:
-      test: ["CMD", "redis-cli", "-p", "6380", "ping"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-    networks:
-      - accelerator-network
-    restart: unless-stopped
-
 volumes:
-  redis_data:
   sessions_data:
 
 networks:

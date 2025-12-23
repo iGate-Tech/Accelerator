@@ -4,7 +4,7 @@ services:
     expose:
       - "4000"
     environment:
-      - NODE_ENV=${NODE_ENV:-production}
+      - NODE_ENV=development
       - PORT=4000
       - SESSION_SECRET=${SESSION_SECRET}
       - SUPABASE_URL=${SUPABASE_URL}
@@ -12,9 +12,9 @@ services:
       - SUPABASE_PUBLIC_KEY=${SUPABASE_PUBLIC_KEY}
       - OPENROUTER_API_KEY=${OPENROUTER_API_KEY}
       - APP_URL=${APP_URL}
-        - REDIS_URL=redis://invalid:6379
-        - REDIS_HOST=invalid
-        - REDIS_PORT=6379
+      - REDIS_URL=redis://invalid:6379
+      - REDIS_HOST=invalid
+      - REDIS_PORT=6379
     networks:
       - accelerator-network
     restart: unless-stopped

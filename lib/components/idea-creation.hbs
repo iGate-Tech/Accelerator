@@ -2,7 +2,7 @@
     <!-- Header -->
     <header class="w-full flex flex-col items-center gap-2 mb-2">
            <h1 class="text-2xl sm:text-3xl md:text-4xl font-sans font-light text-foreground mb-6 sm:mb-10 text-center">
-               {{t 'ideas.new.greeting'}} <span class="text-primary">{{firstName user.profile.name}}</span>, {{t 'ideas.new.question'}}
+               {{t 'new-idea.greeting'}} <span class="text-primary">{{firstName user.profile.name}}</span>, {{t 'new-idea.question'}}
            </h1>
     </header>
 
@@ -241,12 +241,12 @@
                         <div class="flex rounded-full border border-border overflow-hidden">
                             <span
                                 class="inline-flex items-center gap-1 px-2 py-1 bg-muted text-muted-foreground text-xs focus:outline-none focus:bg-accent transition-all duration-300">
-                                 <i contenteditable="true" id="title" class="text-foreground">{{t 'ideas.new.untitled'}}</i>
+                                 <i contenteditable="true" id="title" class="text-foreground">{{t 'new-idea.untitled'}}</i>
                                 {{{icon 'square-pen' class='w-3 h-3' size='12'}}}
                             </span>
                             <span
                                 class="inline-flex items-center gap-1 px-2 py-1 bg-muted text-muted-foreground text-xs focus:outline-none focus:bg-accent transition-all duration-300">
-                                 <i contenteditable="true" id="category">{{t 'ideas.new.category'}}</i>
+                                 <i contenteditable="true" id="category">{{t 'new-idea.category'}}</i>
                                 {{{icon 'square-pen' class='w-3 h-3' size='12'}}}
                             </span>
                         </div>
@@ -256,12 +256,12 @@
                             <label for="privacy-public" class="privacy-btn flex items-center gap-1 px-2 py-1 text-xs cursor-pointer bg-muted text-muted-foreground hover:bg-primary/10 hover:text-primary peer-checked:bg-primary peer-checked:text-primary-foreground transition-all duration-300">
                                 <input type="radio" id="privacy-public" name="privacy-radio" value="public" class="sr-only peer" checked>
                                 {{{icon 'eye' class='w-4 h-4' size='16'}}}
-                                <span class="hidden peer-checked:inline">{{t 'ideas.new.public'}}</span>
+                                <span class="hidden peer-checked:inline">{{t 'new-idea.public'}}</span>
                             </label>
                             <label for="privacy-private" class="privacy-btn flex items-center gap-1 px-2 py-1 text-xs cursor-pointer bg-muted text-muted-foreground hover:bg-primary/10 hover:text-primary peer-checked:bg-primary peer-checked:text-primary-foreground transition-all duration-300">
                                 <input type="radio" id="privacy-private" name="privacy-radio" value="private" class="sr-only peer">
                                 {{{icon 'eye-off' class='w-4 h-4' size='16'}}}
-                                <span class="hidden peer-checked:inline">{{t 'ideas.new.private'}}</span>
+                                <span class="hidden peer-checked:inline">{{t 'new-idea.private'}}</span>
                             </label>
                         </div>
                     </div>
@@ -272,7 +272,7 @@
                             project requirements</label>
                          <div id="assistant-prompt-display" class="w-full rounded-md border border-input bg-background px-3 py-2 text-base text-foreground min-h-[2.5rem] cursor-pointer overflow-visible markdown-content" style="display: none;"></div>
                           <textarea id="assistant-prompt" name="prompt"
-                               placeholder="{{t 'ideas.new.describe_requirements'}}"
+                               placeholder="{{t 'new-idea.describe_requirements'}}"
                               aria-label="Describe your project requirements" aria-describedby="prompt-help char-counter"
                               class="flex w-full rounded-md border-0 bg-transparent p-0 pt-[1px] text-base text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0"
                               required=""
@@ -295,7 +295,7 @@
                      text-xs rounded-full" style="display: none;">
 
   {{{icon 'plus' class='w-3 h-3' size='12'}}}
-                                  {{t 'ideas.new.add_more'}}
+                                  {{t 'new-idea.add_more'}}
                              </span>
 
                              <!-- Remove all -->
@@ -306,7 +306,7 @@
                       text-xs rounded-full cursor-pointer" style="display: none;">
 
   {{{icon 'trash' class='w-3 h-3' size='12'}}}
-                                  {{t 'ideas.new.remove_all'}}
+                                  {{t 'new-idea.remove_all'}}
                              </span>
 
                         </div>
@@ -322,7 +322,7 @@
 
   {{{icon 'type' class='w-4 h-4' size='16'}}}
 
-                                  <span class="hidden group-hover:inline transition-all duration-200">{{t 'ideas.new.generate_title_ai'}}</span>
+                                  <span class="hidden group-hover:inline transition-all duration-200">{{t 'new-idea.generate_title_ai'}}</span>
                              </button>
 
                              <!-- Add category with AI -->
@@ -331,7 +331,7 @@
 
   {{{icon 'folder' class='w-4 h-4' size='16'}}}
 
-                                  <span class="hidden group-hover:inline transition-all duration-200">{{t 'ideas.new.add_category_ai'}}</span>
+                                  <span class="hidden group-hover:inline transition-all duration-200">{{t 'new-idea.add_category_ai'}}</span>
                              </button>
 
                              <!-- Improve with AI -->
@@ -340,7 +340,7 @@
 
   {{{icon 'lightbulb' class='w-4 h-4' size='16'}}}
 
-                                  <span class="hidden group-hover:inline transition-all duration-200">{{t 'ideas.new.improve_description_ai'}}</span>
+                                  <span class="hidden group-hover:inline transition-all duration-200">{{t 'new-idea.improve_description_ai'}}</span>
                              </button>
 
                              <!-- Add tags with AI -->
@@ -349,7 +349,7 @@
 
   {{{icon 'tag' class='w-4 h-4' size='16'}}}
 
-                                  <span class="hidden group-hover:inline transition-all duration-200">{{t 'ideas.new.add_tags_ai'}}</span>
+                                  <span class="hidden group-hover:inline transition-all duration-200">{{t 'new-idea.add_tags_ai'}}</span>
                              </button>
 
                              <!-- Auto fill with AI -->
@@ -358,7 +358,7 @@
 
   {{{icon 'wand-sparkles' class='w-4 h-4' size='16'}}}
 
-                                  <span class="hidden group-hover:inline transition-all duration-200">{{t 'ideas.new.auto_fill_ai'}}</span>
+                                  <span class="hidden group-hover:inline transition-all duration-200">{{t 'new-idea.auto_fill_ai'}}</span>
                              </button>
 
                              <!-- Generate random idea -->
@@ -367,7 +367,7 @@
 
   {{{icon 'shuffle' class='w-4 h-4' size='16'}}}
 
-                                  <span class="hidden group-hover:inline transition-all duration-200">{{t 'ideas.new.random_idea_ai'}}</span>
+                                  <span class="hidden group-hover:inline transition-all duration-200">{{t 'new-idea.random_idea_ai'}}</span>
                              </button>
 
                              <!-- Reset form -->
@@ -376,19 +376,19 @@
 
   {{{icon 'rotate-ccw' class='w-4 h-4' size='16'}}}
 
-                                  <span class="hidden group-hover:inline transition-all duration-200">{{t 'ideas.new.reset_form'}}</span>
+                                  <span class="hidden group-hover:inline transition-all duration-200">{{t 'new-idea.reset_form'}}</span>
                              </button>
                          </div>
 
                         <!-- Submit button on the right -->
                         <div class="min-w-0 flex gap-2 ml-auto flex-shrink items-center">
-                             <span id="char-counter" class="text-xs text-red-500/60 mr-2" aria-live="polite">{{t 'ideas.new.characters'}}</span>
+                             <span id="char-counter" class="text-xs text-red-500/60 mr-2" aria-live="polite">{{t 'new-idea.characters'}}</span>
                             <button type="submit" aria-label="Create project" title="Create project"
                                 class="rounded-full border border-border inline-flex items-center justify-center gap-1 cursor-pointer text-xs text-muted-foreground hover:bg-primary-100 hover:text-primary-900 px-2 py-1 shrink-0 transition-all duration-300 group">
 
  {{{icon 'plus' class='w-4 h-4' size='16'}}}
 
-                                 <span class="hidden group-hover:inline transition-all duration-200">{{t 'ideas.new.create_project'}}</span>
+                                 <span class="hidden group-hover:inline transition-all duration-200">{{t 'new-idea.create_project'}}</span>
                             </button>
                         </div>
                     </div>

@@ -54,6 +54,16 @@
   <body class="{{bodyClass}}
       bg-background pb-8">
 
+  <!-- Language and Theme Switchers -->
+  <button id="lang-toggle" class="fixed top-4 {{#if (eq lng 'ar')}}right-4{{else}}left-4{{/if}} z-50 text-foreground hover:text-muted-foreground transition-colors px-3 py-2 text-sm font-medium flex items-center bg-background/80 backdrop-blur-sm rounded-lg border border-border shadow-sm">
+    {{{icon 'languages' class='h-4 w-4 mr-2'}}}
+    <span id="lang-text">EN</span>
+  </button>
+  <button id="theme-toggle" class="fixed top-4 {{#if (eq lng 'ar')}}left-4{{else}}right-4{{/if}} z-50 text-foreground hover:text-muted-foreground transition-colors p-2 bg-background/80 backdrop-blur-sm rounded-lg border border-border shadow-sm">
+    {{{icon 'sun' class='h-5 w-5' id='theme-icon-light'}}}
+    {{{icon 'moon' class='h-5 w-5 hidden' id='theme-icon-dark'}}}
+  </button>
+
   {{{body}}}
 
   {{#if scripts}}{{scripts}}{{/if}}

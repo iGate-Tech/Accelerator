@@ -1,0 +1,22 @@
+{
+  "login_successful": "Login Successful",
+  "login_success_description": "Welcome back! Redirecting to your dashboard...",
+  "login_failed": "Login Failed",
+  "signup_successful": "Welcome to Accelerator!",
+  "signup_success_description": "Account created successfully! Redirecting to onboarding...",
+  "signup_failed": "Signup Failed",
+  "invalid_credentials": "Invalid email or password",
+  "email_already_exists": "An account with this email already exists",
+  "weak_password": "Password must be at least 8 characters long",
+  "password_mismatch": "Passwords do not match",
+  "invalid_email": "Please enter a valid email address",
+  "account_disabled": "This account has been disabled",
+  "too_many_attempts": "Too many failed login attempts. Please try again later.",
+  "session_expired": "Your session has expired. Please log in again.",
+  "server_error": "Server error occurred. Please try again later.",
+  "changes_saved": "Success! Your changes have been saved",
+  "changes_saved_desc": "This is an alert with icon, title and description.",
+  "example_alert": "This Alert has a title and an icon. No description.",
+  "payment_failed": "Unable to process your payment.",
+  "payment_failed_desc": "Please verify your billing information and try again."
+}

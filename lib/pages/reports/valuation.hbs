@@ -48,7 +48,7 @@
                    <li>• {{t 'reports-valuation.methodology2'}}</li>
                    <li>• {{t 'reports-valuation.methodology3'}}</li>
                    <li>• {{t 'reports-valuation.methodology4'}}</li>
-                  <li>• Investment readiness evaluation</li>
+                   <li>• {{t 'reports-valuation.methodology5'}}</li>
                 </ul>
               </div>
             </div>
@@ -60,8 +60,8 @@
                 {{{ icon 'zap' class='w-4 h-4 text-yellow-600' }}}
               </div>
               <div>
-                <h4 class="text-sm font-semibold text-yellow-900">Cost: 50 Credits</h4>
-                <p class="text-sm text-yellow-800">Your current balance: <span class="font-semibold">{{userCredits}} credits</span></p>
+                 <h4 class="text-sm font-semibold text-yellow-900">{{t 'reports-valuation.cost_credits'}}</h4>
+                 <p class="text-sm text-yellow-800">{{t 'reports-valuation.current_balance'}}: <span class="font-semibold">{{userCredits}} credits</span></p>
               </div>
             </div>
           </div>
@@ -70,7 +70,7 @@
             <button type="submit"
               class="flex-1 bg-green-600 hover:bg-green-700 text-white font-semibold py-4 px-6 rounded-lg transition-all duration-300 transform hover:scale-105 flex items-center justify-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
               {{#if (lt userCredits 50)}}disabled{{/if}}>
-              <span>Generate Valuation Report</span>
+               <span>{{t 'reports-valuation.generate_button'}}</span>
               {{#if (gte userCredits 50)}}
                 {{{ icon 'calculator' class='w-5 h-5' }}}
               {{/if}}
@@ -82,12 +82,12 @@
           <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
             {{{ icon 'lightbulb' class='w-8 h-8 text-gray-400' }}}
           </div>
-          <h3 class="text-lg font-medium text-gray-900 mb-2">No Ideas Available</h3>
-          <p class="text-gray-600 mb-6">Create your first idea to generate valuation reports</p>
-          <a href="/new-idea" class="bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-6 rounded-lg transition-colors inline-flex items-center space-x-2">
-            {{{ icon 'plus' class='w-4 h-4' }}}
-            <span>Create Your First Idea</span>
-          </a>
+           <h3 class="text-lg font-medium text-gray-900 mb-2">{{t 'reports-valuation.no_ideas_title'}}</h3>
+           <p class="text-gray-600 mb-6">{{t 'reports-valuation.no_ideas_description'}}</p>
+           <a href="/new-idea" class="bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-6 rounded-lg transition-colors inline-flex items-center space-x-2">
+             {{{ icon 'plus' class='w-4 h-4' }}}
+             <span>{{t 'reports-valuation.create_first_idea'}}</span>
+           </a>
         </div>
         {{/if}}
       </div>
@@ -99,24 +99,24 @@
         <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mx-auto mb-4">
           {{{ icon 'trending-up' class='w-6 h-6 text-blue-600' }}}
         </div>
-        <h3 class="text-lg font-semibold text-gray-900 mb-2">Multiple Methods</h3>
-        <p class="text-gray-600 text-sm">Comprehensive analysis using various valuation approaches</p>
+         <h3 class="text-lg font-semibold text-gray-900 mb-2">{{t 'reports-valuation.features_multiple_methods'}}</h3>
+         <p class="text-gray-600 text-sm">{{t 'reports-valuation.features_multiple_methods_desc'}}</p>
       </div>
 
       <div class="bg-white rounded-xl shadow-lg p-6 text-center">
         <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mx-auto mb-4">
           {{{ icon 'shield' class='w-6 h-6 text-purple-600' }}}
         </div>
-        <h3 class="text-lg font-semibold text-gray-900 mb-2">Investment Ready</h3>
-        <p class="text-gray-600 text-sm">Professional reports suitable for investors and stakeholders</p>
+         <h3 class="text-lg font-semibold text-gray-900 mb-2">{{t 'reports-valuation.features_investment_ready'}}</h3>
+         <p class="text-gray-600 text-sm">{{t 'reports-valuation.features_investment_ready_desc'}}</p>
       </div>
 
       <div class="bg-white rounded-xl shadow-lg p-6 text-center">
         <div class="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center mx-auto mb-4">
           {{{ icon 'bar-chart-3' class='w-6 h-6 text-orange-600' }}}
         </div>
-        <h3 class="text-lg font-semibold text-gray-900 mb-2">Data-Driven</h3>
-        <p class="text-gray-600 text-sm">Evidence-based valuations with clear assumptions and methodology</p>
+         <h3 class="text-lg font-semibold text-gray-900 mb-2">{{t 'reports-valuation.features_data_driven'}}</h3>
+         <p class="text-gray-600 text-sm">{{t 'reports-valuation.features_data_driven_desc'}}</p>
       </div>
     </div>
 

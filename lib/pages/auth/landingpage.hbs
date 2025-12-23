@@ -12,11 +12,11 @@
         <span id="theme-icon-light">{{{icon "sun" class="h-5 w-5"}}}</span>
         <span id="theme-icon-dark" class="hidden">{{{icon "moon" class="h-5 w-5"}}}</span>
       </button>
-      <!-- Language Switcher -->
-       <button id="lang-switcher" class="flex items-center gap-1 ml-4 px-3 py-1 sm:px-2 text-xs rounded-md bg-muted text-muted-foreground hover:bg-primary hover:text-primary-foreground">
-        {{{icon "languages" class="h-4 w-4"}}}
-        <span id="lang-text">{{#if (eq lng 'ar')}}AR{{else}}EN{{/if}}</span>
-      </button>
+       <!-- Language Switcher -->
+        <button id="lang-switcher" class="flex items-center gap-1 ml-4 px-3 py-1 sm:px-2 text-xs rounded-md bg-muted text-muted-foreground hover:bg-primary hover:text-primary-foreground">
+         {{{icon "globe" class="h-4 w-4"}}}
+         <span id="lang-text">{{#if (eq lng 'ar')}}AR{{else}}EN{{/if}}</span>
+       </button>
       <a href="/auth/login" class="ml-4 px-3 py-2 sm:px-4 text-sm font-medium bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors">
   <span data-t="landing.nav.start_building">Start Building</span>
       </a>
@@ -35,11 +35,11 @@
         <span id="mobile-theme-icon-dark" class="hidden">{{{icon "moon" class="h-5 w-5"}}}</span>
         <span>Theme</span>
       </button>
-      <!-- Language Switcher -->
-       <button id="mobile-lang-switcher" class="flex items-center gap-2 self-start w-full px-2 py-1 text-xs rounded-md bg-muted text-muted-foreground hover:bg-primary hover:text-primary-foreground">
-        {{{icon "languages" class="h-4 w-4"}}}
-        <span id="mobile-lang-text">{{#if (eq lng 'ar')}}العربية{{else}}English{{/if}}</span>
-      </button>
+       <!-- Language Switcher -->
+        <button id="mobile-lang-switcher" class="flex items-center gap-2 self-start w-full px-2 py-1 text-xs rounded-md bg-muted text-muted-foreground hover:bg-primary hover:text-primary-foreground">
+         {{{icon "globe" class="h-4 w-4"}}}
+         <span id="mobile-lang-text">{{#if (eq lng 'ar')}}العربية{{else}}English{{/if}}</span>
+       </button>
       <a href="/auth/login" class="self-start px-4 py-2 text-sm font-medium bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors">
   <span data-t="landing.nav.start_building">Start Building</span>
       </a>
@@ -141,31 +141,51 @@
         }
         updateThemeToggle(isDark);
 
-        // Add event listeners for theme toggles
-        const themeToggle = document.getElementById('theme-toggle');
-        const mobileThemeToggle = document.getElementById('mobile-theme-toggle');
-        if (themeToggle) {
-          themeToggle.addEventListener('click', toggleTheme);
-        }
-        if (mobileThemeToggle) {
-          mobileThemeToggle.addEventListener('click', toggleTheme);
-        }
+         // Add event listeners for theme toggles
+         const themeToggle = document.getElementById('theme-toggle');
+         const mobileThemeToggle = document.getElementById('mobile-theme-toggle');
+         try {
+           if (themeToggle) {
+             themeToggle.addEventListener('click', toggleTheme);
+           }
+         } catch (e) {
+           console.error('Error adding theme toggle listener:', e);
+         }
+         try {
+           if (mobileThemeToggle) {
+             mobileThemeToggle.addEventListener('click', toggleTheme);
+           }
+         } catch (e) {
+           console.error('Error adding mobile theme toggle listener:', e);
+         }
 
-        // Add event listeners for language switches
-        const langSwitcher = document.getElementById('lang-switcher');
-        const mobileLangSwitcher = document.getElementById('mobile-lang-switcher');
-        if (langSwitcher) {
-          langSwitcher.addEventListener('click', switchLanguage);
-        }
-        if (mobileLangSwitcher) {
-          mobileLangSwitcher.addEventListener('click', switchLanguage);
-        }
+         // Add event listeners for language switches
+         const langSwitcher = document.getElementById('lang-switcher');
+         const mobileLangSwitcher = document.getElementById('mobile-lang-switcher');
+         try {
+           if (langSwitcher) {
+             langSwitcher.addEventListener('click', switchLanguage);
+           }
+         } catch (e) {
+           console.error('Error adding lang switcher listener:', e);
+         }
+         try {
+           if (mobileLangSwitcher) {
+             mobileLangSwitcher.addEventListener('click', switchLanguage);
+           }
+         } catch (e) {
+           console.error('Error adding mobile lang switcher listener:', e);
+         }
 
-        // Add event listener for mobile menu
-        const mobileMenuToggle = document.getElementById('mobile-menu-toggle');
-        if (mobileMenuToggle) {
-          mobileMenuToggle.addEventListener('click', toggleMobileMenu);
-        }
+         // Add event listener for mobile menu
+         const mobileMenuToggle = document.getElementById('mobile-menu-toggle');
+         try {
+           if (mobileMenuToggle) {
+             mobileMenuToggle.addEventListener('click', toggleMobileMenu);
+           }
+         } catch (e) {
+           console.error('Error adding mobile menu toggle listener:', e);
+         }
       });
    } catch (e) {
      console.error('Theme toggle initialization error:', e);

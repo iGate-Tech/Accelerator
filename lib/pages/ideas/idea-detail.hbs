@@ -5,7 +5,7 @@
     <div class="mb-4 sm:mb-6">
       <a href="/explore-idea" class="inline-flex items-center text-primary hover:text-primary/80 transition-colors text-sm sm:text-base">
  {{{icon 'arrow-left' class='w-4 h-4 sm:w-5 sm:h-5 mr-2' size='24'}}}
-         {{t 'ideas.detail.back_to_explore'}}
+         {{t 'idea-detail.back_to_explore'}}
        </a>
     </div>
 
@@ -22,7 +22,7 @@
         <div class="flex items-center space-x-3">
           <img src="{{cond idea.profiles.avatar_url idea.profiles.avatar_url '/images/avatar.png'}}" alt="Creator" class="w-8 h-8 sm:w-10 sm:h-10 rounded-full border border-border">
           <div>
-            <p class="text-xs sm:text-sm text-muted-foreground">{{t 'ideas.detail.created_by'}}</p>
+            <p class="text-xs sm:text-sm text-muted-foreground">{{t 'idea-detail.created_by'}}</p>
             <p class="font-semibold text-foreground text-sm sm:text-base">{{idea.profiles.name}}</p>
           </div>
         </div>
@@ -41,24 +41,24 @@
       <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 mb-4 sm:mb-6">
            {{#if idea.category}}
            <div class="flex justify-between items-center p-3 bg-muted/30 rounded-lg">
-             <span class="text-xs sm:text-sm text-muted-foreground">{{t 'ideas.detail.category'}}</span>
+             <span class="text-xs sm:text-sm text-muted-foreground">{{t 'idea-detail.category'}}</span>
              <span class="font-semibold text-foreground text-sm sm:text-base">{{idea.category}}</span>
            </div>
            {{/if}}
            <div class="flex justify-between items-center p-3 bg-muted/30 rounded-lg">
-             <span class="text-xs sm:text-sm text-muted-foreground">{{t 'ideas.detail.status'}}</span>
+             <span class="text-xs sm:text-sm text-muted-foreground">{{t 'idea-detail.status'}}</span>
              <span class="px-2 py-1 rounded-full text-xs {{#if (eq idea.overall_status 'completed')}}bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300{{else if (eq idea.overall_status 'in_progress')}}bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300{{else}}bg-muted text-muted-foreground{{/if}}">
                {{idea.overall_status}}
              </span>
            </div>
            {{#if idea.completion_percentage}}
            <div class="flex justify-between items-center p-3 bg-muted/30 rounded-lg">
-             <span class="text-xs sm:text-sm text-muted-foreground">{{t 'ideas.detail.progress'}}</span>
+             <span class="text-xs sm:text-sm text-muted-foreground">{{t 'idea-detail.progress'}}</span>
              <span class="font-semibold text-foreground text-sm sm:text-base">{{idea.completion_percentage}}%</span>
            </div>
            {{/if}}
            <div class="flex justify-between items-center p-3 bg-muted/30 rounded-lg">
-             <span class="text-xs sm:text-sm text-muted-foreground">{{t 'ideas.detail.created'}}</span>
+             <span class="text-xs sm:text-sm text-muted-foreground">{{t 'idea-detail.created'}}</span>
              <span class="font-semibold text-foreground text-sm sm:text-base">{{idea.created_at_formatted}}</span>
            </div>
         </div>
@@ -78,13 +78,13 @@
         <div class="mb-4 sm:mb-6">
            <a href="/models/idea?ideaId={{idea.id}}" class="w-full inline-flex items-center justify-center px-4 sm:px-6 py-3 sm:py-4 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors text-sm sm:text-base font-medium">
  {{{icon 'edit' class='w-4 h-4 mr-2'}}}
-             {{t 'ideas.detail.continue_editing'}}
+             {{t 'idea-detail.continue_editing'}}
            </a>
         </div>
         {{else}}
          <div class="bg-primary/5 border border-primary/20 rounded-lg p-3 sm:p-4 mb-4 sm:mb-6">
            <p class="text-primary dark:text-primary text-sm sm:text-base">
-             {{t 'ideas.detail.public_idea'}}
+             {{t 'idea-detail.public_idea'}}
            </p>
          </div>
         {{/if}}
@@ -92,7 +92,7 @@
         {{#if (not user)}}
          <div class="bg-green-50 border border-green-200 rounded-lg p-3 sm:p-4 mb-4 sm:mb-6">
            <p class="text-green-800 text-sm sm:text-base">
-             {{t 'ideas.detail.join_community'}}
+             {{t 'idea-detail.join_community'}}
            </p>
          </div>
         {{/if}}
@@ -102,7 +102,7 @@
         {{else if (not user)}}
          <div class="bg-green-50 border border-green-200 rounded-lg p-4 mb-6">
            <p class="text-green-800">
-             {{t 'ideas.detail.join_community'}}
+             {{t 'idea-detail.join_community'}}
            </p>
          </div>
         {{/if}}
@@ -112,7 +112,7 @@
     <!-- Vote Statistics -->
     {{#if (gt idea.voteStats.total 0)}}
     <div class="bg-card rounded-2xl shadow-xl p-4 sm:p-6 md:p-8 mb-4 sm:mb-6 md:mb-8 border border-border">
-       <h2 class="text-lg sm:text-xl md:text-2xl font-bold text-foreground mb-4 sm:mb-6 text-center">{{t 'ideas.detail.vote_distribution'}}</h2>
+       <h2 class="text-lg sm:text-xl md:text-2xl font-bold text-foreground mb-4 sm:mb-6 text-center">{{t 'idea-detail.vote_distribution'}}</h2>
       <div class="space-y-3 sm:space-y-4">
         {{#each (range 1 6)}}
         {{#if (lt this 6)}}
@@ -134,14 +134,14 @@
     <!-- Voting Section -->
     {{#if (not (eq idea.user_id user.id))}}
     <div class="bg-card rounded-2xl shadow-xl p-4 sm:p-6 md:p-8 border border-border">
-       <h2 class="text-lg sm:text-xl md:text-2xl font-bold text-foreground mb-4 sm:mb-6 text-center">{{t 'ideas.detail.share_feedback'}}</h2>
+       <h2 class="text-lg sm:text-xl md:text-2xl font-bold text-foreground mb-4 sm:mb-6 text-center">{{t 'idea-detail.share_feedback'}}</h2>
 
       <form id="vote-form" class="space-y-4 sm:space-y-6" method="post" action="/api/votes">
         <input type="hidden" name="ideaId" value="{{idea.id}}" />
 
         <div>
            <label class="block text-sm font-medium text-foreground mb-4 text-center">
-             {{t 'ideas.detail.rating_question'}}
+             {{t 'idea-detail.rating_question'}}
            </label>
           <div class="grid grid-cols-5 gap-2 sm:gap-3 mb-4">
             {{#each (range 1 5)}}
@@ -154,14 +154,14 @@
             {{/each}}
           </div>
            <div class="flex justify-between text-xs sm:text-sm text-muted-foreground px-1">
-             <span>{{t 'ideas.detail.poor'}}</span>
-             <span>{{t 'ideas.detail.excellent'}}</span>
+             <span>{{t 'idea-detail.poor'}}</span>
+             <span>{{t 'idea-detail.excellent'}}</span>
            </div>
         </div>
 
         <button type="submit" id="submit-vote-btn"
           class="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-semibold py-3 sm:py-4 px-4 sm:px-6 rounded-lg transition-all duration-300 flex items-center justify-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed text-sm sm:text-base">
-           <span>{{t 'ideas.detail.submit_vote'}}</span>
+           <span>{{t 'idea-detail.submit_vote'}}</span>
 {{{icon 'check' class='w-4 h-4 sm:w-5 sm:h-5'}}}
         </button>
       </form>
@@ -169,8 +169,8 @@
         <div id="vote-result" class="mt-4 sm:mt-6 text-center hidden">
           <div class="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-3 sm:p-4">
 {{{icon 'check-circle' class='w-6 h-6 sm:w-8 sm:h-8 text-green-600 dark:text-green-400 mx-auto mb-2'}}}
-             <h3 class="text-base sm:text-lg font-semibold text-green-900 dark:text-green-100 mb-1">{{t 'ideas.detail.vote_submitted'}}</h3>
-             <p class="text-sm sm:text-base text-green-800 dark:text-green-200">{{t 'ideas.detail.thank_you_feedback'}}</p>
+             <h3 class="text-base sm:text-lg font-semibold text-green-900 dark:text-green-100 mb-1">{{t 'idea-detail.vote_submitted'}}</h3>
+             <p class="text-sm sm:text-base text-green-800 dark:text-green-200">{{t 'idea-detail.thank_you_feedback'}}</p>
           </div>
         </div>
     </div>
@@ -178,10 +178,10 @@
     <!-- Owner view - no voting -->
     <div class="bg-card rounded-2xl shadow-xl p-4 sm:p-6 md:p-8 border border-border">
       <div class="text-center">
-         <h2 class="text-lg sm:text-xl md:text-2xl font-bold text-foreground mb-4">{{t 'ideas.detail.your_idea'}}</h2>
-         <p class="text-muted-foreground mb-4 text-sm sm:text-base">{{t 'ideas.detail.own_idea_message'}}</p>
+         <h2 class="text-lg sm:text-xl md:text-2xl font-bold text-foreground mb-4">{{t 'idea-detail.your_idea'}}</h2>
+         <p class="text-muted-foreground mb-4 text-sm sm:text-base">{{t 'idea-detail.own_idea_message'}}</p>
          <a href="/portfolios" class="w-full inline-flex items-center justify-center px-4 sm:px-6 py-3 sm:py-4 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors text-sm sm:text-base font-medium">
-           {{t 'ideas.detail.go_to_portfolios'}}
+           {{t 'idea-detail.go_to_portfolios'}}
          </a>
       </div>
     </div>

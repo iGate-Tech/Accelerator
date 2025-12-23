@@ -20,7 +20,7 @@
 
         <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
            <p class="text-blue-800">
-             {{t 'ideas.shared.private_idea'}}
+             {{t 'shared-idea.private_idea'}}
            </p>
         </div>
       </div>
@@ -28,7 +28,7 @@
 
     <!-- Voting Section -->
     <div class="bg-white rounded-2xl shadow-xl p-8">
-       <h2 class="text-2xl font-bold text-gray-900 mb-6 text-center">{{t 'ideas.shared.share_feedback'}}</h2>
+       <h2 class="text-2xl font-bold text-gray-900 mb-6 text-center">{{t 'shared-idea.share_feedback'}}</h2>
 
       <div class="max-w-md mx-auto">
         <form id="vote-form" class="space-y-6" method="post" action="/api/shared-idea/{{shareToken}}/vote">
@@ -36,7 +36,7 @@
 
           <div>
              <label class="block text-sm font-medium text-gray-700 mb-3 text-center">
-               {{t 'ideas.shared.rating_question'}}
+               {{t 'shared-idea.rating_question'}}
              </label>
             <div class="flex justify-center space-x-2">
               {{#each (range 1 5)}}
@@ -49,14 +49,14 @@
               {{/each}}
             </div>
              <div class="flex justify-center space-x-8 mt-2 text-sm text-gray-600">
-               <span>{{t 'ideas.shared.poor'}}</span>
-               <span>{{t 'ideas.shared.excellent'}}</span>
+               <span>{{t 'shared-idea.poor'}}</span>
+               <span>{{t 'shared-idea.excellent'}}</span>
              </div>
           </div>
 
           <button type="submit" id="submit-vote-btn"
             class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-4 px-6 rounded-lg transition-all duration-300 transform hover:scale-105 flex items-center justify-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed">
-             <span>{{t 'ideas.shared.submit_vote'}}</span>
+             <span>{{t 'shared-idea.submit_vote'}}</span>
             {{{icon "check" class="w-5 h-5"}}}
           </button>
         </form>
@@ -64,8 +64,8 @@
         <div id="vote-result" class="mt-6 text-center hidden">
           <div class="bg-green-50 border border-green-200 rounded-lg p-4">
             {{{icon "check-circle" class="w-8 h-8 text-green-600 mx-auto mb-2"}}}
-             <h3 class="text-lg font-semibold text-green-900 mb-1">{{t 'ideas.shared.vote_submitted'}}</h3>
-             <p class="text-green-800">{{t 'ideas.shared.thank_you_feedback'}}</p>
+             <h3 class="text-lg font-semibold text-green-900 mb-1">{{t 'shared-idea.vote_submitted'}}</h3>
+             <p class="text-green-800">{{t 'shared-idea.thank_you_feedback'}}</p>
           </div>
         </div>
       </div>

@@ -1,10 +1,10 @@
 <div class="p-4 sm:p-6 md:p-8 lg:p-20">
     <div class="grid gap-1 mb-8 sm:mb-12">
         <h1 class="font-heading text-2xl sm:text-3xl font-semibold text-foreground">
-            {{t 'ideas.favorites.title'}}
+            {{t 'favorites.title'}}
         </h1>
         <p class="text-base sm:text-lg text-muted-foreground">
-            {{t 'ideas.favorites.description'}}
+            {{t 'favorites.description'}}
         </p>
     </div>
 
@@ -21,11 +21,11 @@
         <div class="inline-flex items-center justify-center w-12 h-12 sm:w-16 sm:h-16 bg-muted rounded-2xl mb-4 sm:mb-6">
             {{{icon 'heart' class='w-6 h-6 sm:w-8 sm:h-8 text-muted-foreground'}}}
         </div>
-         <h3 class="text-lg sm:text-xl font-semibold text-foreground mb-2">{{t 'ideas.favorites.no_favorites'}}</h3>
-         <p class="text-sm sm:text-base text-muted-foreground mb-4 sm:mb-6">{{t 'ideas.favorites.explore_message'}}</p>
+         <h3 class="text-lg sm:text-xl font-semibold text-foreground mb-2">{{t 'favorites.no_favorites'}}</h3>
+         <p class="text-sm sm:text-base text-muted-foreground mb-4 sm:mb-6">{{t 'favorites.explore_message'}}</p>
          <a href="/explore-idea" class="inline-flex items-center px-4 sm:px-6 py-2 sm:py-3 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors text-sm sm:text-base">
              {{{icon 'search' class='w-4 h-4 mr-2'}}}
-             {{t 'ideas.favorites.explore_button'}}
+             {{t 'favorites.explore_button'}}
          </a>
     </div>
     {{/if}}

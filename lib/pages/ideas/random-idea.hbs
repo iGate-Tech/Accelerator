@@ -8,8 +8,8 @@
           {{{ icon 'lightbulb' class='w-8 h-8 text-white' }}}
         </div>
         <div>
-           <h1 class="text-4xl font-bold text-gray-900">{{t 'ideas.random.title'}}</h1>
-           <p class="text-xl text-gray-600 mt-2">{{t 'ideas.random.subtitle'}}</p>
+           <h1 class="text-4xl font-bold text-gray-900">{{t 'random-idea.title'}}</h1>
+           <p class="text-xl text-gray-600 mt-2">{{t 'random-idea.subtitle'}}</p>
         </div>
       </div>
     </div>
@@ -21,8 +21,8 @@
         <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
           {{{ icon 'sparkles' class='w-6 h-6 text-green-600' }}}
         </div>
-         <h2 class="text-2xl font-bold text-gray-900 mb-2">{{t 'ideas.random.idea_ready'}}</h2>
-         <p class="text-gray-600">{{t 'ideas.random.ai_generated'}}</p>
+         <h2 class="text-2xl font-bold text-gray-900 mb-2">{{t 'random-idea.idea_ready'}}</h2>
+         <p class="text-gray-600">{{t 'random-idea.ai_generated'}}</p>
       </div>
 
       <div class="bg-gradient-to-r from-indigo-50 to-purple-50 rounded-xl p-6 mb-6">
@@ -45,12 +45,12 @@
           <input type="hidden" name="tags" value="{{generatedIdea.tags}}" />
           <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 px-6 rounded-lg transition-colors flex items-center justify-center space-x-2">
             {{{ icon 'save' class='w-5 h-5' }}}
-             <span>{{t 'ideas.random.save_idea'}}</span>
+             <span>{{t 'random-idea.save_idea'}}</span>
           </button>
         </form>
         <a href="/random-idea" class="flex-1 bg-gray-600 hover:bg-gray-700 text-white font-semibold py-3 px-6 rounded-lg transition-colors flex items-center justify-center space-x-2">
           {{{ icon 'refresh-cw' class='w-5 h-5' }}}
-           <span>{{t 'ideas.random.generate_another'}}</span>
+           <span>{{t 'random-idea.generate_another'}}</span>
         </a>
       </div>
     </div>
@@ -58,8 +58,8 @@
     <!-- Generation Form -->
     <div class="bg-white rounded-2xl shadow-xl p-8 max-w-2xl mx-auto">
       <div class="text-center mb-6">
-         <h2 class="text-2xl font-semibold text-gray-900 mb-2">{{t 'ideas.random.generate_random'}}</h2>
-         <p class="text-gray-600">{{t 'ideas.random.let_ai_spark'}}</p>
+         <h2 class="text-2xl font-semibold text-gray-900 mb-2">{{t 'random-idea.generate_random'}}</h2>
+         <p class="text-gray-600">{{t 'random-idea.let_ai_spark'}}</p>
       </div>
 
       <form method="post" action="/random-idea" class="space-y-6">
@@ -67,36 +67,36 @@
 
         <div>
            <label for="prompt" class="block text-sm font-medium text-gray-700 mb-2">
-             {{t 'ideas.random.inspiration_prompt'}}
+             {{t 'random-idea.inspiration_prompt'}}
            </label>
           <textarea id="prompt" name="prompt" rows="3"
             class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
-                         placeholder="{{t 'ideas.random.prompt_placeholder'}}"></textarea>
+                         placeholder="{{t 'random-idea.prompt_placeholder'}}"></textarea>
         </div>
 
         <!-- Quick Inspiration Buttons -->
         <div>
            <label class="block text-sm font-medium text-gray-700 mb-2">
-             {{t 'ideas.random.quick_inspiration'}}
+             {{t 'random-idea.quick_inspiration'}}
            </label>
           <div class="grid grid-cols-2 md:grid-cols-3 gap-2">
             <button type="button" class="quick-prompt-btn px-3 py-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-sm rounded-lg border border-indigo-200 transition-colors" data-prompt="AI-powered solutions for everyday problems">
-               {{t 'ideas.random.ai_tech'}}
+               {{t 'random-idea.ai_tech'}}
             </button>
             <button type="button" class="quick-prompt-btn px-3 py-2 bg-green-50 hover:bg-green-100 text-green-700 text-sm rounded-lg border border-green-200 transition-colors" data-prompt="Sustainable and eco-friendly business ideas">
-               {{t 'ideas.random.sustainability'}}
+               {{t 'random-idea.sustainability'}}
             </button>
             <button type="button" class="quick-prompt-btn px-3 py-2 bg-blue-50 hover:bg-blue-100 text-blue-700 text-sm rounded-lg border border-blue-200 transition-colors" data-prompt="Healthcare innovation and medical technology">
-               {{t 'ideas.random.healthcare'}}
+               {{t 'random-idea.healthcare'}}
             </button>
             <button type="button" class="quick-prompt-btn px-3 py-2 bg-purple-50 hover:bg-purple-100 text-purple-700 text-sm rounded-lg border border-purple-200 transition-colors" data-prompt="Education technology and learning platforms">
-               {{t 'ideas.random.education'}}
+               {{t 'random-idea.education'}}
             </button>
             <button type="button" class="quick-prompt-btn px-3 py-2 bg-orange-50 hover:bg-orange-100 text-orange-700 text-sm rounded-lg border border-orange-200 transition-colors" data-prompt="Financial technology and fintech solutions">
-               {{t 'ideas.random.fintech'}}
+               {{t 'random-idea.fintech'}}
             </button>
             <button type="button" class="quick-prompt-btn px-3 py-2 bg-pink-50 hover:bg-pink-100 text-pink-700 text-sm rounded-lg border border-pink-200 transition-colors" data-prompt="Entertainment and gaming industry innovations">
-               {{t 'ideas.random.entertainment'}}
+               {{t 'random-idea.entertainment'}}
             </button>
           </div>
         </div>
@@ -107,15 +107,15 @@
               {{{ icon 'brain' class='w-4 h-4 text-blue-600' }}}
             </div>
             <div>
-               <h4 class="text-sm font-semibold text-blue-900 mb-1">{{t 'ideas.random.ai_powered_generation'}}</h4>
+               <h4 class="text-sm font-semibold text-blue-900 mb-1">{{t 'random-idea.ai_powered_generation'}}</h4>
                <p class="text-sm text-blue-800">
-                 {{t 'ideas.random.ai_description'}}
+                 {{t 'random-idea.ai_description'}}
                </p>
               <ul class="text-sm text-blue-800 mt-2 space-y-1">
-                 <li>{{t 'ideas.random.compelling_concept'}}</li>
-                 <li>{{t 'ideas.random.market_opportunity'}}</li>
-                 <li>{{t 'ideas.random.target_audience'}}</li>
-                 <li>{{t 'ideas.random.competitive_advantage'}}</li>
+                 <li>{{t 'random-idea.compelling_concept'}}</li>
+                 <li>{{t 'random-idea.market_opportunity'}}</li>
+                 <li>{{t 'random-idea.target_audience'}}</li>
+                 <li>{{t 'random-idea.competitive_advantage'}}</li>
               </ul>
             </div>
           </div>
@@ -127,8 +127,8 @@
               {{{ icon 'zap' class='w-4 h-4 text-yellow-600' }}}
             </div>
             <div>
-               <h4 class="text-sm font-semibold text-yellow-900">{{t 'ideas.random.cost_credits'}}</h4>
-               <p class="text-sm text-yellow-800">{{t 'ideas.random.current_balance'}}</p>
+               <h4 class="text-sm font-semibold text-yellow-900">{{t 'random-idea.cost_credits'}}</h4>
+               <p class="text-sm text-yellow-800">{{t 'random-idea.current_balance'}}</p>
             </div>
           </div>
         </div>
@@ -137,7 +137,7 @@
           <button type="submit"
             class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-4 px-6 rounded-lg transition-all duration-300 transform hover:scale-105 flex items-center justify-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
             {{#if (lt userCredits 20)}}disabled{{/if}}>
-             <span>{{t 'ideas.random.generate_random_button'}}</span>
+             <span>{{t 'random-idea.generate_random_button'}}</span>
             {{#if (gte userCredits 10)}}
               {{{ icon 'sparkles' class='w-5 h-5' }}}
             {{/if}}
@@ -148,7 +148,7 @@
       {{#if (lt userCredits 20)}}
       <div class="mt-6 text-center">
         <a href="/buy-credits" class="text-indigo-600 hover:text-indigo-800 font-semibold">
-           {{t 'ideas.random.need_credits'}}
+           {{t 'random-idea.need_credits'}}
         </a>
       </div>
       {{/if}}
@@ -161,24 +161,24 @@
         <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mx-auto mb-4">
           {{{ icon 'target' class='w-6 h-6 text-blue-600' }}}
         </div>
-         <h3 class="text-lg font-semibold text-gray-900 mb-2">{{t 'ideas.random.market_validated'}}</h3>
-         <p class="text-gray-600 text-sm">{{t 'ideas.random.market_validated_desc'}}</p>
+         <h3 class="text-lg font-semibold text-gray-900 mb-2">{{t 'random-idea.market_validated'}}</h3>
+         <p class="text-gray-600 text-sm">{{t 'random-idea.market_validated_desc'}}</p>
       </div>
 
       <div class="bg-white rounded-xl shadow-lg p-6 text-center">
         <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mx-auto mb-4">
           {{{ icon 'trending-up' class='w-6 h-6 text-green-600' }}}
         </div>
-         <h3 class="text-lg font-semibold text-gray-900 mb-2">{{t 'ideas.random.high_potential'}}</h3>
-         <p class="text-gray-600 text-sm">{{t 'ideas.random.high_potential_desc'}}</p>
+         <h3 class="text-lg font-semibold text-gray-900 mb-2">{{t 'random-idea.high_potential'}}</h3>
+         <p class="text-gray-600 text-sm">{{t 'random-idea.high_potential_desc'}}</p>
       </div>
 
       <div class="bg-white rounded-xl shadow-lg p-6 text-center">
         <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mx-auto mb-4">
           {{{ icon 'users' class='w-6 h-6 text-purple-600' }}}
         </div>
-         <h3 class="text-lg font-semibold text-gray-900 mb-2">{{t 'ideas.random.community_feedback'}}</h3>
-         <p class="text-gray-600 text-sm">{{t 'ideas.random.community_feedback_desc'}}</p>
+         <h3 class="text-lg font-semibold text-gray-900 mb-2">{{t 'random-idea.community_feedback'}}</h3>
+         <p class="text-gray-600 text-sm">{{t 'random-idea.community_feedback_desc'}}</p>
       </div>
     </div>
 

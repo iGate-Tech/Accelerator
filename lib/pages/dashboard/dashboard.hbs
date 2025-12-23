@@ -15,7 +15,7 @@
          <div class="rounded-lg bg-card px-4 py-6 text-card-foreground shadow-sm border border-border">
            <div class="flex items-center justify-between px-3 py-1">
              <div class="flex flex-col gap-1">
-                <h3 class="text-sm font-medium text-muted-foreground">{{t 'dashboard.overview.total_ideas'}}</h3>
+                <h3 class="text-sm font-medium text-muted-foreground">{{t 'dashboard-dashboard.total_ideas'}}</h3>
                 <p class="text-2xl font-semibold text-foreground">{{stats.ideas.total}}</p>
              </div>
             <div>
@@ -35,13 +35,13 @@
             {{{icon 'trending-up' class='w-5 h-4' size='16'}}}
 
              <span class="text-success">+2</span>
-             {{t 'dashboard.overview.since_last_month'}}
+             {{t 'dashboard-dashboard.since_last_month'}}
           </p>
         </div>
          <div class="rounded-lg bg-card px-4 py-6 text-card-foreground shadow-sm border border-border">
            <div class="flex items-center justify-between px-3 py-1">
              <div class="flex flex-col gap-1">
-                <h3 class="text-sm font-medium text-muted-foreground">{{t 'dashboard.overview.completed_ideas'}}</h3>
+                <h3 class="text-sm font-medium text-muted-foreground">{{t 'dashboard-dashboard.completed_ideas'}}</h3>
                 <p class="text-2xl font-semibold text-foreground">{{stats.ideas.completed}}</p>
              </div>
             <div>
@@ -62,13 +62,13 @@
             {{{icon 'trending-up' class='w-5 h-4' size='16'}}}
 
              <span class="text-success">+8</span>
-             {{t 'dashboard.overview.since_last_month'}}
+             {{t 'dashboard-dashboard.since_last_month'}}
           </p>
         </div>
          <div class="rounded-lg bg-card px-4 py-6 text-card-foreground shadow-sm border border-border">
            <div class="flex items-center justify-between px-3 py-1">
              <div class="flex flex-col gap-1">
-                <h3 class="text-sm font-medium text-muted-foreground">{{t 'dashboard.overview.credit_balance'}}</h3>
+                <h3 class="text-sm font-medium text-muted-foreground">{{t 'dashboard-dashboard.credit_balance'}}</h3>
                 <p class="text-2xl font-semibold text-foreground">{{stats.credits.currentBalance}}</p>
              </div>
             <div>
@@ -88,13 +88,13 @@
             {{{icon 'trending-up' class='w-5 h-4' size='16'}}}
 
              <span class="text-success">+3</span>
-             {{t 'dashboard.overview.since_last_month'}}
+             {{t 'dashboard-dashboard.since_last_month'}}
           </p>
         </div>
          <div class="rounded-lg bg-card px-4 py-6 text-card-foreground shadow-sm border border-border">
            <div class="flex items-center justify-between px-3 py-1">
              <div class="flex flex-col gap-1">
-                <h3 class="text-sm font-medium text-muted-foreground">{{t 'dashboard.overview.completion_rate'}}</h3>
+                <h3 class="text-sm font-medium text-muted-foreground">{{t 'dashboard-dashboard.completion_rate'}}</h3>
                 <p class="text-2xl font-semibold text-foreground">{{stats.ideas.completionRate}}%</p>
              </div>
             <div>
@@ -114,13 +114,13 @@
             {{{icon 'trending-up' class='w-5 h-4' size='16'}}}
 
              <span class="text-success">+25%</span>
-             {{t 'dashboard.overview.since_last_month'}}
+             {{t 'dashboard-dashboard.since_last_month'}}
           </p>
         </div>
          <div class="rounded-lg bg-card px-4 py-6 text-card-foreground shadow-sm border border-border">
            <div class="flex items-center justify-between px-3 py-1">
              <div class="flex flex-col gap-1">
-                <h3 class="text-sm font-medium text-muted-foreground">{{t 'dashboard.overview.average_rating'}}</h3>
+                <h3 class="text-sm font-medium text-muted-foreground">{{t 'dashboard-dashboard.average_rating'}}</h3>
                 <p class="text-2xl font-semibold text-foreground">{{stats.ideas.averageRating}}★</p>
              </div>
             <div>
@@ -140,7 +140,7 @@
             {{{icon 'trending-up' class='w-5 h-4' size='16'}}}
 
              <span class="text-success">+15%</span>
-             {{t 'dashboard.overview.since_last_month'}}
+             {{t 'dashboard-dashboard.since_last_month'}}
           </p>
         </div>
       </div>
@@ -151,9 +151,9 @@
           <div>
             <div class="bg-card rounded-lg border border-border p-6">
               <div class="flex items-center justify-between mb-4">
-                 <h2 class="text-xl font-semibold text-foreground">{{t 'dashboard.overview.recent_activity'}}</h2>
+                 <h2 class="text-xl font-semibold text-foreground">{{t 'dashboard-dashboard.recent_activity'}}</h2>
                  <a href="/user-activity" class="btn btn-ghost text-sm">
-                   {{t 'dashboard.overview.view_all'}}
+                   {{t 'dashboard-dashboard.view_all'}}
                    {{{icon 'arrow-right' class='' size='14'}}}
                  </a>
               </div>
@@ -175,17 +175,17 @@
                     <div class="flex-1">
                       <p class="text-sm text-foreground">
                       {{#if (eq action_type "idea_created")}}
-                           {{t 'dashboard.overview.activity_created_idea'}}
+                           {{t 'dashboard-dashboard.activity_created_idea'}}
                          {{else if (eq action_type "vote_cast")}}
-                           {{t 'dashboard.overview.activity_cast_vote'}}
+                           {{t 'dashboard-dashboard.activity_cast_vote'}}
                       {{else if (eq action_type "model_completed")}}
-                           {{t 'dashboard.overview.activity_completed_model'}}
+                           {{t 'dashboard-dashboard.activity_completed_model'}}
                          {{else if (eq action_type "model_section_updated")}}
-                           {{t 'dashboard.overview.activity_updated_section'}}
+                           {{t 'dashboard-dashboard.activity_updated_section'}}
                          {{else if (eq action_type "package_selected")}}
-                           {{t 'dashboard.overview.activity_selected_package'}}
+                           {{t 'dashboard-dashboard.activity_selected_package'}}
                          {{else if (eq action_type "profile_completed")}}
-                           {{t 'dashboard.overview.activity_completed_profile'}}
+                           {{t 'dashboard-dashboard.activity_completed_profile'}}
                          {{else}}
                            {{action_type}}
                          {{/if}}
@@ -199,9 +199,9 @@
                     <div class="w-16 h-16 bg-muted rounded-full flex items-center justify-center mx-auto mb-4">
 {{{icon 'activity' class='text-muted-foreground' size='24'}}}
                     </div>
-                     <h3 class="text-lg font-medium text-foreground mb-2">{{t 'dashboard.overview.no_activity'}}</h3>
-                     <p class="text-muted-foreground mb-4">{{t 'dashboard.overview.start_creating'}}</p>
-                     <a href="/new-idea" class="btn btn-primary">{{t 'dashboard.overview.create_first_idea'}}</a>
+                     <h3 class="text-lg font-medium text-foreground mb-2">{{t 'dashboard-dashboard.no_activity'}}</h3>
+                     <p class="text-muted-foreground mb-4">{{t 'dashboard-dashboard.start_creating'}}</p>
+                     <a href="/new-idea" class="btn btn-primary">{{t 'dashboard-dashboard.create_first_idea'}}</a>
                   </div>
                 {{/if}}
               </div>
@@ -215,22 +215,22 @@
             <!-- Credit Balance -->
             <div class="bg-card rounded-lg border border-border p-6">
                <div class="flex items-center justify-between mb-4">
-                 <h2 class="text-xl font-semibold text-foreground">{{t 'dashboard.overview.credit_balance'}}</h2>
+                 <h2 class="text-xl font-semibold text-foreground">{{t 'dashboard-dashboard.credit_balance'}}</h2>
                  <a href="/buy-credits" class="btn btn-ghost text-sm">
-                   {{t 'dashboard.overview.buy_credits'}}
+                   {{t 'dashboard-dashboard.buy_credits'}}
                    {{{icon 'arrow-right' class='' size='14'}}}
                  </a>
                </div>
               <div class="text-center">
                 <div class="text-3xl font-bold text-primary mb-2">{{stats.credits.currentBalance}}</div>
-                 <p class="text-sm text-muted-foreground mb-4">{{t 'dashboard.overview.available_credits'}}</p>
+                 <p class="text-sm text-muted-foreground mb-4">{{t 'dashboard-dashboard.available_credits'}}</p>
                 <div class="grid grid-cols-2 gap-4 text-sm">
                   <div>
-                     <span class="text-muted-foreground">{{t 'dashboard.overview.earned_30d'}}</span>
+                     <span class="text-muted-foreground">{{t 'dashboard-dashboard.earned_30d'}}</span>
                      <div class="font-semibold text-green-600">+{{stats.credits.earned30d}}</div>
                    </div>
                    <div>
-                     <span class="text-muted-foreground">{{t 'dashboard.overview.spent_30d'}}</span>
+                     <span class="text-muted-foreground">{{t 'dashboard-dashboard.spent_30d'}}</span>
                      <div class="font-semibold text-red-600">-{{stats.credits.spent30d}}</div>
                   </div>
                 </div>
@@ -239,7 +239,7 @@
 
             <!-- Model Progress -->
           <div class="bg-card rounded-lg border border-border p-6">
-             <h2 class="text-xl font-semibold text-foreground mb-4">{{t 'dashboard.overview.model_progress'}}</h2>
+             <h2 class="text-xl font-semibold text-foreground mb-4">{{t 'dashboard-dashboard.model_progress'}}</h2>
             <div class="space-y-4">
               {{#each stats.models}}
                 <div class="flex items-center justify-between">
@@ -260,22 +260,22 @@
           </div>
             <!-- Quick Stats -->
             <div class="bg-card rounded-lg border border-border p-6">
-               <h2 class="text-xl font-semibold text-foreground mb-4">{{t 'dashboard.overview.quick_stats'}}</h2>
+               <h2 class="text-xl font-semibold text-foreground mb-4">{{t 'dashboard-dashboard.quick_stats'}}</h2>
               <div class="space-y-3">
                 <div class="flex items-center justify-between">
-                   <span class="text-sm text-muted-foreground">{{t 'dashboard.overview.ideas_created'}}</span>
+                   <span class="text-sm text-muted-foreground">{{t 'dashboard-dashboard.ideas_created'}}</span>
                    <span class="text-sm font-medium text-foreground">{{stats.ideas.total}}</span>
                  </div>
                  <div class="flex items-center justify-between">
-                   <span class="text-sm text-muted-foreground">{{t 'dashboard.overview.votes_given'}}</span>
+                   <span class="text-sm text-muted-foreground">{{t 'dashboard-dashboard.votes_given'}}</span>
                    <span class="text-sm font-medium text-foreground">{{stats.votes.totalGiven}}</span>
                  </div>
                  <div class="flex items-center justify-between">
-                   <span class="text-sm text-muted-foreground">{{t 'dashboard.overview.completion_rate'}}</span>
+                   <span class="text-sm text-muted-foreground">{{t 'dashboard-dashboard.completion_rate'}}</span>
                    <span class="text-sm font-medium text-foreground">{{stats.ideas.completionRate}}%</span>
                  </div>
                  <div class="flex items-center justify-between">
-                   <span class="text-sm text-muted-foreground">{{t 'dashboard.overview.avg_rating'}}</span>
+                   <span class="text-sm text-muted-foreground">{{t 'dashboard-dashboard.avg_rating'}}</span>
                    <span class="text-sm font-medium text-foreground">{{stats.ideas.averageRating}}★</span>
                 </div>
               </div>
@@ -283,25 +283,25 @@
 
             <!-- Quick Actions -->
             <div class="bg-card rounded-lg border border-border p-6">
-               <h2 class="text-xl font-semibold text-foreground mb-4">{{t 'dashboard.overview.quick_actions'}}</h2>
+               <h2 class="text-xl font-semibold text-foreground mb-4">{{t 'dashboard-dashboard.quick_actions'}}</h2>
               <div class="grid grid-cols-1 gap-3">
                 <a href="/new-idea" class="btn btn-outline w-full justify-start">
                    {{{icon 'plus' class='' size='14'}}}
-                   {{t 'dashboard.overview.create_new_idea'}}
+                   {{t 'dashboard-dashboard.create_new_idea'}}
                  </a>
                  <a href="/explore-ideas" class="btn btn-outline w-full justify-start">
                    {{{icon 'search' class='' size='14'}}}
-                   {{t 'dashboard.overview.explore_ideas'}}
+                   {{t 'dashboard-dashboard.explore_ideas'}}
                  </a>
 
                 {{#if (eq user.package_type 'enterprise')}}
                 <a href="/portfolios" class="btn btn-outline w-full justify-start">
                    {{{icon 'archive' class='' size='14'}}}
-                   {{t 'dashboard.overview.manage_portfolios'}}
+                   {{t 'dashboard-dashboard.manage_portfolios'}}
                  </a>
                   <a href="/settings" class="btn btn-outline w-full justify-start">
                     {{{icon 'settings' class='' size='14'}}}
-                    {{t 'dashboard.overview.settings'}}
+                    {{t 'dashboard-dashboard.settings'}}
                   </a>
                  {{/if}}
               </div>

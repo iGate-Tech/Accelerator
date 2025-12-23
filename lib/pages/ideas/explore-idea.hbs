@@ -1,10 +1,10 @@
 <div class="p-4 sm:p-6 md:p-8 lg:p-20">
     <div class="grid gap-1 mb-8 sm:mb-12">
         <h1 class="font-heading text-2xl sm:text-3xl font-semibold text-foreground">
-            {{t 'ideas.explore.title'}}
+            {{t 'explore-idea.title'}}
         </h1>
         <p class="text-base sm:text-lg text-muted-foreground">
-            {{t 'ideas.explore.description'}}
+            {{t 'explore-idea.description'}}
         </p>
     </div>
 
@@ -13,9 +13,9 @@
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <!-- Search Input -->
             <div class="sm:col-span-2">
-                <label for="search-input" class="block text-sm font-medium text-foreground mb-2">{{t 'ideas.explore.search'}}</label>
+                <label for="search-input" class="block text-sm font-medium text-foreground mb-2">{{t 'explore-idea.search'}}</label>
                 <div class="relative">
-                     <input type="text" id="search-input" placeholder="{{t 'ideas.explore.search_placeholder'}}"
+                     <input type="text" id="search-input" placeholder="{{t 'explore-idea.search_placeholder'}}"
                            class="w-full pl-10 pr-4 py-2 border border-input rounded-md bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary text-base">
                     {{{icon 'search' class='absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground'}}}
                 </div>
@@ -23,9 +23,9 @@
 
             <!-- Category Filter -->
             <div>
-                 <label for="category-filter" class="block text-sm font-medium text-foreground mb-2">{{t 'ideas.explore.category'}}</label>
+                 <label for="category-filter" class="block text-sm font-medium text-foreground mb-2">{{t 'explore-idea.category'}}</label>
                 <select id="category-filter" class="w-full px-3 py-2 border border-input rounded-md bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary text-base">
-                     <option value="">{{t 'ideas.explore.all_categories'}}</option>
+                     <option value="">{{t 'explore-idea.all_categories'}}</option>
                     {{#each categories}}
                     <option value="{{this}}">{{this}}</option>
                     {{/each}}
@@ -34,12 +34,12 @@
 
             <!-- Sort Options -->
             <div>
-                 <label for="sort-select" class="block text-sm font-medium text-foreground mb-2">{{t 'ideas.explore.sort_by'}}</label>
+                 <label for="sort-select" class="block text-sm font-medium text-foreground mb-2">{{t 'explore-idea.sort_by'}}</label>
                 <select id="sort-select" class="w-full px-3 py-2 border border-input rounded-md bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary text-base">
-                     <option value="newest">{{t 'ideas.explore.newest_first'}}</option>
-                     <option value="oldest">{{t 'ideas.explore.oldest_first'}}</option>
-                     <option value="rating">{{t 'ideas.explore.highest_rated'}}</option>
-                     <option value="title">{{t 'ideas.explore.title_az'}}</option>
+                     <option value="newest">{{t 'explore-idea.newest_first'}}</option>
+                     <option value="oldest">{{t 'explore-idea.oldest_first'}}</option>
+                     <option value="rating">{{t 'explore-idea.highest_rated'}}</option>
+                     <option value="title">{{t 'explore-idea.title_az'}}</option>
                 </select>
             </div>
         </div>
@@ -57,8 +57,8 @@
         <div class="inline-flex items-center justify-center w-12 h-12 sm:w-16 sm:h-16 bg-muted rounded-2xl mb-4 sm:mb-6">
             {{{icon 'search-x' class='w-6 h-6 sm:w-8 sm:h-8 text-muted-foreground'}}}
         </div>
-         <h3 class="text-lg sm:text-xl font-semibold text-foreground mb-2">{{t 'ideas.explore.no_ideas_found'}}</h3>
-         <p class="text-sm sm:text-base text-muted-foreground">{{t 'ideas.explore.try_adjusting_search'}}</p>
+         <h3 class="text-lg sm:text-xl font-semibold text-foreground mb-2">{{t 'explore-idea.no_ideas_found'}}</h3>
+         <p class="text-sm sm:text-base text-muted-foreground">{{t 'explore-idea.try_adjusting_search'}}</p>
     </div>
 </div>
 

@@ -4,26 +4,26 @@
        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
          <div class="grid gap-1">
            <h1 class="font-heading text-2xl sm:text-3xl font-semibold text-foreground">
-             {{t 'dashboard.user_activity.title'}}
+             {{t 'user-activity.user_activity.title'}}
            </h1>
            <p class="text-base sm:text-lg text-muted-foreground">
-             {{t 'dashboard.user_activity.description'}}
+             {{t 'user-activity.user_activity.description'}}
            </p>
          </div>
          <div class="flex items-center gap-2">
            <button class="px-3 py-1.5 border border-input bg-background text-foreground hover:bg-accent hover:text-accent-foreground rounded-full transition-colors text-sm">
-             {{t 'dashboard.user_activity.export'}}
+             {{t 'user-activity.user_activity.export'}}
            </button>
          </div>
        </div>
 
        <!-- Activity Filters -->
        <div class="flex flex-wrap gap-2" id="activity-filters">
-         <button class="filter-btn px-3 py-1.5 bg-primary text-primary-foreground hover:bg-primary/90 rounded-full transition-colors text-sm active" data-filter="all">{{t 'dashboard.user_activity.filter_all'}}</button>
-         <button class="filter-btn px-3 py-1.5 border border-input bg-background text-foreground hover:bg-accent hover:text-accent-foreground rounded-full transition-colors text-sm" data-filter="login">{{t 'dashboard.user_activity.filter_logins'}}</button>
-         <button class="filter-btn px-3 py-1.5 border border-input bg-background text-foreground hover:bg-accent hover:text-accent-foreground rounded-full transition-colors text-sm" data-filter="idea_created">{{t 'dashboard.user_activity.filter_ideas'}}</button>
-         <button class="filter-btn px-3 py-1.5 border border-input bg-background text-foreground hover:bg-accent hover:text-accent-foreground rounded-full transition-colors text-sm" data-filter="profile_completed">{{t 'dashboard.user_activity.filter_profile'}}</button>
-         <button class="filter-btn px-3 py-1.5 border border-input bg-background text-foreground hover:bg-accent hover:text-accent-foreground rounded-full transition-colors text-sm" data-filter="create">{{t 'dashboard.user_activity.filter_account'}}</button>
+         <button class="filter-btn px-3 py-1.5 bg-primary text-primary-foreground hover:bg-primary/90 rounded-full transition-colors text-sm active" data-filter="all">{{t 'user-activity.user_activity.filter_all'}}</button>
+         <button class="filter-btn px-3 py-1.5 border border-input bg-background text-foreground hover:bg-accent hover:text-accent-foreground rounded-full transition-colors text-sm" data-filter="login">{{t 'user-activity.user_activity.filter_logins'}}</button>
+         <button class="filter-btn px-3 py-1.5 border border-input bg-background text-foreground hover:bg-accent hover:text-accent-foreground rounded-full transition-colors text-sm" data-filter="idea_created">{{t 'user-activity.user_activity.filter_ideas'}}</button>
+         <button class="filter-btn px-3 py-1.5 border border-input bg-background text-foreground hover:bg-accent hover:text-accent-foreground rounded-full transition-colors text-sm" data-filter="profile_completed">{{t 'user-activity.user_activity.filter_profile'}}</button>
+         <button class="filter-btn px-3 py-1.5 border border-input bg-background text-foreground hover:bg-accent hover:text-accent-foreground rounded-full transition-colors text-sm" data-filter="create">{{t 'user-activity.user_activity.filter_account'}}</button>
        </div>
 
       <!-- Activity Timeline -->
@@ -62,13 +62,13 @@
                    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1">
                       <h3 class="text-sm font-medium text-foreground">
                         {{#if (eq action_type "login")}}
-                          {{t 'dashboard.user_activity.logged_in'}}
+                          {{t 'user-activity.user_activity.logged_in'}}
                         {{else if (eq action_type "create")}}
-                          {{#if (eq entity_type "account")}}{{t 'dashboard.user_activity.account_created'}}{{else}}{{t 'dashboard.user_activity.created_entity'}} {{entity_type}}{{/if}}
+                          {{#if (eq entity_type "account")}}{{t 'user-activity.user_activity.account_created'}}{{else}}{{t 'user-activity.user_activity.created_entity'}} {{entity_type}}{{/if}}
                         {{else if (eq action_type "idea_created")}}
-                          {{t 'dashboard.user_activity.idea_created'}}
+                          {{t 'user-activity.user_activity.idea_created'}}
                         {{else if (eq action_type "profile_completed")}}
-                          {{t 'dashboard.user_activity.profile_completed'}}
+                          {{t 'user-activity.user_activity.profile_completed'}}
                         {{else}}
                           {{action_type}} {{entity_type}}
                         {{/if}}
@@ -78,13 +78,13 @@
                    {{#if details}}
                     <p class="text-sm text-muted-foreground mt-1">
                       {{#if (eq action_type "login")}}
-                        {{#if details.description}}{{details.description}}{{else}}{{t 'dashboard.user_activity.successful_login'}}{{/if}}
+                        {{#if details.description}}{{details.description}}{{else}}{{t 'user-activity.user_activity.successful_login'}}{{/if}}
                       {{else if (eq action_type "idea_created")}}
                         {{#if details.title}}"{{details.title}}"{{/if}}
                       {{else if details.description}}
                         {{details.description}}
                       {{else}}
-                        {{t 'dashboard.user_activity.activity_details'}}
+                        {{t 'user-activity.user_activity.activity_details'}}
                       {{/if}}
                     </p>
                    {{/if}}
@@ -102,8 +102,8 @@
            <div class="w-12 h-12 sm:w-16 sm:h-16 bg-muted rounded-full flex items-center justify-center mx-auto mb-4">
              {{{icon "activity" class="w-6 h-6 sm:w-8 sm:h-8 text-muted-foreground"}}}
            </div>
-            <h3 class="text-base sm:text-lg font-medium text-foreground mb-2">{{t 'dashboard.user_activity.no_activity'}}</h3>
-            <p class="text-sm sm:text-base text-muted-foreground">{{t 'dashboard.user_activity.activity_will_appear'}}</p>
+            <h3 class="text-base sm:text-lg font-medium text-foreground mb-2">{{t 'user-activity.user_activity.no_activity'}}</h3>
+            <p class="text-sm sm:text-base text-muted-foreground">{{t 'user-activity.user_activity.activity_will_appear'}}</p>
          </div>
          {{/if}}
       </div>
@@ -111,7 +111,7 @@
        <!-- Load More -->
        <div class="text-center py-4">
           <button class="px-3 py-1.5 border border-input bg-background text-foreground hover:bg-accent hover:text-accent-foreground rounded-full transition-colors text-sm">
-            {{t 'dashboard.user_activity.load_more'}}
+            {{t 'user-activity.user_activity.load_more'}}
           </button>
        </div>
     </div>

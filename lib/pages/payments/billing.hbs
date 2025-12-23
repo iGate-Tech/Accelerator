@@ -5,18 +5,18 @@
        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
          <div class="grid gap-1">
            <h1 class="font-heading text-2xl sm:text-3xl font-semibold text-foreground">
-             {{t 'dashboard.payments.billing.title'}}
+             {{t 'billing.title'}}
            </h1>
            <p class="text-base sm:text-lg text-muted-foreground">
- {{t 'dashboard.payments.billing.description'}}
+ {{t 'billing.description'}}
            </p>
          </div>
          <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
            <button class="px-3 sm:px-4 py-2 text-sm font-medium border border-input bg-background text-foreground hover:bg-accent hover:text-accent-foreground rounded-md transition-colors">
-             {{t 'dashboard.payments.billing.export_transactions'}}
+             {{t 'billing.export_transactions'}}
            </button>
            <a href="/add-payment-method" class="px-3 sm:px-4 py-2 text-sm font-medium bg-primary text-primary-foreground hover:bg-primary/90 rounded-md transition-colors">
-             {{t 'dashboard.payments.billing.add_payment_method'}}
+             {{t 'billing.add_payment_method'}}
            </a>
          </div>
       </div>
@@ -27,8 +27,8 @@
          <div class="rounded-lg bg-card px-3 sm:px-4 py-4 sm:py-6 text-card-foreground shadow-sm border border-border">
            <div class="flex items-center justify-between px-2 sm:px-3 py-1">
              <div class="flex flex-col gap-1">
-               <h3 class="text-sm font-medium text-muted-foreground">{{t 'dashboard.payments.billing.current_balance'}}</h3>
-               <p class="text-xl sm:text-2xl font-semibold text-foreground">{{billingStats.currentBalance}} {{t 'dashboard.payments.billing.credits'}}</p>
+               <h3 class="text-sm font-medium text-muted-foreground">{{t 'billing.current_balance'}}</h3>
+               <p class="text-xl sm:text-2xl font-semibold text-foreground">{{billingStats.currentBalance}} {{t 'billing.credits'}}</p>
              </div>
              <div>
                <div class="bg-success/20 rounded-lg">
@@ -41,7 +41,7 @@
              </div>
            </div>
            <p class="flex items-center gap-1 text-sm font-medium text-muted-foreground mt-2">
-             <span class="text-success">{{t 'dashboard.payments.billing.available'}}</span>
+             <span class="text-success">{{t 'billing.available'}}</span>
            </p>
          </div>
 
@@ -49,8 +49,8 @@
          <div class="rounded-lg bg-card px-3 sm:px-4 py-4 sm:py-6 text-card-foreground shadow-sm border border-border">
            <div class="flex items-center justify-between px-2 sm:px-3 py-1">
              <div class="flex flex-col gap-1">
-               <h3 class="text-sm font-medium text-muted-foreground">{{t 'dashboard.payments.billing.spent_this_month'}}</h3>
-               <p class="text-xl sm:text-2xl font-semibold text-foreground">{{billingStats.spentThisMonth}} {{t 'dashboard.payments.billing.credits'}}</p>
+               <h3 class="text-sm font-medium text-muted-foreground">{{t 'billing.spent_this_month'}}</h3>
+               <p class="text-xl sm:text-2xl font-semibold text-foreground">{{billingStats.spentThisMonth}} {{t 'billing.credits'}}</p>
              </div>
              <div>
                <div class="bg-primary/20 rounded-lg">
@@ -63,7 +63,7 @@
              </div>
            </div>
            <p class="flex items-center gap-1 text-sm font-medium text-muted-foreground mt-2">
-             <span class="text-muted-foreground">{{t 'dashboard.payments.billing.ai_usage_reports'}}</span>
+             <span class="text-muted-foreground">{{t 'billing.ai_usage_reports'}}</span>
            </p>
          </div>
 
@@ -71,7 +71,7 @@
          <div class="rounded-lg bg-card px-3 sm:px-4 py-4 sm:py-6 text-card-foreground shadow-sm border border-border">
            <div class="flex items-center justify-between px-2 sm:px-3 py-1">
              <div class="flex flex-col gap-1">
-               <h3 class="text-sm font-medium text-muted-foreground">{{t 'dashboard.payments.billing.current_package'}}</h3>
+               <h3 class="text-sm font-medium text-muted-foreground">{{t 'billing.current_package'}}</h3>
                 <p class="text-xl sm:text-2xl font-semibold text-foreground">{{#if packageDetails}}{{packageDetails.name}}{{else}}{{capitalize profile.package_type}}{{/if}}</p>
              </div>
              <div>
@@ -87,7 +87,7 @@
            <p class="flex items-center gap-1 text-sm font-medium text-muted-foreground mt-2">
              <span class="text-muted-foreground">
                    {{#if (eq profile.package_type "free")}}
-                     {{t 'dashboard.payments.billing.basic_features'}}
+                     {{t 'billing.basic_features'}}
                    {{else}}
                      ${{divide profile.package_price 100}}{{t 'dashboard.payments.upgrade.per_month'}}
                    {{/if}}
@@ -99,7 +99,7 @@
          <div class="rounded-lg bg-card px-3 sm:px-4 py-4 sm:py-6 text-card-foreground shadow-sm border border-border">
            <div class="flex items-center justify-between px-2 sm:px-3 py-1">
              <div class="flex flex-col gap-1">
-               <h3 class="text-sm font-medium text-muted-foreground">{{t 'dashboard.payments.billing.pending_items'}}</h3>
+               <h3 class="text-sm font-medium text-muted-foreground">{{t 'billing.pending_items'}}</h3>
                <p class="text-xl sm:text-2xl font-semibold text-foreground">{{billingStats.pendingPayments}}</p>
              </div>
              <div>
@@ -113,7 +113,7 @@
              </div>
            </div>
            <p class="flex items-center gap-1 text-sm font-medium text-muted-foreground mt-2">
-             <span class="text-warning">{{billingStats.pendingPayments}} {{t 'dashboard.payments.billing.transactions'}}</span>
+             <span class="text-warning">{{billingStats.pendingPayments}} {{t 'billing.transactions'}}</span>
            </p>
          </div>
       </div>
@@ -122,13 +122,13 @@
        <div class="bg-card rounded-lg border border-border overflow-hidden">
          <div class="px-4 sm:px-6 py-3 sm:py-4 border-b border-border">
              <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-             <h2 class="text-lg sm:text-xl font-semibold text-foreground">{{t 'dashboard.payments.billing.transaction_history'}}</h2>
+             <h2 class="text-lg sm:text-xl font-semibold text-foreground">{{t 'billing.transaction_history'}}</h2>
              <div class="flex items-center gap-2">
                <select id="transaction-filter" class="px-3 py-1.5 text-sm border border-input rounded-md bg-background w-full sm:w-auto">
-                 <option value="all">{{t 'dashboard.payments.billing.all_transactions'}}</option>
-                 <option value="billing">{{t 'dashboard.payments.billing.billing'}}</option>
-                 <option value="credits">{{t 'dashboard.payments.billing.credits'}}</option>
-                 <option value="rewards">{{t 'dashboard.payments.billing.rewards'}}</option>
+                 <option value="all">{{t 'billing.all_transactions'}}</option>
+                 <option value="billing">{{t 'billing.billing'}}</option>
+                 <option value="credits">{{t 'billing.credits'}}</option>
+                 <option value="rewards">{{t 'billing.rewards'}}</option>
                </select>
              </div>
            </div>
@@ -139,12 +139,12 @@
           <table class="w-full">
              <thead class="bg-muted/50">
                <tr>
-                 <th class="px-3 sm:px-6 py-2 sm:py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">{{t 'dashboard.payments.billing.date'}}</th>
-                 <th class="px-3 sm:px-6 py-2 sm:py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">{{t 'dashboard.payments.billing.type'}}</th>
-                 <th class="px-3 sm:px-6 py-2 sm:py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">{{t 'dashboard.payments.billing.description'}}</th>
-                 <th class="px-3 sm:px-6 py-2 sm:py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">{{t 'dashboard.payments.billing.amount'}}</th>
-                 <th class="px-3 sm:px-6 py-2 sm:py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">{{t 'dashboard.payments.billing.status'}}</th>
-                 <th class="px-3 sm:px-6 py-2 sm:py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">{{t 'dashboard.payments.billing.actions'}}</th>
+                 <th class="px-3 sm:px-6 py-2 sm:py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">{{t 'billing.date'}}</th>
+                 <th class="px-3 sm:px-6 py-2 sm:py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">{{t 'billing.type'}}</th>
+                 <th class="px-3 sm:px-6 py-2 sm:py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">{{t 'billing.description'}}</th>
+                 <th class="px-3 sm:px-6 py-2 sm:py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">{{t 'billing.amount'}}</th>
+                 <th class="px-3 sm:px-6 py-2 sm:py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">{{t 'billing.status'}}</th>
+                 <th class="px-3 sm:px-6 py-2 sm:py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">{{t 'billing.actions'}}</th>
                </tr>
              </thead>
             <tbody class="bg-card divide-y divide-border">
@@ -174,15 +174,15 @@
                  <td class="px-3 sm:px-6 py-3 sm:py-4 whitespace-nowrap">
                    <span class="inline-flex px-2 py-1 text-xs font-medium {{#if (eq transaction_type "reward_earned")}}bg-yellow/10 text-yellow-700{{else if (eq transaction_type "credit_purchase")}}bg-green/10 text-green-700{{else if (eq transaction_type "billing")}}bg-primary/10 text-primary{{else if (eq transaction_type "ai_generation")}}bg-blue/10 text-blue-700{{else}}bg-gray/10 text-gray-700{{/if}} rounded-full">
                       {{#if (eq transaction_type "reward_earned")}}
-                        {{t 'dashboard.payments.billing.reward_earned'}}
+                        {{t 'billing.reward_earned'}}
                       {{else if (eq transaction_type "credit_purchase")}}
-                        {{t 'dashboard.payments.billing.purchase'}}
+                        {{t 'billing.purchase'}}
                       {{else if (eq transaction_type "billing")}}
-                        {{t 'dashboard.payments.billing.billing'}}
+                        {{t 'billing.billing'}}
                       {{else if (eq transaction_type "ai_generation")}}
-                        {{t 'dashboard.payments.billing.ai_usage'}}
+                        {{t 'billing.ai_usage'}}
                       {{else if (eq transaction_type "report_generation")}}
-                        {{t 'dashboard.payments.billing.report'}}
+                        {{t 'billing.report'}}
                       {{else}}
                         {{transaction_type}}
                       {{/if}}
@@ -191,15 +191,15 @@
                  <td class="px-3 sm:px-6 py-3 sm:py-4 whitespace-nowrap">
                    <div class="text-sm text-foreground">
                       {{#if (eq transaction_type "reward_earned")}}
-                        {{t 'dashboard.payments.billing.voting_reward'}}
+                        {{t 'billing.voting_reward'}}
                       {{else if (eq transaction_type "credit_purchase")}}
-                        {{t 'dashboard.payments.billing.credit_purchase'}}
+                        {{t 'billing.credit_purchase'}}
                       {{else if (eq transaction_type "billing")}}
-                        {{t 'dashboard.payments.billing.subscription_payment'}}
+                        {{t 'billing.subscription_payment'}}
                       {{else if (eq transaction_type "ai_generation")}}
-                        {{t 'dashboard.payments.billing.ai_generation'}}
+                        {{t 'billing.ai_generation'}}
                       {{else if (eq transaction_type "report_generation")}}
-                        {{t 'dashboard.payments.billing.report_generation'}}
+                        {{t 'billing.report_generation'}}
                       {{else}}
                         {{transaction_type}}
                       {{/if}}
@@ -212,20 +212,20 @@
                      {{else if metadata.idea_title}}
                        "{{metadata.idea_title}}"
                      {{else}}
-                        {{t 'dashboard.payments.billing.transaction_details'}}
+                        {{t 'billing.transaction_details'}}
                      {{/if}}
                    </div>
                  </td>
                  <td class="px-3 sm:px-6 py-3 sm:py-4 whitespace-nowrap text-sm font-medium {{#if (gt amount 0)}}text-success{{else}}text-foreground{{/if}}">
                     {{#if (gt amount 0)}}
-                      +{{amount}} {{#if (eq transaction_type "billing")}}USD{{else}}{{t 'dashboard.payments.billing.credits'}}{{/if}}
+                      +{{amount}} {{#if (eq transaction_type "billing")}}USD{{else}}{{t 'billing.credits'}}{{/if}}
                     {{else}}
-                      {{amount}} {{#if (eq transaction_type "billing")}}USD{{else}}{{t 'dashboard.payments.billing.credits'}}{{/if}}
+                      {{amount}} {{#if (eq transaction_type "billing")}}USD{{else}}{{t 'billing.credits'}}{{/if}}
                     {{/if}}
                  </td>
                  <td class="px-3 sm:px-6 py-3 sm:py-4 whitespace-nowrap">
                    <span class="inline-flex px-2 py-1 text-xs font-medium bg-success/10 text-success rounded-full">
-                      {{t 'dashboard.payments.billing.completed'}}
+                      {{t 'billing.completed'}}
                    </span>
                  </td>
                  <td class="px-3 sm:px-6 py-3 sm:py-4 whitespace-nowrap text-sm font-medium">
@@ -233,12 +233,12 @@
                       {{#if (eq transaction_type "billing")}}
                        <button class="text-primary hover:text-primary/80" title="Download Invoice">
                           {{{icon 'download' class='w-4 h-4' size='16'}}}
-                          <span class="sr-only">{{t 'dashboard.payments.billing.download_invoice'}}</span>
+                          <span class="sr-only">{{t 'billing.download_invoice'}}</span>
                        </button>
                      {{/if}}
                      <button class="text-muted-foreground hover:text-foreground" title="View Details">
                         {{{icon 'more-horizontal' class='w-4 h-4' size='16'}}}
-                        <span class="sr-only">{{t 'dashboard.payments.billing.view_details'}}</span>
+                        <span class="sr-only">{{t 'billing.view_details'}}</span>
                      </button>
                    </div>
                  </td>
@@ -246,7 +246,7 @@
               {{else}}
                <tr>
                  <td colspan="6" class="px-3 sm:px-6 py-6 sm:py-8 text-center text-sm text-muted-foreground">
-                   {{t 'dashboard.payments.billing.no_transactions'}}
+                   {{t 'billing.no_transactions'}}
                  </td>
                </tr>
               {{/each}}
@@ -258,15 +258,15 @@
          <div class="px-4 sm:px-6 py-3 sm:py-4 border-t border-border bg-card">
            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
              <div class="text-sm text-muted-foreground">
-               {{t 'dashboard.payments.billing.showing'}} <span class="font-medium">{{transactions.length}}</span> {{t 'dashboard.payments.billing.transactions'}}
+               {{t 'billing.showing'}} <span class="font-medium">{{transactions.length}}</span> {{t 'billing.transactions'}}
              </div>
              <div class="flex items-center gap-2">
                <button class="px-3 py-1.5 text-sm font-medium border border-input bg-background text-foreground hover:bg-accent hover:text-accent-foreground rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed" disabled>
-                 {{t 'dashboard.payments.billing.previous'}}
+                 {{t 'billing.previous'}}
                </button>
                <button class="px-3 py-1.5 text-sm font-medium bg-primary text-primary-foreground hover:bg-primary/90 rounded-md transition-colors">1</button>
                <button class="px-3 py-1.5 text-sm font-medium border border-input bg-background text-foreground hover:bg-accent hover:text-accent-foreground rounded-md transition-colors">
-                 {{t 'dashboard.payments.billing.next'}}
+                 {{t 'billing.next'}}
                </button>
              </div>
            </div>
@@ -278,11 +278,11 @@
          <!-- Credit Usage Chart -->
          <div class="bg-card rounded-lg border border-border p-4 sm:p-6">
            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 gap-2">
-             <h2 class="text-lg sm:text-xl font-semibold text-foreground">{{t 'dashboard.payments.billing.credit_usage'}}</h2>
+             <h2 class="text-lg sm:text-xl font-semibold text-foreground">{{t 'billing.credit_usage'}}</h2>
              <select class="text-sm border border-input rounded-md px-3 py-1 bg-background w-full sm:w-auto">
-               <option>{{t 'dashboard.payments.billing.last_30_days'}}</option>
-               <option>{{t 'dashboard.payments.billing.last_90_days'}}</option>
-               <option>{{t 'dashboard.payments.billing.all_time'}}</option>
+               <option>{{t 'billing.last_30_days'}}</option>
+               <option>{{t 'billing.last_90_days'}}</option>
+               <option>{{t 'billing.all_time'}}</option>
              </select>
            </div>
            <div class="h-48 sm:h-64 flex items-center justify-center bg-muted/20 rounded-lg">
@@ -295,18 +295,18 @@
            <div class="mt-4 grid grid-cols-2 gap-4">
              <div class="text-center">
                <div class="text-xl sm:text-2xl font-bold text-foreground">{{billingStats.spentThisMonth}}</div>
-               <div class="text-sm text-muted-foreground">{{t 'dashboard.payments.billing.spent_this_month'}}</div>
+               <div class="text-sm text-muted-foreground">{{t 'billing.spent_this_month'}}</div>
              </div>
              <div class="text-center">
                <div class="text-xl sm:text-2xl font-bold text-foreground">{{billingStats.currentBalance}}</div>
-               <div class="text-sm text-muted-foreground">{{t 'dashboard.payments.billing.current_balance'}}</div>
+               <div class="text-sm text-muted-foreground">{{t 'billing.current_balance'}}</div>
              </div>
            </div>
         </div>
 
          <!-- Package & Billing Info -->
          <div class="bg-card rounded-lg border border-border p-4 sm:p-6">
-           <h2 class="text-lg sm:text-xl font-semibold text-foreground mb-4">{{t 'dashboard.payments.billing.package_billing_info'}}</h2>
+           <h2 class="text-lg sm:text-xl font-semibold text-foreground mb-4">{{t 'billing.package_billing_info'}}</h2>
 
           <div class="space-y-4">
              <!-- Current Package -->
@@ -315,9 +315,9 @@
                    <h3 class="font-medium text-foreground">{{#if packageDetails}}{{packageDetails.name}}{{else}}{{capitalize profile.package_type}}{{/if}}</h3>
                   <p class="text-sm text-muted-foreground">
                 {{#if (eq profile.package_type "free")}}
-                      {{t 'dashboard.payments.billing.basic_features'}}
+                      {{t 'billing.basic_features'}}
                     {{else}}
-                      ${{divide profile.package_price 100}}{{t 'dashboard.payments.upgrade.per_month'}} • {{profile.package_credits}} {{t 'dashboard.payments.billing.credits'}}
+                      ${{divide profile.package_price 100}}{{t 'dashboard.payments.upgrade.per_month'}} • {{profile.package_credits}} {{t 'billing.credits'}}
                     {{/if}}
                   </p>
                </div>
@@ -326,21 +326,21 @@
                    {{profile.package_status}}
                  </span>
                  {{#if profile.package_expires}}
-                   <p class="text-xs text-muted-foreground">{{t 'dashboard.payments.billing.renews'}} {{formatDate profile.package_expires}}</p>
+                   <p class="text-xs text-muted-foreground">{{t 'billing.renews'}} {{formatDate profile.package_expires}}</p>
                  {{/if}}
                </div>
              </div>
 
              <!-- Billing Address -->
              <div class="p-4 border border-border rounded-lg">
-               <h3 class="font-medium text-foreground mb-2">{{t 'dashboard.payments.billing.billing_address'}}</h3>
+               <h3 class="font-medium text-foreground mb-2">{{t 'billing.billing_address'}}</h3>
                <p class="text-sm text-muted-foreground">
                  {{#if profile.billing_address}}
                    {{profile.billing_address.street}}<br>
                    {{profile.billing_address.city}}, {{profile.billing_address.state}} {{profile.billing_address.zipCode}}<br>
                    {{profile.billing_address.country}}
                  {{else}}
-                   {{t 'dashboard.payments.billing.no_billing_address'}}
+                   {{t 'billing.no_billing_address'}}
                  {{/if}}
                </p>
              </div>
@@ -349,15 +349,15 @@
              <div class="flex flex-col sm:flex-row gap-2">
                <a href="/upgrade-package" class="flex-1 px-4 py-2 bg-primary text-primary-foreground hover:bg-primary/90 rounded-md transition-colors text-center text-sm">
                  {{#if (eq profile.package_type "free")}}
-                   {{t 'dashboard.payments.billing.upgrade_package'}}
+                   {{t 'billing.upgrade_package'}}
                  {{else if (eq profile.package_type "student")}}
-                   {{t 'dashboard.payments.billing.upgrade_enterprise'}}
+                   {{t 'billing.upgrade_enterprise'}}
                  {{else}}
-                   {{t 'dashboard.payments.billing.manage_package'}}
+                   {{t 'billing.manage_package'}}
                  {{/if}}
                </a>
                <a href="/settings" class="px-4 py-2 border border-input bg-background text-foreground hover:bg-accent hover:text-accent-foreground rounded-md transition-colors text-sm text-center">
-                 {{t 'dashboard.payments.billing.update_billing'}}
+                 {{t 'billing.update_billing'}}
                </a>
              </div>
           </div>

@@ -16,7 +16,8 @@
     "card2_title": "Idea Modeling",
     "card2_desc": "Model and optimize your startup ideas using advanced analytics. Test assumptions, gather data, and iterate based on real user feedback.",
     "card3_title": "Business Model Generation",
-    "card3_desc": "Create comprehensive business models with AI assistance. Generate financial projections, marketing strategies, and team structures for your startup."
+    "card3_desc": "Create comprehensive business models with AI assistance. Generate financial projections, marketing strategies, and team structures for your startup.",
+    "ai_powered_features": "AI-powered features"
   },
   "pricing": {
     "title_choose": "Choose",
@@ -275,36 +276,6 @@
       "quick_actions": "Quick Actions",
       "create_new_idea": "Create New Idea",
       "explore_ideas": "Explore Ideas"
-    }
-  },
-  "onboarding": {
-    "package": {
-      "footer": "Questions about our plans? Contact our team"
-    },
-    "profile": {
-      "title": "Complete Your Profile",
-      "subtitle": "Help us personalize your experience by sharing a bit about yourself. This information helps us provide better recommendations and features.",
-      "personal_info": "Personal Information",
-      "professional_background": "Professional Background",
-      "about_you": "About You",
-      "contact_location": "Contact & Location",
-      "display_name": "Display Name",
-      "your_role": "Your Role",
-      "bio": "Bio",
-      "location": "Location",
-      "website": "Website",
-      "complete_profile_setup": "Complete Profile Setup"
-    },
-    "tutorial": {
-      "welcome_title": "Welcome to Accelerator",
-      "welcome_desc": "Accelerator is your all-in-one platform for turning ideas into successful startups. Start by creating your first idea, get feedback from the community, and build comprehensive business models.",
-      "create_ideas": "Create Ideas",
-      "create_ideas_desc": "Start with your first startup concept",
-      "get_feedback": "Get Feedback",
-      "get_feedback_desc": "Share and validate with community",
-      "build_models": "Build Models",
-      "build_models_desc": "Create comprehensive business plans",
-      "lets_get_started": "Let's Get Started!"
     }
   }
 }

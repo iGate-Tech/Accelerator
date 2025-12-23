@@ -11,12 +11,12 @@
           <div class="inline-flex items-center justify-center w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-br from-success to-info rounded-2xl mb-6 sm:mb-8 shadow-lg">
  {{{icon 'user' class="w-8 h-8 sm:w-10 sm:h-10 text-white"}}}
          </div>
-           <h1 class="text-3xl sm:text-5xl font-bold text-foreground mb-4 sm:mb-6">
-            {{t 'profile.title'}}
-          </h1>
-           <p class="text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed px-4">
-            {{t 'profile.subtitle'}}
-          </p>
+             <h1 class="text-3xl sm:text-5xl font-bold text-foreground mb-4 sm:mb-6">
+              {{t 'onboarding.profile.title'}}
+            </h1>
+             <p class="text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed px-4">
+              {{t 'onboarding.profile.subtitle'}}
+            </p>
        </div>
 
         <!-- Progress Indicator -->
@@ -24,17 +24,17 @@
           <div class="flex items-center space-x-1 sm:space-x-2 lg:space-x-4 overflow-x-auto px-4 sm:px-0">
             <div class="flex items-center flex-shrink-0">
                <div class="w-6 h-6 sm:w-8 sm:h-8 lg:w-10 lg:h-10 bg-success rounded-full flex items-center justify-center text-success-content font-bold text-xs sm:text-sm lg:text-base">1</div>
-               <span class="ml-1 sm:ml-2 lg:ml-3 text-success font-semibold text-xs sm:text-sm lg:text-base whitespace-nowrap">Account</span>
+                <span class="ml-1 sm:ml-2 lg:ml-3 text-success font-semibold text-xs sm:text-sm lg:text-base whitespace-nowrap">{{t 'onboarding.profile.progress_account'}}</span>
             </div>
              <div class="w-4 sm:w-8 lg:w-16 h-0.5 bg-success/50 flex-shrink-0"></div>
              <div class="flex items-center flex-shrink-0">
                <div class="w-6 h-6 sm:w-8 sm:h-8 lg:w-10 lg:h-10 bg-success rounded-full flex items-center justify-center text-success-content font-bold text-xs sm:text-sm lg:text-base">2</div>
-               <span class="ml-1 sm:ml-2 lg:ml-3 text-success font-semibold text-xs sm:text-sm lg:text-base whitespace-nowrap">Profile</span>
+                <span class="ml-1 sm:ml-2 lg:ml-3 text-success font-semibold text-xs sm:text-sm lg:text-base whitespace-nowrap">{{t 'onboarding.profile.progress_profile'}}</span>
              </div>
              <div class="w-4 sm:w-8 lg:w-16 h-0.5 bg-muted flex-shrink-0"></div>
              <div class="flex items-center flex-shrink-0">
                <div class="w-6 h-6 sm:w-8 sm:h-8 lg:w-10 lg:h-10 bg-muted rounded-full flex items-center justify-center text-muted-foreground font-bold text-xs sm:text-sm lg:text-base">3</div>
-               <span class="ml-1 sm:ml-2 lg:ml-3 text-muted-foreground text-xs sm:text-sm lg:text-base whitespace-nowrap">Complete</span>
+                <span class="ml-1 sm:ml-2 lg:ml-3 text-muted-foreground text-xs sm:text-sm lg:text-base whitespace-nowrap">{{t 'onboarding.profile.progress_complete'}}</span>
              </div>
           </div>
         </div>
@@ -46,78 +46,141 @@
 
              <!-- Display Name -->
              <div class="space-y-4 sm:space-y-6">
-                 <h3 class="text-lg sm:text-xl lg:text-2xl font-semibold text-foreground">{{t 'profile.personal_info'}}</h3>
+                   <h3 class="text-xl lg:text-2xl font-semibold text-foreground">{{t 'onboarding.profile.personal_info'}}</h3>
 
               <div class="pl-4 sm:pl-6 lg:pl-8">
-                 <label for="name" class="block text-sm sm:text-base font-medium text-foreground mb-2">
-                   {{t 'profile.display_name'}} <span class="text-error">*</span>
-                 </label>
-                 <input type="text" id="name" name="name" value="{{profile.name}}"
-                   class="w-full px-3 sm:px-4 py-3 sm:py-4 border border-input rounded-lg sm:rounded-xl focus:ring-2 focus:ring-success focus:border-success transition-all duration-200 bg-background focus:bg-background text-sm sm:text-base"
-                   placeholder="How you'd like to be known on Accelerator" required />
-                <p class="text-xs sm:text-sm text-muted-foreground mt-1">This will be visible to other community members</p>
+                  <label for="name" class="block text-base font-medium text-foreground mb-2">
+                    {{t 'profile.display_name'}} <span class="text-error">*</span>
+                  </label>
+                  <input type="text" id="name" name="name" value="{{profile.name}}"
+                    class="w-full px-4 py-4 border border-input rounded-lg focus:ring-2 focus:ring-success focus:border-success transition-all duration-200 bg-background focus:bg-background text-base min-h-[44px] placeholder:text-muted-foreground"
+                    placeholder="{{t 'onboarding.profile.display_name_placeholder'}}" required />
+                  <p class="text-sm text-muted-foreground mt-1">{{t 'onboarding.profile.display_name_help'}}</p>
              </div>
            </div>
 
              <!-- Role -->
              <div class="space-y-4 sm:space-y-6">
-                 <h3 class="text-lg sm:text-xl lg:text-2xl font-semibold text-foreground">{{t 'profile.professional_background'}}</h3>
+                  <h3 class="text-xl lg:text-2xl font-semibold text-foreground">{{t 'onboarding.profile.professional_background'}}</h3>
 
               <div class="pl-4 sm:pl-6 lg:pl-8">
-                  <label for="role" class="block text-sm sm:text-base font-medium text-foreground mb-2">
-                    {{t 'profile.your_role'}}
-                  </label>
-                 <select id="role" name="role"
-                   class="w-full px-3 sm:px-4 py-3 sm:py-4 border border-input rounded-lg sm:rounded-xl focus:ring-2 focus:ring-primary focus:border-primary transition-all duration-200 bg-background focus:bg-background text-sm sm:text-base">
-                 <option value="">Select your role (optional)</option>
-                 <option value="founder" {{#if (eq profile.role "founder") }}selected{{/if}}>🏢 Founder/Entrepreneur</option>
-                 <option value="student" {{#if (eq profile.role "student") }}selected{{/if}}>🎓 Student</option>
-                 <option value="developer" {{#if (eq profile.role "developer") }}selected{{/if}}>💻 Developer</option>
-                 <option value="designer" {{#if (eq profile.role "designer") }}selected{{/if}}>🎨 Designer</option>
-                 <option value="marketer" {{#if (eq profile.role "marketer") }}selected{{/if}}>📈 Marketer</option>
-                 <option value="investor" {{#if (eq profile.role "investor") }}selected{{/if}}>💰 Investor</option>
-                 <option value="consultant" {{#if (eq profile.role "consultant") }}selected{{/if}}>🎯 Consultant</option>
-                 <option value="other" {{#if (eq profile.role "other") }}selected{{/if}}>🤔 Other</option>
-               </select>
+                   <label for="role" class="block text-base font-medium text-foreground mb-2">
+                     {{t 'profile.your_role'}}
+                   </label>
+                  <div class="relative" data-placeholder="{{t 'onboarding.profile.role_placeholder'}}">
+                    <button type="button" id="role-toggle" class="w-full px-4 py-4 border border-input rounded-lg bg-background text-left text-base min-h-[44px] flex items-center justify-between focus:ring-2 focus:ring-primary focus:border-primary transition-all duration-200">
+                      <span id="role-selected" class="text-muted-foreground">{{t 'onboarding.profile.role_placeholder'}}</span>
+                      <svg class="w-5 h-5 transition-transform" id="role-arrow" style="transform: rotate(0deg);">
+                        <path fill="currentColor" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"/>
+                      </svg>
+                    </button>
+                    <div id="role-accordion" class="hidden mt-2 border border-input rounded-lg bg-background shadow-lg z-10">
+                      <div class="p-2 space-y-2">
+                        <label class="flex items-center space-x-3 p-2 hover:bg-muted rounded cursor-pointer">
+                          <input type="radio" name="role" value="" class="opacity-0 absolute peer" {{#if (not profile.role)}}checked{{/if}}>
+                          <div class="w-5 h-5 flex items-center justify-center border border-muted-foreground peer-checked:border-primary peer-checked:bg-primary rounded transition-colors">
+                            <span class="text-muted-foreground peer-checked:text-primary-foreground opacity-0 peer-checked:opacity-100 transition-opacity text-lg">✓</span>
+                          </div>
+                          <span class="text-base">{{t 'onboarding.profile.role_placeholder'}}</span>
+                        </label>
+                        <label class="flex items-center space-x-3 p-2 hover:bg-muted rounded cursor-pointer">
+                          <input type="radio" name="role" value="founder" class="opacity-0 absolute peer" {{#if (eq profile.role "founder")}}checked{{/if}}>
+                          <div class="w-5 h-5 flex items-center justify-center border border-muted-foreground peer-checked:border-primary peer-checked:bg-primary rounded transition-colors">
+                            <span class="text-muted-foreground peer-checked:text-primary-foreground opacity-0 peer-checked:opacity-100 transition-opacity text-lg">✓</span>
+                          </div>
+                          <span class="text-base">{{t 'onboarding.profile.role_founder'}}</span>
+                        </label>
+                        <label class="flex items-center space-x-3 p-2 hover:bg-muted rounded cursor-pointer">
+                          <input type="radio" name="role" value="student" class="opacity-0 absolute peer" {{#if (eq profile.role "student")}}checked{{/if}}>
+                          <div class="w-5 h-5 flex items-center justify-center border border-muted-foreground peer-checked:border-primary peer-checked:bg-primary rounded transition-colors">
+                            <span class="text-muted-foreground peer-checked:text-primary-foreground opacity-0 peer-checked:opacity-100 transition-opacity text-lg">✓</span>
+                          </div>
+                          <span class="text-base">{{t 'onboarding.profile.role_student'}}</span>
+                        </label>
+                        <label class="flex items-center space-x-3 p-2 hover:bg-muted rounded cursor-pointer">
+                          <input type="radio" name="role" value="developer" class="opacity-0 absolute peer" {{#if (eq profile.role "developer")}}checked{{/if}}>
+                          <div class="w-5 h-5 flex items-center justify-center border border-muted-foreground peer-checked:border-primary peer-checked:bg-primary rounded transition-colors">
+                            <span class="text-muted-foreground peer-checked:text-primary-foreground opacity-0 peer-checked:opacity-100 transition-opacity text-lg">✓</span>
+                          </div>
+                          <span class="text-base">{{t 'onboarding.profile.role_developer'}}</span>
+                        </label>
+                        <label class="flex items-center space-x-3 p-2 hover:bg-muted rounded cursor-pointer">
+                          <input type="radio" name="role" value="designer" class="opacity-0 absolute peer" {{#if (eq profile.role "designer")}}checked{{/if}}>
+                          <div class="w-5 h-5 flex items-center justify-center border border-muted-foreground peer-checked:border-primary peer-checked:bg-primary rounded transition-colors">
+                            <span class="text-muted-foreground peer-checked:text-primary-foreground opacity-0 peer-checked:opacity-100 transition-opacity text-lg">✓</span>
+                          </div>
+                          <span class="text-base">{{t 'onboarding.profile.role_designer'}}</span>
+                        </label>
+                        <label class="flex items-center space-x-3 p-2 hover:bg-muted rounded cursor-pointer">
+                          <input type="radio" name="role" value="marketer" class="opacity-0 absolute peer" {{#if (eq profile.role "marketer")}}checked{{/if}}>
+                          <div class="w-5 h-5 flex items-center justify-center border border-muted-foreground peer-checked:border-primary peer-checked:bg-primary rounded transition-colors">
+                            <span class="text-muted-foreground peer-checked:text-primary-foreground opacity-0 peer-checked:opacity-100 transition-opacity text-lg">✓</span>
+                          </div>
+                          <span class="text-base">{{t 'onboarding.profile.role_marketer'}}</span>
+                        </label>
+                        <label class="flex items-center space-x-3 p-2 hover:bg-muted rounded cursor-pointer">
+                          <input type="radio" name="role" value="investor" class="opacity-0 absolute peer" {{#if (eq profile.role "investor")}}checked{{/if}}>
+                          <div class="w-5 h-5 flex items-center justify-center border border-muted-foreground peer-checked:border-primary peer-checked:bg-primary rounded transition-colors">
+                            <span class="text-muted-foreground peer-checked:text-primary-foreground opacity-0 peer-checked:opacity-100 transition-opacity text-lg">✓</span>
+                          </div>
+                          <span class="text-base">{{t 'onboarding.profile.role_investor'}}</span>
+                        </label>
+                        <label class="flex items-center space-x-3 p-2 hover:bg-muted rounded cursor-pointer">
+                          <input type="radio" name="role" value="consultant" class="sr-only peer" {{#if (eq profile.role "consultant")}}checked{{/if}}>
+                          <div class="w-5 h-5 flex items-center justify-center border border-muted-foreground peer-checked:border-primary peer-checked:bg-primary rounded transition-colors">
+                            <span class="text-muted-foreground peer-checked:text-primary-foreground opacity-0 peer-checked:opacity-100 transition-opacity text-lg">✓</span>
+                          </div>
+                          <span class="text-base">{{t 'onboarding.profile.role_consultant'}}</span>
+                        </label>
+                        <label class="flex items-center space-x-3 p-2 hover:bg-muted rounded cursor-pointer">
+                          <input type="radio" name="role" value="other" class="opacity-0 absolute peer" {{#if (eq profile.role "other")}}checked{{/if}}>
+                          <div class="w-5 h-5 flex items-center justify-center border border-muted-foreground peer-checked:border-primary peer-checked:bg-primary rounded transition-colors">
+                            <span class="text-muted-foreground peer-checked:text-primary-foreground opacity-0 peer-checked:opacity-100 transition-opacity text-lg">✓</span>
+                          </div>
+                          <span class="text-base">{{t 'onboarding.profile.role_other'}}</span>
+                        </label>
+                      </div>
+                    </div>
+                  </div>
              </div>
            </div>
 
              <!-- Bio -->
              <div class="space-y-4 sm:space-y-6">
-                 <h3 class="text-lg sm:text-xl lg:text-2xl font-semibold text-foreground">{{t 'profile.about_you'}}</h3>
+                  <h3 class="text-xl lg:text-2xl font-semibold text-foreground">{{t 'onboarding.profile.about_you'}}</h3>
 
               <div class="pl-4 sm:pl-6 lg:pl-8">
-                  <label for="bio" class="block text-sm sm:text-base font-medium text-foreground mb-2">
-                    {{t 'profile.bio'}}
-                  </label>
-                 <textarea id="bio" name="bio" rows="4"
-                   class="w-full px-3 sm:px-4 py-3 sm:py-4 border border-input rounded-lg sm:rounded-xl focus:ring-2 focus:ring-secondary focus:border-secondary transition-all duration-200 bg-background focus:bg-background resize-none text-sm sm:text-base"
-                  placeholder="Tell us about your background, interests, and what you're passionate about...">{{#if profile.preferences}}{{profile.preferences.bio}}{{/if}}</textarea>
-                <p class="text-xs sm:text-sm text-muted-foreground mt-1">Share your story to connect with like-minded entrepreneurs</p>
+                   <label for="bio" class="block text-base font-medium text-foreground mb-2">
+                     {{t 'profile.bio'}}
+                   </label>
+                  <textarea id="bio" name="bio" rows="4"
+                    class="w-full px-4 py-4 border border-input rounded-lg focus:ring-2 focus:ring-secondary focus:border-secondary transition-all duration-200 bg-background focus:bg-background resize-none text-base placeholder:text-muted-foreground"
+                   placeholder="{{t 'onboarding.profile.bio_placeholder'}}">{{#if profile.preferences}}{{profile.preferences.bio}}{{/if}}</textarea>
+                 <p class="text-sm text-muted-foreground mt-1">{{t 'onboarding.profile.bio_help'}}</p>
              </div>
            </div>
 
             <!-- Location & Website -->
              <div class="space-y-4 sm:space-y-6">
-                 <h3 class="text-lg sm:text-xl lg:text-2xl font-semibold text-foreground">{{t 'profile.contact_location'}}</h3>
+                  <h3 class="text-xl lg:text-2xl font-semibold text-foreground">{{t 'onboarding.profile.contact_location'}}</h3>
 
               <div class="pl-4 sm:pl-6 lg:pl-8 grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
                <div>
-                   <label for="location" class="block text-sm sm:text-base font-medium text-foreground mb-2">
-                     {{t 'profile.location'}}
-                   </label>
-                   <input type="text" id="location" name="location" value="{{#if profile.preferences}}{{profile.preferences.location}}{{/if}}"
-                     class="w-full px-3 sm:px-4 py-3 sm:py-4 border border-input rounded-lg sm:rounded-xl focus:ring-2 focus:ring-warning focus:border-warning transition-all duration-200 bg-background focus:bg-background text-sm sm:text-base"
-                     placeholder="City, Country" />
+                    <label for="location" class="block text-base font-medium text-foreground mb-2">
+                      {{t 'profile.location'}}
+                    </label>
+                    <input type="text" id="location" name="location" value="{{#if profile.preferences}}{{profile.preferences.location}}{{/if}}"
+                      class="w-full px-4 py-4 border border-input rounded-lg focus:ring-2 focus:ring-warning focus:border-warning transition-all duration-200 bg-background focus:bg-background text-base min-h-[44px] placeholder:text-muted-foreground"
+                      placeholder="{{t 'onboarding.profile.location_placeholder'}}" />
                </div>
 
                <div>
-                   <label for="website" class="block text-sm sm:text-base font-medium text-foreground mb-2">
-                     {{t 'profile.website'}}
-                   </label>
-                   <input type="url" id="website" name="website" value="{{#if profile.preferences}}{{profile.preferences.website}}{{/if}}"
-                     class="w-full px-3 sm:px-4 py-3 sm:py-4 border border-input rounded-lg sm:rounded-xl focus:ring-2 focus:ring-warning focus:border-warning transition-all duration-200 bg-background focus:bg-background text-sm sm:text-base"
-                     placeholder="https://yourwebsite.com" />
+                    <label for="website" class="block text-base font-medium text-foreground mb-2">
+                      {{t 'profile.website'}}
+                    </label>
+                    <input type="url" id="website" name="website" value="{{#if profile.preferences}}{{profile.preferences.website}}{{/if}}"
+                      class="w-full px-4 py-4 border border-input rounded-lg focus:ring-2 focus:ring-warning focus:border-warning transition-all duration-200 bg-background focus:bg-background text-base min-h-[44px] placeholder:text-muted-foreground"
+                      placeholder="{{t 'onboarding.profile.website_placeholder'}}" />
                </div>
              </div>
            </div>
@@ -129,11 +192,10 @@
                    {{{icon 'info' class="w-3 h-3 sm:w-4 sm:h-4 lg:w-5 lg:h-5 text-success"}}}
                  </div>
                  <div>
-                   <h4 class="text-sm sm:text-base lg:text-lg font-semibold text-foreground mb-2">What's Next?</h4>
-                   <p class="text-xs sm:text-sm lg:text-base text-muted-foreground leading-relaxed">
-                    After completing your profile, you'll unlock the full potential of Accelerator. Start creating ideas,
-                    connect with the community, and build your startup journey. You can always update these details later in your settings.
-                  </p>
+                    <h4 class="text-sm sm:text-base lg:text-lg font-semibold text-foreground mb-2">{{t 'onboarding.profile.next_title'}}</h4>
+                    <p class="text-sm lg:text-base text-muted-foreground leading-relaxed">
+                     {{t 'onboarding.profile.next_content'}}
+                   </p>
                 </div>
               </div>
             </div>
@@ -141,13 +203,62 @@
             <!-- Submit Button -->
             <div class="pt-4 sm:pt-6 lg:pt-8">
                <button type="submit"
-                 class="w-full bg-gradient-to-r from-success to-info hover:from-success/90 hover:to-info/90 text-white font-bold py-3 sm:py-4 lg:py-5 px-4 sm:px-6 lg:px-8 rounded-xl sm:rounded-2xl transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98] shadow-lg hover:shadow-xl flex items-center justify-center space-x-2 sm:space-x-3 text-sm sm:text-base lg:text-lg">
+                                   class="w-full bg-gradient-to-r from-success to-info hover:from-success/90 hover:to-info/90 text-white font-bold py-4 lg:py-5 px-4 lg:px-8 rounded-xl transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98] shadow-lg hover:shadow-xl flex items-center justify-center space-x-2 lg:space-x-3 text-base lg:text-lg min-h-[48px]">
                  <span>{{t 'profile.complete_profile_setup'}}</span>
                  {{{icon 'trending-up' class="w-4 h-4 sm:w-5 sm:h-5"}}}
               </button>
             </div>
-        </form>
-      </div>
-    </div>
-  </div>
-</div>
+         </form>
+       </div>
+     </div>
+   </div>
+
+   <script>
+     document.addEventListener('DOMContentLoaded', function() {
+       const container = document.querySelector('[data-placeholder]');
+       const placeholder = container.getAttribute('data-placeholder');
+       const toggle = document.getElementById('role-toggle');
+       const accordion = document.getElementById('role-accordion');
+       const selected = document.getElementById('role-selected');
+       const arrow = document.getElementById('role-arrow');
+       const radios = document.querySelectorAll('input[name="role"]');
+
+       function updateSelected() {
+         const checked = document.querySelector('input[name="role"]:checked');
+         if (checked && checked.value) {
+           // Find the label text
+           const label = checked.closest('label').querySelector('span').textContent;
+           selected.textContent = label;
+           selected.classList.remove('text-muted-foreground');
+         } else {
+           selected.textContent = placeholder;
+           selected.classList.add('text-muted-foreground');
+         }
+       }
+
+       toggle.addEventListener('click', function(e) {
+         e.preventDefault();
+         const isHidden = accordion.classList.contains('hidden');
+         if (isHidden) {
+           accordion.classList.remove('hidden');
+           arrow.style.transform = 'rotate(180deg)';
+         } else {
+           accordion.classList.add('hidden');
+           arrow.style.transform = 'rotate(0deg)';
+         }
+       });
+
+       radios.forEach(radio => {
+         radio.addEventListener('change', function() {
+           updateSelected();
+           // Close accordion
+           accordion.classList.add('hidden');
+           arrow.style.transform = 'rotate(0deg)';
+         });
+       });
+
+       // Initialize
+       updateSelected();
+     });
+   </script>
+ </div>

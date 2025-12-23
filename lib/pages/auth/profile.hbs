@@ -12,10 +12,10 @@
  {{{icon 'user' class="w-8 h-8 sm:w-10 sm:h-10 text-white"}}}
          </div>
            <h1 class="text-3xl sm:text-5xl font-bold text-foreground mb-4 sm:mb-6">
-            {{t 'onboarding.profile.title'}}
+            {{t 'profile.title'}}
           </h1>
            <p class="text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed px-4">
-            {{t 'onboarding.profile.subtitle'}}
+            {{t 'profile.subtitle'}}
           </p>
        </div>
 
@@ -46,11 +46,11 @@
 
             <!-- Display Name -->
             <div class="space-y-4">
-                <h3 class="text-lg sm:text-xl font-semibold text-foreground">{{t 'onboarding.profile.personal_info'}}</h3>
+                <h3 class="text-lg sm:text-xl font-semibold text-foreground">{{t 'profile.personal_info'}}</h3>
 
              <div class="ml-8 sm:ml-11">
                 <label for="name" class="block text-sm font-medium text-foreground mb-2">
-                  {{t 'onboarding.profile.display_name'}} <span class="text-error">*</span>
+                  {{t 'profile.display_name'}} <span class="text-error">*</span>
                 </label>
                 <input type="text" id="name" name="name" value="{{profile.name}}"
                   class="w-full px-4 py-2 sm:py-3 border border-input rounded-xl focus:ring-2 focus:ring-success focus:border-success transition-all duration-200 bg-muted focus:bg-base-100 text-base"
@@ -61,11 +61,11 @@
 
             <!-- Role -->
             <div class="space-y-4">
-                <h3 class="text-lg sm:text-xl font-semibold text-foreground">{{t 'onboarding.profile.professional_background'}}</h3>
+                <h3 class="text-lg sm:text-xl font-semibold text-foreground">{{t 'profile.professional_background'}}</h3>
 
              <div class="ml-8 sm:ml-11">
                  <label for="role" class="block text-sm font-medium text-foreground mb-2">
-                   {{t 'onboarding.profile.your_role'}}
+                   {{t 'profile.your_role'}}
                  </label>
                 <select id="role" name="role"
                   class="w-full px-4 py-2 sm:py-3 border border-input rounded-xl focus:ring-2 focus:ring-primary focus:border-primary transition-all duration-200 bg-muted focus:bg-base-100 text-base">
@@ -84,11 +84,11 @@
 
             <!-- Bio -->
             <div class="space-y-4">
-                <h3 class="text-lg sm:text-xl font-semibold text-foreground">{{t 'onboarding.profile.about_you'}}</h3>
+                <h3 class="text-lg sm:text-xl font-semibold text-foreground">{{t 'profile.about_you'}}</h3>
 
              <div class="ml-8 sm:ml-11">
                  <label for="bio" class="block text-sm font-medium text-foreground mb-2">
-                   {{t 'onboarding.profile.bio'}}
+                   {{t 'profile.bio'}}
                  </label>
                 <textarea id="bio" name="bio" rows="4"
                   class="w-full px-4 py-2 sm:py-3 border border-input rounded-xl focus:ring-2 focus:ring-secondary focus:border-secondary transition-all duration-200 bg-muted focus:bg-base-100 resize-none text-base"
@@ -99,12 +99,12 @@
 
             <!-- Location & Website -->
             <div class="space-y-4">
-                <h3 class="text-lg sm:text-xl font-semibold text-foreground">{{t 'onboarding.profile.contact_location'}}</h3>
+                <h3 class="text-lg sm:text-xl font-semibold text-foreground">{{t 'profile.contact_location'}}</h3>
 
              <div class="ml-8 sm:ml-11 grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
               <div>
                   <label for="location" class="block text-sm font-medium text-foreground mb-2">
-                    {{t 'onboarding.profile.location'}}
+                    {{t 'profile.location'}}
                   </label>
                   <input type="text" id="location" name="location" value="{{#if profile.preferences}}{{profile.preferences.location}}{{/if}}"
                     class="w-full px-4 py-2 sm:py-3 border border-input rounded-xl focus:ring-2 focus:ring-warning focus:border-warning transition-all duration-200 bg-muted focus:bg-base-100 text-base"
@@ -113,7 +113,7 @@
 
               <div>
                   <label for="website" class="block text-sm font-medium text-foreground mb-2">
-                    {{t 'onboarding.profile.website'}}
+                    {{t 'profile.website'}}
                   </label>
                   <input type="url" id="website" name="website" value="{{#if profile.preferences}}{{profile.preferences.website}}{{/if}}"
                     class="w-full px-4 py-2 sm:py-3 border border-input rounded-xl focus:ring-2 focus:ring-warning focus:border-warning transition-all duration-200 bg-muted focus:bg-base-100 text-base"
@@ -142,7 +142,7 @@
            <div class="pt-4 sm:pt-6">
               <button type="submit"
                 class="w-full bg-gradient-to-r from-success to-info hover:from-success/90 hover:to-info/90 text-white font-bold py-3 sm:py-4 px-6 sm:px-8 rounded-2xl transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl flex items-center justify-center space-x-3 text-base sm:text-lg">
-                <span>{{t 'onboarding.profile.complete_profile_setup'}}</span>
+                <span>{{t 'profile.complete_profile_setup'}}</span>
  {{{icon 'trending-up' class="w-4 h-4 sm:w-5 sm:h-5"}}}
              </button>
            </div>

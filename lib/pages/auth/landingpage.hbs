@@ -8,12 +8,12 @@
     <!-- Desktop Menu -->
     <div class="hidden md:flex items-center">
       <!-- Theme Toggle -->
-      <button id="theme-toggle" class="ml-4 self-center w-6 h-6 text-muted-foreground hover:text-primary rounded-full cursor-pointer border-0" onclick="toggleTheme()">
+       <button id="theme-toggle" class="ml-4 self-center w-6 h-6 text-muted-foreground hover:text-primary rounded-full cursor-pointer border-0">
         <span id="theme-icon-light">{{{icon "sun" class="h-5 w-5"}}}</span>
         <span id="theme-icon-dark" class="hidden">{{{icon "moon" class="h-5 w-5"}}}</span>
       </button>
       <!-- Language Switcher -->
-      <button id="lang-switcher" class="flex items-center gap-1 ml-4 px-3 py-1 sm:px-2 text-xs rounded-md bg-muted text-muted-foreground hover:bg-primary hover:text-primary-foreground" onclick="switchLanguage()">
+       <button id="lang-switcher" class="flex items-center gap-1 ml-4 px-3 py-1 sm:px-2 text-xs rounded-md bg-muted text-muted-foreground hover:bg-primary hover:text-primary-foreground">
         {{{icon "languages" class="h-4 w-4"}}}
         <span id="lang-text">{{#if (eq lng 'ar')}}AR{{else}}EN{{/if}}</span>
       </button>
@@ -22,7 +22,7 @@
       </a>
     </div>
     <!-- Mobile Menu Button -->
-    <button id="mobile-menu-toggle" class="md:hidden ml-4 self-center w-6 h-6 text-muted-foreground hover:text-primary rounded cursor-pointer border-0" onclick="toggleMobileMenu()">
+     <button id="mobile-menu-toggle" class="md:hidden ml-4 self-center w-6 h-6 text-muted-foreground hover:text-primary rounded cursor-pointer border-0">
       {{{icon "menu" class="h-5 w-5"}}}
     </button>
   </div>
@@ -30,13 +30,13 @@
   <div id="mobile-menu" class="hidden md:hidden bg-base-100 border-t border-input px-4 py-4">
     <div class="flex flex-col gap-4">
       <!-- Theme Toggle -->
-      <button id="mobile-theme-toggle" class="flex items-center gap-2 self-start w-full text-muted-foreground hover:text-primary rounded cursor-pointer border-0" onclick="toggleTheme()">
+       <button id="mobile-theme-toggle" class="flex items-center gap-2 self-start w-full text-muted-foreground hover:text-primary rounded cursor-pointer border-0">
         <span id="mobile-theme-icon-light">{{{icon "sun" class="h-5 w-5"}}}</span>
         <span id="mobile-theme-icon-dark" class="hidden">{{{icon "moon" class="h-5 w-5"}}}</span>
         <span>Theme</span>
       </button>
       <!-- Language Switcher -->
-      <button id="mobile-lang-switcher" class="flex items-center gap-2 self-start w-full px-2 py-1 text-xs rounded-md bg-muted text-muted-foreground hover:bg-primary hover:text-primary-foreground" onclick="switchLanguage()">
+       <button id="mobile-lang-switcher" class="flex items-center gap-2 self-start w-full px-2 py-1 text-xs rounded-md bg-muted text-muted-foreground hover:bg-primary hover:text-primary-foreground">
         {{{icon "languages" class="h-4 w-4"}}}
         <span id="mobile-lang-text">{{#if (eq lng 'ar')}}العربية{{else}}English{{/if}}</span>
       </button>
@@ -49,35 +49,45 @@
 
 <script>
   function toggleTheme() {
-    const html = document.documentElement;
-    html.classList.toggle('dark');
-    const isDark = html.classList.contains('dark');
-    localStorage.setItem('theme', isDark ? 'dark' : 'light');
-    updateThemeToggle(isDark);
+    try {
+      const html = document.documentElement;
+      if (html) {
+        html.classList.toggle('dark');
+        const isDark = html.classList.contains('dark');
+        localStorage.setItem('theme', isDark ? 'dark' : 'light');
+        updateThemeToggle(isDark);
+      }
+    } catch (e) {
+      console.error('Toggle theme error:', e);
+    }
   }
 
   function updateThemeToggle(isDark) {
-    const lightIcon = document.getElementById('theme-icon-light');
-    const darkIcon = document.getElementById('theme-icon-dark');
-    const mobileLightIcon = document.getElementById('mobile-theme-icon-light');
-    const mobileDarkIcon = document.getElementById('mobile-theme-icon-dark');
-    if (lightIcon && darkIcon) {
-      if (isDark) {
-        lightIcon.classList.add('hidden');
-        darkIcon.classList.remove('hidden');
-      } else {
-        darkIcon.classList.add('hidden');
-        lightIcon.classList.remove('hidden');
+    try {
+      const lightIcon = document.getElementById('theme-icon-light');
+      const darkIcon = document.getElementById('theme-icon-dark');
+      const mobileLightIcon = document.getElementById('mobile-theme-icon-light');
+      const mobileDarkIcon = document.getElementById('mobile-theme-icon-dark');
+      if (lightIcon && darkIcon) {
+        if (isDark) {
+          lightIcon.classList.add('hidden');
+          darkIcon.classList.remove('hidden');
+        } else {
+          darkIcon.classList.add('hidden');
+          lightIcon.classList.remove('hidden');
+        }
       }
-    }
-    if (mobileLightIcon && mobileDarkIcon) {
-      if (isDark) {
-        mobileLightIcon.classList.add('hidden');
-        mobileDarkIcon.classList.remove('hidden');
-      } else {
-        mobileDarkIcon.classList.add('hidden');
-        mobileLightIcon.classList.remove('hidden');
+      if (mobileLightIcon && mobileDarkIcon) {
+        if (isDark) {
+          mobileLightIcon.classList.add('hidden');
+          mobileDarkIcon.classList.remove('hidden');
+        } else {
+          mobileDarkIcon.classList.add('hidden');
+          mobileLightIcon.classList.remove('hidden');
+        }
       }
+    } catch (e) {
+      console.error('Update theme toggle error:', e);
     }
   }
 
@@ -113,23 +123,53 @@
     return ['en', 'ar'].includes(normalized) ? normalized : 'en';
   }
 
-    document.addEventListener('DOMContentLoaded', function() {
-      const serverLang = normalizeLanguage('{{lng}}');
-      localStorage.setItem('language', serverLang);
-      updateLangSwitcher(serverLang);
+    try {
+     document.addEventListener('DOMContentLoaded', function() {
+        const serverLang = normalizeLanguage('{{lng}}');
+        localStorage.setItem('language', serverLang);
+        updateLangSwitcher(serverLang);
 
-      // Initialize theme
-      const savedTheme = localStorage.getItem('theme');
-      const systemPrefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-      const theme = savedTheme || (systemPrefersDark ? 'dark' : 'light');
-      const isDark = theme === 'dark';
-      if (isDark) {
-        document.documentElement.classList.add('dark');
-      } else {
-        document.documentElement.classList.remove('dark');
-      }
-      updateThemeToggle(isDark);
-    });
+        // Initialize theme
+        const savedTheme = localStorage.getItem('theme');
+        const systemPrefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+        const theme = savedTheme || (systemPrefersDark ? 'dark' : 'light');
+        const isDark = theme === 'dark';
+        if (isDark) {
+          document.documentElement.classList.add('dark');
+        } else {
+          document.documentElement.classList.remove('dark');
+        }
+        updateThemeToggle(isDark);
+
+        // Add event listeners for theme toggles
+        const themeToggle = document.getElementById('theme-toggle');
+        const mobileThemeToggle = document.getElementById('mobile-theme-toggle');
+        if (themeToggle) {
+          themeToggle.addEventListener('click', toggleTheme);
+        }
+        if (mobileThemeToggle) {
+          mobileThemeToggle.addEventListener('click', toggleTheme);
+        }
+
+        // Add event listeners for language switches
+        const langSwitcher = document.getElementById('lang-switcher');
+        const mobileLangSwitcher = document.getElementById('mobile-lang-switcher');
+        if (langSwitcher) {
+          langSwitcher.addEventListener('click', switchLanguage);
+        }
+        if (mobileLangSwitcher) {
+          mobileLangSwitcher.addEventListener('click', switchLanguage);
+        }
+
+        // Add event listener for mobile menu
+        const mobileMenuToggle = document.getElementById('mobile-menu-toggle');
+        if (mobileMenuToggle) {
+          mobileMenuToggle.addEventListener('click', toggleMobileMenu);
+        }
+      });
+   } catch (e) {
+     console.error('Theme toggle initialization error:', e);
+   }
 </script>
 
 <!-- Main Content -->

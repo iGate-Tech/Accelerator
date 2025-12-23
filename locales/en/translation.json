@@ -71,6 +71,59 @@
     "reward_notifications": "Reward Notifications",
     "no_reward_notifications": "No reward notifications"
   },
+  "notifications": {
+    "title": "Notifications",
+    "description": "Stay updated with your latest activity and rewards",
+    "mark_all_read": "Mark All Read",
+    "mark_as_read": "Mark as Read",
+    "no_notifications": "No notifications yet",
+    "load_more": "Load More"
+  },
+  "reports": {
+    "business_plan": {
+      "title": "Business Plan Generator",
+      "subtitle": "Create professional business plans with AI",
+      "generate_title": "Generate Your Business Plan",
+      "description": "Select an idea and let AI create a comprehensive business plan",
+      "select_idea": "Select Idea",
+      "select_placeholder": "Choose an idea to generate a business plan for",
+      "no_ideas": "No ideas available",
+      "create_idea_first": "Create your first idea to generate a business plan",
+      "generate_button": "Generate Business Plan",
+      "cost_credits": "Cost: 50 credits",
+      "current_balance": "Current Balance",
+      "need_credits": "Need more credits? Buy credits →"
+    },
+    "pitch_deck": {
+      "generate_title": "Generate Your Pitch Deck",
+      "description": "Create compelling pitch decks to attract investors",
+      "select_idea": "Select Idea",
+      "generate_button": "Generate Pitch Deck",
+      "cost_credits": "Cost: 30 credits"
+    },
+    "valuation": {
+      "title": "Valuation Report Generator",
+      "subtitle": "Professional startup valuation analysis with AI",
+      "generate_title": "Generate Your Valuation Report",
+      "description": "Get professional startup valuation with multiple methodologies",
+      "select_idea": "Select Idea",
+      "select_placeholder": "Choose an idea to generate valuation for...",
+      "methodologies_title": "Valuation Methodologies",
+      "methodology1": "Comparable company analysis",
+      "methodology2": "Discounted cash flow (DCF)",
+      "methodology3": "Market size & opportunity assessment",
+      "methodology4": "Risk-adjusted valuation ranges",
+      "generate_button": "Generate Valuation Report",
+      "cost_credits": "Cost: 25 credits",
+      "current_balance": "Current Balance",
+      "need_credits": "Need more credits? Buy credits →"
+    },
+    "view": {
+      "title": "Report Viewer",
+      "description": "View your generated reports",
+      "generated_on": "Generated on"
+    }
+  },
   "auth": {
     "login": {
       "title": "Login",
@@ -669,7 +722,7 @@
   },
   "dashboard": {
     "overview": {
-      "title": "Dashboard Overview",
+      "title": "Dashboard",
       "description": "Monitor progress and key metrics across all metrics",
       "new_project": "New Project",
       "total_ideas": "Total Ideas",
@@ -848,7 +901,7 @@
         "update_billing": "Update Billing"
       },
       "upgrade": {
-        "title": "Upgrade Packages",
+        "title": "Choose Your Plan",
         "subtitle": "Select the perfect plan to accelerate your startup journey",
         "description": "Manage your account packages",
         "most_popular": "Most Popular",
@@ -938,6 +991,14 @@
         "payment_secure": "Your payment information is encrypted and secure. We never store your card details.",
         "add_payment_method": "Add Payment Method",
         "cancel": "Cancel"
+      },
+      "notifications": {
+        "title": "Notifications",
+        "description": "Stay updated with your latest activity and rewards",
+        "mark_all_read": "Mark All Read",
+        "mark_as_read": "Mark as Read",
+        "no_notifications": "No notifications yet",
+        "load_more": "Load More"
       },
       "upgrade": {
         "title": "Upgrade Packages",
@@ -1244,6 +1305,36 @@
           "quick_actions": "Quick Actions",
           "create_new_idea": "Create New Idea",
           "explore_ideas": "Explore Ideas"
+        }
+      },
+      "onboarding": {
+        "package": {
+          "footer": "Questions about our plans? Contact our team"
+        },
+        "profile": {
+          "title": "Complete Your Profile",
+          "subtitle": "Help us personalize your experience by sharing a bit about yourself. This information helps us provide better recommendations and features.",
+          "personal_info": "Personal Information",
+          "professional_background": "Professional Background",
+          "about_you": "About You",
+          "contact_location": "Contact & Location",
+          "display_name": "Display Name",
+          "your_role": "Your Role",
+          "bio": "Bio",
+          "location": "Location",
+          "website": "Website",
+          "complete_profile_setup": "Complete Profile Setup"
+        },
+        "tutorial": {
+          "welcome_title": "Welcome to Accelerator",
+          "welcome_desc": "Accelerator is your all-in-one platform for turning ideas into successful startups. Start by creating your first idea, get feedback from the community, and build comprehensive business models.",
+          "create_ideas": "Create Ideas",
+          "create_ideas_desc": "Start with your first startup concept",
+          "get_feedback": "Get Feedback",
+          "get_feedback_desc": "Share and validate with community",
+          "build_models": "Build Models",
+          "build_models_desc": "Create comprehensive business plans",
+          "lets_get_started": "Let's Get Started!"
         }
       }
     }

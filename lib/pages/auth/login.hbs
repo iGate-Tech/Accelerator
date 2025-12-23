@@ -1,9 +1,18 @@
+  <button id="lang-toggle" class="absolute top-4 {{#if (eq lng 'ar')}}right-4{{else}}left-4{{/if}} text-foreground hover:text-muted-foreground transition-colors z-10 px-2 py-1 text-sm font-medium flex items-center">
+    {{{icon 'languages' class='h-4 w-4 mr-1'}}}
+    <span id="lang-text">EN</span>
+  </button>
+  <button id="theme-toggle" class="absolute top-4 {{#if (eq lng 'ar')}}left-4{{else}}right-4{{/if}} text-foreground hover:text-muted-foreground transition-colors z-10">
+    {{{icon 'sun' class='h-6 w-6' id='sun-icon'}}}
+    {{{icon 'moon' class='h-6 w-6 hidden' id='moon-icon'}}}
+  </button>    
+    
     <div class="bg-background">
       <div class="bg-background flex min-h-svh flex-col items-center justify-center gap-6 p-6 md:p-10">
           <div class="w-full max-w-md">
             <div class="flex flex-col gap-6">
                <div id="alert-container" class="w-full max-w-md"></div>
-                <form action="/auth/login" method="post" hx-post="/auth/login" hx-target="body" hx-swap="beforeend" hx-on:htmx:before-request="clearAlerts()">
+                  <form action="/auth/login" method="post" hx-post="/auth/login" hx-target="body" hx-swap="beforeend" hx-on:htmx:before-request="clearAlerts(); showLoading()" hx-on:htmx:after-swap="hideLoading()">
                   <div data-slot="field-group" class="group/field-group @container/field-group flex w-full flex-col gap-7 data-[slot=checkbox-group]:gap-3 [&>[data-slot=field-group]]:gap-4">
                      <div class="flex flex-col items-center gap-2 text-center">
                         <a href="#" class="flex flex-col items-center gap-2 font-medium">
@@ -151,8 +160,29 @@
             </div>
          </div>
       </div>
-   </div>
-    <script>
+     </div>
+
+     <!-- Loading Screen -->
+     <div id="auth-loading-screen" class="fixed inset-0 bg-background flex items-center justify-center z-50 hidden">
+       <div class="text-center">
+         <svg class="animate-spin h-16 w-16 sm:h-20 sm:w-20 md:h-24 md:w-24 mx-auto" viewBox="0 0 24 24">
+           <defs>
+             <linearGradient id="spinner-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
+               <stop offset="0%" stop-color="#9e28b5"/>
+               <stop offset="25%" stop-color="#00a7e0"/>
+               <stop offset="50%" stop-color="#6cd14d"/>
+               <stop offset="75%" stop-color="#ffc600"/>
+               <stop offset="100%" stop-color="#9e28b5"/>
+             </linearGradient>
+           </defs>
+           <circle cx="12" cy="12" r="10" stroke="url(#spinner-gradient)" stroke-width="2" fill="none"/>
+         </svg>
+         <h2 class="text-xl font-semibold text-foreground mt-4 mb-2">Logging in...</h2>
+         <p class="text-muted-foreground">Please wait while we securely log you in.</p>
+       </div>
+     </div>
+
+     <script>
     function togglePasswordVisibility() {
        const input = document.getElementById('password');
        const eyeIcon = document.getElementById('eye-icon');
@@ -176,11 +206,19 @@
         }, 5000);
     }
 
-    // Setup auto-hide for alerts added via HTMX
-    document.addEventListener('htmx:afterSwap', (event) => {
-      if (event.detail.target === document.body) {
-        setupAlertAutoHide();
+      // Setup auto-hide for alerts added via HTMX
+      document.addEventListener('htmx:afterSwap', (event) => {
+        if (event.detail.target === document.body) {
+          setupAlertAutoHide();
+        }
+      });
+
+      function showLoading() {
+        document.getElementById('auth-loading-screen').classList.remove('hidden');
       }
-    });
-    </script>
+
+      function hideLoading() {
+        document.getElementById('auth-loading-screen').classList.add('hidden');
+      }
+     </script>
 

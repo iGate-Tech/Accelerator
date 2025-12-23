@@ -262,26 +262,7 @@
        });
       </script>
 
-    {{#if flash.success}}
-    {{#each flash.success}}
-    <script>showToast({{{ json this}}}, 'success');</script>
-    {{/each}}
-    {{/if}}
-    {{#if flash.error}}
-    {{#each flash.error}}
-    <script>showToast({{{ json this}}}, 'error');</script>
-    {{/each}}
-    {{/if}}
-    {{#if flash.info}}
-    {{#each flash.info}}
-    <script>showToast({{{ json this}}}, 'info');</script>
-    {{/each}}
-    {{/if}}
-    {{#if flash.warning}}
-    {{#each flash.warning}}
-    <script>showToast({{{ json this}}}, 'warning');</script>
-    {{/each}}
-    {{/if}}
+
 </body>
 
 </html>

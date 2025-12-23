@@ -11,12 +11,12 @@
           <div class="inline-flex items-center justify-center w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-br from-success to-info rounded-2xl mb-6 sm:mb-8 shadow-lg">
  {{{icon 'user' class="w-8 h-8 sm:w-10 sm:h-10 text-white"}}}
          </div>
-          <h1 class="text-3xl sm:text-5xl font-bold bg-gradient-to-r from-foreground via-success to-info bg-clip-text text-transparent mb-4 sm:mb-6">
-           Complete Your Profile
-         </h1>
-          <p class="text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed px-4">
-           Help us personalize your experience by sharing a bit about yourself. This information helps us provide better recommendations and features.
-         </p>
+           <h1 class="text-3xl sm:text-5xl font-bold text-foreground mb-4 sm:mb-6">
+            {{t 'onboarding.profile.title'}}
+          </h1>
+           <p class="text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed px-4">
+            {{t 'onboarding.profile.subtitle'}}
+          </p>
        </div>
 
        <!-- Progress Indicator -->
@@ -44,19 +44,14 @@
          <form method="post" action="/onboarding/profile" class="space-y-6 sm:space-y-8">
           <input type="hidden" name="_csrf" value="{{csrf}}" />
 
-           <!-- Display Name -->
-           <div class="space-y-4">
-              <div class="flex items-center space-x-3">
-                <div class="w-6 h-6 sm:w-8 sm:h-8 bg-success/10 rounded-full flex items-center justify-center">
- {{{icon 'user' class="w-3 h-3 sm:w-4 sm:h-4 text-success"}}}
-                </div>
-                <h3 class="text-lg sm:text-xl font-semibold text-foreground">Personal Information</h3>
-              </div>
+            <!-- Display Name -->
+            <div class="space-y-4">
+                <h3 class="text-lg sm:text-xl font-semibold text-foreground">{{t 'onboarding.profile.personal_info'}}</h3>
 
              <div class="ml-8 sm:ml-11">
-               <label for="name" class="block text-sm font-medium text-foreground mb-2">
-                 Display Name <span class="text-error">*</span>
-               </label>
+                <label for="name" class="block text-sm font-medium text-foreground mb-2">
+                  {{t 'onboarding.profile.display_name'}} <span class="text-error">*</span>
+                </label>
                 <input type="text" id="name" name="name" value="{{profile.name}}"
                   class="w-full px-4 py-2 sm:py-3 border border-input rounded-xl focus:ring-2 focus:ring-success focus:border-success transition-all duration-200 bg-muted focus:bg-base-100 text-base"
                   placeholder="How you'd like to be known on Accelerator" required />
@@ -64,19 +59,14 @@
             </div>
           </div>
 
-           <!-- Role -->
-           <div class="space-y-4">
-              <div class="flex items-center space-x-3">
-                <div class="w-6 h-6 sm:w-8 sm:h-8 bg-primary/10 rounded-full flex items-center justify-center">
- {{{icon 'briefcase' class="w-3 h-3 sm:w-4 sm:h-4 text-primary"}}}
-                </div>
-                <h3 class="text-lg sm:text-xl font-semibold text-foreground">Professional Background</h3>
-              </div>
+            <!-- Role -->
+            <div class="space-y-4">
+                <h3 class="text-lg sm:text-xl font-semibold text-foreground">{{t 'onboarding.profile.professional_background'}}</h3>
 
              <div class="ml-8 sm:ml-11">
-                <label for="role" class="block text-sm font-medium text-foreground mb-2">
-                  Your Role
-                </label>
+                 <label for="role" class="block text-sm font-medium text-foreground mb-2">
+                   {{t 'onboarding.profile.your_role'}}
+                 </label>
                 <select id="role" name="role"
                   class="w-full px-4 py-2 sm:py-3 border border-input rounded-xl focus:ring-2 focus:ring-primary focus:border-primary transition-all duration-200 bg-muted focus:bg-base-100 text-base">
                 <option value="">Select your role (optional)</option>
@@ -92,19 +82,14 @@
             </div>
           </div>
 
-           <!-- Bio -->
-           <div class="space-y-4">
-              <div class="flex items-center space-x-3">
-                <div class="w-6 h-6 sm:w-8 sm:h-8 bg-secondary/10 rounded-full flex items-center justify-center">
- {{{icon 'edit-3' class="w-3 h-3 sm:w-4 sm:h-4 text-secondary"}}}
-                </div>
-                <h3 class="text-lg sm:text-xl font-semibold text-foreground">About You</h3>
-              </div>
+            <!-- Bio -->
+            <div class="space-y-4">
+                <h3 class="text-lg sm:text-xl font-semibold text-foreground">{{t 'onboarding.profile.about_you'}}</h3>
 
              <div class="ml-8 sm:ml-11">
-                <label for="bio" class="block text-sm font-medium text-foreground mb-2">
-                  Bio
-                </label>
+                 <label for="bio" class="block text-sm font-medium text-foreground mb-2">
+                   {{t 'onboarding.profile.bio'}}
+                 </label>
                 <textarea id="bio" name="bio" rows="4"
                   class="w-full px-4 py-2 sm:py-3 border border-input rounded-xl focus:ring-2 focus:ring-secondary focus:border-secondary transition-all duration-200 bg-muted focus:bg-base-100 resize-none text-base"
                  placeholder="Tell us about your background, interests, and what you're passionate about...">{{#if profile.preferences}}{{profile.preferences.bio}}{{/if}}</textarea>
@@ -112,29 +97,24 @@
             </div>
           </div>
 
-           <!-- Location & Website -->
-           <div class="space-y-4">
-              <div class="flex items-center space-x-3">
-                <div class="w-6 h-6 sm:w-8 sm:h-8 bg-warning/10 rounded-full flex items-center justify-center">
- {{{icon 'map-pin' class="w-3 h-3 sm:w-4 sm:h-4 text-warning"}}}
-                </div>
-                <h3 class="text-lg sm:text-xl font-semibold text-foreground">Contact & Location</h3>
-              </div>
+            <!-- Location & Website -->
+            <div class="space-y-4">
+                <h3 class="text-lg sm:text-xl font-semibold text-foreground">{{t 'onboarding.profile.contact_location'}}</h3>
 
              <div class="ml-8 sm:ml-11 grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
               <div>
-                 <label for="location" class="block text-sm font-medium text-foreground mb-2">
-                   Location
-                 </label>
+                  <label for="location" class="block text-sm font-medium text-foreground mb-2">
+                    {{t 'onboarding.profile.location'}}
+                  </label>
                   <input type="text" id="location" name="location" value="{{#if profile.preferences}}{{profile.preferences.location}}{{/if}}"
                     class="w-full px-4 py-2 sm:py-3 border border-input rounded-xl focus:ring-2 focus:ring-warning focus:border-warning transition-all duration-200 bg-muted focus:bg-base-100 text-base"
                     placeholder="City, Country" />
               </div>
 
               <div>
-                 <label for="website" class="block text-sm font-medium text-foreground mb-2">
-                   Website
-                 </label>
+                  <label for="website" class="block text-sm font-medium text-foreground mb-2">
+                    {{t 'onboarding.profile.website'}}
+                  </label>
                   <input type="url" id="website" name="website" value="{{#if profile.preferences}}{{profile.preferences.website}}{{/if}}"
                     class="w-full px-4 py-2 sm:py-3 border border-input rounded-xl focus:ring-2 focus:ring-warning focus:border-warning transition-all duration-200 bg-muted focus:bg-base-100 text-base"
                     placeholder="https://yourwebsite.com" />
@@ -162,7 +142,7 @@
            <div class="pt-4 sm:pt-6">
               <button type="submit"
                 class="w-full bg-gradient-to-r from-success to-info hover:from-success/90 hover:to-info/90 text-white font-bold py-3 sm:py-4 px-6 sm:px-8 rounded-2xl transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl flex items-center justify-center space-x-3 text-base sm:text-lg">
-               <span>Complete Profile Setup</span>
+                <span>{{t 'onboarding.profile.complete_profile_setup'}}</span>
  {{{icon 'trending-up' class="w-4 h-4 sm:w-5 sm:h-5"}}}
              </button>
            </div>

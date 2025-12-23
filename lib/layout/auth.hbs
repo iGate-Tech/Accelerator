@@ -53,14 +53,7 @@
 
   <body class="{{bodyClass}}
       bg-background pb-8">
-  <button id="lang-toggle" class="absolute top-4 {{#if (eq lng 'ar')}}right-4{{else}}left-4{{/if}} text-foreground hover:text-muted-foreground transition-colors z-10 px-2 py-1 text-sm font-medium flex items-center">
-    {{{icon 'languages' class='h-4 w-4 mr-1'}}}
-    <span id="lang-text">EN</span>
-  </button>
-  <button id="theme-toggle" class="absolute top-4 {{#if (eq lng 'ar')}}left-4{{else}}right-4{{/if}} text-foreground hover:text-muted-foreground transition-colors z-10">
-    {{{icon 'sun' class='h-6 w-6' id='sun-icon'}}}
-    {{{icon 'moon' class='h-6 w-6 hidden' id='moon-icon'}}}
-  </button>
+
   {{{body}}}
 
   {{#if scripts}}{{scripts}}{{/if}}
@@ -137,15 +130,15 @@
     // The showToast function is already defined in toast.js
   </script>
    {{#if scripts}}{{scripts}}{{/if}}
-    <script>
-      function showLoadingFor4Seconds() {
-        const loading = document.getElementById('global-loading');
-        loading.style.display = 'block';
-        setTimeout(() => {
-          loading.style.display = 'none';
-        }, 4000);
-      }
-    </script>
+     <script>
+       function showLoadingFor8Seconds() {
+         const loading = document.getElementById('global-loading');
+         loading.style.display = 'block';
+         setTimeout(() => {
+           loading.style.display = 'none';
+         }, 8000);
+       }
+     </script>
 
 
 

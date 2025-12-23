@@ -1,23 +1,19 @@
-<div class="min-h-screen bg-gradient-to-br from-base-100 via-primary/5 to-secondary/5">
-  <div class="relative overflow-hidden">
-    <!-- Background Pattern -->
-    <div class="absolute inset-0 opacity-5">
-      <div class="absolute inset-0" style="background-image: radial-gradient(circle at 20% 80%, color-mix(in oklab, hsl(var(--color-primary)), transparent 95%) 2px, transparent 2px), radial-gradient(circle at 80% 20%, color-mix(in oklab, hsl(var(--color-secondary)), transparent 95%) 2px, transparent 2px); background-size: 40px 40px;"></div>
-    </div>
 
-    <div class="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 lg:py-16">
-      <!-- Header -->
-      <div class="text-center mb-8 sm:mb-12">
-        <div class="inline-flex items-center justify-center w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-br from-primary to-secondary rounded-2xl mb-6 sm:mb-8 shadow-lg">
-{{{icon 'credit-card' class="w-8 h-8 sm:w-10 sm:h-10 text-white"}}}
-        </div>
-        <h1 class="text-3xl sm:text-4xl lg:text-5xl font-bold bg-gradient-to-r from-foreground via-primary to-secondary bg-clip-text text-transparent mb-4 sm:mb-6">
-          {{t 'dashboard.payments.upgrade.title'}}
-        </h1>
-        <p class="text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed">
-          {{t 'dashboard.payments.upgrade.subtitle'}}
-        </p>
-      </div>
+<div class="min-h-screen bg-base-100">
+   <div class="relative overflow-hidden">
+     <div class="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 lg:py-16">
+       <!-- Header -->
+       <div class="text-center mb-8 sm:mb-12">
+         <div class="inline-flex items-center justify-center w-16 h-16 sm:w-20 sm:h-20 bg-primary rounded-2xl mb-6 sm:mb-8">
+ {{{icon 'credit-card' class="w-8 h-8 sm:w-10 sm:h-10 text-white"}}}
+         </div>
+         <h1 class="text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground mb-4 sm:mb-6">
+           {{t 'dashboard.payments.upgrade.title'}}
+         </h1>
+         <p class="text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed">
+           {{t 'dashboard.payments.upgrade.subtitle'}}
+         </p>
+       </div>
 
       <!-- Current Balance Card -->
       <div class="bg-card rounded-2xl shadow-xl p-6 mb-8 sm:mb-12 border border-border">
@@ -28,10 +24,10 @@
       </div>
 
       <!-- Package Plans -->
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
-        {{#each packages}}
-        <div class="bg-card rounded-3xl shadow-2xl overflow-hidden border border-border hover:shadow-3xl transition-shadow duration-300">
-          <div class="bg-gradient-to-r from-primary/10 to-secondary/10 p-6 sm:p-8">
+       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
+         {{#each packages}}
+         <div class="bg-white rounded-lg border border-gray-300">
+           <div class="p-6 sm:p-8">
             <div class="text-center">
               <h3 class="text-xl sm:text-2xl font-bold text-foreground mb-2">{{name}} Plan</h3>
               <div class="text-3xl sm:text-4xl font-extrabold text-primary mb-1">${{price_monthly}}</div>
@@ -67,24 +63,20 @@
             <form method="POST" action="/onboarding/package">
               <input type="hidden" name="_csrf" value="{{csrf}}" />
               <input type="hidden" name="package_type" value="{{type}}" />
-              <button type="submit" class="w-full bg-gradient-to-r from-primary to-secondary hover:from-primary/90 hover:to-secondary/90 text-white font-bold py-3 sm:py-4 px-6 rounded-2xl transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl flex items-center justify-center space-x-2">
-                <span>{{t 'dashboard.payments.upgrade.upgrade_to'}} {{name}} {{t 'dashboard.payments.upgrade.plan'}}</span>
-{{{icon 'arrow-right' class="w-5 h-5"}}}
-              </button>
+             <button type="submit" class="w-full bg-primary hover:bg-primary/90 text-white font-bold py-3 px-6 rounded-lg flex items-center justify-center space-x-2">
+                 <span>{{t 'dashboard.payments.upgrade.upgrade_to'}} {{name}} {{t 'dashboard.payments.upgrade.plan'}}</span>
+ {{{icon 'arrow-right' class="w-5 h-5"}}}
+               </button>
             </form>
           </div>
         </div>
         {{/each}}
       </div>
 
-      <!-- Footer -->
-      <div class="mt-12 sm:mt-16 text-center">
-        <div class="bg-card rounded-2xl p-6 border border-border">
-          <p class="text-muted-foreground mb-4">Questions about our plans? <a href="/contact" class="text-primary hover:text-primary/80 font-medium transition-colors">Contact our team</a></p>
-          <a href="/settings" class="inline-flex items-center space-x-2 text-muted-foreground hover:text-foreground transition-colors">
-{{{icon 'settings' class="w-4 h-4"}}}
-            <span>Manage Settings</span>
-          </a>
+       <!-- Footer -->
+       <div class="mt-12 sm:mt-16 text-center">
+         <div class="bg-white rounded-lg p-6 border border-gray-300">
+           <p class="text-muted-foreground">{{t 'onboarding.package.footer'}}</p>
         </div>
       </div>
     </div>

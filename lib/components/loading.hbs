@@ -1,4 +1,4 @@
-<div class="fixed inset-0 bg-background flex items-center justify-center z-50">
+<div class="fixed inset-0 bg-background flex items-center justify-center z-50{{#if class}} {{{class}}}{{/if}}"{{#if id}} id="{{{id}}}"{{/if}}>
    <div class="text-center">
       <svg class="animate-spin h-16 w-16 sm:h-20 sm:w-20 md:h-24 md:w-24 mx-auto" viewBox="0 0 24 24">
         <defs>
@@ -12,5 +12,11 @@
         </defs>
         <circle cx="12" cy="12" r="10" stroke="url(#spinner-gradient)" stroke-width="2" fill="none"/>
       </svg>
-  </div>
-</div> 
+      {{#if title}}
+      <h2 class="text-xl font-semibold text-foreground mt-4 mb-2">{{{title}}}</h2>
+      {{/if}}
+      {{#if description}}
+      <p class="text-muted-foreground">{{{description}}}</p>
+      {{/if}}
+   </div>
+ </div>

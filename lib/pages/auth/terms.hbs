@@ -1,4 +1,13 @@
-<div class="w-full min-h-screen flex flex-col items-center justify-center" dir="{{#if (eq lng 'ar')}}rtl{{else}}ltr{{/if}}"
+  <button id="lang-toggle" class="absolute top-4 {{#if (eq lng 'ar')}}right-4{{else}}left-4{{/if}} text-foreground hover:text-muted-foreground transition-colors z-10 px-2 py-1 text-sm font-medium flex items-center">
+    {{{icon 'languages' class='h-4 w-4 mr-1'}}}
+    <span id="lang-text">EN</span>
+  </button>
+  <button id="theme-toggle" class="absolute top-4 {{#if (eq lng 'ar')}}left-4{{else}}right-4{{/if}} text-foreground hover:text-muted-foreground transition-colors z-10">
+    {{{icon 'sun' class='h-6 w-6' id='sun-icon'}}}
+    {{{icon 'moon' class='h-6 w-6 hidden' id='moon-icon'}}}
+  </button>
+
+<div class="w-full min-h-screen flex flex-col items-center justify-center" dir="{{#if (eq lng 'ar')}}rtl{{else}}ltr{{/if}}">
       <div class="max-w-4xl mx-auto px-3 sm:px-0 w-full relative">
          <img src="/images/accelerator_logo.svg" alt="Accelerator Logo" class="w-32 sm:w-40 my-4 sm:my-8 mx-auto" />
          <div class="flex flex-col items-center justify-center h-full gap-4 w-full max-w-3xl mx-auto bg-card shadow-primary rounded-lg p-3 sm:p-5 border border-input" style="direction: {{#if (eq lng 'ar')}}rtl{{else}}ltr{{/if}}; text-align: {{#if (eq lng 'ar')}}right{{else}}left{{/if}};">

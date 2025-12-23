@@ -1,0 +1,13 @@
+{
+  "profile_information": "معلومات الملف الشخصي",
+  "change_photo": "تغيير الصورة",
+  "full_name": "الاسم الكامل",
+  "save_changes": "حفظ التغييرات",
+  "current_password": "كلمة المرور الحالية",
+  "new_password": "كلمة المرور الجديدة",
+  "confirm_password": "تأكيد كلمة المرور",
+  "update_password": "تحديث كلمة المرور",
+  "billing_history": "تاريخ الفواتير",
+  "payment_methods": "طرق الدفع",
+  "update_billing": "تحديث الفواتير"
+}

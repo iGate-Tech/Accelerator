@@ -1,0 +1,13 @@
+{
+  "profile_information": "Profile Information",
+  "change_photo": "Change Photo",
+  "full_name": "Full Name",
+  "save_changes": "Save Changes",
+  "current_password": "Current Password",
+  "new_password": "New Password",
+  "confirm_password": "Confirm Password",
+  "update_password": "Update Password",
+  "billing_history": "Billing History",
+  "payment_methods": "Payment Methods",
+  "update_billing": "Update Billing"
+}

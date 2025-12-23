@@ -1,0 +1,17 @@
+{
+  "title": "Valuation Report Generator",
+  "subtitle": "Professional startup valuation analysis with AI",
+  "generate_title": "Generate Your Valuation Report",
+  "description": "Get professional startup valuation with multiple methodologies",
+  "select_idea": "Select Idea",
+  "select_placeholder": "Choose an idea to generate valuation for...",
+  "methodologies_title": "Valuation Methodologies",
+  "methodology1": "Comparable company analysis",
+  "methodology2": "Discounted cash flow (DCF)",
+  "methodology3": "Market size & opportunity assessment",
+  "methodology4": "Risk-adjusted valuation ranges",
+  "generate_button": "Generate Valuation Report",
+  "cost_credits": "Cost: 25 credits",
+  "current_balance": "Current Balance",
+  "need_credits": "Need more credits? Buy credits →"
+}

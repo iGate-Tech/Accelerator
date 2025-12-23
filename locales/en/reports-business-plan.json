@@ -1,0 +1,14 @@
+{
+  "title": "Business Plan Generator",
+  "subtitle": "Create professional business plans with AI",
+  "generate_title": "Generate Your Business Plan",
+  "description": "Select an idea and let AI create a comprehensive business plan",
+  "select_idea": "Select Idea",
+  "select_placeholder": "Choose an idea to generate a business plan for",
+  "no_ideas": "No ideas available",
+  "create_idea_first": "Create your first idea to generate a business plan",
+  "generate_button": "Generate Business Plan",
+  "cost_credits": "Cost: 50 credits",
+  "current_balance": "Current Balance",
+  "need_credits": "Need more credits? Buy credits →"
+}

@@ -6,22 +6,22 @@
             <div class="space-y-4">
               <a href="/new-idea" class="flex items-center gap-3 px-3 py-2 rounded-md text-muted-foreground hover:bg-primary/10 hover:text-primary">
                 {{{icon 'plus' class="w-5 h-5"}}}
-                <span>{{t 'nav.new_idea'}}</span>
+                <span>{{t 'sidebar.new_idea'}}</span>
               </a>
               <a href="/favorites" class="flex items-center gap-3 px-3 py-2 rounded-md text-muted-foreground hover:bg-primary/10 hover:text-primary">
                 {{{icon 'heart' class="w-5 h-5"}}}
-                <span>{{t 'ideas.favorites.title'}}</span>
+                <span>{{t 'sidebar.favorites'}}</span>
               </a>
               <a href="/explore-idea" class="flex items-center gap-3 px-3 py-2 rounded-md text-muted-foreground hover:bg-primary/10 hover:text-primary">
                 {{{icon 'search' class="w-5 h-5"}}}
-                <span>{{t 'nav.explore_ideas'}}</span>
+                <span>{{t 'sidebar.explore_ideas'}}</span>
               </a>
             </div>
              <div class="mt-4">
                <button onclick="toggleSidebarPortfolio()" class="w-full flex items-center justify-between px-3 py-3 rounded-lg bg-muted/50 hover:bg-muted text-left">
                  <div class="flex items-center gap-3">
                    {{{icon 'folder' class='w-5 h-5 text-primary'}}}
-                   <span class="font-medium text-foreground">{{t 'nav.projects'}}</span>
+                   <span class="font-medium text-foreground">{{t 'sidebar.projects'}}</span>
                  </div>
                  <div class="flex items-center">
                    <span class="text-xs text-muted-foreground mr-2">{{projects.length}} projects</span>

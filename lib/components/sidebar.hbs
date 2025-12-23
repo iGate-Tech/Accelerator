@@ -24,13 +24,13 @@
                    <span class="font-medium text-foreground">{{t 'sidebar.projects' lng=lng}}</span>
                  </div>
                  <div class="flex items-center">
-                   <span class="text-xs text-muted-foreground mr-2">{{projects.length}} projects</span>
+                    <span class="text-xs text-muted-foreground mr-2">{{t 'sidebar.project_count' count=projects.length lng=lng}}</span>
                    {{{icon 'chevron-down' class='w-4 h-4 transition-transform duration-200 sidebar-chevron'}}}
                  </div>
                </button>
                <div id="sidebar-portfolio-list-container" class="hidden mt-3 pl-4">
                  <div class="relative mb-3">
-                   <input type="text" id="sidebar-project-search" placeholder="Search projects..." class="w-full text-sm border border-input rounded-lg bg-card text-foreground pl-10 pr-10 py-2 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/40">
+                    <input type="text" id="sidebar-project-search" placeholder="{{t 'sidebar.search_projects' lng=lng}}" class="w-full text-sm border border-input rounded-lg bg-card text-foreground pl-10 pr-10 py-2 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/40">
                    <div class="absolute left-3 top-1/2 transform -translate-y-1/2">
                      {{{icon 'search' class='w-4 h-4 text-muted-foreground'}}}
                    </div>
@@ -46,7 +46,7 @@
                      </div>
                      <div class="flex-1 min-w-0">
                        <p class="text-sm font-medium text-foreground truncate">{{title}}</p>
-                       <p class="text-xs text-muted-foreground">Idea</p>
+                        <p class="text-xs text-muted-foreground">{{t 'sidebar.idea_label' lng=lng}}</p>
                      </div>
                      {{{icon 'chevron-right' class='w-4 h-4 text-muted-foreground'}}}
                    </a>
@@ -85,7 +85,9 @@
        // Update the count in the toggle button
        const countSpan = document.querySelector('#sidebar button span.text-xs');
        if (countSpan) {
-         countSpan.textContent = `${visibleCount} projects`;
+          // Note: This JavaScript count update would need server-side translation
+          // For now, keeping the English fallback
+          countSpan.textContent = `${visibleCount} projects`;
        }
      }
 

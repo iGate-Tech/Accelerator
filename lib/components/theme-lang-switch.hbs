@@ -1,13 +1,13 @@
 {{!-- Theme and Language Switch Component --}}
 <div class="flex justify-between items-center w-full">
   {{!-- Language Toggle --}}
-  <button id="lang-toggle" class="flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 rounded-lg border border-border hover:bg-muted transition-colors" title="Switch Language">
+  <button id="lang-toggle" class="flex items-center justify-center w-16 h-8 sm:w-10 sm:h-10 rounded-lg hover:bg-muted transition-colors" title="Switch Language">
     {{{icon 'languages' class='h-4 w-4 mr-1'}}}
     <span id="lang-text" class="text-sm font-medium">EN</span>
   </button>
 
   {{!-- Theme Toggle --}}
-  <button id="theme-toggle" class="flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 rounded-lg border border-border hover:bg-muted transition-colors" title="Toggle Theme">
+  <button id="theme-toggle" class="flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 rounded-lg hover:bg-muted transition-colors" title="Toggle Theme">
     {{{icon 'sun' class='w-4 h-4 sm:w-5 sm:h-5 text-yellow-500' id='sun-icon'}}}
     {{{icon 'moon' class='w-4 h-4 sm:w-5 sm:h-5 text-blue-500 hidden' id='moon-icon'}}}
   </button>

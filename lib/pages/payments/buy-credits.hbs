@@ -36,7 +36,7 @@
                  <p class="text-xl sm:text-2xl font-bold text-foreground">
                      ${{price}}
                  </p>
-                 <p class="text-sm text-muted-foreground">{{credits}} {{t 'dashboard.payments.billing.credits'}}</p>
+                 <p class="text-sm text-muted-foreground">{{credits}} {{t 'billing.credits'}}</p>
                  <p class="text-xs text-muted-foreground">{{divide (multiply price 100) credits}}¢ {{t 'buy-credits.per_credit'}}</p>
              </div>
 
@@ -59,7 +59,7 @@
                 <input type="hidden" name="_csrf" value="{{csrf}}" />
                 <input type="hidden" name="package_id" value="{{id}}" />
                  <button type="submit" class="w-full {{#if (eq @index 1)}}bg-primary text-primary-foreground hover:bg-primary/90{{else}}border border-input/80 text-foreground hover:bg-muted{{/if}} px-3 sm:px-4 py-2 rounded-md transition-colors text-sm sm:text-base">
-                     {{t 'buy-credits.buy_package'}} {{name}} {{t 'dashboard.payments.billing.package'}}
+                     {{t 'buy-credits.buy_package'}} {{name}} {{t 'billing.package'}}
                  </button>
             </form>
         </div>

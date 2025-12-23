@@ -18,8 +18,8 @@
       <!-- Current Balance Card -->
       <div class="bg-card rounded-2xl shadow-xl p-6 mb-8 sm:mb-12 border border-border">
                  <div class="text-center">
-          <div class="text-sm text-muted-foreground mb-2">{{t 'dashboard.payments.billing.current_balance'}}</div>
-          <div class="text-4xl sm:text-5xl font-bold text-primary">{{currentBalance}} {{t 'dashboard.payments.billing.credits'}}</div>
+          <div class="text-sm text-muted-foreground mb-2">{{t 'billing.current_balance'}}</div>
+          <div class="text-4xl sm:text-5xl font-bold text-primary">{{currentBalance}} {{t 'billing.credits'}}</div>
         </div>
       </div>
 
@@ -32,7 +32,7 @@
               <h3 class="text-xl sm:text-2xl font-bold text-foreground mb-2">{{name}} Plan</h3>
               <div class="text-3xl sm:text-4xl font-extrabold text-primary mb-1">${{price_monthly}}</div>
               <div class="text-sm text-muted-foreground mb-4">{{t 'package.month'}}</div>
-              <div class="text-sm text-muted-foreground">{{credits_monthly}} {{t 'dashboard.payments.billing.credits'}} included</div>
+              <div class="text-sm text-muted-foreground">{{credits_monthly}} {{t 'billing.credits'}} included</div>
             </div>
           </div>
 
@@ -42,14 +42,14 @@
                 <div class="w-6 h-6 bg-green-500/10 rounded-full flex items-center justify-center flex-shrink-0">
 {{{icon 'check' class="w-4 h-4 text-green-600 dark:text-green-400"}}}
                 </div>
-                <span class="text-sm text-foreground">{{t 'dashboard.payments.buy_credits.instant_delivery'}}</span>
+                <span class="text-sm text-foreground">{{t 'buy-credits.instant_delivery'}}</span>
               </div>
 
               <div class="flex items-center space-x-3">
                 <div class="w-6 h-6 bg-blue-500/10 rounded-full flex items-center justify-center flex-shrink-0">
 {{{icon 'clock' class="w-4 h-4 text-blue-600 dark:text-blue-400"}}}
                 </div>
-                <span class="text-sm text-foreground">{{t 'dashboard.payments.buy_credits.no_expiration'}}</span>
+                <span class="text-sm text-foreground">{{t 'buy-credits.no_expiration'}}</span>
               </div>
 
               <div class="flex items-center space-x-3">
@@ -76,7 +76,7 @@
        <!-- Footer -->
        <div class="mt-12 sm:mt-16 text-center">
          <div class="bg-white rounded-lg p-6 border border-gray-300">
-           <p class="text-muted-foreground">{{t 'onboarding.package.footer'}}</p>
+           <p class="text-muted-foreground">{{t 'package.footer'}}</p>
         </div>
       </div>
     </div>

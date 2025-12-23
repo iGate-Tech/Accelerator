@@ -113,36 +113,36 @@
     return ['en', 'ar'].includes(normalized) ? normalized : 'en';
   }
 
-   document.addEventListener('DOMContentLoaded', function() {
-     const serverLang = normalizeLanguage('{{lng}}');
-     localStorage.setItem('language', serverLang);
-     updateLangSwitcher(serverLang);
+    document.addEventListener('DOMContentLoaded', function() {
+      const serverLang = normalizeLanguage('{{lng}}');
+      localStorage.setItem('language', serverLang);
+      updateLangSwitcher(serverLang);
 
-     // Initialize theme
-     const savedTheme = localStorage.getItem('theme');
-     const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-     const theme = savedTheme || (systemPrefersDark ? 'dark' : 'light');
-     const isDark = theme === 'dark';
-     if (isDark) {
-       document.documentElement.classList.add('dark');
-     } else {
-       document.documentElement.classList.remove('dark');
-     }
-     updateThemeToggle(isDark);
-   });
+      // Initialize theme
+      const savedTheme = localStorage.getItem('theme');
+      const systemPrefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+      const theme = savedTheme || (systemPrefersDark ? 'dark' : 'light');
+      const isDark = theme === 'dark';
+      if (isDark) {
+        document.documentElement.classList.add('dark');
+      } else {
+        document.documentElement.classList.remove('dark');
+      }
+      updateThemeToggle(isDark);
+    });
 </script>
 
 <!-- Main Content -->
 <main class="py-12 md:py-16">
   <div class="container mx-auto px-4">
     <div class="text-center max-w-3xl mx-auto">
-     <h1 class="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-foreground mb-6">
-         <span data-t="landing.hero_title">Build Your Startup</span> <br />
-         <span class="text-muted-foreground" data-t="landing.hero_title_suffix">with AI Power</span>
-       </h1>
-       <p class="text-base md:text-lg text-muted-foreground mb-6 md:mb-8" data-t="landing.hero_description">
- Transform your ideas into successful businesses with our comprehensive startup development platform powered by artificial intelligence.
-       </p>
+      <h1 class="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-foreground mb-6">
+          <span>{{t 'landing.hero_title'}}</span> <br />
+          <span class="text-muted-foreground">{{t 'landing.hero_title_suffix'}}</span>
+        </h1>
+        <p class="text-base md:text-lg text-muted-foreground mb-6 md:mb-8">
+          {{t 'landing.hero_description'}}
+        </p>
       <div class="flex flex-col sm:flex-row gap-4 justify-center">
         <a href="/auth/signup" class="px-6 py-3 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors">
           <span data-t="landing.cta_start">Get Started</span>
@@ -158,27 +158,27 @@
 <!-- Features Section -->
 <section class="py-12 md:py-16 bg-muted/50">
   <div class="container mx-auto px-4">
-    <div class="text-center max-w-3xl mx-auto mb-8 md:mb-12">
-      <h2 class="text-2xl md:text-3xl lg:text-4xl font-bold text-foreground mb-4">
-        <span data-t="landing.features.title_ai_powered">AI-Powered</span> <span class="text-muted-foreground" data-t="landing.features.title_effortless">Effortless.</span>
-      </h2>
-      <p class="text-base md:text-lg text-muted-foreground" data-t="landing.features.description">
-        Guides users through the entire startup building lifecycle: AI idea generation, idea modeling, business model generation, financial modeling, legal/marketing/team models, pitch deck creation.
-      </p>
-    </div>
+     <div class="text-center max-w-3xl mx-auto mb-8 md:mb-12">
+       <h2 class="text-2xl md:text-3xl lg:text-4xl font-bold text-foreground mb-4">
+         <span>{{t 'landing.features.title_ai_powered'}}</span> <span class="text-muted-foreground">{{t 'landing.features.title_effortless'}}</span>
+       </h2>
+       <p class="text-base md:text-lg text-muted-foreground">
+         {{t 'landing.features.description'}}
+       </p>
+     </div>
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
-      <div class="bg-card p-6 rounded-lg border border-input">
-        <h3 class="text-xl font-semibold text-foreground mb-3" data-t="landing.features.card1_title">AI Idea Generation</h3>
-        <p class="text-muted-foreground" data-t="landing.features.card1_desc">Generate innovative startup ideas using our AI-powered suggestion engine. Explore trending markets and validate concepts before investing time and money.</p>
-      </div>
-      <div class="bg-card p-6 rounded-lg border border-input">
-        <h3 class="text-xl font-semibold text-foreground mb-3" data-t="landing.features.card2_title">Idea Modeling</h3>
-        <p class="text-muted-foreground" data-t="landing.features.card2_desc">Model and optimize your startup ideas using advanced analytics. Test assumptions, gather data, and iterate based on real user feedback.</p>
-      </div>
-      <div class="bg-card p-6 rounded-lg border border-input">
-        <h3 class="text-xl font-semibold text-foreground mb-3" data-t="landing.features.card3_title">Business Model Generation</h3>
-        <p class="text-muted-foreground" data-t="landing.features.card3_desc">Create comprehensive business models with AI assistance. Generate financial projections, marketing strategies, and team structures for your startup.</p>
-      </div>
+       <div class="bg-card p-6 rounded-lg border border-input">
+         <h3 class="text-xl font-semibold text-foreground mb-3">{{t 'landing.features.card1_title'}}</h3>
+         <p class="text-muted-foreground">{{t 'landing.features.card1_desc'}}</p>
+       </div>
+       <div class="bg-card p-6 rounded-lg border border-input">
+         <h3 class="text-xl font-semibold text-foreground mb-3">{{t 'landing.features.card2_title'}}</h3>
+         <p class="text-muted-foreground">{{t 'landing.features.card2_desc'}}</p>
+       </div>
+       <div class="bg-card p-6 rounded-lg border border-input">
+         <h3 class="text-xl font-semibold text-foreground mb-3">{{t 'landing.features.card3_title'}}</h3>
+         <p class="text-muted-foreground">{{t 'landing.features.card3_desc'}}</p>
+       </div>
     </div>
   </div>
 </section>
@@ -186,14 +186,14 @@
 <!-- Pricing Section -->
 <section class="py-12 md:py-16">
   <div class="container mx-auto px-4">
-    <div class="text-center max-w-3xl mx-auto mb-8 md:mb-12">
-      <h2 class="text-2xl md:text-3xl lg:text-4xl font-bold text-foreground mb-4">
-        <span data-t="landing.pricing.title_choose">Choose</span> <span class="text-muted-foreground" data-t="landing.pricing.title_path">Your Acceleration Path</span>
-      </h2>
-      <p class="text-base md:text-lg text-muted-foreground" data-t="landing.pricing.description">
-        Flexible pricing designed for startups at every stage. Start with our AI-powered tools and scale as you grow.
-      </p>
-    </div>
+     <div class="text-center max-w-3xl mx-auto mb-8 md:mb-12">
+       <h2 class="text-2xl md:text-3xl lg:text-4xl font-bold text-foreground mb-4">
+         <span>{{t 'landing.pricing.title_choose'}}</span> <span>{{t 'landing.pricing.title_path'}}</span>
+       </h2>
+       <p class="text-base md:text-lg text-muted-foreground">
+         {{t 'landing.pricing.description'}}
+       </p>
+     </div>
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
       <div class="bg-card p-6 rounded-lg border border-input text-center">
         <h3 class="text-xl font-semibold text-foreground mb-2" data-t="landing.pricing.starter">Starter</h3>
@@ -232,14 +232,14 @@
 <!-- Success Stories Section -->
 <section class="py-12 md:py-16 bg-muted/50">
   <div class="container mx-auto px-4">
-    <div class="text-center max-w-3xl mx-auto mb-12">
-      <h2 class="text-3xl md:text-4xl font-bold text-foreground mb-4">
-        <span data-t="landing.success_stories.title_stories">Success Stories</span> <span data-t="landing.success_stories.title_from">from Accelerator</span>
-      </h2>
-      <p class="text-lg text-muted-foreground">
-        "<span data-t="landing.success_stories.quote">Accelerator helped me validate my SaaS idea and connect with the right investors. Within 6 months, we raised $2 million in funding!</span>" - <span data-t="landing.success_stories.author">Sarah Johnson, Founder of TechFlow</span>
-      </p>
-    </div>
+     <div class="text-center max-w-3xl mx-auto mb-12">
+       <h2 class="text-3xl md:text-4xl font-bold text-foreground mb-4">
+         <span>{{t 'landing.success_stories.title_stories'}}</span> <span>{{t 'landing.success_stories.title_from'}}</span>
+       </h2>
+       <p class="text-lg text-muted-foreground">
+         "{{t 'landing.success_stories.quote'}}" - {{t 'landing.success_stories.author'}}
+       </p>
+     </div>
     <div class="text-center">
       <p class="text-sm text-muted-foreground mb-6">
         <span data-t="landing.success_stories.startups_launched">Startups Launched</span> <span data-t="landing.success_stories.percentage">17%</span> <span data-t="landing.success_stories.since_inception">Since Inception</span>
@@ -254,30 +254,30 @@
 
 <!-- CTA Section -->
 <section class="py-12 md:py-16">
-  <div class="container mx-auto px-4 text-center">
-    <h2 class="text-2xl md:text-3xl lg:text-4xl font-bold text-foreground mb-4">
-      <span data-t="landing.cta.title_ready">Ready to Accelerate</span> <span data-t="landing.cta.title_startup">Your Startup?</span>
-    </h2>
-    <p class="text-base md:text-lg text-muted-foreground mb-6 md:mb-8" data-t="landing.cta.description">
-      Our liquidity specialists are ready to model your risk profile and design a tailored return solution.
-    </p>
-    <button class="px-6 py-3 bg-primary text-primary-foreground rounded-md hover:bg-primary/90" data-t="landing.cta.consult_architect">
-      Consult the Architect
-    </button>
-  </div>
+   <div class="container mx-auto px-4 text-center">
+     <h2 class="text-2xl md:text-3xl lg:text-4xl font-bold text-foreground mb-4">
+       <span>{{t 'landing.cta.title_ready'}}</span> <span>{{t 'landing.cta.title_startup'}}</span>
+     </h2>
+     <p class="text-base md:text-lg text-muted-foreground mb-6 md:mb-8">
+       {{t 'landing.cta.description'}}
+     </p>
+     <button class="px-6 py-3 bg-primary text-primary-foreground rounded-md hover:bg-primary/90">
+       {{t 'landing.cta.consult_architect'}}
+     </button>
+   </div>
 </section>
 
 <!-- Credits Section -->
 <section class="py-12 md:py-16 bg-muted/50">
   <div class="container mx-auto px-4">
-    <div class="text-center max-w-3xl mx-auto mb-8 md:mb-12">
-      <h2 class="text-2xl md:text-3xl lg:text-4xl font-bold text-foreground mb-4">
-        <span data-t="landing.credits.title_power">Power</span> <span data-t="landing.credits.title_innovation">Your Innovation</span>
-      </h2>
-      <p class="text-base md:text-lg text-muted-foreground" data-t="landing.credits.description">
-        Buy credits to unlock unlimited access to our smart tools. Accelerator features an innovative credit-based economy: users buy credits to generate smart models and launch ideas. Other users vote on these ideas using credits — rewarding idea creators with redeemable credits as profits, creating a circular value system.
-      </p>
-    </div>
+     <div class="text-center max-w-3xl mx-auto mb-8 md:mb-12">
+       <h2 class="text-2xl md:text-3xl lg:text-4xl font-bold text-foreground mb-4">
+         <span>{{t 'landing.credits.title_power'}}</span> <span>{{t 'landing.credits.title_innovation'}}</span>
+       </h2>
+       <p class="text-base md:text-lg text-muted-foreground">
+         {{t 'landing.credits.description'}}
+       </p>
+     </div>
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
       <div class="bg-card p-6 rounded-lg border border-input text-center">
         <h3 class="text-xl font-semibold text-foreground mb-2" data-t="landing.credits.starter_pack">Starter Pack</h3>
@@ -493,22 +493,12 @@
      <span class="text-muted-foreground text-xs font-mono tracking-wide" data-t="landing.footer.copyright">© 2024 Aura Financial Technologies. All rights reserved.</span>
 
     <div class="flex items-center gap-8">
-      <div class="flex items-center gap-2 grayscale opacity-30 hover:opacity-100 transition-opacity duration-300">
-        <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" role="img" width="2.4em" height="1em"
-          viewBox="0 0 512 214" data-icon="logos:stripe" class="iconify h-5 w-auto iconify--logos">
-          <path fill="currentColor"
-            d="M512 110.08c0-36.409-17.636-65.138-51.342-65.138c-33.85 0-54.33 28.73-54.33 64.854c0 42.808 24.179 64.426 58.88 64.426c16.925 0 29.725-3.84 39.396-9.244v-28.445c-9.67 4.836-20.764 7.823-34.844 7.823c-13.796 0-26.027-4.836-27.591-21.618h69.547c0-1.85.284-9.245.284-12.658m-70.258-13.511c0-16.071 9.814-22.756 18.774-22.756c8.675 0 17.92 6.685 17.92 22.756zm-90.31-51.627c-13.939 0-22.899 6.542-27.876 11.094l-1.85-8.818h-31.288v165.83l35.555-7.537l.143-40.249c5.12 3.698 12.657 8.96 25.173 8.96c25.458 0 48.64-20.48 48.64-65.564c-.142-41.245-23.609-63.716-48.498-63.716m-8.534 97.991c-8.391 0-13.37-2.986-16.782-6.684l-.143-52.765c3.698-4.124 8.818-6.968 16.925-6.968c12.942 0 21.902 14.506 21.902 33.137c0 19.058-8.818 33.28-21.902 33.28M241.493 36.551l35.698-7.68V0l-35.698 7.538zm0 10.809h35.698v124.444h-35.698zm-38.257 10.524L200.96 47.36h-30.72v124.444h35.556V87.467c8.39-10.951 22.613-8.96 27.022-7.396V47.36c-4.551-1.707-21.191-4.836-29.582 10.524m-71.112-41.386l-34.702 7.395l-.142 113.92c0 21.05 15.787 36.551 36.836 36.551c11.662 0 20.195-2.133 24.888-4.693V140.8c-4.55 1.849-27.022 8.391-27.022-12.658V77.653h27.022V47.36h-27.022zM35.982 83.484c0-5.546 4.551-7.68 12.09-7.68c10.808 0 24.461 3.272 35.27 9.103V51.484c-11.804-4.693-23.466-6.542-35.27-6.542C19.2 44.942 0 60.018 0 85.192c0 39.252 54.044 32.995 54.044 49.92c0 6.541-5.688 8.675-13.653 8.675c-11.804 0-26.88-4.836-38.827-11.378v33.849c13.227 5.689 26.596 8.106 38.827 8.106c29.582 0 49.92-14.648 49.92-40.106c-.142-42.382-54.329-34.845-54.329-50.774">
-          </path>
-        </svg>
-      </div>
-      <div class="flex items-center gap-2 grayscale opacity-30 hover:opacity-100 transition-opacity duration-300">
-        <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" role="img" width="2.25em" height="1em"
-          viewBox="0 0 256 114" data-icon="logos:visaelectron">
-          <path fill="currentColor"
-            d="M97.197 1.46L63.68 81.418H41.814L25.32 17.604c-1-3.921-1.869-5.364-4.912-7.022C15.434 7.88 7.22 5.353 0 3.781L.487 1.46h35.204c4.48 0 8.514 2.983 9.54 8.148l8.715 46.273L75.462 1.46zm29.56 0l-17.103 79.958H88.966L106.071 1.46zm56.116 53.852c.086-21.099-29.174-22.27-28.983-31.697c.07-2.866 2.8-5.917 8.776-6.697c2.96-.383 11.138-.688 20.401 3.58l3.624-16.966C181.714 1.732 175.309 0 167.342 0c-20.45 0-34.835 10.862-34.95 26.428c-.134 11.514 10.275 17.931 18.103 21.766c8.063 3.916 10.767 6.433 10.73 9.933c-.058 5.365-6.44 7.74-12.373 7.828c-10.404.165-16.435-2.812-21.246-5.053l-3.755 17.528c4.84 2.218 13.76 4.145 22.999 4.243c21.74 0 35.959-10.737 36.023-27.36m54 26.106H256L239.29 1.46h-17.647c-3.98 0-7.325 2.31-8.809 5.861l-31.04 74.097h21.723l4.309-11.944h26.54zm-23.09-28.329l10.892-30.027l6.257 30.027zm-60.55 50.338h-8.406v7.823h9.402v2.352h-12.234V91.9h11.752v2.352h-8.92v6.857h8.405zm5.339-12.686h2.832v22.86h-2.832zm9.978 15.583c.064 3.833 2.48 5.41 5.344 5.41c2.03 0 3.285-.354 4.317-.804l.514 2.029c-.998.45-2.736.997-5.217.997c-4.796 0-7.661-3.187-7.661-7.889c0-4.7 2.767-8.372 7.308-8.372c5.12 0 6.44 4.445 6.44 7.31c0 .579-.033.997-.098 1.32zm8.307-2.028c.033-1.77-.74-4.572-3.928-4.572c-2.898 0-4.122 2.608-4.348 4.572zm18.154 8.758c-.74.355-2.383.903-4.475.903c-4.701 0-7.76-3.188-7.76-7.954c0-4.798 3.283-8.307 8.371-8.307c1.674 0 3.155.417 3.928.837l-.642 2.157c-.679-.354-1.741-.742-3.286-.742c-3.575 0-5.505 2.673-5.505 5.895c0 3.605 2.318 5.827 5.409 5.827c1.61 0 2.672-.386 3.477-.74zm7.948-18.772v3.735h4.056v2.156h-4.056v8.405c0 1.934.548 3.027 2.125 3.027c.772 0 1.224-.063 1.643-.194l.129 2.16c-.548.192-1.417.385-2.512.385c-1.321 0-2.384-.451-3.059-1.19c-.773-.871-1.095-2.254-1.095-4.09v-8.503h-2.416v-2.156h2.416V95.12zm8.013 8.598c0-1.836-.034-3.413-.129-4.863h2.48l.13 3.09h.094c.71-2.091 2.447-3.412 4.346-3.412c.291 0 .517.033.775.064v2.674c-.29-.066-.579-.066-.968-.066c-1.994 0-3.413 1.481-3.798 3.608a8.5 8.5 0 0 0-.097 1.32v8.308h-2.833zm25.11...
-            class=""></path>
-        </svg>
-      </div>
+       <div class="flex items-center gap-2 grayscale opacity-30 hover:opacity-100 transition-opacity duration-300">
+         <span class="text-muted-foreground text-sm">Visa</span>
+       </div>
+       <div class="flex items-center gap-2 grayscale opacity-30 hover:opacity-100 transition-opacity duration-300">
+         <span class="text-muted-foreground text-sm">Stripe</span>
+       </div>
        <span class="text-muted-foreground text-xs font-mono border-l border-input pl-8" data-t="landing.footer.soc2_compliant">SOC2 Type II Compliant</span>
     </div>
   </div>

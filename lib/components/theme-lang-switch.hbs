@@ -22,34 +22,61 @@ document.addEventListener('DOMContentLoaded', function() {
   const moonIcon = document.getElementById('moon-icon');
   const langText = document.getElementById('lang-text');
 
-  // Language Toggle
-  langToggle.addEventListener('click', function() {
-    const currentLang = new URLSearchParams(window.location.search).get('lng') || 'en';
-    const newLang = currentLang === 'ar' ? 'en' : 'ar';
-    const newUrl = new URL(window.location);
-    newUrl.searchParams.set('lng', newLang);
-    window.location.href = newUrl.toString();
-  });
+   // Language Toggle
+   langToggle.addEventListener('click', function() {
+     const currentLang = new URLSearchParams(window.location.search).get('lng') || 'en';
+     const newLang = currentLang === 'ar' ? 'en' : 'ar';
 
-  // Initialize language display
-  const currentLang = new URLSearchParams(window.location.search).get('lng') || 'en';
-  langText.textContent = currentLang.toUpperCase();
+     // Save to localStorage
+     localStorage.setItem('language', newLang);
 
-  // Theme Toggle
-  let isDark = localStorage.getItem('theme') === 'dark' ||
-               (!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: dark)').matches);
+     // If user is authenticated, sync with server
+     if (document.body.dataset.loggedIn === 'true') {
+       fetch('/settings/language', {
+         method: 'POST',
+         headers: {
+           'Content-Type': 'application/json',
+         },
+         body: JSON.stringify({ language: newLang })
+       }).catch(err => console.warn('Failed to sync language with server'));
+     }
 
-  function updateTheme() {
-    document.documentElement.classList.toggle('dark', isDark);
-    sunIcon.classList.toggle('hidden', isDark);
-    moonIcon.classList.toggle('hidden', !isDark);
-    localStorage.setItem('theme', isDark ? 'dark' : 'light');
-  }
+     // Reload page with new language
+     const newUrl = new URL(window.location);
+     newUrl.searchParams.set('lng', newLang);
+     window.location.href = newUrl.toString();
+   });
 
-  themeToggle.addEventListener('click', function() {
-    isDark = !isDark;
-    updateTheme();
-  });
+   // Initialize language display
+   const currentLang = new URLSearchParams(window.location.search).get('lng') || 'en';
+   langText.textContent = currentLang.toUpperCase();
+
+   // Theme Toggle
+   let isDark = localStorage.getItem('theme') === 'dark' ||
+                (!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: dark)').matches);
+
+   function updateTheme() {
+     document.documentElement.classList.toggle('dark', isDark);
+     sunIcon.classList.toggle('hidden', isDark);
+     moonIcon.classList.toggle('hidden', !isDark);
+     localStorage.setItem('theme', isDark ? 'dark' : 'light');
+
+     // If user is authenticated, sync with server
+     if (document.body.dataset.loggedIn === 'true') {
+       fetch('/settings/theme', {
+         method: 'POST',
+         headers: {
+           'Content-Type': 'application/json',
+         },
+         body: JSON.stringify({ theme: isDark ? 'dark' : 'light' })
+       }).catch(err => console.warn('Failed to sync theme with server'));
+     }
+   }
+
+   themeToggle.addEventListener('click', function() {
+     isDark = !isDark;
+     updateTheme();
+   });
 
   // Initialize theme
   updateTheme();

@@ -5,7 +5,7 @@
     {{{icon 'menu' class="w-5 h-5"}}}
   </button>
 
-      <div class="h-6 w-6 ml-1 mr-4 sm:mr-6 text-primary"><img src="/images/favicon.svg" class="h-full w-full" /></div>
+      <div class="h-6 w-6 ml-1 mr-4 sm:mr-6 text-primary"><img src="/images/favicon.svg" alt="Accelerator logo" class="h-full w-full"/></div>
 
       <div class="hidden md:flex items-center gap-2 sm:gap-4">
        <div class="flex flex-col items-center justify-center group">
@@ -51,15 +51,12 @@
     </div>
 
     <!-- Theme Toggle Button -->
-    <button id="theme-toggle"
-      class="ml-4 self-center w-6 h-6 text-muted-foreground hover:text-primary rounded-full cursor-pointer border-0"
-      onclick="toggleTheme()">
-      <span id="theme-icon-light">{{{icon "sun" class="h-5 w-5"}}}</span>
-      <span id="theme-icon-dark" class="hidden">{{{icon
-        "moon"
-        class="h-5 w-5"
-        }}}</span>
-    </button>
+     <button id="theme-toggle"
+       class="ml-4 self-center w-6 h-6 text-muted-foreground hover:text-primary rounded-full cursor-pointer border-0"
+       onclick="toggleTheme()">
+       <span id="theme-icon-light">{{{icon "sun" class="h-5 w-5"}}}</span>
+       <span id="theme-icon-dark" class="hidden">{{{icon "moon" class="h-5 w-5"}}}</span>
+     </button>
 
     <!-- Language Switcher -->
     <button id="lang-switcher" class="flex items-center gap-1 ml-4 px-2 py-1 text-xs rounded-md bg-muted text-muted-foreground hover:bg-primary hover:text-primary-foreground" onclick="switchLanguage()">
@@ -208,10 +205,10 @@
       
     <!-- User Menu -->
     <div class="relative self-center" id="admin-user-menu">
-      <button onclick="toggleUserMenu()"
-        class="flex items-center gap-3 h-10 px-3 rounded-md transition-all duration-200 hover:text-primary cursor-pointer border-0"
-        id="admin-user-menu-button">
-        <img src="/images/avatar.png" class="h-6 w-6 rounded-full object-cover shrink-0 user-avatar" alt="User Avatar">
+       <button onclick="toggleUserMenu()"
+         class="flex items-center gap-3 h-10 px-3 rounded-md transition-all duration-200 hover:text-primary cursor-pointer border-0"
+         id="admin-user-menu-button">
+         <img src="{{cond user.profile.avatar_url user.profile.avatar_url '/images/avatar.png'}}" class="h-6 w-6 rounded-full object-cover shrink-0 user-avatar" alt="User Avatar">
 
 
       </button>
@@ -312,7 +309,7 @@
       <div class="fixed top-0 left-0 w-full h-full bg-card border-r border-input shadow-xl transform transition-transform duration-300 overflow-y-auto">
         <div class="flex items-center justify-between p-4 border-b border-input">
           <div class="flex items-center gap-2">
-            <img src="/images/favicon.svg" class="h-6 w-6" />
+            <img src="/images/favicon.svg" alt="Accelerator logo" class="h-6 w-6"/>
             <span class="font-medium">Accelerator</span>
           </div>
           <button onclick="toggleMobileNav()" class="p-2 text-muted-foreground hover:text-foreground">
@@ -471,34 +468,7 @@ document.addEventListener('click', function(event) {
   }
 });
 
-// Mobile portfolio search
-function clearMobileProjectSearch() {
-  const input = document.getElementById('mobile-project-search');
-  input.value = '';
-  filterMobileProjects('');
-  const clearBtn = document.getElementById('mobile-project-search-clear');
-  clearBtn.style.opacity = '0';
-}
-
-function filterMobileProjects(query) {
-  const items = document.querySelectorAll('#mobile-portfolio-list a');
-  let visibleCount = 0;
-  items.forEach(item => {
-    const text = item.textContent.toLowerCase();
-    if (text.includes(query.toLowerCase())) {
-      item.style.display = 'block';
-      visibleCount++;
-    } else {
-      item.style.display = 'none';
-    }
-  });
-  // Update the count in the toggle button
-  const countSpan = document.querySelector('#mobile-nav-menu button span.text-xs');
-  if (countSpan) {
-    countSpan.textContent = `${visibleCount} projects`;
-  }
-}
-
+// Mobile portfolio search functions are now defined in main layout
 document.addEventListener('DOMContentLoaded', function() {
   const mobileSearchInput = document.getElementById('mobile-project-search');
   if (mobileSearchInput) {

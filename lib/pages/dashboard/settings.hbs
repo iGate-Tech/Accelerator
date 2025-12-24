@@ -1,1178 +1,211 @@
-<div class="min-h-screen bg-background">
-  <!-- Mobile-first responsive container -->
-  <div class="w-full max-w-md mx-auto bg-card min-h-screen">
+<div class="flex h-[calc(100vh-4rem)]">
+  {{> sidebar projects=projects lng=lng}}
+  <main class="flex-1 overflow-y-auto bg-background">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 lg:py-8">
+      <div class="space-y-8">
 
-    <!-- Header with back button -->
-    <div class="sticky top-0 z-10 bg-card border-b border-border px-4 py-4 flex items-center gap-3">
-      <a href="/dashboard" class="p-2 -ml-2 text-muted-foreground hover:text-foreground">
-        {{{icon 'arrow-left' class="w-5 h-5"}}}
-      </a>
-      <div>
-        <h1 class="text-xl font-semibold text-foreground">Settings</h1>
-        <p class="text-sm text-muted-foreground">Manage your account</p>
-      </div>
-    </div>
+        <!-- Header -->
+        <div class="text-center sm:text-left">
+          <h1 class="text-3xl font-bold text-foreground">{{t 'settings.settings.title'}}</h1>
+          <p class="text-muted-foreground mt-2">{{t 'settings.settings.subtitle'}}</p>
+        </div>
 
-     <!-- Settings Timeline -->
-     <div class="relative pb-6" id="settings-timeline">
-       <!-- Timeline line -->
-       <div class="absolute left-4 sm:left-6 top-0 bottom-0 w-0.5 bg-border"></div>
+        <!-- Profile Settings -->
+        <div class="bg-card rounded-lg border border-border shadow-sm">
+          <div class="p-4 sm:p-6">
+            <h2 class="text-lg sm:text-xl font-semibold text-foreground mb-3 sm:mb-4">{{t 'settings.settings.profile'}}</h2>
+            <form method="POST" action="/settings/profile" enctype="multipart/form-data" class="space-y-3 sm:space-y-4">
+              <input type="hidden" name="_csrf" value="{{csrf}}"/>
 
-       <!-- Account Section -->
-       <div class="mb-6 sm:mb-8">
-         <div class="flex items-center gap-3 sm:gap-4 mb-4">
-           {{{icon "user" class="w-4 h-4 sm:w-5 sm:h-5 text-primary z-10"}}}
-           <h2 class="text-base sm:text-lg font-semibold text-foreground">Account</h2>
-         </div>
-
-         <div class="ml-8 sm:ml-12 space-y-3 sm:space-y-4">
-           <!-- Profile -->
-           <div class="activity-item bg-card rounded-lg border border-border overflow-hidden">
-             <button data-section="profile" class="w-full px-3 sm:px-4 py-3 sm:py-4 flex items-center gap-3 sm:gap-4 hover:bg-muted/50 transition-colors text-left">
-               <div class="flex-shrink-0">
-                 <div class="w-8 h-8 sm:w-10 sm:h-10 bg-primary/20 rounded-full flex items-center justify-center">
-                   {{{icon 'user' class="w-4 h-4 sm:w-5 sm:h-5 text-primary"}}}
-                 </div>
-               </div>
-               <div class="flex-1 min-w-0">
-                  <p class="text-sm sm:text-base font-medium text-foreground">{{t 'settings.settings.profile_information'}}</p>
-                 <p class="text-xs sm:text-sm text-muted-foreground truncate">{{profile.name}}</p>
-               </div>
-               <div class="flex items-center gap-2">
-                 <span class="text-xs text-muted-foreground">Edit</span>
-                 {{{icon 'chevron-down' class="w-3 h-3 sm:w-4 sm:h-4 text-muted-foreground chevron-icon transition-transform duration-200"}}}
-               </div>
-             </button>
-             <!-- Profile Content -->
-             <div id="profile-content" class="hidden px-3 sm:px-4 pb-3 sm:pb-4 border-t border-border">
-               <form method="POST" action="/settings/profile" enctype="multipart/form-data" class="space-y-3 sm:space-y-4 pt-3 sm:pt-4" onsubmit="return validateProfileForm()">
-                 <input type="hidden" name="_csrf" value="{{csrf}}" />
-
-                 <!-- Avatar -->
-                 <div class="flex flex-col items-center gap-3 sm:gap-4">
-                   <img src="{{#if profile.avatar_url}}{{profile.avatar_url}}{{else}}/images/avatar.png{{/if}}"
-                        class="w-14 h-14 sm:w-16 sm:h-16 rounded-full object-cover border-2 border-border"
-                        id="avatar-preview" alt="Current avatar">
-                   <div class="text-center">
-                     <input type="file" name="avatar" id="avatar-upload" accept="image/*" class="hidden" onchange="previewAvatar(this)">
-                     <label for="avatar-upload" class="bg-primary text-primary-foreground px-3 py-2 rounded-lg cursor-pointer hover:bg-primary/90 transition-colors text-xs sm:text-sm font-medium">
-{{t 'settings.settings.change_photo'}}
-                     </label>
-                     <p class="text-xs text-muted-foreground mt-1">Max 5MB</p>
-                   </div>
-                 </div>
-
-                 <!-- Name -->
-                 <div>
-                    <label for="name" class="block text-xs sm:text-sm font-medium text-foreground mb-1 sm:mb-2">{{t 'settings.settings.full_name'}}</label>
-                   <input type="text" id="name" name="name" value="{{profile.name}}"
-                          class="w-full px-3 py-2 border border-input rounded-lg bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary text-sm"
-                          placeholder="Your full name">
-                 </div>
-
-                 <!-- Role -->
-                 <div>
-                   <label for="role" class="block text-xs sm:text-sm font-medium text-foreground mb-1 sm:mb-2">Role</label>
-                   <input type="text" id="role" name="role" value="{{profile.role}}"
-                          class="w-full px-3 py-2 border border-input rounded-lg bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary text-sm"
-                          placeholder="Your role">
-                 </div>
-
-                 <!-- Bio -->
-                 <div>
-                   <label for="bio" class="block text-xs sm:text-sm font-medium text-foreground mb-1 sm:mb-2">Bio</label>
-                   <textarea id="bio" name="bio" rows="2"
-                             class="w-full px-3 py-2 border border-input rounded-lg bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary resize-none text-sm"
-                             placeholder="Tell us about yourself">{{profile.preferences.bio}}</textarea>
-                 </div>
-
-                 <!-- Location -->
-                 <div>
-                   <label for="location" class="block text-xs sm:text-sm font-medium text-foreground mb-1 sm:mb-2">Location</label>
-                   <input type="text" id="location" name="location" value="{{profile.preferences.location}}"
-                          class="w-full px-3 py-2 border border-input rounded-lg bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary text-sm"
-                          placeholder="City, Country">
-                 </div>
-
-                 <!-- Website -->
-                 <div>
-                   <label for="website" class="block text-xs sm:text-sm font-medium text-foreground mb-1 sm:mb-2">Website</label>
-                   <input type="url" id="website" name="website" value="{{profile.preferences.website}}"
-                          class="w-full px-3 py-2 border border-input rounded-lg bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary text-sm"
-                          placeholder="https://yourwebsite.com">
-                 </div>
-
-                 <!-- Action Buttons -->
-                 <div class="flex gap-2 sm:gap-3 pt-2">
-                   <button type="submit" class="flex-1 bg-primary text-primary-foreground py-2 px-3 rounded-lg font-medium hover:bg-primary/90 transition-colors text-xs sm:text-sm">
-{{t 'settings.settings.save_changes'}}
-                   </button>
-                   <button type="button" onclick="toggleSection('profile')" class="flex-1 bg-muted text-muted-foreground py-2 px-3 rounded-lg font-medium hover:bg-muted/80 transition-colors text-xs sm:text-sm">
-                     Cancel
-                   </button>
-                 </div>
-               </form>
-             </div>
-           </div>
-
-           <!-- Password -->
-           <div class="activity-item bg-card rounded-lg border border-border overflow-hidden">
-             <button data-section="password" class="w-full px-3 sm:px-4 py-3 sm:py-4 flex items-center gap-3 sm:gap-4 hover:bg-muted/50 transition-colors text-left">
-               <div class="flex-shrink-0">
-                 <div class="w-8 h-8 sm:w-10 sm:h-10 bg-green-500/20 rounded-full flex items-center justify-center">
-                   {{{icon 'lock' class="w-4 h-4 sm:w-5 sm:h-5 text-green-600"}}}
-                 </div>
-               </div>
-               <div class="flex-1 min-w-0">
-                 <p class="text-sm sm:text-base font-medium text-foreground">Password</p>
-                 <p class="text-xs sm:text-sm text-muted-foreground">Change your password</p>
-               </div>
-               <div class="flex items-center gap-2">
-                 <span class="text-xs text-muted-foreground">Change</span>
-                 {{{icon 'chevron-down' class="w-3 h-3 sm:w-4 sm:h-4 text-muted-foreground chevron-icon transition-transform duration-200"}}}
-               </div>
-             </button>
-             <!-- Password Content -->
-             <div id="password-content" class="hidden px-3 sm:px-4 pb-3 sm:pb-4 border-t border-border">
-               <form method="POST" action="/settings/password" class="space-y-3 sm:space-y-4 pt-3 sm:pt-4" onsubmit="return validatePasswordForm()">
-                 <input type="hidden" name="_csrf" value="{{csrf}}" />
-
-                 <!-- Current Password -->
-                 <div>
-                    <label for="current-password" class="block text-xs sm:text-sm font-medium text-foreground mb-1 sm:mb-2">{{t 'settings.settings.current_password'}}</label>
-                   <input type="password" id="current-password" name="current_password" autocomplete="current-password"
-                          class="w-full px-3 py-2 border border-input rounded-lg bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary text-sm"
-                          placeholder="Enter current password">
-                 </div>
-
-                 <!-- New Password -->
-                 <div>
-                    <label for="new-password" class="block text-xs sm:text-sm font-medium text-foreground mb-1 sm:mb-2">{{t 'settings.settings.new_password'}}</label>
-                   <input type="password" id="new-password" name="new_password" autocomplete="new-password"
-                          class="w-full px-3 py-2 border border-input rounded-lg bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary text-sm"
-                          placeholder="Enter new password">
-                 </div>
-
-                 <!-- Confirm Password -->
-                 <div>
-                    <label for="confirm-password" class="block text-xs sm:text-sm font-medium text-foreground mb-1 sm:mb-2">{{t 'settings.settings.confirm_password'}}</label>
-                   <input type="password" id="confirm-password" name="confirm_password" autocomplete="new-password"
-                          class="w-full px-3 py-2 border border-input rounded-lg bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary text-sm"
-                          placeholder="Confirm new password">
-                 </div>
-
-                 <!-- Action Buttons -->
-                 <div class="flex gap-2 sm:gap-3 pt-2">
-                   <button type="submit" class="flex-1 bg-primary text-primary-foreground py-2 px-3 rounded-lg font-medium hover:bg-primary/90 transition-colors text-xs sm:text-sm">
-{{t 'settings.settings.update_password'}}
-                   </button>
-                   <button type="button" onclick="toggleSection('password')" class="flex-1 bg-muted text-muted-foreground py-2 px-3 rounded-lg font-medium hover:bg-muted/80 transition-colors text-xs sm:text-sm">
-                     Cancel
-                   </button>
-                 </div>
-               </form>
-             </div>
-           </div>
-         </div>
-       </div>
-
-       <!-- Billing Section -->
-       <div class="mb-6 sm:mb-8">
-         <div class="flex items-center gap-3 sm:gap-4 mb-4">
-           {{{icon "credit-card" class="w-4 h-4 sm:w-5 sm:h-5 text-purple-600 z-10"}}}
-           <h2 class="text-base sm:text-lg font-semibold text-foreground">Billing</h2>
-         </div>
-
-         <div class="ml-8 sm:ml-12 space-y-3 sm:space-y-4">
-           <!-- Current Plan -->
-           <div class="activity-item bg-card rounded-lg border border-border p-3 sm:p-4">
-             <div class="flex items-center gap-3 sm:gap-4">
-               <div class="flex-shrink-0">
-                 <div class="w-8 h-8 sm:w-10 sm:h-10 bg-purple-500/20 rounded-full flex items-center justify-center">
-                   {{{icon 'credit-card' class="w-4 h-4 sm:w-5 sm:h-5 text-purple-600"}}}
-                 </div>
-               </div>
-               <div class="flex-1 min-w-0">
-                 <p class="text-sm sm:text-base font-medium text-foreground">{{#if packageDetails}}{{packageDetails.name}} Plan{{else}}{{capitalize profile.package_type}} Plan{{/if}}</p>
-                 <p class="text-xs sm:text-sm text-muted-foreground">{{profile.credit_balance}} credits available</p>
-               </div>
-               <a href="/upgrade-package" class="text-xs sm:text-sm text-primary font-medium">Upgrade</a>
-             </div>
-           </div>
-
-           <!-- Billing History -->
-           <div class="activity-item bg-card rounded-lg border border-border overflow-hidden">
-             <a href="/billing" class="px-3 sm:px-4 py-3 sm:py-4 flex items-center gap-3 sm:gap-4 hover:bg-muted/50 transition-colors text-left">
-               <div class="flex-shrink-0">
-                 <div class="w-8 h-8 sm:w-10 sm:h-10 bg-orange-500/20 rounded-full flex items-center justify-center">
-                   {{{icon 'receipt' class="w-4 h-4 sm:w-5 sm:h-5 text-orange-600"}}}
-                 </div>
-               </div>
-               <div class="flex-1 min-w-0">
-                  <p class="text-sm sm:text-base font-medium text-foreground">{{t 'settings.settings.billing_history'}}</p>
-                 <p class="text-xs sm:text-sm text-muted-foreground">View past transactions</p>
-               </div>
-               {{{icon 'chevron-right' class="w-3 h-3 sm:w-4 sm:h-4 text-muted-foreground"}}}
-             </a>
-           </div>
-
-           <!-- Payment Methods -->
-           <div class="activity-item bg-card rounded-lg border border-border overflow-hidden">
-             <a href="/add-payment-method" class="px-3 sm:px-4 py-3 sm:py-4 flex items-center gap-3 sm:gap-4 hover:bg-muted/50 transition-colors text-left">
-               <div class="flex-shrink-0">
-                 <div class="w-8 h-8 sm:w-10 sm:h-10 bg-teal-500/20 rounded-full flex items-center justify-center">
-                   {{{icon 'credit-card' class="w-4 h-4 sm:w-5 sm:h-5 text-teal-600"}}}
-                 </div>
-               </div>
-               <div class="flex-1 min-w-0">
-                  <p class="text-sm sm:text-base font-medium text-foreground">{{t 'settings.settings.payment_methods'}}</p>
-                 <p class="text-xs sm:text-sm text-muted-foreground">Manage cards and payment options</p>
-               </div>
-               {{{icon 'chevron-right' class="w-3 h-3 sm:w-4 sm:h-4 text-muted-foreground"}}}
-             </a>
-           </div>
-         </div>
-       </div>
-
-       <!-- Preferences Section -->
-       <div class="mb-6 sm:mb-8">
-         <div class="flex items-center gap-3 sm:gap-4 mb-4">
-           {{{icon "settings" class="w-4 h-4 sm:w-5 sm:h-5 text-indigo-600 z-10"}}}
-           <h2 class="text-base sm:text-lg font-semibold text-foreground">Preferences</h2>
-         </div>
-
-         <div class="ml-8 sm:ml-12 space-y-3 sm:space-y-4">
-           <!-- Theme Toggle -->
-           <div class="activity-item bg-card rounded-lg border border-border overflow-hidden">
-             <button onclick="toggleTheme()" class="w-full px-3 sm:px-4 py-3 sm:py-4 flex items-center gap-3 sm:gap-4 hover:bg-muted/50 transition-colors text-left">
-               <div class="flex-shrink-0">
-                 <div class="w-8 h-8 sm:w-10 sm:h-10 bg-indigo-500/20 rounded-full flex items-center justify-center">
-                   <span id="theme-icon-light">{{{icon 'sun' class="w-4 h-4 sm:w-5 sm:h-5 text-indigo-600"}}}</span>
-                   <span id="theme-icon-dark" class="hidden">{{{icon 'moon' class="w-4 h-4 sm:w-5 sm:h-5 text-indigo-600"}}}</span>
-                 </div>
-               </div>
-               <div class="flex-1 min-w-0">
-                 <p class="text-sm sm:text-base font-medium text-foreground">Theme</p>
-                 <p class="text-xs sm:text-sm text-muted-foreground" id="theme-status">{{#if (eq settings.theme 'dark')}}Dark mode{{else}}Light mode{{/if}}</p>
-               </div>
-               {{{icon 'chevron-right' class="w-3 h-3 sm:w-4 sm:h-4 text-muted-foreground"}}}
-             </button>
-           </div>
-
-           <!-- Language -->
-           <div class="activity-item bg-card rounded-lg border border-border overflow-hidden">
-             <button onclick="switchLanguage()" class="w-full px-3 sm:px-4 py-3 sm:py-4 flex items-center gap-3 sm:gap-4 hover:bg-muted/50 transition-colors text-left">
-               <div class="flex-shrink-0">
-                 <div class="w-8 h-8 sm:w-10 sm:h-10 bg-pink-500/20 rounded-full flex items-center justify-center">
-                   {{{icon 'languages' class="w-4 h-4 sm:w-5 sm:h-5 text-pink-600"}}}
-                 </div>
-               </div>
-               <div class="flex-1 min-w-0">
-                 <p class="text-sm sm:text-base font-medium text-foreground">Language</p>
-                 <p class="text-xs sm:text-sm text-muted-foreground" id="lang-display">{{#if (eq settings.language 'ar')}}العربية{{else}}English{{/if}}</p>
-               </div>
-               {{{icon 'chevron-right' class="w-3 h-3 sm:w-4 sm:h-4 text-muted-foreground"}}}
-             </button>
-           </div>
-
-           <!-- Notifications -->
-           <div class="activity-item bg-card rounded-lg border border-border overflow-hidden">
-             <button data-section="notifications" class="w-full px-3 sm:px-4 py-3 sm:py-4 flex items-center gap-3 sm:gap-4 hover:bg-muted/50 transition-colors text-left">
-               <div class="flex-shrink-0">
-                 <div class="w-8 h-8 sm:w-10 sm:h-10 bg-red-500/20 rounded-full flex items-center justify-center">
-                   {{{icon 'bell' class="w-4 h-4 sm:w-5 sm:h-5 text-red-600"}}}
-                 </div>
-               </div>
-               <div class="flex-1 min-w-0">
-                 <p class="text-sm sm:text-base font-medium text-foreground">Notifications</p>
-                 <p class="text-xs sm:text-sm text-muted-foreground">Manage notification preferences</p>
-               </div>
-               {{{icon 'chevron-down' class="w-3 h-3 sm:w-4 sm:h-4 text-muted-foreground chevron-icon transition-transform duration-200"}}}
-             </button>
-             <!-- Notifications Content -->
-             <div id="notifications-content" class="hidden px-3 sm:px-4 pb-3 sm:pb-4 border-t border-border">
-               <form method="POST" action="/settings/notifications" class="space-y-3 sm:space-y-4 pt-3 sm:pt-4">
-                 <input type="hidden" name="_csrf" value="{{csrf}}" />
-
-                 <!-- Email Notifications -->
-                 <div class="bg-muted/50 rounded-lg p-3">
-                   <h4 class="font-medium text-foreground mb-3 text-sm sm:text-base">Email Notifications</h4>
-                   <div class="space-y-2 sm:space-y-3">
-                     <label class="flex items-center justify-between">
-                       <div>
-                         <p class="font-medium text-foreground text-xs sm:text-sm">Project Updates</p>
-                         <p class="text-xs text-muted-foreground">Get notified about project changes</p>
-                       </div>
-                       <input type="checkbox" name="email_project_updates" {{#if settings.notifications_email_project_updates}}checked{{/if}} class="w-4 h-4 text-primary">
-                     </label>
-                     <label class="flex items-center justify-between">
-                       <div>
-                         <p class="font-medium text-foreground text-xs sm:text-sm">Billing Alerts</p>
-                         <p class="text-xs text-muted-foreground">Receive billing and payment notifications</p>
-                       </div>
-                       <input type="checkbox" name="email_billing" {{#if settings.notifications_email_billing}}checked{{/if}} class="w-4 h-4 text-primary">
-                     </label>
-                     <label class="flex items-center justify-between">
-                       <div>
-                         <p class="font-medium text-foreground text-xs sm:text-sm">Marketing</p>
-                         <p class="text-xs text-muted-foreground">Receive updates about new features</p>
-                       </div>
-                       <input type="checkbox" name="email_marketing" {{#if settings.notifications_email_marketing}}checked{{/if}} class="w-4 h-4 text-primary">
-                     </label>
-                   </div>
-                 </div>
-
-                 <!-- Push Notifications -->
-                 <div class="bg-muted/50 rounded-lg p-3">
-                   <h4 class="font-medium text-foreground mb-3 text-sm sm:text-base">Push Notifications</h4>
-                   <div class="space-y-2 sm:space-y-3">
-                     <label class="flex items-center justify-between">
-                       <div>
-                         <p class="font-medium text-foreground text-xs sm:text-sm">New Messages</p>
-                         <p class="text-xs text-muted-foreground">Get notified about new messages</p>
-                       </div>
-                       <input type="checkbox" name="push_messages" {{#if settings.notifications_push_messages}}checked{{/if}} class="w-4 h-4 text-primary">
-                     </label>
-                     <label class="flex items-center justify-between">
-                       <div>
-                         <p class="font-medium text-foreground text-xs sm:text-sm">Reminders</p>
-                         <p class="text-xs text-muted-foreground">Receive reminder notifications</p>
-                       </div>
-                       <input type="checkbox" name="push_reminders" {{#if settings.notifications_push_reminders}}checked{{/if}} class="w-4 h-4 text-primary">
-                     </label>
-                   </div>
-                 </div>
-
-                 <!-- Action Buttons -->
-                 <div class="flex gap-2 sm:gap-3 pt-2">
-                   <button type="submit" class="flex-1 bg-primary text-primary-foreground py-2 px-3 rounded-lg font-medium hover:bg-primary/90 transition-colors text-xs sm:text-sm">
-                     Save Preferences
-                   </button>
-                   <button type="button" onclick="toggleSection('notifications')" class="flex-1 bg-muted text-muted-foreground py-2 px-3 rounded-lg font-medium hover:bg-muted/80 transition-colors text-xs sm:text-sm">
-                     Cancel
-                   </button>
-                 </div>
-               </form>
-             </div>
-           </div>
-         </div>
-       </div>
-
-       <!-- Support Section -->
-       <div class="mb-6 sm:mb-8">
-         <div class="flex items-center gap-3 sm:gap-4 mb-4">
-           {{{icon "help-circle" class="w-4 h-4 sm:w-5 sm:h-5 text-cyan-600 z-10"}}}
-           <h2 class="text-base sm:text-lg font-semibold text-foreground">Support</h2>
-         </div>
-
-         <div class="ml-8 sm:ml-12 space-y-3 sm:space-y-4">
-           <!-- Help -->
-           <div class="activity-item bg-card rounded-lg border border-border overflow-hidden">
-             <a href="/help" class="px-3 sm:px-4 py-3 sm:py-4 flex items-center gap-3 sm:gap-4 hover:bg-muted/50 transition-colors text-left">
-               <div class="flex-shrink-0">
-                 <div class="w-8 h-8 sm:w-10 sm:h-10 bg-cyan-500/20 rounded-full flex items-center justify-center">
-                   {{{icon 'help-circle' class="w-4 h-4 sm:w-5 sm:h-5 text-cyan-600"}}}
-                 </div>
-               </div>
-               <div class="flex-1 min-w-0">
-                 <p class="text-sm sm:text-base font-medium text-foreground">Help & Support</p>
-                 <p class="text-xs sm:text-sm text-muted-foreground">Get help and contact support</p>
-               </div>
-               {{{icon 'chevron-right' class="w-3 h-3 sm:w-4 sm:h-4 text-muted-foreground"}}}
-             </a>
-           </div>
-
-           <!-- About -->
-           <div class="activity-item bg-card rounded-lg border border-border overflow-hidden">
-             <button data-section="about" class="w-full px-3 sm:px-4 py-3 sm:py-4 flex items-center gap-3 sm:gap-4 hover:bg-muted/50 transition-colors text-left">
-               <div class="flex-shrink-0">
-                 <div class="w-8 h-8 sm:w-10 sm:h-10 bg-gray-500/20 rounded-full flex items-center justify-center">
-                   {{{icon 'info' class="w-4 h-4 sm:w-5 sm:h-5 text-gray-600"}}}
-                 </div>
-               </div>
-               <div class="flex-1 min-w-0">
-                 <p class="text-sm sm:text-base font-medium text-foreground">About Accelerator</p>
-                 <p class="text-xs sm:text-sm text-muted-foreground">Version 1.0.0</p>
-               </div>
-               {{{icon 'chevron-down' class="w-3 h-3 sm:w-4 sm:h-4 text-muted-foreground chevron-icon transition-transform duration-200"}}}
-             </button>
-             <!-- About Content -->
-             <div id="about-content" class="hidden px-3 sm:px-4 pb-3 sm:pb-4 border-t border-border">
-               <div class="pt-3 sm:pt-4 space-y-3 sm:space-y-4">
-                 <!-- App Info -->
-                 <div class="bg-muted/50 rounded-lg p-3 text-center">
-                   <div class="w-10 h-10 sm:w-12 sm:h-12 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-3">
-                     {{{icon 'zap' class="w-5 h-5 sm:w-6 sm:h-6 text-primary"}}}
-                   </div>
-                   <h4 class="font-semibold text-foreground text-sm sm:text-base">Accelerator</h4>
-                   <p class="text-muted-foreground text-xs sm:text-sm">Version 1.0.0</p>
-                   <p class="text-xs text-muted-foreground mt-2">AI-powered business planning platform</p>
-                 </div>
-
-                 <!-- Links -->
-                 <div class="space-y-2">
-                   <a href="/privacy" class="w-full bg-card border border-border rounded-lg px-3 py-2 flex items-center gap-3 hover:bg-muted/50 transition-colors">
-                     <div class="w-5 h-5 sm:w-6 sm:h-6 bg-blue-500/10 rounded-lg flex items-center justify-center">
-                       {{{icon 'shield' class="w-3 h-3 text-blue-600"}}}
-                     </div>
-                     <div>
-                       <p class="font-medium text-foreground text-xs sm:text-sm">Privacy Policy</p>
-                       <p class="text-xs text-muted-foreground">How we protect your data</p>
-                     </div>
-                     {{{icon 'chevron-right' class="w-3 h-3 text-muted-foreground"}}}
-                   </a>
-
-                   <a href="/terms" class="w-full bg-card border border-border rounded-lg px-3 py-2 flex items-center gap-3 hover:bg-muted/50 transition-colors">
-                     <div class="w-5 h-5 sm:w-6 sm:h-6 bg-green-500/10 rounded-lg flex items-center justify-center">
-                       {{{icon 'file-text' class="w-3 h-3 text-green-600"}}}
-                     </div>
-                     <div>
-                       <p class="font-medium text-foreground text-xs sm:text-sm">Terms of Service</p>
-                       <p class="text-xs text-muted-foreground">Terms and conditions</p>
-                     </div>
-                     {{{icon 'chevron-right' class="w-3 h-3 text-muted-foreground"}}}
-                   </a>
-
-                   <a href="/contact" class="w-full bg-card border border-border rounded-lg px-3 py-2 flex items-center gap-3 hover:bg-muted/50 transition-colors">
-                     <div class="w-5 h-5 sm:w-6 sm:h-6 bg-red-500/10 rounded-lg flex items-center justify-center">
-                       {{{icon 'mail' class="w-3 h-3 text-red-600"}}}
-                     </div>
-                     <div>
-                       <p class="font-medium text-foreground text-xs sm:text-sm">Contact Us</p>
-                       <p class="text-xs text-muted-foreground">Get in touch with support</p>
-                     </div>
-                     {{{icon 'chevron-right' class="w-3 h-3 text-muted-foreground"}}}
-                   </a>
-                 </div>
-               </div>
-             </div>
-           </div>
-         </div>
-       </div>
-     </div>
-             <div class="flex-1 min-w-0">
-               <p class="font-medium text-foreground">Profile Information</p>
-               <p class="text-sm text-muted-foreground truncate">{{profile.name}}</p>
-             </div>
-              <div class="flex items-center gap-2">
-                <span class="text-xs text-muted-foreground">Edit</span>
-                {{{icon 'chevron-down' class="w-4 h-4 text-muted-foreground chevron-icon transition-transform duration-200"}}}
+              <!-- Avatar Section -->
+              <div class="flex items-center space-x-4 mb-4">
+                <div class="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-muted flex items-center justify-center overflow-hidden">
+                  {{#if user.avatar_url}}
+                    <img src="{{user.avatar_url}}" alt="Avatar" class="w-full h-full object-cover"/>
+                  {{else}}
+                    <svg class="w-8 h-8 sm:w-10 sm:h-10 text-muted-foreground" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+                    </svg>
+                  {{/if}}
+                </div>
+                <div class="flex-1">
+                  <label for="avatar" class="block text-sm font-medium text-foreground mb-1">{{t 'settings.settings.change_avatar'}}</label>
+                  <input type="file" id="avatar" name="avatar" accept="image/*" class="block w-full text-sm text-muted-foreground file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-medium file:bg-primary file:text-primary-foreground hover:file:bg-primary/90"/>
+                  <p class="text-xs text-muted-foreground mt-1">{{t 'settings.settings.max_5mb'}}</p>
+                </div>
               </div>
-           </button>
-           <!-- Profile Content -->
-           <div id="profile-content" class="hidden px-4 pb-4 border-t border-border">
-             <form method="POST" action="/settings/profile" enctype="multipart/form-data" class="space-y-4 pt-4" onsubmit="return validateProfileForm()">
-               <input type="hidden" name="_csrf" value="{{csrf}}" />
-
-               <!-- Avatar -->
-               <div class="flex flex-col items-center gap-4">
-                 <img src="{{#if profile.avatar_url}}{{profile.avatar_url}}{{else}}/images/avatar.png{{/if}}"
-                      class="w-16 h-16 rounded-full object-cover border-2 border-border"
-                      id="avatar-preview" alt="Current avatar">
-                 <div class="text-center">
-                   <input type="file" name="avatar" id="avatar-upload" accept="image/*" class="hidden" onchange="previewAvatar(this)">
-                   <label for="avatar-upload" class="bg-primary text-primary-foreground px-3 py-2 rounded-lg cursor-pointer hover:bg-primary/90 transition-colors text-sm font-medium">
-                     Change Photo
-                   </label>
-                   <p class="text-xs text-muted-foreground mt-1">Max 5MB</p>
-                 </div>
-               </div>
-
-               <!-- Name -->
-               <div>
-                  <label for="name" class="block text-sm font-medium text-foreground mb-2">{{t 'settings.settings.full_name'}}</label>
-                 <input type="text" id="name" name="name" value="{{profile.name}}"
-                        class="w-full px-3 py-2 border border-input rounded-lg bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
-                        placeholder="Your full name">
-               </div>
-
-               <!-- Role -->
-               <div>
-                 <label for="role" class="block text-sm font-medium text-foreground mb-2">Role</label>
-                 <input type="text" id="role" name="role" value="{{profile.role}}"
-                        class="w-full px-3 py-2 border border-input rounded-lg bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
-                        placeholder="Your role">
-               </div>
-
-               <!-- Bio -->
-               <div>
-                 <label for="bio" class="block text-sm font-medium text-foreground mb-2">Bio</label>
-                 <textarea id="bio" name="bio" rows="2"
-                           class="w-full px-3 py-2 border border-input rounded-lg bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary resize-none"
-                           placeholder="Tell us about yourself">{{profile.preferences.bio}}</textarea>
-               </div>
-
-               <!-- Location -->
-               <div>
-                 <label for="location" class="block text-sm font-medium text-foreground mb-2">Location</label>
-                 <input type="text" id="location" name="location" value="{{profile.preferences.location}}"
-                        class="w-full px-3 py-2 border border-input rounded-lg bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
-                        placeholder="City, Country">
-               </div>
-
-               <!-- Website -->
-               <div>
-                 <label for="website" class="block text-sm font-medium text-foreground mb-2">Website</label>
-                 <input type="url" id="website" name="website" value="{{profile.preferences.website}}"
-                        class="w-full px-3 py-2 border border-input rounded-lg bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
-                        placeholder="https://yourwebsite.com">
-               </div>
-
-               <!-- Action Buttons -->
-               <div class="flex gap-3 pt-2">
-                 <button type="submit" class="flex-1 bg-primary text-primary-foreground py-2 px-3 rounded-lg font-medium hover:bg-primary/90 transition-colors text-sm">
-{{t 'settings.settings.save_changes'}}
-                 </button>
-                 <button type="button" onclick="toggleSection('profile')" class="flex-1 bg-muted text-muted-foreground py-2 px-3 rounded-lg font-medium hover:bg-muted/80 transition-colors text-sm">
-                   Cancel
-                 </button>
-               </div>
-             </form>
-           </div>
-         </div>
-
-         <!-- Password -->
-         <div class="bg-card border border-border rounded-xl mb-3 overflow-hidden">
-           <button data-section="password" class="w-full px-4 py-4 flex items-center gap-4 hover:bg-muted/50 transition-colors text-left">
-             <div class="w-10 h-10 bg-green-500/10 rounded-xl flex items-center justify-center flex-shrink-0">
-               {{{icon 'lock' class="w-5 h-5 text-green-600"}}}
-             </div>
-             <div class="flex-1 min-w-0">
-               <p class="font-medium text-foreground">Password</p>
-               <p class="text-sm text-muted-foreground">Change your password</p>
-             </div>
-              <div class="flex items-center gap-2">
-                <span class="text-xs text-muted-foreground">Change</span>
-                {{{icon 'chevron-down' class="w-4 h-4 text-muted-foreground chevron-icon transition-transform duration-200"}}}
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                <div>
+                  <label for="name" class="block text-sm font-medium text-foreground mb-2">{{t 'settings.settings.name'}}</label>
+                  <input type="text" id="name" name="name" value="{{user.name}}" class="w-full px-3 py-2 border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent" required/>
+                </div>
+                <div>
+                  <label for="email" class="block text-sm font-medium text-foreground mb-2">{{t 'settings.settings.email'}}</label>
+                  <input type="email" id="email" name="email" value="{{user.email}}" class="w-full px-3 py-2 border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent" required/>
+                </div>
+                <div>
+                  <label for="role" class="block text-sm font-medium text-foreground mb-2">{{t 'settings.settings.role'}}</label>
+                  <input type="text" id="role" name="role" value="{{user.role}}" placeholder="{{t 'settings.settings.role_placeholder'}}" class="w-full px-3 py-2 border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"/>
+                </div>
+                <div>
+                  <label for="location" class="block text-sm font-medium text-foreground mb-2">{{t 'settings.settings.location'}}</label>
+                  <input type="text" id="location" name="location" value="{{user.location}}" placeholder="e.g., New York, USA" class="w-full px-3 py-2 border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"/>
+                </div>
               </div>
-           </button>
-           <!-- Password Content -->
-           <div id="password-content" class="hidden px-4 pb-4 border-t border-border">
-             <form method="POST" action="/settings/password" class="space-y-4 pt-4" onsubmit="return validatePasswordForm()">
-               <input type="hidden" name="_csrf" value="{{csrf}}" />
-
-               <!-- Current Password -->
-               <div>
-                  <label for="current-password" class="block text-sm font-medium text-foreground mb-2">{{t 'settings.settings.current_password'}}</label>
-                 <input type="password" id="current-password" name="current_password" autocomplete="current-password"
-                        class="w-full px-3 py-2 border border-input rounded-lg bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
-                        placeholder="Enter current password">
-               </div>
-
-               <!-- New Password -->
-               <div>
-                  <label for="new-password" class="block text-sm font-medium text-foreground mb-2">{{t 'settings.settings.new_password'}}</label>
-                 <input type="password" id="new-password" name="new_password" autocomplete="new-password"
-                        class="w-full px-3 py-2 border border-input rounded-lg bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
-                        placeholder="Enter new password">
-               </div>
-
-               <!-- Confirm Password -->
-               <div>
-                  <label for="confirm-password" class="block text-sm font-medium text-foreground mb-2">{{t 'settings.settings.confirm_password'}}</label>
-                 <input type="password" id="confirm-password" name="confirm_password" autocomplete="new-password"
-                        class="w-full px-3 py-2 border border-input rounded-lg bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
-                        placeholder="Confirm new password">
-               </div>
-
-               <!-- Action Buttons -->
-               <div class="flex gap-3 pt-2">
-                 <button type="submit" class="flex-1 bg-primary text-primary-foreground py-2 px-3 rounded-lg font-medium hover:bg-primary/90 transition-colors text-sm">
-{{t 'settings.settings.update_password'}}
-                 </button>
-                 <button type="button" onclick="toggleSection('password')" class="flex-1 bg-muted text-muted-foreground py-2 px-3 rounded-lg font-medium hover:bg-muted/80 transition-colors text-sm">
-                   Cancel
-                 </button>
-               </div>
-             </form>
-           </div>
-         </div>
-      </div>
-
-      <!-- Billing Section -->
-      <div class="px-4 py-2">
-        <h2 class="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3 px-4">Billing</h2>
-
-        <!-- Current Plan -->
-        <div class="bg-card border border-border rounded-xl mb-3 overflow-hidden">
-          <div class="px-4 py-4 flex items-center gap-4">
-            <div class="w-10 h-10 bg-purple-500/10 rounded-xl flex items-center justify-center flex-shrink-0">
-              {{{icon 'credit-card' class="w-5 h-5 text-purple-600"}}}
-            </div>
-            <div class="flex-1 min-w-0">
-              <p class="font-medium text-foreground">{{#if packageDetails}}{{packageDetails.name}} Plan{{else}}{{capitalize profile.package_type}} Plan{{/if}}</p>
-              <p class="text-sm text-muted-foreground">{{profile.credit_balance}} credits available</p>
-            </div>
-            <a href="/upgrade-package" class="text-sm text-primary font-medium">Upgrade</a>
+              <div>
+                <label for="bio" class="block text-sm font-medium text-foreground mb-2">{{t 'settings.settings.bio'}}</label>
+                <textarea id="bio" name="bio" rows="3" class="w-full px-3 py-2 border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">{{user.bio}}</textarea>
+              </div>
+              <button type="submit" class="bg-primary hover:bg-primary/90 text-primary-foreground px-4 py-2 sm:px-4 sm:py-2 rounded-md font-medium transition-colors text-sm sm:text-base">
+                {{t 'settings.settings.save_changes'}}
+              </button>
+            </form>
           </div>
         </div>
 
-        <!-- Billing History -->
-        <div class="bg-card border border-border rounded-xl mb-3 overflow-hidden">
-          <a href="/billing" class="px-4 py-4 flex items-center gap-4 hover:bg-muted/50 transition-colors text-left">
-            <div class="w-10 h-10 bg-orange-500/10 rounded-xl flex items-center justify-center flex-shrink-0">
-              {{{icon 'receipt' class="w-5 h-5 text-orange-600"}}}
-            </div>
-            <div class="flex-1 min-w-0">
-               <p class="font-medium text-foreground">{{t 'settings.settings.billing_history'}}</p>
-              <p class="text-sm text-muted-foreground">View past transactions</p>
-            </div>
-            {{{icon 'chevron-right' class="w-4 h-4 text-muted-foreground"}}}
-          </a>
+        <!-- Password Settings -->
+        <div class="bg-card rounded-lg border border-border shadow-sm">
+          <div class="p-4 sm:p-6">
+            <h2 class="text-lg sm:text-xl font-semibold text-foreground mb-3 sm:mb-4">{{t 'settings.settings.password'}}</h2>
+            <form method="POST" action="/settings/password" class="space-y-3 sm:space-y-4">
+              <input type="hidden" name="_csrf" value="{{csrf}}"/>
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                <div>
+                  <label for="currentPassword" class="block text-sm font-medium text-foreground mb-2">{{t 'settings.settings.current_password'}}</label>
+                  <input type="password" id="currentPassword" name="currentPassword" class="w-full px-3 py-2 border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent" required/>
+                </div>
+                <div></div>
+                <div>
+                  <label for="newPassword" class="block text-sm font-medium text-foreground mb-2">{{t 'settings.settings.new_password'}}</label>
+                  <input type="password" id="newPassword" name="newPassword" class="w-full px-3 py-2 border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent" required/>
+                </div>
+                <div>
+                  <label for="confirmPassword" class="block text-sm font-medium text-foreground mb-2">{{t 'settings.settings.confirm_password'}}</label>
+                  <input type="password" id="confirmPassword" name="confirmPassword" class="w-full px-3 py-2 border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent" required/>
+                </div>
+              </div>
+              <button type="submit" class="bg-primary hover:bg-primary/90 text-primary-foreground px-4 py-2 sm:px-4 sm:py-2 rounded-md font-medium transition-colors text-sm sm:text-base">
+                {{t 'settings.settings.update_password'}}
+              </button>
+            </form>
+          </div>
         </div>
 
-        <!-- Payment Methods -->
-        <div class="bg-card border border-border rounded-xl mb-3 overflow-hidden">
-          <a href="/add-payment-method" class="px-4 py-4 flex items-center gap-4 hover:bg-muted/50 transition-colors text-left">
-            <div class="w-10 h-10 bg-teal-500/10 rounded-xl flex items-center justify-center flex-shrink-0">
-              {{{icon 'credit-card' class="w-5 h-5 text-teal-600"}}}
-            </div>
-            <div class="flex-1 min-w-0">
-               <p class="font-medium text-foreground">{{t 'settings.settings.payment_methods'}}</p>
-              <p class="text-sm text-muted-foreground">Manage cards and payment options</p>
-            </div>
-            {{{icon 'chevron-right' class="w-4 h-4 text-muted-foreground"}}}
-          </a>
-        </div>
-      </div>
+        <!-- Preferences -->
+        <div class="bg-card rounded-lg border border-border shadow-sm">
+          <div class="p-4 sm:p-6">
+            <h2 class="text-lg sm:text-xl font-semibold text-foreground mb-3 sm:mb-4">Preferences</h2>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
+              <!-- Theme Settings -->
+              <div>
+                <h3 class="text-base sm:text-lg font-medium text-foreground mb-2 sm:mb-3">{{t 'settings.settings.theme'}}</h3>
+                <form method="POST" action="/settings/theme" class="space-y-4">
+                  <input type="hidden" name="_csrf" value="{{csrf}}"/>
+                  <div class="flex items-center justify-between">
+                    <span class="text-sm text-muted-foreground">{{t 'settings.settings.theme_mode'}}</span>
+                    <button type="button" id="theme-toggle" class="relative inline-flex h-6 w-11 items-center rounded-full bg-muted transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 {{#if (eq settings.theme 'dark')}}bg-primary{{/if}}">
+                      <span class="inline-block h-4 w-4 transform rounded-full bg-white transition-transform {{#if (eq settings.theme 'dark')}}translate-x-6{{/if}} translate-x-1"></span>
+                    </button>
+                  </div>
+                  <input type="hidden" id="theme-input" name="theme" value="{{settings.theme}}"/>
+                </form>
+              </div>
 
-      <!-- Preferences Section -->
-      <div class="px-4 py-2">
-        <h2 class="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3 px-4">Preferences</h2>
-
-        <!-- Theme Toggle -->
-        <div class="bg-card border border-border rounded-xl mb-3 overflow-hidden">
-          <button onclick="toggleTheme()" class="w-full px-4 py-4 flex items-center gap-4 hover:bg-muted/50 transition-colors text-left">
-            <div class="w-10 h-10 bg-indigo-500/10 rounded-xl flex items-center justify-center flex-shrink-0">
-              <span id="theme-icon-light">{{{icon 'sun' class="w-5 h-5 text-indigo-600"}}}</span>
-              <span id="theme-icon-dark" class="hidden">{{{icon 'moon' class="w-5 h-5 text-indigo-600"}}}</span>
+              <!-- Language Settings -->
+              <div>
+                <h3 class="text-base sm:text-lg font-medium text-foreground mb-2 sm:mb-3">{{t 'settings.settings.language'}}</h3>
+                <form method="POST" action="/settings/language" class="space-y-4">
+                  <input type="hidden" name="_csrf" value="{{csrf}}"/>
+                  <div>
+                    <label for="language" class="block text-sm font-medium text-foreground mb-2">{{t 'settings.settings.select_language'}}</label>
+                    <select id="language" name="language" class="w-full px-3 py-2 border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
+                      <option value="en" {{#if (eq settings.language 'en')}}selected{{/if}}>English</option>
+                      <option value="ar" {{#if (eq settings.language 'ar')}}selected{{/if}}>العربية</option>
+                    </select>
+                  </div>
+                  <button type="submit" class="bg-primary hover:bg-primary/90 text-primary-foreground px-4 py-2 sm:px-4 sm:py-2 rounded-md font-medium transition-colors text-sm sm:text-base">
+                    {{t 'settings.settings.save_language'}}
+                  </button>
+                </form>
+              </div>
             </div>
-             <div class="flex-1 min-w-0">
-               <p class="font-medium text-foreground">Theme</p>
-               <p class="text-sm text-muted-foreground" id="theme-status">{{#if (eq settings.theme 'dark')}}Dark mode{{else}}Light mode{{/if}}</p>
-             </div>
-             <div class="flex items-center">
-               {{{icon 'chevron-right' class="w-4 h-4 text-muted-foreground chevron-icon transition-transform duration-200"}}}
-             </div>
-             </div>
-          </button>
-        </div>
-
-        <!-- Language -->
-        <div class="bg-card border border-border rounded-xl mb-3 overflow-hidden">
-          <button onclick="switchLanguage()" class="w-full px-4 py-4 flex items-center gap-4 hover:bg-muted/50 transition-colors text-left">
-            <div class="w-10 h-10 bg-pink-500/10 rounded-xl flex items-center justify-center flex-shrink-0">
-              {{{icon 'languages' class="w-5 h-5 text-pink-600"}}}
-            </div>
-             <div class="flex-1 min-w-0">
-               <p class="font-medium text-foreground">Language</p>
-               <p class="text-sm text-muted-foreground" id="lang-display">{{#if (eq settings.language 'ar')}}العربية{{else}}English{{/if}}</p>
-             </div>
-            {{{icon 'chevron-right' class="w-4 h-4 text-muted-foreground"}}}
-          </button>
+          </div>
         </div>
 
-         <!-- Notifications -->
-         <div class="bg-card border border-border rounded-xl mb-3 overflow-hidden">
-           <button data-section="notifications" class="w-full px-4 py-4 flex items-center gap-4 hover:bg-muted/50 transition-colors text-left">
-             <div class="w-10 h-10 bg-red-500/10 rounded-xl flex items-center justify-center flex-shrink-0">
-               {{{icon 'bell' class="w-5 h-5 text-red-600"}}}
-             </div>
-             <div class="flex-1 min-w-0">
-               <p class="font-medium text-foreground">Notifications</p>
-               <p class="text-sm text-muted-foreground">Manage notification preferences</p>
-             </div>
-             {{{icon 'chevron-down' class="w-4 h-4 text-muted-foreground chevron-icon transition-transform duration-200"}}}
-           </button>
-           <!-- Notifications Content -->
-           <div id="notifications-content" class="hidden px-4 pb-4 border-t border-border">
-             <form method="POST" action="/settings/notifications" class="space-y-4 pt-4">
-               <input type="hidden" name="_csrf" value="{{csrf}}" />
 
-               <!-- Email Notifications -->
-               <div class="bg-muted/50 rounded-lg p-3">
-                 <h4 class="font-medium text-foreground mb-3">Email Notifications</h4>
-                 <div class="space-y-3">
-                   <label class="flex items-center justify-between">
-                     <div>
-                       <p class="font-medium text-foreground text-sm">Project Updates</p>
-                       <p class="text-xs text-muted-foreground">Get notified about project changes</p>
-                     </div>
-                     <input type="checkbox" name="email_project_updates" {{#if settings.notifications_email_project_updates}}checked{{/if}} class="w-4 h-4 text-primary">
-                   </label>
-                   <label class="flex items-center justify-between">
-                     <div>
-                       <p class="font-medium text-foreground text-sm">Billing Alerts</p>
-                       <p class="text-xs text-muted-foreground">Receive billing and payment notifications</p>
-                     </div>
-                     <input type="checkbox" name="email_billing" {{#if settings.notifications_email_billing}}checked{{/if}} class="w-4 h-4 text-primary">
-                   </label>
-                   <label class="flex items-center justify-between">
-                     <div>
-                       <p class="font-medium text-foreground text-sm">Marketing</p>
-                       <p class="text-xs text-muted-foreground">Receive updates about new features</p>
-                     </div>
-                     <input type="checkbox" name="email_marketing" {{#if settings.notifications_email_marketing}}checked{{/if}} class="w-4 h-4 text-primary">
-                   </label>
-                 </div>
-               </div>
 
-               <!-- Push Notifications -->
-               <div class="bg-muted/50 rounded-lg p-3">
-                 <h4 class="font-medium text-foreground mb-3">Push Notifications</h4>
-                 <div class="space-y-3">
-                   <label class="flex items-center justify-between">
-                     <div>
-                       <p class="font-medium text-foreground text-sm">New Messages</p>
-                       <p class="text-xs text-muted-foreground">Get notified about new messages</p>
-                     </div>
-                     <input type="checkbox" name="push_messages" {{#if settings.notifications_push_messages}}checked{{/if}} class="w-4 h-4 text-primary">
-                   </label>
-                   <label class="flex items-center justify-between">
-                     <div>
-                       <p class="font-medium text-foreground text-sm">Reminders</p>
-                       <p class="text-xs text-muted-foreground">Receive reminder notifications</p>
-                     </div>
-                     <input type="checkbox" name="push_reminders" {{#if settings.notifications_push_reminders}}checked{{/if}} class="w-4 h-4 text-primary">
-                   </label>
-                 </div>
-               </div>
+        <!-- Billing & Packages -->
+        <div class="bg-card rounded-lg border border-border shadow-sm">
+          <div class="p-4 sm:p-6">
+            <h2 class="text-lg sm:text-xl font-semibold text-foreground mb-3 sm:mb-4">Billing & Packages</h2>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
+              <!-- Upgrade Package -->
+              <div>
+                <h3 class="text-base sm:text-lg font-medium text-foreground mb-2 sm:mb-3">Upgrade Package</h3>
+                <div class="space-y-4">
+                  <div>
+                    <h4 class="text-sm font-medium text-foreground">Current Package</h4>
+                    <p class="text-sm text-muted-foreground capitalize">{{#if user.package_type}}{{user.package_type}}{{else}}free{{/if}}</p>
+                  </div>
+                  <a href="/upgrade-package" class="w-full bg-primary hover:bg-primary/90 text-primary-foreground px-4 py-2 rounded-md text-sm font-medium transition-colors text-center block">
+                    Upgrade Package
+                  </a>
+                </div>
+              </div>
 
-               <!-- Action Buttons -->
-               <div class="flex gap-3 pt-2">
-                 <button type="submit" class="flex-1 bg-primary text-primary-foreground py-2 px-3 rounded-lg font-medium hover:bg-primary/90 transition-colors text-sm">
-                   Save Preferences
-                 </button>
-                 <button type="button" onclick="toggleSection('notifications')" class="flex-1 bg-muted text-muted-foreground py-2 px-3 rounded-lg font-medium hover:bg-muted/80 transition-colors text-sm">
-                   Cancel
-                 </button>
-               </div>
-             </form>
-           </div>
-         </div>
-      </div>
-
-      <!-- Support Section -->
-      <div class="px-4 py-2">
-        <h2 class="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3 px-4">Support</h2>
-
-        <!-- Help -->
-        <div class="bg-card border border-border rounded-xl mb-3 overflow-hidden">
-          <a href="/help" class="px-4 py-4 flex items-center gap-4 hover:bg-muted/50 transition-colors text-left">
-            <div class="w-10 h-10 bg-cyan-500/10 rounded-lg flex items-center justify-center">
-              {{{icon 'help-circle' class="w-4 h-4 text-cyan-600"}}}
+              <!-- Buy Credits -->
+              <div>
+                <h3 class="text-base sm:text-lg font-medium text-foreground mb-2 sm:mb-3">Buy Credits</h3>
+                <div class="space-y-4">
+                  <div>
+                    <h4 class="text-sm font-medium text-foreground">Current Balance</h4>
+                    <p class="text-sm text-muted-foreground">{{currentBalance}} credits</p>
+                  </div>
+                  <a href="/buy-credits" class="w-full bg-primary hover:bg-primary/90 text-primary-foreground px-4 py-2 rounded-md text-sm font-medium transition-colors text-center block">
+                    Buy Credits
+                  </a>
+                </div>
+              </div>
             </div>
-            <div class="flex-1 min-w-0">
-              <p class="font-medium text-foreground">Help & Support</p>
-              <p class="text-sm text-muted-foreground">Get help and contact support</p>
-            </div>
-            {{{icon 'chevron-right' class="w-4 h-4 text-muted-foreground"}}}
-          </a>
+          </div>
         </div>
 
-         <!-- About -->
-         <div class="bg-card border border-border rounded-xl mb-3 overflow-hidden">
-           <button data-section="about" class="w-full px-4 py-4 flex items-center gap-4 hover:bg-muted/50 transition-colors text-left">
-             <div class="w-10 h-10 bg-gray-500/10 rounded-lg flex items-center justify-center">
-               {{{icon 'info' class="w-4 h-4 text-gray-600"}}}
-             </div>
-             <div class="flex-1 min-w-0">
-               <p class="font-medium text-foreground">About Accelerator</p>
-               <p class="text-sm text-muted-foreground">Version 1.0.0</p>
-             </div>
-             {{{icon 'chevron-down' class="w-4 h-4 text-muted-foreground chevron-icon transition-transform duration-200"}}}
-           </button>
-           <!-- About Content -->
-           <div id="about-content" class="hidden px-4 pb-4 border-t border-border">
-             <div class="pt-4 space-y-4">
-               <!-- App Info -->
-               <div class="bg-muted/50 rounded-lg p-3 text-center">
-                 <div class="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-3">
-                   {{{icon 'zap' class="w-6 h-6 text-primary"}}}
-                 </div>
-                 <h4 class="font-semibold text-foreground text-base">Accelerator</h4>
-                 <p class="text-muted-foreground text-sm">Version 1.0.0</p>
-                 <p class="text-xs text-muted-foreground mt-2">AI-powered business planning platform</p>
-               </div>
-
-               <!-- Links -->
-               <div class="space-y-2">
-                 <a href="/privacy" class="w-full bg-card border border-border rounded-lg px-3 py-2 flex items-center gap-3 hover:bg-muted/50 transition-colors">
-                   <div class="w-6 h-6 bg-blue-500/10 rounded-lg flex items-center justify-center">
-                     {{{icon 'shield' class="w-3 h-3 text-blue-600"}}}
-                   </div>
-                   <div>
-                     <p class="font-medium text-foreground text-sm">Privacy Policy</p>
-                     <p class="text-xs text-muted-foreground">How we protect your data</p>
-                   </div>
-                   {{{icon 'chevron-right' class="w-3 h-3 text-muted-foreground"}}}
-                 </a>
-
-                 <a href="/terms" class="w-full bg-card border border-border rounded-lg px-3 py-2 flex items-center gap-3 hover:bg-muted/50 transition-colors">
-                   <div class="w-6 h-6 bg-green-500/10 rounded-lg flex items-center justify-center">
-                     {{{icon 'file-text' class="w-3 h-3 text-green-600"}}}
-                   </div>
-                   <div>
-                     <p class="font-medium text-foreground text-sm">Terms of Service</p>
-                     <p class="text-xs text-muted-foreground">Terms and conditions</p>
-                   </div>
-                   {{{icon 'chevron-right' class="w-3 h-3 text-muted-foreground"}}}
-                 </a>
-
-                 <a href="/contact" class="w-full bg-card border border-border rounded-lg px-3 py-2 flex items-center gap-3 hover:bg-muted/50 transition-colors">
-                   <div class="w-6 h-6 bg-red-500/10 rounded-lg flex items-center justify-center">
-                     {{{icon 'mail' class="w-3 h-3 text-red-600"}}}
-                   </div>
-                   <div>
-                     <p class="font-medium text-foreground text-sm">Contact Us</p>
-                     <p class="text-xs text-muted-foreground">Get in touch with support</p>
-                   </div>
-                   {{{icon 'chevron-right' class="w-3 h-3 text-red-600"}}}
-                 </a>
-               </div>
-             </div>
-           </div>
-         </div>
-      </div>
-
-      <!-- Sign Out -->
-      <div class="px-4 py-2">
-        <div class="bg-card border border-border rounded-xl overflow-hidden">
-          <button onclick="showLogoutConfirm()" class="w-full px-4 py-4 flex items-center gap-4 hover:bg-muted/50 transition-colors text-left">
-            <div class="w-10 h-10 bg-red-500/10 rounded-xl flex items-center justify-center flex-shrink-0">
-              {{{icon 'log-out' class="w-5 h-5 text-red-600"}}}
+        <!-- Account Actions -->
+        <div class="bg-card rounded-lg border border-border shadow-sm">
+          <div class="p-4 sm:p-6">
+            <h2 class="text-lg sm:text-xl font-semibold text-foreground mb-3 sm:mb-4">{{t 'settings.settings.account'}}</h2>
+            <div class="space-y-4">
+              <div class="flex items-center justify-between p-4 border border-destructive/20 rounded-lg">
+                <div>
+                  <h3 class="text-sm font-medium text-destructive">{{t 'settings.settings.delete_account'}}</h3>
+                  <p class="text-sm text-muted-foreground">{{t 'settings.settings.delete_account_desc'}}</p>
+                </div>
+                <button class="bg-destructive hover:bg-destructive/90 text-destructive-foreground px-4 py-2 sm:px-4 sm:py-2 rounded-md text-sm font-medium transition-colors">
+                  {{t 'settings.settings.delete'}}
+                </button>
+              </div>
             </div>
-            <div class="flex-1 min-w-0">
-              <p class="font-medium text-foreground">Sign Out</p>
-              <p class="text-sm text-muted-foreground">Log out of your account</p>
-            </div>
-          </button>
+          </div>
         </div>
+
       </div>
     </div>
-
-
-
-  </div>
+  </main>
 </div>
 
 <script>
-// Section management - accordion style
-function toggleSection(section) {
-  const contentId = section + '-content';
-  const contentEl = document.getElementById(contentId);
-  const button = document.querySelector(`[data-section="${section}"]`);
-  const chevron = button ? button.querySelector('.chevron-icon') : null;
+  // Theme toggle
+  const themeToggle = document.getElementById('theme-toggle');
+  const themeInput = document.getElementById('theme-input');
 
-  if (!contentEl) return;
+  themeToggle.addEventListener('click', function() {
+    const isDark = themeInput.value === 'dark';
+    themeInput.value = isDark ? 'light' : 'dark';
+    themeToggle.classList.toggle('bg-primary', !isDark);
+    themeToggle.querySelector('span').classList.toggle('translate-x-6', !isDark);
+    themeToggle.querySelector('span').classList.toggle('translate-x-1', isDark);
 
-  // Close all other sections first
-  const allSections = ['profile', 'password', 'notifications', 'about'];
-  allSections.forEach(s => {
-    if (s !== section) {
-      const otherContent = document.getElementById(s + '-content');
-      const otherButton = document.querySelector(`[data-section="${s}"]`);
-      const otherChevron = otherButton ? otherButton.querySelector('.chevron-icon') : null;
-
-      if (otherContent && !otherContent.classList.contains('hidden')) {
-        otherContent.style.maxHeight = otherContent.scrollHeight + 'px';
-        setTimeout(() => {
-          otherContent.style.maxHeight = '0px';
-          setTimeout(() => {
-            otherContent.classList.add('hidden');
-            otherContent.style.maxHeight = '';
-          }, 200);
-        }, 10);
-
-        // Reset chevron for other sections
-        if (otherChevron) {
-          otherChevron.style.transform = 'rotate(0deg)';
-        }
-      }
-    }
+    // Submit form
+    themeToggle.closest('form').submit();
   });
-
-  // Toggle the clicked section
-  const isOpen = !contentEl.classList.contains('hidden');
-
-  if (isOpen) {
-    // Close the section
-    contentEl.style.maxHeight = contentEl.scrollHeight + 'px';
-    setTimeout(() => {
-      contentEl.style.maxHeight = '0px';
-      setTimeout(() => {
-        contentEl.classList.add('hidden');
-        contentEl.style.maxHeight = '';
-      }, 200);
-    }, 10);
-    if (chevron) chevron.style.transform = 'rotate(0deg)';
-  } else {
-    // Open the section
-    contentEl.classList.remove('hidden');
-    contentEl.style.maxHeight = '0px';
-    setTimeout(() => {
-      contentEl.style.maxHeight = contentEl.scrollHeight + 'px';
-      setTimeout(() => {
-        contentEl.style.maxHeight = '';
-      }, 200);
-    }, 10);
-    if (chevron) chevron.style.transform = 'rotate(90deg)';
-  }
-}
-
-// Theme management
-function updateThemeStatus() {
-  const isDark = document.documentElement.classList.contains('dark');
-  const statusEl = document.getElementById('theme-status');
-  const indicator = document.getElementById('theme-toggle-indicator');
-
-  if (statusEl) {
-    statusEl.textContent = isDark ? 'Dark mode' : 'Light mode';
-  }
-
-  // Toggle theme icons
-  const lightIcon = document.getElementById('theme-icon-light');
-  const darkIcon = document.getElementById('theme-icon-dark');
-  if (lightIcon && darkIcon) {
-    if (isDark) {
-      lightIcon.classList.add('hidden');
-      darkIcon.classList.remove('hidden');
-      if (indicator) indicator.style.transform = 'translateX(22px)';
-    } else {
-      darkIcon.classList.add('hidden');
-      lightIcon.classList.remove('hidden');
-      if (indicator) indicator.style.transform = 'translateX(1px)';
-    }
-  }
-}
-
-// Define toggleTheme
-window.toggleTheme = function() {
-  const currentTheme = localStorage.getItem('theme') || 'light';
-  const newTheme = currentTheme === 'light' ? 'dark' : 'light';
-
-  // Update UI immediately for responsiveness
-  document.documentElement.classList.toggle('dark');
-  updateThemeStatus();
-
-  // Send to server
-  fetch('/settings/theme', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ theme: newTheme })
-  })
-  .then(response => response.json())
-  .then(data => {
-    if (data.success) {
-      showToast('Theme updated successfully', 'success');
-    } else {
-      showToast('Failed to save theme preference', 'error');
-      // Revert on error
-      document.documentElement.classList.toggle('dark');
-      updateThemeStatus();
-    }
-  })
-  .catch(error => {
-    console.error('Theme update error:', error);
-    showToast('Failed to save theme preference', 'error');
-    // Revert on error
-    document.documentElement.classList.toggle('dark');
-    updateThemeStatus();
-  });
-};
-
-// Initialize theme on load
-document.addEventListener('DOMContentLoaded', function() {
-  const savedTheme = '{{settings.theme}}';
-  if (savedTheme === 'dark') {
-    document.documentElement.classList.add('dark');
-  }
-  updateThemeStatus();
-});
-
-// Language management
-function normalizeLanguage(lang) {
-  return lang === 'ar' ? 'ar' : 'en';
-}
-
-function switchLanguage() {
-  const currentLang = '{{settings.language}}' || 'en';
-  const newLang = currentLang === 'en' ? 'ar' : 'en';
-
-  // Update display immediately
-  updateLangDisplay(newLang);
-
-  // Send to server
-  fetch('/settings/language', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ language: newLang })
-  })
-  .then(response => response.json())
-  .then(data => {
-    if (data.success) {
-      showToast(newLang === 'ar' ? 'تم تغيير اللغة إلى العربية' : 'Language changed to English', 'success');
-    } else {
-      showToast('Failed to save language preference', 'error');
-      // Revert on error
-      updateLangDisplay(currentLang);
-    }
-  })
-  .catch(error => {
-    console.error('Language update error:', error);
-    showToast('Failed to save language preference', 'error');
-    // Revert on error
-    updateLangDisplay(currentLang);
-  });
-}
-
-function updateLangDisplay(lang) {
-  const langDisplay = document.getElementById('lang-display');
-  if (langDisplay) {
-    const currentLang = lang || normalizeLanguage('{{settings.language}}' || 'en');
-    langDisplay.textContent = currentLang === 'ar' ? 'العربية' : 'English';
-  }
-}
-
-// Avatar preview
-function previewAvatar(input) {
-  if (input.files && input.files[0]) {
-    const file = input.files[0];
-    if (file.size > 5 * 1024 * 1024) {
-      showToast('File size must be less than 5MB', 'error');
-      return;
-    }
-    const reader = new FileReader();
-    reader.onload = function(e) {
-      const preview = document.getElementById('avatar-preview');
-      if (preview) {
-        preview.src = e.target.result;
-      }
-    };
-    reader.readAsDataURL(file);
-  }
-}
-
-// Password form validation
-function validatePasswordForm() {
-  const currentPassword = document.getElementById('current-password').value;
-  const newPassword = document.getElementById('new-password').value;
-  const confirmPassword = document.getElementById('confirm-password').value;
-
-  if (!currentPassword || !newPassword || !confirmPassword) {
-    showToast('All password fields are required', 'error');
-    return false;
-  }
-
-  if (newPassword !== confirmPassword) {
-    showToast('New passwords do not match', 'error');
-    return false;
-  }
-
-  if (newPassword.length < 8) {
-    showToast('Password must be at least 8 characters long', 'error');
-    return false;
-  }
-
-  return true;
-}
-
-// Profile form validation
-function validateProfileForm() {
-  const name = document.getElementById('name').value;
-  const email = document.getElementById('email')?.value;
-
-  if (!name.trim()) {
-    showToast('Name is required', 'error');
-    return false;
-  }
-
-  if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-    showToast('Please enter a valid email address', 'error');
-    return false;
-  }
-
-  return true;
-}
-
-// Logout confirmation
-function showLogoutConfirm() {
-  if (confirm('Are you sure you want to sign out?')) {
-    // Create and submit logout form
-    const form = document.createElement('form');
-    form.method = 'POST';
-    form.action = '/auth/logout';
-
-    // Add CSRF token if available
-    const csrfToken = document.querySelector('input[name="_csrf"]');
-    if (csrfToken) {
-      const csrfInput = document.createElement('input');
-      csrfInput.type = 'hidden';
-      csrfInput.name = '_csrf';
-      csrfInput.value = csrfToken.value;
-      form.appendChild(csrfInput);
-    }
-
-    document.body.appendChild(form);
-    form.submit();
-  }
-}
-
-// Toast notification (simple implementation)
-function showToast(message, type = 'info') {
-  // Create toast element
-  const toast = document.createElement('div');
-  toast.className = `fixed bottom-4 left-4 right-4 z-50 bg-card border border-border rounded-xl px-4 py-3 shadow-lg transform translate-y-full transition-transform duration-300`;
-  toast.innerHTML = `
-    <div class="flex items-center gap-3">
-      <div class="w-5 h-5 ${type === 'error' ? 'text-red-500' : 'text-green-500'}">
-        ${type === 'error' ? '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>' : '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>'}
-      </div>
-      <p class="text-sm text-foreground">${message}</p>
-    </div>
-  `;
-
-  document.body.appendChild(toast);
-
-  // Show toast
-  setTimeout(() => {
-    toast.classList.remove('translate-y-full');
-  }, 100);
-
-  // Hide toast after 3 seconds
-  setTimeout(() => {
-    toast.classList.add('translate-y-full');
-    setTimeout(() => {
-      document.body.removeChild(toast);
-    }, 300);
-  }, 3000);
-}
-
-// Initialize on load
-document.addEventListener('DOMContentLoaded', function() {
-  updateThemeStatus();
-  updateLangDisplay();
-
-  // Ensure all accordion contents start hidden
-  const sections = ['profile', 'password', 'notifications', 'about'];
-  sections.forEach(s => {
-    const el = document.getElementById(s + '-content');
-    if (el) el.classList.add('hidden');
-  });
-
-  // Add event listeners for section buttons
-  document.querySelectorAll('[data-section]').forEach(button => {
-    button.addEventListener('click', function() {
-      const section = this.getAttribute('data-section');
-      toggleSection(section);
-    });
-  });
-
-  // Close sections when clicking outside (optional - accordion style usually keeps them open until clicked again)
-  // Removed for better UX with accordion
-});
 </script>

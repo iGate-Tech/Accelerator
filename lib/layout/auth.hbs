@@ -1,12 +1,12 @@
 <html lang="{{lng}}" dir="{{#if (eq lng 'ar')}}rtl{{else}}ltr{{/if}}">
 
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>{{title}}</title>
-  <link rel="icon" href="/images/favicon.svg" />
+  <link rel="icon" href="/images/favicon.svg"/>
   <script src="https://unpkg.com/htmx.org@1.9.10"></script>
-  <link rel="stylesheet" href="/css/output.css" />
+  <link rel="stylesheet" href="/css/output.css"/>
   <style>
     .htmx-request {
       opacity: 0.8;
@@ -51,8 +51,8 @@
   {{#if styles}}{{styles}}{{/if}}
 </head>
 
-  <body class="{{bodyClass}}
-      bg-background pb-8">
+   <body class="{{bodyClass}}
+      bg-background pb-8" data-logged-in="false">
 
   <!-- Language and Theme Switchers -->
   <div class="fixed top-4 left-4 right-4 z-50">

@@ -1,20 +1,40 @@
-<main id="add-payment-method-main-content" class="flex-1 overflow-auto bg-background">
-   <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
-     <div class="flex flex-col gap-4 lg:gap-6 mt-4 sm:mt-6">
-        <div class="grid gap-1">
-          <h1 class="font-heading text-2xl sm:text-3xl font-semibold text-foreground">
-            {{t 'add-payment-method.title'}}
-          </h1>
-          <p class="text-base sm:text-lg text-muted-foreground">
-            {{t 'add-payment-method.description'}}
-          </p>
-        </div>
+<div class="min-h-screen bg-base-100">
+   <div class="relative overflow-hidden">
+     <div class="relative max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 lg:py-16">
+       <!-- Header -->
+        <div class="text-center mb-8 sm:mb-12">
+           <h1 class="text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground mb-4 sm:mb-6">
+             Add Payment Method
+           </h1>
+           <p class="text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed">
+             Securely add your payment information to complete your plan selection.
+           </p>
+       </div>
+
+       {{> onboarding-progress activeStep="payment"}}
+
+       <!-- Selected Package Summary -->
+       <div class="bg-card rounded-lg border border-border p-4 sm:p-6 mb-6">
+         <h2 class="text-lg sm:text-xl font-bold text-foreground mb-4">Selected Package</h2>
+         <div class="flex items-center justify-between">
+           <div>
+             <h3 class="text-lg font-semibold text-foreground">{{selectedPackage.name}}</h3>
+             <p class="text-sm text-muted-foreground">{{selectedPackage.credits_monthly}} credits included monthly</p>
+           </div>
+           <div class="text-right">
+             <div class="text-2xl font-bold text-primary">${{selectedPackage.price_monthly}}</div>
+             <div class="text-sm text-muted-foreground">per month</div>
+           </div>
+         </div>
+       </div>
 
        <!-- Payment Method Form -->
        <div class="bg-card rounded-lg border border-border p-4 sm:p-6">
-         <form id="payment-method-form" method="POST" action="/add-payment-method" class="space-y-4 sm:space-y-6">
+         <form method="POST" action="/onboarding/payment">
+           <input type="hidden" name="_csrf" value="{{csrf}}"/>
+
            <!-- Card Type Selection -->
-           <div>
+           <div class="mb-6">
              <label class="block text-sm font-medium text-foreground mb-2">{{t 'add-payment-method.payment_method_type'}}</label>
              <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <label class="relative">
@@ -139,17 +159,22 @@
              </div>
            </div>
 
-           <!-- Actions -->
-           <div class="flex flex-col sm:flex-row gap-3 sm:gap-4 pt-4">
-             <button type="submit" class="flex-1 px-4 py-2 bg-primary text-primary-foreground hover:bg-primary/90 rounded-md transition-colors text-sm sm:text-base font-medium">
-               {{t 'add-payment-method.add_payment_method'}}
-             </button>
-             <button type="button" class="px-4 py-2 border border-input bg-background text-foreground hover:bg-accent hover:text-accent-foreground rounded-md transition-colors text-sm sm:text-base font-medium" onclick="window.history.back()">
-               {{t 'add-payment-method.cancel'}}
+           <!-- Submit Button -->
+           <div class="pt-6">
+             <button type="submit" class="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-semibold py-3 px-6 rounded-lg transition-colors duration-200 text-base">
+               <span class="flex items-center justify-center space-x-2">
+                 <span>Complete Payment & Continue</span>
+                 {{{icon 'arrow-right' class="w-5 h-5"}}}
+               </span>
              </button>
            </div>
-        </form>
-      </div>
-    </div>
-  </div>
-</main>
+         </form>
+       </div>
+
+       <!-- Footer -->
+       <div class="text-center mt-8 sm:mt-12">
+         <p class="text-sm text-muted-foreground">Your payment information is securely encrypted and protected.</p>
+       </div>
+     </div>
+   </div>
+ </div>

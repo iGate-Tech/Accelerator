@@ -38,11 +38,11 @@
 
       <div class="flex gap-4">
         <form method="post" action="/random-idea/save" class="flex-1">
-          <input type="hidden" name="_csrf" value="{{csrf}}" />
-          <input type="hidden" name="title" value="{{generatedIdea.title}}" />
-          <input type="hidden" name="category" value="{{generatedIdea.category}}" />
-          <input type="hidden" name="description" value="{{generatedIdea.description}}" />
-          <input type="hidden" name="tags" value="{{generatedIdea.tags}}" />
+          <input type="hidden" name="_csrf" value="{{csrf}}"/>
+          <input type="hidden" name="title" value="{{generatedIdea.title}}"/>
+          <input type="hidden" name="category" value="{{generatedIdea.category}}"/>
+          <input type="hidden" name="description" value="{{generatedIdea.description}}"/>
+          <input type="hidden" name="tags" value="{{generatedIdea.tags}}"/>
           <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 px-6 rounded-lg transition-colors flex items-center justify-center space-x-2">
             {{{ icon 'save' class='w-5 h-5' }}}
              <span>{{t 'random-idea.save_idea'}}</span>
@@ -63,7 +63,7 @@
       </div>
 
       <form method="post" action="/random-idea" class="space-y-6">
-        <input type="hidden" name="_csrf" value="{{csrf}}" />
+        <input type="hidden" name="_csrf" value="{{csrf}}"/>
 
         <div>
            <label for="prompt" class="block text-sm font-medium text-gray-700 mb-2">

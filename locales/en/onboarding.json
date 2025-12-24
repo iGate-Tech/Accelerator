@@ -1,9 +1,12 @@
 {
   "package": {
+    "title": "Choose Your Plan",
+    "subtitle": "Select the perfect plan to accelerate your startup journey",
     "footer": "Questions about our plans? Contact our team",
     "choose_plan": "Choose Plan",
     "complete_profile": "Complete Profile",
     "get_started": "Get Started",
+    "select_plan": "Select",
     "welcome_title": "Welcome to Accelerator",
     "welcome_message": "To get started, choose the plan that best fits your startup journey. You'll get free credits to explore all our AI-powered features and can upgrade anytime as you grow."
   },

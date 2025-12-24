@@ -1,0 +1,4 @@
+{
+  "ignore": ["sessions/", "node_modules/", "*.log"],
+  "ext": "js,json,hbs"
+}

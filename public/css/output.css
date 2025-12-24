@@ -1371,12 +1371,6 @@
   .bg-background {
     background-color: var(--color-background);
   }
-  .bg-background\/80 {
-    background-color: color-mix(in srgb, hsl(0 0% 100%) 80%, transparent);
-    @supports (color: color-mix(in lab, red, red)) {
-      background-color: color-mix(in oklab, var(--color-background) 80%, transparent);
-    }
-  }
   .bg-base-100 {
     background-color: var(--color-base-100);
   }
@@ -2652,11 +2646,6 @@
       background-color: var(--color-yellow-50);
     }
   }
-  .peer-checked\:text-primary {
-    &:is(:where(.peer):checked ~ *) {
-      color: var(--color-primary);
-    }
-  }
   .peer-checked\:text-primary-foreground {
     &:is(:where(.peer):checked ~ *) {
       color: var(--color-primary-foreground);
@@ -3814,15 +3803,6 @@
         --tw-space-x-reverse: 0;
         margin-inline-start: calc(calc(var(--spacing) * 2) * var(--tw-space-x-reverse));
         margin-inline-end: calc(calc(var(--spacing) * 2) * calc(1 - var(--tw-space-x-reverse)));
-      }
-    }
-  }
-  .sm\:space-x-3 {
-    @media (width >= 40rem) {
-      :where(& > :not(:last-child)) {
-        --tw-space-x-reverse: 0;
-        margin-inline-start: calc(calc(var(--spacing) * 3) * var(--tw-space-x-reverse));
-        margin-inline-end: calc(calc(var(--spacing) * 3) * calc(1 - var(--tw-space-x-reverse)));
       }
     }
   }

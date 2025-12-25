@@ -262,7 +262,7 @@
                     <p class="text-sm text-muted-foreground">{{t 'settings.settings.delete_account_desc'}}</p>
                   </div>
                 </div>
-                <form method="POST" action="/settings/delete" class="space-y-4">
+                <form method="POST" action="/settings/delete" hx-post="/settings/delete" hx-target="body" hx-swap="beforeend" hx-on:htmx:before-request="clearAlerts(); showLoading()" hx-on:htmx:after-swap="hideLoading()" class="space-y-4">
                   <input type="hidden" name="_csrf" value="{{csrf}}"/>
                   <div>
                     <label for="confirm_delete" class="block text-sm font-medium text-foreground mb-2">Type "DELETE" to confirm</label>

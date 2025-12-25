@@ -11,9 +11,11 @@
            </p>
        </div>
 
-       {{> onboarding-progress activeStep="payment"}}
+        {{> onboarding-progress activeStep="payment"}}
 
-       <!-- Selected Package Summary -->
+        <div id="alert-container" class="w-full max-w-md mx-auto mb-4"></div>
+
+        <!-- Selected Package Summary -->
        <div class="bg-card rounded-lg border border-border p-4 sm:p-6 mb-6">
          <h2 class="text-lg sm:text-xl font-bold text-foreground mb-4">Selected Package</h2>
          <div class="flex items-center justify-between">
@@ -24,13 +26,54 @@
            <div class="text-right">
              <div class="text-2xl font-bold text-primary">${{selectedPackage.price_monthly}}</div>
              <div class="text-sm text-muted-foreground">per month</div>
-           </div>
-         </div>
-       </div>
+      </div>
+    </div>
+
+    <!-- Loading Screen -->
+    <div id="auth-loading-screen" class="fixed inset-0 bg-background flex items-center justify-center z-50 hidden">
+      <div class="text-center">
+        <svg class="animate-spin h-16 w-16 sm:h-20 sm:w-20 md:h-24 md:w-24 mx-auto" viewBox="0 0 24 24">
+          <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" fill="none"/>
+        </svg>
+         <h2 class="text-xl font-semibold text-foreground mt-4 mb-2">{{t 'loading.complete_payment_title'}}</h2>
+         <p class="text-muted-foreground">{{t 'loading.complete_payment_description'}}</p>
+      </div>
+    </div>
+
+    <script>
+    function clearAlerts() {
+        const alerts = document.querySelectorAll('.alert');
+        alerts.forEach(alert => alert.remove());
+    }
+
+    // Auto-hide alerts after 5 seconds
+    function setupAlertAutoHide() {
+        setTimeout(() => {
+          const alerts = document.querySelectorAll('.alert-auto-hide');
+          alerts.forEach(alert => alert.remove());
+        }, 5000);
+    }
+
+      // Setup auto-hide for alerts added via HTMX
+      document.addEventListener('htmx:afterSwap', (event) => {
+        if (event.detail.target === document.body) {
+          setupAlertAutoHide();
+        }
+      });
+
+      function showLoading() {
+        document.getElementById('auth-loading-screen').classList.remove('hidden');
+      }
+
+      function hideLoading() {
+        document.getElementById('auth-loading-screen').classList.add('hidden');
+      }
+    </script>
+  </div>
 
        <!-- Payment Method Form -->
        <div class="bg-card rounded-lg border border-border p-4 sm:p-6">
-         <form method="POST" action="/onboarding/payment">
+          <form method="POST" action="/onboarding/payment" hx-post="/onboarding/payment" hx-target="body" hx-swap="beforeend" hx-on:htmx:before-request="clearAlerts(); showLoading()" hx-on:htmx:after-swap="hideLoading()">
            <input type="hidden" name="_csrf" value="{{csrf}}"/>
 
            <!-- Card Type Selection -->

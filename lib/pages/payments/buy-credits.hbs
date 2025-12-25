@@ -57,7 +57,7 @@
                  </div>
              </div>
 
-            <form method="POST" action="/buy-credits" hx-post="/buy-credits" hx-target="body" hx-swap="beforeend" hx-on:htmx:before-request="clearAlerts(); showLoading()" hx-on:htmx:after-swap="hideLoading()"
+             <form method="POST" action="/buy-credits" hx-post="/buy-credits" hx-target="body" hx-swap="beforeend" hx-on:htmx:before-request="clearAlerts(); showLoading()" hx-on:htmx:after-swap="hideLoading()">
                 <input type="hidden" name="_csrf" value="{{csrf}}"/>
                 <input type="hidden" name="package_id" value="{{id}}"/>
                  <button type="submit" class="w-full {{#if (eq @index 1)}}bg-primary text-primary-foreground hover:bg-primary/90{{else}}border border-input/80 text-foreground hover:bg-muted{{/if}} px-3 sm:px-4 py-2 rounded-md transition-colors text-sm sm:text-base">

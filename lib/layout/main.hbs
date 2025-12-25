@@ -156,12 +156,29 @@
           };
 
            // Toggle function for card details
-           function toggleCardDetails(card) {
-               const details = card.querySelector('.card-details');
-               if (details) {
-                   details.style.display = details.style.display === 'none' ? 'block' : 'none';
-               }
-           }
+            function toggleCardDetails(card) {
+                const details = card.querySelector('.card-details');
+                const expandBtn = card.querySelector('.expand-btn');
+                const chevron = expandBtn ? expandBtn.querySelector('svg') : null;
+
+                if (details) {
+                    if (details.classList.contains('expanded')) {
+                        // Collapse
+                        details.classList.remove('expanded');
+                        details.style.maxHeight = '0';
+                        if (chevron) {
+                            chevron.style.transform = 'rotate(0deg)';
+                        }
+                    } else {
+                        // Expand
+                        details.classList.add('expanded');
+                        details.style.maxHeight = details.scrollHeight + 'px';
+                        if (chevron) {
+                            chevron.style.transform = 'rotate(180deg)';
+                        }
+                    }
+                }
+            }
 
            // Toggle favorite status
            async function toggleFavorite(id, button) {
@@ -219,7 +236,7 @@ function goToIdea(button) {
 
             // Event delegation for populate buttons
             document.addEventListener('click', function(e) {
-                const button = e.target.closest('[data-populate-id]');
+                const button = e.target.closest('.populate-btn, [data-populate-id]');
                 if (button) {
                     e.preventDefault();
                     e.stopPropagation();
@@ -247,6 +264,7 @@ function goToIdea(button) {
                     e.stopPropagation();
                     const rating = starBtn.dataset.rating;
                     const ideaId = starBtn.closest('.star-rating').dataset.ideaId;
+                    console.log('Rating clicked:', ideaId, rating);
                     rateIdea(ideaId, rating, starBtn);
                 }
             });

@@ -3,7 +3,7 @@
           <div class="w-full max-w-md">
             <div class="flex flex-col gap-6">
                <div id="alert-container" class="w-full max-w-md"></div>
-                   <form action="/auth/login" method="post" hx-post="/auth/login" hx-target="body" hx-swap="beforeend" hx-on:htmx:before-request="clearAlerts(); showLoading()" hx-on:htmx:after-swap="hideLoading()"
+                    <form action="/auth/login" method="post" hx-post="/auth/login" hx-target="body" hx-swap="beforeend" hx-on:htmx:before-request="clearAlerts(); showLoading()" hx-on:htmx:after-swap="hideLoading()" onsubmit="return validateLoginForm()"
                   <div data-slot="field-group" class="group/field-group @container/field-group flex w-full flex-col gap-7 data-[slot=checkbox-group]:gap-3 [&>[data-slot=field-group]]:gap-4">
                      <div class="flex flex-col items-center gap-2 text-center">
                         <a href="#" class="flex flex-col items-center gap-2 font-medium">
@@ -15,19 +15,21 @@
                         <h1 class="text-xl font-bold text-foreground">{{t 'login.title'}}</h1>
                         <p data-slot="field-description" class="text-muted-foreground text-sm leading-normal font-normal group-has-[[data-orientation=horizontal]]/field:text-balance last:mt-0 nth-last-2:-mt-1 [[data-variant=legend]+&]:-mt-1.5 [&>a:hover]:text-primary [&>a]:underline [&>a]:underline-offset-4">{{t 'login.no_account'}} <a href="/auth/signup">{{t 'login.sign_up'}}</a></p>
                      </div>
-                     <div role="group" data-slot="field" data-orientation="vertical" class="group/field flex w-full gap-3 data-[invalid=true]:text-destructive flex-col [&>*]:w-full [&>.sr-only]:w-auto">
-                        <label data-slot="field-label" class="items-center text-sm font-medium select-none group-data-[disabled=true]:pointer-events-none group-data-[disabled=true]:opacity-50 peer-disabled:cursor-not-allowed peer-disabled:opacity-50 group/field-label peer/field-label flex w-fit gap-2 leading-snug group-data-[disabled=true]/field:opacity-50 has-[>[data-slot=field]]:w-full has-[>[data-slot=field]]:flex-col has-[>[data-slot=field]]:rounded-md has-[>[data-slot=field]]:border [&>*]:data-[slot=field]:p-4 has-data-[state=checked]:bg-primary/5 has-data-[state=checked]:border-primary dark:has-data-[state=checked]:bg-primary/10" for="email">{{t 'login.email_label'}}</label>
-                         <input type="email" name="email" data-slot="input" class="file:text-foreground placeholder:text-muted-foreground selection:bg-primary selection:text-primary-foreground dark:bg-input/30 border-input h-9 w-full min-w-0 rounded-md border bg-transparent px-3 py-1 text-base shadow-xs transition-[color,box-shadow] outline-none file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-sm file:font-medium disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive" id="email" placeholder="{{t 'login.email_placeholder'}}" autocomplete="email" required="">
-                     </div>
+                      <div role="group" data-slot="field" data-orientation="vertical" class="group/field flex w-full gap-3 data-[invalid=true]:text-destructive flex-col [&>*]:w-full [&>.sr-only]:w-auto">
+                         <label data-slot="field-label" class="items-center text-sm font-medium select-none group-data-[disabled=true]:pointer-events-none group-data-[disabled=true]:opacity-50 peer-disabled:cursor-not-allowed peer-disabled:opacity-50 group/field-label peer/field-label flex w-fit gap-2 leading-snug group-data-[disabled=true]/field:opacity-50 has-[>[data-slot=field]]:w-full has-[>[data-slot=field]]:flex-col has-[>[data-slot=field]]:rounded-md has-[>[data-slot=field]]:border [&>*]:data-[slot=field]:p-4 has-data-[state=checked]:bg-primary/5 has-data-[state=checked]:border-primary dark:has-data-[state=checked]:bg-primary/10" for="email">{{t 'login.email_label'}}</label>
+                          <input type="email" name="email" data-slot="input" class="file:text-foreground placeholder:text-muted-foreground selection:bg-primary selection:text-primary-foreground dark:bg-input/30 border-input h-9 w-full min-w-0 rounded-md border bg-transparent px-3 py-1 text-base shadow-xs transition-[color,box-shadow] outline-none file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-sm file:font-medium disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive" id="email" placeholder="{{t 'login.email_placeholder'}}" autocomplete="email" required="">
+                          <div id="email-error" class="text-destructive text-xs mt-1 hidden"></div>
+                      </div>
                      <div role="group" data-slot="field" data-orientation="vertical" class="group/field flex w-full gap-3 data-[invalid=true]:text-destructive flex-col [&>*]:w-full [&>.sr-only]:w-auto">
                         <label data-slot="field-label" class="items-center text-sm font-medium select-none group-data-[disabled=true]:pointer-events-none group-data-[disabled=true]:opacity-50 peer-disabled:cursor-not-allowed peer-disabled:opacity-50 group/field-label peer/field-label flex w-fit gap-2 leading-snug group-data-[disabled=true]/field:opacity-50 has-[>[data-slot=field]]:w-full has-[>[data-slot=field]]:flex-col has-[>[data-slot=field]]:rounded-md has-[>[data-slot=field]]:border [&>*]:data-[slot=field]:p-4 has-data-[state=checked]:bg-primary/5 has-data-[state=checked]:border-primary dark:has-data-[state=checked]:bg-primary/10" for="password">{{t 'login.password_label'}}</label>
-                         <div class="relative">
-                            <input type="password" name="password" data-slot="input" class="file:text-foreground placeholder:text-muted-foreground selection:bg-primary selection:text-primary-foreground dark:bg-input/30 border-input h-9 w-full min-w-0 rounded-md border bg-transparent px-3 py-1 pr-10 text-base shadow-xs transition-[color,box-shadow] outline-none file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-sm file:font-medium disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive" id="password" placeholder="{{t 'login.password_placeholder'}}" autocomplete="current-password" required="">
-                            <button type="button" onclick="togglePasswordVisibility()" class="absolute right-2 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground">
-                               {{{icon 'eye' class='h-4 w-4' id='eye-icon'}}}
-                               {{{icon 'eye-off' class='h-4 w-4 hidden' id='eye-off-icon'}}}
-                            </button>
-                         </div>
+                          <div class="relative">
+                             <input type="password" name="password" data-slot="input" class="file:text-foreground placeholder:text-muted-foreground selection:bg-primary selection:text-primary-foreground dark:bg-input/30 border-input h-9 w-full min-w-0 rounded-md border bg-transparent px-3 py-1 pr-10 text-base shadow-xs transition-[color,box-shadow] outline-none file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-sm file:font-medium disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive" id="password" placeholder="{{t 'login.password_placeholder'}}" autocomplete="current-password" required="">
+                             <button type="button" onclick="togglePasswordVisibility()" class="absolute right-2 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground">
+                                {{{icon 'eye' class='h-4 w-4' id='eye-icon'}}}
+                                {{{icon 'eye-off' class='h-4 w-4 hidden' id='eye-off-icon'}}}
+                             </button>
+                          </div>
+                          <div id="password-error" class="text-destructive text-xs mt-1 hidden"></div>
                      </div>
                      <div role="group" data-slot="field" data-orientation="vertical" class="group/field flex w-full gap-3 data-[invalid=true]:text-destructive flex-col [&>*]:w-full [&>.sr-only]:w-auto">
                         <button type="submit" class="shiny-cta text-center bg-white dark:bg-black w-full mx-auto relative" style="padding: 0.5rem 1rem; margin: 0 auto;">
@@ -208,8 +210,41 @@
         document.getElementById('auth-loading-screen').classList.remove('hidden');
       }
 
-      function hideLoading() {
-        document.getElementById('auth-loading-screen').classList.add('hidden');
-      }
+     function hideLoading() {
+         document.getElementById('auth-loading-screen').classList.add('hidden');
+       }
+
+     function validateLoginForm() {
+       let isValid = true;
+
+       // Clear previous errors
+       document.getElementById('email-error').classList.add('hidden');
+       document.getElementById('email-error').textContent = '';
+       document.getElementById('password-error').classList.add('hidden');
+       document.getElementById('password-error').textContent = '';
+
+       const email = document.getElementById('email').value.trim();
+       const password = document.getElementById('password').value;
+
+       // Validate email
+       if (!email) {
+         document.getElementById('email-error').textContent = 'Email is required';
+         document.getElementById('email-error').classList.remove('hidden');
+         isValid = false;
+       } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+         document.getElementById('email-error').textContent = 'Please enter a valid email address';
+         document.getElementById('email-error').classList.remove('hidden');
+         isValid = false;
+       }
+
+       // Validate password
+       if (!password) {
+         document.getElementById('password-error').textContent = 'Password is required';
+         document.getElementById('password-error').classList.remove('hidden');
+         isValid = false;
+       }
+
+       return isValid;
+     }
      </script>
 

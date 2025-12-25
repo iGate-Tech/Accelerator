@@ -11,9 +11,11 @@
            </p>
        </div>
 
-       {{> onboarding-progress activeStep="package"}}
+        {{> onboarding-progress activeStep="package"}}
 
-       <!-- Billing Toggle -->
+        <div id="alert-container" class="w-full max-w-md mx-auto mb-4"></div>
+
+        <!-- Billing Toggle -->
        <div class="flex justify-center mb-6">
          <div class="bg-muted rounded-lg p-1 flex items-center">
            <button id="monthly-btn" class="px-4 py-2 rounded-md text-sm font-medium transition-colors bg-primary text-primary-foreground">Monthly</button>
@@ -39,7 +41,7 @@
 
 
        <!-- Package Plans -->
-        <form method="POST" action="/onboarding/plan">
+         <form method="POST" action="/onboarding/plan" hx-post="/onboarding/plan" hx-target="body" hx-swap="beforeend" hx-on:htmx:before-request="clearAlerts(); showLoading()" hx-on:htmx:after-swap="hideLoading()"
           <input type="hidden" name="_csrf" value="{{csrf}}"/>
           <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
             {{#each packages}}
@@ -154,5 +156,55 @@
           });
         });
       });
-    </script>
-  </div>
+     </script>
+
+     <!-- Loading Screen -->
+     <div id="auth-loading-screen" class="fixed inset-0 bg-background flex items-center justify-center z-50 hidden">
+       <div class="text-center">
+         <svg class="animate-spin h-16 w-16 sm:h-20 sm:w-20 md:h-24 md:w-24 mx-auto" viewBox="0 0 24 24">
+           <defs>
+             <linearGradient id="spinner-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
+               <stop offset="0%" stop-color="#9e28b5"/>
+               <stop offset="25%" stop-color="#00a7e0"/>
+               <stop offset="50%" stop-color="#6cd14d"/>
+               <stop offset="75%" stop-color="#ffc600"/>
+               <stop offset="100%" stop-color="#9e28b5"/>
+             </linearGradient>
+           </defs>
+           <circle cx="12" cy="12" r="10" stroke="url(#spinner-gradient)" stroke-width="2" fill="none"/>
+         </svg>
+          <h2 class="text-xl font-semibold text-foreground mt-4 mb-2">{{t 'loading.select_plan_title'}}</h2>
+          <p class="text-muted-foreground">{{t 'loading.select_plan_description'}}</p>
+       </div>
+     </div>
+
+     <script>
+     function clearAlerts() {
+         const alerts = document.querySelectorAll('.alert');
+         alerts.forEach(alert => alert.remove());
+     }
+
+     // Auto-hide alerts after 5 seconds
+     function setupAlertAutoHide() {
+         setTimeout(() => {
+           const alerts = document.querySelectorAll('.alert-auto-hide');
+           alerts.forEach(alert => alert.remove());
+         }, 5000);
+     }
+
+       // Setup auto-hide for alerts added via HTMX
+       document.addEventListener('htmx:afterSwap', (event) => {
+         if (event.detail.target === document.body) {
+           setupAlertAutoHide();
+         }
+       });
+
+       function showLoading() {
+         document.getElementById('auth-loading-screen').classList.remove('hidden');
+       }
+
+       function hideLoading() {
+         document.getElementById('auth-loading-screen').classList.add('hidden');
+       }
+     </script>
+   </div>

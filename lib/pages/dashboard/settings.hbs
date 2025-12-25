@@ -8,13 +8,15 @@
         <div class="text-center sm:text-left">
           <h1 class="text-3xl font-bold text-foreground">{{t 'settings.settings.title'}}</h1>
           <p class="text-muted-foreground mt-2">{{t 'settings.settings.subtitle'}}</p>
-        </div>
+         </div>
 
-        <!-- Profile Settings -->
+         <div id="alert-container" class="w-full max-w-md mx-auto"></div>
+
+         <!-- Profile Settings -->
         <div class="bg-card rounded-lg border border-border shadow-sm">
           <div class="p-4 sm:p-6">
             <h2 class="text-lg sm:text-xl font-semibold text-foreground mb-3 sm:mb-4">{{t 'settings.settings.profile'}}</h2>
-            <form method="POST" action="/settings/profile" enctype="multipart/form-data" class="space-y-3 sm:space-y-4">
+             <form method="POST" action="/settings/profile" enctype="multipart/form-data" hx-post="/settings/profile" hx-target="body" hx-swap="beforeend" hx-on:htmx:before-request="clearAlerts(); showLoading()" hx-on:htmx:after-swap="hideLoading()" class="space-y-3 sm:space-y-4">
               <input type="hidden" name="_csrf" value="{{csrf}}"/>
 
               <!-- Avatar Section -->
@@ -278,10 +280,57 @@
       </div>
     </div>
   </main>
-</div>
+ </div>
 
-<script>
-  // Theme toggle
+   <!-- Loading Screen -->
+   <div id="auth-loading-screen" class="fixed inset-0 bg-background flex items-center justify-center z-50 hidden">
+     <div class="text-center">
+       <svg class="animate-spin h-16 w-16 sm:h-20 sm:w-20 md:h-24 md:w-24 mx-auto" viewBox="0 0 24 24">
+         <defs>
+           <linearGradient id="spinner-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
+             <stop offset="0%" stop-color="#9e28b5"/>
+             <stop offset="25%" stop-color="#00a7e0"/>
+             <stop offset="50%" stop-color="#6cd14d"/>
+             <stop offset="75%" stop-color="#ffc600"/>
+             <stop offset="100%" stop-color="#9e28b5"/>
+           </linearGradient>
+         </defs>
+         <circle cx="12" cy="12" r="10" stroke="url(#spinner-gradient)" stroke-width="2" fill="none"/>
+       </svg>
+        <h2 class="text-xl font-semibold text-foreground mt-4 mb-2">{{t 'loading.settings_title'}}</h2>
+        <p class="text-muted-foreground">{{t 'loading.settings_description'}}</p>
+     </div>
+   </div>
+
+ <script>
+ function clearAlerts() {
+     const alerts = document.querySelectorAll('.alert');
+     alerts.forEach(alert => alert.remove());
+ }
+
+ // Auto-hide alerts after 5 seconds
+ function setupAlertAutoHide() {
+     setTimeout(() => {
+       const alerts = document.querySelectorAll('.alert-auto-hide');
+       alerts.forEach(alert => alert.remove());
+     }, 5000);
+ }
+
+   // Setup auto-hide for alerts added via HTMX
+   document.addEventListener('htmx:afterSwap', (event) => {
+     if (event.detail.target === document.body) {
+       setupAlertAutoHide();
+     }
+   });
+
+   function showLoading() {
+     document.getElementById('auth-loading-screen').classList.remove('hidden');
+   }
+
+   function hideLoading() {
+     document.getElementById('auth-loading-screen').classList.add('hidden');
+   }
+   // Theme toggle
   const themeToggle = document.getElementById('theme-toggle');
   const themeInput = document.getElementById('theme-input');
 

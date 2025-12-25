@@ -116,7 +116,7 @@
               <!-- Language Settings -->
               <div>
                 <h3 class="text-base sm:text-lg font-medium text-foreground mb-2 sm:mb-3">{{t 'settings.settings.language'}}</h3>
-                <form method="POST" action="/settings/language" class="space-y-4">
+                <form method="POST" action="/settings/language" hx-post="/settings/language" hx-target="body" hx-swap="beforeend" hx-on:htmx:before-request="clearAlerts(); showLoading()" hx-on:htmx:after-swap="hideLoading()" class="space-y-4">
                   <input type="hidden" name="_csrf" value="{{csrf}}"/>
                   <div>
                     <label for="language" class="block text-sm font-medium text-foreground mb-2">{{t 'settings.settings.select_language'}}</label>

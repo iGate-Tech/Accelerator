@@ -374,4 +374,53 @@ INSERT INTO packages (name, type, price_monthly, credits_monthly, features) VALU
 ('Student', 'student', 999, 500, '{"create": true, "models": true}'),
 ('Enterprise', 'enterprise', 2999, 2000, '{"all": true, "team": true}');
 
+-- Database Validation Triggers
+
+-- Trigger to validate credit balance is not negative
+CREATE OR REPLACE FUNCTION check_credit_balance() RETURNS TRIGGER AS $$
+BEGIN
+  IF NEW.credit_balance < 0 THEN
+    RAISE EXCEPTION 'Credit balance cannot be negative';
+  END IF;
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trigger_check_credit_balance
+BEFORE INSERT OR UPDATE ON profiles
+FOR EACH ROW EXECUTE FUNCTION check_credit_balance();
+
+-- Trigger to validate package type exists
+CREATE OR REPLACE FUNCTION check_package_type() RETURNS TRIGGER AS $$
+BEGIN
+  IF NEW.package_type NOT IN ('free', 'student', 'enterprise') THEN
+    RAISE EXCEPTION 'Invalid package type';
+  END IF;
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trigger_check_package_type
+BEFORE INSERT OR UPDATE ON profiles
+FOR EACH ROW EXECUTE FUNCTION check_package_type();
+
+-- Trigger to prevent credit deduction below zero
+CREATE OR REPLACE FUNCTION prevent_negative_credit_transaction() RETURNS TRIGGER AS $$
+DECLARE
+  current_balance INTEGER;
+BEGIN
+  IF NEW.transaction_type IN ('ai_generation', 'report_generation') AND NEW.amount < 0 THEN
+    SELECT credit_balance INTO current_balance FROM profiles WHERE user_id = NEW.user_id;
+    IF current_balance + NEW.amount < 0 THEN
+      RAISE EXCEPTION 'Insufficient credits for transaction';
+    END IF;
+  END IF;
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trigger_prevent_negative_credit_transaction
+BEFORE INSERT ON credit_transactions
+FOR EACH ROW EXECUTE FUNCTION prevent_negative_credit_transaction();
+
 -- End of schema

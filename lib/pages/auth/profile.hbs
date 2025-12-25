@@ -352,9 +352,8 @@
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({ theme: newTheme })
-        }).catch(err => {
-          console.log('Theme saved locally only');
-        });
+         }).catch(err => {
+         });
       }
 
       // Language switch function
@@ -373,9 +372,8 @@
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({ language: newLang })
-        }).catch(err => {
-          console.log('Language saved locally only');
-        });
+         }).catch(err => {
+         });
       }
 
       // Initialize theme and language on load

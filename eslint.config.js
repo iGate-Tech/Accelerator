@@ -47,6 +47,7 @@ export default [
       semi: "off", // Disabled since Prettier handles semicolons
       "no-var": "warn", // Warn on var for modern JS
       "prefer-const": "warn", // Warn on non-const
+      curly: "warn", // Warn on missing braces for control statements
       eqeqeq: "warn", // Warn on ==
       "no-magic-numbers": [
         "warn",
@@ -60,9 +61,10 @@ export default [
       ],
       "no-process-exit": "off",
       "require-await": "warn", // Warn on async without await
+      "no-eval": "error", // Disallow eval() for security
       "no-shadow": "off", // Allow variable shadowing
       "no-control-regex": "off", // Allow control characters in regex for sanitization
-      "security/detect-object-injection": "off", // Too noisy for sanitized code
+      "security/detect-object-injection": "warn", // Warn on potential object injection
       "security/detect-non-literal-fs-filename": "off", // Safe in this context
       "security/detect-non-literal-regexp": "off", // Safe patterns
       "security/detect-unsafe-regex": "off", // RegEx are controlled

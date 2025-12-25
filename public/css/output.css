@@ -1257,6 +1257,12 @@
   .border-border {
     border-color: var(--color-border);
   }
+  .border-border\/50 {
+    border-color: color-mix(in srgb, hsl(0 0% 96%) 50%, transparent);
+    @supports (color: color-mix(in lab, red, red)) {
+      border-color: color-mix(in oklab, var(--color-border) 50%, transparent);
+    }
+  }
   .border-destructive\/20 {
     border-color: color-mix(in srgb, hsl(0 84% 60%) 20%, transparent);
     @supports (color: color-mix(in lab, red, red)) {
@@ -1589,6 +1595,9 @@
   }
   .bg-purple-600 {
     background-color: var(--color-purple-600);
+  }
+  .bg-red-100 {
+    background-color: var(--color-red-100);
   }
   .bg-red-500 {
     background-color: var(--color-red-500);
@@ -2244,6 +2253,9 @@
   .text-red-600 {
     color: var(--color-red-600);
   }
+  .text-red-800 {
+    color: var(--color-red-800);
+  }
   .text-secondary {
     color: var(--color-secondary);
   }
@@ -2315,6 +2327,9 @@
   }
   .opacity-30 {
     opacity: 30%;
+  }
+  .opacity-50 {
+    opacity: 50%;
   }
   .opacity-75 {
     opacity: 75%;
@@ -2980,6 +2995,16 @@
       }
     }
   }
+  .hover\:bg-secondary\/90 {
+    &:hover {
+      @media (hover: hover) {
+        background-color: color-mix(in srgb, hsl(260 56% 44%) 90%, transparent);
+        @supports (color: color-mix(in lab, red, red)) {
+          background-color: color-mix(in oklab, var(--color-secondary) 90%, transparent);
+        }
+      }
+    }
+  }
   .hover\:bg-success\/10 {
     &:hover {
       @media (hover: hover) {
@@ -3030,6 +3055,16 @@
     &:hover {
       @media (hover: hover) {
         color: var(--color-destructive);
+      }
+    }
+  }
+  .hover\:text-destructive\/80 {
+    &:hover {
+      @media (hover: hover) {
+        color: color-mix(in srgb, hsl(0 84% 60%) 80%, transparent);
+        @supports (color: color-mix(in lab, red, red)) {
+          color: color-mix(in oklab, var(--color-destructive) 80%, transparent);
+        }
       }
     }
   }
@@ -3229,6 +3264,11 @@
   .focus\:ring-blue-500 {
     &:focus {
       --tw-ring-color: var(--color-blue-500);
+    }
+  }
+  .focus\:ring-destructive {
+    &:focus {
+      --tw-ring-color: var(--color-destructive);
     }
   }
   .focus\:ring-green-500 {

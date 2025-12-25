@@ -90,6 +90,36 @@
     </main>
 </div>
 
+<script>
+function clearAlerts() {
+    const alerts = document.querySelectorAll('.alert');
+    alerts.forEach(alert => alert.remove());
+}
+
+function showLoading() {
+    // For modal, perhaps show loading in modal
+}
+
+function hideLoading() {
+    // Hide loading
+}
+
+// Auto-hide alerts after 5 seconds
+function setupAlertAutoHide() {
+    setTimeout(() => {
+        const alerts = document.querySelectorAll('.alert-auto-hide');
+        alerts.forEach(alert => alert.remove());
+    }, 5000);
+}
+
+// Setup auto-hide for alerts added via HTMX
+document.addEventListener('htmx:afterSwap', (event) => {
+    if (event.detail.target === document.body) {
+        setupAlertAutoHide();
+    }
+});
+</script>
+
 <!-- Create Portfolio Modal -->
 <div id="create-portfolio-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50">
     <div class="flex items-center justify-center min-h-screen p-4">
@@ -102,8 +132,8 @@
                     </button>
                 </div>
 
-                <form method="post" action="/portfolios">
-                    <input type="hidden" name="_csrf" value="{{csrf}}"/>
+                 <form hx-post="/portfolios" hx-target="body" hx-swap="beforeend" hx-on:htmx:before-request="clearAlerts(); showLoading()" hx-on:htmx:after-swap="hideLoading()">
+                     <input type="hidden" name="_csrf" value="{{csrf}}"/>
 
                     <div class="space-y-4">
                         <div>

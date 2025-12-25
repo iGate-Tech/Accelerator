@@ -24,9 +24,11 @@
             {{t 'portfolios.portfolios.view'}}
           </a>
         </div>
-      </div>
+       </div>
 
-      <!-- Available Ideas -->
+       <div id="alert-container" class="w-full max-w-md mx-auto mb-4"></div>
+
+       <!-- Available Ideas -->
       <div class="bg-card rounded-lg border border-border p-6">
          {{#if hasIdeas}}
         <div class="mb-6">
@@ -34,7 +36,7 @@
           <p class="text-muted-foreground">Select the ideas you want to add to this portfolio</p>
         </div>
 
-         <form id="add-ideas-form" onsubmit="addIdeasToPortfolio(event)">
+          <form id="add-ideas-form" hx-post="/portfolios/{{portfolio.id}}/ideas" hx-target="body" hx-swap="beforeend" hx-on:htmx:before-request="clearAlerts(); showLoading()" hx-on:htmx:after-swap="hideLoading()"
            <!-- Search -->
            <div class="mb-4">
              <div class="relative max-w-md">
@@ -130,5 +132,55 @@
 
     </div>
   </div>
+
+  <!-- Loading Screen -->
+  <div id="auth-loading-screen" class="fixed inset-0 bg-background flex items-center justify-center z-50 hidden">
+    <div class="text-center">
+      <svg class="animate-spin h-16 w-16 sm:h-20 sm:w-20 md:h-24 md:w-24 mx-auto" viewBox="0 0 24 24">
+        <defs>
+          <linearGradient id="spinner-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stop-color="#9e28b5"/>
+            <stop offset="25%" stop-color="#00a7e0"/>
+            <stop offset="50%" stop-color="#6cd14d"/>
+            <stop offset="75%" stop-color="#ffc600"/>
+            <stop offset="100%" stop-color="#9e28b5"/>
+          </linearGradient>
+        </defs>
+        <circle cx="12" cy="12" r="10" stroke="url(#spinner-gradient)" stroke-width="2" fill="none"/>
+      </svg>
+       <h2 class="text-xl font-semibold text-foreground mt-4 mb-2">{{t 'loading.add_ideas_title'}}</h2>
+       <p class="text-muted-foreground">{{t 'loading.add_ideas_description'}}</p>
+    </div>
+  </div>
+
+  <script>
+  function clearAlerts() {
+      const alerts = document.querySelectorAll('.alert');
+      alerts.forEach(alert => alert.remove());
+  }
+
+  // Auto-hide alerts after 5 seconds
+  function setupAlertAutoHide() {
+      setTimeout(() => {
+        const alerts = document.querySelectorAll('.alert-auto-hide');
+        alerts.forEach(alert => alert.remove());
+      }, 5000);
+  }
+
+    // Setup auto-hide for alerts added via HTMX
+    document.addEventListener('htmx:afterSwap', (event) => {
+      if (event.detail.target === document.body) {
+        setupAlertAutoHide();
+      }
+    });
+
+    function showLoading() {
+      document.getElementById('auth-loading-screen').classList.remove('hidden');
+    }
+
+    function hideLoading() {
+      document.getElementById('auth-loading-screen').classList.add('hidden');
+    }
+  </script>
 </main>
 

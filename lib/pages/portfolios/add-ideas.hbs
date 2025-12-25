@@ -36,7 +36,7 @@
           <p class="text-muted-foreground">Select the ideas you want to add to this portfolio</p>
         </div>
 
-          <form id="add-ideas-form" hx-post="/portfolios/{{portfolio.id}}/ideas" hx-target="body" hx-swap="beforeend" hx-on:htmx:before-request="clearAlerts(); showLoading()" hx-on:htmx:after-swap="hideLoading()"
+          <form id="add-ideas-form" hx-post="/portfolios/{{portfolio.id}}/ideas" hx-target="body" hx-swap="beforeend" hx-on:htmx:before-request="clearAlerts(); showLoading()" hx-on:htmx:after-swap="hideLoading()">
            <!-- Search -->
            <div class="mb-4">
              <div class="relative max-w-md">

@@ -226,8 +226,7 @@
             padding: 0;
         }
     </style>
-    <form id="new-project-form" class="flex m-auto max-w-[750px] w-full flex-col gap-1" method="post"
-        action="/new-idea">
+    <form id="new-project-form" class="flex m-auto max-w-[750px] w-full flex-col gap-1" method="post" action="/new-idea" hx-post="/new-idea" hx-target="body" hx-swap="beforeend" hx-on:htmx:before-request="clearAlerts(); showLoading()" hx-on:htmx:after-swap="hideLoading()"
         <!-- CSRF Token (Important for security) -->
         <input type="hidden" name="_csrf" value="">
         <input type="hidden" name="privacy" id="privacy-hidden" value="public">

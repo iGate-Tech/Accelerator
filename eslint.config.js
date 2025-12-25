@@ -11,6 +11,7 @@ export default [
   {
     ignores: [
       "lib/components/idea-card.hbs",
+      "lib/components/idea-creation.hbs",
       "lib/pages/auth/login.hbs",
       "lib/pages/dashboard/dashboard.hbs",
       "lib/pages/ideas/idea-detail.hbs",

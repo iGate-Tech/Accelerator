@@ -1,7 +1,8 @@
 <div class="min-h-screen bg-gradient-to-br from-indigo-50 to-purple-100 py-12 px-4 sm:px-6 lg:px-8">
-  <div class="max-w-4xl mx-auto">
+   <div class="max-w-4xl mx-auto">
+     <div id="alert-container" class="w-full max-w-md mx-auto mb-4"></div>
 
-    <!-- Header -->
+     <!-- Header -->
     <div class="text-center mb-12">
       <div class="inline-flex items-center gap-4 mb-6">
         <div class="w-16 h-16 bg-indigo-600 rounded-2xl flex items-center justify-center">
@@ -10,8 +11,58 @@
         <div>
            <h1 class="text-4xl font-bold text-gray-900">{{t 'random-idea.title'}}</h1>
            <p class="text-xl text-gray-600 mt-2">{{t 'random-idea.subtitle'}}</p>
-        </div>
-      </div>
+   </div>
+
+   <!-- Loading Screen -->
+   <div id="auth-loading-screen" class="fixed inset-0 bg-background flex items-center justify-center z-50 hidden">
+     <div class="text-center">
+       <svg class="animate-spin h-16 w-16 sm:h-20 sm:w-20 md:h-24 md:w-24 mx-auto" viewBox="0 0 24 24">
+         <defs>
+           <linearGradient id="spinner-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
+             <stop offset="0%" stop-color="#9e28b5"/>
+             <stop offset="25%" stop-color="#00a7e0"/>
+             <stop offset="50%" stop-color="#6cd14d"/>
+             <stop offset="75%" stop-color="#ffc600"/>
+             <stop offset="100%" stop-color="#9e28b5"/>
+           </linearGradient>
+         </defs>
+         <circle cx="12" cy="12" r="10" stroke="url(#spinner-gradient)" stroke-width="2" fill="none"/>
+       </svg>
+        <h2 class="text-xl font-semibold text-foreground mt-4 mb-2">{{t 'loading.random_idea_title'}}</h2>
+        <p class="text-muted-foreground">{{t 'loading.random_idea_description'}}</p>
+     </div>
+   </div>
+
+   <script>
+   function clearAlerts() {
+       const alerts = document.querySelectorAll('.alert');
+       alerts.forEach(alert => alert.remove());
+   }
+
+   // Auto-hide alerts after 5 seconds
+   function setupAlertAutoHide() {
+       setTimeout(() => {
+         const alerts = document.querySelectorAll('.alert-auto-hide');
+         alerts.forEach(alert => alert.remove());
+       }, 5000);
+   }
+
+     // Setup auto-hide for alerts added via HTMX
+     document.addEventListener('htmx:afterSwap', (event) => {
+       if (event.detail.target === document.body) {
+         setupAlertAutoHide();
+       }
+     });
+
+     function showLoading() {
+       document.getElementById('auth-loading-screen').classList.remove('hidden');
+     }
+
+     function hideLoading() {
+       document.getElementById('auth-loading-screen').classList.add('hidden');
+     }
+   </script>
+ </div>
     </div>
 
     {{#if generatedIdea}}
@@ -37,7 +88,7 @@
       </div>
 
       <div class="flex gap-4">
-        <form method="post" action="/random-idea/save" class="flex-1">
+         <form method="post" action="/random-idea/save" hx-post="/random-idea/save" hx-target="body" hx-swap="beforeend" hx-on:htmx:before-request="clearAlerts(); showLoading()" hx-on:htmx:after-swap="hideLoading()" class="flex-1">
           <input type="hidden" name="_csrf" value="{{csrf}}"/>
           <input type="hidden" name="title" value="{{generatedIdea.title}}"/>
           <input type="hidden" name="category" value="{{generatedIdea.category}}"/>
@@ -62,7 +113,7 @@
          <p class="text-gray-600">{{t 'random-idea.let_ai_spark'}}</p>
       </div>
 
-      <form method="post" action="/random-idea" class="space-y-6">
+       <form method="post" action="/random-idea" hx-post="/random-idea" hx-target="body" hx-swap="beforeend" hx-on:htmx:before-request="clearAlerts(); showLoading()" hx-on:htmx:after-swap="hideLoading()" class="space-y-6">
         <input type="hidden" name="_csrf" value="{{csrf}}"/>
 
         <div>

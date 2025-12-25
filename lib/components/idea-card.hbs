@@ -172,6 +172,20 @@
                   {{{icon 'archive' class='w-4 h-4'}}}
 
              </button>
+             {{#if is_owner}}
+             <button
+                 class="text-muted-foreground hover:text-red-500 rounded-full hover:bg-primary-100 hover:text-primary-900 delete-btn"
+                 hx-delete="/api/ideas/{{id}}"
+                 hx-confirm="Are you sure you want to delete this idea? This action cannot be undone."
+                 hx-target="closest .flex.relative"
+                 hx-swap="outerHTML"
+                 hx-on:htmx:response-error="showToast('Failed to delete idea. Please try again.', 'error')"
+                 title="Delete Idea">
+
+                  {{{icon 'trash' class='w-4 h-4'}}}
+
+             </button>
+             {{/if}}
         </div>
     </div>
 </div>

@@ -204,7 +204,12 @@ function openTeamModal(button) {
 
 function shareIdea(button) {
   const id = button.dataset.id;
-  showToast('Share feature coming soon', 'info');
+  const url = `${window.location.origin}/idea/${id}`;
+  navigator.clipboard.writeText(url).then(() => {
+    showToast('Link copied to clipboard', 'success');
+  }).catch(() => {
+    showToast('Failed to copy link', 'error');
+  });
 }
 
 function goToIdea(button) {
@@ -212,26 +217,151 @@ function goToIdea(button) {
   window.location.href = `/models/idea?id=${id}`;
 }
 
-           // Event delegation for populate buttons
-           document.addEventListener('click', function(e) {
-               const button = e.target.closest('[data-populate-id]');
-               if (button) {
-                   e.preventDefault();
-                   const id = button.dataset.populateId;
-                   redirectToPopulate(id);
-               }
-           });
+            // Event delegation for populate buttons
+            document.addEventListener('click', function(e) {
+                const button = e.target.closest('[data-populate-id]');
+                if (button) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    const id = button.dataset.populateId;
+                    redirectToPopulate(id);
+                }
+            });
 
-           // Event delegation for favorite buttons
-           document.addEventListener('click', function(e) {
-               const button = e.target.closest('.favorite-btn');
-               if (button) {
-                   e.preventDefault();
-                   const id = button.dataset.favoriteId;
-                   toggleFavorite(id, button);
-               }
-           });
-       </script>
+            // Event delegation for favorite buttons
+            document.addEventListener('click', function(e) {
+                const button = e.target.closest('.favorite-btn');
+                if (button) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    const id = button.dataset.favoriteId;
+                    toggleFavorite(id, button);
+                }
+            });
+
+            // Event delegation for star rating buttons
+            document.addEventListener('click', function(e) {
+                const starBtn = e.target.closest('.star-btn');
+                if (starBtn) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    const rating = starBtn.dataset.rating;
+                    const ideaId = starBtn.closest('.star-rating').dataset.ideaId;
+                    rateIdea(ideaId, rating, starBtn);
+                }
+            });
+
+            // Event delegation for unpublish buttons
+            document.addEventListener('click', function(e) {
+                const button = e.target.closest('.unpublish-btn');
+                if (button) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    const id = button.closest('.cursor-pointer').dataset.id;
+                    unpublishIdea(id);
+                }
+            });
+
+            // Event delegation for archive buttons
+            document.addEventListener('click', function(e) {
+                const button = e.target.closest('.archive-btn');
+                if (button) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    const id = button.closest('.cursor-pointer').dataset.id;
+                    archiveIdea(id);
+                }
+            });
+
+            // Archive idea function
+            async function archiveIdea(id) {
+                if (!confirm('Are you sure you want to archive this idea?')) return;
+                try {
+                    const response = await fetch(`/api/ideas/${id}/archive`, {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                    });
+                    if (response.ok) {
+                        showToast('Idea archived successfully', 'success');
+                        window.location.reload();
+                    } else {
+                        showToast('Failed to archive idea', 'error');
+                    }
+                } catch (error) {
+                    console.error('Archive error:', error);
+                    showToast('Failed to archive idea', 'error');
+                }
+            }
+
+            // Unpublish idea function
+            async function unpublishIdea(id) {
+                if (!confirm('Are you sure you want to unpublish this idea? It will become private.')) return;
+                try {
+                    const response = await fetch(`/api/ideas/${id}/unpublish`, {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                    });
+                    if (response.ok) {
+                        showToast('Idea unpublished successfully', 'success');
+                        window.location.reload();
+                    } else {
+                        showToast('Failed to unpublish idea', 'error');
+                    }
+                } catch (error) {
+                    console.error('Unpublish error:', error);
+                    showToast('Failed to unpublish idea', 'error');
+                }
+            }
+
+            // Rate idea function
+            async function rateIdea(ideaId, rating, clickedStar) {
+                try {
+                    const response = await fetch(`/api/votes`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ idea_id: ideaId, rating: parseInt(rating) }),
+                    });
+                    if (response.ok) {
+                        const data = await response.json();
+                        // Update the star display
+                        updateStarDisplay(clickedStar.closest('.star-rating'), rating);
+                        showToast('Rating submitted successfully', 'success');
+                    } else {
+                        const error = await response.json();
+                        showToast(error.error || 'Failed to submit rating', 'error');
+                    }
+                } catch (error) {
+                    console.error('Rate idea error:', error);
+                    showToast('Failed to submit rating', 'error');
+                }
+            }
+
+            // Update star display
+            function updateStarDisplay(starRating, rating) {
+                const stars = starRating.querySelectorAll('.star-btn');
+                stars.forEach((star, index) => {
+                    const starIcon = star.querySelector('svg');
+                    if (index < rating) {
+                        starIcon.classList.add('fill-current', 'text-yellow-400');
+                        starIcon.classList.remove('text-muted-foreground');
+                    } else {
+                        starIcon.classList.remove('fill-current', 'text-yellow-400');
+                        starIcon.classList.add('text-muted-foreground');
+                    }
+                });
+                // Update data-rating on card
+                const card = starRating.closest('.cursor-pointer');
+                if (card) {
+                    card.setAttribute('data-rating', rating);
+                }
+            }
+        </script>
 
         <script>
            async function toggleTheme() {

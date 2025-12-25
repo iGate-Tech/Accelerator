@@ -14,33 +14,34 @@
             <!-- Search Input -->
             <div class="sm:col-span-2">
                 <label for="search-input" class="block text-sm font-medium text-foreground mb-2">{{t 'ideas.explore.search' lng=lng}}</label>
-                <div class="relative">
-                     <input type="text" id="search-input" placeholder="{{t 'ideas.explore.search_placeholder' lng=lng}}"
-                           class="w-full pl-10 pr-4 py-2 border border-input rounded-md bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary text-base">
-                    {{{icon 'search' class='absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground'}}}
-                </div>
+                 <div class="relative">
+                      <input type="text" id="search-input" placeholder="{{t 'ideas.explore.search_placeholder' lng=lng}}"
+                            value="{{search}}"
+                            class="w-full pl-10 pr-4 py-2 border border-input rounded-md bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary text-base">
+                     {{{icon 'search' class='absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground'}}}
+                 </div>
             </div>
 
             <!-- Category Filter -->
             <div>
                  <label for="category-filter" class="block text-sm font-medium text-foreground mb-2">{{t 'ideas.explore.category' lng=lng}}</label>
                 <select id="category-filter" class="w-full px-3 py-2 border border-input rounded-md bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary text-base">
-                     <option value="">{{t 'ideas.explore.all_categories' lng=lng}}</option>
-                    {{#each categories}}
-                    <option value="{{this}}">{{this}}</option>
-                    {{/each}}
-                </select>
+                      <option value="" {{#if (eq category '')}}selected{{/if}}>{{t 'ideas.explore.all_categories' lng=lng}}</option>
+                     {{#each categories}}
+                     <option value="{{this}}" {{#if (eq category this)}}selected{{/if}}>{{this}}</option>
+                     {{/each}}
+                 </select>
             </div>
 
             <!-- Sort Options -->
             <div>
                  <label for="sort-select" class="block text-sm font-medium text-foreground mb-2">{{t 'ideas.explore.sort_by' lng=lng}}</label>
                 <select id="sort-select" class="w-full px-3 py-2 border border-input rounded-md bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary text-base">
-                     <option value="newest">{{t 'ideas.explore.newest_first' lng=lng}}</option>
-                     <option value="oldest">{{t 'ideas.explore.oldest_first' lng=lng}}</option>
-                     <option value="rating">{{t 'ideas.explore.highest_rated' lng=lng}}</option>
-                     <option value="title">{{t 'ideas.explore.title_az' lng=lng}}</option>
-                </select>
+                      <option value="newest" {{#if (eq sort 'newest')}}selected{{/if}}>{{t 'ideas.explore.newest_first' lng=lng}}</option>
+                      <option value="oldest" {{#if (eq sort 'oldest')}}selected{{/if}}>{{t 'ideas.explore.oldest_first' lng=lng}}</option>
+                      <option value="rating" {{#if (eq sort 'rating')}}selected{{/if}}>{{t 'ideas.explore.highest_rated' lng=lng}}</option>
+                      <option value="title" {{#if (eq sort 'title')}}selected{{/if}}>{{t 'ideas.explore.title_az' lng=lng}}</option>
+                 </select>
             </div>
         </div>
     </div>
@@ -52,13 +53,16 @@
         {{/each}}
     </div>
 
-    <!-- No Results Message -->
-    <div id="no-results" class="hidden text-center py-8 sm:py-12">
+     <!-- No Results Message -->
+     <div id="no-results" class="{{#if hasIdeas}}hidden{{/if}} text-center py-8 sm:py-12">
         <div class="inline-flex items-center justify-center w-12 h-12 sm:w-16 sm:h-16 bg-muted rounded-2xl mb-4 sm:mb-6">
             {{{icon 'search-x' class='w-6 h-6 sm:w-8 sm:h-8 text-muted-foreground'}}}
         </div>
          <h3 class="text-lg sm:text-xl font-semibold text-foreground mb-2">{{t 'ideas.explore.no_ideas_found' lng=lng}}</h3>
          <p class="text-sm sm:text-base text-muted-foreground">{{t 'ideas.explore.try_adjusting_search' lng=lng}}</p>
     </div>
-</div>
+ </div>
+
+<script src="/js/explore-idea.js"></script>
+<script>window.ideasData = {{{ideasJson}}}</script>
 

@@ -43,7 +43,7 @@ CREATE TABLE ideas (
     validation_threshold_met BOOLEAN DEFAULT FALSE,
     unlocked_models TEXT[] DEFAULT ARRAY['idea'],
     completion_percentage INTEGER DEFAULT 0 CHECK (completion_percentage >= 0 AND completion_percentage <= 100),
-    overall_status TEXT CHECK (overall_status IN ('draft', 'in_progress', 'completed', 'reported')) DEFAULT 'draft',
+    overall_status TEXT CHECK (overall_status IN ('draft', 'in_progress', 'completed', 'reported', 'archived')) DEFAULT 'draft',
     rating DECIMAL(3,2),
     is_favorite BOOLEAN DEFAULT FALSE,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),

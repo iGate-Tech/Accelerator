@@ -360,9 +360,10 @@
                                   <span class="hidden group-hover:inline transition-all duration-200">{{t 'new-idea.auto_fill_ai' lng=lng}}</span>
                              </button>
 
-                             <!-- Generate random idea -->
-                             <button type="button" aria-label="Generate random idea" title="Generate random idea"
-                                 class="inline-flex items-center justify-center gap-1 cursor-pointer text-xs text-muted-foreground hover:bg-primary-100 hover:text-primary-900 px-2 py-1 shrink-0 transition-all duration-300 group">
+                              <!-- Generate random idea -->
+                              <button type="button" aria-label="Generate random idea" title="Generate random idea"
+                                  class="inline-flex items-center justify-center gap-1 cursor-pointer text-xs text-muted-foreground hover:bg-primary-100 hover:text-primary-900 px-2 py-1 shrink-0 transition-all duration-300 group"
+                                  hx-post="/new-idea/generate" hx-include="[name='_csrf']" hx-target="body" hx-swap="beforeend" hx-on:htmx:before-request="showLoading()" hx-on:htmx:after-swap="hideLoading()">
 
   {{{icon 'shuffle' class='w-4 h-4' size='16'}}}
 
@@ -423,6 +424,29 @@ document.addEventListener('DOMContentLoaded', function() {
 
     updateActive(privacyRadios, privacyLabels); // Initial call
 });
+
+// Populate form from populateIdeaJson if available
+if (typeof populateIdeaJson !== 'undefined' && populateIdeaJson !== "null") {
+    try {
+        const data = JSON.parse(populateIdeaJson.replace(/\\'/g, "'").replace(/\\u003c/g, "<").replace(/\\u003e/g, ">"));
+        if (data.title) document.getElementById('title').textContent = data.title;
+        if (data.category) document.getElementById('category').textContent = data.category;
+        if (data.description) document.getElementById('assistant-prompt').value = data.description;
+        if (data.tags && data.tags.length > 0) {
+            const tagsList = document.getElementById('tagslist');
+            data.tags.forEach(tag => {
+                const tagSpan = document.createElement('span');
+                tagSpan.className = 'inline-flex items-center gap-1 px-2 py-0.5 bg-secondary text-secondary-foreground border border-secondary/40 text-xs rounded-full';
+                tagSpan.innerHTML = `${tag} <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-x w-3 h-3"><path d="m18 6-12 12"></path><path d="m6 6 12 12"></path></svg>`;
+                tagSpan.onclick = function() { this.remove(); };
+                tagsList.appendChild(tagSpan);
+            });
+            document.getElementById('removeAllTags').style.display = 'inline-flex';
+        }
+    } catch (e) {
+        console.error('Error populating form:', e);
+    }
+}
 </script>
 
 

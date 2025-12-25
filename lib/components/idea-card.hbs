@@ -19,13 +19,13 @@
 
       </button>
 
-      <button onclick="window.location.href='/idea/{{id}}'"
-          class="absolute top-2 right-20 px-2 py-0.5 bg-secondary/10 text-foreground text-xs rounded-md border border-secondary/40 cursor-pointer hover:bg-secondary/20"
-          title="View Full Details">
+       <button onclick="event.stopPropagation(); window.location.href='/idea/{{id}}'"
+           class="absolute top-2 right-20 px-2 py-0.5 bg-secondary/10 text-foreground text-xs rounded-md border border-secondary/40 cursor-pointer hover:bg-secondary/20"
+           title="View Full Details">
 
-          Full Screen
+           Full Screen
 
-      </button>
+       </button>
     <div class="w-full">
         <span
             class="text-ellipsis break-words line-clamp-2 text-sm text-foreground">{{title}}</span>
@@ -122,16 +122,16 @@
         </div>
 
         <div class="flex space-x-2">
-            {{#if (eq ../user.package_type 'enterprise')}}
-             <button onclick="openTeamModal(this)"
-                 data-id="{{id}}"
-                 class="text-muted-foreground hover:text-blue-500 rounded-full hover:bg-primary-100 hover:text-primary-900"
-                 title="Manage Team">
+             {{#if (eq ../user.package_type 'enterprise')}}
+              <button onclick="event.stopPropagation(); openTeamModal(this)"
+                  data-id="{{id}}"
+                  class="text-muted-foreground hover:text-blue-500 rounded-full hover:bg-primary-100 hover:text-primary-900"
+                  title="Manage Team">
 
-                  {{{icon 'users' class='w-4 h-4'}}}
+                   {{{icon 'users' class='w-4 h-4'}}}
 
-             </button>
-            {{/if}}
+              </button>
+             {{/if}}
 
             <button
                 class="text-muted-foreground hover:text-orange-500 rounded-full hover:bg-primary-100 hover:text-primary-900 unpublish-btn">
@@ -147,24 +147,24 @@
 
             </button>
             {{#if (eq privacy 'private')}}
-             <button onclick="shareIdea(this)"
-                 data-id="{{id}}"
-                 class="text-muted-foreground hover:text-green-500 rounded-full hover:bg-primary-100 hover:text-primary-900"
-                 title="Share Private Idea">
+              <button onclick="event.stopPropagation(); shareIdea(this)"
+                  data-id="{{id}}"
+                  class="text-muted-foreground hover:text-green-500 rounded-full hover:bg-primary-100 hover:text-primary-900"
+                  title="Share Private Idea">
 
-                  {{{icon 'share' class='w-4 h-4'}}}
+                   {{{icon 'share' class='w-4 h-4'}}}
 
-             </button>
-            {{/if}}
+              </button>
+             {{/if}}
 
-       <button onclick="goToIdea(this)"
-           data-id="{{id}}"
-           class="absolute top-2 right-20 px-2 py-0.5 bg-secondary/10 text-foreground text-xs rounded-md border border-secondary/40 cursor-pointer hover:bg-secondary/20"
-           title="View Full Details">
+        <button onclick="event.stopPropagation(); goToIdea(this)"
+            data-id="{{id}}"
+            class="absolute top-2 right-20 px-2 py-0.5 bg-secondary/10 text-foreground text-xs rounded-md border border-secondary/40 cursor-pointer hover:bg-secondary/20"
+            title="View Full Details">
 
-           Full Screen
+            Full Screen
 
-       </button>
+        </button>
 
              <button
                  class="text-muted-foreground hover:text-red-500 rounded-full hover:bg-primary-100 hover:text-primary-900 archive-btn">

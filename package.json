@@ -12,12 +12,16 @@
     "lint": "eslint .",
     "format": "prettier --write . --single-quote",
     "deploy": "git push origin staging:main",
-    "db:reset": "psql \"$SUPABASE_DB_URL\" -f reset_database.sql",
-    "db:schema": "psql \"$SUPABASE_DB_URL\" -f schema.sql",
+    "db:reset": "psql \"$SUPABASE_DB_URL\" -f db/reset_database.sql",
+    "db:schema": "psql \"$SUPABASE_DB_URL\" -f db/schema.sql",
     "db:setup": "npm run db:reset && npm run db:schema",
     "db:reset-remote": "psql \"$SUPABASE_DB_URL\" -c \"DO \\$$ \\$ DECLARE table_name TEXT; BEGIN FOR table_name IN SELECT tablename FROM pg_tables WHERE schemaname = 'public' LOOP EXECUTE 'DROP TABLE IF EXISTS ' || quote_ident(table_name) || ' CASCADE'; RAISE NOTICE 'Dropped table: %', table_name; END LOOP; END \\$$;\\\"",
-    "db:schema-remote": "psql \"$SUPABASE_DB_URL\" -f schema.sql",
-    "db:deploy": "npm run db:reset-remote && npm run db:schema-remote"
+    "db:schema-remote": "psql \"$SUPABASE_DB_URL\" -f db/schema.sql",
+    "db:deploy": "npm run db:reset-remote && npm run db:schema-remote",
+    "db:get-schema": "pg_dump \"$SUPABASE_DB_URL\" --schema-only --no-owner --no-privileges > db/current_schema.sql",
+    "db:update-schema": "npm run db:schema-remote",
+    "db:upload-seeds": "psql \"$SUPABASE_DB_URL\" -f db/seeds.sql",
+    "db:reset-full": "npm run db:reset-remote"
   },
   "repository": {
     "type": "git",

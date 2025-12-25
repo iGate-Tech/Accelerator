@@ -2,18 +2,18 @@
 <div class="flex justify-center mb-4 sm:mb-6">
   <div class="flex items-center space-x-0.5 sm:space-x-1 overflow-x-auto px-2 sm:px-0">
     <div class="flex items-center flex-shrink-0">
-        <div id="step1-circle" class="w-4 h-4 sm:w-5 sm:h-5 {{#if (eq activeStep 'package')}}bg-primary{{else}}bg-muted{{/if}} rounded-full flex items-center justify-center {{#if (eq activeStep 'package')}}text-primary-content{{else}}text-muted-foreground{{/if}} font-bold text-xs sm:text-sm">{{#if (eq activeStep 'package')}}1{{else}}✓{{/if}}</div>
-         <span id="step1-label" class="ml-0.5 sm:ml-1 {{#if (eq activeStep 'package')}}text-primary{{else}}text-muted-foreground{{/if}} font-medium text-xs sm:text-sm whitespace-nowrap">Choose Plan</span>
+         <div id="step1-circle" class="w-4 h-4 sm:w-5 sm:h-5 {{#if (eq activeStep 'package')}}bg-primary{{else}}bg-muted{{/if}} rounded-full flex items-center justify-center {{#if (eq activeStep 'package')}}text-primary-content{{else}}text-muted-foreground{{/if}} font-bold text-xs sm:text-sm">{{#if (eq activeStep 'package')}}1{{else}}✓{{/if}}</div>
+          <span id="step1-label" class="ml-0.5 sm:ml-1 {{#if (eq activeStep 'package')}}text-primary{{else}}text-muted-foreground{{/if}} font-medium text-xs sm:text-sm whitespace-nowrap">{{t 'onboarding.package.step_choose_plan'}}</span>
     </div>
       <div id="step1-2-line" class="w-1 sm:w-2 h-0.5 {{#if (or (eq activeStep 'payment') (eq activeStep 'profile'))}}bg-primary{{else}}bg-muted{{/if}} flex-shrink-0"></div>
      <div class="flex items-center flex-shrink-0">
-        <div id="step2-circle" class="w-4 h-4 sm:w-5 sm:h-5 {{#if (or (eq activeStep 'payment') (eq activeStep 'profile'))}}bg-primary{{else}}bg-muted{{/if}} rounded-full flex items-center justify-center {{#if (or (eq activeStep 'payment') (eq activeStep 'profile'))}}text-primary-content{{else}}text-muted-foreground{{/if}} font-bold text-xs sm:text-sm">2</div>
-         <span id="step2-label" class="ml-0.5 sm:ml-1 {{#if (or (eq activeStep 'payment') (eq activeStep 'profile'))}}text-primary{{else}}text-muted-foreground{{/if}} font-medium text-xs sm:text-sm whitespace-nowrap">Add Payment Method</span>
+         <div id="step2-circle" class="w-4 h-4 sm:w-5 sm:h-5 {{#if (or (eq activeStep 'payment') (eq activeStep 'profile'))}}bg-primary{{else}}bg-muted{{/if}} rounded-full flex items-center justify-center {{#if (or (eq activeStep 'payment') (eq activeStep 'profile'))}}text-primary-content{{else}}text-muted-foreground{{/if}} font-bold text-xs sm:text-sm">2</div>
+          <span id="step2-label" class="ml-0.5 sm:ml-1 {{#if (or (eq activeStep 'payment') (eq activeStep 'profile'))}}text-primary{{else}}text-muted-foreground{{/if}} font-medium text-xs sm:text-sm whitespace-nowrap">{{t 'onboarding.package.step_add_payment'}}</span>
      </div>
       <div id="step2-3-line" class="w-1 sm:w-2 h-0.5 {{#if (eq activeStep 'profile')}}bg-primary{{else}}bg-muted{{/if}} flex-shrink-0"></div>
      <div class="flex items-center flex-shrink-0">
-        <div class="w-4 h-4 sm:w-5 sm:h-5 {{#if (eq activeStep 'profile')}}bg-primary{{else}}bg-muted{{/if}} rounded-full flex items-center justify-center {{#if (eq activeStep 'profile')}}text-primary-content{{else}}text-muted-foreground{{/if}} font-bold text-xs sm:text-sm">3</div>
-         <span class="ml-0.5 sm:ml-1 {{#if (eq activeStep 'profile')}}text-primary{{else}}text-muted-foreground{{/if}} font-medium text-xs sm:text-sm whitespace-nowrap">Complete Profile</span>
+         <div class="w-4 h-4 sm:w-5 sm:h-5 {{#if (eq activeStep 'profile')}}bg-primary{{else}}bg-muted{{/if}} rounded-full flex items-center justify-center {{#if (eq activeStep 'profile')}}text-primary-content{{else}}text-muted-foreground{{/if}} font-bold text-xs sm:text-sm">3</div>
+          <span class="ml-0.5 sm:ml-1 {{#if (eq activeStep 'profile')}}text-primary{{else}}text-muted-foreground{{/if}} font-medium text-xs sm:text-sm whitespace-nowrap">{{t 'onboarding.package.step_complete_profile'}}</span>
      </div>
 
   </div>

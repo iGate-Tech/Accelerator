@@ -28,6 +28,7 @@
   "billing": "Billing",
   "add_payment_method": "Add Payment Method",
   "user_activity": "User Activity",
+  "settings": "Settings",
   "logout": "Logout",
   "logout_confirm": "Are you sure you want to log out?",
   "cancel": "Cancel",

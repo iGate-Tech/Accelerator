@@ -45,7 +45,6 @@ CREATE TABLE ideas (
     completion_percentage INTEGER DEFAULT 0 CHECK (completion_percentage >= 0 AND completion_percentage <= 100),
     overall_status TEXT CHECK (overall_status IN ('draft', 'in_progress', 'completed', 'reported', 'archived')) DEFAULT 'draft',
     rating DECIMAL(3,2),
-    is_favorite BOOLEAN DEFAULT FALSE,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
@@ -149,7 +148,17 @@ CREATE TABLE activity_log (
 );
 ALTER TABLE activity_log ENABLE ROW LEVEL SECURITY;
 
--- 11. voting_rewards
+-- 11. user_favorites
+CREATE TABLE user_favorites (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
+    idea_id UUID REFERENCES ideas(id) ON DELETE CASCADE,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    UNIQUE(user_id, idea_id)
+);
+ALTER TABLE user_favorites ENABLE ROW LEVEL SECURITY;
+
+-- 12. voting_rewards
 CREATE TABLE voting_rewards (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     idea_id UUID REFERENCES ideas(id) ON DELETE CASCADE,
@@ -212,9 +221,24 @@ CREATE TABLE rewards (
 ALTER TABLE rewards ENABLE ROW LEVEL SECURITY;
 
 -- RLS Policies (basic user-owned access)
-CREATE POLICY "Users can manage own profile" ON profiles FOR ALL USING (auth.uid() = user_id);
-CREATE POLICY "Users can manage own ideas" ON ideas FOR ALL USING (auth.uid() = user_id);
-CREATE POLICY "Public read public ideas" ON ideas FOR SELECT USING (privacy = 'public');
+-- Profiles: Allow authenticated users to read all profiles (for public profile viewing)
+-- Allow users to manage their own profiles
+CREATE POLICY "Allow authenticated users to read profiles" ON profiles
+FOR SELECT USING (auth.role() = 'authenticated');
+
+CREATE POLICY "Allow users to manage own profile" ON profiles
+FOR ALL USING (auth.uid() = user_id);
+
+-- Allow authenticated users to insert their own profiles (for profile creation)
+CREATE POLICY "Allow users to insert own profile" ON profiles
+FOR INSERT WITH CHECK (auth.uid() = user_id);
+
+-- Ideas: Allow public read of public ideas, users manage own ideas
+CREATE POLICY "Allow reading public and own ideas" ON ideas
+FOR SELECT USING (privacy = 'public' OR auth.uid() = user_id);
+
+CREATE POLICY "Allow users to manage own ideas" ON ideas
+FOR ALL USING (auth.uid() = user_id);
 CREATE POLICY "Users can vote on public ideas" ON votes FOR ALL USING (EXISTS (SELECT 1 FROM ideas WHERE id = idea_id AND privacy = 'public'));
 CREATE POLICY "Users can manage own model instances" ON model_instances FOR ALL USING (auth.uid() = user_id);
 CREATE POLICY "Users can manage own model sections" ON model_sections FOR ALL USING (EXISTS (SELECT 1 FROM model_instances WHERE id = model_instance_id AND user_id = auth.uid()));
@@ -222,7 +246,11 @@ CREATE POLICY "Users can manage own team members" ON team_members FOR ALL USING 
 CREATE POLICY "Users can manage own reports" ON reports FOR ALL USING (auth.uid() = user_id);
 CREATE POLICY "Users can manage own notifications" ON notifications FOR ALL USING (auth.uid() = user_id);
 CREATE POLICY "Users can manage own credit transactions" ON credit_transactions FOR ALL USING (auth.uid() = user_id);
-CREATE POLICY "Users can manage own activity log" ON activity_log FOR ALL USING (auth.uid() = user_id);
+-- Activity log: Allow reading own activity (public activity can be handled separately if needed)
+CREATE POLICY "Allow users to manage own activity log" ON activity_log FOR ALL USING (auth.uid() = user_id);
+
+CREATE POLICY "Users can manage own favorites" ON user_favorites FOR ALL USING (auth.uid() = user_id);
+CREATE POLICY "Users can manage own favorites" ON user_favorites FOR ALL USING (auth.uid() = user_id);
 CREATE POLICY "Users can manage own voting rewards" ON voting_rewards FOR ALL USING (auth.uid() = voter_id);
 CREATE POLICY "Users can manage own settings" ON user_settings FOR ALL USING (auth.uid() = user_id);
 CREATE POLICY "Users can manage own billing" ON billing_history FOR ALL USING (auth.uid() = user_id);
@@ -367,12 +395,38 @@ CREATE POLICY "Users can manage portfolio memberships for own portfolios delete"
     )
 );
 
--- Sample Data (PRD 6.8)
-INSERT INTO credit_packages (name, credits, price) VALUES ('Basic', 500, 999), ('Pro', 2000, 2999);
-INSERT INTO packages (name, type, price_monthly, credits_monthly, features) VALUES
-('Free', 'free', 0, 50, '{"vote": true}'),
-('Student', 'student', 999, 500, '{"create": true, "models": true}'),
-('Enterprise', 'enterprise', 2999, 2000, '{"all": true, "team": true}');
+-- Storage Buckets Setup
+INSERT INTO storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
+VALUES ('avatars', 'avatars', true, 5242880, ARRAY['image/jpeg', 'image/png', 'image/webp', 'image/gif']);
+
+-- Bucket Policies
+CREATE POLICY "Avatar images are publicly accessible" ON storage.objects
+FOR SELECT USING (bucket_id = 'avatars');
+
+CREATE POLICY "Users can upload their own avatar" ON storage.objects
+FOR INSERT WITH CHECK (bucket_id = 'avatars' AND auth.uid()::text = (storage.foldername(name))[1]);
+
+CREATE POLICY "Users can update their own avatar" ON storage.objects
+FOR UPDATE USING (bucket_id = 'avatars' AND auth.uid()::text = (storage.foldername(name))[1]);
+
+CREATE POLICY "Users can delete their own avatar" ON storage.objects
+FOR DELETE USING (bucket_id = 'avatars' AND auth.uid()::text = (storage.foldername(name))[1]);
+
+-- Session table for connect-pg-simple
+CREATE TABLE session (
+    sid varchar NOT NULL COLLATE "default",
+    sess json NOT NULL,
+    expire timestamp(6) NOT NULL
+) WITH (OIDS=FALSE);
+
+ALTER TABLE session ADD CONSTRAINT session_pkey PRIMARY KEY (sid) NOT DEFERRABLE INITIALLY IMMEDIATE;
+ALTER TABLE session ENABLE ROW LEVEL SECURITY;
+CREATE INDEX IDX_session_expire ON session(expire);
+
+-- Policy for session table (allow service role access)
+CREATE POLICY "Service role can manage sessions" ON session FOR ALL USING (auth.role() = 'service_role');
+
+-- Sample data is inserted via seeds.sql separately
 
 -- Database Validation Triggers
 

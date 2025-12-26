@@ -482,9 +482,9 @@ if (response.ok) {
       </button>
 
       <!-- Grid Dropdown -->
-      <div
-        class="fixed md:absolute {{#if (eq lng 'ar')}}left-0{{else}}right-0{{/if}} mt-0 md:mt-2 w-full md:w-[200px] bg-popover backdrop-blur-sm border border-input/80 rounded-lg shadow-xl z-30 transition-all duration-200 opacity-0 invisible hidden"
-        id="grid-dropdown">
+       <div
+         class="fixed md:absolute left-0 mt-0 md:mt-2 w-full md:w-[200px] bg-popover backdrop-blur-sm border border-input/80 rounded-lg shadow-xl z-30 transition-all duration-200 opacity-0 invisible hidden"
+         id="grid-dropdown">
         <div class="p-1">
           <div class="px-2 py-1 text-sm font-medium text-muted-foreground text-center">{{t 'nav.quick_access' lng=lng}}</div>
           <div class="bg-border -mx-1 my-1 h-px"></div>
@@ -556,12 +556,12 @@ if (response.ok) {
         <div class="p-2">
 
             <!-- User profile section -->
-            <a href="/settings"
+            <a href="/profile/{{user.id}}"
      class="w-full mb-2 relative flex cursor-default select-none items-center gap-3 rounded-sm px-3 py-3 text-sm text-left outline-none transition-colors bg-primary-50 hover:bg-primary-100 hover:text-primary-900">
+     <img src="{{cond user.profile.avatar_url user.profile.avatar_url '/images/avatar.png'}}" class="h-8 w-8 rounded-full object-cover shrink-0" alt="User Avatar">
      <div class="flex-1 min-w-0">
          <div class="flex items-center justify-between mb-1">
               <span class="truncate user-name text-foreground">{{user.profile.name}}</span>
-             {{{icon 'settings' class='h-4 w-4 text-muted-foreground shrink-0' size='16'}}}
          </div>
          <div class="truncate text-xs text-muted-foreground user-email mb-1">{{user.email}}</div>
          <div class="text-xs text-muted-foreground">
@@ -569,6 +569,15 @@ if (response.ok) {
          </div>
      </div>
  </a>
+
+            <!-- Settings -->
+            <a href="/settings"
+              class="w-full relative flex cursor-default select-none items-center gap-2 rounded-sm px-2 py-2 text-sm text-left outline-none transition-colors hover:bg-primary-100 hover:text-primary-900 mb-1">
+
+             {{{icon "settings" class="h-4 w-4 shrink-0"}}}
+
+             {{t 'nav.settings' lng=lng}}
+            </a>
 
 
 
@@ -591,16 +600,25 @@ if (response.ok) {
              {{{icon "coins" class="h-4 w-4 shrink-0"}}}
 
              {{t 'nav.buy_credits' lng=lng}}
-          </a>
+           </a>
 
-          <!-- Billing -->
-          <a href="/billing"
-            class="w-full relative flex cursor-default select-none items-center gap-2 rounded-sm px-2 py-2 text-sm text-left outline-none transition-colors hover:bg-primary-100 hover:text-primary-900">
+           <!-- Rewards Earn -->
+           <a href="/rewards"
+             class="w-full relative flex cursor-default select-none items-center gap-2 rounded-sm px-2 py-2 text-sm text-left outline-none transition-colors hover:bg-primary-100 hover:text-primary-900">
 
-             {{{icon "credit-card" class="h-4 w-4 shrink-0"}}}
+              {{{icon "gift" class="h-4 w-4 shrink-0"}}}
 
-             {{t 'nav.billing' lng=lng}}
-          </a>
+              Rewards Earn
+           </a>
+
+           <!-- Billing -->
+           <a href="/billing"
+             class="w-full relative flex cursor-default select-none items-center gap-2 rounded-sm px-2 py-2 text-sm text-left outline-none transition-colors hover:bg-primary-100 hover:text-primary-900">
+
+              {{{icon "credit-card" class="h-4 w-4 shrink-0"}}}
+
+              {{t 'nav.billing' lng=lng}}
+           </a>
 
           <!-- Add Payment Method -->
           <a href="/add-payment-method"

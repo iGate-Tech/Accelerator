@@ -6,6 +6,7 @@
   "scripts": {
     "start": "node index.js",
     "dev": "concurrently \"npm run watch-css\" \"nodemon index.js\" \"bdui start --open\"",
+    "dev-no-css": "concurrently \"nodemon index.js\" \"bdui start --open\"",
     "build": "npm run build-css",
     "build-css": "npx @tailwindcss/cli -i public/css/input.css -o public/css/output.css",
     "watch-css": "npx @tailwindcss/cli -i public/css/input.css -o public/css/output.css --watch",
@@ -15,13 +16,14 @@
     "db:reset": "psql \"$SUPABASE_DB_URL\" -f db/reset_database.sql",
     "db:schema": "psql \"$SUPABASE_DB_URL\" -f db/schema.sql",
     "db:setup": "npm run db:reset && npm run db:schema",
-    "db:reset-remote": "psql \"$SUPABASE_DB_URL\" -c \"DO \\$$ \\$ DECLARE table_name TEXT; BEGIN FOR table_name IN SELECT tablename FROM pg_tables WHERE schemaname = 'public' LOOP EXECUTE 'DROP TABLE IF EXISTS ' || quote_ident(table_name) || ' CASCADE'; RAISE NOTICE 'Dropped table: %', table_name; END LOOP; END \\$$;\\\"",
-    "db:schema-remote": "psql \"$SUPABASE_DB_URL\" -f db/schema.sql",
+    "db:reset-remote": "bash -c 'source .env && psql \"$SUPABASE_DB_URL\" -f db/reset_full.sql'",
+    "db:schema-remote": "bash -c 'source .env && psql \"$SUPABASE_DB_URL\" -f db/schema.sql'",
     "db:deploy": "npm run db:reset-remote && npm run db:schema-remote",
-    "db:get-schema": "pg_dump \"$SUPABASE_DB_URL\" --schema-only --no-owner --no-privileges > db/current_schema.sql",
+    "db:get-schema": "bash -c 'source .env && pg_dump \"$SUPABASE_DB_URL\" --schema-only --no-owner --no-privileges > db/current_schema.sql'",
     "db:update-schema": "npm run db:schema-remote",
-    "db:upload-seeds": "psql \"$SUPABASE_DB_URL\" -f db/seeds.sql",
-    "db:reset-full": "npm run db:reset-remote"
+    "db:upload-seeds": "bash -c 'source .env && psql \"$SUPABASE_DB_URL\" -f db/seeds.sql'",
+    "db:reset-full": "npm run db:reset-remote",
+    "db:reset-recreate": "npm run db:reset-full && npm run db:update-schema && npm run db:upload-seeds"
   },
   "repository": {
     "type": "git",
@@ -40,6 +42,7 @@
   "homepage": "https://github.com/AR-92/accelerator#readme",
   "dependencies": {
     "@supabase/supabase-js": "^2.84.0",
+    "connect-pg-simple": "^10.0.0",
     "dompurify": "^3.3.1",
     "dotenv": "^17.2.3",
     "express": "^4.19.2",
@@ -53,13 +56,12 @@
     "jsonwebtoken": "^9.0.3",
     "lucide-static": "^0.556.0",
     "marked": "^17.0.1",
-    "memorystore": "^1.6.7",
     "moment": "^2.30.1",
     "node-cache": "^5.1.2",
     "node-fetch": "^3.3.2",
     "nodemailer": "^7.0.11",
+    "pg": "^8.16.3",
     "puppeteer": "^24.34.0",
-    "session-file-store": "^1.5.0",
     "slugify": "^1.6.6",
     "winston": "^3.19.0"
   },

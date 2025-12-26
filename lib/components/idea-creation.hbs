@@ -1,9 +1,9 @@
 <div class="flex flex-col ">
     <!-- Header -->
     <header class="w-full flex flex-col items-center gap-2 mb-2">
-           <h1 class="text-2xl sm:text-3xl md:text-4xl font-sans font-light text-foreground mb-6 sm:mb-10 text-center">
-               {{t 'new-idea.greeting' lng=lng}} <span class="text-primary">{{firstName user.profile.name}}</span>, {{t 'new-idea.question' lng=lng}}
-           </h1>
+            <h1 class="text-2xl sm:text-3xl md:text-4xl font-sans font-light text-foreground mb-6 sm:mb-10 text-center">
+                {{t 'new-idea.greeting' lng=lng}} <span class="text-primary">{{firstName user.profile.name}}</span>, {{t 'new-idea.question' lng=lng}}
+            </h1>
     </header>
 
     <!-- Form / Input area -->
@@ -226,45 +226,14 @@
             padding: 0;
         }
     </style>
-    <form id="new-project-form" class="flex m-auto max-w-[750px] w-full flex-col gap-1" method="post" action="/new-idea" hx-post="/new-idea" hx-target="body" hx-swap="beforeend" hx-on:htmx:before-request="clearAlerts(); showLoading()" hx-on:htmx:after-swap="hideLoading()"
+    <form id="new-project-form" class="flex m-auto max-w-[500px] w-full flex-col gap-1" method="post" action="/new-idea" hx-post="/new-idea" hx-target="body" hx-swap="beforeend" hx-on:htmx:before-request="clearAlerts(); showLoading()" hx-on:htmx:after-swap="hideLoading()">
         <!-- CSRF Token (Important for security) -->
         <input type="hidden" name="_csrf" value="">
-        <input type="hidden" name="privacy" id="privacy-hidden" value="public">
 
         <div class="flex flex-col w-full">
             <div class="">
                 <div
                     class="new-project-form flex flex-col gap-2 rounded-2xl relative py-2 border border-border bg-background shadow-sm">
-                    <!-- Title wrapper -->
-                    <div class="pl-4 pr-2 flex justify-between items-center">
-                        <div class="flex rounded-full border border-border overflow-hidden">
-                            <span
-                                class="inline-flex items-center gap-1 px-2 py-1 bg-muted text-muted-foreground text-xs focus:outline-none focus:bg-accent transition-all duration-300">
-                                 <i contenteditable="true" id="title" class="text-foreground">{{t 'new-idea.untitled' lng=lng}}</i>
-                                {{{icon 'square-pen' class='w-3 h-3' size='12'}}}
-                            </span>
-                            <span
-                                class="inline-flex items-center gap-1 px-2 py-1 bg-muted text-muted-foreground text-xs focus:outline-none focus:bg-accent transition-all duration-300">
-                                 <i contenteditable="true" id="category">{{t 'new-idea.category' lng=lng}}</i>
-                                {{{icon 'square-pen' class='w-3 h-3' size='12'}}}
-                            </span>
-                        </div>
-
-                        <!-- Privacy setting -->
-                        <div class="flex rounded-full border border-border overflow-hidden">
-                            <label for="privacy-public" class="privacy-btn flex items-center gap-1 px-2 py-1 text-xs cursor-pointer bg-muted text-muted-foreground hover:bg-primary/10 hover:text-primary peer-checked:bg-primary peer-checked:text-primary-foreground transition-all duration-300">
-                                <input type="radio" id="privacy-public" name="privacy-radio" value="public" class="sr-only peer" checked>
-                                {{{icon 'eye' class='w-4 h-4' size='16'}}}
-                                <span class="hidden peer-checked:inline">{{t 'new-idea.public' lng=lng}}</span>
-                            </label>
-                            <label for="privacy-private" class="privacy-btn flex items-center gap-1 px-2 py-1 text-xs cursor-pointer bg-muted text-muted-foreground hover:bg-primary/10 hover:text-primary peer-checked:bg-primary peer-checked:text-primary-foreground transition-all duration-300">
-                                <input type="radio" id="privacy-private" name="privacy-radio" value="private" class="sr-only peer">
-                                {{{icon 'eye-off' class='w-4 h-4' size='16'}}}
-                                <span class="hidden peer-checked:inline">{{t 'new-idea.private' lng=lng}}</span>
-                            </label>
-                        </div>
-                    </div>
-
                     <!-- Description wrapper -->
                     <div class=" pl-4 pr-2 relative">
                         <label for="assistant-prompt" class="sr-only">Describe your
@@ -274,103 +243,28 @@
                                placeholder="{{t 'new-idea.describe_requirements' lng=lng}}"
                               aria-label="Describe your project requirements" aria-describedby="prompt-help char-counter"
                               class="flex w-full rounded-md border-0 bg-transparent p-0 pt-[1px] text-base text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0"
-                              required=""
-                                                            style="min-height: 2.5rem; resize: none; overflow: hidden;"></textarea>
+                              required="" rows="3"
+                                                            style="resize: none; overflow: hidden;"></textarea>
                         <p id="prompt-help" class="sr-only">Enter your project
                             description or requirements</p>
                      </div>
 
 
 
-                     <!-- Tags wrapper -->
-                    <div class="pl-4 pr-2">
-                        <div id="tagslist" class="flex flex-wrap gap-1">
-
-                             <!-- Add more -->
-                             <span id="addOneTag" class="inline-flex items-center gap-1 px-2 py-0.5
-                       bg-success/5
-                       text-success
-                        border border-success/40 cursor-pointer
-                     text-xs rounded-full" style="display: none;">
-
-  {{{icon 'plus' class='w-3 h-3' size='12'}}}
-                                  {{t 'new-idea.add_more' lng=lng}}
-                             </span>
-
-                             <!-- Remove all -->
-                             <span id="removeAllTags" class="inline-flex items-center gap-1 px-2 py-0.5
-                       bg-destructive/10
-                       text-destructive
-                        border border-destructive/40
-                      text-xs rounded-full cursor-pointer" style="display: none;">
-
-  {{{icon 'trash' class='w-3 h-3' size='12'}}}
-                                  {{t 'new-idea.remove_all' lng=lng}}
-                             </span>
-
-                        </div>
-                     </div>
-
 
                      <!-- toolbar -->
                      <div class="px-3 flex gap-2 items-center">
-                         <div class="flex rounded-full border border-border overflow-hidden flex-shrink-0">
-                             <!-- Generate title with AI -->
-                             <button type="button" aria-label="Generate title with AI" title="Generate title with AI"
-                                 class="inline-flex items-center justify-center gap-1 cursor-pointer text-xs text-muted-foreground hover:bg-primary-100 hover:text-primary-900 px-2 py-1 shrink-0 transition-all duration-300 group">
-
-  {{{icon 'type' class='w-4 h-4' size='16'}}}
-
-                                  <span class="hidden group-hover:inline transition-all duration-200">{{t 'new-idea.generate_title_ai' lng=lng}}</span>
-                             </button>
-
-                             <!-- Add category with AI -->
-                             <button type="button" aria-label="Add category with AI" title="Add category with AI"
-                                 class="inline-flex items-center justify-center gap-1 cursor-pointer text-xs text-muted-foreground hover:bg-primary-100 hover:text-primary-900 px-2 py-1 shrink-0 transition-all duration-300 group">
-
-  {{{icon 'folder' class='w-4 h-4' size='16'}}}
-
-                                  <span class="hidden group-hover:inline transition-all duration-200">{{t 'new-idea.add_category_ai' lng=lng}}</span>
-                             </button>
-
-                             <!-- Improve with AI -->
-                             <button type="button" aria-label="Improve with AI" title="Improve with AI"
-                                 class="inline-flex items-center justify-center gap-1 cursor-pointer text-xs text-muted-foreground hover:bg-primary-100 hover:text-primary-900 px-2 py-1 shrink-0 transition-all duration-300 group">
+                          <div class="flex rounded-full border border-border overflow-hidden flex-shrink-0">
+                              <!-- Improve with AI -->
+                              <button type="button" aria-label="Improve with AI" title="Improve with AI"
+                                  class="inline-flex items-center justify-center gap-1 cursor-pointer text-xs text-muted-foreground hover:bg-primary-100 hover:text-primary-900 px-2 py-1 shrink-0 transition-all duration-300 group">
 
   {{{icon 'lightbulb' class='w-4 h-4' size='16'}}}
 
-                                  <span class="hidden group-hover:inline transition-all duration-200">{{t 'new-idea.improve_description_ai' lng=lng}}</span>
-                             </button>
+                                   <span class="hidden group-hover:inline transition-all duration-200">{{t 'new-idea.improve_description_ai' lng=lng}}</span>
+                              </button>
 
-                             <!-- Add tags with AI -->
-                             <button type="button" aria-label="Add tags with AI" title="Add tags with AI"
-                                 class="inline-flex items-center justify-center gap-1 cursor-pointer text-xs text-muted-foreground hover:bg-primary-100 hover:text-primary-900 px-2 py-1 shrink-0 transition-all duration-300 group">
-
-  {{{icon 'tag' class='w-4 h-4' size='16'}}}
-
-                                  <span class="hidden group-hover:inline transition-all duration-200">{{t 'new-idea.add_tags_ai' lng=lng}}</span>
-                             </button>
-
-                             <!-- Auto fill with AI -->
-                             <button type="button" aria-label="Auto fill with AI" title="Auto fill with AI"
-                                 class="inline-flex items-center justify-center gap-1 cursor-pointer text-xs text-muted-foreground hover:bg-primary-100 hover:text-primary-900 px-2 py-1 shrink-0 transition-all duration-300 group">
-
-  {{{icon 'wand-sparkles' class='w-4 h-4' size='16'}}}
-
-                                  <span class="hidden group-hover:inline transition-all duration-200">{{t 'new-idea.auto_fill_ai' lng=lng}}</span>
-                             </button>
-
-                              <!-- Generate random idea -->
-                              <button type="button" aria-label="Generate random idea" title="Generate random idea"
-                                  class="inline-flex items-center justify-center gap-1 cursor-pointer text-xs text-muted-foreground hover:bg-primary-100 hover:text-primary-900 px-2 py-1 shrink-0 transition-all duration-300 group"
-                                  hx-post="/new-idea/generate" hx-include="[name='_csrf']" hx-target="body" hx-swap="beforeend" hx-on:htmx:before-request="showLoading()" hx-on:htmx:after-swap="hideLoading()">
-
-  {{{icon 'shuffle' class='w-4 h-4' size='16'}}}
-
-                                  <span class="hidden group-hover:inline transition-all duration-200">{{t 'new-idea.random_idea_ai' lng=lng}}</span>
-                             </button>
-
-                             <!-- Reset form -->
+                              <!-- Reset form -->
                              <button type="button" aria-label="Reset form" title="Reset form"
                                  class="inline-flex items-center justify-center gap-1 cursor-pointer text-xs text-muted-foreground hover:bg-primary-100 hover:text-primary-900 px-2 py-1 shrink-0 transition-all duration-300 group">
 
@@ -380,17 +274,16 @@
                              </button>
                          </div>
 
-                        <!-- Submit button on the right -->
-                        <div class="min-w-0 flex gap-2 ml-auto flex-shrink items-center">
-                             <span id="char-counter" class="text-xs text-red-500/60 mr-2" aria-live="polite">{{t 'new-idea.characters' lng=lng}}</span>
-                            <button type="submit" aria-label="Create project" title="Create project"
-                                class="rounded-full border border-border inline-flex items-center justify-center gap-1 cursor-pointer text-xs text-muted-foreground hover:bg-primary-100 hover:text-primary-900 px-2 py-1 shrink-0 transition-all duration-300 group">
+                         <!-- Submit button on the right -->
+                         <div class="min-w-0 flex gap-2 ml-auto flex-shrink items-center">
+                             <button type="submit" aria-label="Create project" title="Create project"
+                                 class="rounded-full border border-border inline-flex items-center justify-center gap-1 cursor-pointer text-xs text-muted-foreground hover:bg-primary-100 hover:text-primary-900 px-2 py-1 shrink-0 transition-all duration-300 group">
 
- {{{icon 'plus' class='w-4 h-4' size='16'}}}
+  {{{icon 'plus' class='w-4 h-4' size='16'}}}
 
-                                 <span class="hidden group-hover:inline transition-all duration-200">{{t 'new-idea.create_project' lng=lng}}</span>
-                            </button>
-                        </div>
+                                  <span class="transition-all duration-200">{{t 'new-idea.create_project' lng=lng}}</span>
+                             </button>
+                         </div>
                     </div>
                 </div>
             </div>
@@ -401,48 +294,12 @@
 <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    const privacyRadios = document.querySelectorAll('input[name="privacy-radio"]');
-    const privacyLabels = document.querySelectorAll('.privacy-btn');
-
-    function updateActive(radios, labels) {
-        labels.forEach(label => {
-            const input = label.querySelector('input');
-            if (input.checked) {
-                label.classList.add('bg-primary', 'text-primary-foreground');
-                label.classList.remove('bg-muted', 'text-muted-foreground');
-            } else {
-                label.classList.remove('bg-primary', 'text-primary-foreground');
-                label.classList.add('bg-muted', 'text-muted-foreground');
-            }
-        });
-    }
-
-    privacyRadios.forEach(radio => {
-        radio.addEventListener('change', () => updateActive(privacyRadios, privacyLabels));
-    });
-
-    updateActive(privacyRadios, privacyLabels); // Initial call
-});
 
 // Populate form from populateIdeaJson if available
 if (typeof populateIdeaJson !== 'undefined' && populateIdeaJson !== "null") {
     try {
         const data = JSON.parse(populateIdeaJson.replace(/\\'/g, "'").replace(/\\u003c/g, "<").replace(/\\u003e/g, ">"));
-        if (data.title) document.getElementById('title').textContent = data.title;
-        if (data.category) document.getElementById('category').textContent = data.category;
         if (data.description) document.getElementById('assistant-prompt').value = data.description;
-        if (data.tags && data.tags.length > 0) {
-            const tagsList = document.getElementById('tagslist');
-            data.tags.forEach(tag => {
-                const tagSpan = document.createElement('span');
-                tagSpan.className = 'inline-flex items-center gap-1 px-2 py-0.5 bg-secondary text-secondary-foreground border border-secondary/40 text-xs rounded-full';
-                tagSpan.innerHTML = `${tag} <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-x w-3 h-3"><path d="m18 6-12 12"></path><path d="m6 6 12 12"></path></svg>`;
-                tagSpan.onclick = function() { this.remove(); };
-                tagsList.appendChild(tagSpan);
-            });
-            document.getElementById('removeAllTags').style.display = 'inline-flex';
-        }
     } catch (e) {
         console.error('Error populating form:', e);
     }

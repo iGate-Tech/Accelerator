@@ -12,6 +12,7 @@
     "watch-css": "npx @tailwindcss/cli -i public/css/input.css -o public/css/output.css --watch",
     "lint": "eslint .",
     "format": "prettier --write . --single-quote",
+    "push": "git push origin main",
     "deploy": "git push origin staging:main",
     "db:reset": "psql \"$SUPABASE_DB_URL\" -f db/reset_database.sql",
     "db:schema": "psql \"$SUPABASE_DB_URL\" -f db/schema.sql",

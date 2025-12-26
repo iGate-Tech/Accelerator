@@ -24,6 +24,7 @@
     --color-orange-700: oklch(55.3% 0.195 38.402);
     --color-orange-950: oklch(26.6% 0.079 36.259);
     --color-amber-50: oklch(98.7% 0.022 95.277);
+    --color-amber-300: oklch(87.9% 0.169 91.605);
     --color-amber-400: oklch(82.8% 0.189 84.429);
     --color-amber-500: oklch(76.9% 0.188 70.08);
     --color-amber-600: oklch(66.6% 0.179 58.318);
@@ -2816,6 +2817,11 @@
       display: block;
     }
   }
+  .peer-checked\:border-amber-400 {
+    &:is(:where(.peer):checked ~ *) {
+      border-color: var(--color-amber-400);
+    }
+  }
   .peer-checked\:border-primary {
     &:is(:where(.peer):checked ~ *) {
       border-color: var(--color-primary);
@@ -2824,6 +2830,11 @@
   .peer-checked\:border-yellow-400 {
     &:is(:where(.peer):checked ~ *) {
       border-color: var(--color-yellow-400);
+    }
+  }
+  .peer-checked\:bg-amber-50 {
+    &:is(:where(.peer):checked ~ *) {
+      background-color: var(--color-amber-50);
     }
   }
   .peer-checked\:bg-primary {
@@ -2842,6 +2853,11 @@
   .peer-checked\:bg-yellow-50 {
     &:is(:where(.peer):checked ~ *) {
       background-color: var(--color-yellow-50);
+    }
+  }
+  .peer-checked\:text-amber-600 {
+    &:is(:where(.peer):checked ~ *) {
+      color: var(--color-amber-600);
     }
   }
   .peer-checked\:text-primary-foreground {
@@ -2992,6 +3008,13 @@
     &:hover {
       @media (hover: hover) {
         scale: 1.02;
+      }
+    }
+  }
+  .hover\:border-amber-300 {
+    &:hover {
+      @media (hover: hover) {
+        border-color: var(--color-amber-300);
       }
     }
   }
@@ -3537,6 +3560,13 @@
     &:hover {
       @media (hover: hover) {
         text-decoration-line: underline;
+      }
+    }
+  }
+  .hover\:opacity-80 {
+    &:hover {
+      @media (hover: hover) {
+        opacity: 80%;
       }
     }
   }
@@ -4597,6 +4627,11 @@
       width: calc(var(--spacing) * 10);
     }
   }
+  .lg\:w-80 {
+    @media (width >= 64rem) {
+      width: calc(var(--spacing) * 80);
+    }
+  }
   .lg\:grid-cols-2 {
     @media (width >= 64rem) {
       grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -4620,6 +4655,11 @@
   .lg\:grid-cols-12 {
     @media (width >= 64rem) {
       grid-template-columns: repeat(12, minmax(0, 1fr));
+    }
+  }
+  .lg\:flex-row {
+    @media (width >= 64rem) {
+      flex-direction: row;
     }
   }
   .lg\:gap-6 {
@@ -4793,6 +4833,14 @@
       }
     }
   }
+  .dark\:bg-green-950\/30 {
+    @media (prefers-color-scheme: dark) {
+      background-color: color-mix(in srgb, oklch(26.6% 0.065 152.934) 30%, transparent);
+      @supports (color: color-mix(in lab, red, red)) {
+        background-color: color-mix(in oklab, var(--color-green-950) 30%, transparent);
+      }
+    }
+  }
   .dark\:bg-indigo-950 {
     @media (prefers-color-scheme: dark) {
       background-color: var(--color-indigo-950);
@@ -4887,6 +4935,16 @@
   .dark\:text-slate-300 {
     @media (prefers-color-scheme: dark) {
       color: var(--color-slate-300);
+    }
+  }
+  .dark\:peer-checked\:bg-amber-950\/30 {
+    @media (prefers-color-scheme: dark) {
+      &:is(:where(.peer):checked ~ *) {
+        background-color: color-mix(in srgb, oklch(27.9% 0.077 45.635) 30%, transparent);
+        @supports (color: color-mix(in lab, red, red)) {
+          background-color: color-mix(in oklab, var(--color-amber-950) 30%, transparent);
+        }
+      }
     }
   }
   .dark\:peer-checked\:bg-yellow-900\/20 {

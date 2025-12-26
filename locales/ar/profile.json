@@ -10,5 +10,12 @@
   "bio": "السيرة الذاتية",
   "location": "الموقع",
   "website": "الموقع الإلكتروني",
-  "complete_profile_setup": "إكمال إعداد الملف الشخصي"
+  "complete_profile_setup": "إكمال إعداد الملف الشخصي",
+  "edit_profile": "تحرير الملف الشخصي",
+  "average_rating": "متوسط التقييم",
+  "public_ideas": "الأفكار العامة",
+  "public_ideas_subtitle": "الأفكار التي تم نشرها علنًا وهي مرئية للآخرين",
+  "no_activity_title": "لا يوجد نشاط بعد",
+  "no_activity_subtitle": "لم يقم هذا المستخدم بإنشاء أي أفكار عامة بعد",
+  "avatar": "الصورة الرمزية"
 }

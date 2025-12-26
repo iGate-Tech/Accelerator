@@ -238,13 +238,13 @@
                     <div class=" pl-4 pr-2 relative">
                         <label for="assistant-prompt" class="sr-only">Describe your
                             project requirements</label>
-                         <div id="assistant-prompt-display" class="w-full rounded-md border border-input bg-background px-3 py-2 text-base text-foreground min-h-[2.5rem] cursor-pointer overflow-visible markdown-content" style="display: none;"></div>
-                          <textarea id="assistant-prompt" name="prompt"
-                               placeholder="{{t 'new-idea.describe_requirements' lng=lng}}"
-                              aria-label="Describe your project requirements" aria-describedby="prompt-help char-counter"
-                              class="flex w-full rounded-md border-0 bg-transparent p-0 pt-[1px] text-base text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0"
-                              required="" rows="3"
-                                                            style="resize: none; overflow: hidden;"></textarea>
+                          <div id="assistant-prompt-display" class="w-full rounded-md border border-input bg-background px-3 py-2 text-base text-foreground min-h-[2.5rem] cursor-pointer overflow-visible markdown-content" style="display: none;"></div>
+                           <textarea id="assistant-prompt" name="description"
+                                placeholder="{{t 'new-idea.describe_requirements' lng=lng}}"
+                               aria-label="Describe your project requirements" aria-describedby="prompt-help char-counter"
+                               class="flex w-full rounded-md border-0 bg-transparent p-0 pt-[1px] text-base text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0"
+                               required="" rows="3"
+                                                             style="resize: none; overflow: hidden;"></textarea>
                         <p id="prompt-help" class="sr-only">Enter your project
                             description or requirements</p>
                      </div>
@@ -294,16 +294,81 @@
 <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 
 <script>
+ // Populate form from populateIdeaJson if available
+ if (typeof populateIdeaJson !== 'undefined' && populateIdeaJson !== "null") {
+     try {
+         const data = JSON.parse(populateIdeaJson.replace(/\\'/g, "'").replace(/\\u003c/g, "<").replace(/\\u003e/g, ">"));
+         if (data.description) document.getElementById('assistant-prompt').value = data.description;
+     } catch (e) {
+         console.error('Error populating form:', e);
+     }
+ }
 
-// Populate form from populateIdeaJson if available
-if (typeof populateIdeaJson !== 'undefined' && populateIdeaJson !== "null") {
-    try {
-        const data = JSON.parse(populateIdeaJson.replace(/\\'/g, "'").replace(/\\u003c/g, "<").replace(/\\u003e/g, ">"));
-        if (data.description) document.getElementById('assistant-prompt').value = data.description;
-    } catch (e) {
-        console.error('Error populating form:', e);
-    }
-}
-</script>
+ // Handle buttons
+ document.addEventListener('click', async (e) => {
+     // Improve with AI button
+     if (e.target.closest('button[aria-label="Improve with AI"]')) {
+         e.preventDefault();
+         const textarea = document.getElementById('assistant-prompt');
+         const description = textarea.value.trim();
+
+         if (!description) {
+             alert('Please enter a description first');
+             return;
+         }
+
+         // Show loading state
+         const button = e.target.closest('button');
+         const originalText = button.innerHTML;
+         button.innerHTML = 'Improving...';
+         button.disabled = true;
+
+         try {
+             // Call improve description API
+             const response = await fetch('/api/ai/improve/idea/description', {
+                 method: 'POST',
+                 headers: {
+                     'Content-Type': 'application/json',
+                 },
+                 body: JSON.stringify({ description }),
+             });
+
+             if (response.ok) {
+                 const result = await response.json();
+                 if (result.success) {
+                     // Show improved version
+                     const displayDiv = document.getElementById('assistant-prompt-display');
+                     displayDiv.innerHTML = marked.parse(result.improved_description);
+                     displayDiv.style.display = 'block';
+                     textarea.style.display = 'none';
+                 } else {
+                     alert('Failed to improve description: ' + (result.error || 'Unknown error'));
+                 }
+             } else {
+                 alert('Failed to improve description');
+             }
+         } catch (error) {
+             console.error('Error improving description:', error);
+             alert('Error improving description');
+         } finally {
+             button.innerHTML = originalText;
+             button.disabled = false;
+         }
+     }
+
+     // Reset form button
+     if (e.target.closest('button[aria-label="Reset form"]')) {
+         e.preventDefault();
+         const textarea = document.getElementById('assistant-prompt');
+         const displayDiv = document.getElementById('assistant-prompt-display');
+
+         // Reset to original state
+         textarea.value = '';
+         textarea.style.display = 'block';
+         displayDiv.style.display = 'none';
+         displayDiv.innerHTML = '';
+     }
+ });
+ </script>
 
 

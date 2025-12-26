@@ -7,10 +7,10 @@
       <div class="flex flex-col sm:flex-row items-start sm:items-center gap-4">
         <!-- Avatar -->
         <div class="flex-shrink-0">
-          <img src="{{cond profile.avatar_url profile.avatar_url '/images/avatar.png'}}"
-               alt="{{profile.name}}'s avatar"
-               class="w-20 h-20 sm:w-24 sm:h-24 rounded-full object-cover border-2 border-border"
-               onerror="this.src='/images/avatar.png'">
+           <img src="{{cond profile.avatar_url profile.avatar_url '/images/avatar.png'}}"
+                alt="{{profile.name}}'s {{t 'profile.avatar'}}"
+                class="w-20 h-20 sm:w-24 sm:h-24 rounded-full object-cover border-2 border-border"
+                onerror="this.src='/images/avatar.png'">
         </div>
 
         <!-- Profile Info -->
@@ -18,10 +18,10 @@
           <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-2">
             <h1 class="text-2xl sm:text-3xl font-bold text-foreground truncate">{{profile.name}}</h1>
             {{#if isOwnProfile}}
-            <a href="/settings" class="btn btn-outline btn-sm whitespace-nowrap">
-              {{{icon 'settings' class='w-4 h-4 mr-2'}}}
-              {{t 'profile.edit_profile'}}
-            </a>
+             <button type="button" onclick="window.location.href='/settings'" class="btn btn-primary btn-sm whitespace-nowrap">
+               {{{icon 'settings' class='w-4 h-4 mr-2'}}}
+               {{t 'profile.edit_profile'}}
+             </button>
             {{/if}}
           </div>
 

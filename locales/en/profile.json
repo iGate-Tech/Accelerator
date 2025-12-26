@@ -10,5 +10,12 @@
   "bio": "Bio",
   "location": "Location",
   "website": "Website",
-  "complete_profile_setup": "Complete Profile Setup"
+  "complete_profile_setup": "Complete Profile Setup",
+  "edit_profile": "Edit Profile",
+  "average_rating": "Average Rating",
+  "public_ideas": "Public Ideas",
+  "public_ideas_subtitle": "Ideas that have been made public and are visible to others",
+  "no_activity_title": "No Activity Yet",
+  "no_activity_subtitle": "This user hasn't created any public ideas yet",
+  "avatar": "avatar"
 }

@@ -361,10 +361,10 @@ if (response.ok) {
        {{#if (eq user.profile.package_type "enterprise")}}
        <div id="nav-portfolio-item" class="flex flex-col items-center justify-center group">
          <div class="border-t-4 border-primary w-6 rounded-md{{#if (eq activeNav 'portfolios')}} opacity-100{{else}} opacity-0 group-hover:opacity-100{{/if}}"></div>
-          <a href="/portfolios"
-            class="text-{{#if (eq activeNav 'portfolios')}}primary{{else}}muted-foreground group-hover:text-foreground hover:text-foreground{{/if}} text-sm leading-[2.7]">
-            <span class="nav-text">{{t 'nav.projects' lng=lng}}</span>
-         </a>
+           <a href="/portfolios"
+             class="text-{{#if (eq activeNav 'portfolios')}}primary{{else}}muted-foreground group-hover:text-foreground hover:text-foreground{{/if}} text-sm leading-[2.7]">
+             <span class="nav-text">{{t 'nav.portfolios' lng=lng}}</span>
+          </a>
        </div>
        {{/if}}
        <div class="flex flex-col items-center justify-center group">
@@ -690,10 +690,10 @@ if (response.ok) {
                <span>{{t 'nav.explore_ideas' lng=lng}}</span>
              </a>
             {{#if (eq user.profile.package_type "enterprise")}}
-            <a href="/portfolios" class="flex items-center gap-3 px-3 py-2 rounded-md text-muted-foreground hover:bg-primary/10 hover:text-primary" onclick="toggleMobileNav()">
-              {{{icon 'folder' class="w-5 h-5"}}}
-              <span>{{t 'nav.projects' lng=lng}}</span>
-            </a>
+             <a href="/portfolios" class="flex items-center gap-3 px-3 py-2 rounded-md text-muted-foreground hover:bg-primary/10 hover:text-primary" onclick="toggleMobileNav()">
+               {{{icon 'folder' class="w-5 h-5"}}}
+               <span>{{t 'nav.portfolios' lng=lng}}</span>
+             </a>
             {{/if}}
             <a href="/voting-reward" class="flex items-center gap-3 px-3 py-2 rounded-md text-muted-foreground hover:bg-primary/10 hover:text-primary" onclick="toggleMobileNav()">
                {{{icon 'star' class="w-5 h-5"}}}
@@ -704,10 +704,10 @@ if (response.ok) {
             {{#if projects}}
             <div class="border-t border-input pt-4 mt-4">
               <button onclick="toggleMobilePortfolio(event)" class="w-full flex items-center justify-between px-3 py-3 rounded-lg bg-muted/50 hover:bg-muted text-left">
-                <div class="flex items-center gap-3">
-                  {{{icon 'folder' class='w-5 h-5 text-primary'}}}
-                  <span class="font-medium text-foreground">{{t 'nav.projects' lng=lng}}</span>
-                </div>
+                 <div class="flex items-center gap-3">
+                   {{{icon 'folder' class='w-5 h-5 text-primary'}}}
+                   <span class="font-medium text-foreground">{{t 'nav.portfolios' lng=lng}}</span>
+                 </div>
                 <div class="flex items-center">
                   <span class="text-xs text-muted-foreground mr-2">{{projects.length}} projects</span>
                   {{{icon 'chevron-down' class='w-4 h-4 transition-transform duration-200 chevron'}}}

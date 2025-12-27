@@ -1,3 +1,6 @@
+/* eslint-disable no-unused-vars, no-undef */
+/* global showToast, navigator, location */
+
 // idea-card.js - Handle interactions for idea cards
 
 // Toggle card details expansion

@@ -1,17 +1,20 @@
--- Complete database reset script
--- Truncates auth tables and drops all public tables
+-- Full Database Reset Script
+-- This script completely resets the database by dropping and recreating the public schema
+-- WARNING: This will delete all data and schema objects in the database
 
--- Truncate auth tables first (in dependency order)
-TRUNCATE TABLE auth.identities CASCADE;
-TRUNCATE TABLE auth.users CASCADE;
+-- Drop the public schema and all its contents
+DROP SCHEMA IF EXISTS public CASCADE;
 
--- Drop all public tables
-DO $$
-DECLARE
-    table_name TEXT;
-BEGIN
-    FOR table_name IN SELECT tablename FROM pg_tables WHERE schemaname = 'public' LOOP
-        EXECUTE 'DROP TABLE IF EXISTS ' || quote_ident(table_name) || ' CASCADE';
-        RAISE NOTICE 'Dropped table: %', table_name;
-    END LOOP;
-END $$;
+-- Recreate the public schema
+CREATE SCHEMA public;
+
+-- Grant necessary permissions
+GRANT ALL ON SCHEMA public TO postgres;
+GRANT ALL ON SCHEMA public TO public;
+
+-- Set default privileges
+ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON TABLES TO postgres;
+ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON SEQUENCES TO postgres;
+
+-- Set search path
+SET search_path TO public;

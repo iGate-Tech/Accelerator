@@ -1,12 +1,19 @@
 <div class="p-4 sm:p-6 md:p-8 lg:p-20">
     <div class="grid gap-1 mb-8 sm:mb-12">
         <h1 class="font-heading text-2xl sm:text-3xl font-semibold text-foreground">
+            <div class="flex h-full">
+{{> sidebar projects=projects lng=lng}}
+<div class="flex-1 overflow-y-auto">
+    <div class="grid gap-1 mb-8 sm:mb-12">
+        <h1 class="font-heading text-2xl sm:text-3xl font-semibold text-foreground">
             {{t 'ideas.explore.title' lng=lng}}
         </h1>
         <p class="text-base sm:text-lg text-muted-foreground">
             {{t 'ideas.explore.description' lng=lng}}
         </p>
     </div>
+
+    <!-- Search and Filter Controls -->
 
     <!-- Search and Filter Controls -->
     <div class="bg-card rounded-lg p-4 sm:p-6 mb-6 sm:mb-8 border border-border">
@@ -61,7 +68,9 @@
          <h3 class="text-lg sm:text-xl font-semibold text-foreground mb-2">{{t 'ideas.explore.no_ideas_found' lng=lng}}</h3>
          <p class="text-sm sm:text-base text-muted-foreground">{{t 'ideas.explore.try_adjusting_search' lng=lng}}</p>
     </div>
- </div>
+  </div>
+</div>
+</div>
 
 <script src="/js/toast.js"></script>
 <script src="/js/explore-idea.js"></script>

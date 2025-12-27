@@ -3,6 +3,8 @@ services:
     build: .
     expose:
       - "4000"
+    sysctls:
+      - net.ipv6.conf.all.disable_ipv6=0
     environment:
       - NODE_ENV=development
       - PORT=4000
@@ -26,3 +28,7 @@ volumes:
 networks:
   accelerator-network:
     driver: bridge
+    enable_ipv6: true
+    ipam:
+      config:
+        - subnet: 2001:db8::/32

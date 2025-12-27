@@ -264,5 +264,278 @@ LEFT JOIN voting_rewards vr ON p.user_id = vr.voter_id
 LEFT JOIN activity_log al ON p.user_id = al.user_id
 LEFT JOIN user_favorites f ON p.user_id = f.user_id
 GROUP BY p.user_id, p.name, p.avatar_url, p.credit_balance, p.total_earned,
-         p.total_spent, p.package_type, p.package_status, p.created_at, p.preferences;</content>
+         p.total_spent, p.package_type, p.package_status, p.created_at, p.preferences;
+
+-- Advanced Automated Views for Maximum Automation
+
+-- User Achievement Progress View
+CREATE OR REPLACE VIEW user_achievements AS
+SELECT
+  p.user_id,
+  p.name,
+  -- Idea creation achievements
+  CASE WHEN COUNT(DISTINCT i.id) >= 1 THEN 'first_idea' ELSE NULL END as achievement_first_idea,
+  CASE WHEN COUNT(DISTINCT i.id) >= 5 THEN 'idea_creator_5' ELSE NULL END as achievement_idea_creator_5,
+  CASE WHEN COUNT(DISTINCT i.id) >= 10 THEN 'idea_creator_10' ELSE NULL END as achievement_idea_creator_10,
+  CASE WHEN COUNT(DISTINCT i.id) >= 25 THEN 'idea_creator_25' ELSE NULL END as achievement_idea_creator_25,
+  CASE WHEN COUNT(DISTINCT i.id) >= 50 THEN 'idea_creator_50' ELSE NULL END as achievement_idea_creator_50,
+
+  -- Completion achievements
+  CASE WHEN COUNT(DISTINCT CASE WHEN i.overall_status = 'completed' THEN i.id END) >= 1 THEN 'first_completion' ELSE NULL END as achievement_first_completion,
+  CASE WHEN COUNT(DISTINCT CASE WHEN i.overall_status = 'completed' THEN i.id END) >= 5 THEN 'project_finisher' ELSE NULL END as achievement_project_finisher,
+  CASE WHEN COUNT(DISTINCT CASE WHEN i.overall_status = 'completed' THEN i.id END) >= 10 THEN 'completion_master' ELSE NULL END as achievement_completion_master,
+
+  -- Voting achievements
+  CASE WHEN COUNT(DISTINCT v.id) >= 10 THEN 'first_voter' ELSE NULL END as achievement_first_voter,
+  CASE WHEN COUNT(DISTINCT v.id) >= 50 THEN 'active_voter' ELSE NULL END as achievement_active_voter,
+  CASE WHEN COUNT(DISTINCT v.id) >= 100 THEN 'voting_expert' ELSE NULL END as achievement_voting_expert,
+
+  -- Social achievements
+  CASE WHEN COUNT(DISTINCT f.id) >= 10 THEN 'social_butterfly' ELSE NULL END as achievement_social_butterfly,
+  CASE WHEN COUNT(DISTINCT CASE WHEN i.privacy = 'public' THEN i.id END) >= 5 THEN 'public_figure' ELSE NULL END as achievement_public_figure,
+
+  -- Reward achievements
+  CASE WHEN COALESCE(SUM(vr.reward_amount), 0) >= 100 THEN 'reward_novice' ELSE NULL END as achievement_reward_novice,
+  CASE WHEN COALESCE(SUM(vr.reward_amount), 0) >= 500 THEN 'reward_earner' ELSE NULL END as achievement_reward_earner,
+  CASE WHEN COALESCE(SUM(vr.reward_amount), 0) >= 1000 THEN 'reward_master' ELSE NULL END as achievement_reward_master,
+
+  -- Activity achievements
+  CASE WHEN COUNT(DISTINCT al.id) >= 100 THEN 'active_user' ELSE NULL END as achievement_active_user,
+  CASE WHEN COUNT(DISTINCT CASE WHEN al.created_at >= NOW() - INTERVAL '7 days' THEN al.id END) >= 10 THEN 'weekly_active' ELSE NULL END as achievement_weekly_active,
+
+  -- Statistics for calculations
+  COUNT(DISTINCT i.id) as total_ideas,
+  COUNT(DISTINCT CASE WHEN i.overall_status = 'completed' THEN i.id END) as completed_ideas,
+  COUNT(DISTINCT v.id) as total_votes_given,
+  COUNT(DISTINCT f.id) as total_favorites,
+  COUNT(DISTINCT CASE WHEN i.privacy = 'public' THEN i.id END) as public_ideas,
+  COALESCE(SUM(vr.reward_amount), 0) as total_rewards_earned,
+  COUNT(DISTINCT al.id) as total_activities,
+  COUNT(DISTINCT CASE WHEN al.created_at >= NOW() - INTERVAL '7 days' THEN al.id END) as weekly_activities
+FROM profiles p
+LEFT JOIN ideas i ON p.user_id = i.user_id
+LEFT JOIN votes v ON p.user_id = v.user_id
+LEFT JOIN user_favorites f ON p.user_id = f.user_id
+LEFT JOIN voting_rewards vr ON p.user_id = vr.voter_id
+LEFT JOIN activity_log al ON p.user_id = al.user_id
+GROUP BY p.user_id, p.name;
+
+-- Automated Leaderboard View
+CREATE OR REPLACE VIEW automated_leaderboards AS
+SELECT
+  'most_ideas' as leaderboard_type,
+  ROW_NUMBER() OVER (ORDER BY COUNT(DISTINCT i.id) DESC) as rank,
+  p.user_id,
+  p.name,
+  COUNT(DISTINCT i.id) as score,
+  'ideas created' as score_label
+FROM profiles p
+JOIN ideas i ON p.user_id = i.user_id
+GROUP BY p.user_id, p.name
+HAVING COUNT(DISTINCT i.id) > 0
+
+UNION ALL
+
+SELECT
+  'most_completed' as leaderboard_type,
+  ROW_NUMBER() OVER (ORDER BY COUNT(DISTINCT CASE WHEN i.overall_status = 'completed' THEN i.id END) DESC) as rank,
+  p.user_id,
+  p.name,
+  COUNT(DISTINCT CASE WHEN i.overall_status = 'completed' THEN i.id END) as score,
+  'projects completed' as score_label
+FROM profiles p
+JOIN ideas i ON p.user_id = i.user_id
+GROUP BY p.user_id, p.name
+HAVING COUNT(DISTINCT CASE WHEN i.overall_status = 'completed' THEN i.id END) > 0
+
+UNION ALL
+
+SELECT
+  'most_helpful' as leaderboard_type,
+  ROW_NUMBER() OVER (ORDER BY COALESCE(SUM(vr.reward_amount), 0) DESC) as rank,
+  p.user_id,
+  p.name,
+  COALESCE(SUM(vr.reward_amount), 0) as score,
+  'reward points earned' as score_label
+FROM profiles p
+LEFT JOIN voting_rewards vr ON p.user_id = vr.voter_id
+GROUP BY p.user_id, p.name
+HAVING COALESCE(SUM(vr.reward_amount), 0) > 0
+
+UNION ALL
+
+SELECT
+  'most_active_voter' as leaderboard_type,
+  ROW_NUMBER() OVER (ORDER BY COUNT(DISTINCT v.id) DESC) as rank,
+  p.user_id,
+  p.name,
+  COUNT(DISTINCT v.id) as score,
+  'votes given' as score_label
+FROM profiles p
+JOIN votes v ON p.user_id = v.user_id
+GROUP BY p.user_id, p.name
+HAVING COUNT(DISTINCT v.id) > 0
+
+ORDER BY leaderboard_type, rank;
+
+-- Automated Recommendation Engine View
+CREATE OR REPLACE VIEW idea_recommendations AS
+SELECT
+  i.id as idea_id,
+  i.title,
+  i.category,
+  i.description,
+  p.name as author_name,
+  i.created_at,
+  -- Recommendation score based on multiple factors
+  (
+    -- Recency score (newer ideas get higher scores)
+    (EXTRACT(EPOCH FROM (NOW() - i.created_at)) / 86400.0) * -0.1 +
+    -- Vote score (more votes = higher score)
+    COUNT(DISTINCT v.id) * 2.0 +
+    -- Average rating score
+    COALESCE(AVG(v.rating), 0) * 1.5 +
+    -- Completion percentage bonus
+    (i.completion_percentage / 100.0) * 1.0 +
+    -- Public visibility bonus
+    CASE WHEN i.privacy = 'public' THEN 3.0 ELSE 0.0 END
+  ) as recommendation_score,
+  COUNT(DISTINCT v.id) as vote_count,
+  ROUND(AVG(v.rating), 2) as average_rating,
+  i.completion_percentage,
+  i.privacy
+FROM ideas i
+JOIN profiles p ON i.user_id = p.user_id
+LEFT JOIN votes v ON i.id = v.idea_id
+WHERE i.privacy = 'public'
+  AND i.created_at >= NOW() - INTERVAL '30 days' -- Only recent ideas
+GROUP BY i.id, i.title, i.category, i.description, p.name, i.created_at, i.completion_percentage, i.privacy
+HAVING COUNT(DISTINCT v.id) >= 1 -- Must have at least 1 vote
+ORDER BY recommendation_score DESC;
+
+-- Automated System Health Monitoring View
+CREATE OR REPLACE VIEW system_health_dashboard AS
+SELECT
+  'user_engagement' as metric_category,
+  'total_active_users_24h' as metric_name,
+  COUNT(DISTINCT al.user_id) as metric_value,
+  'users' as metric_unit
+FROM activity_log al
+WHERE al.created_at >= NOW() - INTERVAL '24 hours'
+
+UNION ALL
+
+SELECT
+  'user_engagement' as metric_category,
+  'total_active_users_7d' as metric_name,
+  COUNT(DISTINCT al.user_id) as metric_value,
+  'users' as metric_unit
+FROM activity_log al
+WHERE al.created_at >= NOW() - INTERVAL '7 days'
+
+UNION ALL
+
+SELECT
+  'content_creation' as metric_category,
+  'ideas_created_24h' as metric_name,
+  COUNT(*) as metric_value,
+  'ideas' as metric_unit
+FROM ideas
+WHERE created_at >= NOW() - INTERVAL '24 hours'
+
+UNION ALL
+
+SELECT
+  'content_creation' as metric_category,
+  'ideas_completed_24h' as metric_name,
+  COUNT(*) as metric_value,
+  'ideas' as metric_unit
+FROM ideas
+WHERE overall_status = 'completed'
+  AND updated_at >= NOW() - INTERVAL '24 hours'
+
+UNION ALL
+
+SELECT
+  'voting_activity' as metric_category,
+  'votes_cast_24h' as metric_name,
+  COUNT(*) as metric_value,
+  'votes' as metric_unit
+FROM votes
+WHERE created_at >= NOW() - INTERVAL '24 hours'
+
+UNION ALL
+
+SELECT
+  'credit_system' as metric_category,
+  'credits_transacted_24h' as metric_name,
+  COALESCE(SUM(ABS(amount)), 0) as metric_value,
+  'credits' as metric_unit
+FROM credit_transactions
+WHERE created_at >= NOW() - INTERVAL '24 hours'
+
+UNION ALL
+
+SELECT
+  'credit_system' as metric_category,
+  'average_credit_balance' as metric_name,
+  ROUND(AVG(credit_balance), 2) as metric_value,
+  'credits' as metric_unit
+FROM profiles
+
+UNION ALL
+
+SELECT
+  'system_performance' as metric_category,
+  'database_connection_pool_usage' as metric_name,
+  (SELECT COUNT(*) FROM pg_stat_activity WHERE state = 'active') as metric_value,
+  'connections' as metric_unit;
+
+-- Automated User Onboarding Status View
+CREATE OR REPLACE VIEW user_onboarding_status AS
+SELECT
+  p.user_id,
+  p.name,
+  p.created_at as account_created_at,
+  -- Profile completion score
+  CASE
+    WHEN p.name IS NOT NULL AND p.avatar_url IS NOT NULL THEN 100
+    WHEN p.name IS NOT NULL THEN 75
+    ELSE 25
+  END as profile_completion_percentage,
+
+  -- First idea created
+  EXISTS(SELECT 1 FROM ideas WHERE user_id = p.user_id) as has_created_first_idea,
+  (SELECT MIN(created_at) FROM ideas WHERE user_id = p.user_id) as first_idea_created_at,
+
+  -- First vote given
+  EXISTS(SELECT 1 FROM votes WHERE user_id = p.user_id) as has_given_first_vote,
+  (SELECT MIN(created_at) FROM votes WHERE user_id = p.user_id) as first_vote_given_at,
+
+  -- First favorite
+  EXISTS(SELECT 1 FROM user_favorites WHERE user_id = p.user_id) as has_favorited_first_idea,
+  (SELECT MIN(created_at) FROM user_favorites WHERE user_id = p.user_id) as first_favorite_at,
+
+  -- Welcome notifications received
+  EXISTS(SELECT 1 FROM notifications WHERE user_id = p.user_id AND type = 'welcome') as received_welcome_notification,
+  EXISTS(SELECT 1 FROM notifications WHERE user_id = p.user_id AND type = 'getting_started') as received_getting_started_notification,
+
+  -- Overall onboarding completion
+  CASE
+    WHEN EXISTS(SELECT 1 FROM ideas WHERE user_id = p.user_id)
+         AND EXISTS(SELECT 1 FROM votes WHERE user_id = p.user_id)
+         AND p.name IS NOT NULL THEN 'completed'
+    WHEN EXISTS(SELECT 1 FROM ideas WHERE user_id = p.user_id) THEN 'idea_created'
+    WHEN p.name IS NOT NULL THEN 'profile_setup'
+    ELSE 'just_signed_up'
+  END as onboarding_stage,
+
+  -- Days since signup
+  EXTRACT(DAY FROM (NOW() - p.created_at)) as days_since_signup,
+
+  -- Activity in last 7 days
+  COUNT(DISTINCT CASE WHEN al.created_at >= NOW() - INTERVAL '7 days' THEN al.id END) as weekly_activity_count
+FROM profiles p
+LEFT JOIN activity_log al ON p.user_id = al.user_id
+GROUP BY p.user_id, p.name, p.avatar_url, p.created_at;</content>
 <parameter name="filePath">/home/rana/Documents/test/accelerator/db/views.sql

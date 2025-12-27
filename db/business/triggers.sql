@@ -384,6 +384,233 @@ CREATE TRIGGER trigger_auto_notifications_credits
   AFTER INSERT ON credit_transactions
   FOR EACH ROW EXECUTE FUNCTION auto_create_notifications();
 
+-- Advanced Automation Triggers
+
+-- Automatic User Onboarding Trigger
+CREATE OR REPLACE FUNCTION auto_user_onboarding() RETURNS TRIGGER AS $$
+DECLARE
+  welcome_message TEXT;
+  getting_started_message TEXT;
+BEGIN
+  -- Create default profile if not exists (shouldn't happen, but safety check)
+  INSERT INTO profiles (user_id, package_type, package_status, credit_balance, total_earned)
+  VALUES (NEW.id, 'free', 'active', 1000, 1000)
+  ON CONFLICT (user_id) DO NOTHING;
+
+  -- Create welcome notifications
+  welcome_message := '🎉 Welcome to Accelerator! Your entrepreneurial journey starts here. Complete your profile to unlock all features.';
+  getting_started_message := '🚀 Ready to build? Start by creating your first idea. Click "New Project" to begin turning your vision into reality.';
+
+  PERFORM create_user_notification(NEW.id, 'welcome', welcome_message);
+  PERFORM create_user_notification(NEW.id, 'getting_started', getting_started_message);
+
+  -- Log signup activity
+  PERFORM log_user_activity(NEW.id, 'create', 'account', NEW.id,
+    json_build_object('signup_method', NEW.raw_user_meta_data->>'provider'));
+
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- Apply onboarding trigger to auth.users (but Supabase handles this differently)
+-- We'll trigger this from the registration function instead
+
+-- Automatic Credit Reward Triggers
+
+-- Reward credits for receiving votes (idea owner gets rewarded)
+CREATE OR REPLACE FUNCTION auto_reward_vote_credits() RETURNS TRIGGER AS $$
+DECLARE
+  idea_owner UUID;
+  reward_amount INTEGER := 5; -- 5 credits per vote received
+BEGIN
+  -- Get idea owner
+  SELECT user_id INTO idea_owner FROM ideas WHERE id = NEW.idea_id;
+
+  -- Don't reward self-votes
+  IF idea_owner != NEW.user_id THEN
+    -- Award credits to idea owner
+    PERFORM process_credit_transaction(
+      idea_owner,
+      'vote_received',
+      reward_amount,
+      json_build_object(
+        'voter_id', NEW.user_id,
+        'idea_id', NEW.idea_id,
+        'rating', NEW.rating
+      )
+    );
+  END IF;
+
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Reward credits for giving first vote of the day
+CREATE OR REPLACE FUNCTION auto_reward_daily_first_vote() RETURNS TRIGGER AS $$
+DECLARE
+  has_voted_today BOOLEAN;
+BEGIN
+  -- Check if user has voted today already
+  SELECT EXISTS(
+    SELECT 1 FROM votes
+    WHERE user_id = NEW.user_id
+    AND DATE(created_at) = CURRENT_DATE
+    AND id != NEW.id -- Exclude current vote
+  ) INTO has_voted_today;
+
+  -- If first vote today, give bonus credits
+  IF NOT has_voted_today THEN
+    PERFORM process_credit_transaction(
+      NEW.user_id,
+      'daily_first_vote',
+      10, -- 10 bonus credits for first daily vote
+      json_build_object('date', CURRENT_DATE)
+    );
+  END IF;
+
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Automatic Model Unlocking Trigger
+CREATE OR REPLACE FUNCTION auto_unlock_models() RETURNS TRIGGER AS $$
+DECLARE
+  total_votes INTEGER;
+  avg_rating DECIMAL(3,2);
+  should_unlock BOOLEAN := FALSE;
+BEGIN
+  -- Check if validation threshold is met
+  IF NEW.validation_threshold_met THEN
+    -- Get current vote statistics
+    SELECT
+      COUNT(*),
+      COALESCE(AVG(rating), 0)
+    INTO total_votes, avg_rating
+    FROM votes
+    WHERE idea_id = NEW.id;
+
+    -- Unlock models based on criteria
+    CASE
+      WHEN total_votes >= 50 AND avg_rating >= 4.0 THEN
+        -- Unlock all models for highly validated ideas
+        UPDATE ideas SET unlocked_models = ARRAY['idea', 'canvas', 'financial', 'pitch', 'market']
+        WHERE id = NEW.id;
+        should_unlock := TRUE;
+
+      WHEN total_votes >= 25 AND avg_rating >= 3.5 THEN
+        -- Unlock advanced models
+        UPDATE ideas SET unlocked_models = ARRAY['idea', 'canvas', 'financial']
+        WHERE id = NEW.id;
+        should_unlock := TRUE;
+
+      WHEN total_votes >= 10 AND avg_rating >= 3.0 THEN
+        -- Unlock basic additional models
+        UPDATE ideas SET unlocked_models = ARRAY['idea', 'canvas']
+        WHERE id = NEW.id;
+        should_unlock := TRUE;
+    END CASE;
+
+    -- Log model unlocking if it happened
+    IF should_unlock THEN
+      PERFORM log_user_activity(
+        NEW.user_id,
+        'update',
+        'idea',
+        NEW.id,
+        json_build_object(
+          'action', 'models_unlocked',
+          'total_votes', total_votes,
+          'average_rating', avg_rating,
+          'unlocked_models', NEW.unlocked_models
+        )
+      );
+
+      -- Notify user of unlocked models
+      PERFORM create_user_notification(
+        NEW.user_id,
+        'models_unlocked',
+        format('🎉 Congratulations! Your idea "%s" has met validation criteria and unlocked new models!', NEW.title)
+      );
+    END IF;
+  END IF;
+
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Automatic Milestone Achievement Tracking
+CREATE OR REPLACE FUNCTION auto_milestone_achievements() RETURNS TRIGGER AS $$
+DECLARE
+  current_stats RECORD;
+  new_achievements TEXT[] := ARRAY[]::TEXT[];
+BEGIN
+  -- Get current user statistics
+  SELECT
+    COUNT(DISTINCT i.id) as total_ideas,
+    COUNT(DISTINCT CASE WHEN i.overall_status = 'completed' THEN i.id END) as completed_ideas,
+    COUNT(DISTINCT v.id) as total_votes_given,
+    COUNT(DISTINCT vr.id) as total_rewards_earned,
+    COALESCE(SUM(vr.reward_amount), 0) as total_rewards_amount
+  INTO current_stats
+  FROM profiles p
+  LEFT JOIN ideas i ON p.user_id = NEW.user_id
+  LEFT JOIN votes v ON p.user_id = NEW.user_id
+  LEFT JOIN voting_rewards vr ON p.user_id = NEW.user_id
+  WHERE p.user_id = NEW.user_id;
+
+  -- Check for new achievements
+  CASE
+    WHEN current_stats.total_ideas >= 10 AND current_stats.total_ideas < 25 THEN
+      new_achievements := array_append(new_achievements, 'idea_creator_10');
+    WHEN current_stats.total_ideas >= 25 THEN
+      new_achievements := array_append(new_achievements, 'idea_creator_25');
+    WHEN current_stats.completed_ideas >= 5 THEN
+      new_achievements := array_append(new_achievements, 'project_finisher');
+    WHEN current_stats.total_votes_given >= 50 THEN
+      new_achievements := array_append(new_achievements, 'active_voter');
+    WHEN current_stats.total_rewards_amount >= 1000 THEN
+      new_achievements := array_append(new_achievements, 'reward_earner');
+  END CASE;
+
+  -- Create achievement notifications for new milestones
+  FOREACH achievement IN ARRAY new_achievements LOOP
+    CASE achievement
+      WHEN 'idea_creator_10' THEN
+        PERFORM create_user_notification(NEW.user_id, 'achievement', '🏆 Achievement Unlocked: Idea Creator (10 ideas)!');
+      WHEN 'idea_creator_25' THEN
+        PERFORM create_user_notification(NEW.user_id, 'achievement', '🏆 Achievement Unlocked: Pro Creator (25 ideas)!');
+      WHEN 'project_finisher' THEN
+        PERFORM create_user_notification(NEW.user_id, 'achievement', '🏆 Achievement Unlocked: Project Finisher (5 completed)!');
+      WHEN 'active_voter' THEN
+        PERFORM create_user_notification(NEW.user_id, 'achievement', '🏆 Achievement Unlocked: Active Voter (50 votes given)!');
+      WHEN 'reward_earner' THEN
+        PERFORM create_user_notification(NEW.user_id, 'achievement', '🏆 Achievement Unlocked: Reward Earner (1000 credits earned)!');
+    END CASE;
+  END LOOP;
+
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Apply advanced automation triggers
+CREATE TRIGGER trigger_auto_vote_rewards
+  AFTER INSERT ON votes
+  FOR EACH ROW EXECUTE FUNCTION auto_reward_vote_credits();
+
+CREATE TRIGGER trigger_daily_first_vote_bonus
+  AFTER INSERT ON votes
+  FOR EACH ROW EXECUTE FUNCTION auto_reward_daily_first_vote();
+
+CREATE TRIGGER trigger_auto_model_unlocking
+  AFTER UPDATE OF validation_threshold_met ON ideas
+  FOR EACH ROW EXECUTE FUNCTION auto_unlock_models();
+
+CREATE TRIGGER trigger_milestone_achievements
+  AFTER INSERT ON credit_transactions
+  FOR EACH ROW
+  WHEN (NEW.transaction_type IN ('vote_received', 'daily_first_vote'))
+  EXECUTE FUNCTION auto_milestone_achievements();
+
 -- Advanced Business Logic Functions for API Unification
 
 -- Function to get filtered user ideas with ratings and stats

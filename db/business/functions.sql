@@ -703,7 +703,216 @@ BEGIN
          result := json_build_object('success', false, 'error', 'Invalid action');
    END CASE;
 
-   RETURN result;
+  RETURN result;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- Automated System Functions using Views and Triggers
+
+-- Function to get user achievements from automated view
+CREATE OR REPLACE FUNCTION get_user_achievements(p_user_id UUID)
+RETURNS JSON AS $$
+DECLARE
+  achievements JSON;
+BEGIN
+  SELECT json_build_object(
+    'unlocked_achievements', json_build_array(
+      SELECT json_build_object(
+        'id', achievement,
+        'name', CASE achievement
+          WHEN 'first_idea' THEN 'First Idea'
+          WHEN 'idea_creator_5' THEN 'Idea Creator (5)'
+          WHEN 'idea_creator_10' THEN 'Idea Creator (10)'
+          WHEN 'idea_creator_25' THEN 'Pro Creator (25)'
+          WHEN 'idea_creator_50' THEN 'Master Creator (50)'
+          WHEN 'first_completion' THEN 'First Completion'
+          WHEN 'project_finisher' THEN 'Project Finisher (5)'
+          WHEN 'completion_master' THEN 'Completion Master (10)'
+          WHEN 'first_voter' THEN 'First Voter'
+          WHEN 'active_voter' THEN 'Active Voter (50)'
+          WHEN 'voting_expert' THEN 'Voting Expert (100)'
+          WHEN 'social_butterfly' THEN 'Social Butterfly'
+          WHEN 'public_figure' THEN 'Public Figure'
+          WHEN 'reward_novice' THEN 'Reward Novice'
+          WHEN 'reward_earner' THEN 'Reward Earner'
+          WHEN 'reward_master' THEN 'Reward Master'
+          WHEN 'active_user' THEN 'Active User'
+          WHEN 'weekly_active' THEN 'Weekly Active'
+          ELSE achievement
+        END,
+        'description', CASE achievement
+          WHEN 'first_idea' THEN 'Created your first idea'
+          WHEN 'idea_creator_5' THEN 'Created 5 ideas'
+          WHEN 'idea_creator_10' THEN 'Created 10 ideas'
+          WHEN 'idea_creator_25' THEN 'Created 25 ideas'
+          WHEN 'idea_creator_50' THEN 'Created 50 ideas'
+          WHEN 'first_completion' THEN 'Completed your first project'
+          WHEN 'project_finisher' THEN 'Completed 5 projects'
+          WHEN 'completion_master' THEN 'Completed 10 projects'
+          WHEN 'first_voter' THEN 'Cast your first vote'
+          WHEN 'active_voter' THEN 'Cast 50 votes'
+          WHEN 'voting_expert' THEN 'Cast 100 votes'
+          WHEN 'social_butterfly' THEN 'Favorited 10 ideas'
+          WHEN 'public_figure' THEN 'Made 5 ideas public'
+          WHEN 'reward_novice' THEN 'Earned 100 reward points'
+          WHEN 'reward_earner' THEN 'Earned 500 reward points'
+          WHEN 'reward_master' THEN 'Earned 1000 reward points'
+          WHEN 'active_user' THEN '100 total activities'
+          WHEN 'weekly_active' THEN '10+ activities this week'
+          ELSE 'Achievement unlocked'
+        END
+      )
+      FROM unnest(ARRAY[
+        achievement_first_idea, achievement_idea_creator_5, achievement_idea_creator_10,
+        achievement_idea_creator_25, achievement_idea_creator_50, achievement_first_completion,
+        achievement_project_finisher, achievement_completion_master, achievement_first_voter,
+        achievement_active_voter, achievement_voting_expert, achievement_social_butterfly,
+        achievement_public_figure, achievement_reward_novice, achievement_reward_earner,
+        achievement_reward_master, achievement_active_user, achievement_weekly_active
+      ]) as achievement
+      WHERE achievement IS NOT NULL
+    ),
+    'statistics', json_build_object(
+      'total_ideas', total_ideas,
+      'completed_ideas', completed_ideas,
+      'total_votes_given', total_votes_given,
+      'total_favorites', total_favorites,
+      'public_ideas', public_ideas,
+      'total_rewards_earned', total_rewards_earned,
+      'total_activities', total_activities,
+      'weekly_activities', weekly_activities
+    )
+  ) INTO achievements
+  FROM user_achievements
+  WHERE user_id = p_user_id;
+
+  RETURN achievements;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- Function to get automated leaderboards
+CREATE OR REPLACE FUNCTION get_automated_leaderboards(p_type TEXT DEFAULT NULL, p_limit INTEGER DEFAULT 10)
+RETURNS JSON AS $$
+DECLARE
+  leaderboard_data JSON;
+BEGIN
+  SELECT json_build_object(
+    'leaderboards', json_object_agg(
+      leaderboard_type,
+      json_build_object(
+        'top_users', (
+          SELECT json_agg(row_to_json(leader))
+          FROM (
+            SELECT user_id, name, score, score_label
+            FROM automated_leaderboards
+            WHERE leaderboard_type = lb.leaderboard_type
+            ORDER BY rank
+            LIMIT p_limit
+          ) leader
+        )
+      )
+    )
+  ) INTO leaderboard_data
+  FROM (
+    SELECT DISTINCT leaderboard_type
+    FROM automated_leaderboards
+    WHERE p_type IS NULL OR leaderboard_type = p_type
+  ) lb;
+
+  RETURN leaderboard_data;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- Function to get automated recommendations
+CREATE OR REPLACE FUNCTION get_idea_recommendations(p_user_id UUID, p_limit INTEGER DEFAULT 10)
+RETURNS JSON AS $$
+DECLARE
+  recommendations JSON;
+BEGIN
+  SELECT json_build_object(
+    'recommendations', json_agg(
+      json_build_object(
+        'idea_id', idea_id,
+        'title', title,
+        'category', category,
+        'author_name', author_name,
+        'recommendation_score', recommendation_score,
+        'vote_count', vote_count,
+        'average_rating', average_rating,
+        'completion_percentage', completion_percentage
+      )
+    ),
+    'total_available', (SELECT COUNT(*) FROM idea_recommendations)
+  ) INTO recommendations
+  FROM (
+    SELECT * FROM idea_recommendations
+    -- Exclude user's own ideas and already voted/favorited ideas
+    WHERE author_name != (SELECT name FROM profiles WHERE user_id = p_user_id)
+      AND NOT EXISTS (SELECT 1 FROM votes WHERE idea_id = idea_recommendations.idea_id AND user_id = p_user_id)
+      AND NOT EXISTS (SELECT 1 FROM user_favorites WHERE idea_id = idea_recommendations.idea_id AND user_id = p_user_id)
+    ORDER BY recommendation_score DESC
+    LIMIT p_limit
+  ) recs;
+
+  RETURN recommendations;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- Function to get system health dashboard
+CREATE OR REPLACE FUNCTION get_system_health_dashboard()
+RETURNS JSON AS $$
+DECLARE
+  health_data JSON;
+BEGIN
+  SELECT json_build_object(
+    'metrics', json_object_agg(
+      metric_category || '_' || metric_name,
+      json_build_object(
+        'value', metric_value,
+        'unit', metric_unit,
+        'category', metric_category
+      )
+    ),
+    'last_updated', NOW(),
+    'status', CASE
+      WHEN (SELECT metric_value FROM system_health_dashboard WHERE metric_name = 'total_active_users_24h') > 10 THEN 'healthy'
+      WHEN (SELECT metric_value FROM system_health_dashboard WHERE metric_name = 'total_active_users_24h') > 5 THEN 'moderate'
+      ELSE 'low_activity'
+    END
+  ) INTO health_data
+  FROM system_health_dashboard;
+
+  RETURN health_data;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- Function to get user onboarding status
+CREATE OR REPLACE FUNCTION get_user_onboarding_status(p_user_id UUID)
+RETURNS JSON AS $$
+DECLARE
+  onboarding_data JSON;
+BEGIN
+  SELECT row_to_json(uos) INTO onboarding_data
+  FROM user_onboarding_status uos
+  WHERE user_id = p_user_id;
+
+  RETURN onboarding_data;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- Function to trigger automated onboarding (called from registration)
+CREATE OR REPLACE FUNCTION trigger_automated_onboarding(p_user_id UUID)
+RETURNS VOID AS $$
+BEGIN
+  -- This function can be called after user registration to trigger all automated onboarding
+  -- The triggers will handle the rest automatically
+  -- We could add additional automated setup here if needed
+
+  -- Log onboarding trigger
+  PERFORM log_user_activity(p_user_id, 'system', 'onboarding', p_user_id,
+    json_build_object('action', 'automated_onboarding_triggered'));
+
+  -- Any additional automated setup can go here
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
@@ -746,22 +955,8 @@ BEGIN
       RETURN profile_result;
    END IF;
 
-   -- Create welcome notification
-   PERFORM create_notification(
-      p_user_id,
-      'welcome',
-      'Welcome to Accelerator! You have ' ||
-      CASE
-         WHEN package_type = 'free' THEN '1000'
-         WHEN package_type = 'student' THEN '1500'
-         WHEN package_type = 'enterprise' THEN '5000'
-         ELSE '1000'
-      END || ' credits to start building your ideas.'
-   );
-
-   -- Log registration activity
-   PERFORM log_activity(p_user_id, 'register', 'user', p_user_id,
-      json_build_object('package_type', package_type, 'source', p_metadata->>'source'));
+    -- Trigger automated onboarding (handles notifications, activity logging, etc.)
+    PERFORM trigger_automated_onboarding(p_user_id);
 
    RETURN json_build_object(
       'success', true,

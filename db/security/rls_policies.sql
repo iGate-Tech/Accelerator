@@ -44,8 +44,8 @@ CREATE POLICY "Service role can manage portfolio_ideas" ON portfolio_ideas FOR A
 CREATE POLICY "Service role can manage portfolio_members" ON portfolio_members FOR ALL USING (auth.role() = 'service_role');
 
 -- Ideas: Public read for public ideas, full management for own, read for team members
-CREATE POLICY "Allow public read of public ideas" ON ideas
-FOR SELECT USING (privacy = 'public');
+CREATE POLICY "Allow authenticated read of public ideas" ON ideas
+FOR SELECT USING (privacy = 'public' AND auth.role() = 'authenticated');
 
 CREATE POLICY "Allow users to read own ideas" ON ideas
 FOR SELECT USING (auth.uid() = user_id);
@@ -107,8 +107,8 @@ FOR DELETE USING (EXISTS (SELECT 1 FROM model_instances WHERE id = model_instanc
 CREATE POLICY "Users can read own team member entries" ON team_members
 FOR SELECT USING (auth.uid() = user_id);
 
-CREATE POLICY "Users can insert own team member entries" ON team_members
-FOR INSERT WITH CHECK (auth.uid() = user_id);
+CREATE POLICY "Idea owners can insert team member entries" ON team_members
+FOR INSERT WITH CHECK (EXISTS (SELECT 1 FROM ideas WHERE id = idea_id AND user_id = auth.uid()));
 
 CREATE POLICY "Users can update own team member entries" ON team_members
 FOR UPDATE USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
@@ -142,30 +142,18 @@ FOR UPDATE USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
 
 CREATE POLICY "Users can delete own notifications" ON notifications
 FOR DELETE USING (auth.uid() = user_id);
--- Credit transactions: Users can manage their own transactions
+-- Credit transactions: Users can read and insert own transactions
 CREATE POLICY "Users can read own credit transactions" ON credit_transactions
 FOR SELECT USING (auth.uid() = user_id);
 
 CREATE POLICY "Users can insert own credit transactions" ON credit_transactions
 FOR INSERT WITH CHECK (auth.uid() = user_id);
-
-CREATE POLICY "Users can update own credit transactions" ON credit_transactions
-FOR UPDATE USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
-
-CREATE POLICY "Users can delete own credit transactions" ON credit_transactions
-FOR DELETE USING (auth.uid() = user_id);
--- Activity log: Users can manage their own activity log
+-- Activity log: Users can read and insert own activity log
 CREATE POLICY "Users can read own activity log" ON activity_log
 FOR SELECT USING (auth.uid() = user_id);
 
 CREATE POLICY "Users can insert own activity log" ON activity_log
 FOR INSERT WITH CHECK (auth.uid() = user_id);
-
-CREATE POLICY "Users can update own activity log" ON activity_log
-FOR UPDATE USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
-
-CREATE POLICY "Users can delete own activity log" ON activity_log
-FOR DELETE USING (auth.uid() = user_id);
 
 -- User favorites: Users can manage their own favorites
 CREATE POLICY "Users can read own favorites" ON user_favorites
@@ -179,18 +167,7 @@ FOR UPDATE USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
 
 CREATE POLICY "Users can delete own favorites" ON user_favorites
 FOR DELETE USING (auth.uid() = user_id);
--- Voting rewards: Users can manage their own voting rewards
-CREATE POLICY "Users can read own voting rewards" ON voting_rewards
-FOR SELECT USING (auth.uid() = voter_id);
-
-CREATE POLICY "Users can insert own voting rewards" ON voting_rewards
-FOR INSERT WITH CHECK (auth.uid() = voter_id);
-
-CREATE POLICY "Users can update own voting rewards" ON voting_rewards
-FOR UPDATE USING (auth.uid() = voter_id) WITH CHECK (auth.uid() = voter_id);
-
-CREATE POLICY "Users can delete own voting rewards" ON voting_rewards
-FOR DELETE USING (auth.uid() = voter_id);
+-- Voting rewards: Managed by service role only
 -- User settings: Users can manage their own settings
 CREATE POLICY "Users can read own settings" ON user_settings
 FOR SELECT USING (auth.uid() = user_id);
@@ -203,34 +180,17 @@ FOR UPDATE USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
 
 CREATE POLICY "Users can delete own settings" ON user_settings
 FOR DELETE USING (auth.uid() = user_id);
--- Billing history: Users can manage their own billing history
+-- Billing history: Users can read and insert own billing history
 CREATE POLICY "Users can read own billing history" ON billing_history
 FOR SELECT USING (auth.uid() = user_id);
 
 CREATE POLICY "Users can insert own billing history" ON billing_history
 FOR INSERT WITH CHECK (auth.uid() = user_id);
+-- Rewards: Managed by service role only
 
-CREATE POLICY "Users can update own billing history" ON billing_history
-FOR UPDATE USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
+CREATE POLICY "Allow authenticated users to read credit packages" ON credit_packages FOR SELECT USING (auth.role() = 'authenticated');
 
-CREATE POLICY "Users can delete own billing history" ON billing_history
-FOR DELETE USING (auth.uid() = user_id);
--- Rewards: Users can manage their own rewards
-CREATE POLICY "Users can read own rewards" ON rewards
-FOR SELECT USING (auth.uid() = user_id);
-
-CREATE POLICY "Users can insert own rewards" ON rewards
-FOR INSERT WITH CHECK (auth.uid() = user_id);
-
-CREATE POLICY "Users can update own rewards" ON rewards
-FOR UPDATE USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
-
-CREATE POLICY "Users can delete own rewards" ON rewards
-FOR DELETE USING (auth.uid() = user_id);
-
-CREATE POLICY "Allow all users to read credit packages" ON credit_packages FOR SELECT USING (true);
-
-CREATE POLICY "Allow all users to read packages" ON packages FOR SELECT USING (true);
+CREATE POLICY "Allow authenticated users to read packages" ON packages FOR SELECT USING (auth.role() = 'authenticated');
 
 -- RLS Policies for portfolios
 CREATE POLICY "Users can manage own portfolios" ON portfolios FOR ALL USING (auth.uid() = user_id);

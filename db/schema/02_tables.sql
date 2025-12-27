@@ -249,3 +249,5 @@ CREATE TABLE session (
     expire timestamp(6) NOT NULL
 ) WITH (OIDS=FALSE);
 
+ALTER TABLE session ENABLE ROW LEVEL SECURITY;
+

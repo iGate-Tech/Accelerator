@@ -2694,6 +2694,254 @@ BEGIN
       );
    END IF;
 
-   RETURN profile_data;
+    RETURN profile_data;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- Comprehensive User Settings Management
+CREATE OR REPLACE FUNCTION manage_user_settings(p_user_id UUID, p_action TEXT, p_settings JSONB DEFAULT '{}')
+RETURNS JSON AS $$
+DECLARE
+  result JSON;
+BEGIN
+  CASE p_action
+    WHEN 'get' THEN
+      -- Return all user settings and preferences as JSON
+      SELECT json_build_object(
+        'preferences', p.preferences,
+        'settings', COALESCE(us.settings, '{}'::jsonb),
+        'notifications', json_build_object(
+          'email', COALESCE((p.preferences->'notifications'->>'email')::boolean, true),
+          'push', COALESCE((p.preferences->'notifications'->>'push')::boolean, true)
+        ),
+        'theme', COALESCE(p.preferences->>'theme', 'light'),
+        'language', COALESCE(p.preferences->>'language', 'en')
+      ) INTO result
+      FROM profiles p
+      LEFT JOIN (
+        SELECT user_id, jsonb_object_agg(key, value) as settings
+        FROM user_settings
+        WHERE user_id = p_user_id
+        GROUP BY user_id
+      ) us ON p.user_id = us.user_id
+      WHERE p.user_id = p_user_id;
+
+    WHEN 'update' THEN
+      -- Update preferences in profile
+      UPDATE profiles SET
+        preferences = COALESCE(p.preferences, '{}'::jsonb) || p_settings,
+        updated_at = NOW()
+      WHERE user_id = p_user_id;
+
+      -- Update individual settings if provided
+      IF p_settings ? 'settings' THEN
+        -- Delete existing settings
+        DELETE FROM user_settings WHERE user_id = p_user_id;
+
+        -- Insert new settings
+        INSERT INTO user_settings (user_id, key, value)
+        SELECT p_user_id, key, value::text
+        FROM jsonb_each_text(p_settings->'settings');
+      END IF;
+
+      -- Log activity
+      PERFORM log_user_activity(p_user_id, 'update', 'settings', p_user_id,
+        json_build_object('settings_updated', array(select jsonb_object_keys(p_settings))));
+
+      result := json_build_object('success', true, 'message', 'Settings updated successfully');
+
+    WHEN 'update_notifications' THEN
+      -- Update notification preferences only
+      UPDATE profiles SET
+        preferences = jsonb_set(
+          COALESCE(preferences, '{}'::jsonb),
+          '{notifications}',
+          p_settings
+        ),
+        updated_at = NOW()
+      WHERE user_id = p_user_id;
+
+      result := json_build_object('success', true, 'message', 'Notification settings updated');
+
+    WHEN 'reset' THEN
+      -- Reset to defaults
+      UPDATE profiles SET
+        preferences = '{
+          "language": "en",
+          "theme": "light",
+          "notifications": {"email": true, "push": true}
+        }'::jsonb,
+        updated_at = NOW()
+      WHERE user_id = p_user_id;
+
+      -- Clear user settings
+      DELETE FROM user_settings WHERE user_id = p_user_id;
+
+      result := json_build_object('success', true, 'message', 'Settings reset to defaults');
+  END CASE;
+
+  RETURN result;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- Comprehensive Ideas Operations Function
+CREATE OR REPLACE FUNCTION comprehensive_idea_operations(p_user_id UUID, p_action TEXT, p_data JSONB DEFAULT '{}')
+RETURNS JSON AS $$
+DECLARE
+  result JSON;
+  idea_record RECORD;
+  is_owner BOOLEAN;
+BEGIN
+  CASE p_action
+    WHEN 'get_details' THEN
+      -- Return complete idea with all related data
+      SELECT
+        i.*,
+        p.name as author_name,
+        p.avatar_url as author_avatar,
+        COUNT(DISTINCT v.id) as vote_count,
+        ROUND(AVG(v.rating), 2) as average_rating,
+        COUNT(DISTINCT f.id) as favorite_count,
+        COUNT(DISTINCT mi.id) as total_models,
+        COUNT(DISTINCT CASE WHEN mi.status = 'completed' THEN mi.id END) as completed_models,
+        EXISTS(SELECT 1 FROM votes WHERE idea_id = i.id AND user_id = p_user_id) as has_voted,
+        EXISTS(SELECT 1 FROM user_favorites WHERE idea_id = i.id AND user_id = p_user_id) as has_favorited,
+        i.user_id = p_user_id as is_owner
+      INTO idea_record
+      FROM ideas i
+      JOIN profiles p ON i.user_id = p.user_id
+      LEFT JOIN votes v ON i.id = v.idea_id
+      LEFT JOIN user_favorites f ON i.id = f.idea_id
+      LEFT JOIN model_instances mi ON i.id = mi.idea_id
+      WHERE i.id = (p_data->>'idea_id')::UUID
+      GROUP BY i.id, p.name, p.avatar_url, i.user_id;
+
+      IF FOUND THEN
+        result := json_build_object(
+          'success', true,
+          'idea', row_to_json(idea_record),
+          'permissions', json_build_object(
+            'can_edit', idea_record.is_owner,
+            'can_delete', idea_record.is_owner,
+            'can_vote', NOT idea_record.is_owner AND idea_record.privacy = 'public',
+            'can_favorite', NOT idea_record.is_owner
+          )
+        );
+      ELSE
+        result := json_build_object('success', false, 'error', 'Idea not found');
+      END IF;
+
+    WHEN 'update' THEN
+      -- Update idea (owner only)
+      SELECT user_id = p_user_id as is_owner INTO is_owner
+      FROM ideas WHERE id = (p_data->>'idea_id')::UUID;
+
+      IF NOT is_owner THEN
+        RETURN json_build_object('success', false, 'error', 'Permission denied');
+      END IF;
+
+      UPDATE ideas SET
+        title = COALESCE(p_data->>'title', title),
+        description = COALESCE(p_data->>'description', description),
+        category = COALESCE(p_data->>'category', category),
+        tags = COALESCE(p_data->'tags', tags),
+        privacy = COALESCE(p_data->>'privacy', privacy),
+        updated_at = NOW()
+      WHERE id = (p_data->>'idea_id')::UUID;
+
+      result := json_build_object('success', true, 'message', 'Idea updated successfully');
+
+    WHEN 'delete' THEN
+      -- Delete idea (owner only)
+      SELECT user_id = p_user_id as is_owner INTO is_owner
+      FROM ideas WHERE id = (p_data->>'idea_id')::UUID;
+
+      IF NOT is_owner THEN
+        RETURN json_build_object('success', false, 'error', 'Permission denied');
+      END IF;
+
+      DELETE FROM ideas WHERE id = (p_data->>'idea_id')::UUID;
+      result := json_build_object('success', true, 'message', 'Idea deleted successfully');
+
+    WHEN 'toggle_favorite' THEN
+      -- Toggle favorite status
+      IF EXISTS(SELECT 1 FROM user_favorites WHERE idea_id = (p_data->>'idea_id')::UUID AND user_id = p_user_id) THEN
+        DELETE FROM user_favorites WHERE idea_id = (p_data->>'idea_id')::UUID AND user_id = p_user_id;
+        result := json_build_object('action', 'removed', 'favorited', false);
+      ELSE
+        INSERT INTO user_favorites (idea_id, user_id) VALUES ((p_data->>'idea_id')::UUID, p_user_id);
+        result := json_build_object('action', 'added', 'favorited', true);
+      END IF;
+
+    WHEN 'cast_vote' THEN
+      -- Cast or update vote (can't vote on own ideas)
+      SELECT user_id = p_user_id as is_owner INTO is_owner
+      FROM ideas WHERE id = (p_data->>'idea_id')::UUID;
+
+      IF is_owner THEN
+        RETURN json_build_object('success', false, 'error', 'Cannot vote on your own ideas');
+      END IF;
+
+      -- Use existing validate_and_cast_vote function
+      SELECT * INTO result FROM validate_and_cast_vote(
+        (p_data->>'idea_id')::UUID,
+        p_user_id,
+        (p_data->>'rating')::INTEGER
+      );
+
+    WHEN 'get_list' THEN
+      -- Get paginated list of ideas with filters
+      -- This would use the existing get_user_ideas function or enhance it
+      SELECT * INTO result FROM get_user_ideas(p_user_id, p_data, p_data->'pagination');
+  END CASE;
+
+  RETURN result;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- Enhanced Dashboard Data Function
+CREATE OR REPLACE FUNCTION get_enhanced_dashboard_data(p_user_id UUID)
+RETURNS JSON AS $$
+DECLARE
+  dashboard_data JSON;
+BEGIN
+  -- Use the comprehensive dashboard view
+  SELECT json_build_object(
+    'user', json_build_object(
+      'name', name,
+      'avatar_url', avatar_url,
+      'package_type', package_type,
+      'package_status', package_status,
+      'member_since', member_since,
+      'preferred_language', preferred_language,
+      'preferred_theme', preferred_theme
+    ),
+    'stats', json_build_object(
+      'credit_balance', credit_balance,
+      'total_earned', total_earned,
+      'total_spent', total_spent,
+      'total_ideas', total_ideas,
+      'completed_ideas', completed_ideas,
+      'public_ideas', public_ideas,
+      'total_votes_given', total_votes_given,
+      'total_rewards_earned', total_rewards_earned,
+      'rewards_amount', rewards_amount,
+      'total_favorites', total_favorites,
+      'weekly_activities', weekly_activities
+    ),
+    'recent_activity', (
+      SELECT json_agg(row_to_json(af))
+      FROM (SELECT * FROM user_activity_feed WHERE user_id = p_user_id LIMIT 10) af
+    ),
+    'recent_ideas', (
+      SELECT json_agg(row_to_json(i))
+      FROM (SELECT * FROM ideas_with_full_stats WHERE user_id = p_user_id ORDER BY created_at DESC LIMIT 5) i
+    ),
+    'last_activity_at', last_activity_at
+  ) INTO dashboard_data
+  FROM user_dashboard_comprehensive
+  WHERE user_id = p_user_id;
+
+  RETURN dashboard_data;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;

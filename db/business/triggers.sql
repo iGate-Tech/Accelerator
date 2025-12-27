@@ -251,8 +251,138 @@ END;
 $$ LANGUAGE plpgsql;
 
 CREATE TRIGGER trigger_log_section_completion
-AFTER UPDATE ON model_sections
-FOR EACH ROW EXECUTE FUNCTION log_section_completion();
+  AFTER INSERT OR UPDATE ON model_sections
+  FOR EACH ROW EXECUTE FUNCTION log_section_completion();
+
+-- Advanced Automation Triggers
+
+-- Automatic Activity Logging Trigger
+CREATE OR REPLACE FUNCTION auto_log_activities() RETURNS TRIGGER AS $$
+DECLARE
+  action_type TEXT;
+  entity_type TEXT;
+  entity_id UUID;
+BEGIN
+  -- Determine entity type from table
+  CASE TG_TABLE_NAME
+    WHEN 'ideas' THEN
+      entity_type := 'idea';
+      entity_id := COALESCE(NEW.id, OLD.id);
+    WHEN 'votes' THEN
+      entity_type := 'vote';
+      entity_id := COALESCE(NEW.id, OLD.id);
+    WHEN 'user_favorites' THEN
+      entity_type := 'favorite';
+      entity_id := COALESCE(NEW.idea_id, OLD.idea_id);
+    WHEN 'credit_transactions' THEN
+      entity_type := 'credit';
+      entity_id := COALESCE(NEW.id, OLD.id);
+    WHEN 'profiles' THEN
+      entity_type := 'profile';
+      entity_id := COALESCE(NEW.user_id, OLD.user_id);
+    ELSE
+      entity_type := TG_TABLE_NAME;
+      entity_id := COALESCE(NEW.id, OLD.id);
+  END CASE;
+
+  -- Determine action type
+  CASE TG_OP
+    WHEN 'INSERT' THEN action_type := 'create';
+    WHEN 'UPDATE' THEN action_type := 'update';
+    WHEN 'DELETE' THEN action_type := 'delete';
+  END CASE;
+
+  -- Auto-log the activity if we have a user_id
+  IF (COALESCE(NEW.user_id, OLD.user_id) IS NOT NULL) THEN
+    PERFORM log_user_activity(
+      COALESCE(NEW.user_id, OLD.user_id),
+      action_type,
+      entity_type,
+      entity_id
+    );
+  END IF;
+
+  RETURN COALESCE(NEW, OLD);
+END;
+$$ LANGUAGE plpgsql;
+
+-- Apply auto-logging to key tables
+CREATE TRIGGER trigger_auto_log_ideas
+  AFTER INSERT OR UPDATE OR DELETE ON ideas
+  FOR EACH ROW EXECUTE FUNCTION auto_log_activities();
+
+CREATE TRIGGER trigger_auto_log_votes
+  AFTER INSERT OR UPDATE OR DELETE ON votes
+  FOR EACH ROW EXECUTE FUNCTION auto_log_activities();
+
+CREATE TRIGGER trigger_auto_log_favorites
+  AFTER INSERT OR DELETE ON user_favorites
+  FOR EACH ROW EXECUTE FUNCTION auto_log_activities();
+
+-- Automatic Notification Creation Trigger
+CREATE OR REPLACE FUNCTION auto_create_notifications() RETURNS TRIGGER AS $$
+BEGIN
+  CASE TG_TABLE_NAME
+    WHEN 'votes' THEN
+      -- Notify idea owner of new vote (but not self-votes)
+      IF NEW.user_id != (SELECT user_id FROM ideas WHERE id = NEW.idea_id) THEN
+        PERFORM create_user_notification(
+          (SELECT user_id FROM ideas WHERE id = NEW.idea_id),
+          'vote_received',
+          format('Someone voted %s on your idea!', NEW.rating)
+        );
+      END IF;
+
+    WHEN 'user_favorites' THEN
+      -- Notify idea owner of favorite (but not self-favorites)
+      IF NEW.user_id != (SELECT user_id FROM ideas WHERE id = NEW.idea_id) THEN
+        PERFORM create_user_notification(
+          (SELECT user_id FROM ideas WHERE id = NEW.idea_id),
+          'idea_favorited',
+          'Someone favorited your idea!'
+        );
+      END IF;
+
+    WHEN 'credit_transactions' THEN
+      -- Notify of significant credit changes
+      IF NEW.amount > 50 THEN
+        PERFORM create_user_notification(
+          NEW.user_id,
+          'credits_earned',
+          format('You earned %s credits!', NEW.amount)
+        );
+      ELSIF NEW.amount < -50 THEN
+        PERFORM create_user_notification(
+          NEW.user_id,
+          'credits_spent',
+          format('You spent %s credits.', abs(NEW.amount))
+        );
+      END IF;
+
+    WHEN 'ideas' THEN
+      -- Notify followers when idea is updated significantly
+      IF TG_OP = 'UPDATE' AND NEW.overall_status != OLD.overall_status THEN
+        -- Could notify package subscribers or followers here
+        NULL; -- Placeholder for future enhancement
+      END IF;
+  END CASE;
+
+  RETURN COALESCE(NEW, OLD);
+END;
+$$ LANGUAGE plpgsql;
+
+-- Apply notification triggers
+CREATE TRIGGER trigger_auto_notifications_votes
+  AFTER INSERT ON votes
+  FOR EACH ROW EXECUTE FUNCTION auto_create_notifications();
+
+CREATE TRIGGER trigger_auto_notifications_favorites
+  AFTER INSERT ON user_favorites
+  FOR EACH ROW EXECUTE FUNCTION auto_create_notifications();
+
+CREATE TRIGGER trigger_auto_notifications_credits
+  AFTER INSERT ON credit_transactions
+  FOR EACH ROW EXECUTE FUNCTION auto_create_notifications();
 
 -- Advanced Business Logic Functions for API Unification
 

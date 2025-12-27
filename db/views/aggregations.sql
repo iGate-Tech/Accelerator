@@ -154,5 +154,115 @@ SELECT
   COUNT(DISTINCT CASE WHEN mi.status = 'completed' THEN mi.id END) as completed_models
 FROM ideas i
 LEFT JOIN model_instances mi ON i.id = mi.idea_id
-GROUP BY i.id, i.user_id, i.title, i.completion_percentage;</content>
+GROUP BY i.id, i.user_id, i.title, i.completion_percentage;
+
+-- Enhanced User Preferences View
+CREATE OR REPLACE VIEW user_preferences AS
+SELECT
+  p.user_id,
+  p.preferences,
+  -- Extract individual preference fields for easy access
+  COALESCE(p.preferences->>'language', 'en') as language,
+  COALESCE(p.preferences->>'theme', 'light') as theme,
+  COALESCE(p.preferences->'notifications', json_build_object('email', true, 'push', true)) as notifications,
+  -- User settings as aggregated JSON
+  COALESCE(us.settings, '{}'::jsonb) as user_settings
+FROM profiles p
+LEFT JOIN (
+  SELECT user_id, jsonb_object_agg(key, value) as settings
+  FROM user_settings
+  GROUP BY user_id
+) us ON p.user_id = us.user_id;
+
+-- User Activity Feed View with Entity Details
+CREATE OR REPLACE VIEW user_activity_feed AS
+SELECT
+  al.id,
+  al.user_id,
+  al.action_type,
+  al.entity_type,
+  al.entity_id,
+  al.details,
+  al.created_at,
+  -- Add entity display names for better UX
+  CASE
+    WHEN al.entity_type = 'idea' THEN i.title
+    WHEN al.entity_type = 'profile' THEN p.name
+    WHEN al.entity_type = 'package' THEN pkg.name
+    ELSE NULL
+  END as entity_display_name,
+  -- Add user info
+  up.name as user_name,
+  up.avatar_url as user_avatar
+FROM activity_log al
+LEFT JOIN ideas i ON al.entity_id = i.id AND al.entity_type = 'idea'
+LEFT JOIN profiles p ON al.entity_id = p.user_id AND al.entity_type = 'profile'
+LEFT JOIN packages pkg ON al.entity_id::text = pkg.type AND al.entity_type = 'package'
+LEFT JOIN profiles up ON al.user_id = up.user_id
+ORDER BY al.created_at DESC;
+
+-- Enhanced Ideas with Comprehensive Stats View
+CREATE OR REPLACE VIEW ideas_with_full_stats AS
+SELECT
+  i.*,
+  -- Author information
+  p.name as author_name,
+  p.avatar_url as author_avatar,
+  -- Statistics
+  COUNT(DISTINCT v.id) as vote_count,
+  ROUND(AVG(v.rating), 2) as average_rating,
+  COUNT(DISTINCT f.id) as favorite_count,
+  COUNT(DISTINCT mi.id) as total_models,
+  COUNT(DISTINCT CASE WHEN mi.status = 'completed' THEN mi.id END) as completed_models,
+  -- Model progress percentage
+  CASE
+    WHEN COUNT(mi.id) > 0 THEN ROUND((COUNT(CASE WHEN mi.status = 'completed' THEN 1 END)::decimal / COUNT(mi.id)) * 100, 1)
+    ELSE 0
+  END as model_completion_percentage,
+  -- Recent activity
+  MAX(al.created_at) as last_activity_at
+FROM ideas i
+JOIN profiles p ON i.user_id = p.user_id
+LEFT JOIN votes v ON i.id = v.idea_id
+LEFT JOIN user_favorites f ON i.id = f.idea_id
+LEFT JOIN model_instances mi ON i.id = mi.idea_id
+LEFT JOIN activity_log al ON i.id = al.entity_id AND al.entity_type = 'idea'
+GROUP BY i.id, p.name, p.avatar_url;
+
+-- User Dashboard Comprehensive View
+CREATE OR REPLACE VIEW user_dashboard_comprehensive AS
+SELECT
+  p.user_id,
+  p.name,
+  p.avatar_url,
+  p.credit_balance,
+  p.total_earned,
+  p.total_spent,
+  p.package_type,
+  p.package_status,
+  p.created_at as member_since,
+  -- Idea statistics
+  COUNT(DISTINCT i.id) as total_ideas,
+  COUNT(DISTINCT CASE WHEN i.overall_status = 'completed' THEN i.id END) as completed_ideas,
+  COUNT(DISTINCT CASE WHEN i.privacy = 'public' THEN i.id END) as public_ideas,
+  -- Voting statistics
+  COUNT(DISTINCT v.id) as total_votes_given,
+  COUNT(DISTINCT vr.id) as total_rewards_earned,
+  COALESCE(SUM(vr.reward_amount), 0) as rewards_amount,
+  -- Recent activity
+  MAX(al.created_at) as last_activity_at,
+  COUNT(DISTINCT CASE WHEN al.created_at >= NOW() - INTERVAL '7 days' THEN al.id END) as weekly_activities,
+  -- Favorite statistics
+  COUNT(DISTINCT f.id) as total_favorites,
+  -- Preferences
+  COALESCE(p.preferences->>'language', 'en') as preferred_language,
+  COALESCE(p.preferences->>'theme', 'light') as preferred_theme
+FROM profiles p
+LEFT JOIN ideas i ON p.user_id = i.user_id
+LEFT JOIN votes v ON p.user_id = v.user_id
+LEFT JOIN voting_rewards vr ON p.user_id = vr.voter_id
+LEFT JOIN activity_log al ON p.user_id = al.user_id
+LEFT JOIN user_favorites f ON p.user_id = f.user_id
+GROUP BY p.user_id, p.name, p.avatar_url, p.credit_balance, p.total_earned,
+         p.total_spent, p.package_type, p.package_status, p.created_at, p.preferences;</content>
 <parameter name="filePath">/home/rana/Documents/test/accelerator/db/views.sql

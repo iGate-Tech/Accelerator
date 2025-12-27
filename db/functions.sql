@@ -2763,3 +2763,31 @@ BEGIN
    RETURN json_build_object('success', true, 'message', 'Profile updated successfully');
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- Function to get user preferences (language, theme, etc.)
+CREATE OR REPLACE FUNCTION get_user_preferences(p_user_id UUID)
+RETURNS JSON AS $$
+DECLARE
+   profile_data JSON;
+BEGIN
+   SELECT json_build_object(
+      'language', COALESCE(p.preferences->>'language', 'en'),
+      'theme', COALESCE(p.preferences->>'theme', 'light'),
+      'notifications', COALESCE(p.preferences->'notifications',
+         json_build_object('email', true, 'push', true))
+   ) INTO profile_data
+   FROM profiles p
+   WHERE p.user_id = p_user_id;
+
+   IF NOT FOUND THEN
+      -- Return defaults if no profile
+      RETURN json_build_object(
+         'language', 'en',
+         'theme', 'light',
+         'notifications', json_build_object('email', true, 'push', true)
+      );
+   END IF;
+
+   RETURN profile_data;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;

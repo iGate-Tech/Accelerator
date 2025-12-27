@@ -62,13 +62,15 @@
   {{{body}}}
 
    {{#if scripts}}{{scripts}}{{/if}}
-   <script>
-     // Set document direction based on language
-     const urlParams = new URLSearchParams(window.location.search);
-     const lang = urlParams.get('lng') || 'en';
-     document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
-     document.documentElement.lang = lang;
-   </script>
+    <script>
+      (function() {
+        // Set document direction based on language
+        const searchParams = new URLSearchParams(window.location.search);
+        const lang = searchParams.get('lng') || 'en';
+        document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
+        document.documentElement.lang = lang;
+      })();
+    </script>
    {{#if scripts}}{{scripts}}{{/if}}
      <script>
        function showLoadingFor8Seconds() {

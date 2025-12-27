@@ -164,7 +164,7 @@ SELECT
   -- Extract individual preference fields for easy access
   COALESCE(p.preferences->>'language', 'en') as language,
   COALESCE(p.preferences->>'theme', 'light') as theme,
-  COALESCE(p.preferences->'notifications', json_build_object('email', true, 'push', true)) as notifications,
+  COALESCE((p.preferences->'notifications')::jsonb, json_build_object('push', true)) as notifications,
   -- User settings as aggregated JSON
   COALESCE(us.settings, '{}'::jsonb) as user_settings
 FROM profiles p
@@ -190,7 +190,7 @@ SELECT
     WHEN al.entity_type = 'profile' THEN p.name
     WHEN al.entity_type = 'package' THEN pkg.name
     ELSE NULL
-  END as entity_display_name,
+   END as idea_title,
   -- Add user info
   up.name as user_name,
   up.avatar_url as user_avatar
@@ -537,5 +537,4 @@ SELECT
   COUNT(DISTINCT CASE WHEN al.created_at >= NOW() - INTERVAL '7 days' THEN al.id END) as weekly_activity_count
 FROM profiles p
 LEFT JOIN activity_log al ON p.user_id = al.user_id
-GROUP BY p.user_id, p.name, p.avatar_url, p.created_at;</content>
-<parameter name="filePath">/home/rana/Documents/test/accelerator/db/views.sql
+GROUP BY p.user_id, p.name, p.avatar_url, p.created_at;

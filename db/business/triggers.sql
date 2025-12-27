@@ -543,6 +543,7 @@ CREATE OR REPLACE FUNCTION auto_milestone_achievements() RETURNS TRIGGER AS $$
 DECLARE
   current_stats RECORD;
   new_achievements TEXT[] := ARRAY[]::TEXT[];
+  achievement TEXT;
 BEGIN
   -- Get current user statistics
   SELECT
@@ -1161,7 +1162,7 @@ BEGIN
          'preferences', json_build_object(
             'language', COALESCE(p_metadata->>'language', 'en'),
             'theme', 'light',
-            'notifications', json_build_object('email', true, 'push', true)
+            'notifications', json_build_object('push', true)
          )
       )
    ) INTO profile_result;
@@ -1586,10 +1587,26 @@ BEGIN
             completion_percentage,
             validation_threshold_met,
             unlocked_models
-         ) VALUES (
-            p_user_id,
-            trim(p_idea_data->>'title'),
-            trim(p_idea_data->>'description'),
-            COALESCE(p_idea_data->>'category', 'Other'),
-            COALESCE(p_idea_data->>'tags', '{}')::TEXT[],
-            COALESCE(p_idea_data->>'privacy', 'private'),
+          ) VALUES (
+             p_user_id,
+             trim(p_idea_data->>'title'),
+             trim(p_idea_data->>'description'),
+             COALESCE(p_idea_data->>'category', 'Other'),
+             COALESCE(p_idea_data->>'tags', '{}')::TEXT[],
+             COALESCE(p_idea_data->>'privacy', 'private'),
+             slug_text,
+             'pending',
+             0,
+             false,
+             '{}'::jsonb
+          ) RETURNING id INTO new_idea_id;
+
+          RETURN json_build_object('success', true, 'idea_id', new_idea_id);
+       WHEN 'update' THEN
+          -- Update logic here
+          RETURN json_build_object('success', false, 'error', 'Update not implemented');
+       ELSE
+          RETURN json_build_object('success', false, 'error', 'Invalid action');
+    END CASE;
+END;
+$$ LANGUAGE plpgsql;

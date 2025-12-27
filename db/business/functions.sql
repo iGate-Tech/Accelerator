@@ -125,7 +125,7 @@ END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
 -- Function to complete a model section
-CREATE OR REPLACE FUNCTION complete_model_section(p_section_id UUID, p_user_id UUID) RETURNS VOID AS $$
+CREATE OR REPLACE FUNCTION complete_model_section_void(p_section_id UUID, p_user_id UUID) RETURNS VOID AS $$
 BEGIN
   UPDATE model_sections SET is_completed = TRUE, updated_at = NOW()
   WHERE id = p_section_id AND EXISTS (
@@ -566,7 +566,7 @@ BEGIN
   END IF;
 
   -- Complete section
-  PERFORM complete_model_section(p_section_id, p_user_id);
+  PERFORM complete_model_section_void(p_section_id, p_user_id);
 
   RETURN json_build_object('success', true);
 END;
@@ -946,7 +946,7 @@ BEGIN
          'preferences', json_build_object(
             'language', COALESCE(p_metadata->>'language', 'en'),
             'theme', 'light',
-            'notifications', json_build_object('email', true, 'push', true)
+            'notifications', json_build_object('push', true)
          )
       )
    ) INTO profile_result;
@@ -2874,8 +2874,8 @@ BEGIN
    SELECT json_build_object(
       'language', COALESCE(p.preferences->>'language', 'en'),
       'theme', COALESCE(p.preferences->>'theme', 'light'),
-      'notifications', COALESCE(p.preferences->'notifications',
-         json_build_object('email', true, 'push', true))
+       'notifications', COALESCE(p.preferences->'notifications',
+          json_build_object('push', true))
    ) INTO profile_data
    FROM profiles p
    WHERE p.user_id = p_user_id;
@@ -2885,7 +2885,7 @@ BEGIN
       RETURN json_build_object(
          'language', 'en',
          'theme', 'light',
-         'notifications', json_build_object('email', true, 'push', true)
+          'notifications', json_build_object('push', true)
       );
    END IF;
 
@@ -2906,7 +2906,6 @@ BEGIN
         'preferences', p.preferences,
         'settings', COALESCE(us.settings, '{}'::jsonb),
         'notifications', json_build_object(
-          'email', COALESCE((p.preferences->'notifications'->>'email')::boolean, true),
           'push', COALESCE((p.preferences->'notifications'->>'push')::boolean, true)
         ),
         'theme', COALESCE(p.preferences->>'theme', 'light'),

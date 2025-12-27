@@ -147,7 +147,7 @@ document.addEventListener("DOMContentLoaded", function () {
       e.preventDefault();
       const button = e.target.closest(".favorite-btn");
       const ideaId = button.getAttribute("data-favorite-id");
-      const heartIcon = button.querySelector(".fa-heart");
+      const heartIcon = button.querySelector("svg");
       const isCurrentlyFavorite = heartIcon.classList.contains("text-red-500");
 
       try {

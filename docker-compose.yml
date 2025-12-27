@@ -5,17 +5,11 @@ services:
       - "4000"
     sysctls:
       - net.ipv6.conf.all.disable_ipv6=0
+    env_file:
+      - .env
     environment:
       - NODE_ENV=development
       - PORT=4000
-      - SESSION_SECRET=d9325766bdf825bb8c27156f986534be87d9d93575a96e82ee61ac4b043cbff415be0cb31d19111fb439e4cef680c2720bdb232e9a831fcc9c5140ddf0a36849
-      - REDIS_URL=redis://redis:6380
-      - SUPABASE_URL=https://xtpnyajkqsqvebymcyuu.supabase.co
-      - SUPABASE_KEY=sb_secret_I4iKJMUjQwTtW4d7PuKGQQ_cGch_8ob
-      - SUPABASE_PUBLIC_KEY=sb_publishable_V2Y7_TRoja7rKn8G2xuspw_gMCDpsV2
-      - SUPABASE_DB_URL=postgresql://postgres:aVbn6QVSpk3RBm8a@db.xtpnyajkqsqvebymcyuu.supabase.co:5432/postgres
-      - OPENROUTER_API_KEY=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
-      - APP_URL=${APP_URL}
     volumes:
       - sessions_data:/app/sessions
     networks:

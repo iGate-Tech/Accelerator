@@ -831,7 +831,7 @@ BEGIN
          'preferences', json_build_object(
             'language', COALESCE(p_metadata->>'language', 'en'),
             'theme', 'light',
-            'notifications', json_build_object('email', true, 'push', true)
+            'notifications', json_build_object('push', true)
          )
       )
    ) INTO profile_result;
@@ -2773,8 +2773,8 @@ BEGIN
    SELECT json_build_object(
       'language', COALESCE(p.preferences->>'language', 'en'),
       'theme', COALESCE(p.preferences->>'theme', 'light'),
-      'notifications', COALESCE(p.preferences->'notifications',
-         json_build_object('email', true, 'push', true))
+       'notifications', COALESCE(p.preferences->'notifications',
+          json_build_object('push', true))
    ) INTO profile_data
    FROM profiles p
    WHERE p.user_id = p_user_id;
@@ -2784,7 +2784,7 @@ BEGIN
       RETURN json_build_object(
          'language', 'en',
          'theme', 'light',
-         'notifications', json_build_object('email', true, 'push', true)
+          'notifications', json_build_object('push', true)
       );
    END IF;
 

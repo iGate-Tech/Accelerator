@@ -1,13 +1,40 @@
--- Accelerator Application Schema SQL
+-- Accelerator Application Schema SQL - Complete Database Schema
 -- Generated based on PRD.md (Product Requirements Document)
--- This file has been segregated into separate files for better organization:
--- - tables.sql: All table definitions, extensions, indexes, and storage setup
--- - rls.sql: All Row Level Security policies
--- - functions.sql: All database functions and triggers
+-- This is the master schema file that orchestrates all database components
 --
--- To deploy the schema, run the files in the following order:
--- 1. tables.sql
--- 2. rls.sql
--- 3. functions.sql
+-- Organized structure:
+-- ├── schema/          # Core schema definitions
+-- │   ├── 01_extensions.sql     # Database extensions
+-- │   ├── 02_tables.sql         # Table definitions
+-- │   ├── 03_indexes.sql        # Indexes and constraints
+-- │   ├── 04_constraints.sql    # Additional constraints
+-- │   └── 05_types.sql          # Custom types
+-- ├── security/        # Security policies
+-- │   ├── rls_policies.sql      # Row Level Security
+-- │   └── permissions.sql       # Custom permissions
+-- ├── business/        # Business logic
+-- │   ├── functions.sql         # Business functions
+-- │   └── triggers.sql          # Database triggers
+-- ├── views/           # Data aggregation views
+-- │   ├── aggregations.sql      # Summary views
+-- │   ├── reporting.sql         # Report views
+-- │   └── api_views.sql         # API-optimized views
+-- ├── data/            # Sample data
+-- │   ├── seeds.sql             # Base data
+-- │   ├── seeds_ideas.sql       # Idea samples
+-- │   └── demo_data.sql         # Demo data
+-- └── maintenance/     # Maintenance scripts
+--     ├── reset.sql             # Database reset
+--     ├── backup.sql            # Backup procedures
+--     └── migration.sql         # Migration helpers
+--
+-- Deployment order:
+-- 1. schema/01_extensions.sql
+-- 2. schema/02_tables.sql
+-- 3. schema/03_indexes.sql
+-- 4. security/rls_policies.sql
+-- 5. business/triggers.sql
+-- 6. business/functions.sql
+-- 7. views/aggregations.sql
 --
 -- Reference for future schema updates and migrations

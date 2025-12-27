@@ -1,15 +1,3 @@
--- Accelerator Application Schema SQL - Tables
--- Generated based on PRD.md (Product Requirements Document)
--- This file provides the table definitions, indexes, and storage setup
--- Upload to Supabase SQL Query Runner for deployment
--- Reference for future schema updates and migrations
-
--- Enable necessary extensions
-CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
-
--- Enable RLS on all tables (run after creation if needed)
-
--- 1. profiles (consolidated user data, replaces user_credits)
 CREATE TABLE profiles (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
@@ -260,35 +248,3 @@ CREATE TABLE session (
     expire timestamp(6) NOT NULL
 ) WITH (OIDS=FALSE);
 
-ALTER TABLE session ADD CONSTRAINT session_pkey PRIMARY KEY (sid) NOT DEFERRABLE INITIALLY IMMEDIATE;
-ALTER TABLE session ENABLE ROW LEVEL SECURITY;
-CREATE INDEX IDX_session_expire ON session(expire);
-
--- Indexes (PRD 5.5)
-CREATE INDEX idx_profiles_user_id ON profiles(user_id);
-CREATE INDEX idx_ideas_user_id ON ideas(user_id);
-CREATE INDEX idx_ideas_user_id_created_at ON ideas(user_id, created_at);
-CREATE INDEX idx_ideas_slug ON ideas(slug);
-CREATE INDEX idx_votes_idea_id ON votes(idea_id);
-CREATE INDEX idx_model_instances_idea_id ON model_instances(idea_id);
-CREATE INDEX idx_model_instances_user_id_model_type ON model_instances(user_id, model_type);
-CREATE INDEX idx_model_sections_model_instance_id ON model_sections(model_instance_id);
-CREATE INDEX idx_model_sections_section_data ON model_sections USING GIN (section_data);
-CREATE INDEX idx_reports_idea_id ON reports(idea_id);
-CREATE INDEX idx_reports_report_data ON reports USING GIN (report_data);
-CREATE INDEX idx_credit_transactions_user_id ON credit_transactions(user_id);
-CREATE INDEX idx_credit_transactions_user_id_created_at ON credit_transactions(user_id, created_at);
-CREATE INDEX idx_activity_log_user_id ON activity_log(user_id);
-CREATE INDEX idx_activity_log_user_id_action_type ON activity_log(user_id, action_type);
-CREATE INDEX idx_activity_log_details ON activity_log USING GIN (details);
-
--- Indexes for portfolios
-CREATE INDEX idx_portfolios_user_id ON portfolios(user_id);
-CREATE INDEX idx_portfolio_ideas_portfolio_id ON portfolio_ideas(portfolio_id);
-CREATE INDEX idx_portfolio_ideas_idea_id ON portfolio_ideas(idea_id);
-CREATE INDEX idx_portfolio_members_portfolio_id ON portfolio_members(portfolio_id);
-CREATE INDEX idx_portfolio_members_user_id ON portfolio_members(user_id);
-
--- Storage Buckets Setup
-INSERT INTO storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
-VALUES ('avatars', 'avatars', true, 5242880, ARRAY['image/jpeg', 'image/png', 'image/webp', 'image/gif']);

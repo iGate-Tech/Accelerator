@@ -428,6 +428,32 @@ CREATE POLICY "Service role can manage sessions" ON session FOR ALL USING (auth.
 
 -- Sample data is inserted via seeds.sql separately
 
+-- Trigger to update idea rating on vote changes
+CREATE OR REPLACE FUNCTION update_idea_rating() RETURNS TRIGGER AS $$
+DECLARE
+  avg_rating DECIMAL(3,2);
+BEGIN
+  -- Calculate average rating for the idea
+  SELECT ROUND(AVG(rating)::numeric, 2) INTO avg_rating FROM votes WHERE idea_id = COALESCE(NEW.idea_id, OLD.idea_id);
+
+  -- Update the idea's rating
+  UPDATE ideas SET rating = avg_rating WHERE id = COALESCE(NEW.idea_id, OLD.idea_id);
+
+  RETURN COALESCE(NEW, OLD);
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trigger_update_idea_rating
+AFTER INSERT OR UPDATE OR DELETE ON votes
+FOR EACH ROW EXECUTE FUNCTION update_idea_rating();
+
+-- Function to update idea rating (security definer to bypass RLS)
+CREATE OR REPLACE FUNCTION update_idea_rating_func(p_idea_id UUID, p_rating DECIMAL) RETURNS VOID AS $$
+BEGIN
+  UPDATE ideas SET rating = p_rating WHERE id = p_idea_id;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
 -- Database Validation Triggers
 
 -- Trigger to validate credit balance is not negative

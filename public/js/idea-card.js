@@ -116,12 +116,12 @@ document.addEventListener("DOMContentLoaded", function () {
         .getAttribute("data-idea-id");
 
       try {
-        const response = await fetch(`/api/ideas/${ideaId}/rate`, {
+        const response = await fetch(`/api/votes`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({ rating }),
+          body: JSON.stringify({ idea_id: ideaId, rating }),
         });
 
         if (response.ok) {

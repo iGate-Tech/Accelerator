@@ -7,7 +7,6 @@
 
 import { execSync } from "child_process";
 import { config } from "dotenv";
-import { writeFileSync } from "fs";
 import { fileURLToPath } from "url";
 import { dirname, join } from "path";
 
@@ -26,6 +25,7 @@ if (!SUPABASE_DB_URL) {
 }
 
 // Generate backup filename with timestamp
+// eslint-disable-next-line no-magic-numbers
 const timestamp = new Date().toISOString().replace(/[:.]/g, "-").slice(0, -5);
 const backupFile = `db_backup_${NODE_ENV}_${timestamp}.sql`;
 

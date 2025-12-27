@@ -21,7 +21,11 @@
          data-favorite-id="{{id}}"
          title="{{#if is_favorite}}Remove from favorites{{else}}Add to favorites{{/if}}"
          aria-label="{{#if is_favorite}}Remove from favorites{{else}}Add to favorites{{/if}}">
-         {{{icon 'heart' class='w-4 h-4 {{#if is_favorite}}fill-current text-red-500{{/if}} transition-all duration-200'}}}
+          {{#if is_favorite}}
+            {{{icon 'heart' class='w-4 h-4 fill-current text-red-500 transition-all duration-200'}}}
+          {{else}}
+            {{{icon 'heart' class='w-4 h-4 transition-all duration-200'}}}
+          {{/if}}
        </button>
        {{/if}}
        <a href="/idea/{{id}}" class="btn btn-ghost btn-sm p-2">

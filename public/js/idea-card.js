@@ -144,9 +144,8 @@ document.addEventListener("DOMContentLoaded", function () {
       e.preventDefault();
       const button = e.target.closest(".favorite-btn");
       const ideaId = button.getAttribute("data-favorite-id");
-      const isCurrentlyFavorite = button
-        .querySelector(".fa-heart")
-        .classList.contains("text-red-500");
+      const heartIcon = button.querySelector(".fa-heart");
+      const isCurrentlyFavorite = heartIcon.classList.contains("text-red-500");
 
       try {
         const response = await fetch(`/api/ideas/${ideaId}/favorite`, {
@@ -157,18 +156,18 @@ document.addEventListener("DOMContentLoaded", function () {
         });
 
         if (response.ok) {
-          const heartIcon = button.querySelector(".fa-heart");
-          if (isCurrentlyFavorite) {
-            heartIcon.classList.remove("text-red-500", "fill-current");
-            showToast("Removed from favorites", "info");
-          } else {
+          const data = await response.json();
+          // Update UI based on server response
+          if (data.is_favorite) {
             heartIcon.classList.add("text-red-500", "fill-current");
-            showToast("Added to favorites!", "success");
+          } else {
+            heartIcon.classList.remove("text-red-500", "fill-current");
           }
           // Update data attribute
           button
             .closest(".idea-card")
-            .setAttribute("data-favorite", !isCurrentlyFavorite);
+            .setAttribute("data-favorite", data.is_favorite);
+          showToast(data.message, "success");
         } else {
           showToast("Failed to update favorite", "error");
         }

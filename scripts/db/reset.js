@@ -30,7 +30,7 @@ try {
   // Apply the reset script
   execSync(`psql "${SUPABASE_DB_URL}" -f db/maintenance/reset.sql`, {
     stdio: "inherit",
-    cwd: join(__dirname, ".."),
+    cwd: join(__dirname, "../.."),
   });
 
   console.log("✅ Database reset complete!");

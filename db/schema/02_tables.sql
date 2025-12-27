@@ -1,6 +1,6 @@
 CREATE TABLE profiles (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
+    user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE UNIQUE,
     name TEXT,
     avatar_url TEXT,
     role TEXT,
@@ -163,7 +163,8 @@ CREATE TABLE user_settings (
     user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
     key TEXT,
     value JSONB,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    UNIQUE(user_id, key)
 );
 ALTER TABLE user_settings ENABLE ROW LEVEL SECURITY;
 

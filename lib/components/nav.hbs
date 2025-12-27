@@ -383,7 +383,7 @@ if (response.ok) {
 
       {{{icon 'coins' class='w-5 h-5 text-primary' size='16'}}}
 
-        <span id="nav-credit-balance" class="text-sm">{{user.profile.credit_balance}} {{t 'nav.credits' lng=lng}}</span>
+         <span id="nav-credit-balance" class="text-sm">{{cond user.profile.credit_balance user.profile.credit_balance 0}} {{t 'nav.credits' lng=lng}}</span>
     </div>
 
     <!-- Theme Toggle Button -->
@@ -544,7 +544,8 @@ if (response.ok) {
        <button onclick="toggleUserMenu()"
          class="flex items-center gap-3 h-10 px-3 rounded-md transition-all duration-200 hover:text-primary cursor-pointer border-0"
          id="admin-user-menu-button">
-         <img src="{{cond user.profile.avatar_url user.profile.avatar_url '/images/avatar.png'}}" class="h-6 w-6 rounded-full object-cover shrink-0 user-avatar" alt="User Avatar">
+          <img src="{{cond user.profile.avatar_url user.profile.avatar_url '/images/avatar.png'}}" class="h-6 w-6 rounded-full object-cover shrink-0 user-avatar" alt="User Avatar">
+          <span class="text-sm">{{cond user.profile.name user.profile.name 'User'}}</span>
 
 
       </button>
@@ -558,15 +559,15 @@ if (response.ok) {
             <!-- User profile section -->
             <a href="/profile/{{user.id}}"
      class="w-full mb-2 relative flex cursor-default select-none items-center gap-3 rounded-sm px-3 py-3 text-sm text-left outline-none transition-colors bg-primary-50 hover:bg-primary-100 hover:text-primary-900">
-     <img src="{{cond user.profile.avatar_url user.profile.avatar_url '/images/avatar.png'}}" class="h-8 w-8 rounded-full object-cover shrink-0" alt="User Avatar">
-     <div class="flex-1 min-w-0">
-         <div class="flex items-center justify-between mb-1">
-              <span class="truncate user-name text-foreground">{{user.profile.name}}</span>
-         </div>
-         <div class="truncate text-xs text-muted-foreground user-email mb-1">{{user.email}}</div>
-         <div class="text-xs text-muted-foreground">
-              <span class="nav-current-plan-name">{{#if user.profile.packageName}}{{user.profile.packageName}} {{t 'nav.plan' lng=lng}}{{else}}{{capitalize user.profile.package_type}} {{t 'nav.plan' lng=lng}}{{/if}}</span>
-         </div>
+      <img src="{{cond user.profile.avatar_url user.profile.avatar_url '/images/avatar.png'}}" class="h-8 w-8 rounded-full object-cover shrink-0" alt="User Avatar">
+      <div class="flex-1 min-w-0">
+          <div class="flex items-center justify-between mb-1">
+               <span class="truncate user-name text-foreground">{{cond user.profile.name user.profile.name 'User'}}</span>
+          </div>
+          <div class="truncate text-xs text-muted-foreground user-email mb-1">{{user.email}}</div>
+          <div class="text-xs text-muted-foreground">
+               <span class="nav-current-plan-name">{{#if user.profile.packageName}}{{user.profile.packageName}} {{t 'nav.plan' lng=lng}}{{else}}{{cond user.profile.package_type (capitalize user.profile.package_type) 'Free'}} {{t 'nav.plan' lng=lng}}{{/if}}</span>
+          </div>
      </div>
  </a>
 

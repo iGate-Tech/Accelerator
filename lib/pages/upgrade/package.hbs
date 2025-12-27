@@ -1,0 +1,81 @@
+<main id="upgrade-package-main-content" class="flex-1 overflow-auto bg-background">
+  <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
+    <div class="flex flex-col gap-6 mt-6">
+
+      <!-- Header -->
+      <div class="text-center mb-8">
+        <h1 class="text-3xl font-bold text-foreground">{{t 'upgrade.title' lng=lng}}</h1>
+        <p class="text-muted-foreground mt-2">{{t 'upgrade.subtitle' lng=lng}}</p>
+      </div>
+
+      <!-- Current Package Info -->
+      <div class="bg-card rounded-lg border border-border p-6">
+        <h2 class="text-xl font-semibold mb-4">{{t 'upgrade.current_plan' lng=lng}}</h2>
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="font-medium">{{cond user.profile.packageName user.profile.packageName (cond user.profile.package_type (capitalize user.profile.package_type) 'Free')}}</p>
+            <p class="text-sm text-muted-foreground">{{t 'upgrade.plan_description' lng=lng}}</p>
+          </div>
+          <span class="px-3 py-1 bg-primary/10 text-primary rounded-full text-sm">
+            {{t 'upgrade.active' lng=lng}}
+          </span>
+        </div>
+      </div>
+
+      <!-- Upgrade Options -->
+      <div class="bg-card rounded-lg border border-border p-6">
+        <h2 class="text-xl font-semibold mb-4">{{t 'upgrade.available_plans' lng=lng}}</h2>
+        <div class="grid gap-4 md:grid-cols-2">
+          <!-- Student Plan -->
+          <div class="border border-border rounded-lg p-4 hover:border-primary/50 transition-colors">
+            <div class="flex items-center justify-between mb-2">
+              <h3 class="font-medium">{{t 'upgrade.student_plan' lng=lng}}</h3>
+              <span class="text-sm text-muted-foreground">$9/month</span>
+            </div>
+            <p class="text-sm text-muted-foreground mb-4">{{t 'upgrade.student_description' lng=lng}}</p>
+            <button class="w-full btn btn-outline">{{t 'upgrade.upgrade_now' lng=lng}}</button>
+          </div>
+
+          <!-- Enterprise Plan -->
+          <div class="border border-primary rounded-lg p-4 bg-primary/5">
+            <div class="flex items-center justify-between mb-2">
+              <h3 class="font-medium">{{t 'upgrade.enterprise_plan' lng=lng}}</h3>
+              <span class="text-sm text-primary">$29/month</span>
+            </div>
+            <p class="text-sm text-muted-foreground mb-4">{{t 'upgrade.enterprise_description' lng=lng}}</p>
+            <button class="w-full btn btn-primary">{{t 'upgrade.upgrade_now' lng=lng}}</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Features Comparison -->
+      <div class="bg-card rounded-lg border border-border p-6">
+        <h2 class="text-xl font-semibold mb-4">{{t 'upgrade.features' lng=lng}}</h2>
+        <div class="space-y-3">
+          <div class="flex items-center justify-between py-2">
+            <span>{{t 'upgrade.feature_ideas' lng=lng}}</span>
+            <div class="flex gap-2">
+              <span class="text-muted-foreground">10</span>
+              <span class="text-primary font-medium">Unlimited</span>
+            </div>
+          </div>
+          <div class="flex items-center justify-between py-2">
+            <span>{{t 'upgrade.feature_credits' lng=lng}}</span>
+            <div class="flex gap-2">
+              <span class="text-muted-foreground">1000</span>
+              <span class="text-primary font-medium">5000</span>
+            </div>
+          </div>
+          <div class="flex items-center justify-between py-2">
+            <span>{{t 'upgrade.feature_support' lng=lng}}</span>
+            <div class="flex gap-2">
+              <span class="text-muted-foreground">{{t 'upgrade.basic' lng=lng}}</span>
+              <span class="text-primary font-medium">{{t 'upgrade.priority' lng=lng}}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</main>

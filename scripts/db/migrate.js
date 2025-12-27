@@ -32,8 +32,14 @@ const migrationFiles = [
   "db/schema/02_tables.sql",
   "db/schema/03_indexes.sql",
   "db/security/rls_policies.sql",
+  "db/business/core_functions.sql",
+  "db/business/user_management.sql",
+  "db/business/credit_system.sql",
+  "db/business/idea_management.sql",
+  "db/business/voting_rewards.sql",
+  "db/business/model_management.sql",
+  "db/business/portfolio_management.sql",
   "db/business/triggers.sql",
-  "db/business/functions.sql",
   "db/views/aggregations.sql",
 ];
 
@@ -44,7 +50,7 @@ try {
     console.log(`🔧 Applying ${file}...`);
     execSync(`psql "${SUPABASE_DB_URL}" -f ${file}`, {
       stdio: "pipe", // Suppress output for cleaner logs
-      cwd: join(__dirname, ".."),
+      cwd: join(__dirname, "../.."),
     });
   });
 

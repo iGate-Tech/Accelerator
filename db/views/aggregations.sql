@@ -164,7 +164,7 @@ SELECT
   -- Extract individual preference fields for easy access
   COALESCE(p.preferences->>'language', 'en') as language,
   COALESCE(p.preferences->>'theme', 'light') as theme,
-  COALESCE((p.preferences->'notifications')::jsonb, json_build_object('push', true)) as notifications,
+   COALESCE((p.preferences->'notifications')::jsonb, json_build_object('push', true)::jsonb) as notifications,
   -- User settings as aggregated JSON
   COALESCE(us.settings, '{}'::jsonb) as user_settings
 FROM profiles p

@@ -33,7 +33,7 @@ try {
     console.log(`📄 Applying ${file}...`);
     execSync(`psql "${SUPABASE_DB_URL}" -f ${file}`, {
       stdio: "inherit",
-      cwd: join(__dirname, ".."),
+      cwd: join(__dirname, "../.."),
     });
   });
 

@@ -1,0 +1,20 @@
+{{!-- Credit Summary Component --}}
+<div class="rounded-lg bg-card p-6 text-card-foreground shadow-sm border border-border">
+  <div class="flex items-center justify-between mb-4">
+    <h3 class="text-lg font-semibold">{{../t 'dashboard-dashboard.credits' lng=../lng}}</h3>
+  </div>
+  <div class="space-y-4">
+    <div class="flex items-center justify-between">
+      <span class="text-sm text-muted-foreground">{{../t 'dashboard-dashboard.current_balance' lng=../lng}}</span>
+      <span class="font-semibold">{{currentBalance}}</span>
+    </div>
+    <div class="flex items-center justify-between">
+      <span class="text-sm text-muted-foreground">{{../t 'dashboard-dashboard.earned_this_month' lng=../lng}}</span>
+      <span class="text-success font-semibold">+{{earned30d}}</span>
+    </div>
+    <div class="flex items-center justify-between">
+      <span class="text-sm text-muted-foreground">{{../t 'dashboard-dashboard.spent_this_month' lng=../lng}}</span>
+      <span class="text-destructive font-semibold">-{{spent30d}}</span>
+    </div>
+  </div>
+</div>

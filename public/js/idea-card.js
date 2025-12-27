@@ -1,4 +1,4 @@
-/* eslint-disable no-unused-vars, no-undef */
+/* eslint-disable no-unused-vars */
 /* global showToast, navigator, location */
 
 // idea-card.js - Handle interactions for idea cards

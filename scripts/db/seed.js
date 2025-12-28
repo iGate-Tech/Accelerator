@@ -24,7 +24,7 @@ if (!SUPABASE_DB_URL) {
 }
 
 // Seed files in application order
-const seedFiles = ["db/data/seeds.sql", "db/data/seeds_ideas.sql"];
+const seedFiles = ["db/data/seeds.sql"];
 
 console.log("🌱 Starting database seeding...");
 

@@ -1,24 +1,13 @@
 {
-  "name": "accelerator",
+  "name": "accelerator-db",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "Database setup and management for Accelerator",
+  "type": "module",
+  "engines": {
+    "node": ">=22.12.0"
+  },
   "scripts": {
-    "start": "node index.js",
-    "dev": "concurrently \"npm run watch:css\" \"nodemon index.js\" \"bdui start --open\"",
-    "dev:server": "nodemon index.js",
-    "dev:ui": "bdui start --open",
-    "build": "npm run build-css && npm run type-check",
-    "build:css": "npx @tailwindcss/cli -i public/css/input.css -o public/css/output.css",
-    "watch:css": "npm run build:css -- --watch",
-    "lint": "eslint .",
-    "lint:fix": "eslint . --fix",
-    "format": "prettier --write .",
-    "format:check": "prettier --check .",
-    "type-check": "tsc --noEmit",
     "test": "vitest",
-    "test:watch": "vitest --watch",
-    "test:coverage": "vitest --coverage",
     "db:install": "npm run db:reset && npm run db:setup && npm run db:seed",
     "db:reset": "node scripts/db/reset.js",
     "db:setup": "node scripts/db/setup.js",
@@ -27,67 +16,16 @@
     "db:migrate": "node scripts/db/migrate.js",
     "db:dev:setup": "NODE_ENV=development npm run db:install",
     "db:test:setup": "NODE_ENV=test npm run db:install",
-    "db:prod:backup": "NODE_ENV=production npm run db:backup",
-    "deploy:staging": "npm run build && git push origin staging:main",
-    "deploy:production": "npm run build && npm run db:prod:backup && git push origin main"
+    "db:prod:backup": "NODE_ENV=production npm run db:backup"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/AR-92/accelerator.git"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "type": "module",
-  "engines": {
-    "node": ">=22.12.0"
-  },
-  "bugs": {
-    "url": "https://github.com/AR-92/accelerator/issues"
-  },
-  "homepage": "https://github.com/AR-92/accelerator#readme",
   "dependencies": {
     "@supabase/supabase-js": "^2.84.0",
     "connect-pg-simple": "^10.0.0",
-    "dompurify": "^3.3.1",
     "dotenv": "^17.2.3",
-    "express": "^4.19.2",
-    "express-fileupload": "^1.5.0",
-    "express-handlebars": "^8.0.4",
-    "express-session": "^1.18.2",
-    "i18next": "^25.7.3",
-    "i18next-http-middleware": "^3.9.1",
-    "jsdom": "^27.3.0",
-    "jsonwebtoken": "^9.0.3",
-    "lucide-static": "^0.556.0",
-    "marked": "^17.0.1",
-    "moment": "^2.30.1",
-    "node-cache": "^5.1.2",
-    "node-fetch": "^3.3.2",
-    "pg": "^8.16.3",
-    "puppeteer": "^24.34.0",
-    "slugify": "^1.6.6",
-    "winston": "^3.19.0"
+    "pg": "^8.16.3"
   },
   "devDependencies": {
-    "@html-eslint/eslint-plugin": "^0.52.0",
-    "@html-eslint/parser": "^0.52.0",
-    "@tailwindcss/postcss": "^4.1.17",
-    "@vitest/coverage-v8": "^4.0.16",
-    "@vitest/ui": "^4.0.16",
-    "autoprefixer": "^10.4.22",
-    "concurrently": "^9.2.1",
-    "eslint": "^9.39.2",
-    "eslint-config-prettier": "^10.1.8",
-    "eslint-plugin-security": "^3.0.1",
-    "handlebars": "^4.7.8",
-    "nodemon": "^3.1.11",
-    "postcss": "^8.5.6",
-    "postcss-cli": "^11.0.1",
-    "prettier": "^3.6.2",
-    "supertest": "^7.1.4",
-    "tailwindcss": "^4.1.17",
-    "tailwindcss-rtl": "^0.9.0",
+    "supabase": "^2.70.5",
     "vitest": "^4.0.16"
   }
 }

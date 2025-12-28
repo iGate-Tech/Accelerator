@@ -2,16 +2,16 @@
 -- This script sets up the entire database in the correct order
 
 -- Step 1: Extensions
-\i db/setup/extensions.sql
+\i db/setup/extensions/extensions.sql
 
 -- Step 2: Tables
-\i db/setup/tables.sql
+\i db/setup/tables/tables.sql
 
 -- Step 3: Indexes
-\i db/setup/indexes.sql
+\i db/setup/indexes/indexes.sql
 
 -- Step 4: Security Policies
-\i db/setup/policies.sql
+\i db/setup/policies/policies.sql
 
 -- Step 5: Functions (in dependency order)
 \i db/setup/functions/functions-core.sql
@@ -23,7 +23,7 @@
 \i db/setup/functions/functions-portfolio.sql
 
 -- Step 6: Triggers
-\i db/setup/triggers.sql
+\i db/setup/triggers/triggers.sql
 
 -- Step 7: Views
-\i db/setup/views.sql
+\i db/setup/views/views.sql

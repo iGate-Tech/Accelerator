@@ -23,16 +23,8 @@ if (!SUPABASE_DB_URL) {
   process.exit(1);
 }
 
-// Cleanup and seed files in order
-const cleanupFile = "db/data/cleanup-seeds.sql";
+// Seed files in application order
 const seedFiles = ["db/data/seeds.sql", "db/data/seeds_ideas.sql"];
-
-console.log("🧹 Cleaning up existing seed data...");
-console.log(`📄 Applying ${cleanupFile}...`);
-execSync(`psql "${SUPABASE_DB_URL}" -f ${cleanupFile}`, {
-  stdio: "inherit",
-  cwd: join(__dirname, "../.."),
-});
 
 console.log("🌱 Starting database seeding...");
 

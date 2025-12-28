@@ -1,6 +1,11 @@
 -- Sample data for Accelerator database
 -- Run after schema setup
 
+-- Cleanup existing test data first
+DELETE FROM auth.users WHERE id::text LIKE '550e8400-e29b-41d4-a716-44665544%';
+TRUNCATE TABLE credit_packages CASCADE;
+TRUNCATE TABLE packages CASCADE;
+
 -- Test auth users (for development only - these are not real Supabase auth users)
 -- WARNING: Direct auth.users inserts create database records but not authenticated users
 INSERT INTO auth.users (id, email, email_confirmed_at, created_at, updated_at, raw_user_meta_data) VALUES

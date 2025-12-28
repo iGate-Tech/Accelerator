@@ -14,13 +14,13 @@
 \i db/setup/policies.sql
 
 -- Step 5: Functions (in dependency order)
-\i db/setup/functions-core.sql
-\i db/setup/functions-user.sql
-\i db/setup/functions-credit.sql
-\i db/setup/functions-idea.sql
-\i db/setup/functions-voting.sql
-\i db/setup/functions-model.sql
-\i db/setup/functions-portfolio.sql
+\i db/setup/functions/functions-core.sql
+\i db/setup/functions/functions-user.sql
+\i db/setup/functions/functions-credit.sql
+\i db/setup/functions/functions-idea.sql
+\i db/setup/functions/functions-voting.sql
+\i db/setup/functions/functions-model.sql
+\i db/setup/functions/functions-portfolio.sql
 
 -- Step 6: Triggers
 \i db/setup/triggers.sql

@@ -1,12 +1,20 @@
 -- Full Database Reset Script
--- This script completely resets the database by dropping and recreating the public schema
--- WARNING: This will delete all data and schema objects in the database
+-- This script completely resets the database in ordered steps
 
--- Delete all users from auth schema
-DELETE FROM auth.users;
+-- Step 1: Reset users
+\i db/maintenance/reset-users.sql
 
--- Drop the public schema and all its contents
-DROP SCHEMA IF EXISTS public CASCADE;
+-- Step 2: Reset views (drop first to avoid dependencies)
+\i db/maintenance/reset-views.sql
+
+-- Step 3: Reset functions
+\i db/maintenance/reset-functions.sql
+
+-- Step 4: Reset triggers
+\i db/maintenance/reset-triggers.sql
+
+-- Step 5: Reset tables
+\i db/maintenance/reset-tables.sql
 
 -- Recreate the public schema
 CREATE SCHEMA public;

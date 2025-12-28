@@ -15,9 +15,12 @@ if (!SUPABASE_DB_URL) {
 console.log("💰 Setting up credit system functions...");
 
 try {
-  execSync(`psql "${SUPABASE_DB_URL}" -f db/setup/functions-credit.sql`, {
-    stdio: "inherit",
-  });
+  execSync(
+    `psql "${SUPABASE_DB_URL}" -f db/setup/functions/functions-credit.sql`,
+    {
+      stdio: "inherit",
+    },
+  );
   console.log("✅ Credit functions setup complete!");
 } catch (error) {
   console.error("❌ Credit functions setup failed:", error.message);

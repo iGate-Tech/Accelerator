@@ -15,7 +15,7 @@ if (!SUPABASE_DB_URL) {
 console.log("🔧 Setting up extensions...");
 
 try {
-  execSync(`psql "${SUPABASE_DB_URL}" -f db/setup/extensions.sql`, {
+  execSync(`psql "${SUPABASE_DB_URL}" -f db/setup/extensions/extensions.sql`, {
     stdio: "inherit",
   });
   console.log("✅ Extensions setup complete!");

@@ -15,9 +15,12 @@ if (!SUPABASE_DB_URL) {
 console.log("💡 Setting up idea management functions...");
 
 try {
-  execSync(`psql "${SUPABASE_DB_URL}" -f db/setup/functions-idea.sql`, {
-    stdio: "inherit",
-  });
+  execSync(
+    `psql "${SUPABASE_DB_URL}" -f db/setup/functions/functions-idea.sql`,
+    {
+      stdio: "inherit",
+    },
+  );
   console.log("✅ Idea functions setup complete!");
 } catch (error) {
   console.error("❌ Idea functions setup failed:", error.message);

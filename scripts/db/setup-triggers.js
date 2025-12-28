@@ -15,7 +15,7 @@ if (!SUPABASE_DB_URL) {
 console.log("⚡ Setting up triggers...");
 
 try {
-  execSync(`psql "${SUPABASE_DB_URL}" -f db/setup/triggers.sql`, {
+  execSync(`psql "${SUPABASE_DB_URL}" -f db/setup/triggers/triggers.sql`, {
     stdio: "inherit",
   });
   console.log("✅ Triggers setup complete!");

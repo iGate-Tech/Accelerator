@@ -15,7 +15,7 @@ if (!SUPABASE_DB_URL) {
 console.log("🔒 Setting up security policies...");
 
 try {
-  execSync(`psql "${SUPABASE_DB_URL}" -f db/setup/policies.sql`, {
+  execSync(`psql "${SUPABASE_DB_URL}" -f db/setup/policies/policies.sql`, {
     stdio: "inherit",
   });
   console.log("✅ Security policies setup complete!");

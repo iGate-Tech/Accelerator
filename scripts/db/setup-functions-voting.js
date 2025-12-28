@@ -15,9 +15,12 @@ if (!SUPABASE_DB_URL) {
 console.log("🗳️  Setting up voting and rewards functions...");
 
 try {
-  execSync(`psql "${SUPABASE_DB_URL}" -f db/setup/functions-voting.sql`, {
-    stdio: "inherit",
-  });
+  execSync(
+    `psql "${SUPABASE_DB_URL}" -f db/setup/functions/functions-voting.sql`,
+    {
+      stdio: "inherit",
+    },
+  );
   console.log("✅ Voting functions setup complete!");
 } catch (error) {
   console.error("❌ Voting functions setup failed:", error.message);

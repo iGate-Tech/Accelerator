@@ -15,7 +15,7 @@ if (!SUPABASE_DB_URL) {
 console.log("👁️  Setting up views...");
 
 try {
-  execSync(`psql "${SUPABASE_DB_URL}" -f db/setup/views.sql`, {
+  execSync(`psql "${SUPABASE_DB_URL}" -f db/setup/views/views.sql`, {
     stdio: "inherit",
   });
   console.log("✅ Views setup complete!");

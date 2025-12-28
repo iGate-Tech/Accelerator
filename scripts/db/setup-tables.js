@@ -15,7 +15,7 @@ if (!SUPABASE_DB_URL) {
 console.log("📋 Setting up tables...");
 
 try {
-  execSync(`psql "${SUPABASE_DB_URL}" -f db/setup/tables.sql`, {
+  execSync(`psql "${SUPABASE_DB_URL}" -f db/setup/tables/tables.sql`, {
     stdio: "inherit",
   });
   console.log("✅ Tables setup complete!");

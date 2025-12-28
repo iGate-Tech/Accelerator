@@ -15,9 +15,12 @@ if (!SUPABASE_DB_URL) {
 console.log("📁 Setting up portfolio management functions...");
 
 try {
-  execSync(`psql "${SUPABASE_DB_URL}" -f db/setup/functions-portfolio.sql`, {
-    stdio: "inherit",
-  });
+  execSync(
+    `psql "${SUPABASE_DB_URL}" -f db/setup/functions/functions-portfolio.sql`,
+    {
+      stdio: "inherit",
+    },
+  );
   console.log("✅ Portfolio functions setup complete!");
 } catch (error) {
   console.error("❌ Portfolio functions setup failed:", error.message);

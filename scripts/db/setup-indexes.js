@@ -15,7 +15,7 @@ if (!SUPABASE_DB_URL) {
 console.log("⚡ Setting up indexes...");
 
 try {
-  execSync(`psql "${SUPABASE_DB_URL}" -f db/setup/indexes.sql`, {
+  execSync(`psql "${SUPABASE_DB_URL}" -f db/setup/indexes/indexes.sql`, {
     stdio: "inherit",
   });
   console.log("✅ Indexes setup complete!");

@@ -15,9 +15,12 @@ if (!SUPABASE_DB_URL) {
 console.log("📊 Setting up model management functions...");
 
 try {
-  execSync(`psql "${SUPABASE_DB_URL}" -f db/setup/functions-model.sql`, {
-    stdio: "inherit",
-  });
+  execSync(
+    `psql "${SUPABASE_DB_URL}" -f db/setup/functions/functions-model.sql`,
+    {
+      stdio: "inherit",
+    },
+  );
   console.log("✅ Model functions setup complete!");
 } catch (error) {
   console.error("❌ Model functions setup failed:", error.message);

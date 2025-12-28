@@ -15,9 +15,12 @@ if (!SUPABASE_DB_URL) {
 console.log("⚙️  Setting up core functions...");
 
 try {
-  execSync(`psql "${SUPABASE_DB_URL}" -f db/setup/functions-core.sql`, {
-    stdio: "inherit",
-  });
+  execSync(
+    `psql "${SUPABASE_DB_URL}" -f db/setup/functions/functions-core.sql`,
+    {
+      stdio: "inherit",
+    },
+  );
   console.log("✅ Core functions setup complete!");
 } catch (error) {
   console.error("❌ Core functions setup failed:", error.message);

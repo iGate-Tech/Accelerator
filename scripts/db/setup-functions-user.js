@@ -15,9 +15,12 @@ if (!SUPABASE_DB_URL) {
 console.log("👤 Setting up user management functions...");
 
 try {
-  execSync(`psql "${SUPABASE_DB_URL}" -f db/setup/functions-user.sql`, {
-    stdio: "inherit",
-  });
+  execSync(
+    `psql "${SUPABASE_DB_URL}" -f db/setup/functions/functions-user.sql`,
+    {
+      stdio: "inherit",
+    },
+  );
   console.log("✅ User functions setup complete!");
 } catch (error) {
   console.error("❌ User functions setup failed:", error.message);

@@ -1,0 +1,176 @@
+START: Running setup-extensions script
+SUCCESS: Setup-extensions script completed
+START: Running setup-extensions script
+SUCCESS: Setup-extensions script completed
+INFO: Connecting to database
+SUCCESS: Database connection established
+START: Running setup-extensions script
+SUCCESS: Setup-extensions script completed
+INFO: Closing database connection
+SUCCESS: Database connection closed
+INFO: Connecting to database
+SUCCESS: Database connection established
+START: Running setup-extensions script
+SUCCESS: Setup-extensions script completed
+INFO: Verifying extensions installed
+INFO: Query returned 1 rows
+SUCCESS: Extensions verification passed
+INFO: Closing database connection
+SUCCESS: Database connection closed
+INFO: Connecting to database
+INFO: Connecting to database
+SUCCESS: Database connection established
+START: Running setup-extensions script
+SUCCESS: Database connection established
+START: Running setup-extensions script
+SUCCESS: Setup-extensions script completed
+INFO: Verifying extensions installed
+INFO: Query returned 1 rows
+SUCCESS: Extensions verification passed
+INFO: Closing database connection
+SUCCESS: Database connection closed
+SUCCESS: Setup-extensions script completed
+INFO: Verifying extensions installed
+INFO: Query returned 1 rows
+SUCCESS: Extensions verification passed
+INFO: Closing database connection
+SUCCESS: Database connection closed
+INFO: Connecting to database
+SUCCESS: Database connection established
+START: Running setup-extensions script
+SUCCESS: Setup-extensions script completed
+INFO: Verifying extensions installed
+INFO: Query returned 1 rows
+SUCCESS: Extensions verification passed
+INFO: Closing database connection
+SUCCESS: Database connection closed
+INFO: Connecting to database
+SUCCESS: Database connection established
+START: Running setup-extensions script
+SUCCESS: Setup-extensions script completed
+INFO: Verifying extensions installed
+INFO: Query returned 1 rows
+SUCCESS: Extensions verification passed
+START: Running setup-tables script
+SUCCESS: Setup-tables script completed
+INFO: Verifying tables created
+INFO: Query returned 21 tables
+SUCCESS: Tables verification passed
+START: Running setup-indexes script
+SUCCESS: Setup-indexes script completed
+INFO: Verifying indexes created
+INFO: Query returned 28 indexes
+SUCCESS: Indexes verification passed
+START: Running setup-policies script
+SUCCESS: Setup-policies script completed
+INFO: Verifying policies created
+START: Running setup-functions-core script
+SUCCESS: Setup-functions-core script completed
+INFO: Verifying functions created
+INFO: Query returned 53 functions
+SUCCESS: Functions verification passed
+START: Running setup-triggers script
+SUCCESS: Setup-triggers script completed
+INFO: Verifying triggers created
+INFO: Query returned 27 triggers
+SUCCESS: Triggers verification passed
+START: Running setup-views script
+SUCCESS: Setup-views script completed
+INFO: Verifying views created
+INFO: Query returned 0 views
+SUCCESS: Views verification completed
+START: Running reset-tables script
+SUCCESS: Reset-tables script completed
+INFO: Verifying tables removed
+INFO: Query returned 0 tables
+SUCCESS: Tables reset verification passed
+INFO: Closing database connection
+SUCCESS: Database connection closed
+INFO: Connecting to database
+SUCCESS: Database connection established
+START: Running setup-extensions script
+SUCCESS: Setup-extensions script completed
+INFO: Verifying extensions installed
+INFO: Query returned 1 rows
+SUCCESS: Extensions verification passed
+START: Running setup-tables script
+SUCCESS: Setup-tables script completed
+INFO: Verifying tables created
+INFO: Query returned 21 tables
+SUCCESS: Tables verification passed
+START: Running setup-indexes script
+SUCCESS: Setup-indexes script completed
+INFO: Verifying indexes created
+INFO: Query returned 28 indexes
+SUCCESS: Indexes verification passed
+START: Running setup-policies script
+SUCCESS: Setup-policies script completed
+INFO: Verifying policies created
+INFO: Query returned 86 policies
+SUCCESS: Policies verification passed
+START: Running setup-functions-core script
+SUCCESS: Setup-functions-core script completed
+INFO: Verifying functions created
+INFO: Query returned 53 functions
+SUCCESS: Functions verification passed
+START: Running setup-triggers script
+SUCCESS: Setup-triggers script completed
+INFO: Verifying triggers created
+INFO: Query returned 27 triggers
+SUCCESS: Triggers verification passed
+START: Running setup-views script
+SUCCESS: Setup-views script completed
+INFO: Verifying views created
+INFO: Query returned 0 views
+SUCCESS: Views verification completed
+START: Running reset-tables script
+SUCCESS: Reset-tables script completed
+INFO: Verifying tables removed
+INFO: Query returned 0 tables
+SUCCESS: Tables reset verification passed
+INFO: Closing database connection
+SUCCESS: Database connection closed
+INFO: Connecting to database
+SUCCESS: Database connection established
+START: Running setup-extensions script
+SUCCESS: Setup-extensions script completed
+INFO: Verifying extensions installed
+INFO: Query returned 1 rows
+SUCCESS: Extensions verification passed
+START: Running setup-tables script
+SUCCESS: Setup-tables script completed
+INFO: Verifying tables created
+INFO: Query returned 21 tables
+SUCCESS: Tables verification passed
+START: Running setup-indexes script
+SUCCESS: Setup-indexes script completed
+INFO: Verifying indexes created
+INFO: Query returned 28 indexes
+SUCCESS: Indexes verification passed
+START: Running setup-policies script
+SUCCESS: Setup-policies script completed
+INFO: Verifying policies created
+INFO: Query returned 86 policies
+SUCCESS: Policies verification passed
+START: Running setup-functions-core script
+SUCCESS: Setup-functions-core script completed
+INFO: Verifying functions created
+INFO: Query returned 53 functions
+SUCCESS: Functions verification passed
+START: Running setup-triggers script
+SUCCESS: Setup-triggers script completed
+INFO: Verifying triggers created
+INFO: Query returned 27 triggers
+SUCCESS: Triggers verification passed
+START: Running setup-views script
+SUCCESS: Setup-views script completed
+INFO: Verifying views created
+INFO: Query returned 40 views
+SUCCESS: Views verification completed
+START: Running reset-tables script
+SUCCESS: Reset-tables script completed
+INFO: Verifying tables removed
+INFO: Query returned 0 tables
+SUCCESS: Tables reset verification passed
+INFO: Closing database connection
+SUCCESS: Database connection closed

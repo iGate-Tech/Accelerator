@@ -1,0 +1,32 @@
+-- Storage Buckets Configuration
+-- Purpose: Configures Supabase Storage buckets for file uploads
+-- Sets up the avatars bucket for user profile pictures
+--
+-- Bucket Configuration:
+-- - ID: avatars (unique identifier)
+-- - Name: avatars (human-readable name)
+-- - Public: true (files are publicly accessible)
+-- - File Size Limit: 5,242,880 bytes (5MB)
+-- - Allowed MIME Types: JPEG, PNG, WebP, GIF images
+--
+-- Security Considerations:
+-- - Public access allows direct image URLs without authentication
+-- - File size limit prevents abuse and storage bloat
+-- - MIME type restrictions prevent malicious file uploads
+-- - Images are user-generated content (avatars)
+--
+-- Usage in Application:
+-- - User profile picture uploads
+-- - Avatar display in UI components
+-- - Profile editing functionality
+--
+-- Example Usage:
+-- - Frontend uploads to: /storage/v1/object/public/avatars/
+-- - Public URL format: https://[project].supabase.co/storage/v1/object/public/avatars/[filename]
+--
+-- Business Context:
+-- - Essential for user personalization features
+-- - Supports social aspects of the platform
+-- - Part of user onboarding and profile management
+INSERT INTO storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
+VALUES ('avatars', 'avatars', true, 5242880, ARRAY['image/jpeg', 'image/png', 'image/webp', 'image/gif']);

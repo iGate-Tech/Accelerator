@@ -1,0 +1,28 @@
+-- Portfolio Members User ID Index
+-- Purpose: Optimizes queries that filter portfolio members by user ID
+-- Improves performance for user-specific portfolio access queries
+--
+-- Index Details:
+-- - Table: portfolio_members
+-- - Column: user_id
+-- - Type: B-tree (default, good for equality and range queries)
+--
+-- Query Patterns This Index Supports:
+-- - Finding all portfolios a user is member of
+-- - Checking if a user is member of a specific portfolio
+-- - User-specific portfolio member listings
+--
+-- Example Queries That Benefit:
+-- SELECT * FROM portfolio_members WHERE user_id = 'user-123';
+-- SELECT COUNT(*) FROM portfolio_members WHERE user_id = 'user-456';
+--
+-- Performance Impact:
+-- - Faster user portfolio access in team collaboration features
+-- - Improved query performance for portfolio member validation
+-- - Better performance for user-specific portfolio filtering
+--
+-- Business Context:
+-- - Used in enterprise portfolio sharing features
+-- - Critical for user experience in team collaboration workflows
+-- - Supports role-based access control queries
+CREATE INDEX idx_portfolio_members_user_id ON portfolio_members(user_id);

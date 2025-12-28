@@ -6,11 +6,10 @@ export default defineConfig({
     environment: "node",
     setupFiles: ["./test/setup/global.js"],
     testTimeout: 30000,
+    hookTimeout: 60000, // Increase for DB operations
     pool: "threads",
-    poolOptions: {
-      threads: {
-        singleThread: true, // Database tests need sequential execution
-      },
+    threads: {
+      singleThread: true, // Database tests need sequential execution
     },
     coverage: {
       reporter: ["text", "json", "html"],

@@ -1,0 +1,33 @@
+-- UUID-OSSP Extension
+-- Purpose: Provides universally unique identifier (UUID) functions for PostgreSQL
+-- Enables generation of UUIDs using various algorithms
+--
+-- What it provides:
+-- - uuid_generate_v1(): Generates UUID based on MAC address and timestamp
+-- - uuid_generate_v1mc(): Generates UUID with random multicast MAC address
+-- - uuid_generate_v3(namespace, name): Generates UUID based on MD5 hash of namespace and name
+-- - uuid_generate_v4(): Generates random UUID (most commonly used)
+-- - uuid_generate_v5(namespace, name): Generates UUID based on SHA-1 hash
+-- - uuid_nil(): Returns the nil UUID (all zeros)
+-- - uuid_ns_*(): Predefined namespace UUIDs for DNS, URL, OID, X.500
+--
+-- Why needed:
+-- - Primary keys: UUIDs provide globally unique identifiers without coordination
+-- - Security: Harder to guess sequential IDs, reducing enumeration attacks
+-- - Scalability: No collision risk across distributed systems
+-- - Data integrity: Unique identifiers across all tables and databases
+--
+-- Usage in this project:
+-- - All primary keys use uuid_generate_v4() for uniqueness
+-- - User IDs, idea IDs, transaction IDs all leverage UUID generation
+-- - Foreign key relationships depend on UUID uniqueness
+--
+-- Installation notes:
+-- - Must be installed by database superuser
+-- - Available in PostgreSQL contrib package
+-- - Safe to run multiple times (IF NOT EXISTS clause)
+--
+-- Example usage:
+-- SELECT uuid_generate_v4(); -- Returns something like: a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11
+-- INSERT INTO profiles (id, user_id) VALUES (uuid_generate_v4(), 'auth-user-123');
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";

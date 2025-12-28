@@ -1,5 +1,32 @@
--- Setup Views
--- Database views for aggregations
+-- Database Views Setup
+-- Creates optimized views for data aggregation and API responses
+-- Views provide pre-computed datasets for improved application performance
+--
+-- VIEW CATEGORIES:
+-- 1. PRODUCTION VIEWS: Optimized for application use (17 views)
+--    - User dashboards and profiles
+--    - Idea listings and statistics
+--    - Activity feeds and leaderboards
+--    - System health monitoring
+--
+-- 2. TESTING VIEWS: Validation and monitoring (22 views)
+--    - Data integrity checks
+--    - Trigger effect verification
+--    - Automation success monitoring
+--    - System health diagnostics
+--
+-- TOTAL VIEWS: 39 (17 production + 22 testing)
+--
+-- PERFORMANCE BENEFITS:
+-- - Pre-computed aggregations reduce query complexity
+-- - Materialized data access improves response times
+-- - Consistent data presentation across the application
+-- - Simplified API development with complex joins abstracted
+--
+-- MAINTENANCE NOTES:
+-- - Views automatically reflect underlying data changes
+-- - No data duplication (views are virtual tables)
+-- - Can be indexed for additional performance gains
 
--- Include views from views/aggregations.sql
+-- Include all views through the aggregations orchestrator
 \i db/views/aggregations.sql

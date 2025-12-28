@@ -36,6 +36,7 @@
     "db:setup:triggers": "node scripts/db/setup-triggers.js",
     "db:setup:views": "node scripts/db/setup-views.js",
     "db:seed": "node scripts/db/seed.js",
+    "db:generate-seed-users": "node scripts/db/generate-seed-users.js",
     "db:create-users": "node scripts/db/create-users.js",
     "db:backup": "node scripts/db/backup.js",
     "db:migrate": "node scripts/db/migrate.js",

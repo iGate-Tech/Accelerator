@@ -67,7 +67,7 @@ const authUsers = names.map((name, index) => {
   const id = `550e8400-e29b-41d4-a716-44665544${index.toString().padStart(3, "0")}`;
   const email = `${name.toLowerCase().replace(/[^a-zA-Z0-9]/g, ".")}@example.com`;
   const comma = index < names.length - 1 ? "," : "";
-  return `  ('${id}', '${email}', NOW(), NOW(), NOW(), '{"name": "${name}"}')${comma}`;
+  return `  ('${id}'::uuid, '${email}', NOW(), NOW(), NOW(), '{"name": "${name}"}')${comma}`;
 });
 
 console.log(authUsers.join("\n"));
@@ -75,14 +75,14 @@ console.log("ON CONFLICT (id) DO NOTHING;");
 console.log("");
 
 console.log(
-  "INSERT INTO profiles (user_id, name, credit_balance, package_type, created_at, updated_at) VALUES",
+  "INSERT INTO profiles (user_id, name, credit_balance, package_type, created_at) VALUES",
 );
 
 const profiles = names.map((name, index) => {
   const id = `550e8400-e29b-41d4-a716-44665544${index.toString().padStart(3, "0")}`;
   const credits = Math.floor(Math.random() * 1000) + 500; // 500-1500 credits
   const comma = index < names.length - 1 ? "," : "";
-  return `  ('${id}', '${name}', ${credits}, 'free', NOW(), NOW())${comma}`;
+  return `  ('${id}'::uuid, '${name}', ${credits}, 'free', NOW())${comma}`;
 });
 
 console.log(profiles.join("\n"));

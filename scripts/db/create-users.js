@@ -70,26 +70,46 @@ async function createUsers() {
       const email = `testuser${Date.now() + i}@example.com`; // Unique email like in the test
       const password = "TestPass123!";
 
-      try {
-        const { data, error } = await supabase.auth.signUp({
-          email,
-          password,
-          options: {
-            data: { name },
-          },
-        });
+      let retries = 3;
+      let success = false;
 
-        if (error) {
-          console.error(`Error signing up ${name}:`, error.message);
-        } else {
-          console.log(`Created user: ${name} (${email}) - ID: ${data.user.id}`);
+      while (retries > 0 && !success) {
+        try {
+          const { data, error } = await supabase.auth.signUp({
+            email,
+            password,
+            options: {
+              data: { name },
+            },
+          });
+
+          if (error) {
+            if (error.message.includes("Request rate limit reached")) {
+              console.log(`Rate limit hit for ${name}, waiting 10 seconds...`);
+              await new Promise((resolve) => setTimeout(resolve, 10000));
+              retries--;
+            } else {
+              console.error(`Error signing up ${name}:`, error.message);
+              retries = 0; // Don't retry for other errors
+            }
+          } else {
+            console.log(
+              `Created user: ${name} (${email}) - ID: ${data.user.id}`,
+            );
+            success = true;
+          }
+        } catch (error) {
+          console.error(`Error for ${name}:`, error.message);
+          retries = 0;
         }
-      } catch (error) {
-        console.error(`Error for ${name}:`, error.message);
       }
 
-      // Delay to avoid rate limiting (1 user every 2 seconds)
-      await new Promise((resolve) => setTimeout(resolve, 2000));
+      if (!success) {
+        console.error(`Failed to create user ${name} after retries`);
+      }
+
+      // Small delay between requests
+      await new Promise((resolve) => setTimeout(resolve, 100));
     }
 
     console.log("All 50 users created successfully!");

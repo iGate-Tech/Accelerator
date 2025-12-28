@@ -88,8 +88,8 @@ async function createUsers() {
         console.error(`Error for ${name}:`, error.message);
       }
 
-      // Small delay to avoid rate limiting
-      await new Promise((resolve) => setTimeout(resolve, 100));
+      // Delay to avoid rate limiting (1 user every 2 seconds)
+      await new Promise((resolve) => setTimeout(resolve, 2000));
     }
 
     console.log("All 50 users created successfully!");

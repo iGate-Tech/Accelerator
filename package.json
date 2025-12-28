@@ -8,6 +8,11 @@
   },
   "scripts": {
     "test": "vitest",
+    "test:unit": "vitest unit",
+    "test:integration": "vitest integration",
+    "test:e2e": "vitest e2e",
+    "test:coverage": "vitest --coverage",
+    "test:db": "vitest --run integration",
     "db:install": "npm run db:reset && npm run db:setup && npm run db:seed",
     "db:reset": "node scripts/db/reset.js",
     "db:setup": "node scripts/db/setup.js",
@@ -26,6 +31,7 @@
   },
   "devDependencies": {
     "supabase": "^2.70.5",
+    "uuid": "^13.0.0",
     "vitest": "^4.0.16"
   }
 }

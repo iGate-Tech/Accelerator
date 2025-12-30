@@ -1116,7 +1116,30 @@ app.post('/update-node/:id', (req, res) => {
 app.post('/paste-as-child', (req, res) => {
   const { parentId, copyId } = req.body;
   console.log('Pasting node', copyId, 'as child of', parentId);
-  const copy = copyNode(hierarchicalData, copyId, parentId);
+  let copy;
+  if (parentId === 'root') {
+    const node = getNodeByUniqueId(hierarchicalData, copyId);
+    if (!node) {
+      console.log('Node not found');
+      return res.status(400).json({ success: false });
+    }
+    copy = JSON.parse(JSON.stringify(node));
+    copy.id = Date.now().toString();
+    copy.uniqueId = Math.random().toString(36).substr(2, 9);
+    function updateIds(obj) {
+      if (obj.children && Array.isArray(obj.children)) {
+        obj.children.forEach(child => {
+          child.id = Date.now().toString() + Math.random().toString(36).substr(2, 9);
+          child.uniqueId = Math.random().toString(36).substr(2, 9);
+          updateIds(child);
+        });
+      }
+    }
+    updateIds(copy);
+    hierarchicalData.push(copy);
+  } else {
+    copy = copyNode(hierarchicalData, copyId, parentId);
+  }
   if (copy) {
     fs.writeFileSync('hierarchical-data.json', JSON.stringify(hierarchicalData, null, 2));
     console.log('Paste successful');

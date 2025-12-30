@@ -98,17 +98,49 @@
         }
 
         function updateHierarchyAfterPaste(parentUniqueId, newNode) {
-          const parentContainer = document.querySelector('[data-nodeid="' + parentUniqueId + '"]');
-          if (parentContainer) {
-            let ul = parentContainer.querySelector('ul:not(.dropdown)');
-            if (!ul) {
-              ul = document.createElement('ul');
-              parentContainer.appendChild(ul);
+          if (parentUniqueId === 'root') {
+            const rootUl = document.querySelector('.sidebar ul.menu.w-full');
+            if (rootUl) {
+              const newLiHTML = generateNodeHTML(newNode);
+              rootUl.insertAdjacentHTML('beforeend', newLiHTML);
+              lucide.createIcons();
             }
-            const newLiHTML = generateNodeHTML(newNode);
-            ul.insertAdjacentHTML('beforeend', newLiHTML);
-            lucide.createIcons();
+          } else {
+            const parentContainer = document.querySelector('[data-nodeid="' + parentUniqueId + '"]');
+            if (parentContainer) {
+              let ul = parentContainer.querySelector('ul:not(.dropdown)');
+              if (!ul) {
+                ul = document.createElement('ul');
+                parentContainer.appendChild(ul);
+              }
+              const newLiHTML = generateNodeHTML(newNode);
+              ul.insertAdjacentHTML('beforeend', newLiHTML);
+              lucide.createIcons();
+            }
           }
+        }
+
+        function pasteAsChildToRoot() {
+          if (!copiedId) {
+            alert('No node copied');
+            return;
+          }
+          console.log('Pasting to root from:', copiedId);
+          fetch('/paste-as-child', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ parentId: 'root', copyId: copiedId })
+          }).then(res => res.json()).then(data => {
+            console.log('Paste to root response:', data);
+            if (data.success && data.newNode) {
+              updateHierarchyAfterPaste('root', data.newNode);
+            } else {
+              alert('Paste failed');
+            }
+          }).catch(err => {
+            console.error('Paste error:', err);
+            alert('Paste error');
+          });
         }
 
         function pasteAsChild(el) {

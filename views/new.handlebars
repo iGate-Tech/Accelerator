@@ -207,18 +207,35 @@
 
 
 
-        function toggleSidebarItem(el) {
-          const icon = el.querySelector('i');
-          const nextUl = el.nextElementSibling;
-          el.querySelectorAll('span').forEach(s => s.classList.toggle('text-primary'));
-          if (nextUl && nextUl.tagName === 'UL') {
-            nextUl.classList.toggle('hidden');
-            if (icon) {
-              const newIcon = nextUl.classList.contains('hidden') ? 'chevron-right' : 'chevron-down';
-              icon.outerHTML = `<i class="lucide lucide-${newIcon} w-4 h-4" data-lucide="${newIcon}"></i>`;
-              lucide.createIcons();
-            }
+        function updateItem(el, type) {
+          console.log('Updated ' + type + ': ' + el.textContent);
+        }
+
+        function editItem(el, type) {
+          // Find the editable span in the same item and focus it
+          const summary = el.closest('summary');
+          const editableSpan = summary.querySelector('.editable-text');
+          if (editableSpan) {
+            editableSpan.focus();
+            // Select all text
+            const range = document.createRange();
+            range.selectNodeContents(editableSpan);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
           }
+        }
+
+        function saveItem(el, type) {
+          alert('Save ' + type);
+        }
+
+        function deleteItem(el, type) {
+          alert('Delete ' + type);
+        }
+
+        function addItem(el, type) {
+          alert('Add ' + type);
         }
 
         function updateItem(el, type) {

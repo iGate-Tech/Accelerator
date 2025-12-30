@@ -2,31 +2,8 @@
 <div class="flex gap-10  items-center min-h-[85vh]">
 {{> hierarchical-sidebar rawData}}
 
-   <div class="flex justify-center items-center gap-8">
 
-      
-
-      {{> question-card
-        title="Hi <span class='text-primary'>Demo</span>, what's your next big idea? (Hierarchical)"
-        placeholder="Enter prompt..."
-        content="As part of the Idea Model in Section 4: Branding, answer the following question for your startup: What is your mission?. Provide a comprehensive, startup-focused response with specific, actionable details."
-      }}
-    </div>
       <script>
-        // Hierarchical question selection
-        document.addEventListener('click', function(e) {
-          if (e.target.closest('a[data-question-id]')) {
-            e.preventDefault();
-            const link = e.target.closest('a[data-question-id]');
-            const questionId = link.getAttribute('data-question-id');
-            const path = link.getAttribute('data-path');
-            console.log('Selected question:', questionId, 'Path:', path);
-            // TODO: Load question prompt into textarea
-            // For now, alert
-            alert('Selected question: ' + questionId + ' in path: ' + path);
-          }
-        });
-
         // CRUD functionality
         let copiedId = null;
 

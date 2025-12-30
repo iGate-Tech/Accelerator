@@ -776,6 +776,7 @@ app.get('/hierarchy', (req, res) => {
         }
     }
     addIsFolder(hierarchicalData);
+    res.locals.rawData = hierarchicalData;
     res.render('hierarchy', { rawData: hierarchicalData });
 });
 

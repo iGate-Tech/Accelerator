@@ -99,6 +99,22 @@ loadQuestions();
 let rawData = JSON.parse(fs.readFileSync('data.json', 'utf8'));
 let hierarchicalData = JSON.parse(fs.readFileSync('hierarchical-data.json', 'utf8'));
 
+// Function to normalize children property
+function normalizeChildren(data) {
+  for (let node of data) {
+    if (node.childern && !node.children) {
+      node.children = node.childern;
+      delete node.childern;
+    }
+    if ('children' in node && (node.children === null || node.children === undefined)) {
+      node.children = [];
+    }
+    if (Array.isArray(node.children)) {
+      normalizeChildren(node.children);
+    }
+  }
+}
+
 function deleteNodeById(data, id) {
   for (let i = 0; i < data.length; i++) {
     if (data[i].id === id) {
@@ -141,6 +157,19 @@ function updateNode(data, id, updates) {
     }
   }
   return false;
+}
+
+function getNode(data, id) {
+  for (let i = 0; i < data.length; i++) {
+    if (data[i].id === id) {
+      return data[i];
+    }
+    if (data[i].children) {
+      const found = getNode(data[i].children, id);
+      if (found) return found;
+    }
+  }
+  return null;
 }
 
 const app = express();
@@ -1027,10 +1056,11 @@ app.post('/delete-node/:id', (req, res) => {
 app.post('/add-node', (req, res) => {
   const { parentId, type, name } = req.body;
   const newId = Date.now().toString();
-  const newNode = { id: newId, name, children: type === 'sub' ? [] : undefined };
+  const newNode = type === 'sub' ? { id: newId, name, children: [] } : { id: newId, question: name, answer: "", "prompt-en": "", "prompt-ar": "", placeholder: "" };
+  newNode.uniqueId = Math.random().toString(36).substr(2, 9);
   if (addNode(hierarchicalData, parentId, newNode)) {
     fs.writeFileSync('hierarchical-data.json', JSON.stringify(hierarchicalData, null, 2));
-    res.json({ success: true, id: newId });
+    res.json({ success: true, id: newId, uniqueId: newNode.uniqueId });
   } else {
     res.status(400).json({ success: false });
   }
@@ -1039,7 +1069,12 @@ app.post('/add-node', (req, res) => {
 app.post('/update-node/:id', (req, res) => {
   const nodeId = req.params.id;
   const { name } = req.body;
-  if (updateNode(hierarchicalData, nodeId, { name })) {
+  const node = getNode(hierarchicalData, nodeId);
+  if (!node) {
+    return res.status(400).json({ success: false });
+  }
+  const updates = 'children' in node ? { name } : { question: name };
+  if (updateNode(hierarchicalData, nodeId, updates)) {
     fs.writeFileSync('hierarchical-data.json', JSON.stringify(hierarchicalData, null, 2));
     res.json({ success: true });
   } else {
@@ -1056,9 +1091,12 @@ app.get('/new', (req, res) => {
 });
 
 app.get('/hierarchy', (req, res) => {
+    // Normalize children property
+    normalizeChildren(hierarchicalData);
     function addIsFolder(data) {
         for (let node of data) {
             node.isFolder = 'children' in node;
+            node.uniqueId = Math.random().toString(36).substr(2, 9);
             if (node.children && node.children.length > 0) {
                 addIsFolder(node.children);
             }

@@ -1,1815 +1,1156 @@
 [
   {
-    "id": "business-model",
-    "name": "Business Model",
-    "children": [
-      {
-        "id": "business-model-section-1-product-section",
-        "name": "Section 1: Product Section",
-        "children": [
-          {
-            "id": "q1",
-            "name": "What is the core function of your product?"
-          },
-          {
-            "id": "q2",
-            "name": "What is the primary purpose of your product?"
-          },
-          {
-            "id": "q3",
-            "name": "What is the main feature of your product?"
-          },
-          {
-            "id": "q4",
-            "name": "How does your product solve a customer problem?"
-          },
-          {
-            "id": "q5",
-            "name": "What examples can help define the core function?"
-          },
-          {
-            "id": "q6",
-            "name": "What are your Key Activities?"
-          },
-          {
-            "id": "q7",
-            "name": "What important actions must your business take?"
-          },
-          {
-            "id": "q8",
-            "name": "How do these activities create and deliver your product?"
-          },
-          {
-            "id": "q9",
-            "name": "How do these activities create and deliver your service?"
-          },
-          {
-            "id": "q10",
-            "name": "What common Key Activities can you include?"
-          },
-          {
-            "id": "q11",
-            "name": "What are your Key Resources?"
-          },
-          {
-            "id": "q12",
-            "name": "What essential assets do you need?"
-          },
-          {
-            "id": "q13",
-            "name": "What physical items are required?"
-          },
-          {
-            "id": "q14",
-            "name": "What intellectual property is needed?"
-          },
-          {
-            "id": "q15",
-            "name": "What human resources are required?"
-          },
-          {
-            "id": "q16",
-            "name": "What financial resources are needed?"
-          },
-          {
-            "id": "q17",
-            "name": "Who are your Key Partners?"
-          },
-          {
-            "id": "q18",
-            "name": "Who are your suppliers?"
-          },
-          {
-            "id": "q19",
-            "name": "Who are your distributors?"
-          },
-          {
-            "id": "q20",
-            "name": "Who are your strategic alliances?"
-          },
-          {
-            "id": "q21",
-            "name": "How do partners enhance your capabilities?"
-          },
-          {
-            "id": "q22",
-            "name": "What partners provide materials?"
-          }
-        ]
-      },
-      {
-        "id": "business-model-section-3-competition-analysis",
-        "name": "Section 3: Competition Analysis",
-        "children": [
-          {
-            "id": "q1",
-            "name": "Who are your Key Competitors?"
-          },
-          {
-            "id": "q2",
-            "name": "Who are the main players in your market?"
-          },
-          {
-            "id": "q3",
-            "name": "Who offers similar solutions?"
-          },
-          {
-            "id": "q4",
-            "name": "How do you identify key competitors?"
-          },
-          {
-            "id": "q5",
-            "name": "What criteria define a key competitor?"
-          },
-          {
-            "id": "q6",
-            "name": "What is the Market Share of each competitor?"
-          },
-          {
-            "id": "q7",
-            "name": "How much of the market does each hold?"
-          },
-          {
-            "id": "q8",
-            "name": "How do you estimate market share?"
-          },
-          {
-            "id": "q9",
-            "name": "Why is market share important?"
-          },
-          {
-            "id": "q10",
-            "name": "What data sources for market share?"
-          },
-          {
-            "id": "q11",
-            "name": "What is the Competition Level in your market?"
-          },
-          {
-            "id": "q12",
-            "name": "Is competition high, medium, or low?"
-          },
-          {
-            "id": "q13",
-            "name": "How does competition affect your strategy?"
-          },
-          {
-            "id": "q14",
-            "name": "What factors indicate competition level?"
-          },
-          {
-            "id": "q15",
-            "name": "How to assess competition intensity?"
-          },
-          {
-            "id": "q16",
-            "name": "What are your Penetration Opportunities?"
-          },
-          {
-            "id": "q17",
-            "name": "Where can you find advantages over competitors?"
-          },
-          {
-            "id": "q18",
-            "name": "What unique features offer opportunities?"
-          },
-          {
-            "id": "q19",
-            "name": "What underserved niches exist?"
-          },
-          {
-            "id": "q20",
-            "name": "How to identify penetration opportunities?"
-          },
-          {
-            "id": "q21",
-            "name": "What are the Market Challenges you might face?"
-          },
-          {
-            "id": "q22",
-            "name": "What switching costs exist?"
-          },
-          {
-            "id": "q23",
-            "name": "What integration issues are there?"
-          },
-          {
-            "id": "q24",
-            "name": "What data privacy concerns arise?"
-          },
-          {
-            "id": "q25",
-            "name": "How to mitigate market challenges?"
-          }
-        ]
-      },
-      {
-        "id": "business-model-section-4-risk-register",
-        "name": "Section 4: Risk Register",
-        "children": [
-          {
-            "id": "q1",
-            "name": "What business risks do you identify?"
-          },
-          {
-            "id": "q2",
-            "name": "What technical issues could arise?"
-          },
-          {
-            "id": "q3",
-            "name": "What market changes could occur?"
-          },
-          {
-            "id": "q4",
-            "name": "What operational problems might happen?"
-          },
-          {
-            "id": "q5",
-            "name": "How do you categorize risks?"
-          },
-          {
-            "id": "q6",
-            "name": "What percentage of risks are Technical?"
-          },
-          {
-            "id": "q7",
-            "name": "What percentage of risks are Market?"
-          },
-          {
-            "id": "q8",
-            "name": "What percentage of risks are Operational?"
-          },
-          {
-            "id": "q9",
-            "name": "How do you distribute risks into categories?"
-          },
-          {
-            "id": "q10",
-            "name": "Why categorize risks?"
-          },
-          {
-            "id": "q11",
-            "name": "What is your Overall Risk Level?"
-          },
-          {
-            "id": "q12",
-            "name": "Is the risk level low, medium, medium-high, or high?"
-          },
-          {
-            "id": "q13",
-            "name": "How do you assess overall risk?"
-          },
-          {
-            "id": "q14",
-            "name": "What factors contribute to overall risk?"
-          },
-          {
-            "id": "q15",
-            "name": "How to manage overall risk?"
-          }
-        ]
-      },
-      {
-        "id": "business-model-section-5-value-proposition",
-        "name": "Section 5: Value Proposition",
-        "children": [
-          {
-            "id": "q1",
-            "name": "What is the Customer Job?"
-          },
-          {
-            "id": "q2",
-            "name": "What core problem is the customer solving?"
-          },
-          {
-            "id": "q3",
-            "name": "What do customers want to achieve?"
-          },
-          {
-            "id": "q4",
-            "name": "How does the customer job relate to your product?"
-          },
-          {
-            "id": "q5",
-            "name": "What outcomes define the customer job?"
-          },
-          {
-            "id": "q6",
-            "name": "What are the Customer Pains?"
-          },
-          {
-            "id": "q7",
-            "name": "What problems do customers experience?"
-          },
-          {
-            "id": "q8",
-            "name": "What frustrations do customers have?"
-          },
-          {
-            "id": "q9",
-            "name": "How does your product address pains?"
-          },
-          {
-            "id": "q10",
-            "name": "What specific pains can you identify?"
-          },
-          {
-            "id": "q11",
-            "name": "What are the Customer Gains?"
-          },
-          {
-            "id": "q12",
-            "name": "What benefits do customers hope for?"
-          },
-          {
-            "id": "q13",
-            "name": "What positive outcomes are desired?"
-          },
-          {
-            "id": "q14",
-            "name": "How does your product deliver gains?"
-          },
-          {
-            "id": "q15",
-            "name": "What gains motivate customers?"
-          },
-          {
-            "id": "q16",
-            "name": "What are the Solution Components?"
-          },
-          {
-            "id": "q17",
-            "name": "What key features address pains?"
-          },
-          {
-            "id": "q18",
-            "name": "What elements deliver gains?"
-          },
-          {
-            "id": "q19",
-            "name": "What are the main components of your product?"
-          },
-          {
-            "id": "q20",
-            "name": "How do components solve problems?"
-          }
-        ]
-      },
-      {
-        "id": "business-model-section-6-cost-&-revenue",
-        "name": "Section 6: Cost & Revenue",
-        "children": [
-          {
-            "id": "q1",
-            "name": "What are your Key Costs?"
-          },
-          {
-            "id": "q2",
-            "name": "What fixed costs do you have?"
-          },
-          {
-            "id": "q3",
-            "name": "What variable costs do you have?"
-          },
-          {
-            "id": "q4",
-            "name": "How are costs tied to product delivery?"
-          },
-          {
-            "id": "q5",
-            "name": "What examples of key costs?"
-          },
-          {
-            "id": "q6",
-            "name": "What are your Revenue Streams?"
-          },
-          {
-            "id": "q7",
-            "name": "How will you make money?"
-          },
-          {
-            "id": "q8",
-            "name": "What methods generate revenue?"
-          },
-          {
-            "id": "q9",
-            "name": "What revenue models do you use?"
-          },
-          {
-            "id": "q10",
-            "name": "How do revenue streams relate to your product?"
-          },
-          {
-            "id": "q11",
-            "name": "What are your Financial Projections?"
-          },
-          {
-            "id": "q12",
-            "name": "What revenue estimates over 3-5 years?"
-          },
-          {
-            "id": "q13",
-            "name": "What cost estimates over 3-5 years?"
-          },
-          {
-            "id": "q14",
-            "name": "What profitability projections?"
-          },
-          {
-            "id": "q15",
-            "name": "How do you create financial projections?"
-          }
-        ]
-      },
-      {
-        "id": "business-model-section-7-exit-strategy",
-        "name": "Section 7: Exit Strategy",
-        "children": [
-          {
-            "id": "q1",
-            "name": "What is your Exit Strategy?"
-          },
-          {
-            "id": "q2",
-            "name": "Are you considering acquisition?"
-          },
-          {
-            "id": "q3",
-            "name": "Are you considering IPO?"
-          },
-          {
-            "id": "q4",
-            "name": "What other options for realizing returns?"
-          },
-          {
-            "id": "q5",
-            "name": "How does exit strategy align with goals?"
-          }
-        ]
-      },
-      {
-        "id": "1767114393654",
-        "name": "New Sub",
-        "children": []
-      }
-    ]
-  },
-  {
-    "id": "financial-model",
-    "name": "Financial Model",
-    "children": [
-      {
-        "id": "financial-model-section-1-kpi-collection",
-        "name": "Section 1: KPI Collection",
-        "children": [
-          {
-            "id": "q1",
-            "name": "What KPIs do you currently track?"
-          },
-          {
-            "id": "q2",
-            "name": "What KPIs do you plan to track?"
-          },
-          {
-            "id": "q3",
-            "name": "What is Customer Acquisition Cost (CAC)?"
-          },
-          {
-            "id": "q4",
-            "name": "What is Lifetime Value (LTV)?"
-          },
-          {
-            "id": "q5",
-            "name": "What is Gross Margin?"
-          },
-          {
-            "id": "q6",
-            "name": "What is Churn Rate?"
-          }
-        ]
-      },
-      {
-        "id": "financial-model-section-3-revenue-streams",
-        "name": "Section 3: Revenue Streams",
-        "children": [
-          {
-            "id": "q1",
-            "name": "What are your revenue streams?"
-          },
-          {
-            "id": "q2",
-            "name": "Do you have subscription revenue?"
-          },
-          {
-            "id": "q3",
-            "name": "Do you have transaction fees?"
-          },
-          {
-            "id": "q4",
-            "name": "Do you have licensing revenue?"
-          },
-          {
-            "id": "q5",
-            "name": "Do you have professional services revenue?"
-          },
-          {
-            "id": "q6",
-            "name": "Do you have hardware sales?"
-          }
-        ]
-      },
-      {
-        "id": "financial-model-section-4-cogs",
-        "name": "Section 4: COGS",
-        "children": [
-          {
-            "id": "q1",
-            "name": "What are your monthly COGS?"
-          },
-          {
-            "id": "q2",
-            "name": "What costs are directly tied to delivery?"
-          },
-          {
-            "id": "q3",
-            "name": "What are examples of COGS?"
-          },
-          {
-            "id": "q4",
-            "name": "What is the typical SaaS COGS range?"
-          },
-          {
-            "id": "q5",
-            "name": "How do you calculate COGS?"
-          },
-          {
-            "id": "q6",
-            "name": "What percentage of revenue is COGS?"
-          }
-        ]
-      },
-      {
-        "id": "financial-model-section-5-opex",
-        "name": "Section 5: Opex",
-        "children": [
-          {
-            "id": "q1",
-            "name": "What is your Opex?"
-          },
-          {
-            "id": "q2",
-            "name": "What categories of Opex do you have?"
-          },
-          {
-            "id": "q3",
-            "name": "Do you have salaries and wages?"
-          },
-          {
-            "id": "q4",
-            "name": "Do you have marketing expenses?"
-          },
-          {
-            "id": "q5",
-            "name": "Do you have office rent?"
-          },
-          {
-            "id": "q6",
-            "name": "Do you have software subscriptions?"
-          }
-        ]
-      },
-      {
-        "id": "financial-model-section-6-capex",
-        "name": "Section 6: Capex",
-        "children": [
-          {
-            "id": "q1",
-            "name": "What capital expenditures do you have?"
-          },
-          {
-            "id": "q2",
-            "name": "Do you have equipment purchases?"
-          },
-          {
-            "id": "q3",
-            "name": "Do you have server costs?"
-          },
-          {
-            "id": "q4",
-            "name": "Do you have vehicle costs?"
-          },
-          {
-            "id": "q5",
-            "name": "Do you have machinery costs?"
-          },
-          {
-            "id": "q6",
-            "name": "Do you have one-time system build costs?"
-          }
-        ]
-      },
-      {
-        "id": "financial-model-section-7-financial-statements",
-        "name": "Section 7: Financial Statements",
-        "children": [
-          {
-            "id": "q1",
-            "name": "What formatting do you want for statements?"
-          },
-          {
-            "id": "q2",
-            "name": "Do you want monthly view?"
-          },
-          {
-            "id": "q3",
-            "name": "Do you want quarterly view?"
-          },
-          {
-            "id": "q4",
-            "name": "Do you want yearly summary?"
-          },
-          {
-            "id": "q5",
-            "name": "Do you want 3-year projection?"
-          },
-          {
-            "id": "q6",
-            "name": "Do you want 5-year projection?"
-          }
-        ]
-      },
-      {
-        "id": "financial-model-section-8-financial-ratios",
-        "name": "Section 8: Financial Ratios",
-        "children": [
-          {
-            "id": "q1",
-            "name": "What financial ratios will be calculated?"
-          },
-          {
-            "id": "q2",
-            "name": "What profitability ratios?"
-          },
-          {
-            "id": "q3",
-            "name": "What efficiency ratios?"
-          },
-          {
-            "id": "q4",
-            "name": "What liquidity ratios?"
-          },
-          {
-            "id": "q5",
-            "name": "What growth ratios?"
-          },
-          {
-            "id": "q6",
-            "name": "Do you want all ratios or a selected group?"
-          }
-        ]
-      }
-    ]
-  },
-  {
-    "id": "funding-model",
-    "name": "Funding Model",
-    "children": [
-      {
-        "id": "funding-model-section-1-funding-goal",
-        "name": "Section 1: Funding Goal",
-        "children": [
-          {
-            "id": "q1",
-            "name": "How much total funding are you seeking?"
-          },
-          {
-            "id": "q2",
-            "name": "What is the suggested range for early stage?"
-          },
-          {
-            "id": "q3",
-            "name": "What is the suggested range for seed stage?"
-          },
-          {
-            "id": "q4",
-            "name": "What is the suggested range for Series A?"
-          },
-          {
-            "id": "q5",
-            "name": "What is the suggested range for Series B?"
-          },
-          {
-            "id": "q6",
-            "name": "Can you enter your own amount?"
-          },
-          {
-            "id": "q7",
-            "name": "What type of funding are you targeting?"
-          },
-          {
-            "id": "q8",
-            "name": "Are you targeting equity?"
-          },
-          {
-            "id": "q9",
-            "name": "Are you targeting debt?"
-          },
-          {
-            "id": "q10",
-            "name": "Are you targeting grants?"
-          },
-          {
-            "id": "q11",
-            "name": "Are you targeting crowdfunding?"
-          },
-          {
-            "id": "q12",
-            "name": "What funding types suit your revenue model?"
-          }
-        ]
-      },
-      {
-        "id": "funding-model-section-2-funding-allocation",
-        "name": "Section 2: Funding Allocation",
-        "children": [
-          {
-            "id": "q1",
-            "name": "How will the funding be allocated?"
-          },
-          {
-            "id": "q2",
-            "name": "What percentage for product development?"
-          },
-          {
-            "id": "q3",
-            "name": "What percentage for marketing and growth?"
-          },
-          {
-            "id": "q4",
-            "name": "What percentage for hiring?"
-          },
-          {
-            "id": "q5",
-            "name": "What percentage for operations?"
-          },
-          {
-            "id": "q6",
-            "name": "What percentage for contingency?"
-          }
-        ]
-      },
-      {
-        "id": "funding-model-section-3-revenue-model",
-        "name": "Section 3: Revenue Model",
-        "children": [
-          {
-            "id": "q1",
-            "name": "What are your revenue streams?"
-          },
-          {
-            "id": "q2",
-            "name": "Do you have subscription revenue?"
-          },
-          {
-            "id": "q3",
-            "name": "Do you have commission revenue?"
-          },
-          {
-            "id": "q4",
-            "name": "Do you have one-time licensing?"
-          },
-          {
-            "id": "q5",
-            "name": "Do you have hardware sales?"
-          },
-          {
-            "id": "q6",
-            "name": "Do you have services revenue?"
-          },
-          {
-            "id": "q7",
-            "name": "How do you price your product?"
-          },
-          {
-            "id": "q8",
-            "name": "Do you use monthly subscription?"
-          },
-          {
-            "id": "q9",
-            "name": "Do you use per user pricing?"
-          },
-          {
-            "id": "q10",
-            "name": "Do you use tiered plans?"
-          },
-          {
-            "id": "q11",
-            "name": "Do you use usage-based pricing?"
-          },
-          {
-            "id": "q12",
-            "name": "Do you use custom enterprise pricing?"
-          },
-          {
-            "id": "q13",
-            "name": "What is your market size?"
-          },
-          {
-            "id": "q14",
-            "name": "What is your TAM?"
-          },
-          {
-            "id": "q15",
-            "name": "What is your SAM?"
-          },
-          {
-            "id": "q16",
-            "name": "What is your SOM?"
-          },
-          {
-            "id": "q17",
-            "name": "How can AI calculate market size?"
-          },
-          {
-            "id": "q18",
-            "name": "Why is market size important?"
-          }
-        ]
-      },
-      {
-        "id": "funding-model-section-4-investor-roi",
-        "name": "Section 4: Investor ROI",
-        "children": [
-          {
-            "id": "q1",
-            "name": "What valuation are you targeting?"
-          },
-          {
-            "id": "q2",
-            "name": "How is valuation based on revenue?"
-          },
-          {
-            "id": "q3",
-            "name": "What multiples do you use?"
-          },
-          {
-            "id": "q4",
-            "name": "How do you recommend valuation?"
-          },
-          {
-            "id": "q5",
-            "name": "What factors affect valuation?"
-          },
-          {
-            "id": "q6",
-            "name": "Why target a specific valuation?"
-          },
-          {
-            "id": "q7",
-            "name": "What is your preferred exit method?"
-          },
-          {
-            "id": "q8",
-            "name": "Are you considering acquisition?"
-          },
-          {
-            "id": "q9",
-            "name": "Are you considering IPO?"
-          },
-          {
-            "id": "q10",
-            "name": "Are you considering strategic merger?"
-          },
-          {
-            "id": "q11",
-            "name": "Are you considering secondary sale?"
-          },
-          {
-            "id": "q12",
-            "name": "What exit methods suit your business?"
-          }
-        ]
-      },
-      {
-        "id": "funding-model-section-5-cap-table",
-        "name": "Section 5: Cap Table",
-        "children": [
-          {
-            "id": "q1",
-            "name": "What are your future funding rounds?"
-          },
-          {
-            "id": "q2",
-            "name": "Do you have seed to Series A?"
-          },
-          {
-            "id": "q3",
-            "name": "Do you have pre-seed to seed?"
-          },
-          {
-            "id": "q4",
-            "name": "Do you have seed only?"
-          },
-          {
-            "id": "q5",
-            "name": "What custom schedule do you have?"
-          },
-          {
-            "id": "q6",
-            "name": "How does AI suggest rounds?"
-          },
-          {
-            "id": "q7",
-            "name": "What is your cap table structure?"
-          },
-          {
-            "id": "q8",
-            "name": "What is current founders' ownership?"
-          },
-          {
-            "id": "q9",
-            "name": "What is current investors' ownership?"
-          },
-          {
-            "id": "q10",
-            "name": "What is the option pool percentage?"
-          },
-          {
-            "id": "q11",
-            "name": "What are recommended defaults?"
-          },
-          {
-            "id": "q12",
-            "name": "How to build a cap table?"
-          }
-        ]
-      }
-    ]
-  },
-  {
-    "id": "marketing-model",
-    "name": "Marketing Model",
-    "children": [
-      {
-        "id": "marketing-model-section-1-customer-persona",
-        "name": "Section 1: Customer Persona",
-        "children": [
-          {
-            "id": "q1",
-            "name": "What is the basic demographic profile?"
-          },
-          {
-            "id": "q2",
-            "name": "What is the age range?"
-          },
-          {
-            "id": "q3",
-            "name": "Where is the location?"
-          },
-          {
-            "id": "q4",
-            "name": "What is the income range?"
-          },
-          {
-            "id": "q5",
-            "name": "Is the product gender-specific?"
-          },
-          {
-            "id": "q6",
-            "name": "What are the biggest pain points?"
-          }
-        ]
-      },
-      {
-        "id": "marketing-model-section-2-unique-value-proposition",
-        "name": "Section 2: Unique Value Proposition",
-        "children": [
-          {
-            "id": "q1",
-            "name": "What differentiates your product?"
-          },
-          {
-            "id": "q2",
-            "name": "Is it faster delivery?"
-          },
-          {
-            "id": "q3",
-            "name": "Is it lower costs?"
-          },
-          {
-            "id": "q4",
-            "name": "Is it better quality?"
-          },
-          {
-            "id": "q5",
-            "name": "Is it unique features?"
-          },
-          {
-            "id": "q6",
-            "name": "Is it superior service?"
-          },
-          {
-            "id": "q7",
-            "name": "What is the main message?"
-          },
-          {
-            "id": "q8",
-            "name": "What sample messages?"
-          },
-          {
-            "id": "q9",
-            "name": "How to choose a message?"
-          },
-          {
-            "id": "q10",
-            "name": "Why remember a message?"
-          },
-          {
-            "id": "q11",
-            "name": "How does it resonate?"
-          }
-        ]
-      },
-      {
-        "id": "marketing-model-section-3-marketing-objectives",
-        "name": "Section 3: Marketing Objectives",
-        "children": [
-          {
-            "id": "q1",
-            "name": "Do you focus on brand awareness?"
-          },
-          {
-            "id": "q2",
-            "name": "Is lead generation a priority?"
-          },
-          {
-            "id": "q3",
-            "name": "Do you have acquisition targets?"
-          },
-          {
-            "id": "q4",
-            "name": "Do you aim to expand markets?"
-          },
-          {
-            "id": "q5",
-            "name": "Is retention a priority?"
-          }
-        ]
-      },
-      {
-        "id": "marketing-model-section-4-marketing-strategies",
-        "name": "Section 4: Marketing Strategies",
-        "children": [
-          {
-            "id": "q1",
-            "name": "Which digital channels?"
-          },
-          {
-            "id": "q2",
-            "name": "Do you use SEO?"
-          },
-          {
-            "id": "q3",
-            "name": "Do you use Google Ads?"
-          },
-          {
-            "id": "q4",
-            "name": "Do you use social media?"
-          },
-          {
-            "id": "q5",
-            "name": "Do you use email marketing?"
-          },
-          {
-            "id": "q6",
-            "name": "Do you use content marketing?"
-          },
-          {
-            "id": "q7",
-            "name": "Do you use offline channels?"
-          },
-          {
-            "id": "q8",
-            "name": "Do you use events?"
-          },
-          {
-            "id": "q9",
-            "name": "Do you use conferences?"
-          },
-          {
-            "id": "q10",
-            "name": "Do you use trade shows?"
-          },
-          {
-            "id": "q11",
-            "name": "Do you use flyers?"
-          },
-          {
-            "id": "q12",
-            "name": "Do you use billboards?"
-          }
-        ]
-      },
-      {
-        "id": "marketing-model-section-5-marketing-budget",
-        "name": "Section 5: Marketing Budget",
-        "children": [
-          {
-            "id": "q1",
-            "name": "What is your marketing budget?"
-          },
-          {
-            "id": "q2",
-            "name": "What percentage for early-stage?"
-          },
-          {
-            "id": "q3",
-            "name": "What percentage for growth-stage?"
-          },
-          {
-            "id": "q4",
-            "name": "How to allocate budget?"
-          },
-          {
-            "id": "q5",
-            "name": "Why have a budget?"
-          }
-        ]
-      },
-      {
-        "id": "marketing-model-section-6-marketing-kpis",
-        "name": "Section 6: Marketing KPIs",
-        "children": [
-          {
-            "id": "q1",
-            "name": "Do you track website traffic?"
-          },
-          {
-            "id": "q2",
-            "name": "What is monthly traffic?"
-          },
-          {
-            "id": "q3",
-            "name": "What benchmark for visits?"
-          },
-          {
-            "id": "q4",
-            "name": "How to measure traffic?"
-          },
-          {
-            "id": "q5",
-            "name": "Which channels bring traffic?"
-          },
-          {
-            "id": "q6",
-            "name": "Is it organic search?"
-          },
-          {
-            "id": "q7",
-            "name": "Is it direct?"
-          },
-          {
-            "id": "q8",
-            "name": "Is it social media?"
-          },
-          {
-            "id": "q9",
-            "name": "Is it paid ads?"
-          },
-          {
-            "id": "q10",
-            "name": "Is it referral?"
-          },
-          {
-            "id": "q11",
-            "name": "What is session duration?"
-          },
-          {
-            "id": "q12",
-            "name": "Is 30-60 seconds poor?"
-          },
-          {
-            "id": "q13",
-            "name": "Is 1-2 minutes good?"
-          },
-          {
-            "id": "q14",
-            "name": "Is 2-4 minutes excellent?"
-          },
-          {
-            "id": "q15",
-            "name": "How to improve duration?"
-          },
-          {
-            "id": "q16",
-            "name": "What is conversion rate?"
-          },
-          {
-            "id": "q17",
-            "name": "What SaaS benchmark?"
-          },
-          {
-            "id": "q18",
-            "name": "What e-commerce benchmark?"
-          },
-          {
-            "id": "q19",
-            "name": "How to calculate rate?"
-          },
-          {
-            "id": "q20",
-            "name": "What is CAC?"
-          },
-          {
-            "id": "q21",
-            "name": "What is low CAC?"
-          },
-          {
-            "id": "q22",
-            "name": "What is medium CAC?"
-          },
-          {
-            "id": "q23",
-            "name": "What is high CAC?"
-          },
-          {
-            "id": "q24",
-            "name": "How to reduce CAC?"
-          },
-          {
-            "id": "q25",
-            "name": "What is NPS target?"
-          },
-          {
-            "id": "q26",
-            "name": "Is 30+ target?"
-          },
-          {
-            "id": "q27",
-            "name": "Is 50+ target?"
-          },
-          {
-            "id": "q28",
-            "name": "Is 60+ target?"
-          },
-          {
-            "id": "q29",
-            "name": "How to measure NPS?"
-          },
-          {
-            "id": "q30",
-            "name": "What is LTV?"
-          },
-          {
-            "id": "q31",
-            "name": "How to calculate LTV?"
-          },
-          {
-            "id": "q32",
-            "name": "What factors in LTV?"
-          },
-          {
-            "id": "q33",
-            "name": "How to increase LTV?"
-          },
-          {
-            "id": "q34",
-            "name": "What retention rate?"
-          },
-          {
-            "id": "q35",
-            "name": "What benchmark for early SaaS?"
-          },
-          {
-            "id": "q36",
-            "name": "What benchmark for matured SaaS?"
-          },
-          {
-            "id": "q37",
-            "name": "How to improve retention?"
-          },
-          {
-            "id": "q38",
-            "name": "What revenue growth target?"
-          },
-          {
-            "id": "q39",
-            "name": "Is 20-30% target?"
-          },
-          {
-            "id": "q40",
-            "name": "Is 30-50% target?"
-          },
-          {
-            "id": "q41",
-            "name": "Is 50-100% target?"
-          },
-          {
-            "id": "q42",
-            "name": "Is 100%+ hypergrowth?"
-          }
-        ]
-      }
-    ]
-  },
-  {
-    "id": "team-model",
     "name": "Team Model",
     "children": [
       {
-        "id": "team-model-section-1-team-overview",
         "name": "Section 1: Team Overview",
         "children": [
           {
-            "id": "q1",
-            "name": "How many founders?"
+            "question": "How many founders?",
+            "answer": "",
+            "prompt-en": "",
+            "prompt-ar": "",
+            "placeholder": "Please give your answer !",
+            "id": "eyJxdWVzdG",
+            "isFolder": false,
+            "uniqueId": "yc6a3ssho"
           },
           {
-            "id": "q2",
-            "name": "What is team foundation?"
+            "question": "What is team foundation?",
+            "answer": "",
+            "prompt-en": "",
+            "prompt-ar": "",
+            "placeholder": "Please give your answer !",
+            "id": "eyJxdWVzdG",
+            "isFolder": false,
+            "uniqueId": "u1h04ujb4"
           },
           {
-            "id": "q3",
-            "name": "Why understand founders?"
+            "question": "Why understand founders?",
+            "answer": "",
+            "prompt-en": "",
+            "prompt-ar": "",
+            "placeholder": "Please give your answer !",
+            "id": "eyJxdWVzdG",
+            "isFolder": false,
+            "uniqueId": "d2bdz0ksf"
           },
           {
-            "id": "q4",
-            "name": "How many employees?"
+            "question": "How many employees?",
+            "answer": "",
+            "prompt-en": "",
+            "prompt-ar": "",
+            "placeholder": "Please give your answer !",
+            "id": "eyJxdWVzdG",
+            "isFolder": false,
+            "uniqueId": "f3lfkcqre"
           },
           {
-            "id": "q5",
-            "name": "Excluding founders?"
+            "question": "Excluding founders?",
+            "answer": "",
+            "prompt-en": "",
+            "prompt-ar": "",
+            "placeholder": "Please give your answer !",
+            "id": "eyJxdWVzdG",
+            "isFolder": false,
+            "uniqueId": "8g3epnwsv"
           },
           {
-            "id": "q6",
-            "name": "What team structure?"
+            "question": "What team structure?",
+            "answer": "",
+            "prompt-en": "",
+            "prompt-ar": "",
+            "placeholder": "Please give your answer !",
+            "id": "eyJxdWVzdG",
+            "isFolder": false,
+            "uniqueId": "731ovzbte"
           },
           {
-            "id": "q7",
-            "name": "How organized?"
+            "question": "How organized?",
+            "answer": "",
+            "prompt-en": "",
+            "prompt-ar": "",
+            "placeholder": "Please give your answer !",
+            "id": "eyJxdWVzdG",
+            "isFolder": false,
+            "uniqueId": "xhn7p7wrj"
           },
           {
-            "id": "q8",
-            "name": "Best describes setup?"
+            "question": "Best describes setup?",
+            "answer": "",
+            "prompt-en": "",
+            "prompt-ar": "",
+            "placeholder": "Please give your answer !",
+            "id": "eyJxdWVzdG",
+            "isFolder": false,
+            "uniqueId": "kfpkgviqg"
           },
           {
-            "id": "q9",
-            "name": "Why structure matters?"
+            "question": "Why structure matters?",
+            "answer": "",
+            "prompt-en": "",
+            "prompt-ar": "",
+            "placeholder": "Please give your answer !",
+            "id": "eyJxdWVzdG",
+            "isFolder": false,
+            "uniqueId": "eda3xz8yi"
           },
           {
-            "id": "q10",
-            "name": "How ready for execution?"
+            "question": "How ready for execution?",
+            "answer": "",
+            "prompt-en": "",
+            "prompt-ar": "",
+            "placeholder": "Please give your answer !",
+            "id": "eyJxdWVzdG",
+            "isFolder": false,
+            "uniqueId": "vkf65o1f5"
           },
           {
-            "id": "q11",
-            "name": "On scale low to high?"
+            "question": "On scale low to high?",
+            "answer": "",
+            "prompt-en": "",
+            "prompt-ar": "",
+            "placeholder": "Please give your answer !",
+            "id": "eyJxdWVzdG",
+            "isFolder": false,
+            "uniqueId": "4zaom1i4v"
           },
           {
-            "id": "q12",
-            "name": "To hit goals?"
+            "question": "To hit goals?",
+            "answer": "",
+            "prompt-en": "",
+            "prompt-ar": "",
+            "placeholder": "Please give your answer !",
+            "id": "eyJxdWVzdG",
+            "isFolder": false,
+            "uniqueId": "1e29qjd47"
           },
           {
-            "id": "q13",
-            "name": "What readiness means?"
+            "question": "What readiness means?",
+            "answer": "",
+            "prompt-en": "",
+            "prompt-ar": "",
+            "placeholder": "Please give your answer !",
+            "id": "eyJxdWVzdG",
+            "isFolder": false,
+            "uniqueId": "1lttr7uy3"
           },
           {
-            "id": "q14",
-            "name": "What working model?"
+            "question": "What working model?",
+            "answer": "",
+            "prompt-en": "",
+            "prompt-ar": "",
+            "placeholder": "Please give your answer !",
+            "id": "eyJxdWVzdG",
+            "isFolder": false,
+            "uniqueId": "80xy7avx9"
           },
           {
-            "id": "q15",
-            "name": "All in office?"
+            "question": "All in office?",
+            "answer": "",
+            "prompt-en": "",
+            "prompt-ar": "",
+            "placeholder": "Please give your answer !",
+            "id": "eyJxdWVzdG",
+            "isFolder": false,
+            "uniqueId": "emo2im7mm"
           },
           {
-            "id": "q16",
-            "name": "Remote?"
+            "question": "Remote?",
+            "answer": "",
+            "prompt-en": "",
+            "prompt-ar": "",
+            "placeholder": "Please give your answer !",
+            "id": "eyJxdWVzdG",
+            "isFolder": false,
+            "uniqueId": "81t6pew33"
           },
           {
-            "id": "q17",
-            "name": "Hybrid?"
+            "question": "Hybrid?",
+            "answer": "",
+            "prompt-en": "",
+            "prompt-ar": "",
+            "placeholder": "Please give your answer !",
+            "id": "eyJxdWVzdG",
+            "isFolder": false,
+            "uniqueId": "gx96zxs6n"
           },
           {
-            "id": "q18",
-            "name": "Why working model?"
+            "question": "Why working model?",
+            "answer": "",
+            "prompt-en": "",
+            "prompt-ar": "",
+            "placeholder": "Please give your answer !",
+            "id": "eyJxdWVzdG",
+            "isFolder": false,
+            "uniqueId": "xphex4lpp"
           }
-        ]
+        ],
+        "id": "eyJuYW1lIj",
+        "isFolder": true,
+        "uniqueId": "pld5w3xtu"
       },
       {
-        "id": "team-model-section-2-team-roles-&-responsibilities",
         "name": "Section 2: Team Roles & Responsibilities",
         "children": [
           {
-            "id": "q1",
-            "name": "Suggest team structure?"
+            "question": "Suggest team structure?",
+            "answer": "",
+            "prompt-en": "",
+            "prompt-ar": "",
+            "placeholder": "Please give your answer !",
+            "id": "eyJxdWVzdG",
+            "isFolder": false,
+            "uniqueId": "x4hvpfvcr"
           },
           {
-            "id": "q2",
-            "name": "Based on stage?"
+            "question": "Based on stage?",
+            "answer": "",
+            "prompt-en": "",
+            "prompt-ar": "",
+            "placeholder": "Please give your answer !",
+            "id": "eyJxdWVzdG",
+            "isFolder": false,
+            "uniqueId": "hwiblyfr2"
           },
           {
-            "id": "q3",
-            "name": "Recommended?"
+            "question": "Recommended?",
+            "answer": "",
+            "prompt-en": "",
+            "prompt-ar": "",
+            "placeholder": "Please give your answer !",
+            "id": "eyJxdWVzdG",
+            "isFolder": false,
+            "uniqueId": "pa1vh9c06"
           },
           {
-            "id": "q4",
-            "name": "Why suggest?"
+            "question": "Why suggest?",
+            "answer": "",
+            "prompt-en": "",
+            "prompt-ar": "",
+            "placeholder": "Please give your answer !",
+            "id": "eyJxdWVzdG",
+            "isFolder": false,
+            "uniqueId": "c5o5odqm9"
           },
           {
-            "id": "q5",
-            "name": "Define key roles?"
+            "question": "Define key roles?",
+            "answer": "",
+            "prompt-en": "",
+            "prompt-ar": "",
+            "placeholder": "Please give your answer !",
+            "id": "eyJxdWVzdG",
+            "isFolder": false,
+            "uniqueId": "mrc93u2gi"
           },
           {
-            "id": "q6",
-            "name": "Main responsibilities?"
+            "question": "Main responsibilities?",
+            "answer": "",
+            "prompt-en": "",
+            "prompt-ar": "",
+            "placeholder": "Please give your answer !",
+            "id": "eyJxdWVzdG",
+            "isFolder": false,
+            "uniqueId": "2db9oo5my"
           },
           {
-            "id": "q7",
-            "name": "Tweak suggestions?"
+            "question": "Tweak suggestions?",
+            "answer": "",
+            "prompt-en": "",
+            "prompt-ar": "",
+            "placeholder": "Please give your answer !",
+            "id": "eyJxdWVzdG",
+            "isFolder": false,
+            "uniqueId": "yj9xsa1a8"
           },
           {
-            "id": "q8",
-            "name": "Add roles?"
+            "question": "Add roles?",
+            "answer": "",
+            "prompt-en": "",
+            "prompt-ar": "",
+            "placeholder": "Please give your answer !",
+            "id": "eyJxdWVzdG",
+            "isFolder": false,
+            "uniqueId": "247zechfk"
           },
           {
-            "id": "q9",
-            "name": "Why define roles?"
+            "question": "Why define roles?",
+            "answer": "",
+            "prompt-en": "",
+            "prompt-ar": "",
+            "placeholder": "Please give your answer !",
+            "id": "eyJxdWVzdG",
+            "isFolder": false,
+            "uniqueId": "v7jzrhn8z"
           }
-        ]
+        ],
+        "id": "eyJuYW1lIj",
+        "isFolder": true,
+        "uniqueId": "0nvct37qx"
       },
       {
-        "id": "team-model-section-3-skills-matrix",
         "name": "Section 3: Skills Matrix",
         "children": [
           {
-            "id": "q1",
-            "name": "Assess team skills?"
+            "question": "Assess team skills?",
+            "answer": "",
+            "prompt-en": "",
+            "prompt-ar": "",
+            "placeholder": "Please give your answer !",
+            "id": "eyJxdWVzdG",
+            "isFolder": false,
+            "uniqueId": "b16fxuxtx"
           },
           {
-            "id": "q2",
-            "name": "Create skills matrix?"
+            "question": "Create skills matrix?",
+            "answer": "",
+            "prompt-en": "",
+            "prompt-ar": "",
+            "placeholder": "Please give your answer !",
+            "id": "eyJxdWVzdG",
+            "isFolder": false,
+            "uniqueId": "qyqfp6knm"
           },
           {
-            "id": "q3",
-            "name": "Technical skills?"
+            "question": "Technical skills?",
+            "answer": "",
+            "prompt-en": "",
+            "prompt-ar": "",
+            "placeholder": "Please give your answer !",
+            "id": "eyJxdWVzdG",
+            "isFolder": false,
+            "uniqueId": "ncw30u1lz"
           },
           {
-            "id": "q4",
-            "name": "Soft skills?"
+            "question": "Soft skills?",
+            "answer": "",
+            "prompt-en": "",
+            "prompt-ar": "",
+            "placeholder": "Please give your answer !",
+            "id": "eyJxdWVzdG",
+            "isFolder": false,
+            "uniqueId": "yfbscfv7a"
           },
           {
-            "id": "q5",
-            "name": "Business skills?"
+            "question": "Business skills?",
+            "answer": "",
+            "prompt-en": "",
+            "prompt-ar": "",
+            "placeholder": "Please give your answer !",
+            "id": "eyJxdWVzdG",
+            "isFolder": false,
+            "uniqueId": "vfxzpe6s4"
           },
           {
-            "id": "q6",
-            "name": "Why skills matrix?"
+            "question": "Why skills matrix?",
+            "answer": "",
+            "prompt-en": "",
+            "prompt-ar": "",
+            "placeholder": "Please give your answer !",
+            "id": "eyJxdWVzdG",
+            "isFolder": false,
+            "uniqueId": "9xer4dxrx"
           }
-        ]
+        ],
+        "id": "eyJuYW1lIj",
+        "isFolder": true,
+        "uniqueId": "b2nlnca30"
       },
       {
-        "id": "team-model-section-4-hiring-plan",
         "name": "Section 4: Hiring Plan",
         "children": [
           {
-            "id": "q1",
-            "name": "Strategic hiring plan?"
+            "question": "Strategic hiring plan?",
+            "answer": "",
+            "prompt-en": "",
+            "prompt-ar": "",
+            "placeholder": "Please give your answer !",
+            "id": "eyJxdWVzdG",
+            "isFolder": false,
+            "uniqueId": "spea21pf2"
           },
           {
-            "id": "q2",
-            "name": "Based on stage?"
+            "question": "Based on stage?",
+            "answer": "",
+            "prompt-en": "",
+            "prompt-ar": "",
+            "placeholder": "Please give your answer !",
+            "id": "eyJxdWVzdG",
+            "isFolder": false,
+            "uniqueId": "jxd1udf03"
           },
           {
-            "id": "q3",
-            "name": "Based on needs?"
+            "question": "Based on needs?",
+            "answer": "",
+            "prompt-en": "",
+            "prompt-ar": "",
+            "placeholder": "Please give your answer !",
+            "id": "eyJxdWVzdG",
+            "isFolder": false,
+            "uniqueId": "qrm0jdfw9"
           },
           {
-            "id": "q4",
-            "name": "Suggest plan?"
+            "question": "Suggest plan?",
+            "answer": "",
+            "prompt-en": "",
+            "prompt-ar": "",
+            "placeholder": "Please give your answer !",
+            "id": "eyJxdWVzdG",
+            "isFolder": false,
+            "uniqueId": "qk9px2ocy"
           },
           {
-            "id": "q5",
-            "name": "Why hiring plan?"
+            "question": "Why hiring plan?",
+            "answer": "",
+            "prompt-en": "",
+            "prompt-ar": "",
+            "placeholder": "Please give your answer !",
+            "id": "eyJxdWVzdG",
+            "isFolder": false,
+            "uniqueId": "modk1rdwn"
           }
-        ]
+        ],
+        "id": "eyJuYW1lIj",
+        "isFolder": true,
+        "uniqueId": "0lv3hcgk2"
       },
       {
-        "id": "team-model-section-5-compensation-&-equity",
         "name": "Section 5: Compensation & Equity",
         "children": [
           {
-            "id": "q1",
-            "name": "Recommend salary ranges?"
+            "question": "Recommend salary ranges?",
+            "answer": "",
+            "prompt-en": "",
+            "prompt-ar": "",
+            "placeholder": "Please give your answer !",
+            "id": "eyJxdWVzdG",
+            "isFolder": false,
+            "uniqueId": "hena8t091"
           },
           {
-            "id": "q2",
-            "name": "Recommend equity bands?"
+            "question": "Recommend equity bands?",
+            "answer": "",
+            "prompt-en": "",
+            "prompt-ar": "",
+            "placeholder": "Please give your answer !",
+            "id": "eyJxdWVzdG",
+            "isFolder": false,
+            "uniqueId": "8m8untphq"
           },
           {
-            "id": "q3",
-            "name": "Overall structure?"
+            "question": "Overall structure?",
+            "answer": "",
+            "prompt-en": "",
+            "prompt-ar": "",
+            "placeholder": "Please give your answer !",
+            "id": "eyJxdWVzdG",
+            "isFolder": false,
+            "uniqueId": "mi5yw6eus"
           },
           {
-            "id": "q4",
-            "name": "Fair compensation?"
+            "question": "Fair compensation?",
+            "answer": "",
+            "prompt-en": "",
+            "prompt-ar": "",
+            "placeholder": "Please give your answer !",
+            "id": "eyJxdWVzdG",
+            "isFolder": false,
+            "uniqueId": "7c4ixhiir"
           },
           {
-            "id": "q5",
-            "name": "Why compensation?"
+            "question": "Why compensation?",
+            "answer": "",
+            "prompt-en": "",
+            "prompt-ar": "",
+            "placeholder": "Please give your answer !",
+            "id": "eyJxdWVzdG",
+            "isFolder": false,
+            "uniqueId": "47el0qyib"
           }
-        ]
+        ],
+        "id": "eyJuYW1lIj",
+        "isFolder": true,
+        "uniqueId": "krynfg2m1"
       }
-    ]
+    ],
+    "id": "eyJuYW1lIj",
+    "isFolder": true,
+    "uniqueId": "inxh2wyt2"
   },
   {
-    "id": "legal-model",
     "name": "Legal Model",
     "children": [
       {
-        "id": "legal-model-section-1-company-structure",
         "name": "Section 1: Company Structure",
         "children": [
           {
-            "id": "q1",
-            "name": "What company name?"
+            "question": "What company name?",
+            "answer": "",
+            "prompt-en": "",
+            "prompt-ar": "",
+            "placeholder": "Please give your answer !",
+            "id": "eyJxdWVzdG",
+            "isFolder": false,
+            "uniqueId": "wi05u2wai"
           },
           {
-            "id": "q2",
-            "name": "Planning name?"
+            "question": "Planning name?",
+            "answer": "",
+            "prompt-en": "",
+            "prompt-ar": "",
+            "placeholder": "Please give your answer !",
+            "id": "eyJxdWVzdG",
+            "isFolder": false,
+            "uniqueId": "e0e9ztg0v"
           },
           {
-            "id": "q3",
-            "name": "If unsure?"
+            "question": "If unsure?",
+            "answer": "",
+            "prompt-en": "",
+            "prompt-ar": "",
+            "placeholder": "Please give your answer !",
+            "id": "eyJxdWVzdG",
+            "isFolder": false,
+            "uniqueId": "uy0x9suea"
           },
           {
-            "id": "q4",
-            "name": "Suggest ideas?"
+            "question": "Suggest ideas?",
+            "answer": "",
+            "prompt-en": "",
+            "prompt-ar": "",
+            "placeholder": "Please give your answer !",
+            "id": "eyJxdWVzdG",
+            "isFolder": false,
+            "uniqueId": "u4vrvwv4x"
           },
           {
-            "id": "q5",
-            "name": "Based on industry?"
+            "question": "Based on industry?",
+            "answer": "",
+            "prompt-en": "",
+            "prompt-ar": "",
+            "placeholder": "Please give your answer !",
+            "id": "eyJxdWVzdG",
+            "isFolder": false,
+            "uniqueId": "7eos2pa35"
           },
           {
-            "id": "q6",
-            "name": "What legal structure?"
+            "question": "What legal structure?",
+            "answer": "",
+            "prompt-en": "",
+            "prompt-ar": "",
+            "placeholder": "Please give your answer !",
+            "id": "eyJxdWVzdG",
+            "isFolder": false,
+            "uniqueId": "bjfssoyw6"
           },
           {
-            "id": "q7",
-            "name": "LLC?"
+            "question": "LLC?",
+            "answer": "",
+            "prompt-en": "",
+            "prompt-ar": "",
+            "placeholder": "Please give your answer !",
+            "id": "eyJxdWVzdG",
+            "isFolder": false,
+            "uniqueId": "brkbksnyv"
           },
           {
-            "id": "q8",
-            "name": "Sole proprietorship?"
+            "question": "Sole proprietorship?",
+            "answer": "",
+            "prompt-en": "",
+            "prompt-ar": "",
+            "placeholder": "Please give your answer !",
+            "id": "eyJxdWVzdG",
+            "isFolder": false,
+            "uniqueId": "buk6zefgr"
           },
           {
-            "id": "q9",
-            "name": "Joint stock?"
+            "question": "Joint stock?",
+            "answer": "",
+            "prompt-en": "",
+            "prompt-ar": "",
+            "placeholder": "Please give your answer !",
+            "id": "eyJxdWVzdG",
+            "isFolder": false,
+            "uniqueId": "iyfdtoap4"
           },
           {
-            "id": "q10",
-            "name": "Why LLC for early stage?"
+            "question": "Why LLC for early stage?",
+            "answer": "",
+            "prompt-en": "",
+            "prompt-ar": "",
+            "placeholder": "Please give your answer !",
+            "id": "eyJxdWVzdG",
+            "isFolder": false,
+            "uniqueId": "aw5axrgyg"
           },
           {
-            "id": "q11",
-            "name": "Have CR or BR?"
+            "question": "Have CR or BR?",
+            "answer": "",
+            "prompt-en": "",
+            "prompt-ar": "",
+            "placeholder": "Please give your answer !",
+            "id": "eyJxdWVzdG",
+            "isFolder": false,
+            "uniqueId": "qomk2fs45"
           },
           {
-            "id": "q12",
-            "name": "Commercial Registration?"
+            "question": "Commercial Registration?",
+            "answer": "",
+            "prompt-en": "",
+            "prompt-ar": "",
+            "placeholder": "Please give your answer !",
+            "id": "eyJxdWVzdG",
+            "isFolder": false,
+            "uniqueId": "dgypf7zz7"
           },
           {
-            "id": "q13",
-            "name": "Business Registration?"
+            "question": "Business Registration?",
+            "answer": "",
+            "prompt-en": "",
+            "prompt-ar": "",
+            "placeholder": "Please give your answer !",
+            "id": "eyJxdWVzdG",
+            "isFolder": false,
+            "uniqueId": "ler7qbu1j"
           },
           {
-            "id": "q14",
-            "name": "If not?"
+            "question": "If not?",
+            "answer": "",
+            "prompt-en": "",
+            "prompt-ar": "",
+            "placeholder": "Please give your answer !",
+            "id": "eyJxdWVzdG",
+            "isFolder": false,
+            "uniqueId": "bfonotal0"
           },
           {
-            "id": "q15",
-            "name": "Need to get?"
+            "question": "Need to get?",
+            "answer": "",
+            "prompt-en": "",
+            "prompt-ar": "",
+            "placeholder": "Please give your answer !",
+            "id": "eyJxdWVzdG",
+            "isFolder": false,
+            "uniqueId": "6yjx8gd6l"
           }
-        ]
+        ],
+        "id": "eyJuYW1lIj",
+        "isFolder": true,
+        "uniqueId": "0a26htq80"
       },
       {
-        "id": "legal-model-section-2-intellectual-property",
         "name": "Section 2: Intellectual Property",
         "children": [
           {
-            "id": "q1",
-            "name": "What protections needed?"
+            "question": "What protections needed?",
+            "answer": "",
+            "prompt-en": "",
+            "prompt-ar": "",
+            "placeholder": "Please give your answer !",
+            "id": "eyJxdWVzdG",
+            "isFolder": false,
+            "uniqueId": "4o1sjin5o"
           },
           {
-            "id": "q2",
-            "name": "Trademarks?"
+            "question": "Trademarks?",
+            "answer": "",
+            "prompt-en": "",
+            "prompt-ar": "",
+            "placeholder": "Please give your answer !",
+            "id": "eyJxdWVzdG",
+            "isFolder": false,
+            "uniqueId": "pdfes3br0"
           },
           {
-            "id": "q3",
-            "name": "Copyright?"
+            "question": "Copyright?",
+            "answer": "",
+            "prompt-en": "",
+            "prompt-ar": "",
+            "placeholder": "Please give your answer !",
+            "id": "eyJxdWVzdG",
+            "isFolder": false,
+            "uniqueId": "eqdj2ac3d"
           },
           {
-            "id": "q4",
-            "name": "Patents?"
+            "question": "Patents?",
+            "answer": "",
+            "prompt-en": "",
+            "prompt-ar": "",
+            "placeholder": "Please give your answer !",
+            "id": "eyJxdWVzdG",
+            "isFolder": false,
+            "uniqueId": "gfmyjmq8r"
           },
           {
-            "id": "q5",
-            "name": "Trade secrets?"
+            "question": "Trade secrets?",
+            "answer": "",
+            "prompt-en": "",
+            "prompt-ar": "",
+            "placeholder": "Please give your answer !",
+            "id": "eyJxdWVzdG",
+            "isFolder": false,
+            "uniqueId": "uiaecql60"
           },
           {
-            "id": "q6",
-            "name": "Why important?"
+            "question": "Why important?",
+            "answer": "",
+            "prompt-en": "",
+            "prompt-ar": "",
+            "placeholder": "Please give your answer !",
+            "id": "eyJxdWVzdG",
+            "isFolder": false,
+            "uniqueId": "97wt5efv5"
           },
           {
-            "id": "q7",
-            "name": "Proprietary technology?"
+            "question": "Proprietary technology?",
+            "answer": "",
+            "prompt-en": "",
+            "prompt-ar": "",
+            "placeholder": "Please give your answer !",
+            "id": "eyJxdWVzdG",
+            "isFolder": false,
+            "uniqueId": "exjlj81cl"
           },
           {
-            "id": "q8",
-            "name": "Patentable?"
+            "question": "Patentable?",
+            "answer": "",
+            "prompt-en": "",
+            "prompt-ar": "",
+            "placeholder": "Please give your answer !",
+            "id": "eyJxdWVzdG",
+            "isFolder": false,
+            "uniqueId": "3ky2xafxn"
           },
           {
-            "id": "q9",
-            "name": "Unique algorithms?"
+            "question": "Unique algorithms?",
+            "answer": "",
+            "prompt-en": "",
+            "prompt-ar": "",
+            "placeholder": "Please give your answer !",
+            "id": "eyJxdWVzdG",
+            "isFolder": false,
+            "uniqueId": "vumuzd5c6"
           },
           {
-            "id": "q10",
-            "name": "AI models?"
+            "question": "AI models?",
+            "answer": "",
+            "prompt-en": "",
+            "prompt-ar": "",
+            "placeholder": "Please give your answer !",
+            "id": "eyJxdWVzdG",
+            "isFolder": false,
+            "uniqueId": "lbgfwbyzj"
           },
           {
-            "id": "q11",
-            "name": "Hardware designs?"
+            "question": "Hardware designs?",
+            "answer": "",
+            "prompt-en": "",
+            "prompt-ar": "",
+            "placeholder": "Please give your answer !",
+            "id": "eyJxdWVzdG",
+            "isFolder": false,
+            "uniqueId": "1tq05v1jz"
           },
           {
-            "id": "q12",
-            "name": "Why patent?"
+            "question": "Why patent?",
+            "answer": "",
+            "prompt-en": "",
+            "prompt-ar": "",
+            "placeholder": "Please give your answer !",
+            "id": "eyJxdWVzdG",
+            "isFolder": false,
+            "uniqueId": "lxbv6oz07"
           }
-        ]
+        ],
+        "id": "eyJuYW1lIj",
+        "isFolder": true,
+        "uniqueId": "fluhvntfl"
       },
       {
-        "id": "legal-model-section-3-contracts-&-agreements",
         "name": "Section 3: Contracts & Agreements",
         "children": [
           {
-            "id": "q1",
-            "name": "Key contracts?"
+            "question": "Key contracts?",
+            "answer": "",
+            "prompt-en": "",
+            "prompt-ar": "",
+            "placeholder": "Please give your answer !",
+            "id": "eyJxdWVzdG",
+            "isFolder": false,
+            "uniqueId": "n9yqk20ao"
           },
           {
-            "id": "q2",
-            "name": "Founder agreement?"
+            "question": "Founder agreement?",
+            "answer": "",
+            "prompt-en": "",
+            "prompt-ar": "",
+            "placeholder": "Please give your answer !",
+            "id": "eyJxdWVzdG",
+            "isFolder": false,
+            "uniqueId": "e447ndiwr"
           },
           {
-            "id": "q3",
-            "name": "NDAs?"
+            "question": "NDAs?",
+            "answer": "",
+            "prompt-en": "",
+            "prompt-ar": "",
+            "placeholder": "Please give your answer !",
+            "id": "eyJxdWVzdG",
+            "isFolder": false,
+            "uniqueId": "j1nsi6pv6"
           },
           {
-            "id": "q4",
-            "name": "Employment agreements?"
+            "question": "Employment agreements?",
+            "answer": "",
+            "prompt-en": "",
+            "prompt-ar": "",
+            "placeholder": "Please give your answer !",
+            "id": "eyJxdWVzdG",
+            "isFolder": false,
+            "uniqueId": "ja1ml6s2d"
           },
           {
-            "id": "q5",
-            "name": "Terms of use?"
+            "question": "Terms of use?",
+            "answer": "",
+            "prompt-en": "",
+            "prompt-ar": "",
+            "placeholder": "Please give your answer !",
+            "id": "eyJxdWVzdG",
+            "isFolder": false,
+            "uniqueId": "edvzakbmd"
           },
           {
-            "id": "q6",
-            "name": "Privacy policy?"
+            "question": "Privacy policy?",
+            "answer": "",
+            "prompt-en": "",
+            "prompt-ar": "",
+            "placeholder": "Please give your answer !",
+            "id": "eyJxdWVzdG",
+            "isFolder": false,
+            "uniqueId": "11merwthu"
           }
-        ]
+        ],
+        "id": "eyJuYW1lIj",
+        "isFolder": true,
+        "uniqueId": "cekpqf077"
       },
       {
-        "id": "legal-model-section-4-compliance-&-regulations",
         "name": "Section 4: Compliance & Regulations",
         "children": [
           {
-            "id": "q1",
-            "name": "Compliance recommendations?"
+            "question": "Compliance recommendations?",
+            "answer": "",
+            "prompt-en": "",
+            "prompt-ar": "",
+            "placeholder": "Please give your answer !",
+            "id": "eyJxdWVzdG",
+            "isFolder": false,
+            "uniqueId": "kfh92yabg"
           },
           {
-            "id": "q2",
-            "name": "Corporate compliance?"
+            "question": "Corporate compliance?",
+            "answer": "",
+            "prompt-en": "",
+            "prompt-ar": "",
+            "placeholder": "Please give your answer !",
+            "id": "eyJxdWVzdG",
+            "isFolder": false,
+            "uniqueId": "n3oc7x614"
           },
           {
-            "id": "q3",
-            "name": "Data protection?"
+            "question": "Data protection?",
+            "answer": "",
+            "prompt-en": "",
+            "prompt-ar": "",
+            "placeholder": "Please give your answer !",
+            "id": "eyJxdWVzdG",
+            "isFolder": false,
+            "uniqueId": "sjxyrtcl4"
           },
           {
-            "id": "q4",
-            "name": "Cybersecurity?"
+            "question": "Cybersecurity?",
+            "answer": "",
+            "prompt-en": "",
+            "prompt-ar": "",
+            "placeholder": "Please give your answer !",
+            "id": "eyJxdWVzdG",
+            "isFolder": false,
+            "uniqueId": "6kd95o95m"
           },
           {
-            "id": "q5",
-            "name": "Industry-specific?"
+            "question": "Industry-specific?",
+            "answer": "",
+            "prompt-en": "",
+            "prompt-ar": "",
+            "placeholder": "Please give your answer !",
+            "id": "eyJxdWVzdG",
+            "isFolder": false,
+            "uniqueId": "vspag7csj"
           },
           {
-            "id": "q6",
-            "name": "Why crucial?"
+            "question": "Why crucial?",
+            "answer": "",
+            "prompt-en": "",
+            "prompt-ar": "",
+            "placeholder": "Please give your answer !",
+            "id": "eyJxdWVzdG",
+            "isFolder": false,
+            "uniqueId": "op47boony"
           }
-        ]
+        ],
+        "id": "eyJuYW1lIj",
+        "isFolder": true,
+        "uniqueId": "lfkl0tz9w"
       },
       {
-        "id": "legal-model-section-5-cap-table-&-equity",
         "name": "Section 5: Cap Table & Equity",
         "children": [
           {
-            "id": "q1",
-            "name": "Cap table structure?"
+            "question": "Cap table structure?",
+            "answer": "",
+            "prompt-en": "",
+            "prompt-ar": "",
+            "placeholder": "Please give your answer !",
+            "id": "eyJxdWVzdG",
+            "isFolder": false,
+            "uniqueId": "b53o8rofh"
           },
           {
-            "id": "q2",
-            "name": "Founders ownership?"
+            "question": "Founders ownership?",
+            "answer": "",
+            "prompt-en": "",
+            "prompt-ar": "",
+            "placeholder": "Please give your answer !",
+            "id": "eyJxdWVzdG",
+            "isFolder": false,
+            "uniqueId": "spbe72f6t"
           },
           {
-            "id": "q3",
-            "name": "ESOP pool?"
+            "question": "ESOP pool?",
+            "answer": "",
+            "prompt-en": "",
+            "prompt-ar": "",
+            "placeholder": "Please give your answer !",
+            "id": "eyJxdWVzdG",
+            "isFolder": false,
+            "uniqueId": "2ujpexgvp"
           },
           {
-            "id": "q4",
-            "name": "Investors ownership?"
+            "question": "Investors ownership?",
+            "answer": "",
+            "prompt-en": "",
+            "prompt-ar": "",
+            "placeholder": "Please give your answer !",
+            "id": "eyJxdWVzdG",
+            "isFolder": false,
+            "uniqueId": "ra1gp301e"
           },
           {
-            "id": "q5",
-            "name": "Vesting schedules?"
+            "question": "Vesting schedules?",
+            "answer": "",
+            "prompt-en": "",
+            "prompt-ar": "",
+            "placeholder": "Please give your answer !",
+            "id": "eyJxdWVzdG",
+            "isFolder": false,
+            "uniqueId": "m3opxn4yg"
           },
           {
-            "id": "q6",
-            "name": "Why cap table?"
+            "question": "Why cap table?",
+            "answer": "",
+            "prompt-en": "",
+            "prompt-ar": "",
+            "placeholder": "Please give your answer !",
+            "id": "eyJxdWVzdG",
+            "isFolder": false,
+            "uniqueId": "95p2clbyq"
           },
           {
-            "id": "q7",
-            "name": "Add ESOP pool?"
+            "question": "Add ESOP pool?",
+            "answer": "",
+            "prompt-en": "",
+            "prompt-ar": "",
+            "placeholder": "Please give your answer !",
+            "id": "eyJxdWVzdG",
+            "isFolder": false,
+            "uniqueId": "26qluz301"
           },
           {
-            "id": "q8",
-            "name": "Recommended percentage?"
+            "question": "Recommended percentage?",
+            "answer": "",
+            "prompt-en": "",
+            "prompt-ar": "",
+            "placeholder": "Please give your answer !",
+            "id": "eyJxdWVzdG",
+            "isFolder": false,
+            "uniqueId": "b1tfwgpqx"
           },
           {
-            "id": "q9",
-            "name": "Based on team size?"
+            "question": "Based on team size?",
+            "answer": "",
+            "prompt-en": "",
+            "prompt-ar": "",
+            "placeholder": "Please give your answer !",
+            "id": "eyJxdWVzdG",
+            "isFolder": false,
+            "uniqueId": "8b2wo4kel"
           },
           {
-            "id": "q10",
-            "name": "Attract talent?"
+            "question": "Attract talent?",
+            "answer": "",
+            "prompt-en": "",
+            "prompt-ar": "",
+            "placeholder": "Please give your answer !",
+            "id": "eyJxdWVzdG",
+            "isFolder": false,
+            "uniqueId": "vjtdddbq8"
           },
           {
-            "id": "q11",
-            "name": "Retain talent?"
+            "question": "Retain talent?",
+            "answer": "",
+            "prompt-en": "",
+            "prompt-ar": "",
+            "placeholder": "Please give your answer !",
+            "id": "eyJxdWVzdG",
+            "isFolder": false,
+            "uniqueId": "u25y8r369"
           },
           {
-            "id": "q12",
-            "name": "Investment round soon?"
+            "question": "Investment round soon?",
+            "answer": "",
+            "prompt-en": "",
+            "prompt-ar": "",
+            "placeholder": "Please give your answer !",
+            "id": "eyJxdWVzdG",
+            "isFolder": false,
+            "uniqueId": "vgfc2yhe9"
           },
           {
-            "id": "q13",
-            "name": "Pre-seed?"
+            "question": "Pre-seed?",
+            "answer": "",
+            "prompt-en": "",
+            "prompt-ar": "",
+            "placeholder": "Please give your answer !",
+            "id": "eyJxdWVzdG",
+            "isFolder": false,
+            "uniqueId": "s52g6k5pq"
           },
           {
-            "id": "q14",
-            "name": "Seed?"
+            "question": "Seed?",
+            "answer": "",
+            "prompt-en": "",
+            "prompt-ar": "",
+            "placeholder": "Please give your answer !",
+            "id": "eyJxdWVzdG",
+            "isFolder": false,
+            "uniqueId": "ebucpmkc2"
           },
           {
-            "id": "q15",
-            "name": "Series A?"
+            "question": "Series A?",
+            "answer": "",
+            "prompt-en": "",
+            "prompt-ar": "",
+            "placeholder": "Please give your answer !",
+            "id": "eyJxdWVzdG",
+            "isFolder": false,
+            "uniqueId": "fyg0gd2yi"
           },
           {
-            "id": "q16",
-            "name": "Adjust cap table?"
+            "question": "Adjust cap table?",
+            "answer": "",
+            "prompt-en": "",
+            "prompt-ar": "",
+            "placeholder": "Please give your answer !",
+            "id": "eyJxdWVzdG",
+            "isFolder": false,
+            "uniqueId": "oxkgqb6uw"
           },
           {
-            "id": "q17",
-            "name": "Create downloadable cap table?"
+            "question": "Create downloadable cap table?",
+            "answer": "",
+            "prompt-en": "",
+            "prompt-ar": "",
+            "placeholder": "Please give your answer !",
+            "id": "eyJxdWVzdG",
+            "isFolder": false,
+            "uniqueId": "1b75wv77w"
           },
           {
-            "id": "q18",
-            "name": "Excel format?"
+            "question": "Excel format?",
+            "answer": "",
+            "prompt-en": "",
+            "prompt-ar": "",
+            "placeholder": "Please give your answer !",
+            "id": "eyJxdWVzdG",
+            "isFolder": false,
+            "uniqueId": "27iujaspb"
           },
           {
-            "id": "q19",
-            "name": "PDF format?"
+            "question": "PDF format?",
+            "answer": "",
+            "prompt-en": "",
+            "prompt-ar": "",
+            "placeholder": "Please give your answer !",
+            "id": "eyJxdWVzdG",
+            "isFolder": false,
+            "uniqueId": "h9f41l578"
           },
           {
-            "id": "q20",
-            "name": "Full table?"
+            "question": "Full table?",
+            "answer": "",
+            "prompt-en": "",
+            "prompt-ar": "",
+            "placeholder": "Please give your answer !",
+            "id": "eyJxdWVzdG",
+            "isFolder": false,
+            "uniqueId": "rbc2pnc7z"
           }
-        ]
+        ],
+        "id": "eyJuYW1lIj",
+        "isFolder": true,
+        "uniqueId": "bvjhrpiw3"
       }
-    ]
+    ],
+    "id": "eyJuYW1lIj",
+    "isFolder": true,
+    "uniqueId": "xibb251y5"
   },
   {
-    "id": "1767113670628",
     "name": "New Sub",
     "children": [
-        {
-          "id": "q1",
-          "name": "Cap table structure?"
-        }
-    ]
+      {
+        "question": "Cap table structure?",
+        "answer": "",
+        "prompt-en": "",
+        "prompt-ar": "",
+        "placeholder": "Please give your answer !",
+        "id": "eyJxdWVzdG",
+        "isFolder": false,
+        "uniqueId": "7kv4f03c0"
+      }
+    ],
+    "id": "eyJuYW1lIj",
+    "isFolder": true,
+    "uniqueId": "5j1i2igjp"
   },
   {
-    "id": "1767114396495",
-    "name": "New Sub",
-    "children": []
+    "question": "New Sub",
+    "answer": "",
+    "prompt-en": "",
+    "prompt-ar": "",
+    "placeholder": "Please give your answer !",
+    "id": "eyJxdWVzdG",
+    "isFolder": false,
+    "uniqueId": "swq78hhhb"
   },
   {
-    "id": "1767115605203",
-    "name": "New Sub",
-    "children": []
+    "question": "New Sub",
+    "answer": "",
+    "prompt-en": "",
+    "prompt-ar": "",
+    "placeholder": "Please give your answer !",
+    "id": "eyJxdWVzdG",
+    "isFolder": false,
+    "uniqueId": "042mjq18c"
   }
 ]

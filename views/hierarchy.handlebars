@@ -1,14 +1,18 @@
 {{!< main}}
 
-<div class="flex justify-center items-center gap-8 min-h-[calc(100vh-64px-2.5rem)]">
+<div class="flex gap-10 min-h-[85vh]">
+  {{> hierarchical-sidebar rawData}}
+
+  <div class="flex justify-center items-center gap-8 min-h-[calc(100vh-64px-2.5rem)]">
 
 
 
-  {{> question-card
-    title="Hi <span class='text-primary'>Demo</span>, what's your next big idea? (Hierarchical)"
-    placeholder="Enter prompt..."
-    content="As part of the Idea Model in Section 4: Branding, answer the following question for your startup: What is your mission?. Provide a comprehensive, startup-focused response with specific, actionable details."
-  }}
+    {{> question-card
+      title="Hi <span class='text-primary'>Demo</span>, what's your next big idea? (Hierarchical)"
+      placeholder="Enter prompt..."
+      content="As part of the Idea Model in Section 4: Branding, answer the following question for your startup: What is your mission?. Provide a comprehensive, startup-focused response with specific, actionable details."
+    }}
+  </div>
 </div>
      <script>
         // CRUD functionality

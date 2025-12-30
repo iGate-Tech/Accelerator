@@ -95,6 +95,9 @@ function loadQuestions() {
 
 loadQuestions();
 
+// Load raw data for sidebar
+let rawData = JSON.parse(fs.readFileSync('data.json', 'utf8'));
+
 const app = express();
 
 // Session middleware
@@ -121,7 +124,10 @@ app.engine('handlebars', exphbs.engine({
     helpers: {
         gt: (a, b) => a > b,
         eq: (a, b) => a === b,
-        markdown: (text) => marked.parse(text)
+        markdown: (text) => marked.parse(text),
+        countQuestions: (arr) => arr ? arr.length : 0,
+        sumLengths: (content) => content ? content.reduce((sum, group) => sum + (group ? group.length : 0), 0) : 0,
+        totalModelQuestions: (sections) => sections ? sections.reduce((sum, section) => sum + (section.content ? section.content.reduce((s, g) => s + (g ? g.length : 0), 0) : 0), 0) : 0
     },
     partialsDir: path.join(__dirname, 'views/partials')
 }));
@@ -696,7 +702,7 @@ app.get('/', (req, res) => {
             console.error('Select error:', err);
             return res.status(500).send('Database error');
         }
-        res.render('home', { ideas: rows || [] });
+        res.render('home', { ideas: rows || [], rawData });
         db.close();
     });
 });
@@ -967,7 +973,7 @@ app.get('/model', (req, res) => {
 });
 
 app.get('/new', (req, res) => {
-    res.render('new');
+    res.render('new', { rawData });
 });
 
 app.listen(port, () => {

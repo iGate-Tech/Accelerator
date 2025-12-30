@@ -1,14 +1,14 @@
 <!-- sidebar -->
 <div
-  class="w-[320px] bg-base-100 rounded-2xl p-3 shadow-sm border border-base-200"
+  class="sidebar relative w-[400px] bg-base-100 rounded-2xl p-3 shadow-sm border border-base-200 h-[85vh] overflow-visible"
 >
   <!-- Tabs -->
   <div class="flex items-center gap-1 mb-3 text-sm">
     <span
       class="px-3 py-1 rounded-lg bg-base-100 shadow-sm font-medium"
-    >Market</span>
-    <span class="px-3 py-1 text-base-content/60">Insights</span>
-    <span class="px-3 py-1 text-base-content/60">Watchlists</span>
+    >Make</span>
+    <span class="px-3 py-1 text-base-content/60">Edit</span>
+    <span class="px-3 py-1 text-base-content/60">Reports</span>
     <div class="ml-auto flex gap-2 text-base-content/60">
       <i class="lucide lucide-search w-4 h-4" data-lucide="search"></i> <i class="lucide lucide-chevron-right w-4 h-4" data-lucide="chevron-right"></i>
     </div>
@@ -16,124 +16,95 @@
 
   <!-- Section -->
   <div class="px-2">
-    <p class="text-xs text-base-content/60 mb-2">Market type</p>
+    <p class="text-xs text-base-content/60 mb-2">Accelerator</p>
 
     <ul class="text-sm space-y-1 relative">
-      <!-- Perpetuals -->
+      {{#each this}}
+      <!-- {{name}} -->
       <li>
-        <div class="flex items-center gap-2 py-1">
-          <span class="text-base-content/60"><i class="lucide lucide-chevron-down w-4 h-4" data-lucide="chevron-down"></i></span>
-          <span
-            class="w-4 h-4 rounded-md border border-base-300 bg-base-100"
-          ></span>
-          <span class="flex-1">Perpetuals</span>
-          <span class="text-base-content/60">85</span>
+        <div class="flex items-center gap-3 py-0.5 px-2 cursor-pointer rounded-md" onclick="toggleSidebarItem(this)">
+          <span class="text-base-content/60"><i class="lucide lucide-chevron-right w-4 h-4" data-lucide="chevron-right"></i></span>
+          <span class="flex-1 editable-text" oninput="updateItem(this, 'model')">{{name}}</span>
+          <span class="text-base-content/60 text-xs">{{totalModelQuestions sections}}</span>
+          <div class="dropdown dropdown-hover">
+            <div tabindex="0" role="button" class="btn m-1 p-0">
+              <i class="lucide lucide-ellipsis-vertical w-4 h-4" data-lucide="ellipsis-vertical"></i>
+            </div>
+            <ul tabindex="-1" class="dropdown-content menu bg-base-100 rounded-md z-1 w-52 p-2 shadow-sm">
+              <li><a onclick="editItem(this, 'model')"><i class="lucide lucide-edit w-4 h-4 mr-2" data-lucide="edit"></i>Edit</a></li>
+              <li><a onclick="saveItem(this, 'model')"><i class="lucide lucide-save w-4 h-4 mr-2" data-lucide="save"></i>Save</a></li>
+              <li><a onclick="deleteItem(this, 'model')"><i class="lucide lucide-trash w-4 h-4 mr-2" data-lucide="trash"></i>Delete</a></li>
+              <li><a onclick="addItem(this, 'section')"><i class="lucide lucide-plus w-4 h-4 mr-2" data-lucide="plus"></i>Add Section</a></li>
+            </ul>
+          </div>
         </div>
 
-        <!-- Nested -->
-        <ul class="ml-5 pl-4 border-l border-base-300 space-y-1">
-          <li class="flex items-center gap-2 py-1">
-            <span class="text-base-content/70"><i class="lucide lucide-chevron-right w-4 h-4" data-lucide="chevron-right"></i></span>
-            <span
-              class="w-4 h-4 rounded-md bg-primary text-primary-content flex items-center justify-center text-xs"
-            ><i class="lucide lucide-check w-4 h-4" data-lucide="check"></i></span>
-            <span class="flex-1 font-medium">Open Interest</span>
-            <span class="text-base-content/60">24</span>
-          </li>
-
+        <!-- Nested sections -->
+              <ul class="ml-3 pl-2 border-l border-primary space-y-1 hidden mt-1">
+          {{#each sections}}
           <li>
-            <div class="flex items-center gap-2 py-1">
-              <span class="text-base-content/70"><i class="lucide lucide-chevron-down w-4 h-4" data-lucide="chevron-down"></i></span>
-              <span
-                class="w-4 h-4 rounded-md border border-base-300 bg-base-100"
-              ></span>
-              <span class="flex-1">Funding Rates</span>
-              <span class="text-base-content/60">12</span>
+            <div class="flex items-center gap-3 py-0.5 px-2 cursor-pointer rounded-md" onclick="toggleSidebarItem(this)">
+              <span class="text-base-content/70"><i class="lucide lucide-chevron-right w-4 h-4" data-lucide="chevron-right"></i></span>
+              <span class="flex-1 editable-text" oninput="updateItem(this, 'section')">{{name}}</span>
+              <span class="text-base-content/60 text-xs">{{sumLengths content}}</span>
+              <div class="dropdown dropdown-hover">
+                <div tabindex="0" role="button" class="btn m-1 p-0">
+                  <i class="lucide lucide-ellipsis-vertical w-4 h-4" data-lucide="ellipsis-vertical"></i>
+                </div>
+                <ul tabindex="-1" class="dropdown-content menu bg-base-100 rounded-md z-1 w-52 p-2 shadow-sm">
+                  <li><a onclick="editItem(this, 'section')"><i class="lucide lucide-edit w-4 h-4 mr-2" data-lucide="edit"></i>Edit</a></li>
+                  <li><a onclick="saveItem(this, 'section')"><i class="lucide lucide-save w-4 h-4 mr-2" data-lucide="save"></i>Save</a></li>
+                  <li><a onclick="deleteItem(this, 'section')"><i class="lucide lucide-trash w-4 h-4 mr-2" data-lucide="trash"></i>Delete</a></li>
+                  <li><a onclick="addItem(this, 'group')"><i class="lucide lucide-plus w-4 h-4 mr-2" data-lucide="plus"></i>Add Group</a></li>
+                </ul>
+              </div>
             </div>
 
-            <ul class="ml-5 pl-4 border-l border-base-300 space-y-1">
-              <li class="flex items-center gap-2 py-1">
-                <span
-                  class="w-4 h-4 rounded-md border border-base-300 bg-base-100"
-                ></span>
-                <span class="flex-1">Positive Funding</span>
-                <span class="text-base-content/60">4</span>
+            <!-- Nested content groups -->
+            <ul class="ml-3 pl-2 border-l border-primary space-y-1 hidden mt-1">
+            {{#each content}}
+            <li>
+              <div class="flex items-center gap-3 py-0.5 px-2 cursor-pointer rounded-md" onclick="toggleSidebarItem(this)">
+                <span class="text-base-content/60"><i class="lucide lucide-chevron-right w-4 h-4" data-lucide="chevron-right"></i></span>
+                <span class="flex-1 editable-text" oninput="updateItem(this, 'group')">Group {{@index}} ({{countQuestions this}} questions)</span>
+                <span class="text-base-content/60 text-xs">{{countQuestions this}}</span>
+                <div class="dropdown dropdown-hover">
+                  <div tabindex="0" role="button" class="btn m-1 p-0">
+                    <i class="lucide lucide-ellipsis-vertical w-4 h-4" data-lucide="ellipsis-vertical"></i>
+                  </div>
+                  <ul tabindex="-1" class="dropdown-content menu bg-base-100 rounded-md z-1 w-52 p-2 shadow-sm">
+                    <li><a onclick="editItem(this, 'group')"><i class="lucide lucide-edit w-4 h-4 mr-2" data-lucide="edit"></i>Edit</a></li>
+                    <li><a onclick="saveItem(this, 'group')"><i class="lucide lucide-save w-4 h-4 mr-2" data-lucide="save"></i>Save</a></li>
+                    <li><a onclick="deleteItem(this, 'group')"><i class="lucide lucide-trash w-4 h-4 mr-2" data-lucide="trash"></i>Delete</a></li>
+                    <li><a onclick="addItem(this, 'question')"><i class="lucide lucide-plus w-4 h-4 mr-2" data-lucide="plus"></i>Add Question</a></li>
+                  </ul>
+                </div>
+              </div>
+
+              <!-- Nested questions -->
+        <ul class="ml-3 pl-2 border-l border-primary space-y-1 hidden mt-1">
+      {{#each .}}
+              <li class="flex items-center gap-2 py-1 px-2 cursor-pointer rounded-md relative" onclick="toggleSidebarItem(this)">
+                <span class="flex-1 text-xs editable-text" oninput="updateItem(this, 'question')">{{question}}</span>
+                <div class="dropdown dropdown-hover ml-auto">
+                  <div tabindex="0" role="button" class="btn m-1 p-0">
+                    <i class="lucide lucide-ellipsis-vertical w-4 h-4" data-lucide="ellipsis-vertical"></i>
+                  </div>
+                  <ul tabindex="-1" class="dropdown-content menu bg-base-100 rounded-md z-1 w-52 p-2 shadow-sm">
+                    <li><a onclick="editItem(this, 'question')"><i class="lucide lucide-edit w-4 h-4 mr-2" data-lucide="edit"></i>Edit</a></li>
+                    <li><a onclick="saveItem(this, 'question')"><i class="lucide lucide-save w-4 h-4 mr-2" data-lucide="save"></i>Save</a></li>
+                    <li><a onclick="deleteItem(this, 'question')"><i class="lucide lucide-trash w-4 h-4 mr-2" data-lucide="trash"></i>Delete</a></li>
+                  </ul>
+                </div>
               </li>
-              <li class="flex items-center gap-2 py-1">
-                <span
-                  class="w-4 h-4 rounded-md border border-base-300 bg-base-100"
-                ></span>
-                <span class="flex-1">Negative Funding</span>
-                <span class="text-base-content/60">3</span>
-              </li>
+              {{/each}}
             </ul>
-          </li>
-
-          <li class="flex items-center gap-2 py-1">
-            <span class="text-base-content/70"><i class="lucide lucide-chevron-right w-4 h-4" data-lucide="chevron-right"></i></span>
-            <span
-              class="w-4 h-4 rounded-md border border-base-300 bg-base-100"
-            ></span>
-            <span class="flex-1">Newly Listed Perps</span>
-            <span class="text-base-content/60">9</span>
-          </li>
-
-          <li class="flex items-center gap-2 py-1">
-            <span class="text-base-content/70"><i class="lucide lucide-chevron-right w-4 h-4" data-lucide="chevron-right"></i></span>
-            <span
-              class="w-4 h-4 rounded-md border border-base-300 bg-base-100"
-            ></span>
-            <span class="flex-1">Low Liquidity Perps</span>
-            <span class="text-base-content/60">8</span>
-          </li>
-
-          <li class="flex items-center gap-2 py-1">
-            <span class="text-base-content/70"><i class="lucide lucide-chevron-right w-4 h-4" data-lucide="chevron-right"></i></span>
-            <span
-              class="w-4 h-4 rounded-md border border-base-300 bg-base-100"
-            ></span>
-            <span class="flex-1">Points Farming Live</span>
-            <span class="text-base-content/60">7</span>
-          </li>
-
-          <li class="flex items-center gap-2 py-1">
-            <span class="text-base-content/70"><i class="lucide lucide-chevron-right w-4 h-4" data-lucide="chevron-right"></i></span>
-            <span
-              class="w-4 h-4 rounded-md border border-base-300 bg-base-100"
-            ></span>
-            <span class="flex-1">High Volatility</span>
-            <span class="text-base-content/60">18</span>
-          </li>
+            {{/each}}
+          </ul>
+          {{/each}}
         </ul>
       </li>
-
-      <!-- Other roots -->
-      <li class="flex items-center gap-2 py-1 mt-1">
-        <span class="text-base-content/70"><i class="lucide lucide-chevron-right w-4 h-4" data-lucide="chevron-right"></i></span>
-        <span
-          class="w-4 h-4 rounded-md border border-base-300 bg-base-100"
-        ></span>
-        <span class="flex-1">Options</span>
-        <span class="text-base-content/60">42</span>
-      </li>
-
-      <li class="flex items-center gap-2 py-1">
-        <span class="text-base-content/70"><i class="lucide lucide-chevron-right w-4 h-4" data-lucide="chevron-right"></i></span>
-        <span
-          class="w-4 h-4 rounded-md border border-base-300 bg-base-100"
-        ></span>
-        <span class="flex-1">Spot Only</span>
-        <span class="text-base-content/60">110</span>
-      </li>
-
-      <li class="flex items-center gap-2 py-1">
-        <span class="text-base-content/70"><i class="lucide lucide-chevron-right w-4 h-4" data-lucide="chevron-right"></i></span>
-        <span
-          class="w-4 h-4 rounded-md border border-base-300 bg-base-100"
-        ></span>
-        <span class="flex-1">No Active Market</span>
-        <span class="text-base-content/60">18</span>
-      </li>
+      {{/each}}
     </ul>
   </div>
 </div>

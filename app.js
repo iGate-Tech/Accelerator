@@ -199,7 +199,7 @@ function copyNode(data, fromUniqueId, toParentUniqueId) {
   // Add to parent
   const added = addNode(data, toParentUniqueId, copy);
   console.log('Added to parent:', added);
-  return added;
+  return added ? copy : false;
 }
 
 const app = express();
@@ -1116,10 +1116,11 @@ app.post('/update-node/:id', (req, res) => {
 app.post('/paste-as-child', (req, res) => {
   const { parentId, copyId } = req.body;
   console.log('Pasting node', copyId, 'as child of', parentId);
-  if (copyNode(hierarchicalData, copyId, parentId)) {
+  const copy = copyNode(hierarchicalData, copyId, parentId);
+  if (copy) {
     fs.writeFileSync('hierarchical-data.json', JSON.stringify(hierarchicalData, null, 2));
     console.log('Paste successful');
-    res.json({ success: true });
+    res.json({ success: true, newNode: copy });
   } else {
     console.log('Paste failed: node not found');
     res.status(400).json({ success: false });

@@ -2221,6 +2221,9 @@
   .z-10 {
     z-index: 10;
   }
+  .z-50 {
+    z-index: 50;
+  }
   .tab-content {
     @layer daisyui.l1.l2.l3 {
       order: var(--tabcontent-order);

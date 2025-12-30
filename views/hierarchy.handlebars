@@ -2,8 +2,17 @@
 <div class="flex gap-10  items-center min-h-[85vh]">
 {{> hierarchical-sidebar rawData}}
 
+   <div class="flex justify-center items-center gap-8">
 
-      <script>
+
+
+     {{> question-card
+       title="Hi <span class='text-primary'>Demo</span>, what's your next big idea? (Hierarchical)"
+       placeholder="Enter prompt..."
+       content="As part of the Idea Model in Section 4: Branding, answer the following question for your startup: What is your mission?. Provide a comprehensive, startup-focused response with specific, actionable details."
+     }}
+   </div>
+     <script>
         // CRUD functionality
         let copiedId = null;
 

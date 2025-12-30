@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+ <html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{#if title}}{{title}}{{else}}ACC Agent{{/if}}</title>
+       <link href="/output.css" rel="stylesheet">
+       <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+       <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+</head>
+   <body class="bg-base-100 text-base-content min-h-screen">
+       {{> navbar}}
+
+        <div class="container mx-auto mt-10">
+           {{{body}}}
+       </div>
+        <script>
+            // Theme toggle functionality
+            const themeToggle = document.getElementById('theme-toggle');
+            const html = document.documentElement;
+
+            // Get saved theme or default to 'light'
+            const savedTheme = localStorage.getItem('theme') || 'light';
+            html.setAttribute('data-theme', savedTheme);
+
+            // Update icon based on current theme
+            function updateIcon(theme) {
+                const iconContainer = themeToggle.querySelector('i') || themeToggle.querySelector('svg');
+                if (iconContainer) {
+                    if (theme === 'light') {
+                        iconContainer.setAttribute('data-lucide', 'sun');
+                    } else {
+                        iconContainer.setAttribute('data-lucide', 'moon');
+                    }
+                }
+                lucide.createIcons();
+            }
+
+            // Initialize Lucide icons and set initial theme icon
+            lucide.createIcons();
+            updateIcon(savedTheme);
+
+            // Toggle theme on button click
+            themeToggle.addEventListener('click', () => {
+                const currentTheme = html.getAttribute('data-theme');
+                const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+                html.setAttribute('data-theme', newTheme);
+                localStorage.setItem('theme', newTheme);
+                updateIcon(newTheme);
+            });
+        </script>
+  </body>
+</html>

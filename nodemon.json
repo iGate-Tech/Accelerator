@@ -1,0 +1,6 @@
+{
+  "watch": ["app.js", "lib/", "views/"],
+  "ext": "js,json,handlebars",
+  "ignore": ["node_modules/", "public/", "*.db"],
+  "exec": "node app.js"
+}

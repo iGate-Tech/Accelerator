@@ -1,0 +1,31 @@
+<div class="card bg-base-100 shadow-lg hover:shadow-xl transition-all duration-300 border border-base-200 hover:border-primary/30 rounded-lg overflow-hidden relative">
+  <div class="card-body p-6 relative">
+    <div class="flex items-center mb-4">
+      <h3 class="card-title text-xl font-bold text-base-content leading-snug truncate pr-16">{{name}}</h3>
+    </div>
+    {{#if (eq status "in_progress")}}
+      <span class="badge badge-warning badge-xs whitespace-nowrap absolute top-2 right-2">In Progress</span>
+    {{else}}
+      <span class="badge badge-success badge-xs whitespace-nowrap absolute top-2 right-2">Completed</span>
+    {{/if}}
+    <p class="text-sm text-base-content/60 mb-6">Created on {{created_at}}</p>
+    <div class="card-actions justify-end gap-2">
+      {{#if (eq status "in_progress")}}
+        <a href="/resume/{{id}}" class="btn btn-success btn-sm hover:btn-success">
+          <i data-lucide="play" class="w-4 h-4"></i>
+          Resume
+        </a>
+      {{/if}}
+      <a href="/idea/{{id}}" class="btn btn-primary btn-sm hover:btn-primary">
+        <i data-lucide="eye" class="w-4 h-4"></i>
+        View
+      </a>
+      <form action="/delete/{{id}}" method="post" class="inline" onsubmit="return confirm('Are you sure you want to delete this idea?')">
+        <button type="submit" class="btn btn-error btn-sm hover:btn-error">
+          <i data-lucide="trash" class="w-4 h-4"></i>
+          Delete
+        </button>
+      </form>
+    </div>
+  </div>
+</div>

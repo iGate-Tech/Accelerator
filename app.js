@@ -115,66 +115,66 @@ function normalizeChildren(data) {
   }
 }
 
-function deleteNodeById(data, id) {
+function deleteNodeByUniqueId(data, uniqueId) {
   for (let i = 0; i < data.length; i++) {
-    if (data[i].id === id) {
+    if (data[i].uniqueId === uniqueId) {
       data.splice(i, 1);
       return true;
     }
-    if (data[i].children && deleteNodeById(data[i].children, id)) {
+    if (data[i].children && deleteNodeByUniqueId(data[i].children, uniqueId)) {
       return true;
     }
   }
   return false;
 }
 
-function addNode(data, parentId, newNode) {
-  if (!parentId) {
+function addNode(data, parentUniqueId, newNode) {
+  if (!parentUniqueId) {
     data.push(newNode);
     return true;
   }
   for (let i = 0; i < data.length; i++) {
-    if (data[i].id === parentId) {
+    if (data[i].uniqueId === parentUniqueId) {
       if (!data[i].children) data[i].children = [];
       data[i].children.push(newNode);
       return true;
     }
-    if (data[i].children && addNode(data[i].children, parentId, newNode)) {
+    if (data[i].children && addNode(data[i].children, parentUniqueId, newNode)) {
       return true;
     }
   }
   return false;
 }
 
-function updateNode(data, id, updates) {
+function updateNode(data, uniqueId, updates) {
   for (let i = 0; i < data.length; i++) {
-    if (data[i].id === id) {
+    if (data[i].uniqueId === uniqueId) {
       Object.assign(data[i], updates);
       return true;
     }
-    if (data[i].children && updateNode(data[i].children, id, updates)) {
+    if (data[i].children && updateNode(data[i].children, uniqueId, updates)) {
       return true;
     }
   }
   return false;
 }
 
-function getNode(data, id) {
+function getNodeByUniqueId(data, uniqueId) {
   for (let i = 0; i < data.length; i++) {
-    if (data[i].id === id) {
+    if (data[i].uniqueId === uniqueId) {
       return data[i];
     }
     if (data[i].children) {
-      const found = getNode(data[i].children, id);
+      const found = getNodeByUniqueId(data[i].children, uniqueId);
       if (found) return found;
     }
   }
   return null;
 }
 
-function copyNode(data, fromId, toParentId) {
-  console.log('Copying node', fromId, 'to parent', toParentId);
-  const node = getNode(data, fromId);
+function copyNode(data, fromUniqueId, toParentUniqueId) {
+  console.log('Copying node', fromUniqueId, 'to parent', toParentUniqueId);
+  const node = getNodeByUniqueId(data, fromUniqueId);
   if (!node) {
     console.log('Node not found');
     return false;
@@ -184,7 +184,7 @@ function copyNode(data, fromId, toParentId) {
   // Generate new id and uniqueId
   copy.id = Date.now().toString();
   copy.uniqueId = Math.random().toString(36).substr(2, 9);
-  console.log('New id:', copy.id);
+  console.log('New id:', copy.id, 'uniqueId:', copy.uniqueId);
   // If it's a folder, recursively update ids
   function updateIds(obj) {
     if (obj.children && Array.isArray(obj.children)) {
@@ -197,7 +197,7 @@ function copyNode(data, fromId, toParentId) {
   }
   updateIds(copy);
   // Add to parent
-  const added = addNode(data, toParentId, copy);
+  const added = addNode(data, toParentUniqueId, copy);
   console.log('Added to parent:', added);
   return added;
 }
@@ -1032,32 +1032,33 @@ app.post('/improve', async (req, res) => {
     }
 });
 
+// This route is for ideas, not hierarchy
 app.post('/update-answer', (req, res) => {
-    const { id, modelIndex, sectionIndex, questionIndex, answer } = req.body;
-    const db = new sqlite3.Database('ideas.db');
-    db.get("SELECT * FROM ideas WHERE id = ?", [id], (err, row) => {
-        if (err || !row) {
-            db.close();
-            return res.status(404).send('Idea not found');
-        }
-        const idea = JSON.parse(row.data);
-        if (idea.models[modelIndex] && idea.models[modelIndex].sections[sectionIndex] && idea.models[modelIndex].sections[sectionIndex].questions[questionIndex]) {
-            idea.models[modelIndex].sections[sectionIndex].questions[questionIndex].answer = answer;
-            const updatedData = JSON.stringify(idea);
-            db.run("UPDATE ideas SET data = ? WHERE id = ?", [updatedData, id], function(updateErr) {
-                db.close();
-                if (updateErr) {
-                    console.error('Update error:', updateErr);
-                    res.status(500).send('Update failed');
-                } else {
-                    res.redirect(`/idea/${id}`);
-                }
-            });
+  const { id, modelIndex, sectionIndex, questionIndex, answer } = req.body;
+  const db = new sqlite3.Database('ideas.db');
+  db.get("SELECT * FROM ideas WHERE id = ?", [id], (err, row) => {
+    if (err || !row) {
+      db.close();
+      return res.status(404).send('Idea not found');
+    }
+    const idea = JSON.parse(row.data);
+    if (idea.models[modelIndex] && idea.models[modelIndex].sections[sectionIndex] && idea.models[modelIndex].sections[sectionIndex].questions[questionIndex]) {
+      idea.models[modelIndex].sections[sectionIndex].questions[questionIndex].answer = answer;
+      const updatedData = JSON.stringify(idea);
+      db.run("UPDATE ideas SET data = ? WHERE id = ?", [updatedData, id], function(updateErr) {
+        db.close();
+        if (updateErr) {
+          console.error('Update error:', updateErr);
+          res.status(500).send('Update failed');
         } else {
-            db.close();
-            res.status(400).send('Invalid indices');
+          res.redirect(`/idea/${id}`);
         }
-    });
+      });
+    } else {
+      db.close();
+      res.status(400).send('Invalid indices');
+    }
+  });
 });
 
 app.post('/delete/:id', (req, res) => {
@@ -1074,8 +1075,8 @@ app.post('/delete/:id', (req, res) => {
 });
 
 app.post('/delete-node/:id', (req, res) => {
-  const nodeId = req.params.id;
-  if (deleteNodeById(hierarchicalData, nodeId)) {
+  const uniqueId = req.params.id;
+  if (deleteNodeByUniqueId(hierarchicalData, uniqueId)) {
     fs.writeFileSync('hierarchical-data.json', JSON.stringify(hierarchicalData, null, 2));
     res.json({ success: true });
   } else {
@@ -1097,14 +1098,14 @@ app.post('/add-node', (req, res) => {
 });
 
 app.post('/update-node/:id', (req, res) => {
-  const nodeId = req.params.id;
+  const uniqueId = req.params.id;
   const { name } = req.body;
-  const node = getNode(hierarchicalData, nodeId);
+  const node = getNodeByUniqueId(hierarchicalData, uniqueId);
   if (!node) {
     return res.status(400).json({ success: false });
   }
   const updates = 'children' in node ? { name } : { question: name };
-  if (updateNode(hierarchicalData, nodeId, updates)) {
+  if (updateNode(hierarchicalData, uniqueId, updates)) {
     fs.writeFileSync('hierarchical-data.json', JSON.stringify(hierarchicalData, null, 2));
     res.json({ success: true });
   } else {

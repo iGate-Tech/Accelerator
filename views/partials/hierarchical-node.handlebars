@@ -1,5 +1,5 @@
 {{#if node.isFolder}}
-<details class="dropdown w-full" data-nodeid="{{node.id}}">
+<details class="dropdown w-full" data-nodeid="{{node.uniqueId}}">
   <summary>
     <i class="lucide lucide-folder w-4 h-4 flex-shrink-0 min-w-4 min-h-4" data-lucide="folder"></i>
     <span class="node-name">{{node.name}}</span>
@@ -25,7 +25,7 @@
   </ul>
 </details>
 {{else}}
-<a href="#" class="flex justify-between items-center" data-nodeid="{{node.id}}">
+<a href="#" class="flex justify-between items-center" data-nodeid="{{node.uniqueId}}">
   <span class="flex items-center">
     <i class="lucide lucide-file-text w-4 h-4 flex-shrink-0 min-w-4 min-h-4" data-lucide="file-text"></i>
     <span class="node-name ml-2">{{node.question}}</span>

@@ -9,6 +9,8 @@
     <ul class="dropdown menu w-52 rounded-box bg-base-100 shadow-sm" popover id="popover-{{node.uniqueId}}" style="position-anchor:--anchor-{{node.uniqueId}}">
       <li><a onclick="editItem(this)"><i class="lucide lucide-edit w-4 h-4" data-lucide="edit"></i> Edit</a></li>
       <li><a onclick="saveItem(this)"><i class="lucide lucide-save w-4 h-4" data-lucide="save"></i> Save</a></li>
+      <li><a onclick="copyNode(this)"><i class="lucide lucide-copy w-4 h-4" data-lucide="copy"></i> Copy</a></li>
+      <li><a onclick="pasteAsChild(this)"><i class="lucide lucide-clipboard-paste w-4 h-4" data-lucide="clipboard-paste"></i> Paste as child</a></li>
       <li><a onclick="addSub(this)"><i class="lucide lucide-folder-plus w-4 h-4" data-lucide="folder-plus"></i> Add sub</a></li>
       <li><a onclick="addLeaf(this)"><i class="lucide lucide-file-plus w-4 h-4" data-lucide="file-plus"></i> Add leaf</a></li>
       <li><a onclick="deleteItem(this)"><i class="lucide lucide-trash w-4 h-4" data-lucide="trash"></i> Delete</a></li>
@@ -35,6 +37,8 @@
 <ul class="dropdown menu w-52 rounded-box bg-base-100 shadow-sm" popover id="popover-{{node.uniqueId}}" style="position-anchor:--anchor-{{node.uniqueId}}">
   <li><a onclick="editItem(this)"><i class="lucide lucide-edit w-4 h-4" data-lucide="edit"></i> Edit</a></li>
   <li><a onclick="saveItem(this)"><i class="lucide lucide-save w-4 h-4" data-lucide="save"></i> Save</a></li>
+  <li><a onclick="copyNode(this)"><i class="lucide lucide-copy w-4 h-4" data-lucide="copy"></i> Copy</a></li>
+  <li><a onclick="pasteAsChild(this)"><i class="lucide lucide-clipboard-paste w-4 h-4" data-lucide="clipboard-paste"></i> Paste as child</a></li>
   <li><a onclick="deleteItem(this)"><i class="lucide lucide-trash w-4 h-4" data-lucide="trash"></i> Delete</a></li>
 </ul>
 {{/if}}

@@ -28,6 +28,47 @@
         });
 
         // CRUD functionality
+        let copiedId = null;
+
+        function copyNode(el) {
+          let container = el.closest('details');
+          if (!container) {
+            const dropdownUl = el.closest('ul.dropdown');
+            if (dropdownUl) {
+              container = dropdownUl.parentElement.querySelector('details') || dropdownUl.parentElement.querySelector('a[data-nodeid]');
+            }
+          }
+          if (!container) container = el.closest('a[data-nodeid]');
+          copiedId = container.dataset.nodeid;
+          alert('Node copied');
+        }
+
+        function pasteAsChild(el) {
+          if (!copiedId) {
+            alert('No node copied');
+            return;
+          }
+          let container = el.closest('details');
+          if (!container) {
+            const dropdownUl = el.closest('ul.dropdown');
+            if (dropdownUl) {
+              container = dropdownUl.parentElement.querySelector('details') || dropdownUl.parentElement.querySelector('a[data-nodeid]');
+            }
+          }
+          if (!container) container = el.closest('a[data-nodeid]');
+          fetch('/paste-as-child', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ parentId: container.dataset.nodeid, copyId: copiedId })
+          }).then(res => res.json()).then(data => {
+            if (data.success) {
+              location.reload();
+            } else {
+              alert('Paste failed');
+            }
+          });
+        }
+
         function editItem(el) {
            let container = el.closest('details');
            if (!container) {

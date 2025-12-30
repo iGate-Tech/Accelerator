@@ -172,6 +172,29 @@ function getNode(data, id) {
   return null;
 }
 
+function copyNode(data, fromId, toParentId) {
+  const node = getNode(data, fromId);
+  if (!node) return false;
+  const copy = JSON.parse(JSON.stringify(node));
+  // Generate new id and uniqueId
+  copy.id = Date.now().toString();
+  copy.uniqueId = Math.random().toString(36).substr(2, 9);
+  // If it's a folder, recursively update ids
+  function updateIds(obj) {
+    if (obj.children && Array.isArray(obj.children)) {
+      obj.children.forEach(child => {
+        child.id = Date.now().toString() + Math.random().toString(36).substr(2, 9);
+        child.uniqueId = Math.random().toString(36).substr(2, 9);
+        updateIds(child);
+      });
+    }
+  }
+  updateIds(copy);
+  // Add to parent
+  addNode(data, toParentId, copy);
+  return true;
+}
+
 const app = express();
 
 // Session middleware
@@ -1075,6 +1098,16 @@ app.post('/update-node/:id', (req, res) => {
   }
   const updates = 'children' in node ? { name } : { question: name };
   if (updateNode(hierarchicalData, nodeId, updates)) {
+    fs.writeFileSync('hierarchical-data.json', JSON.stringify(hierarchicalData, null, 2));
+    res.json({ success: true });
+  } else {
+    res.status(400).json({ success: false });
+  }
+});
+
+app.post('/paste-as-child', (req, res) => {
+  const { parentId, copyId } = req.body;
+  if (copyNode(hierarchicalData, copyId, parentId)) {
     fs.writeFileSync('hierarchical-data.json', JSON.stringify(hierarchicalData, null, 2));
     res.json({ success: true });
   } else {

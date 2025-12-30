@@ -1,0 +1,3090 @@
+[
+  {
+    "id": "idea-model",
+    "name": "Idea Model",
+    "children": [
+      {
+        "id": "idea-model-section-1-problem-validation",
+        "name": "Section 1: Problem Validation",
+        "children": [
+          {
+            "id": "q1",
+            "name": "What is the specific problem or challenge your startup idea aims to address?"
+            
+          },
+          {
+            "id": "q2",
+            "name": "Who is affected by this problem?"
+            
+          },
+          {
+            "id": "q3",
+            "name": "How does this problem currently impact their daily lives or customer operations?"
+            
+          },
+          {
+            "id": "q4",
+            "name": "What is the scale of the problem?"
+            
+          },
+          {
+            "id": "q5",
+            "name": "Why does this problem urgently need to be solved?"
+            
+          },
+          {
+            "id": "q6",
+            "name": "Can you provide concrete examples of the problem?"
+            
+          },
+          {
+            "id": "q7",
+            "name": "Who is the primary group of people or organizations struggling with the problem?"
+            
+          },
+          {
+            "id": "q8",
+            "name": "What demographic details characterize these people or organizations?"
+            
+          },
+          {
+            "id": "q9",
+            "name": "What are their specific characteristics and pain points?"
+            
+          },
+          {
+            "id": "q10",
+            "name": "How does this problem affect their productivity?"
+            
+          },
+          {
+            "id": "q11",
+            "name": "How does this problem affect their finances?"
+            
+          },
+          {
+            "id": "q12",
+            "name": "How does this problem affect their quality of life?"
+            
+          },
+          {
+            "id": "q13",
+            "name": "What are your key assumptions about the problem?"
+            
+          },
+          {
+            "id": "q14",
+            "name": "What are your key assumptions about the market?"
+            
+          },
+          {
+            "id": "q15",
+            "name": "What are your key assumptions about your potential solution?"
+            
+          },
+          {
+            "id": "q16",
+            "name": "For each assumption, why do you believe it's true?"
+            
+          },
+          {
+            "id": "q17",
+            "name": "What evidence supports each assumption?"
+            
+          },
+          {
+            "id": "q18",
+            "name": "What risks exist if any assumption proves incorrect?"
+            
+          },
+          {
+            "id": "q19",
+            "name": "What existing solutions or alternatives do people use to address this problem?"
+            
+          },
+          {
+            "id": "q20",
+            "name": "What direct competitors offer solutions?"
+            
+          },
+          {
+            "id": "q21",
+            "name": "What indirect alternatives (workarounds) are used?"
+            
+          },
+          {
+            "id": "q22",
+            "name": "What are the strengths of these existing solutions?"
+            
+          },
+          {
+            "id": "q23",
+            "name": "What are the weaknesses of these existing solutions?"
+            
+          },
+          {
+            "id": "q24",
+            "name": "Why haven't these solutions fully solved the problem?"
+            
+          }
+        ]
+      },
+      {
+        "id": "idea-model-section-2-solution-development",
+        "name": "Section 2: Solution Development",
+        "children": [
+          {
+            "id": "q1",
+            "name": "What is your proposed solution called?"
+            
+          },
+          {
+            "id": "q2",
+            "name": "What does the title capture about your product or service?"
+            
+          },
+          {
+            "id": "q3",
+            "name": "How does the title communicate the value provided?"
+            
+          },
+          {
+            "id": "q4",
+            "name": "Why is the title memorable?"
+            
+          },
+          {
+            "id": "q5",
+            "name": "How does the title align with your brand?"
+            
+          },
+          {
+            "id": "q6",
+            "name": "How does your solution work?"
+            
+          },
+          {
+            "id": "q7",
+            "name": "What are the key features and capabilities of your solution?"
+            
+          },
+          {
+            "id": "q8",
+            "name": "How does your solution address the identified problem?"
+            
+          },
+          {
+            "id": "q9",
+            "name": "What technical details are relevant to your solution?"
+            
+          },
+          {
+            "id": "q10",
+            "name": "What are the user workflows involved?"
+            
+          },
+          {
+            "id": "q11",
+            "name": "How does your solution differ from existing alternatives?"
+            
+          }
+        ]
+      },
+      {
+        "id": "idea-model-section-3-customer-model",
+        "name": "Section 3: Customer Model",
+        "children": [
+          {
+            "id": "q1",
+            "name": "What are the demographics of your ideal target customers?"
+            
+          },
+          {
+            "id": "q2",
+            "name": "What are the psychographics of your ideal target customers?"
+            
+          },
+          {
+            "id": "q3",
+            "name": "What behaviors do your ideal target customers exhibit?"
+            
+          },
+          {
+            "id": "q4",
+            "name": "What needs do your ideal target customers have?"
+            
+          },
+          {
+            "id": "q5",
+            "name": "What motivations drive your ideal target customers?"
+            
+          },
+          {
+            "id": "q6",
+            "name": "What pain points do your ideal target customers experience?"
+            
+          },
+          {
+            "id": "q7",
+            "name": "What KPIs will measure the success of your customer?"
+            
+          },
+          {
+            "id": "q8",
+            "name": "What metrics for customer acquisition will you use?"
+            
+          },
+          {
+            "id": "q9",
+            "name": "What metrics for retention will you use?"
+            
+          },
+          {
+            "id": "q10",
+            "name": "What metrics for revenue will you use?"
+            
+          },
+          {
+            "id": "q11",
+            "name": "What metrics for user engagement will you use?"
+            
+          },
+          {
+            "id": "q12",
+            "name": "What benchmarks indicate success for these metrics?"
+            
+          },
+          {
+            "id": "q13",
+            "name": "Who are your direct competitors?"
+            
+          },
+          {
+            "id": "q14",
+            "name": "Who are your indirect competitors?"
+            
+          },
+          {
+            "id": "q15",
+            "name": "What is the market position of each competitor?"
+            
+          },
+          {
+            "id": "q16",
+            "name": "What are the target customers of each competitor?"
+            
+          },
+          {
+            "id": "q17",
+            "name": "What are the pricing strategies of each competitor?"
+            
+          },
+          {
+            "id": "q18",
+            "name": "What are the key features of each competitor?"
+            
+          },
+          {
+            "id": "q19",
+            "name": "What is your unique value proposition (UVP)?"
+            
+          },
+          {
+            "id": "q20",
+            "name": "Why should customers choose your solution over competitors?"
+            
+          },
+          {
+            "id": "q21",
+            "name": "What makes your offering different?"
+            
+          },
+          {
+            "id": "q22",
+            "name": "What makes your offering better?"
+            
+          },
+          {
+            "id": "q23",
+            "name": "What specific benefits does your offering provide?"
+            
+          },
+          {
+            "id": "q24",
+            "name": "What outcomes matter most to your target customers?"
+            
+          },
+          {
+            "id": "q25",
+            "name": "What is the core concept of your solution?"
+            
+          },
+          {
+            "id": "q26",
+            "name": "How does your solution fundamentally solve the customer's problem?"
+            
+          },
+          {
+            "id": "q27",
+            "name": "What is the main idea in simple terms?"
+            
+          },
+          {
+            "id": "q28",
+            "name": "What is the primary mechanism for delivering value?"
+            
+          },
+          {
+            "id": "q29",
+            "name": "How is value delivered to users?"
+            
+          },
+          {
+            "id": "q30",
+            "name": "What elements avoid technical jargon?"
+            
+          },
+          {
+            "id": "q31",
+            "name": "What is your unfair advantage?"
+            
+          },
+          {
+            "id": "q32",
+            "name": "What unique assets do you have?"
+            
+          },
+          {
+            "id": "q33",
+            "name": "What unique capabilities do you have?"
+            
+          },
+          {
+            "id": "q34",
+            "name": "What unique positioning do you have?"
+            
+          },
+          {
+            "id": "q35",
+            "name": "What barriers to entry give you a competitive edge?"
+            
+          },
+          {
+            "id": "q36",
+            "name": "How can competitors not easily replicate your advantage?"
+            
+          },
+          {
+            "id": "q37",
+            "name": "What channels will you use to reach target customers?"
+            
+          },
+          {
+            "id": "q38",
+            "name": "What customer acquisition channels will you use?"
+            
+          },
+          {
+            "id": "q39",
+            "name": "What delivery channels will you use?"
+            
+          },
+          {
+            "id": "q40",
+            "name": "Why did you choose these channels?"
+            
+          },
+          {
+            "id": "q41",
+            "name": "How do these channels align with customer preferences?"
+            
+          },
+          {
+            "id": "q42",
+            "name": "How will customers discover your product?"
+            
+          },
+          {
+            "id": "q43",
+            "name": "Who are your early adopters?"
+            
+          },
+          {
+            "id": "q44",
+            "name": "What characteristics define your early adopters?"
+            
+          },
+          {
+            "id": "q45",
+            "name": "Where can you find your early adopters?"
+            
+          },
+          {
+            "id": "q46",
+            "name": "What motivates early adopters to try new solutions?"
+            
+          },
+          {
+            "id": "q47",
+            "name": "How do early adopters differ from mainstream customers?"
+            
+          },
+          {
+            "id": "q48",
+            "name": "How will you engage with early adopters?"
+            
+          },
+          {
+            "id": "q49",
+            "name": "What is your customer acquisition strategy?"
+            
+          },
+          {
+            "id": "q50",
+            "name": "What is your onboarding process?"
+            
+          },
+          {
+            "id": "q51",
+            "name": "What support mechanisms will you provide?"
+            
+          },
+          {
+            "id": "q52",
+            "name": "What communication channels will you use?"
+            
+          },
+          {
+            "id": "q53",
+            "name": "What retention tactics will you employ?"
+            
+          },
+          {
+            "id": "q54",
+            "name": "How will you build loyalty and encourage long-term engagement?"
+            
+          }
+        ]
+      },
+      {
+        "id": "idea-model-section-4-branding",
+        "name": "Section 4: Branding",
+        "children": [
+          {
+            "id": "q1",
+            "name": "What is your brand identity?"
+            
+          },
+          {
+            "id": "q2",
+            "name": "What is your mission?"
+            
+          },
+          {
+            "id": "q3",
+            "name": "What is your vision?"
+            
+          },
+          {
+            "id": "q4",
+            "name": "What are your core values?"
+            
+          },
+          {
+            "id": "q5",
+            "name": "What is your brand personality?"
+            
+          },
+          {
+            "id": "q6",
+            "name": "How do you position your brand in the market?"
+            
+          },
+          {
+            "id": "q7",
+            "name": "What does your brand stand for?"
+            
+          },
+          {
+            "id": "q8",
+            "name": "How do you want customers to perceive your brand?"
+            
+          },
+          {
+            "id": "q9",
+            "name": "How does your brand differentiate from competitors?"
+            
+          },
+          {
+            "id": "q10",
+            "name": "What is your brand voice?"
+            
+          },
+          {
+            "id": "q11",
+            "name": "What is your brand tone?"
+            
+          },
+          {
+            "id": "q12",
+            "name": "What are your visual identity elements?"
+            
+          },
+          {
+            "id": "q13",
+            "name": "What is your brand statement?"
+            
+          },
+          {
+            "id": "q14",
+            "name": "What does the brand statement communicate?"
+            
+          },
+          {
+            "id": "q15",
+            "name": "How does it encapsulate your company's purpose?"
+            
+          },
+          {
+            "id": "q16",
+            "name": "How does it reflect your values?"
+            
+          },
+          {
+            "id": "q17",
+            "name": "How does it highlight your unique position?"
+            
+          },
+          {
+            "id": "q18",
+            "name": "Why is it concise and memorable?"
+            
+          },
+          {
+            "id": "q19",
+            "name": "What is your proposed company name?"
+            
+          },
+          {
+            "id": "q20",
+            "name": "What does the name represent?"
+            
+          },
+          {
+            "id": "q21",
+            "name": "Why is the name memorable?"
+            
+          },
+          {
+            "id": "q22",
+            "name": "Is the domain available?"
+            
+          },
+          {
+            "id": "q23",
+            "name": "Are trademarks available?"
+            
+          },
+          {
+            "id": "q24",
+            "name": "How does the name align with your brand identity?"
+            
+          },
+          {
+            "id": "q25",
+            "name": "What is your slogan?"
+            
+          },
+          {
+            "id": "q26",
+            "name": "How does the slogan capture your brand essence?"
+            
+          },
+          {
+            "id": "q27",
+            "name": "How does it communicate your value proposition?"
+            
+          },
+          {
+            "id": "q28",
+            "name": "Why is it short and easy to remember?"
+            
+          },
+          {
+            "id": "q29",
+            "name": "How does it resonate with your target audience?"
+            
+          },
+          {
+            "id": "q30",
+            "name": "What key benefit does it highlight?"
+            
+          }
+        ]
+      },
+      {
+        "id": "idea-model-section-5-ip-protection",
+        "name": "Section 5: IP Protection",
+        "children": [
+          {
+            "id": "q1",
+            "name": "What intellectual property protection measures are you using?"
+            
+          },
+          {
+            "id": "q2",
+            "name": "What types of IP protection are you using?"
+            
+          },
+          {
+            "id": "q3",
+            "name": "What specific assets are protected?"
+            
+          },
+          {
+            "id": "q4",
+            "name": "What are the filing dates and jurisdictions?"
+            
+          },
+          {
+            "id": "q5",
+            "name": "What is the protection duration?"
+            
+          },
+          {
+            "id": "q6",
+            "name": "What are the maintenance requirements?"
+            
+          },
+          {
+            "id": "q7",
+            "name": "What is your domain name registration strategy?"
+            
+          },
+          {
+            "id": "q8",
+            "name": "What primary domain have you registered?"
+            
+          },
+          {
+            "id": "q9",
+            "name": "What alternative domains have you secured?"
+            
+          },
+          {
+            "id": "q10",
+            "name": "What are the registration details?"
+            
+          },
+          {
+            "id": "q11",
+            "name": "How does your domain strategy support branding?"
+            
+          },
+          {
+            "id": "q12",
+            "name": "What trademark considerations are in domain selection?"
+            
+          },
+          {
+            "id": "q13",
+            "name": "What specific elements of your IP are you protecting?"
+            
+          },
+          {
+            "id": "q14",
+            "name": "Why is each IP element valuable?"
+            
+          },
+          {
+            "id": "q15",
+            "name": "How is each IP element protected?"
+            
+          },
+          {
+            "id": "q16",
+            "name": "How does each IP element contribute to competitive advantage?"
+            
+          },
+          {
+            "id": "q17",
+            "name": "What registered IP elements do you have?"
+            
+          },
+          {
+            "id": "q18",
+            "name": "What unregistered IP elements do you have?"
+            
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "business-model",
+    "name": "Business Model",
+    "children": [
+      {
+        "id": "business-model-section-1-product-section",
+        "name": "Section 1: Product Section",
+        "children": [
+          {
+            "id": "q1",
+            "name": "What is the core function of your product?"
+            
+          },
+          {
+            "id": "q2",
+            "name": "What is the primary purpose of your product?"
+            
+          },
+          {
+            "id": "q3",
+            "name": "What is the main feature of your product?"
+            
+          },
+          {
+            "id": "q4",
+            "name": "How does your product solve a customer problem?"
+            
+          },
+          {
+            "id": "q5",
+            "name": "What examples can help define the core function?"
+            
+          },
+          {
+            "id": "q6",
+            "name": "What are your Key Activities?"
+            
+          },
+          {
+            "id": "q7",
+            "name": "What important actions must your business take?"
+            
+          },
+          {
+            "id": "q8",
+            "name": "How do these activities create and deliver your product?"
+            
+          },
+          {
+            "id": "q9",
+            "name": "How do these activities create and deliver your service?"
+            
+          },
+          {
+            "id": "q10",
+            "name": "What common Key Activities can you include?"
+            
+          },
+          {
+            "id": "q11",
+            "name": "What are your Key Resources?"
+            
+          },
+          {
+            "id": "q12",
+            "name": "What essential assets do you need?"
+            
+          },
+          {
+            "id": "q13",
+            "name": "What physical items are required?"
+            
+          },
+          {
+            "id": "q14",
+            "name": "What intellectual property is needed?"
+            
+          },
+          {
+            "id": "q15",
+            "name": "What human resources are required?"
+            
+          },
+          {
+            "id": "q16",
+            "name": "What financial resources are needed?"
+            
+          },
+          {
+            "id": "q17",
+            "name": "Who are your Key Partners?"
+            
+          },
+          {
+            "id": "q18",
+            "name": "Who are your suppliers?"
+            
+          },
+          {
+            "id": "q19",
+            "name": "Who are your distributors?"
+            
+          },
+          {
+            "id": "q20",
+            "name": "Who are your strategic alliances?"
+            
+          },
+          {
+            "id": "q21",
+            "name": "How do partners enhance your capabilities?"
+            
+          },
+          {
+            "id": "q22",
+            "name": "What partners provide materials?"
+            
+          }
+        ]
+      },
+      {
+        "id": "business-model-section-2-market-section",
+        "name": "Section 2: Market Section",
+        "children": [
+          {
+            "id": "q1",
+            "name": "What category does your product fit into?"
+            
+          },
+          {
+            "id": "q2",
+            "name": "Is your product SaaS?"
+            
+          },
+          {
+            "id": "q3",
+            "name": "Is your product a platform?"
+            
+          },
+          {
+            "id": "q4",
+            "name": "What is the industry context?"
+            
+          },
+          {
+            "id": "q5",
+            "name": "How does the category help understand your market?"
+            
+          },
+          {
+            "id": "q6",
+            "name": "Who is your Target Market?"
+            
+          },
+          {
+            "id": "q7",
+            "name": "What types of customers benefit from your product?"
+            
+          },
+          {
+            "id": "q8",
+            "name": "Are e-commerce companies part of your target?"
+            
+          },
+          {
+            "id": "q9",
+            "name": "Are logistics firms part of your target?"
+            
+          },
+          {
+            "id": "q10",
+            "name": "Can you select multiple target markets?"
+            
+          },
+          {
+            "id": "q11",
+            "name": "What is your Target Geographic Area?"
+            
+          },
+          {
+            "id": "q12",
+            "name": "Where do you plan to operate?"
+            
+          },
+          {
+            "id": "q13",
+            "name": "Are you focusing on specific countries?"
+            
+          },
+          {
+            "id": "q14",
+            "name": "Are you focusing on regions?"
+            
+          },
+          {
+            "id": "q15",
+            "name": "Are you operating globally?"
+            
+          },
+          {
+            "id": "q16",
+            "name": "What is your TAM (Total Addressable Market)?"
+            
+          },
+          {
+            "id": "q17",
+            "name": "What is the total market size for your product?"
+            
+          },
+          {
+            "id": "q18",
+            "name": "What is the entire logistics market in your region?"
+            
+          },
+          {
+            "id": "q19",
+            "name": "How do you estimate TAM?"
+            
+          },
+          {
+            "id": "q20",
+            "name": "What factors influence TAM?"
+            
+          },
+          {
+            "id": "q21",
+            "name": "What is your SAM (Serviceable Addressable Market)?"
+            
+          },
+          {
+            "id": "q22",
+            "name": "What portion of TAM can you serve?"
+            
+          },
+          {
+            "id": "q23",
+            "name": "What are your current capabilities?"
+            
+          },
+          {
+            "id": "q24",
+            "name": "How does SAM relate to TAM?"
+            
+          },
+          {
+            "id": "q25",
+            "name": "What limits your SAM?"
+            
+          },
+          {
+            "id": "q26",
+            "name": "What is your SOM (Serviceable Obtainable Market)?"
+            
+          },
+          {
+            "id": "q27",
+            "name": "What realistic market share can you capture?"
+            
+          },
+          {
+            "id": "q28",
+            "name": "What is your target in the first few years?"
+            
+          },
+          {
+            "id": "q29",
+            "name": "How do you estimate SOM?"
+            
+          },
+          {
+            "id": "q30",
+            "name": "What factors affect SOM?"
+            
+          }
+        ]
+      },
+      {
+        "id": "business-model-section-3-competition-analysis",
+        "name": "Section 3: Competition Analysis",
+        "children": [
+          {
+            "id": "q1",
+            "name": "Who are your Key Competitors?"
+            
+          },
+          {
+            "id": "q2",
+            "name": "Who are the main players in your market?"
+            
+          },
+          {
+            "id": "q3",
+            "name": "Who offers similar solutions?"
+            
+          },
+          {
+            "id": "q4",
+            "name": "How do you identify key competitors?"
+            
+          },
+          {
+            "id": "q5",
+            "name": "What criteria define a key competitor?"
+            
+          },
+          {
+            "id": "q6",
+            "name": "What is the Market Share of each competitor?"
+            
+          },
+          {
+            "id": "q7",
+            "name": "How much of the market does each hold?"
+            
+          },
+          {
+            "id": "q8",
+            "name": "How do you estimate market share?"
+            
+          },
+          {
+            "id": "q9",
+            "name": "Why is market share important?"
+            
+          },
+          {
+            "id": "q10",
+            "name": "What data sources for market share?"
+            
+          },
+          {
+            "id": "q11",
+            "name": "What is the Competition Level in your market?"
+            
+          },
+          {
+            "id": "q12",
+            "name": "Is competition high, medium, or low?"
+            
+          },
+          {
+            "id": "q13",
+            "name": "How does competition affect your strategy?"
+            
+          },
+          {
+            "id": "q14",
+            "name": "What factors indicate competition level?"
+            
+          },
+          {
+            "id": "q15",
+            "name": "How to assess competition intensity?"
+            
+          },
+          {
+            "id": "q16",
+            "name": "What are your Penetration Opportunities?"
+            
+          },
+          {
+            "id": "q17",
+            "name": "Where can you find advantages over competitors?"
+            
+          },
+          {
+            "id": "q18",
+            "name": "What unique features offer opportunities?"
+            
+          },
+          {
+            "id": "q19",
+            "name": "What underserved niches exist?"
+            
+          },
+          {
+            "id": "q20",
+            "name": "How to identify penetration opportunities?"
+            
+          },
+          {
+            "id": "q21",
+            "name": "What are the Market Challenges you might face?"
+            
+          },
+          {
+            "id": "q22",
+            "name": "What switching costs exist?"
+            
+          },
+          {
+            "id": "q23",
+            "name": "What integration issues are there?"
+            
+          },
+          {
+            "id": "q24",
+            "name": "What data privacy concerns arise?"
+            
+          },
+          {
+            "id": "q25",
+            "name": "How to mitigate market challenges?"
+            
+          }
+        ]
+      },
+      {
+        "id": "business-model-section-4-risk-register",
+        "name": "Section 4: Risk Register",
+        "children": [
+          {
+            "id": "q1",
+            "name": "What business risks do you identify?"
+            
+          },
+          {
+            "id": "q2",
+            "name": "What technical issues could arise?"
+            
+          },
+          {
+            "id": "q3",
+            "name": "What market changes could occur?"
+            
+          },
+          {
+            "id": "q4",
+            "name": "What operational problems might happen?"
+            
+          },
+          {
+            "id": "q5",
+            "name": "How do you categorize risks?"
+            
+          },
+          {
+            "id": "q6",
+            "name": "What percentage of risks are Technical?"
+            
+          },
+          {
+            "id": "q7",
+            "name": "What percentage of risks are Market?"
+            
+          },
+          {
+            "id": "q8",
+            "name": "What percentage of risks are Operational?"
+            
+          },
+          {
+            "id": "q9",
+            "name": "How do you distribute risks into categories?"
+            
+          },
+          {
+            "id": "q10",
+            "name": "Why categorize risks?"
+            
+          },
+          {
+            "id": "q11",
+            "name": "What is your Overall Risk Level?"
+            
+          },
+          {
+            "id": "q12",
+            "name": "Is the risk level low, medium, medium-high, or high?"
+            
+          },
+          {
+            "id": "q13",
+            "name": "How do you assess overall risk?"
+            
+          },
+          {
+            "id": "q14",
+            "name": "What factors contribute to overall risk?"
+            
+          },
+          {
+            "id": "q15",
+            "name": "How to manage overall risk?"
+            
+          }
+        ]
+      },
+      {
+        "id": "business-model-section-5-value-proposition",
+        "name": "Section 5: Value Proposition",
+        "children": [
+          {
+            "id": "q1",
+            "name": "What is the Customer Job?"
+            
+          },
+          {
+            "id": "q2",
+            "name": "What core problem is the customer solving?"
+            
+          },
+          {
+            "id": "q3",
+            "name": "What do customers want to achieve?"
+            
+          },
+          {
+            "id": "q4",
+            "name": "How does the customer job relate to your product?"
+            
+          },
+          {
+            "id": "q5",
+            "name": "What outcomes define the customer job?"
+            
+          },
+          {
+            "id": "q6",
+            "name": "What are the Customer Pains?"
+            
+          },
+          {
+            "id": "q7",
+            "name": "What problems do customers experience?"
+            
+          },
+          {
+            "id": "q8",
+            "name": "What frustrations do customers have?"
+            
+          },
+          {
+            "id": "q9",
+            "name": "How does your product address pains?"
+            
+          },
+          {
+            "id": "q10",
+            "name": "What specific pains can you identify?"
+            
+          },
+          {
+            "id": "q11",
+            "name": "What are the Customer Gains?"
+            
+          },
+          {
+            "id": "q12",
+            "name": "What benefits do customers hope for?"
+            
+          },
+          {
+            "id": "q13",
+            "name": "What positive outcomes are desired?"
+            
+          },
+          {
+            "id": "q14",
+            "name": "How does your product deliver gains?"
+            
+          },
+          {
+            "id": "q15",
+            "name": "What gains motivate customers?"
+            
+          },
+          {
+            "id": "q16",
+            "name": "What are the Solution Components?"
+            
+          },
+          {
+            "id": "q17",
+            "name": "What key features address pains?"
+            
+          },
+          {
+            "id": "q18",
+            "name": "What elements deliver gains?"
+            
+          },
+          {
+            "id": "q19",
+            "name": "What are the main components of your product?"
+            
+          },
+          {
+            "id": "q20",
+            "name": "How do components solve problems?"
+            
+          }
+        ]
+      },
+      {
+        "id": "business-model-section-6-cost-&-revenue",
+        "name": "Section 6: Cost & Revenue",
+        "children": [
+          {
+            "id": "q1",
+            "name": "What are your Key Costs?"
+            
+          },
+          {
+            "id": "q2",
+            "name": "What fixed costs do you have?"
+            
+          },
+          {
+            "id": "q3",
+            "name": "What variable costs do you have?"
+            
+          },
+          {
+            "id": "q4",
+            "name": "How are costs tied to product delivery?"
+            
+          },
+          {
+            "id": "q5",
+            "name": "What examples of key costs?"
+            
+          },
+          {
+            "id": "q6",
+            "name": "What are your Revenue Streams?"
+            
+          },
+          {
+            "id": "q7",
+            "name": "How will you make money?"
+            
+          },
+          {
+            "id": "q8",
+            "name": "What methods generate revenue?"
+            
+          },
+          {
+            "id": "q9",
+            "name": "What revenue models do you use?"
+            
+          },
+          {
+            "id": "q10",
+            "name": "How do revenue streams relate to your product?"
+            
+          },
+          {
+            "id": "q11",
+            "name": "What are your Financial Projections?"
+            
+          },
+          {
+            "id": "q12",
+            "name": "What revenue estimates over 3-5 years?"
+            
+          },
+          {
+            "id": "q13",
+            "name": "What cost estimates over 3-5 years?"
+            
+          },
+          {
+            "id": "q14",
+            "name": "What profitability projections?"
+            
+          },
+          {
+            "id": "q15",
+            "name": "How do you create financial projections?"
+            
+          }
+        ]
+      },
+      {
+        "id": "business-model-section-7-exit-strategy",
+        "name": "Section 7: Exit Strategy",
+        "children": [
+          {
+            "id": "q1",
+            "name": "What is your Exit Strategy?"
+            
+          },
+          {
+            "id": "q2",
+            "name": "Are you considering acquisition?"
+            
+          },
+          {
+            "id": "q3",
+            "name": "Are you considering IPO?"
+            
+          },
+          {
+            "id": "q4",
+            "name": "What other options for realizing returns?"
+            
+          },
+          {
+            "id": "q5",
+            "name": "How does exit strategy align with goals?"
+            
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "financial-model",
+    "name": "Financial Model",
+    "children": [
+      {
+        "id": "financial-model-section-1-kpi-collection",
+        "name": "Section 1: KPI Collection",
+        "children": [
+          {
+            "id": "q1",
+            "name": "What KPIs do you currently track?"
+            
+          },
+          {
+            "id": "q2",
+            "name": "What KPIs do you plan to track?"
+            
+          },
+          {
+            "id": "q3",
+            "name": "What is Customer Acquisition Cost (CAC)?"
+            
+          },
+          {
+            "id": "q4",
+            "name": "What is Lifetime Value (LTV)?"
+            
+          },
+          {
+            "id": "q5",
+            "name": "What is Gross Margin?"
+            
+          },
+          {
+            "id": "q6",
+            "name": "What is Churn Rate?"
+            
+          }
+        ]
+      },
+      {
+        "id": "financial-model-section-2-revenue-assumptions",
+        "name": "Section 2: Revenue Assumptions",
+        "children": [
+          {
+            "id": "q1",
+            "name": "What are your monthly revenue expectations?"
+            
+          },
+          {
+            "id": "q2",
+            "name": "What are your yearly revenue expectations?"
+            
+          },
+          {
+            "id": "q3",
+            "name": "What is the early stage typical range?"
+            
+          },
+          {
+            "id": "q4",
+            "name": "What is the growth stage range?"
+            
+          },
+          {
+            "id": "q5",
+            "name": "What is the scale stage range?"
+            
+          },
+          {
+            "id": "q6",
+            "name": "How do you determine revenue assumptions?"
+            
+          }
+        ]
+      },
+      {
+        "id": "financial-model-section-3-revenue-streams",
+        "name": "Section 3: Revenue Streams",
+        "children": [
+          {
+            "id": "q1",
+            "name": "What are your revenue streams?"
+            
+          },
+          {
+            "id": "q2",
+            "name": "Do you have subscription revenue?"
+            
+          },
+          {
+            "id": "q3",
+            "name": "Do you have transaction fees?"
+            
+          },
+          {
+            "id": "q4",
+            "name": "Do you have licensing revenue?"
+            
+          },
+          {
+            "id": "q5",
+            "name": "Do you have professional services revenue?"
+            
+          },
+          {
+            "id": "q6",
+            "name": "Do you have hardware sales?"
+            
+          }
+        ]
+      },
+      {
+        "id": "financial-model-section-4-cogs",
+        "name": "Section 4: COGS",
+        "children": [
+          {
+            "id": "q1",
+            "name": "What are your monthly COGS?"
+            
+          },
+          {
+            "id": "q2",
+            "name": "What costs are directly tied to delivery?"
+            
+          },
+          {
+            "id": "q3",
+            "name": "What are examples of COGS?"
+            
+          },
+          {
+            "id": "q4",
+            "name": "What is the typical SaaS COGS range?"
+            
+          },
+          {
+            "id": "q5",
+            "name": "How do you calculate COGS?"
+            
+          },
+          {
+            "id": "q6",
+            "name": "What percentage of revenue is COGS?"
+            
+          }
+        ]
+      },
+      {
+        "id": "financial-model-section-5-opex",
+        "name": "Section 5: Opex",
+        "children": [
+          {
+            "id": "q1",
+            "name": "What is your Opex?"
+            
+          },
+          {
+            "id": "q2",
+            "name": "What categories of Opex do you have?"
+            
+          },
+          {
+            "id": "q3",
+            "name": "Do you have salaries and wages?"
+            
+          },
+          {
+            "id": "q4",
+            "name": "Do you have marketing expenses?"
+            
+          },
+          {
+            "id": "q5",
+            "name": "Do you have office rent?"
+            
+          },
+          {
+            "id": "q6",
+            "name": "Do you have software subscriptions?"
+            
+          }
+        ]
+      },
+      {
+        "id": "financial-model-section-6-capex",
+        "name": "Section 6: Capex",
+        "children": [
+          {
+            "id": "q1",
+            "name": "What capital expenditures do you have?"
+            
+          },
+          {
+            "id": "q2",
+            "name": "Do you have equipment purchases?"
+            
+          },
+          {
+            "id": "q3",
+            "name": "Do you have server costs?"
+            
+          },
+          {
+            "id": "q4",
+            "name": "Do you have vehicle costs?"
+            
+          },
+          {
+            "id": "q5",
+            "name": "Do you have machinery costs?"
+            
+          },
+          {
+            "id": "q6",
+            "name": "Do you have one-time system build costs?"
+            
+          }
+        ]
+      },
+      {
+        "id": "financial-model-section-7-financial-statements",
+        "name": "Section 7: Financial Statements",
+        "children": [
+          {
+            "id": "q1",
+            "name": "What formatting do you want for statements?"
+            
+          },
+          {
+            "id": "q2",
+            "name": "Do you want monthly view?"
+            
+          },
+          {
+            "id": "q3",
+            "name": "Do you want quarterly view?"
+            
+          },
+          {
+            "id": "q4",
+            "name": "Do you want yearly summary?"
+            
+          },
+          {
+            "id": "q5",
+            "name": "Do you want 3-year projection?"
+            
+          },
+          {
+            "id": "q6",
+            "name": "Do you want 5-year projection?"
+            
+          }
+        ]
+      },
+      {
+        "id": "financial-model-section-8-financial-ratios",
+        "name": "Section 8: Financial Ratios",
+        "children": [
+          {
+            "id": "q1",
+            "name": "What financial ratios will be calculated?"
+            
+          },
+          {
+            "id": "q2",
+            "name": "What profitability ratios?"
+            
+          },
+          {
+            "id": "q3",
+            "name": "What efficiency ratios?"
+            
+          },
+          {
+            "id": "q4",
+            "name": "What liquidity ratios?"
+            
+          },
+          {
+            "id": "q5",
+            "name": "What growth ratios?"
+            
+          },
+          {
+            "id": "q6",
+            "name": "Do you want all ratios or a selected group?"
+            
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "funding-model",
+    "name": "Funding Model",
+    "children": [
+      {
+        "id": "funding-model-section-1-funding-goal",
+        "name": "Section 1: Funding Goal",
+        "children": [
+          {
+            "id": "q1",
+            "name": "How much total funding are you seeking?"
+            
+          },
+          {
+            "id": "q2",
+            "name": "What is the suggested range for early stage?"
+            
+          },
+          {
+            "id": "q3",
+            "name": "What is the suggested range for seed stage?"
+            
+          },
+          {
+            "id": "q4",
+            "name": "What is the suggested range for Series A?"
+            
+          },
+          {
+            "id": "q5",
+            "name": "What is the suggested range for Series B?"
+            
+          },
+          {
+            "id": "q6",
+            "name": "Can you enter your own amount?"
+            
+          },
+          {
+            "id": "q7",
+            "name": "What type of funding are you targeting?"
+            
+          },
+          {
+            "id": "q8",
+            "name": "Are you targeting equity?"
+            
+          },
+          {
+            "id": "q9",
+            "name": "Are you targeting debt?"
+            
+          },
+          {
+            "id": "q10",
+            "name": "Are you targeting grants?"
+            
+          },
+          {
+            "id": "q11",
+            "name": "Are you targeting crowdfunding?"
+            
+          },
+          {
+            "id": "q12",
+            "name": "What funding types suit your revenue model?"
+            
+          }
+        ]
+      },
+      {
+        "id": "funding-model-section-2-funding-allocation",
+        "name": "Section 2: Funding Allocation",
+        "children": [
+          {
+            "id": "q1",
+            "name": "How will the funding be allocated?"
+            
+          },
+          {
+            "id": "q2",
+            "name": "What percentage for product development?"
+            
+          },
+          {
+            "id": "q3",
+            "name": "What percentage for marketing and growth?"
+            
+          },
+          {
+            "id": "q4",
+            "name": "What percentage for hiring?"
+            
+          },
+          {
+            "id": "q5",
+            "name": "What percentage for operations?"
+            
+          },
+          {
+            "id": "q6",
+            "name": "What percentage for contingency?"
+            
+          }
+        ]
+      },
+      {
+        "id": "funding-model-section-3-revenue-model",
+        "name": "Section 3: Revenue Model",
+        "children": [
+          {
+            "id": "q1",
+            "name": "What are your revenue streams?"
+            
+          },
+          {
+            "id": "q2",
+            "name": "Do you have subscription revenue?"
+            
+          },
+          {
+            "id": "q3",
+            "name": "Do you have commission revenue?"
+            
+          },
+          {
+            "id": "q4",
+            "name": "Do you have one-time licensing?"
+            
+          },
+          {
+            "id": "q5",
+            "name": "Do you have hardware sales?"
+            
+          },
+          {
+            "id": "q6",
+            "name": "Do you have services revenue?"
+            
+          },
+          {
+            "id": "q7",
+            "name": "How do you price your product?"
+            
+          },
+          {
+            "id": "q8",
+            "name": "Do you use monthly subscription?"
+            
+          },
+          {
+            "id": "q9",
+            "name": "Do you use per user pricing?"
+            
+          },
+          {
+            "id": "q10",
+            "name": "Do you use tiered plans?"
+            
+          },
+          {
+            "id": "q11",
+            "name": "Do you use usage-based pricing?"
+            
+          },
+          {
+            "id": "q12",
+            "name": "Do you use custom enterprise pricing?"
+            
+          },
+          {
+            "id": "q13",
+            "name": "What is your market size?"
+            
+          },
+          {
+            "id": "q14",
+            "name": "What is your TAM?"
+            
+          },
+          {
+            "id": "q15",
+            "name": "What is your SAM?"
+            
+          },
+          {
+            "id": "q16",
+            "name": "What is your SOM?"
+            
+          },
+          {
+            "id": "q17",
+            "name": "How can AI calculate market size?"
+            
+          },
+          {
+            "id": "q18",
+            "name": "Why is market size important?"
+            
+          }
+        ]
+      },
+      {
+        "id": "funding-model-section-4-investor-roi",
+        "name": "Section 4: Investor ROI",
+        "children": [
+          {
+            "id": "q1",
+            "name": "What valuation are you targeting?"
+            
+          },
+          {
+            "id": "q2",
+            "name": "How is valuation based on revenue?"
+            
+          },
+          {
+            "id": "q3",
+            "name": "What multiples do you use?"
+            
+          },
+          {
+            "id": "q4",
+            "name": "How do you recommend valuation?"
+            
+          },
+          {
+            "id": "q5",
+            "name": "What factors affect valuation?"
+            
+          },
+          {
+            "id": "q6",
+            "name": "Why target a specific valuation?"
+            
+          },
+          {
+            "id": "q7",
+            "name": "What is your preferred exit method?"
+            
+          },
+          {
+            "id": "q8",
+            "name": "Are you considering acquisition?"
+            
+          },
+          {
+            "id": "q9",
+            "name": "Are you considering IPO?"
+            
+          },
+          {
+            "id": "q10",
+            "name": "Are you considering strategic merger?"
+            
+          },
+          {
+            "id": "q11",
+            "name": "Are you considering secondary sale?"
+            
+          },
+          {
+            "id": "q12",
+            "name": "What exit methods suit your business?"
+            
+          }
+        ]
+      },
+      {
+        "id": "funding-model-section-5-cap-table",
+        "name": "Section 5: Cap Table",
+        "children": [
+          {
+            "id": "q1",
+            "name": "What are your future funding rounds?"
+            
+          },
+          {
+            "id": "q2",
+            "name": "Do you have seed to Series A?"
+            
+          },
+          {
+            "id": "q3",
+            "name": "Do you have pre-seed to seed?"
+            
+          },
+          {
+            "id": "q4",
+            "name": "Do you have seed only?"
+            
+          },
+          {
+            "id": "q5",
+            "name": "What custom schedule do you have?"
+            
+          },
+          {
+            "id": "q6",
+            "name": "How does AI suggest rounds?"
+            
+          },
+          {
+            "id": "q7",
+            "name": "What is your cap table structure?"
+            
+          },
+          {
+            "id": "q8",
+            "name": "What is current founders' ownership?"
+            
+          },
+          {
+            "id": "q9",
+            "name": "What is current investors' ownership?"
+            
+          },
+          {
+            "id": "q10",
+            "name": "What is the option pool percentage?"
+            
+          },
+          {
+            "id": "q11",
+            "name": "What are recommended defaults?"
+            
+          },
+          {
+            "id": "q12",
+            "name": "How to build a cap table?"
+            
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "marketing-model",
+    "name": "Marketing Model",
+    "children": [
+      {
+        "id": "marketing-model-section-1-customer-persona",
+        "name": "Section 1: Customer Persona",
+        "children": [
+          {
+            "id": "q1",
+            "name": "What is the basic demographic profile?"
+            
+          },
+          {
+            "id": "q2",
+            "name": "What is the age range?"
+            
+          },
+          {
+            "id": "q3",
+            "name": "Where is the location?"
+            
+          },
+          {
+            "id": "q4",
+            "name": "What is the income range?"
+            
+          },
+          {
+            "id": "q5",
+            "name": "Is the product gender-specific?"
+            
+          },
+          {
+            "id": "q6",
+            "name": "What are the biggest pain points?"
+            
+          }
+        ]
+      },
+      {
+        "id": "marketing-model-section-2-unique-value-proposition",
+        "name": "Section 2: Unique Value Proposition",
+        "children": [
+          {
+            "id": "q1",
+            "name": "What differentiates your product?"
+            
+          },
+          {
+            "id": "q2",
+            "name": "Is it faster delivery?"
+            
+          },
+          {
+            "id": "q3",
+            "name": "Is it lower costs?"
+            
+          },
+          {
+            "id": "q4",
+            "name": "Is it better quality?"
+            
+          },
+          {
+            "id": "q5",
+            "name": "Is it unique features?"
+            
+          },
+          {
+            "id": "q6",
+            "name": "Is it superior service?"
+            
+          },
+          {
+            "id": "q7",
+            "name": "What is the main message?"
+            
+          },
+          {
+            "id": "q8",
+            "name": "What sample messages?"
+            
+          },
+          {
+            "id": "q9",
+            "name": "How to choose a message?"
+            
+          },
+          {
+            "id": "q10",
+            "name": "Why remember a message?"
+            
+          },
+          {
+            "id": "q11",
+            "name": "How does it resonate?"
+            
+          }
+        ]
+      },
+      {
+        "id": "marketing-model-section-3-marketing-objectives",
+        "name": "Section 3: Marketing Objectives",
+        "children": [
+          {
+            "id": "q1",
+            "name": "Do you focus on brand awareness?"
+            
+          },
+          {
+            "id": "q2",
+            "name": "Is lead generation a priority?"
+            
+          },
+          {
+            "id": "q3",
+            "name": "Do you have acquisition targets?"
+            
+          },
+          {
+            "id": "q4",
+            "name": "Do you aim to expand markets?"
+            
+          },
+          {
+            "id": "q5",
+            "name": "Is retention a priority?"
+            
+          }
+        ]
+      },
+      {
+        "id": "marketing-model-section-4-marketing-strategies",
+        "name": "Section 4: Marketing Strategies",
+        "children": [
+          {
+            "id": "q1",
+            "name": "Which digital channels?"
+            
+          },
+          {
+            "id": "q2",
+            "name": "Do you use SEO?"
+            
+          },
+          {
+            "id": "q3",
+            "name": "Do you use Google Ads?"
+            
+          },
+          {
+            "id": "q4",
+            "name": "Do you use social media?"
+            
+          },
+          {
+            "id": "q5",
+            "name": "Do you use email marketing?"
+            
+          },
+          {
+            "id": "q6",
+            "name": "Do you use content marketing?"
+            
+          },
+          {
+            "id": "q7",
+            "name": "Do you use offline channels?"
+            
+          },
+          {
+            "id": "q8",
+            "name": "Do you use events?"
+            
+          },
+          {
+            "id": "q9",
+            "name": "Do you use conferences?"
+            
+          },
+          {
+            "id": "q10",
+            "name": "Do you use trade shows?"
+            
+          },
+          {
+            "id": "q11",
+            "name": "Do you use flyers?"
+            
+          },
+          {
+            "id": "q12",
+            "name": "Do you use billboards?"
+            
+          }
+        ]
+      },
+      {
+        "id": "marketing-model-section-5-marketing-budget",
+        "name": "Section 5: Marketing Budget",
+        "children": [
+          {
+            "id": "q1",
+            "name": "What is your marketing budget?"
+            
+          },
+          {
+            "id": "q2",
+            "name": "What percentage for early-stage?"
+            
+          },
+          {
+            "id": "q3",
+            "name": "What percentage for growth-stage?"
+            
+          },
+          {
+            "id": "q4",
+            "name": "How to allocate budget?"
+            
+          },
+          {
+            "id": "q5",
+            "name": "Why have a budget?"
+            
+          }
+        ]
+      },
+      {
+        "id": "marketing-model-section-6-marketing-kpis",
+        "name": "Section 6: Marketing KPIs",
+        "children": [
+          {
+            "id": "q1",
+            "name": "Do you track website traffic?"
+            
+          },
+          {
+            "id": "q2",
+            "name": "What is monthly traffic?"
+            
+          },
+          {
+            "id": "q3",
+            "name": "What benchmark for visits?"
+            
+          },
+          {
+            "id": "q4",
+            "name": "How to measure traffic?"
+            
+          },
+          {
+            "id": "q5",
+            "name": "Which channels bring traffic?"
+            
+          },
+          {
+            "id": "q6",
+            "name": "Is it organic search?"
+            
+          },
+          {
+            "id": "q7",
+            "name": "Is it direct?"
+            
+          },
+          {
+            "id": "q8",
+            "name": "Is it social media?"
+            
+          },
+          {
+            "id": "q9",
+            "name": "Is it paid ads?"
+            
+          },
+          {
+            "id": "q10",
+            "name": "Is it referral?"
+            
+          },
+          {
+            "id": "q11",
+            "name": "What is session duration?"
+            
+          },
+          {
+            "id": "q12",
+            "name": "Is 30-60 seconds poor?"
+            
+          },
+          {
+            "id": "q13",
+            "name": "Is 1-2 minutes good?"
+            
+          },
+          {
+            "id": "q14",
+            "name": "Is 2-4 minutes excellent?"
+            
+          },
+          {
+            "id": "q15",
+            "name": "How to improve duration?"
+            
+          },
+          {
+            "id": "q16",
+            "name": "What is conversion rate?"
+            
+          },
+          {
+            "id": "q17",
+            "name": "What SaaS benchmark?"
+            
+          },
+          {
+            "id": "q18",
+            "name": "What e-commerce benchmark?"
+            
+          },
+          {
+            "id": "q19",
+            "name": "How to calculate rate?"
+            
+          },
+          {
+            "id": "q20",
+            "name": "What is CAC?"
+            
+          },
+          {
+            "id": "q21",
+            "name": "What is low CAC?"
+            
+          },
+          {
+            "id": "q22",
+            "name": "What is medium CAC?"
+            
+          },
+          {
+            "id": "q23",
+            "name": "What is high CAC?"
+            
+          },
+          {
+            "id": "q24",
+            "name": "How to reduce CAC?"
+            
+          },
+          {
+            "id": "q25",
+            "name": "What is NPS target?"
+            
+          },
+          {
+            "id": "q26",
+            "name": "Is 30+ target?"
+            
+          },
+          {
+            "id": "q27",
+            "name": "Is 50+ target?"
+            
+          },
+          {
+            "id": "q28",
+            "name": "Is 60+ target?"
+            
+          },
+          {
+            "id": "q29",
+            "name": "How to measure NPS?"
+            
+          },
+          {
+            "id": "q30",
+            "name": "What is LTV?"
+            
+          },
+          {
+            "id": "q31",
+            "name": "How to calculate LTV?"
+            
+          },
+          {
+            "id": "q32",
+            "name": "What factors in LTV?"
+            
+          },
+          {
+            "id": "q33",
+            "name": "How to increase LTV?"
+            
+          },
+          {
+            "id": "q34",
+            "name": "What retention rate?"
+            
+          },
+          {
+            "id": "q35",
+            "name": "What benchmark for early SaaS?"
+            
+          },
+          {
+            "id": "q36",
+            "name": "What benchmark for matured SaaS?"
+            
+          },
+          {
+            "id": "q37",
+            "name": "How to improve retention?"
+            
+          },
+          {
+            "id": "q38",
+            "name": "What revenue growth target?"
+            
+          },
+          {
+            "id": "q39",
+            "name": "Is 20-30% target?"
+            
+          },
+          {
+            "id": "q40",
+            "name": "Is 30-50% target?"
+            
+          },
+          {
+            "id": "q41",
+            "name": "Is 50-100% target?"
+            
+          },
+          {
+            "id": "q42",
+            "name": "Is 100%+ hypergrowth?"
+            
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "team-model",
+    "name": "Team Model",
+    "children": [
+      {
+        "id": "team-model-section-1-team-overview",
+        "name": "Section 1: Team Overview",
+        "children": [
+          {
+            "id": "q1",
+            "name": "How many founders?"
+            
+          },
+          {
+            "id": "q2",
+            "name": "What is team foundation?"
+            
+          },
+          {
+            "id": "q3",
+            "name": "Why understand founders?"
+            
+          },
+          {
+            "id": "q4",
+            "name": "How many employees?"
+            
+          },
+          {
+            "id": "q5",
+            "name": "Excluding founders?"
+            
+          },
+          {
+            "id": "q6",
+            "name": "What team structure?"
+            
+          },
+          {
+            "id": "q7",
+            "name": "How organized?"
+            
+          },
+          {
+            "id": "q8",
+            "name": "Best describes setup?"
+            
+          },
+          {
+            "id": "q9",
+            "name": "Why structure matters?"
+            
+          },
+          {
+            "id": "q10",
+            "name": "How ready for execution?"
+            
+          },
+          {
+            "id": "q11",
+            "name": "On scale low to high?"
+            
+          },
+          {
+            "id": "q12",
+            "name": "To hit goals?"
+            
+          },
+          {
+            "id": "q13",
+            "name": "What readiness means?"
+            
+          },
+          {
+            "id": "q14",
+            "name": "What working model?"
+            
+          },
+          {
+            "id": "q15",
+            "name": "All in office?"
+            
+          },
+          {
+            "id": "q16",
+            "name": "Remote?"
+            
+          },
+          {
+            "id": "q17",
+            "name": "Hybrid?"
+            
+          },
+          {
+            "id": "q18",
+            "name": "Why working model?"
+            
+          }
+        ]
+      },
+      {
+        "id": "team-model-section-2-team-roles-&-responsibilities",
+        "name": "Section 2: Team Roles & Responsibilities",
+        "children": [
+          {
+            "id": "q1",
+            "name": "Suggest team structure?"
+            
+          },
+          {
+            "id": "q2",
+            "name": "Based on stage?"
+            
+          },
+          {
+            "id": "q3",
+            "name": "Recommended?"
+            
+          },
+          {
+            "id": "q4",
+            "name": "Why suggest?"
+            
+          },
+          {
+            "id": "q5",
+            "name": "Define key roles?"
+            
+          },
+          {
+            "id": "q6",
+            "name": "Main responsibilities?"
+            
+          },
+          {
+            "id": "q7",
+            "name": "Tweak suggestions?"
+            
+          },
+          {
+            "id": "q8",
+            "name": "Add roles?"
+            
+          },
+          {
+            "id": "q9",
+            "name": "Why define roles?"
+            
+          }
+        ]
+      },
+      {
+        "id": "team-model-section-3-skills-matrix",
+        "name": "Section 3: Skills Matrix",
+        "children": [
+          {
+            "id": "q1",
+            "name": "Assess team skills?"
+            
+          },
+          {
+            "id": "q2",
+            "name": "Create skills matrix?"
+            
+          },
+          {
+            "id": "q3",
+            "name": "Technical skills?"
+            
+          },
+          {
+            "id": "q4",
+            "name": "Soft skills?"
+            
+          },
+          {
+            "id": "q5",
+            "name": "Business skills?"
+            
+          },
+          {
+            "id": "q6",
+            "name": "Why skills matrix?"
+            
+          }
+        ]
+      },
+      {
+        "id": "team-model-section-4-hiring-plan",
+        "name": "Section 4: Hiring Plan",
+        "children": [
+          {
+            "id": "q1",
+            "name": "Strategic hiring plan?"
+            
+          },
+          {
+            "id": "q2",
+            "name": "Based on stage?"
+            
+          },
+          {
+            "id": "q3",
+            "name": "Based on needs?"
+            
+          },
+          {
+            "id": "q4",
+            "name": "Suggest plan?"
+            
+          },
+          {
+            "id": "q5",
+            "name": "Why hiring plan?"
+            
+          }
+        ]
+      },
+      {
+        "id": "team-model-section-5-compensation-&-equity",
+        "name": "Section 5: Compensation & Equity",
+        "children": [
+          {
+            "id": "q1",
+            "name": "Recommend salary ranges?"
+            
+          },
+          {
+            "id": "q2",
+            "name": "Recommend equity bands?"
+            
+          },
+          {
+            "id": "q3",
+            "name": "Overall structure?"
+            
+          },
+          {
+            "id": "q4",
+            "name": "Fair compensation?"
+            
+          },
+          {
+            "id": "q5",
+            "name": "Why compensation?"
+            
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "legal-model",
+    "name": "Legal Model",
+    "children": [
+      {
+        "id": "legal-model-section-1-company-structure",
+        "name": "Section 1: Company Structure",
+        "children": [
+          {
+            "id": "q1",
+            "name": "What company name?"
+            
+          },
+          {
+            "id": "q2",
+            "name": "Planning name?"
+            
+          },
+          {
+            "id": "q3",
+            "name": "If unsure?"
+            
+          },
+          {
+            "id": "q4",
+            "name": "Suggest ideas?"
+            
+          },
+          {
+            "id": "q5",
+            "name": "Based on industry?"
+            
+          },
+          {
+            "id": "q6",
+            "name": "What legal structure?"
+            
+          },
+          {
+            "id": "q7",
+            "name": "LLC?"
+            
+          },
+          {
+            "id": "q8",
+            "name": "Sole proprietorship?"
+            
+          },
+          {
+            "id": "q9",
+            "name": "Joint stock?"
+            
+          },
+          {
+            "id": "q10",
+            "name": "Why LLC for early stage?"
+            
+          },
+          {
+            "id": "q11",
+            "name": "Have CR or BR?"
+            
+          },
+          {
+            "id": "q12",
+            "name": "Commercial Registration?"
+            
+          },
+          {
+            "id": "q13",
+            "name": "Business Registration?"
+            
+          },
+          {
+            "id": "q14",
+            "name": "If not?"
+            
+          },
+          {
+            "id": "q15",
+            "name": "Need to get?"
+            
+          }
+        ]
+      },
+      {
+        "id": "legal-model-section-2-intellectual-property",
+        "name": "Section 2: Intellectual Property",
+        "children": [
+          {
+            "id": "q1",
+            "name": "What protections needed?"
+            
+          },
+          {
+            "id": "q2",
+            "name": "Trademarks?"
+            
+          },
+          {
+            "id": "q3",
+            "name": "Copyright?"
+            
+          },
+          {
+            "id": "q4",
+            "name": "Patents?"
+            
+          },
+          {
+            "id": "q5",
+            "name": "Trade secrets?"
+            
+          },
+          {
+            "id": "q6",
+            "name": "Why important?"
+            
+          },
+          {
+            "id": "q7",
+            "name": "Proprietary technology?"
+            
+          },
+          {
+            "id": "q8",
+            "name": "Patentable?"
+            
+          },
+          {
+            "id": "q9",
+            "name": "Unique algorithms?"
+            
+          },
+          {
+            "id": "q10",
+            "name": "AI models?"
+            
+          },
+          {
+            "id": "q11",
+            "name": "Hardware designs?"
+            
+          },
+          {
+            "id": "q12",
+            "name": "Why patent?"
+            
+          }
+        ]
+      },
+      {
+        "id": "legal-model-section-3-contracts-&-agreements",
+        "name": "Section 3: Contracts & Agreements",
+        "children": [
+          {
+            "id": "q1",
+            "name": "Key contracts?"
+            
+          },
+          {
+            "id": "q2",
+            "name": "Founder agreement?"
+            
+          },
+          {
+            "id": "q3",
+            "name": "NDAs?"
+            
+          },
+          {
+            "id": "q4",
+            "name": "Employment agreements?"
+            
+          },
+          {
+            "id": "q5",
+            "name": "Terms of use?"
+            
+          },
+          {
+            "id": "q6",
+            "name": "Privacy policy?"
+            
+          }
+        ]
+      },
+      {
+        "id": "legal-model-section-4-compliance-&-regulations",
+        "name": "Section 4: Compliance & Regulations",
+        "children": [
+          {
+            "id": "q1",
+            "name": "Compliance recommendations?"
+            
+          },
+          {
+            "id": "q2",
+            "name": "Corporate compliance?"
+            
+          },
+          {
+            "id": "q3",
+            "name": "Data protection?"
+            
+          },
+          {
+            "id": "q4",
+            "name": "Cybersecurity?"
+            
+          },
+          {
+            "id": "q5",
+            "name": "Industry-specific?"
+            
+          },
+          {
+            "id": "q6",
+            "name": "Why crucial?"
+            
+          }
+        ]
+      },
+      {
+        "id": "legal-model-section-5-cap-table-&-equity",
+        "name": "Section 5: Cap Table & Equity",
+        "children": [
+          {
+            "id": "q1",
+            "name": "Cap table structure?"
+            
+          },
+          {
+            "id": "q2",
+            "name": "Founders ownership?"
+            
+          },
+          {
+            "id": "q3",
+            "name": "ESOP pool?"
+            
+          },
+          {
+            "id": "q4",
+            "name": "Investors ownership?"
+            
+          },
+          {
+            "id": "q5",
+            "name": "Vesting schedules?"
+            
+          },
+          {
+            "id": "q6",
+            "name": "Why cap table?"
+            
+          },
+          {
+            "id": "q7",
+            "name": "Add ESOP pool?"
+            
+          },
+          {
+            "id": "q8",
+            "name": "Recommended percentage?"
+            
+          },
+          {
+            "id": "q9",
+            "name": "Based on team size?"
+            
+          },
+          {
+            "id": "q10",
+            "name": "Attract talent?"
+            
+          },
+          {
+            "id": "q11",
+            "name": "Retain talent?"
+            
+          },
+          {
+            "id": "q12",
+            "name": "Investment round soon?"
+            
+          },
+          {
+            "id": "q13",
+            "name": "Pre-seed?"
+            
+          },
+          {
+            "id": "q14",
+            "name": "Seed?"
+            
+          },
+          {
+            "id": "q15",
+            "name": "Series A?"
+            
+          },
+          {
+            "id": "q16",
+            "name": "Adjust cap table?"
+            
+          },
+          {
+            "id": "q17",
+            "name": "Create downloadable cap table?"
+            
+          },
+          {
+            "id": "q18",
+            "name": "Excel format?"
+            
+          },
+          {
+            "id": "q19",
+            "name": "PDF format?"
+            
+          },
+          {
+            "id": "q20",
+            "name": "Full table?"
+            
+          }
+        ]
+      }
+    ]
+  }
+]

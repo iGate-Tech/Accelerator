@@ -1,0 +1,44 @@
+{{#if node.children}}
+<details class="dropdown w-full" data-node-id="{{node.id}}">
+  <summary>
+    <i class="lucide lucide-folder w-4 h-4 flex-shrink-0" data-lucide="folder"></i>
+    <span class="node-name">{{node.name}}</span>
+    <button class="btn btn-ghost btn-sm" popovertarget="popover-{{node.id}}" style="anchor-name:--anchor-{{node.id}}">
+      <i class="lucide lucide-ellipsis-vertical w-4 h-4" data-lucide="ellipsis-vertical"></i>
+    </button>
+    <ul class="dropdown menu w-52 rounded-box bg-base-100 shadow-sm" popover id="popover-{{node.id}}" style="position-anchor:--anchor-{{node.id}}">
+      <li><a onclick="editItem(this)"><i class="lucide lucide-edit w-4 h-4" data-lucide="edit"></i> Edit</a></li>
+      <li><a onclick="saveItem(this)"><i class="lucide lucide-save w-4 h-4" data-lucide="save"></i> Save</a></li>
+      <li><a onclick="addSub(this)"><i class="lucide lucide-folder-plus w-4 h-4" data-lucide="folder-plus"></i> Add sub</a></li>
+      <li><a onclick="addLeaf(this)"><i class="lucide lucide-file-plus w-4 h-4" data-lucide="file-plus"></i> Add leaf</a></li>
+      <li><a onclick="deleteItem(this)"><i class="lucide lucide-trash w-4 h-4" data-lucide="trash"></i> Delete</a></li>
+    </ul>
+  </summary>
+  <ul>
+    {{#each node.children}}
+    <li>
+      {{> hierarchical-node node=.}}
+    </li>
+    {{/each}}
+  </ul>
+</details>
+{{else}}
+<div data-node-id="{{node.id}}" class="w-full">
+  <div class="flex justify-between items-center w-full">
+    <div class="flex items-center">
+      <i class="lucide lucide-file-text w-4 h-4 ml-4 flex-shrink-0" data-lucide="file-text"></i>
+      <span class="node-name">{{node.name}}</span>
+    </div>
+    <div class="flex items-center">
+      <button class="btn btn-ghost btn-sm" popovertarget="popover-{{node.id}}" style="anchor-name:--anchor-{{node.id}}">
+        <i class="lucide lucide-ellipsis-vertical w-4 h-4" data-lucide="ellipsis-vertical"></i>
+      </button>
+      <ul class="dropdown menu w-52 rounded-box bg-base-100 shadow-sm" popover id="popover-{{node.id}}" style="position-anchor:--anchor-{{node.id}}">
+        <li><a onclick="editItem(this)"><i class="lucide lucide-edit w-4 h-4" data-lucide="edit"></i> Edit</a></li>
+        <li><a onclick="saveItem(this)"><i class="lucide lucide-save w-4 h-4" data-lucide="save"></i> Save</a></li>
+        <li><a onclick="deleteItem(this)"><i class="lucide lucide-trash w-4 h-4" data-lucide="trash"></i> Delete</a></li>
+      </ul>
+    </div>
+  </div>
+</div>
+{{/if}}

@@ -1,0 +1,21 @@
+<!-- Hierarchical Sidebar -->
+  <div class="sidebar relative w-[400px] bg-base-100 rounded-2xl p-3 shadow-sm border border-base-200 h-[85vh] overflow-y-auto">
+  <!-- Tabs -->
+  <div class="flex items-center gap-1 mb-3 text-sm">
+    <span class="px-3 py-1 rounded-lg bg-base-100 shadow-sm font-medium">Make</span>
+    <span class="px-3 py-1 text-base-content/60">Edit</span>
+    <span class="px-3 py-1 text-base-content/60">Reports</span>
+    <div class="ml-auto flex gap-2 text-base-content/60">
+      <i class="lucide lucide-search w-4 h-4" data-lucide="search"></i>
+      <i class="lucide lucide-chevron-right w-4 h-4" data-lucide="chevron-right"></i>
+    </div>
+  </div>
+
+   <ul class="menu w-full">
+     {{#each this}}
+     <li class="w-full p-0">
+       {{> hierarchical-node node=.}}
+     </li>
+     {{/each}}
+   </ul>
+</div>

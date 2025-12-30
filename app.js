@@ -97,6 +97,20 @@ loadQuestions();
 
 // Load raw data for sidebar
 let rawData = JSON.parse(fs.readFileSync('data.json', 'utf8'));
+let hierarchicalData = JSON.parse(fs.readFileSync('hierarchical-data.json', 'utf8'));
+
+function deleteNodeById(data, id) {
+  for (let i = 0; i < data.length; i++) {
+    if (data[i].id === id) {
+      data.splice(i, 1);
+      return true;
+    }
+    if (data[i].children && deleteNodeById(data[i].children, id)) {
+      return true;
+    }
+  }
+  return false;
+}
 
 const app = express();
 
@@ -968,12 +982,26 @@ app.post('/delete/:id', (req, res) => {
     });
 });
 
+app.post('/delete-node/:id', (req, res) => {
+    const nodeId = req.params.id;
+    if (deleteNodeById(hierarchicalData, nodeId)) {
+        fs.writeFileSync('hierarchical-data.json', JSON.stringify(hierarchicalData, null, 2));
+        res.sendStatus(200);
+    } else {
+        res.status(404).send('Node not found');
+    }
+});
+
 app.get('/model', (req, res) => {
     res.render('model');
 });
 
 app.get('/new', (req, res) => {
     res.render('new', { rawData });
+});
+
+app.get('/hierarchy', (req, res) => {
+    res.render('hierarchy', { rawData: hierarchicalData });
 });
 
 app.listen(port, () => {

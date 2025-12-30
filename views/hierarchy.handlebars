@@ -183,117 +183,182 @@
 
         // CRUD functionality
         function editItem(el) {
-          const details = el.closest('details');
-          const summary = details.querySelector('summary');
-          const nameSpan = summary.querySelector('.node-name');
+          const container = el.closest('details') || el.closest('a[data-nodeid]');
+          let header;
+          if (container.tagName.toLowerCase() === 'details') {
+            header = container.querySelector('summary');
+          } else {
+            header = container;
+          }
+          const nameSpan = header.querySelector('.node-name');
           if (nameSpan) {
             const currentText = nameSpan.textContent.trim();
             const input = document.createElement('input');
             input.type = 'text';
             input.value = currentText;
             input.className = 'input input-sm';
-            nameSpan.replaceWith(input);
+            header.replaceChild(input, nameSpan);
             input.focus();
             input.select();
             input.addEventListener('blur', () => saveItem(el));
             input.addEventListener('keydown', (e) => {
               if (e.key === 'Enter') saveItem(el);
               if (e.key === 'Escape') {
-                input.replaceWith(nameSpan);
+            header.replaceChild(nameSpan, input);
               }
             });
           }
         }
+            
 
         function saveItem(el) {
-          const details = el.closest('details');
-          const summary = details.querySelector('summary');
-          const input = summary.querySelector('input');
-          if (input) {
-            const newText = input.value.trim();
-            const nameSpan = document.createElement('span');
-            nameSpan.className = 'node-name';
-            nameSpan.textContent = newText;
-            input.replaceWith(nameSpan);
-            // TODO: Persist to server
-            console.log('Saved:', newText);
-          }
-        }
+           const container = el.closest('details') || el.closest('a[data-nodeid]');
+           let header;
+           if (container.tagName.toLowerCase() === 'details') {
+             header = container.querySelector('summary');
+           } else {
+             header = container;
+           }
+           const input = header.querySelector('input');
+           if (input) {
+             const newText = input.value.trim();
+             const nameSpan = document.createElement('span');
+             nameSpan.className = 'node-name';
+             nameSpan.textContent = newText;
+             header.replaceChild(nameSpan, input);
+             const nodeId = container.dataset.nodeid;
+             fetch('/update-node/' + nodeId, {
+               method: 'POST',
+               headers: { 'Content-Type': 'application/json' },
+               body: JSON.stringify({ name: newText })
+             });
+           }
+         }
 
         function addLeaf(el) {
-          const container = el.closest('details') || el.closest('div[data-node-id]');
-          let ul = container.querySelector('ul:not(.dropdown):not(.questions-ul)');
-          if (!ul) {
-            ul = document.createElement('ul');
-            container.appendChild(ul);
-          }
-          if (container.tagName === 'DETAILS') container.open = true;
-          const uniqueIdLeaf = 'popover-' + Date.now();
-          const newLi = document.createElement('li');
-          newLi.innerHTML = `
-            <div data-node-id="${uniqueIdLeaf}">
-              <div class="flex justify-between items-center w-full">
-                <div class="flex items-center">
-                  <i class="lucide lucide-file-text w-4 h-4 ml-4 flex-shrink-0" data-lucide="file-text"></i>
-                  <span class="node-name">New Leaf</span>
-                </div>
-                <div class="flex items-center">
-                  <button class="btn btn-ghost btn-sm" popovertarget="${uniqueIdLeaf}" style="anchor-name:--anchor-${uniqueIdLeaf}">
-                    <i class="lucide lucide-ellipsis-vertical w-4 h-4" data-lucide="ellipsis-vertical"></i>
-                  </button>
-                  <ul class="dropdown menu w-52 rounded-box bg-base-100 shadow-sm" popover id="${uniqueIdLeaf}" style="position-anchor:--anchor-${uniqueIdLeaf}">
-                    <li><a onclick="editItem(this)"><i class="lucide lucide-edit w-4 h-4" data-lucide="edit"></i> Edit</a></li>
-                    <li><a onclick="saveItem(this)"><i class="lucide lucide-save w-4 h-4" data-lucide="save"></i> Save</a></li>
-                    <li><a onclick="deleteItem(this)"><i class="lucide lucide-trash w-4 h-4" data-lucide="trash"></i> Delete</a></li>
-                  </ul>
-                </div>
-              </div>
-            </div>
-          `;
-          ul.appendChild(newLi);
-          lucide.createIcons();
-        }
+           const container = el.closest('details') || el.closest('a[data-nodeid]');
+           let ul = container.querySelector('ul:not(.dropdown):not(.questions-ul)');
+           if (!ul) {
+             ul = document.createElement('ul');
+             container.appendChild(ul);
+           }
+           if (container.tagName.toLowerCase() === 'details') container.open = true;
+           const tempId = Date.now().toString();
+           const newLi = document.createElement('li');
+           newLi.innerHTML = '<a href="#" class="flex justify-between items-center" data-nodeid="' + tempId + '"><span class="flex items-center"><i class="lucide lucide-file-text w-4 h-4" data-lucide="file-text"></i><span class="node-name ml-2">New Leaf</span></span><button class="btn btn-ghost btn-sm" popovertarget="popover-' + tempId + '" style="anchor-name:--anchor-' + tempId + '" onclick="event.stopPropagation()"><i class="lucide lucide-ellipsis-vertical w-4 h-4" data-lucide="ellipsis-vertical"></i></button></a><ul class="dropdown menu w-52 rounded-box bg-base-100 shadow-sm" popover id="popover-' + tempId + '" style="position-anchor:--anchor-' + tempId + '"><li><a onclick="editItem(this)"><i class="lucide lucide-edit w-4 h-4" data-lucide="edit"></i> Edit</a></li><li><a onclick="saveItem(this)"><i class="lucide lucide-save w-4 h-4" data-lucide="save"></i> Save</a></li><li><a onclick="deleteItem(this)"><i class="lucide lucide-trash w-4 h-4" data-lucide="trash"></i> Delete</a></li></ul>';
+           ul.appendChild(newLi);
+           lucide.createIcons();
+           fetch('/add-node', {
+             method: 'POST',
+             headers: { 'Content-Type': 'application/json' },
+             body: JSON.stringify({ parentId: container.dataset.nodeid || null, type: 'leaf', name: 'New Leaf' })
+           }).then(res => res.json()).then(data => {
+             if (data.success) {
+               newLi.querySelector('a').dataset.nodeid = data.id;
+               const popoverId = 'popover-' + data.id;
+               newLi.querySelector('button').setAttribute('popovertarget', popoverId);
+               newLi.querySelector('button').style.anchorName = '--anchor-' + data.id;
+               newLi.querySelector('ul').id = popoverId;
+               newLi.querySelector('ul').style.positionAnchor = '--anchor-' + data.id;
+             }
+           });
+         }
 
         function addSub(el) {
-          const container = el.closest('details') || el.closest('div[data-node-id]');
-          let ul = container.querySelector('ul:not(.dropdown)');
-          if (!ul) {
-            ul = document.createElement('ul');
-            container.appendChild(ul);
-          }
-          if (container.tagName === 'DETAILS') container.open = true;
-          const uniqueId = 'popover-' + Date.now();
-          const newLi = document.createElement('li');
-          newLi.innerHTML = `
-            <details class="dropdown" data-node-id="${uniqueId}">
-              <summary>
-                <i class="lucide lucide-folder w-4 h-4" data-lucide="folder"></i>
-                <span class="node-name">New Sub</span>
-                <button class="btn btn-ghost btn-sm" popovertarget="${uniqueId}" style="anchor-name:--anchor-${uniqueId}">
-                  <i class="lucide lucide-ellipsis-vertical w-4 h-4" data-lucide="ellipsis-vertical"></i>
-                </button>
-                <ul class="dropdown menu w-52 rounded-box bg-base-100 shadow-sm" popover id="${uniqueId}" style="position-anchor:--anchor-${uniqueId}">
-                  <li><a onclick="editItem(this)"><i class="lucide lucide-edit w-4 h-4" data-lucide="edit"></i> Edit</a></li>
-                  <li><a onclick="saveItem(this)"><i class="lucide lucide-save w-4 h-4" data-lucide="save"></i> Save</a></li>
-                  <li><a onclick="addSub(this)"><i class="lucide lucide-folder-plus w-4 h-4" data-lucide="folder-plus"></i> Add sub</a></li>
-                  <li><a onclick="addLeaf(this)"><i class="lucide lucide-file-plus w-4 h-4" data-lucide="file-plus"></i> Add leaf</a></li>
-                  <li><a onclick="deleteItem(this)"><i class="lucide lucide-trash w-4 h-4" data-lucide="trash"></i> Delete</a></li>
-                </ul>
-              </summary>
-            </details>
-          `;
-          ul.appendChild(newLi);
-          lucide.createIcons();
-        }
+           const container = el.closest('details') || el.closest('a[data-nodeid]');
+           let ul = container.querySelector('ul:not(.dropdown)');
+           if (!ul) {
+             ul = document.createElement('ul');
+             container.appendChild(ul);
+           }
+           if (container.tagName.toLowerCase() === 'details') container.open = true;
+           const tempId = Date.now().toString();
+           const newLi = document.createElement('li');
+           newLi.innerHTML = '<details class="dropdown" data-nodeid="' + tempId + '"><summary><i class="lucide lucide-folder w-4 h-4 flex-shrink-0" data-lucide="folder"></i><span class="node-name">New Sub</span><button class="btn btn-ghost btn-sm" popovertarget="popover-' + tempId + '" style="anchor-name:--anchor-' + tempId + '" onclick="event.stopPropagation()"><i class="lucide lucide-ellipsis-vertical w-4 h-4" data-lucide="ellipsis-vertical"></i></button><ul class="dropdown menu w-52 rounded-box bg-base-100 shadow-sm" popover id="popover-' + tempId + '" style="position-anchor:--anchor-' + tempId + '"><li><a onclick="editItem(this)"><i class="lucide lucide-edit w-4 h-4" data-lucide="edit"></i> Edit</a></li><li><a onclick="saveItem(this)"><i class="lucide lucide-save w-4 h-4" data-lucide="save"></i> Save</a></li><li><a onclick="addSub(this)"><i class="lucide lucide-folder-plus w-4 h-4" data-lucide="folder-plus"></i> Add sub</a></li><li><a onclick="addLeaf(this)"><i class="lucide lucide-file-plus w-4 h-4" data-lucide="file-plus"></i> Add leaf</a></li><li><a onclick="deleteItem(this)"><i class="lucide lucide-trash w-4 h-4" data-lucide="trash"></i> Delete</a></li></ul></summary><ul></ul></details>';
+           ul.appendChild(newLi);
+           lucide.createIcons();
+           fetch('/add-node', {
+             method: 'POST',
+             headers: { 'Content-Type': 'application/json' },
+             body: JSON.stringify({ parentId: container.dataset.nodeid || null, type: 'sub', name: 'New Sub' })
+           }).then(res => res.json()).then(data => {
+             if (data.success) {
+               newLi.querySelector('details').dataset.nodeid = data.id;
+               const popoverId = 'popover-' + data.id;
+               newLi.querySelector('button').setAttribute('popovertarget', popoverId);
+               newLi.querySelector('button').style.anchorName = '--anchor-' + data.id;
+               newLi.querySelector('ul').id = popoverId;
+               newLi.querySelector('ul').style.positionAnchor = '--anchor-' + data.id;
+             }
+           });
+         }
 
         function deleteItem(el) {
-          const details = el.closest('details');
-          const nodeId = details.dataset.nodeId;
+          const container = el.closest('details') || el.closest('a[data-nodeid]');
+          const nodeId = container.dataset.nodeid;
           window.pendingDeleteNodeId = nodeId;
-          window.pendingDeleteLi = details.closest('li');
+          window.pendingDeleteLi = container.closest('li');
           const checkbox = document.getElementById('delete_modal');
           checkbox.checked = true;
         }
+
+        function addSubToRoot() {
+           const sidebar = document.querySelector('.sidebar');
+           let ul = sidebar.querySelector('ul.menu.w-full');
+           if (!ul) {
+             ul = document.createElement('ul');
+             ul.className = 'menu w-full';
+             sidebar.appendChild(ul);
+           }
+           const tempId = Date.now().toString();
+           const newLi = document.createElement('li');
+           newLi.innerHTML = '<details class="dropdown w-full" data-nodeid="' + tempId + '"><summary><i class="lucide lucide-folder w-4 h-4 flex-shrink-0 min-w-4 min-h-4" data-lucide="folder"></i><span class="node-name">New Sub</span><button class="btn btn-ghost btn-sm" popovertarget="popover-' + tempId + '" style="anchor-name:--anchor-' + tempId + '" onclick="event.stopPropagation()"><i class="lucide lucide-ellipsis-vertical w-4 h-4" data-lucide="ellipsis-vertical"></i></button><ul class="dropdown menu w-52 rounded-box bg-base-100 shadow-sm" popover id="popover-' + tempId + '" style="position-anchor:--anchor-' + tempId + '"><li><a onclick="editItem(this)"><i class="lucide lucide-edit w-4 h-4" data-lucide="edit"></i> Edit</a></li><li><a onclick="saveItem(this)"><i class="lucide lucide-save w-4 h-4" data-lucide="save"></i> Save</a></li><li><a onclick="addSub(this)"><i class="lucide lucide-folder-plus w-4 h-4" data-lucide="folder-plus"></i> Add sub</a></li><li><a onclick="addLeaf(this)"><i class="lucide lucide-file-plus w-4 h-4" data-lucide="file-plus"></i> Add leaf</a></li><li><a onclick="deleteItem(this)"><i class="lucide lucide-trash w-4 h-4" data-lucide="trash"></i> Delete</a></li></ul></summary><ul></ul></details>';
+           ul.appendChild(newLi);
+           lucide.createIcons();
+           fetch('/add-node', {
+             method: 'POST',
+             headers: { 'Content-Type': 'application/json' },
+             body: JSON.stringify({ parentId: null, type: 'sub', name: 'New Sub' })
+           }).then(res => res.json()).then(data => {
+             if (data.success) {
+               newLi.querySelector('details').dataset.nodeid = data.id;
+               const popoverId = 'popover-' + data.id;
+               newLi.querySelector('button').setAttribute('popovertarget', popoverId);
+               newLi.querySelector('button').style.anchorName = '--anchor-' + data.id;
+               newLi.querySelector('ul').id = popoverId;
+               newLi.querySelector('ul').style.positionAnchor = '--anchor-' + data.id;
+             }
+           });
+         }
+
+        function addLeafToRoot() {
+           const sidebar = document.querySelector('.sidebar');
+           let ul = sidebar.querySelector('ul.menu.w-full');
+           if (!ul) {
+             ul = document.createElement('ul');
+             ul.className = 'menu w-full';
+             sidebar.appendChild(ul);
+           }
+           const tempId = Date.now().toString();
+           const newLi = document.createElement('li');
+           newLi.innerHTML = '<a href="#" class="flex justify-between items-center" data-nodeid="' + tempId + '"><span class="flex items-center"><i class="lucide lucide-file-text w-4 h-4  flex-shrink-0 min-w-4 min-h-4" data-lucide="file-text"></i><span class="node-name ml-2">New Leaf</span></span><button class="btn btn-ghost btn-sm" popovertarget="popover-' + tempId + '" style="anchor-name:--anchor-' + tempId + '" onclick="event.stopPropagation()"><i class="lucide lucide-ellipsis-vertical w-4 h-4" data-lucide="ellipsis-vertical"></i></button></a><ul class="dropdown menu w-52 rounded-box bg-base-100 shadow-sm" popover id="popover-' + tempId + '" style="position-anchor:--anchor-' + tempId + '"><li><a onclick="editItem(this)"><i class="lucide lucide-edit w-4 h-4" data-lucide="edit"></i> Edit</a></li><li><a onclick="saveItem(this)"><i class="lucide lucide-save w-4 h-4" data-lucide="save"></i> Save</a></li><li><a onclick="deleteItem(this)"><i class="lucide lucide-trash w-4 h-4" data-lucide="trash"></i> Delete</a></li></ul>';
+           ul.appendChild(newLi);
+           lucide.createIcons();
+           fetch('/add-node', {
+             method: 'POST',
+             headers: { 'Content-Type': 'application/json' },
+             body: JSON.stringify({ parentId: null, type: 'leaf', name: 'New Leaf' })
+           }).then(res => res.json()).then(data => {
+             if (data.success) {
+               newLi.querySelector('a').dataset.nodeid = data.id;
+               const popoverId = 'popover-' + data.id;
+               newLi.querySelector('button').setAttribute('popovertarget', popoverId);
+               newLi.querySelector('button').style.anchorName = '--anchor-' + data.id;
+               newLi.querySelector('ul').id = popoverId;
+               newLi.querySelector('ul').style.positionAnchor = '--anchor-' + data.id;
+             }
+           });
+         }
 
         function confirmDelete() {
           const nodeId = window.pendingDeleteNodeId;

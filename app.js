@@ -112,6 +112,37 @@ function deleteNodeById(data, id) {
   return false;
 }
 
+function addNode(data, parentId, newNode) {
+  if (!parentId) {
+    data.push(newNode);
+    return true;
+  }
+  for (let i = 0; i < data.length; i++) {
+    if (data[i].id === parentId) {
+      if (!data[i].children) data[i].children = [];
+      data[i].children.push(newNode);
+      return true;
+    }
+    if (data[i].children && addNode(data[i].children, parentId, newNode)) {
+      return true;
+    }
+  }
+  return false;
+}
+
+function updateNode(data, id, updates) {
+  for (let i = 0; i < data.length; i++) {
+    if (data[i].id === id) {
+      Object.assign(data[i], updates);
+      return true;
+    }
+    if (data[i].children && updateNode(data[i].children, id, updates)) {
+      return true;
+    }
+  }
+  return false;
+}
+
 const app = express();
 
 // Session middleware
@@ -150,6 +181,7 @@ app.set('views', path.join(__dirname, 'views'));
 
 // Middleware
 app.use(express.urlencoded({ extended: true }));
+app.use(express.json());
 
 // Static files
 app.use(express.static(path.join(__dirname, 'public')));
@@ -983,13 +1015,36 @@ app.post('/delete/:id', (req, res) => {
 });
 
 app.post('/delete-node/:id', (req, res) => {
-    const nodeId = req.params.id;
-    if (deleteNodeById(hierarchicalData, nodeId)) {
-        fs.writeFileSync('hierarchical-data.json', JSON.stringify(hierarchicalData, null, 2));
-        res.sendStatus(200);
-    } else {
-        res.status(404).send('Node not found');
-    }
+  const nodeId = req.params.id;
+  if (deleteNodeById(hierarchicalData, nodeId)) {
+    fs.writeFileSync('hierarchical-data.json', JSON.stringify(hierarchicalData, null, 2));
+    res.json({ success: true });
+  } else {
+    res.status(400).json({ success: false });
+  }
+});
+
+app.post('/add-node', (req, res) => {
+  const { parentId, type, name } = req.body;
+  const newId = Date.now().toString();
+  const newNode = { id: newId, name, children: type === 'sub' ? [] : undefined };
+  if (addNode(hierarchicalData, parentId, newNode)) {
+    fs.writeFileSync('hierarchical-data.json', JSON.stringify(hierarchicalData, null, 2));
+    res.json({ success: true, id: newId });
+  } else {
+    res.status(400).json({ success: false });
+  }
+});
+
+app.post('/update-node/:id', (req, res) => {
+  const nodeId = req.params.id;
+  const { name } = req.body;
+  if (updateNode(hierarchicalData, nodeId, { name })) {
+    fs.writeFileSync('hierarchical-data.json', JSON.stringify(hierarchicalData, null, 2));
+    res.json({ success: true });
+  } else {
+    res.status(400).json({ success: false });
+  }
 });
 
 app.get('/model', (req, res) => {
@@ -1001,6 +1056,15 @@ app.get('/new', (req, res) => {
 });
 
 app.get('/hierarchy', (req, res) => {
+    function addIsFolder(data) {
+        for (let node of data) {
+            node.isFolder = 'children' in node;
+            if (node.children && node.children.length > 0) {
+                addIsFolder(node.children);
+            }
+        }
+    }
+    addIsFolder(hierarchicalData);
     res.render('hierarchy', { rawData: hierarchicalData });
 });
 

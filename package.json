@@ -22,11 +22,7 @@
     "dotenv": "^17.2.3",
     "express": "^5.2.1",
     "express-handlebars": "^8.0.4",
-    "express-session": "^1.18.2",
     "lucide": "^0.562.0",
-    "marked": "^17.0.1",
-    "openai": "^6.15.0",
-    "sqlite3": "^5.1.7",
     "tailwindcss": "^3.4.19"
   },
   "devDependencies": {

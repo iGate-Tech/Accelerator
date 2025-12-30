@@ -173,12 +173,18 @@ function getNode(data, id) {
 }
 
 function copyNode(data, fromId, toParentId) {
+  console.log('Copying node', fromId, 'to parent', toParentId);
   const node = getNode(data, fromId);
-  if (!node) return false;
+  if (!node) {
+    console.log('Node not found');
+    return false;
+  }
   const copy = JSON.parse(JSON.stringify(node));
+  console.log('Original node:', node.name || node.question);
   // Generate new id and uniqueId
   copy.id = Date.now().toString();
   copy.uniqueId = Math.random().toString(36).substr(2, 9);
+  console.log('New id:', copy.id);
   // If it's a folder, recursively update ids
   function updateIds(obj) {
     if (obj.children && Array.isArray(obj.children)) {
@@ -191,8 +197,9 @@ function copyNode(data, fromId, toParentId) {
   }
   updateIds(copy);
   // Add to parent
-  addNode(data, toParentId, copy);
-  return true;
+  const added = addNode(data, toParentId, copy);
+  console.log('Added to parent:', added);
+  return added;
 }
 
 const app = express();
@@ -1107,10 +1114,13 @@ app.post('/update-node/:id', (req, res) => {
 
 app.post('/paste-as-child', (req, res) => {
   const { parentId, copyId } = req.body;
+  console.log('Pasting node', copyId, 'as child of', parentId);
   if (copyNode(hierarchicalData, copyId, parentId)) {
     fs.writeFileSync('hierarchical-data.json', JSON.stringify(hierarchicalData, null, 2));
+    console.log('Paste successful');
     res.json({ success: true });
   } else {
+    console.log('Paste failed: node not found');
     res.status(400).json({ success: false });
   }
 });

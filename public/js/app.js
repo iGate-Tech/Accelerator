@@ -455,5 +455,3 @@ if (document.querySelector('.card')) {
 }
 
 console.log('app.js loaded');
-
-// End of app.js

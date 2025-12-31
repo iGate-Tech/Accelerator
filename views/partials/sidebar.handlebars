@@ -1,20 +1,27 @@
 <!-- Hierarchical Sidebar -->
    <div class="sidebar w-[420px]  p-3 rounded-box border-r border-base-200 h-[calc(100vh-4rem)] overflow-y-auto z-50 hidden lg:block">
-   <!-- Tabs -->
-   <div class="tabs tabs-box mb-3">
-     <input type="radio" name="sidebar_tabs" class="tab" aria-label="Make" checked />
-     <input type="radio" name="sidebar_tabs" class="tab" aria-label="Edit" />
-     <input type="radio" name="sidebar_tabs" class="tab" aria-label="Reports" />
-     <button class="btn btn-ghost btn-sm ml-auto" popovertarget="root_popover" onclick="event.stopPropagation()">
-       <i class="lucide lucide-ellipsis-vertical w-4 h-4" data-lucide="ellipsis-vertical"></i>
-     </button>
-     <ul class="dropdown menu w-52 rounded-box bg-base-100 shadow-sm" popover id="root_popover">
-       <li><a onclick="addSubToRoot()">Add sub</a></li>
-       <li><a onclick="addLeafToRoot()">Add leaf</a></li>
-       <li><a onclick="pasteAsChildToRoot()">Paste as child</a></li>
-     </ul>
-   </div>
+    <!-- Tabs -->
+    <div role="tablist" class="tabs tabs-box mb-3">
+      <a role="tab" class="tab tab-active" onclick="switchTab(this)">Build Application</a>
+      <a role="tab" class="tab" onclick="switchTab(this)">Use</a>
+      <a role="tab" class="tab" onclick="switchTab(this)">Reports</a>
+      <button class="btn btn-ghost btn-sm ml-auto" popovertarget="root_popover" onclick="event.stopPropagation()">
+        <i class="lucide lucide-ellipsis-vertical w-4 h-4" data-lucide="ellipsis-vertical"></i>
+      </button>
+      <ul class="dropdown menu w-52 rounded-box bg-base-100 shadow-sm" popover id="root_popover">
+        <li><a onclick="addSubToRoot()"><i data-lucide="plus" class="lucide lucide-plus w-4 h-4"></i> Add sub</a></li>
+        <li><a onclick="addLeafToRoot()"><i data-lucide="file-plus" class="lucide lucide-file-plus w-4 h-4"></i> Add leaf</a></li>
+        <li><a onclick="pasteAsChildToRoot()"><i data-lucide="clipboard-paste" class="lucide lucide-clipboard-paste w-4 h-4"></i> Paste as child</a></li>
+        <li><a onclick="exportData()"><i data-lucide="download" class="lucide lucide-download w-4 h-4"></i> Export</a></li>
+        <li><a onclick="document.getElementById('import-file').click()"><i data-lucide="upload" class="lucide lucide-upload w-4 h-4"></i> Import</a></li>
+      </ul>
+      <input type="file" id="import-file" accept=".json" style="display: none;" onchange="importData(this.files[0])">
+    </div>
 
-    <ul class="menu w-full">
-    </ul>
+     <ul id="build-tab-content" class="menu w-full tab-content tab-build">
+     </ul>
+     <ul id="use-tab-content" class="menu w-full tab-content tab-use" style="display: none;">
+     </ul>
+     <ul id="reports-tab-content" class="menu w-full tab-content tab-reports" style="display: none;">
+     </ul>
   </div>

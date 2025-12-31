@@ -323,7 +323,7 @@ async function renderSidebar() {
   console.log('Preserving open ids:', openIds);
   await sidebarManager.loadRoots();
   console.log('Roots loaded for rendering');
-  const sidebarUl = document.querySelector('.sidebar ul.menu.w-full');
+  const sidebarUl = document.getElementById('build-tab-content');
   if (sidebarUl) {
     console.log('Generating HTML...');
     sidebarUl.innerHTML = sidebarManager.roots.map(generateNodeHTML).join('');
@@ -363,6 +363,41 @@ async function renderSidebar() {
     console.log('Render completed');
   } else {
     console.error('Sidebar ul not found');
+  }
+}
+
+/**
+ * Renders content for the "Use" tab: a flat list of all leaf nodes.
+ */
+async function renderUseTab() {
+  console.log('Rendering Use tab...');
+  const result = await sidebarManager.db.query('SELECT * FROM nodes WHERE type = $1 ORDER BY id', ['leaf']);
+  const leaves = result.rows;
+  const html = leaves.map(leaf => `<li><a onclick="loadQuestion('${leaf.id}')">${leaf.question || ''}</a></li>`).join('');
+  const useUl = document.getElementById('use-tab-content');
+  if (useUl) {
+    useUl.innerHTML = html;
+    console.log('Use tab rendered');
+  }
+}
+
+/**
+ * Renders content for the "Reports" tab: summary statistics.
+ */
+async function renderReportsTab() {
+  console.log('Rendering Reports tab...');
+  const totalNodes = await sidebarManager.db.query('SELECT COUNT(*) as count FROM nodes');
+  const totalLeaves = await sidebarManager.db.query('SELECT COUNT(*) as count FROM nodes WHERE type = $1', ['leaf']);
+  const totalFolders = await sidebarManager.db.query('SELECT COUNT(*) as count FROM nodes WHERE type = $1', ['folder']);
+  const html = `
+    <li><strong>Total Nodes:</strong> ${totalNodes.rows[0].count}</li>
+    <li><strong>Folders:</strong> ${totalFolders.rows[0].count}</li>
+    <li><strong>Questions:</strong> ${totalLeaves.rows[0].count}</li>
+  `;
+  const reportsUl = document.getElementById('reports-tab-content');
+  if (reportsUl) {
+    reportsUl.innerHTML = html;
+    console.log('Reports tab rendered');
   }
 }
 
@@ -693,7 +728,28 @@ async function pasteAsChildToRoot() {
 }
 
 
+/**
+ * Switches the active tab in the sidebar.
+ */
+function switchTab(tabElement) {
+  // Remove active class from all tabs
+  const tabs = document.querySelectorAll('.sidebar .tabs .tab');
+  tabs.forEach(tab => tab.classList.remove('tab-active'));
+  // Add active to clicked tab
+  tabElement.classList.add('tab-active');
+  // Hide all tab content
+  const contents = document.querySelectorAll('.sidebar .tab-content');
+  contents.forEach(content => content.style.display = 'none');
+  // Show content for active tab
+  const tabMap = { 'build-application': 'build', 'use': 'use', 'reports': 'reports' };
+  const tabKey = tabElement.textContent.trim().replace(/\s+/g, '-').toLowerCase();
+  const tabName = tabMap[tabKey];
+  const activeContent = document.getElementById(`${tabName}-tab-content`);
+  if (activeContent) activeContent.style.display = 'block';
+}
+
 // Expose functions to global scope for onclick handlers
+window.switchTab = switchTab;
 window.loadQuestion = loadQuestion;
 window.addSub = addSub;
 window.addSubToRoot = addSubToRoot;
@@ -719,6 +775,40 @@ window.exportData = async function() {
   URL.revokeObjectURL(url);
 };
 
+window.importData = async function(file) {
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = async (e) => {
+    try {
+      const data = JSON.parse(e.target.result);
+      // Clear existing data
+      await sidebarManager.db.exec('DELETE FROM nodes');
+      // Insert new data
+      const insertRecursive = async (nodes, parentId = null) => {
+        for (const node of nodes) {
+          const result = await sidebarManager.db.query(
+            'INSERT INTO nodes (type, name, question, answer, prompt_en, prompt_ar, placeholder, parent_id, is_open, sort_order) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING id',
+            [node.type, node.name, node.question, node.answer, node.prompt_en || '', node.prompt_ar || '', node.placeholder || '', parentId, node.is_open || false, node.sort_order || 0]
+          );
+          const newId = result.rows[0].id;
+          if (node.children && node.children.length > 0) {
+            await insertRecursive(node.children, newId);
+          }
+        }
+      };
+      await insertRecursive(data);
+      // Re-render all tabs
+      await renderSidebar();
+      await renderUseTab();
+      await renderReportsTab();
+      console.log('Data imported successfully!');
+    } catch (error) {
+      console.error('Import error:', error);
+    }
+  };
+  reader.readAsText(file);
+};
+
 // Data management (for pages with sidebar) - now with PGLite
 if (document.querySelector('.sidebar')) {
   console.log('Sidebar found, initializing...');
@@ -726,6 +816,8 @@ if (document.querySelector('.sidebar')) {
     console.log('Starting async init and render...');
     await sidebarManager.init();
     await renderSidebar();
+    await renderUseTab();
+    await renderReportsTab();
     console.log('Sidebar fully loaded');
   })();
 }

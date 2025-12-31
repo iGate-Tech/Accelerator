@@ -135,6 +135,7 @@ if (document.querySelector('.sidebar')) {
       flatten(data);
       // Insert into collection
       nodesCollection.insert(...nodes);
+      console.log('Initial data loaded:', nodes.length, 'nodes');
       // Update sidebar
       updateSidebar();
     });
@@ -259,8 +260,9 @@ if (document.querySelector('.sidebar')) {
           placeholder: node.placeholder,
           parentId: parentId
         };
-        nodesCollection.insert(copy);
-        updateSidebar();
+      nodesCollection.insert(copy);
+      console.log('Pasted node:', copy.uniqueId);
+      updateSidebar();
       }
     }
   };

@@ -16,87 +16,21 @@
          {{> sidebar rawData}}
                {{{body}}}
          </div>
-        <script type="module" src="/js/app.js?v=8"></script>
-        <script>
-            // Active nav
-            const navLinks = document.querySelectorAll('.nav-link');
-            navLinks.forEach(link => {
-              const href = link.getAttribute('href');
-              if (window.location.pathname === href) {
-                link.classList.add('opacity-100', 'text-base-content');
-                link.parentElement.querySelector('.nav-bar').classList.add('opacity-100');
-              }
-            });
-        </script>
-        <script>
-            // I18n functionality
-            const translations = {
-                en: {
-                    title: "Hi <span class='text-primary'>Demo</span>, what's your next big idea?",
-                    placeholder: "Enter prompt...",
-                    home: "Home",
-                    dashboard: "Dashboard",
-                    explore: "Explore",
-                    portfolio: "Portfolio",
-                    help: "Help"
-                },
-                ar: {
-                    title: "مرحباً <span class='text-primary'>ديمو</span>، ما هي فكرتك الكبيرة التالية؟",
-                    placeholder: "أدخل الطلب...",
-                    home: "الرئيسية",
-                    dashboard: "لوحة التحكم",
-                    explore: "استكشف",
-                    portfolio: "المحفظة",
-                    help: "المساعدة"
-                }
-            };
-
-            function setLanguage(lang) {
-                document.documentElement.lang = lang;
-                document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
-                document.querySelectorAll('[data-i18n]').forEach(el => {
-                    const key = el.dataset.i18n;
-                    if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') {
-                        el.placeholder = translations[lang][key];
-                    } else {
-                        el.innerHTML = translations[lang][key];
-                    }
-                });
-                // Adjust sidebar position
-                const sidebar = document.querySelector('.sidebar');
-                if (lang === 'ar') {
-                    sidebar.classList.remove('left-0', 'border-r');
-                    sidebar.classList.add('right-0', 'border-l');
-                } else {
-                    sidebar.classList.remove('right-0', 'border-l');
-                    sidebar.classList.add('left-0', 'border-r');
-                }
-                // Adjust content margin
-                const contentDiv = document.querySelector('div.ml-\\[400px\\]');
-                if (contentDiv) {
-                    if (lang === 'ar') {
-                        contentDiv.classList.remove('ml-[400px]');
-                        contentDiv.classList.add('mr-[400px]');
-                    } else {
-                        contentDiv.classList.remove('mr-[400px]');
-                        contentDiv.classList.add('ml-[400px]');
-                    }
-                }
-
-                localStorage.setItem('lang', lang);
-            }
-
-            // Language toggle
-            const langSwap = document.querySelector('.swap input[type="checkbox"]');
-            langSwap.addEventListener('change', (e) => {
-                const lang = e.target.checked ? 'ar' : 'en';
-                setLanguage(lang);
-            });
-
-            // Initialize
-            const savedLang = localStorage.getItem('lang') || 'en';
-            setLanguage(savedLang);
-            langSwap.checked = savedLang === 'ar';
-        </script>
+         <script src="/js/pglite.js?v=8"></script>
+         <script src="/js/theme.js?v=8"></script>
+         <script src="/js/language.js?v=8"></script>
+         <script src="/js/sidebar.js?v=8"></script>
+         <script type="module" src="/js/app.js?v=8"></script>
+         <script>
+             // Active nav
+             const navLinks = document.querySelectorAll('.nav-link');
+             navLinks.forEach(link => {
+               const href = link.getAttribute('href');
+               if (window.location.pathname === href) {
+                 link.classList.add('opacity-100', 'text-base-content');
+                 link.parentElement.querySelector('.nav-bar').classList.add('opacity-100');
+               }
+             });
+         </script>
   </body>
 </html>

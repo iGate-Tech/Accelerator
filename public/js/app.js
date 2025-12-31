@@ -1,5 +1,58 @@
 // app.js - Client-side logic for theme, language, and data management
 
+// PGLite initialization
+(async () => {
+  try {
+    const { PGlite } = await import("https://cdn.jsdelivr.net/npm/@electric-sql/pglite/dist/index.js");
+    const { live } = await import("https://cdn.jsdelivr.net/npm/@electric-sql/pglite/dist/live/index.js");
+
+    const pg = await PGlite.create({
+      dataDir: `idb://my-database`,
+      extensions: {
+        live,
+      },
+    });
+
+    // Setup schema
+    await pg.exec(`
+      CREATE TABLE IF NOT EXISTS todos (
+        id SERIAL PRIMARY KEY,
+        title TEXT,
+        completed BOOLEAN DEFAULT false
+      );
+    `);
+
+    console.log("PGLite initialized successfully", pg);
+
+    // Sync with server (commented out since no server running)
+    // const BASE_URL = 'http://localhost:5133';
+    // await pg.electric.syncShapeToTable({
+    //   shape: { url: `${BASE_URL}/v1/shape` },
+    //   table: `todos`,
+    //   primaryKey: [`id`],
+    // });
+
+    // Insert some test data
+    await pg.exec(`
+      INSERT INTO todos (title, completed) VALUES ('Install PGLite', true);
+      INSERT INTO todos (title) VALUES ('Test live queries');
+    `);
+
+    // Example live query
+    const unsubscribe = pg.live.query(
+      "SELECT * FROM todos",
+      [],
+      (res) => {
+        console.log("Live query results:", res.rows);
+        // Update UI here, e.g., const list = document.getElementById("todos"); list.innerHTML = ""; res.rows.forEach(todo => { ... });
+      }
+    );
+
+  } catch (error) {
+    console.error("PGLite initialization failed:", error);
+  }
+})();
+
 // Generate HTML
 function generateNodeHTML(node) {
   let html = '';

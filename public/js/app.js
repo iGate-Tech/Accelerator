@@ -133,7 +133,6 @@ if (document.querySelector('.sidebar')) {
       }
       flatten(data);
       // Insert into collection
-      console.log('Inserting nodes:', nodes);
       nodesCollection.insert(nodes);
       // Update sidebar
       updateSidebar();
@@ -285,7 +284,6 @@ if (document.querySelector('.sidebar')) {
       name: 'New Sub',
       parentId: parentId
     };
-    console.log('Inserting newNode:', newNode);
     nodesCollection.insert(newNode);
     updateSidebar();
   };

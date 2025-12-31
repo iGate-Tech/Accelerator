@@ -26,7 +26,6 @@ class SidebarManager {
       await this.db.exec(`
         CREATE TABLE IF NOT EXISTS nodes (
           id SERIAL PRIMARY KEY,
-          uniqueId TEXT UNIQUE NOT NULL,
           type TEXT,
           name TEXT,
           question TEXT,
@@ -34,20 +33,30 @@ class SidebarManager {
           prompt_en TEXT,
           prompt_ar TEXT,
           placeholder TEXT,
-          parent_id INTEGER
+          parent_id INTEGER,
+          is_open BOOLEAN DEFAULT FALSE,
+          sort_order INTEGER DEFAULT 0
         );
       `);
       console.log('Table created or exists');
 
-      // Migrate static data if table is empty
-      const existing = await this.db.query('SELECT COUNT(*) as count FROM nodes');
-      console.log('Existing count query result:', existing);
-      if (existing.rows[0].count === 0) {
-        console.log('No data found, migrating static data...');
-        await this.migrateStaticData();
-      } else {
-        console.log('Data already exists, skipping migration');
-      }
+      // Add sort_order column if not exists
+      await this.db.exec(`
+        ALTER TABLE nodes ADD COLUMN IF NOT EXISTS sort_order INTEGER DEFAULT 0;
+      `);
+      console.log('Sort order column ensured');
+
+       // Migrate static data if table is empty
+       const existing = await this.db.query('SELECT COUNT(*) as count FROM nodes');
+       console.log('Existing count query result:', existing);
+       if (existing.rows[0].count === 0) {
+         console.log('No data found, migrating static data...');
+         await this.migrateStaticData();
+       } else {
+         console.log('Data already exists, skipping migration');
+       }
+       // Ensure orders are set
+       await this.renumberOrders();
     } catch (e) {
       console.error('DB init error:', e);
     }
@@ -56,31 +65,49 @@ class SidebarManager {
 
   async migrateStaticData() {
     console.log('Starting migration of static data');
-    const insertRecursive = async (nodes, parentId = null) => {
+    const insertRecursive = async (nodes, parentId = null, orderStart = 0) => {
       console.log(`Inserting ${nodes.length} nodes at parent ${parentId}`);
-      for (const node of nodes) {
+      for (let i = 0; i < nodes.length; i++) {
+        const node = nodes[i];
         console.log(`Inserting node: ${node.name || node.question}`);
         const result = await this.db.query(
-          'INSERT INTO nodes (uniqueId, type, name, question, answer, prompt_en, prompt_ar, placeholder, parent_id) VALUES (gen_random_uuid(), $1, $2, $3, $4, $5, $6, $7, $8) RETURNING id, uniqueId',
-          [node.type, node.name, node.question, node.answer, node['prompt-en'], node['prompt-ar'], node.placeholder, parentId]
+          'INSERT INTO nodes (type, name, question, answer, prompt_en, prompt_ar, placeholder, parent_id, is_open, sort_order) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING id',
+          [node.type, node.name, node.question, node.answer, node['prompt-en'], node['prompt-ar'], node.placeholder, parentId, false, orderStart + i]
         );
         const newId = result.rows[0].id;
-        const newUniqueId = result.rows[0].uniqueId;
-        console.log(`Inserted node ${newUniqueId} with id ${newId}`);
+        console.log(`Inserted node with id ${newId}`);
         if (node.children && node.children.length > 0) {
-          await insertRecursive(node.children, newId);
+          await insertRecursive(node.children, newId, 0);
         }
       }
     };
-    await insertRecursive(hierarchicalData);
+    await insertRecursive(hierarchicalData, null, 0);
     console.log('Migration completed');
+  }
+
+  async renumberOrders() {
+    console.log('Renumbering orders...');
+    const parents = await this.db.query('SELECT DISTINCT COALESCE(parent_id, -1) as parent FROM nodes');
+    for (const p of parents.rows) {
+      const parentId = p.parent === -1 ? null : p.parent;
+      let children;
+      if (parentId === null) {
+        children = await this.db.query('SELECT id FROM nodes WHERE parent_id IS NULL ORDER BY id');
+      } else {
+        children = await this.db.query('SELECT id FROM nodes WHERE parent_id = $1 ORDER BY id', [parentId]);
+      }
+      for (let i = 0; i < children.rows.length; i++) {
+        await this.db.query('UPDATE nodes SET sort_order = $1 WHERE id = $2', [i, children.rows[i].id]);
+      }
+    }
+    console.log('Orders renumbered');
   }
 
   async loadRoots() {
     console.log('Loading roots...');
-    const result = await this.db.query('SELECT * FROM nodes WHERE parent_id IS NULL ORDER BY id');
+    const result = await this.db.query('SELECT * FROM nodes WHERE parent_id IS NULL ORDER BY sort_order, id');
     this.roots = result.rows;
-    console.log('Roots loaded:', this.roots.length);
+    console.log('Roots loaded:', this.roots.map(r => ({id: r.id, is_open: r.is_open})));
     for (const root of this.roots) {
       root.children = await this.loadChildren(root.id);
     }
@@ -88,7 +115,7 @@ class SidebarManager {
   }
 
   async loadChildren(parentId) {
-    const result = await this.db.query('SELECT * FROM nodes WHERE parent_id = $1 ORDER BY id', [parentId]);
+    const result = await this.db.query('SELECT * FROM nodes WHERE parent_id = $1 ORDER BY sort_order, id', [parentId]);
     const children = result.rows;
     console.log(`Loaded ${children.length} children for parent ${parentId}`);
     for (const child of children) {
@@ -97,8 +124,8 @@ class SidebarManager {
     return children;
   }
 
-  async findNode(uniqueId) {
-    const result = await this.db.query('SELECT * FROM nodes WHERE uniqueId = $1', [uniqueId]);
+  async findNode(id) {
+    const result = await this.db.query('SELECT * FROM nodes WHERE id = $1', [id]);
     const [node] = result.rows;
     if (node) {
       node.children = await this.loadChildren(node.id);
@@ -107,21 +134,43 @@ class SidebarManager {
   }
 
   async addNode(parentId, nodeData) {
+    const maxOrderResult = await this.db.query('SELECT COALESCE(MAX(sort_order), 0) as max_order FROM nodes WHERE parent_id = $1', [parentId]);
+    const maxOrder = maxOrderResult.rows[0].max_order;
     const result = await this.db.query(
-      'INSERT INTO nodes (uniqueId, type, name, question, answer, prompt_en, prompt_ar, placeholder, parent_id) VALUES (gen_random_uuid(), $1, $2, $3, $4, $5, $6, $7, $8) RETURNING uniqueId',
-      [nodeData.type, nodeData.name, nodeData.question, nodeData.answer, nodeData['prompt-en'], nodeData['prompt-ar'], nodeData.placeholder, parentId]
+      'INSERT INTO nodes (type, name, question, answer, prompt_en, prompt_ar, placeholder, parent_id, is_open, sort_order) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING id',
+      [nodeData.type, nodeData.name, nodeData.question, nodeData.answer, nodeData['prompt-en'], nodeData['prompt-ar'], nodeData.placeholder, parentId, false, maxOrder + 1]
     );
-    return result.rows[0].uniqueId;
+    return result.rows[0].id;
   }
 
-  async updateNode(uniqueId, updates) {
+  async updateNode(id, updates) {
+    console.log('Updating node', id, 'with', updates);
     const fields = Object.keys(updates).map((key, i) => `${key} = $${i + 2}`).join(', ');
     const values = Object.values(updates);
-    await this.db.query(`UPDATE nodes SET ${fields} WHERE uniqueId = $1`, [uniqueId, ...values]);
+    await this.db.query(`UPDATE nodes SET ${fields} WHERE id = $1`, [id, ...values]);
+    console.log('Update query executed');
   }
 
-  async deleteNode(uniqueId) {
-    await this.db.query('DELETE FROM nodes WHERE uniqueId = $1', [uniqueId]);
+  async deleteNode(id) {
+    await this.db.query('DELETE FROM nodes WHERE id = $1', [id]);
+  }
+
+  async insertNodeRecursive(parentId, nodeData, orderStart = null) {
+    if (orderStart === null) {
+      const maxOrderResult = await this.db.query('SELECT COALESCE(MAX(sort_order), 0) as max_order FROM nodes WHERE parent_id = $1', [parentId]);
+      orderStart = maxOrderResult.rows[0].max_order + 1;
+    }
+    const result = await this.db.query(
+      'INSERT INTO nodes (type, name, question, answer, prompt_en, prompt_ar, placeholder, parent_id, is_open, sort_order) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING id',
+      [nodeData.type, nodeData.name, nodeData.question, nodeData.answer, nodeData.prompt_en || '', nodeData.prompt_ar || '', nodeData.placeholder || '', parentId, nodeData.is_open || false, orderStart]
+    );
+    const newId = result.rows[0].id;
+    if (nodeData.children && nodeData.children.length > 0) {
+      for (let i = 0; i < nodeData.children.length; i++) {
+        await this.insertNodeRecursive(newId, nodeData.children[i], i);
+      }
+    }
+    return newId;
   }
 
 
@@ -131,7 +180,6 @@ class SidebarManager {
 let hierarchicalData = [
   {
     "type": "folder",
-    "uniqueId": "root1",
     "name": "Projects",
     "question": "",
     "answer": "",
@@ -141,7 +189,6 @@ let hierarchicalData = [
     "children": [
       {
         "type": "folder",
-        "uniqueId": "sub1",
         "name": "Web Development",
         "question": "",
         "answer": "",
@@ -151,7 +198,6 @@ let hierarchicalData = [
         "children": [
           {
             "type": "leaf",
-            "uniqueId": "leaf1",
             "name": "",
             "question": "How to build a website?",
             "answer": "Use HTML, CSS, JS",
@@ -202,68 +248,65 @@ function generateNodeHTML(node) {
   let html = '';
   if (node.type === 'folder') {
     // Folder
+    console.log('Generating folder', node.id, 'open:', node.is_open);
       html += `<li>
-<details id="${elementId}" data-nodeid="${node.uniqueId}">
+<details id="${elementId}" data-nodeid="${node.id}" ${node.is_open ? 'open' : ''}>
 <summary>
 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-4 w-4">
 <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12.75V12A2.25 2.25 0 014.5 9.75h15A2.25 2.25 0 0121.75 12v.75m-8.69-6.44l-2.12-2.12a1.5 1.5 0 00-1.061-.44H4.5A2.25 2.25 0 002.25 6v12a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9a2.25 2.25 0 00-2.25-2.25h-5.379a1.5 1.5 0 01-1.06-.44z" />
 </svg>
 <span>${node.name || ''}</span>
-<button class="btn btn-ghost btn-sm" popovertarget="popover-${node.uniqueId}" style="anchor-name:--anchor-${node.uniqueId}">
+<button class="btn btn-ghost btn-sm" popovertarget="popover-${node.id}" style="anchor-name:--anchor-${node.id}">
 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="ellipsis-vertical" class="lucide lucide-ellipsis-vertical w-4 h-4"><circle cx="12" cy="12" r="1"></circle><circle cx="12" cy="5" r="1"></circle><circle cx="12" cy="19" r="1"></circle></svg>
 </button>
-<ul class="dropdown menu w-52 rounded-box bg-base-100 shadow-sm" popover id="popover-${node.uniqueId}" style="position-anchor:--anchor-${node.uniqueId}">
- <li id="${generateUUID()}"><a onclick="addSub('${node.uniqueId}')"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="plus" class="lucide lucide-plus w-4 h-4"><path d="M5 12h14"></path><path d="M12 5v14"></path></svg> Add</a></li>
- <li id="${generateUUID()}"><a onclick="removeItem('${node.uniqueId}')"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="trash" class="lucide lucide-trash w-4 h-4"><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"></path><path d="M3 6h18"></path><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg> Remove</a></li>
- <li id="${generateUUID()}"><a onclick="copyNode('${node.uniqueId}')"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="copy" class="lucide lucide-copy w-4 h-4"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"></rect><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"></path></svg> Copy</a></li>
- <li id="${generateUUID()}"><a onclick="pasteAsChild('${node.uniqueId}')"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="clipboard-paste" class="lucide lucide-clipboard-paste w-4 h-4"><path d="M11 14h10"></path><path d="M16 4h2a2 2 0 0 1 2 2v1.344"></path><path d="m17 18 4-4-4-4"></path><path d="M8 4H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 1.793-1.113"></path><rect x="8" y="2" width="8" height="4" rx="1"></rect></svg> Paste</a></li>
- <li id="${generateUUID()}"><a onclick="moveUp('${node.uniqueId}')"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="arrow-up" class="lucide lucide-arrow-up w-4 h-4"><path d="m5 12 7-7 7 7"></path><path d="M12 19V5"></path></svg> Move up</a></li>
- <li id="${generateUUID()}"><a onclick="moveDown('${node.uniqueId}')"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="arrow-down" class="lucide lucide-arrow-down w-4 h-4"><path d="M12 5v14"></path><path d="m19 12-7 7-7-7"></path></svg> Move down</a></li>
- <li id="${generateUUID()}"><a onclick="editItem(this, '${node.uniqueId}')"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="edit" class="lucide lucide-edit w-4 h-4"><path d="M12 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.375 2.625a1 1 0 0 1 3 3l-9.013 9.014a2 2 0 0 1-.853.505l-2.873.84a.5.5 0 0 1-.62-.62l.84-2.873a2 2 0 0 1 .506-.852z"></path></svg> Edit</a></li>
- <li id="${generateUUID()}"><a onclick="saveItem('${node.uniqueId}')"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="save" class="lucide lucide-save w-4 h-4"><path d="M15.2 3a2 2 0 0 1 1.4.6l3.8 3.8a2 2 0 0 1 .6 1.4V19a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"></path><path d="M17 21v-7a1 1 0 0 0-1-1H8a1 1 0 0 0-1 1v7"></path><path d="M7 3v4a1 1 0 0 0 1 1h7"></path></svg> Save</a></li>
- <li id="${generateUUID()}"><a onclick="addQuestion('${node.uniqueId}')"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="help-circle" class="lucide lucide-help-circle w-4 h-4"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><path d="M12 17h.01"></path></svg> Add question</a></li>
+<ul class="dropdown menu w-52 rounded-box bg-base-100 shadow-sm" popover id="popover-${node.id}" style="position-anchor:--anchor-${node.id}">
+<li id="${generateUUID()}"><a onclick="addSub('${node.id}')"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="plus" class="lucide lucide-plus w-4 h-4"><path d="M5 12h14"></path><path d="M12 5v14"></path></svg> Add</a></li>
+<li id="${generateUUID()}"><a onclick="removeItem('${node.id}')"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="trash" class="lucide lucide-trash w-4 h-4"><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"></path><path d="M3 6h18"></path><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg> Remove</a></li>
+<li id="${generateUUID()}"><a onclick="copyNode('${node.id}')"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="copy" class="lucide lucide-copy w-4 h-4"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"></rect><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"></path></svg> Copy</a></li>
+<li id="${generateUUID()}"><a onclick="pasteAsChild('${node.id}')"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="clipboard-paste" class="lucide lucide-clipboard-paste w-4 h-4"><path d="M11 14h10"></path><path d="M16 4h2a2 2 0 0 1 2 2v1.344"></path><path d="m17 18 4-4-4-4"></path><path d="M8 4H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 1.793-1.113"></path><rect x="8" y="2" width="8" height="4" rx="1"></rect></svg> Paste</a></li>
+<li id="${generateUUID()}"><a onclick="moveUp('${node.id}')"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="arrow-up" class="lucide lucide-arrow-up w-4 h-4"><path d="m5 12 7-7 7 7"></path><path d="M12 19V5"></path></svg> Move up</a></li>
+<li id="${generateUUID()}"><a onclick="moveDown('${node.id}')"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="arrow-down" class="lucide lucide-arrow-down w-4 h-4"><path d="M12 5v14"></path><path d="m19 12-7 7-7-7"></path></svg> Move down</a></li>
+<li id="${generateUUID()}"><a onclick="editItem(this, '${node.id}')"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="edit" class="lucide lucide-edit w-4 h-4"><path d="M12 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.375 2.625a1 1 0 0 1 3 3l-9.013 9.014a2 2 0 0 1-.853.505l-2.873.84a.5.5 0 0 1-.62-.62l.84-2.873a2 2 0 0 1 .506-.852z"></path></svg> Edit</a></li>
+<li id="${generateUUID()}"><a onclick="saveItem('${node.id}')"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="save" class="lucide lucide-save w-4 h-4"><path d="M15.2 3a2 2 0 0 1 1.4.6l3.8 3.8a2 2 0 0 1 .6 1.4V19a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"></path><path d="M17 21v-7a1 1 0 0 0-1-1H8a1 1 0 0 0-1 1v7"></path><path d="M7 3v4a1 1 0 0 0 1 1h7"></path></svg> Save</a></li>
+<li id="${generateUUID()}"><a onclick="addQuestion('${node.id}')"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="help-circle" class="lucide lucide-help-circle w-4 h-4"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><path d="M12 17h.01"></path></svg> Add question</a></li>
 </ul>
 </summary>
 <ul>`;
       node.children.forEach(child => {
         html += generateNodeHTML(child);
       });
-       html += `</ul>
+        html += `</ul>
 </details>
 </li>`;
     } else {
-     // Leaf
+      // Leaf
       html += `<li>
-<a id="${elementId}" data-nodeid="${node.uniqueId}">
+<a id="${elementId}" data-nodeid="${node.id}">
 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-4 w-4">
 <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
 </svg>
 <span>${node.question || ''}</span>
-<button class="btn btn-ghost btn-sm" popovertarget="popover-${node.uniqueId}" style="anchor-name:--anchor-${node.uniqueId}" onclick="event.stopPropagation()">
+<button class="btn btn-ghost btn-sm" popovertarget="popover-${node.id}" style="anchor-name:--anchor-${node.id}" onclick="event.stopPropagation()">
 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="ellipsis-vertical" class="lucide lucide-ellipsis-vertical w-4 h-4"><circle cx="12" cy="12" r="1"></circle><circle cx="12" cy="5" r="1"></circle><circle cx="12" cy="19" r="1"></circle></svg>
 </button>
 </a>
-<ul class="dropdown menu w-52 rounded-box bg-base-100 shadow-sm" popover id="popover-${node.uniqueId}" style="position-anchor:--anchor-${node.uniqueId}">
- <li id="${generateUUID()}"><a onclick="removeItem('${node.uniqueId}')"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="trash" class="lucide lucide-trash w-4 h-4"><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"></path><path d="M3 6h18"></path><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg> Remove</a></li>
- <li id="${generateUUID()}"><a onclick="copyNode('${node.uniqueId}')"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="copy" class="lucide lucide-copy w-4 h-4"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"></rect><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"></path></svg> Copy</a></li>
- <li id="${generateUUID()}"><a onclick="moveUp('${node.uniqueId}')"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="arrow-up" class="lucide lucide-arrow-up w-4 h-4"><path d="m5 12 7-7 7 7"></path><path d="M12 19V5"></path></svg> Move up</a></li>
- <li id="${generateUUID()}"><a onclick="moveDown('${node.uniqueId}')"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="arrow-down" class="lucide lucide-arrow-down w-4 h-4"><path d="M12 5v14"></path><path d="m19 12-7 7-7-7"></path></svg> Move down</a></li>
- <li id="${generateUUID()}"><a onclick="editItem(this, '${node.uniqueId}')"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="edit" class="lucide lucide-edit w-4 h-4"><path d="M12 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.375 2.625a1 1 0 0 1 3 3l-9.013 9.014a2 2 0 0 1-.853.505l-2.873.84a.5.5 0 0 1-.62-.62l.84-2.873a2 2 0 0 1 .506-.852z"></path></svg> Edit</a></li>
- <li id="${generateUUID()}"><a onclick="saveItem('${node.uniqueId}')"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="save" class="lucide lucide-save w-4 h-4"><path d="M15.2 3a2 2 0 0 1 1.4.6l3.8 3.8a2 2 0 0 1 .6 1.4V19a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"></path><path d="M17 21v-7a1 1 0 0 0-1-1H8a1 1 0 0 0-1 1v7"></path><path d="M7 3v4a1 1 0 0 0 1 1h7"></path></svg> Save</a></li>
+<ul class="dropdown menu w-52 rounded-box bg-base-100 shadow-sm" popover id="popover-${node.id}" style="position-anchor:--anchor-${node.id}">
+<li id="${generateUUID()}"><a onclick="removeItem('${node.id}')"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="trash" class="lucide lucide-trash w-4 h-4"><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"></path><path d="M3 6h18"></path><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg> Remove</a></li>
+<li id="${generateUUID()}"><a onclick="copyNode('${node.id}')"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="copy" class="lucide lucide-copy w-4 h-4"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"></rect><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"></path></svg> Copy</a></li>
+<li id="${generateUUID()}"><a onclick="moveUp('${node.id}')"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="arrow-up" class="lucide lucide-arrow-up w-4 h-4"><path d="m5 12 7-7 7 7"></path><path d="M12 19V5"></path></svg> Move up</a></li>
+<li id="${generateUUID()}"><a onclick="moveDown('${node.id}')"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="arrow-down" class="lucide lucide-arrow-down w-4 h-4"><path d="M12 5v14"></path><path d="m19 12-7 7-7-7"></path></svg> Move down</a></li>
+<li id="${generateUUID()}"><a onclick="editItem(this, '${node.id}')"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="edit" class="lucide lucide-edit w-4 h-4"><path d="M12 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.375 2.625a1 1 0 0 1 3 3l-9.013 9.014a2 2 0 0 1-.853.505l-2.873.84a.5.5 0 0 1-.62-.62l.84-2.873a2 2 0 0 1 .506-.852z"></path></svg> Edit</a></li>
+<li id="${generateUUID()}"><a onclick="saveItem('${node.id}')"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="save" class="lucide lucide-save w-4 h-4"><path d="M15.2 3a2 2 0 0 1 1.4.6l3.8 3.8a2 2 0 0 1 .6 1.4V19a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"></path><path d="M17 21v-7a1 1 0 0 0-1-1H8a1 1 0 0 0-1 1v7"></path><path d="M7 3v4a1 1 0 0 0 1 1h7"></path></svg> Save</a></li>
 </ul>
 </li>`;
-   }
+    }
   return html;
 }
 
 
 // Static data migrated to DB on init
 
-/**
- * Global counter for generating unique IDs for new nodes.
- * Issues: Global state; could conflict if multiple instances.
- */
-let idCounter = Date.now();
+
 
 /**
  * Renders the entire sidebar by generating HTML for all root nodes from DB.
@@ -275,6 +318,9 @@ let idCounter = Date.now();
  */
 async function renderSidebar() {
   console.log('Starting renderSidebar...');
+  // Preserve currently open details
+  const openIds = Array.from(document.querySelectorAll('details[open]')).map(d => d.dataset.nodeid);
+  console.log('Preserving open ids:', openIds);
   await sidebarManager.loadRoots();
   console.log('Roots loaded for rendering');
   const sidebarUl = document.querySelector('.sidebar ul.menu.w-full');
@@ -283,6 +329,37 @@ async function renderSidebar() {
     sidebarUl.innerHTML = sidebarManager.roots.map(generateNodeHTML).join('');
     console.log('HTML set, creating icons...');
     lucide.createIcons();
+    console.log('Setting open states...');
+    // Recursively set open for nodes with is_open
+    const setOpen = (nodes) => {
+      nodes.forEach(node => {
+        if (node.type === 'folder' && node.is_open) {
+          const details = document.querySelector(`[data-nodeid="${node.id}"]`);
+          console.log('Setting open for', node.id, details);
+          if (details) details.open = true;
+        }
+        if (node.children) setOpen(node.children);
+      });
+    };
+    setOpen(sidebarManager.roots);
+    // Also set preserved open states
+    openIds.forEach(id => {
+      const details = document.querySelector(`[data-nodeid="${id}"]`);
+      if (details) {
+        details.open = true;
+        // Update DB if not already
+        sidebarManager.updateNode(id, { is_open: true });
+      }
+    });
+    console.log('Adding toggle listeners...');
+    document.querySelectorAll('details').forEach(details => {
+      details.addEventListener('toggle', async (e) => {
+        const id = details.dataset.nodeid;
+        console.log('Toggling', id, 'to', e.target.open);
+        await sidebarManager.updateNode(id, { is_open: e.target.open });
+        console.log('Updated DB for', id);
+      });
+    });
     console.log('Render completed');
   } else {
     console.error('Sidebar ul not found');
@@ -301,11 +378,8 @@ async function renderSidebar() {
  * How it works: Finds the node by ID via DB, inserts new folder node as child, and re-renders the sidebar.
  */
 async function addSub(nodeId) {
-  console.log('addSub called with nodeId:', nodeId);
   const node = await sidebarManager.findNode(nodeId);
-  console.log('Node found:', node);
   if (node && node.type === 'folder') {
-    console.log('Node is folder, creating new node');
     const newNode = {
       type: 'folder',
       name: 'New Item',
@@ -316,13 +390,10 @@ async function addSub(nodeId) {
       placeholder: '',
       children: []
     };
-    console.log('Adding node:', newNode);
-    const uniqueId = await sidebarManager.addNode(node.id, newNode);
-    console.log('Node added with uniqueId:', uniqueId);
+    const id = await sidebarManager.addNode(node.id, newNode);
+    // Ensure parent folder is open
+    await sidebarManager.updateNode(node.id, { is_open: true });
     await renderSidebar();
-    console.log('addSub completed');
-  } else {
-    console.log('Node not found or not a folder');
   }
 }
 
@@ -332,12 +403,8 @@ async function addSub(nodeId) {
  * How it works: Deletes the node from DB (CASCADE deletes children), and re-renders the sidebar.
  */
 async function removeItem(nodeId) {
-  console.log('removeItem called with nodeId:', nodeId);
-  console.log('Deleting node from DB');
   await sidebarManager.deleteNode(nodeId);
-  console.log('Node deleted, rendering sidebar');
   await renderSidebar();
-  console.log('removeItem completed');
 }
 
 /**
@@ -370,8 +437,8 @@ async function pasteAsChild(nodeId) {
     console.log('Copied node exists:', window.copiedNode);
     const pastedNode = JSON.parse(JSON.stringify(window.copiedNode));
     console.log('Pasting node:', pastedNode);
-    const uniqueId = await sidebarManager.addNode(node.id, pastedNode);
-    console.log('Node added with uniqueId:', uniqueId);
+    const id = await sidebarManager.insertNodeRecursive(node.id, pastedNode);
+    console.log('Node added with id:', id);
     await renderSidebar();
     console.log('pasteAsChild completed');
   } else {
@@ -392,15 +459,22 @@ async function moveUp(nodeId) {
     console.log('Node not found');
     return;
   }
-  const result = await sidebarManager.db.query('SELECT * FROM nodes WHERE parent_id = $1 ORDER BY id', [node.parent_id]);
-  const siblings = result.rows;
+  let siblings;
+  if (node.parent_id === null) {
+    const result = await sidebarManager.db.query('SELECT * FROM nodes WHERE parent_id IS NULL ORDER BY sort_order, id');
+    siblings = result.rows;
+  } else {
+    const result = await sidebarManager.db.query('SELECT * FROM nodes WHERE parent_id = $1 ORDER BY sort_order, id', [node.parent_id]);
+    siblings = result.rows;
+  }
   console.log('Siblings:', siblings);
-  const index = siblings.findIndex(n => n.uniqueId === nodeId);
+   const index = siblings.findIndex(n => n.id === parseInt(nodeId));
   console.log('Index:', index);
   if (index > 0) {
     console.log('Swapping with previous');
-    [siblings[index - 1], siblings[index]] = [siblings[index], siblings[index - 1]];
-    await sidebarManager.db.query('UPDATE nodes SET id = CASE WHEN id = $1 THEN $2 WHEN id = $2 THEN $1 END WHERE id IN ($1, $2)', [siblings[index - 1].id, siblings[index].id]);
+    const tempOrder = siblings[index - 1].sort_order;
+    await sidebarManager.updateNode(siblings[index - 1].id, { sort_order: siblings[index].sort_order });
+    await sidebarManager.updateNode(siblings[index].id, { sort_order: tempOrder });
     console.log('DB updated, rendering');
   } else {
     console.log('Cannot move up');
@@ -423,15 +497,22 @@ async function moveDown(nodeId) {
     console.log('Node not found');
     return;
   }
-  const result = await sidebarManager.db.query('SELECT * FROM nodes WHERE parent_id = $1 ORDER BY id', [node.parent_id]);
-  const siblings = result.rows;
+  let siblings;
+  if (node.parent_id === null) {
+    const result = await sidebarManager.db.query('SELECT * FROM nodes WHERE parent_id IS NULL ORDER BY sort_order, id');
+    siblings = result.rows;
+  } else {
+    const result = await sidebarManager.db.query('SELECT * FROM nodes WHERE parent_id = $1 ORDER BY sort_order, id', [node.parent_id]);
+    siblings = result.rows;
+  }
   console.log('Siblings:', siblings);
-  const index = siblings.findIndex(n => n.uniqueId === nodeId);
+  const index = siblings.findIndex(n => n.id === parseInt(nodeId));
   console.log('Index:', index);
   if (index < siblings.length - 1) {
     console.log('Swapping with next');
-    [siblings[index], siblings[index + 1]] = [siblings[index + 1], siblings[index]];
-    await sidebarManager.db.query('UPDATE nodes SET id = CASE WHEN id = $1 THEN $2 WHEN id = $2 THEN $1 END WHERE id IN ($1, $2)', [siblings[index].id, siblings[index + 1].id]);
+    const tempOrder = siblings[index + 1].sort_order;
+    await sidebarManager.updateNode(siblings[index + 1].id, { sort_order: siblings[index].sort_order });
+    await sidebarManager.updateNode(siblings[index].id, { sort_order: tempOrder });
     console.log('DB updated, rendering');
   } else {
     console.log('Cannot move down');
@@ -512,8 +593,10 @@ async function addQuestion(nodeId) {
       children: []
     };
     console.log('New question node:', newNode);
-    const uniqueId = await sidebarManager.addNode(node.id, newNode);
-    console.log('Question added with uniqueId:', uniqueId);
+    const id = await sidebarManager.addNode(node.id, newNode);
+    console.log('Question added with id:', id);
+    // Ensure parent folder is open
+    await sidebarManager.updateNode(node.id, { is_open: true });
     await renderSidebar();
     console.log('addQuestion completed');
   } else {
@@ -535,12 +618,61 @@ async function addQuestion(nodeId) {
 
 
 
+/**
+ * Adds a new subfolder as a root node.
+ */
+async function addSubToRoot() {
+  const newNode = {
+    type: 'folder',
+    name: 'New Folder',
+    question: '',
+    answer: '',
+    'prompt-en': '',
+    'prompt-ar': '',
+    placeholder: '',
+    children: []
+  };
+  await sidebarManager.addNode(null, newNode);  // null for root
+  await renderSidebar();
+}
 
+/**
+ * Adds a new leaf as a root node.
+ */
+async function addLeafToRoot() {
+  const newNode = {
+    type: 'leaf',
+    name: '',
+    question: 'New Question',
+    answer: '',
+    'prompt-en': '',
+    'prompt-ar': '',
+    placeholder: '',
+    children: []
+  };
+  await sidebarManager.addNode(null, newNode);  // null for root
+  await renderSidebar();
+}
 
+/**
+ * Pastes the copied node as a new root node.
+ */
+async function pasteAsChildToRoot() {
+  if (window.copiedNode) {
+    const pastedNode = JSON.parse(JSON.stringify(window.copiedNode));
+    await sidebarManager.insertNodeRecursive(null, pastedNode);  // null for root
+    await renderSidebar();
+  } else {
+    alert('No node copied to paste.');
+  }
+}
 
 
 // Expose functions to global scope for onclick handlers
 window.addSub = addSub;
+window.addSubToRoot = addSubToRoot;
+window.addLeafToRoot = addLeafToRoot;
+window.pasteAsChildToRoot = pasteAsChildToRoot;
 window.removeItem = removeItem;
 window.copyNode = copyNode;
 window.pasteAsChild = pasteAsChild;
@@ -549,6 +681,17 @@ window.moveDown = moveDown;
 window.editItem = editItem;
 window.saveItem = saveItem;
 window.addQuestion = addQuestion;
+window.exportData = async function() {
+  await sidebarManager.loadRoots();
+  const data = JSON.stringify(sidebarManager.roots, null, 2);
+  const blob = new Blob([data], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'sidebar-data.json';
+  a.click();
+  URL.revokeObjectURL(url);
+};
 
 // Data management (for pages with sidebar) - now with PGLite
 if (document.querySelector('.sidebar')) {

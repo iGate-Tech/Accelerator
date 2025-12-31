@@ -316,12 +316,12 @@ if (document.querySelector('.sidebar')) {
     }
     if (!container) container = el.closest('a[data-nodeid]');
     const nodeId = container.dataset.nodeid;
-    nodesCollection.remove({ uniqueId: nodeId });
+    nodesCollection.removeOne({ uniqueId: nodeId });
     // Also remove children
     function removeChildren(parentId) {
       const children = nodesCollection.find({ parentId: parentId }).fetch();
       children.forEach(child => {
-        nodesCollection.remove({ uniqueId: child.uniqueId });
+        nodesCollection.removeOne({ uniqueId: child.uniqueId });
         removeChildren(child.uniqueId);
       });
     }

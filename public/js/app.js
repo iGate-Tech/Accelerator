@@ -1,9 +1,9 @@
 // app.js - Client-side logic for theme, language, and data management
 
-import { createCollection } from 'https://cdn.skypack.dev/@signaldb/core';
+import { Collection } from 'https://cdn.skypack.dev/@signaldb/core';
 
 // Collections
-const nodesCollection = createCollection('nodes');
+const nodesCollection = new Collection('nodes');
 
 // Theme functionality
 const themeController = document.getElementById('theme-controller');

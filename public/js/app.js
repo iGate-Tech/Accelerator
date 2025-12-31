@@ -280,10 +280,12 @@ if (document.querySelector('.sidebar')) {
       name: 'New Sub',
       parentId: parentId
     };
+    const newNode = {
+      uniqueId: Math.random().toString(36).substr(2, 9),
+      name: 'New Sub',
+      parentId: parentId
+    };
     console.log('Inserting newNode:', newNode);
-    nodesCollection.insert(newNode);
-    updateSidebar();
-  };
     nodesCollection.insert(newNode);
     updateSidebar();
   };

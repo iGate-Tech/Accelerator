@@ -406,9 +406,6 @@ if (document.querySelector('.sidebar')) {
     nodesCollection.insert(newNode);
     updateSidebar();
   };
-    nodesCollection.insert(newNode);
-    updateSidebar();
-  };
 
   window.addLeafToRoot = function() {
     const newNode = {

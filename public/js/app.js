@@ -3,7 +3,7 @@
 import { Collection } from 'https://esm.sh/@signaldb/core';
 
 // Collections
-const nodesCollection = new Collection('nodes');
+const nodesCollection = new Collection();
 
 // Theme functionality
 const themeController = document.getElementById('theme-controller');
@@ -245,7 +245,7 @@ if (document.querySelector('.sidebar')) {
     if (!container) container = el.closest('a[data-nodeid]');
     if (container) {
       const parentId = container.dataset.nodeid;
-      const node = nodesCollection.findOne({ uniqueId: copiedId }).fetch();
+      const node = nodesCollection.find({ uniqueId: copiedId }).fetch()[0];
       if (node) {
       const copy = {
         uniqueId: Math.random().toString(36).substr(2, 9),
@@ -418,7 +418,7 @@ if (document.querySelector('.sidebar')) {
 
   window.pasteAsChildToRoot = function() {
     if (!copiedId) return;
-    const node = nodesCollection.findOne({ uniqueId: copiedId }).fetch();
+    const node = nodesCollection.find({ uniqueId: copiedId }).fetch()[0];
     if (node) {
       const copy = {
         uniqueId: Math.random().toString(36).substr(2, 9),

@@ -1,57 +1,86 @@
 // app.js - Client-side logic for theme, language, and data management
 
-// PGLite initialization
-(async () => {
-  try {
-    const { PGlite } = await import("https://cdn.jsdelivr.net/npm/@electric-sql/pglite/dist/index.js");
-    const { live } = await import("https://cdn.jsdelivr.net/npm/@electric-sql/pglite/dist/live/index.js");
+// Theme functionality
+const themeController = document.getElementById('theme-controller');
+const html = document.documentElement;
+console.log('App.js loaded, themeController:', themeController);
 
-    const pg = await PGlite.create({
-      dataDir: `idb://my-database`,
-      extensions: {
-        live,
-      },
-    });
+let pg;
 
-    // Setup schema
-    await pg.exec(`
-      CREATE TABLE IF NOT EXISTS todos (
-        id SERIAL PRIMARY KEY,
-        title TEXT,
-        completed BOOLEAN DEFAULT false
-      );
-    `);
+// Shared PGLite worker for cross-tab sync
+console.time('PGLite main init');
+const worker = new SharedWorker('/pglite-worker.js');
+const pendingQueries = new Map();
 
-    console.log("PGLite initialized successfully", pg);
-
-    // Sync with server (commented out since no server running)
-    // const BASE_URL = 'http://localhost:5133';
-    // await pg.electric.syncShapeToTable({
-    //   shape: { url: `${BASE_URL}/v1/shape` },
-    //   table: `todos`,
-    //   primaryKey: [`id`],
-    // });
-
-    // Insert some test data
-    await pg.exec(`
-      INSERT INTO todos (title, completed) VALUES ('Install PGLite', true);
-      INSERT INTO todos (title) VALUES ('Test live queries');
-    `);
-
-    // Example live query
-    const unsubscribe = pg.live.query(
-      "SELECT * FROM todos",
-      [],
-      (res) => {
-        console.log("Live query results:", res.rows);
-        // Update UI here, e.g., const list = document.getElementById("todos"); list.innerHTML = ""; res.rows.forEach(todo => { ... });
-      }
-    );
-
-  } catch (error) {
-    console.error("PGLite initialization failed:", error);
+worker.port.onmessage = (e) => {
+  console.log('Main received message from worker:', e.data);
+  const { id, result, error, type, settings } = e.data;
+  if (type === 'settingsUpdate') {
+    // Settings now handled by localStorage
+    console.log("Ignoring settingsUpdate, using localStorage");
+  } else if (id) {
+    console.log('Resolving query id:', id, 'result:', result, 'error:', error);
+    const { resolve, reject } = pendingQueries.get(id);
+    pendingQueries.delete(id);
+    if (error) {
+      reject(new Error(error));
+    } else {
+      resolve(result);
+    }
+  } else {
+    console.warn('Unknown message type:', e.data);
   }
-})();
+};
+
+// PG-like interface
+pg = {
+  query: (query, params = []) => {
+    return new Promise((resolve, reject) => {
+      const id = Math.random().toString(36);
+      pendingQueries.set(id, { resolve, reject });
+      worker.port.postMessage({ type: 'query', id, query, params });
+    });
+  }
+};
+
+console.timeEnd('PGLite main init');
+
+// Set up event listeners
+if (themeController) {
+  console.log('Adding theme change listener');
+  themeController.addEventListener('change', () => {
+    const isChecked = themeController.checked;
+    const newTheme = isChecked ? 'dark' : 'light';
+    console.log('Theme change detected, new theme:', newTheme);
+    // Immediately update UI for instant reactivity
+    html.setAttribute('data-theme', newTheme);
+    console.log('Set html data-theme to:', newTheme);
+    // Persist to localStorage
+    localStorage.setItem('theme', newTheme);
+    console.log('Theme saved to localStorage');
+  });
+} else {
+  console.warn('themeController not found, cannot add listener');
+}
+
+// Language toggle
+const langSwap = document.querySelector('.swap input[type="checkbox"]');
+console.log('langSwap element:', langSwap);
+if (langSwap) {
+  console.log('Adding language change listener');
+  langSwap.addEventListener('change', (e) => {
+    const lang = e.target.checked ? 'ar' : 'en';
+    console.log('Language change detected, new lang:', lang);
+    // Immediately update UI for instant reactivity
+    setLanguage(lang);
+    console.log('Called setLanguage with:', lang);
+    // Persist to localStorage
+    localStorage.setItem('language', lang);
+    console.log('Language saved to localStorage');
+  });
+} else {
+  console.warn('langSwap not found, cannot add listener');
+}
 
 // Generate HTML
 function generateNodeHTML(node) {
@@ -284,27 +313,6 @@ let hierarchicalData = [
   }
 ];
 
-// Theme functionality
-const themeController = document.getElementById('theme-controller');
-const html = document.documentElement;
-
-// Get saved theme or default to 'light'
-const savedTheme = localStorage.getItem('theme') || 'light';
-html.setAttribute('data-theme', savedTheme);
-if (themeController) {
-  themeController.checked = savedTheme === 'dark';
-}
-
-// Toggle theme on checkbox change
-if (themeController) {
-  themeController.addEventListener('change', () => {
-    const isChecked = themeController.checked;
-    const newTheme = isChecked ? 'dark' : 'light';
-    html.setAttribute('data-theme', newTheme);
-    localStorage.setItem('theme', newTheme);
-  });
-}
-
 // I18n functionality
 const translations = {
   en: {
@@ -360,24 +368,47 @@ function setLanguage(lang) {
       contentDiv.classList.add('ml-[400px]');
     }
   }
-  localStorage.setItem('lang', lang);
+
 }
 
-// Language toggle
-const langSwap = document.querySelector('.swap input[type="checkbox"]');
-if (langSwap) {
-  langSwap.addEventListener('change', (e) => {
-    const lang = e.target.checked ? 'ar' : 'en';
+// Storage event listener for cross-tab sync
+window.addEventListener('storage', (e) => {
+  console.log('Storage event:', e.key, e.oldValue, '->', e.newValue);
+  if (e.key === 'theme') {
+    const theme = e.newValue;
+    console.log('Applying theme from storage:', theme);
+    html.setAttribute('data-theme', theme);
+    if (themeController) {
+      themeController.checked = theme === 'dark';
+      console.log('Updated themeController checked');
+    }
+  } else if (e.key === 'language') {
+    const lang = e.newValue;
+    console.log('Applying language from storage:', lang);
     setLanguage(lang);
-  });
+    if (langSwap) {
+      langSwap.checked = lang === 'ar';
+      console.log('Updated langSwap checked');
+    }
+  }
+});
+
+// Load initial settings from localStorage
+const initialTheme = localStorage.getItem('theme') || 'light';
+console.log('Initial theme from localStorage:', initialTheme);
+html.setAttribute('data-theme', initialTheme);
+if (themeController) {
+  themeController.checked = initialTheme === 'dark';
 }
 
-// Initialize
-const savedLang = localStorage.getItem('lang') || 'en';
-setLanguage(savedLang);
+const initialLang = localStorage.getItem('language') || 'en';
+console.log('Initial language from localStorage:', initialLang);
+setLanguage(initialLang);
 if (langSwap) {
-  langSwap.checked = savedLang === 'ar';
+  langSwap.checked = initialLang === 'ar';
 }
+
+// Initialize will be handled by live query
 
 // Data management (for pages with sidebar) - totally client side
 if (document.querySelector('.sidebar')) {

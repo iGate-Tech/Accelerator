@@ -4,7 +4,6 @@ import { createCollection } from 'https://unpkg.com/@signaldb/core@latest/dist/i
 
 // Collections
 const nodesCollection = createCollection('nodes');
-let hierarchicalData = [];
 
 // Theme functionality
 const themeController = document.getElementById('theme-controller');
@@ -107,36 +106,59 @@ if (document.querySelector('.sidebar')) {
   fetch('/data/hierarchical-data.json')
     .then(res => res.json())
     .then(data => {
-      // Normalize
-      function normalizeChildren(data) {
-        for (let node of data) {
+      // Normalize and flatten to individual nodes
+      const nodes = [];
+      function flatten(data, parentId = null) {
+        data.forEach(node => {
           if (node.childern && !node.children) {
             node.children = node.childern;
             delete node.childern;
           }
-          if ('children' in node && (node.children === null || node.children === undefined)) {
-            node.children = [];
+          if (!node.children) node.children = [];
+          const flatNode = {
+            id: node.id,
+            uniqueId: node.uniqueId,
+            name: node.name,
+            question: node.question,
+            answer: node.answer,
+            'prompt-en': node['prompt-en'],
+            'prompt-ar': node['prompt-ar'],
+            placeholder: node.placeholder,
+            parentId: parentId
+          };
+          nodes.push(flatNode);
+          if (node.children.length > 0) {
+            flatten(node.children, node.uniqueId);
           }
-          if (Array.isArray(node.children)) {
-            normalizeChildren(node.children);
-          }
-        }
+        });
       }
-      normalizeChildren(data);
-      hierarchicalData = data;
-      // Add to collection
-      nodesCollection.insert(data);
-      // Update sidebar
+      flatten(data);
+      // Insert into collection
+      nodesCollection.insert(nodes);
+      // Update sidebar reactively
       updateSidebar();
     });
 
   // Function to update sidebar
   function updateSidebar() {
-    const data = nodesCollection.find().fetch();
+    const allNodes = nodesCollection.find().fetch();
+    // Build tree
+    const nodeMap = {};
+    const roots = [];
+    allNodes.forEach(node => {
+      nodeMap[node.uniqueId] = { ...node, children: [] };
+    });
+    allNodes.forEach(node => {
+      if (node.parentId) {
+        nodeMap[node.parentId].children.push(nodeMap[node.uniqueId]);
+      } else {
+        roots.push(nodeMap[node.uniqueId]);
+      }
+    });
     const sidebarUl = document.querySelector('.sidebar ul.menu.w-full');
     if (sidebarUl) {
       sidebarUl.innerHTML = '';
-      data.forEach(node => {
+      roots.forEach(node => {
         const li = document.createElement('li');
         li.innerHTML = generateNodeHTML(node);
         sidebarUl.appendChild(li);
@@ -224,23 +246,20 @@ if (document.querySelector('.sidebar')) {
     if (!container) container = el.closest('a[data-nodeid]');
     if (container) {
       const parentId = container.dataset.nodeid;
-      const node = getNodeByUniqueId(hierarchicalData, copiedId);
+      const node = nodesCollection.findOne({ uniqueId: copiedId }).fetch();
       if (node) {
-        const copy = JSON.parse(JSON.stringify(node));
-        copy.id = Date.now().toString();
-        copy.uniqueId = Math.random().toString(36).substr(2, 9);
-        function updateIds(obj) {
-          if (obj.children && Array.isArray(obj.children)) {
-            obj.children.forEach(child => {
-              child.id = Date.now().toString() + Math.random().toString(36).substr(2, 9);
-              child.uniqueId = Math.random().toString(36).substr(2, 9);
-              updateIds(child);
-            });
-          }
-        }
-        updateIds(copy);
-        addNode(hierarchicalData, parentId, copy);
-        nodesCollection.update({}, hierarchicalData);
+        const copy = {
+          id: Date.now().toString(),
+          uniqueId: Math.random().toString(36).substr(2, 9),
+          name: node.name,
+          question: node.question,
+          answer: node.answer,
+          'prompt-en': node['prompt-en'],
+          'prompt-ar': node['prompt-ar'],
+          placeholder: node.placeholder,
+          parentId: parentId
+        };
+        nodesCollection.insert(copy);
         updateSidebar();
       }
     }
@@ -256,10 +275,13 @@ if (document.querySelector('.sidebar')) {
     }
     if (!container) container = el.closest('a[data-nodeid]');
     const parentId = container ? container.dataset.nodeid : null;
-    const newNode = { id: Date.now().toString(), name: 'New Sub', children: [] };
-    newNode.uniqueId = Math.random().toString(36).substr(2, 9);
-    addNode(hierarchicalData, parentId, newNode);
-    nodesCollection.update({}, hierarchicalData);
+    const newNode = {
+      id: Date.now().toString(),
+      uniqueId: Math.random().toString(36).substr(2, 9),
+      name: 'New Sub',
+      parentId: parentId
+    };
+    nodesCollection.insert(newNode);
     updateSidebar();
   };
 
@@ -273,10 +295,17 @@ if (document.querySelector('.sidebar')) {
     }
     if (!container) container = el.closest('a[data-nodeid]');
     const parentId = container ? container.dataset.nodeid : null;
-    const newNode = { id: Date.now().toString(), question: 'New Leaf', answer: "", "prompt-en": "", "prompt-ar": "", placeholder: "" };
-    newNode.uniqueId = Math.random().toString(36).substr(2, 9);
-    addNode(hierarchicalData, parentId, newNode);
-    nodesCollection.update({}, hierarchicalData);
+    const newNode = {
+      id: Date.now().toString(),
+      uniqueId: Math.random().toString(36).substr(2, 9),
+      question: 'New Leaf',
+      answer: "",
+      "prompt-en": "",
+      "prompt-ar": "",
+      placeholder: "",
+      parentId: parentId
+    };
+    nodesCollection.insert(newNode);
     updateSidebar();
   };
 
@@ -290,10 +319,11 @@ if (document.querySelector('.sidebar')) {
     }
     if (!container) container = el.closest('a[data-nodeid]');
     const nodeId = container.dataset.nodeid;
-    if (deleteNodeByUniqueId(hierarchicalData, nodeId)) {
-      nodesCollection.update({}, hierarchicalData);
-      updateSidebar();
-    }
+    nodesCollection.remove({ uniqueId: nodeId });
+    // Also remove children
+    const children = nodesCollection.find({ parentId: nodeId }).fetch();
+    children.forEach(child => nodesCollection.remove({ uniqueId: child.uniqueId }));
+    updateSidebar();
   };
 
   window.editItem = function(el) {
@@ -354,111 +384,58 @@ if (document.querySelector('.sidebar')) {
       nameSpan.textContent = newText;
       header.replaceChild(nameSpan, input);
       const nodeId = container.dataset.nodeid;
-      const node = getNodeByUniqueId(hierarchicalData, nodeId);
-      if (node) {
-        const updates = 'children' in node ? { name: newText } : { question: newText };
-        updateNode(hierarchicalData, nodeId, updates);
-        nodesCollection.update({}, hierarchicalData);
-      }
+      const updates = { name: newText, question: newText };
+      nodesCollection.update({ uniqueId: nodeId }, updates);
     }
   };
 
   window.addSubToRoot = function() {
-    const newNode = { id: Date.now().toString(), name: 'New Sub', children: [] };
-    newNode.uniqueId = Math.random().toString(36).substr(2, 9);
-    hierarchicalData.push(newNode);
-    nodesCollection.update({}, hierarchicalData);
+    const newNode = {
+      id: Date.now().toString(),
+      uniqueId: Math.random().toString(36).substr(2, 9),
+      name: 'New Sub',
+      parentId: null
+    };
+    nodesCollection.insert(newNode);
     updateSidebar();
   };
 
   window.addLeafToRoot = function() {
-    const newNode = { id: Date.now().toString(), question: 'New Leaf', answer: "", "prompt-en": "", "prompt-ar": "", placeholder: "" };
-    newNode.uniqueId = Math.random().toString(36).substr(2, 9);
-    hierarchicalData.push(newNode);
-    nodesCollection.update({}, hierarchicalData);
+    const newNode = {
+      id: Date.now().toString(),
+      uniqueId: Math.random().toString(36).substr(2, 9),
+      question: 'New Leaf',
+      answer: "",
+      "prompt-en": "",
+      "prompt-ar": "",
+      placeholder: "",
+      parentId: null
+    };
+    nodesCollection.insert(newNode);
     updateSidebar();
   };
 
   window.pasteAsChildToRoot = function() {
     if (!copiedId) return;
-    const node = getNodeByUniqueId(hierarchicalData, copiedId);
+    const node = nodesCollection.findOne({ uniqueId: copiedId }).fetch();
     if (node) {
-      const copy = JSON.parse(JSON.stringify(node));
-      copy.id = Date.now().toString();
-      copy.uniqueId = Math.random().toString(36).substr(2, 9);
-      function updateIds(obj) {
-        if (obj.children && Array.isArray(obj.children)) {
-          obj.children.forEach(child => {
-            child.id = Date.now().toString() + Math.random().toString(36).substr(2, 9);
-            child.uniqueId = Math.random().toString(36).substr(2, 9);
-            updateIds(child);
-          });
-        }
-      }
-      updateIds(copy);
-      hierarchicalData.push(copy);
-      nodesCollection.update({}, hierarchicalData);
+      const copy = {
+        id: Date.now().toString(),
+        uniqueId: Math.random().toString(36).substr(2, 9),
+        name: node.name,
+        question: node.question,
+        answer: node.answer,
+        'prompt-en': node['prompt-en'],
+        'prompt-ar': node['prompt-ar'],
+        placeholder: node.placeholder,
+        parentId: null
+      };
+      nodesCollection.insert(copy);
       updateSidebar();
     }
   };
 
-  // Helper functions
-  function getNodeByUniqueId(data, uniqueId) {
-    for (let i = 0; i < data.length; i++) {
-      if (data[i].uniqueId === uniqueId) {
-        return data[i];
-      }
-      if (data[i].children) {
-        const found = getNodeByUniqueId(data[i].children, uniqueId);
-        if (found) return found;
-      }
-    }
-    return null;
-  }
 
-  function addNode(data, parentUniqueId, newNode) {
-    if (!parentUniqueId) {
-      data.push(newNode);
-      return true;
-    }
-    for (let i = 0; i < data.length; i++) {
-      if (data[i].uniqueId === parentUniqueId) {
-        if (!data[i].children) data[i].children = [];
-        data[i].children.push(newNode);
-        return true;
-      }
-      if (data[i].children && addNode(data[i].children, parentUniqueId, newNode)) {
-        return true;
-      }
-    }
-    return false;
-  }
-
-  function updateNode(data, uniqueId, updates) {
-    for (let i = 0; i < data.length; i++) {
-      if (data[i].uniqueId === uniqueId) {
-        Object.assign(data[i], updates);
-        return true;
-      }
-      if (data[i].children && updateNode(data[i].children, uniqueId, updates)) {
-        return true;
-      }
-    }
-    return false;
-  }
-
-  function deleteNodeByUniqueId(data, uniqueId) {
-    for (let i = 0; i < data.length; i++) {
-      if (data[i].uniqueId === uniqueId) {
-        data.splice(i, 1);
-        return true;
-      }
-      if (data[i].children && deleteNodeByUniqueId(data[i].children, uniqueId)) {
-        return true;
-      }
-    }
-    return false;
-  }
 }
 
 // Question card animation (if present)

@@ -279,17 +279,17 @@ function generateNodeHTML(node) {
 </details>
 </li>`;
     } else {
-      // Leaf
-      html += `<li>
-<a id="${elementId}" data-nodeid="${node.id}">
-<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-4 w-4">
-<path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
-</svg>
-<span>${node.question || ''}</span>
-<button class="btn btn-ghost btn-sm" popovertarget="popover-${node.id}" style="anchor-name:--anchor-${node.id}" onclick="event.stopPropagation()">
-<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="ellipsis-vertical" class="lucide lucide-ellipsis-vertical w-4 h-4"><circle cx="12" cy="12" r="1"></circle><circle cx="12" cy="5" r="1"></circle><circle cx="12" cy="19" r="1"></circle></svg>
-</button>
-</a>
+       // Leaf
+       html += `<li>
+ <a id="${elementId}" data-nodeid="${node.id}" onclick="loadQuestion('${node.id}')">
+ <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-4 w-4">
+ <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
+ </svg>
+ <span>${node.question || ''}</span>
+ <button class="btn btn-ghost btn-sm" popovertarget="popover-${node.id}" style="anchor-name:--anchor-${node.id}" onclick="event.stopPropagation()">
+ <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="ellipsis-vertical" class="lucide lucide-ellipsis-vertical w-4 h-4"><circle cx="12" cy="12" r="1"></circle><circle cx="12" cy="5" r="1"></circle><circle cx="12" cy="19" r="1"></circle></svg>
+ </button>
+ </a>
 <ul class="dropdown menu w-52 rounded-box bg-base-100 shadow-sm" popover id="popover-${node.id}" style="position-anchor:--anchor-${node.id}">
 <li id="${generateUUID()}"><a onclick="removeItem('${node.id}')"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="trash" class="lucide lucide-trash w-4 h-4"><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"></path><path d="M3 6h18"></path><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg> Remove</a></li>
 <li id="${generateUUID()}"><a onclick="copyNode('${node.id}')"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="copy" class="lucide lucide-copy w-4 h-4"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"></rect><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"></path></svg> Copy</a></li>
@@ -619,6 +619,31 @@ async function addQuestion(nodeId) {
 
 
 /**
+ * Loads a question (leaf node) into the question card.
+ * Purpose: Updates the UI when a question is clicked in the sidebar.
+ * How it works: Fetches node data, updates window.currentQuestion, and refreshes the card.
+ */
+async function loadQuestion(nodeId) {
+  console.log('loadQuestion called with nodeId:', nodeId);
+  const node = await sidebarManager.findNode(nodeId);
+  console.log('Node to load:', node);
+  if (node && node.type === 'leaf') {
+    window.currentQuestion = {
+      title: node.question || '',
+      content: node.answer || '',
+      placeholder: node.placeholder || ''
+    };
+    console.log('Updated window.currentQuestion:', window.currentQuestion);
+    if (window.updateQuestionCard) {
+      window.updateQuestionCard();
+    }
+    console.log('Question card updated');
+  } else {
+    console.log('Node not found or not a leaf');
+  }
+}
+
+/**
  * Adds a new subfolder as a root node.
  */
 async function addSubToRoot() {
@@ -669,6 +694,7 @@ async function pasteAsChildToRoot() {
 
 
 // Expose functions to global scope for onclick handlers
+window.loadQuestion = loadQuestion;
 window.addSub = addSub;
 window.addSubToRoot = addSubToRoot;
 window.addLeafToRoot = addLeafToRoot;

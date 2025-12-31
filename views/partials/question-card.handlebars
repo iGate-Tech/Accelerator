@@ -1,10 +1,11 @@
 <div class="mx-auto flex flex-col items-center justify-center gap-4 p-4">
-   <h1
-     class="text-2xl sm:text-3xl md:text-4xl font-sans font-light text-foreground mb-2 sm:mb-2 text-center"
-     data-i18n="title"
-   >
-    {{{title}}}
-  </h1>
+    <h1
+      id="question-card-title"
+      class="text-2xl sm:text-3xl md:text-4xl font-sans font-light text-foreground mb-2 sm:mb-2 text-center"
+      data-i18n="title"
+    >
+     {{{title}}}
+   </h1>
 
     <div
       class="card w-full max-w-lg mx-auto bg-base-100 transition-shadow duration-3000 border border-base-200 hover:border-primary/30 rounded-lg overflow-hidden relative p-4"
@@ -16,21 +17,20 @@
         class="w-full rounded-md border border-base-300 bg-base-100 px-3 py-2 text-base text-base-content min-h-[2.5rem] cursor-pointer overflow-visible markdown-content"
         style="display: none;"
       ></div>
-      <textarea
-        
-        
-         placeholder="{{placeholder}}"
-         data-i18n="placeholder"
-        
+       <textarea
+         id="question-content"
+          placeholder="{{placeholder}}"
+          data-i18n="placeholder"
+
         class="flex w-full rounded-md border-0 bg-transparent p-0 pt-[1px] text-base text-base-content placeholder:text-base-content/60 focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0"
-        
+
         rows="3"
         style="resize: none; overflow: hidden;"
       >{{{content}}}</textarea>
     </div>
      {{> toolbar}}
     </div>
- </div>
+  </div>
 <script>
 document.addEventListener('DOMContentLoaded', () => {
   const card = document.querySelector('.card');
@@ -54,4 +54,32 @@ document.addEventListener('DOMContentLoaded', () => {
     setTimeout(animate, 1000);
   }
 });
+
+// Function to decode HTML entities
+function decodeHtmlEntities(str) {
+  const textarea = document.createElement('textarea');
+  textarea.innerHTML = str;
+  return textarea.value;
+}
+
+// Initialize reactive question object
+window.currentQuestion = {
+  title: decodeHtmlEntities('{{title}}'),
+  content: decodeHtmlEntities('{{content}}'),
+  placeholder: decodeHtmlEntities('{{placeholder}}')
+};
+
+// Function to update the UI from the currentQuestion object
+window.updateQuestionCard = function() {
+  const titleEl = document.getElementById('question-card-title');
+  const contentEl = document.getElementById('question-content');
+  if (titleEl) titleEl.innerHTML = window.currentQuestion.title || '';  // Use innerHTML to render HTML
+  if (contentEl) {
+    contentEl.value = window.currentQuestion.content || '';
+    contentEl.setAttribute('placeholder', window.currentQuestion.placeholder || '');
+  }
+};
+
+// Initially update the card with server-rendered data
+window.updateQuestionCard();
 </script>

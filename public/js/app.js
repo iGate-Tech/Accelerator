@@ -1,6 +1,6 @@
 // app.js - Client-side logic for theme, language, and data management
 
-import { Collection } from 'https://esm.sh/@signaldb/core';
+import { Collection } from '/node_modules/@signaldb/core/dist/index.mjs';
 
 // Collections
 const nodesCollection = new Collection('nodes');

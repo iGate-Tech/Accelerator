@@ -1,9 +1,8 @@
 // app.js - Client-side logic for theme, language, and data management
 
-import { default as SignalDB } from './signaldb/index.mjs';
+import { createCollection } from 'https://cdn.skypack.dev/@signaldb/core';
 
-const db = new SignalDB();
-const nodesCollection = db.collection('nodes');
+const nodesCollection = createCollection('nodes');
 
 // Theme functionality
 const themeController = document.getElementById('theme-controller');
@@ -134,8 +133,8 @@ if (document.querySelector('.sidebar')) {
       }
       flatten(data);
       // Insert into collection
-      nodesCollection.insert(nodes);
-      // Update sidebar reactively
+      nodesCollection.insert(...nodes);
+      // Update sidebar
       updateSidebar();
     });
 
@@ -284,6 +283,9 @@ if (document.querySelector('.sidebar')) {
     nodesCollection.insert(newNode);
     updateSidebar();
   };
+    nodesCollection.insert(newNode);
+    updateSidebar();
+  };
 
   window.addLeaf = function(el) {
     let container = el.closest('details');
@@ -308,6 +310,9 @@ if (document.querySelector('.sidebar')) {
     nodesCollection.insert(newNode);
     updateSidebar();
   };
+    nodesCollection.insert(newNode);
+    updateSidebar();
+  };
 
   window.deleteItem = function(el) {
     let container = el.closest('details');
@@ -321,8 +326,14 @@ if (document.querySelector('.sidebar')) {
     const nodeId = container.dataset.nodeid;
     nodesCollection.remove({ uniqueId: nodeId });
     // Also remove children
-    const children = nodesCollection.find({ parentId: nodeId }).fetch();
-    children.forEach(child => nodesCollection.remove({ uniqueId: child.uniqueId }));
+    function removeChildren(parentId) {
+      const children = nodesCollection.find({ parentId: parentId }).fetch();
+      children.forEach(child => {
+        nodesCollection.remove({ uniqueId: child.uniqueId });
+        removeChildren(child.uniqueId);
+      });
+    }
+    removeChildren(nodeId);
     updateSidebar();
   };
 
@@ -434,6 +445,44 @@ if (document.querySelector('.sidebar')) {
       updateSidebar();
     }
   };
+    nodesCollection.insert(newNode);
+    updateSidebar();
+  };
+
+  window.addLeafToRoot = function() {
+    const newNode = {
+      id: Date.now().toString(),
+      uniqueId: Math.random().toString(36).substr(2, 9),
+      question: 'New Leaf',
+      answer: "",
+      "prompt-en": "",
+      "prompt-ar": "",
+      placeholder: "",
+      parentId: null
+    };
+    nodesCollection.insert(newNode);
+    updateSidebar();
+  };
+
+  window.pasteAsChildToRoot = function() {
+    if (!copiedId) return;
+    const node = nodesCollection.findOne({ uniqueId: copiedId }).fetch();
+    if (node) {
+      const copy = {
+        id: Date.now().toString(),
+        uniqueId: Math.random().toString(36).substr(2, 9),
+        name: node.name,
+        question: node.question,
+        answer: node.answer,
+        'prompt-en': node['prompt-en'],
+        'prompt-ar': node['prompt-ar'],
+        placeholder: node.placeholder,
+        parentId: null
+      };
+      nodesCollection.insert(copy);
+      updateSidebar();
+    }
+  };
 
 
 }
@@ -442,7 +491,6 @@ if (document.querySelector('.sidebar')) {
 if (document.querySelector('.card')) {
   const card = document.querySelector('.card');
   const colors = ['rgba(255,0,0,0.5)', 'rgba(255,165,0,0.5)', 'rgba(255,255,0,0.5)', 'rgba(0,255,0,0.5)', 'rgba(0,0,255,0.5)', 'rgba(75,0,130,0.5)', 'rgba(238,130,238,0.5)'];
-  card.style.boxShadow = '0px 10px 60px 0px rgba(238,130,238,0.5)';
   function animate() {
     const time = Date.now() * 0.001;
     const x = Math.random() * 100 - 50;
@@ -455,5 +503,5 @@ if (document.querySelector('.card')) {
     const delay = Math.random() * 3000 + 1000;
     setTimeout(animate, delay);
   }
-  setTimeout(animate, 1000);
+  animate();
 }

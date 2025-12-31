@@ -1,7 +1,7 @@
 // app.js - Client-side logic for theme, language, and data management
 
-// Use SignalDB from global
-const SignalDB = window.SignalDB;
+import { default as SignalDB } from './signaldb/index.mjs';
+
 const db = new SignalDB();
 const nodesCollection = db.collection('nodes');
 

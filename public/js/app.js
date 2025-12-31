@@ -116,7 +116,7 @@ if (document.querySelector('.sidebar')) {
           }
           if (!node.children) node.children = [];
           const flatNode = {
-            id: node.id,
+            _id: node.id,
             uniqueId: node.uniqueId,
             name: node.name,
             question: node.question,
@@ -249,17 +249,17 @@ if (document.querySelector('.sidebar')) {
       const parentId = container.dataset.nodeid;
       const node = nodesCollection.findOne({ uniqueId: copiedId }).fetch();
       if (node) {
-        const copy = {
-          id: Date.now().toString(),
-          uniqueId: Math.random().toString(36).substr(2, 9),
-          name: node.name,
-          question: node.question,
-          answer: node.answer,
-          'prompt-en': node['prompt-en'],
-          'prompt-ar': node['prompt-ar'],
-          placeholder: node.placeholder,
-          parentId: parentId
-        };
+      const copy = {
+        _id: Date.now().toString(),
+        uniqueId: Math.random().toString(36).substr(2, 9),
+        name: node.name,
+        question: node.question,
+        answer: node.answer,
+        'prompt-en': node['prompt-en'],
+        'prompt-ar': node['prompt-ar'],
+        placeholder: node.placeholder,
+        parentId: null
+      };
       nodesCollection.insert(copy);
       console.log('Pasted node:', copy.uniqueId);
       updateSidebar();
@@ -278,7 +278,7 @@ if (document.querySelector('.sidebar')) {
     if (!container) container = el.closest('a[data-nodeid]');
     const parentId = container ? container.dataset.nodeid : null;
     const newNode = {
-      id: Date.now().toString(),
+      _id: Date.now().toString(),
       uniqueId: Math.random().toString(36).substr(2, 9),
       name: 'New Sub',
       parentId: parentId
@@ -301,14 +301,14 @@ if (document.querySelector('.sidebar')) {
     if (!container) container = el.closest('a[data-nodeid]');
     const parentId = container ? container.dataset.nodeid : null;
     const newNode = {
-      id: Date.now().toString(),
+      _id: Date.now().toString(),
       uniqueId: Math.random().toString(36).substr(2, 9),
       question: 'New Leaf',
       answer: "",
       "prompt-en": "",
       "prompt-ar": "",
       placeholder: "",
-      parentId: parentId
+      parentId: null
     };
     nodesCollection.insert(newNode);
     updateSidebar();
@@ -402,7 +402,7 @@ if (document.querySelector('.sidebar')) {
 
   window.addSubToRoot = function() {
     const newNode = {
-      id: Date.now().toString(),
+      _id: Date.now().toString(),
       uniqueId: Math.random().toString(36).substr(2, 9),
       name: 'New Sub',
       parentId: null

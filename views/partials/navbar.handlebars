@@ -73,6 +73,44 @@ navLinks.forEach(link => {
           عربي <i data-lucide="languages" class="w-5 h-5"></i>
         </div>
       </label>
+      <div class="dropdown dropdown-end">
+        <button tabindex="0" class="btn btn-ghost btn-circle relative">
+          <i data-lucide="bell" class="w-5 h-5"></i>
+          <span class="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full"></span>
+        </button>
+        <div tabindex="0" class="dropdown-content mt-3 z-50 shadow bg-base-100 rounded-box w-[300px]">
+          <ul class="list bg-base-100 rounded-box shadow-md">
+            <li class="p-4 pb-2 text-xs uppercase font-semibold text-gray-400">Notifications</li>
+            <li class="list-row">
+              <div>
+                <i data-lucide="bell" class="size-10 rounded-box"></i>
+              </div>
+              <div class="list-col-grow">
+                <div class="text-xs uppercase font-semibold opacity-60">New Message</div>
+                <div class="text-xs text-gray-400">You have a new message from John Doe</div>
+              </div>
+            </li>
+            <li class="list-row">
+              <div>
+                <i data-lucide="bell" class="size-10 rounded-box"></i>
+              </div>
+              <div class="list-col-grow">
+                <div class="text-xs uppercase font-semibold opacity-60">System Update</div>
+                <div class="text-xs text-gray-400">Your account has been updated successfully</div>
+              </div>
+            </li>
+            <li class="list-row">
+              <div>
+                <i data-lucide="bell" class="size-10 rounded-box"></i>
+              </div>
+              <div class="list-col-grow">
+                <div class="text-xs uppercase font-semibold opacity-60">Reminder</div>
+                <div class="text-xs text-gray-400">Don't forget your meeting at 3 PM</div>
+              </div>
+            </li>
+          </ul>
+        </div>
+      </div>
       <label class="swap swap-rotate">
         <!-- this hidden checkbox controls the state -->
         <input id="theme-controller" type="checkbox" class="theme-controller" value="dark" />

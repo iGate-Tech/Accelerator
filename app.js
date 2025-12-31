@@ -230,7 +230,7 @@ app.get('/home', (req, res) => {
     }
     addIsFolder(hierarchicalData);
     res.locals.rawData = hierarchicalData;
-    res.render('home', { rawData: hierarchicalData });
+    res.render('home', { rawData: hierarchicalData, title: 'Accelerator' });
 });
 
 app.get('/dashboard', (req, res) => {

@@ -59,13 +59,14 @@ class SidebarManager {
     const insertRecursive = async (nodes, parentId = null) => {
       console.log(`Inserting ${nodes.length} nodes at parent ${parentId}`);
       for (const node of nodes) {
-        console.log(`Inserting node: ${node.uniqueId}`);
+        console.log(`Inserting node: ${node.name || node.question}`);
         const result = await this.db.query(
-          'INSERT INTO nodes (uniqueId, type, name, question, answer, prompt_en, prompt_ar, placeholder, parent_id) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING id',
-          [node.uniqueId, node.type, node.name, node.question, node.answer, node['prompt-en'], node['prompt-ar'], node.placeholder, parentId]
+          'INSERT INTO nodes (uniqueId, type, name, question, answer, prompt_en, prompt_ar, placeholder, parent_id) VALUES (gen_random_uuid(), $1, $2, $3, $4, $5, $6, $7, $8) RETURNING id, uniqueId',
+          [node.type, node.name, node.question, node.answer, node['prompt-en'], node['prompt-ar'], node.placeholder, parentId]
         );
         const newId = result.rows[0].id;
-        console.log(`Inserted node ${node.uniqueId} with id ${newId}`);
+        const newUniqueId = result.rows[0].uniqueId;
+        console.log(`Inserted node ${newUniqueId} with id ${newId}`);
         if (node.children && node.children.length > 0) {
           await insertRecursive(node.children, newId);
         }
@@ -106,10 +107,11 @@ class SidebarManager {
   }
 
   async addNode(parentId, nodeData) {
-    await this.db.query(
-      'INSERT INTO nodes (uniqueId, type, name, question, answer, prompt_en, prompt_ar, placeholder, parent_id) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)',
-      [nodeData.uniqueId, nodeData.type, nodeData.name, nodeData.question, nodeData.answer, nodeData['prompt-en'], nodeData['prompt-ar'], nodeData.placeholder, parentId]
+    const result = await this.db.query(
+      'INSERT INTO nodes (uniqueId, type, name, question, answer, prompt_en, prompt_ar, placeholder, parent_id) VALUES (gen_random_uuid(), $1, $2, $3, $4, $5, $6, $7, $8) RETURNING uniqueId',
+      [nodeData.type, nodeData.name, nodeData.question, nodeData.answer, nodeData['prompt-en'], nodeData['prompt-ar'], nodeData.placeholder, parentId]
     );
+    return result.rows[0].uniqueId;
   }
 
   async updateNode(uniqueId, updates) {
@@ -122,14 +124,7 @@ class SidebarManager {
     await this.db.query('DELETE FROM nodes WHERE uniqueId = $1', [uniqueId]);
   }
 
-  async regenerateIds(node, newParentId) {
-    const newUniqueId = 'node' + idCounter++;
-    await this.db.query('UPDATE nodes SET uniqueId = $1, parent_id = $2 WHERE id = $3', [newUniqueId, newParentId, node.id]);
-    const children = await this.db.query('SELECT * FROM nodes WHERE parent_id = $1', [node.id]);
-    for (const child of children) {
-      await this.regenerateIds(child, node.id);
-    }
-  }
+
 }
 
 // Static seed data migrated to DB on init (reduced for performance)
@@ -218,15 +213,15 @@ function generateNodeHTML(node) {
 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="ellipsis-vertical" class="lucide lucide-ellipsis-vertical w-4 h-4"><circle cx="12" cy="12" r="1"></circle><circle cx="12" cy="5" r="1"></circle><circle cx="12" cy="19" r="1"></circle></svg>
 </button>
 <ul class="dropdown menu w-52 rounded-box bg-base-100 shadow-sm" popover id="popover-${node.uniqueId}" style="position-anchor:--anchor-${node.uniqueId}">
- <li id="${generateUUID()}"><a onclick="addSub(this.closest('[data-nodeid]').dataset.nodeid)"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="plus" class="lucide lucide-plus w-4 h-4"><path d="M5 12h14"></path><path d="M12 5v14"></path></svg> Add</a></li>
- <li id="${generateUUID()}"><a onclick="removeItem(this.closest('[data-nodeid]').dataset.nodeid)"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="trash" class="lucide lucide-trash w-4 h-4"><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"></path><path d="M3 6h18"></path><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg> Remove</a></li>
- <li id="${generateUUID()}"><a onclick="copyNode(this.closest('[data-nodeid]').dataset.nodeid)"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="copy" class="lucide lucide-copy w-4 h-4"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"></rect><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"></path></svg> Copy</a></li>
- <li id="${generateUUID()}"><a onclick="pasteAsChild(this.closest('[data-nodeid]').dataset.nodeid)"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="clipboard-paste" class="lucide lucide-clipboard-paste w-4 h-4"><path d="M11 14h10"></path><path d="M16 4h2a2 2 0 0 1 2 2v1.344"></path><path d="m17 18 4-4-4-4"></path><path d="M8 4H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 1.793-1.113"></path><rect x="8" y="2" width="8" height="4" rx="1"></rect></svg> Paste</a></li>
- <li id="${generateUUID()}"><a onclick="moveUp(this.closest('[data-nodeid]').dataset.nodeid)"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="arrow-up" class="lucide lucide-arrow-up w-4 h-4"><path d="m5 12 7-7 7 7"></path><path d="M12 19V5"></path></svg> Move up</a></li>
- <li id="${generateUUID()}"><a onclick="moveDown(this.closest('[data-nodeid]').dataset.nodeid)"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="arrow-down" class="lucide lucide-arrow-down w-4 h-4"><path d="M12 5v14"></path><path d="m19 12-7 7-7-7"></path></svg> Move down</a></li>
- <li id="${generateUUID()}"><a onclick="editItem(this, this.closest('[data-nodeid]').dataset.nodeid)"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="edit" class="lucide lucide-edit w-4 h-4"><path d="M12 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.375 2.625a1 1 0 0 1 3 3l-9.013 9.014a2 2 0 0 1-.853.505l-2.873.84a.5.5 0 0 1-.62-.62l.84-2.873a2 2 0 0 1 .506-.852z"></path></svg> Edit</a></li>
- <li id="${generateUUID()}"><a onclick="saveItem(this.closest('[data-nodeid]').dataset.nodeid)"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="save" class="lucide lucide-save w-4 h-4"><path d="M15.2 3a2 2 0 0 1 1.4.6l3.8 3.8a2 2 0 0 1 .6 1.4V19a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"></path><path d="M17 21v-7a1 1 0 0 0-1-1H8a1 1 0 0 0-1 1v7"></path><path d="M7 3v4a1 1 0 0 0 1 1h7"></path></svg> Save</a></li>
- <li id="${generateUUID()}"><a onclick="addQuestion(this.closest('[data-nodeid]').dataset.nodeid)"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="help-circle" class="lucide lucide-help-circle w-4 h-4"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><path d="M12 17h.01"></path></svg> Add question</a></li>
+ <li id="${generateUUID()}"><a onclick="addSub('${node.uniqueId}')"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="plus" class="lucide lucide-plus w-4 h-4"><path d="M5 12h14"></path><path d="M12 5v14"></path></svg> Add</a></li>
+ <li id="${generateUUID()}"><a onclick="removeItem('${node.uniqueId}')"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="trash" class="lucide lucide-trash w-4 h-4"><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"></path><path d="M3 6h18"></path><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg> Remove</a></li>
+ <li id="${generateUUID()}"><a onclick="copyNode('${node.uniqueId}')"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="copy" class="lucide lucide-copy w-4 h-4"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"></rect><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"></path></svg> Copy</a></li>
+ <li id="${generateUUID()}"><a onclick="pasteAsChild('${node.uniqueId}')"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="clipboard-paste" class="lucide lucide-clipboard-paste w-4 h-4"><path d="M11 14h10"></path><path d="M16 4h2a2 2 0 0 1 2 2v1.344"></path><path d="m17 18 4-4-4-4"></path><path d="M8 4H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 1.793-1.113"></path><rect x="8" y="2" width="8" height="4" rx="1"></rect></svg> Paste</a></li>
+ <li id="${generateUUID()}"><a onclick="moveUp('${node.uniqueId}')"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="arrow-up" class="lucide lucide-arrow-up w-4 h-4"><path d="m5 12 7-7 7 7"></path><path d="M12 19V5"></path></svg> Move up</a></li>
+ <li id="${generateUUID()}"><a onclick="moveDown('${node.uniqueId}')"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="arrow-down" class="lucide lucide-arrow-down w-4 h-4"><path d="M12 5v14"></path><path d="m19 12-7 7-7-7"></path></svg> Move down</a></li>
+ <li id="${generateUUID()}"><a onclick="editItem(this, '${node.uniqueId}')"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="edit" class="lucide lucide-edit w-4 h-4"><path d="M12 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.375 2.625a1 1 0 0 1 3 3l-9.013 9.014a2 2 0 0 1-.853.505l-2.873.84a.5.5 0 0 1-.62-.62l.84-2.873a2 2 0 0 1 .506-.852z"></path></svg> Edit</a></li>
+ <li id="${generateUUID()}"><a onclick="saveItem('${node.uniqueId}')"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="save" class="lucide lucide-save w-4 h-4"><path d="M15.2 3a2 2 0 0 1 1.4.6l3.8 3.8a2 2 0 0 1 .6 1.4V19a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"></path><path d="M17 21v-7a1 1 0 0 0-1-1H8a1 1 0 0 0-1 1v7"></path><path d="M7 3v4a1 1 0 0 0 1 1h7"></path></svg> Save</a></li>
+ <li id="${generateUUID()}"><a onclick="addQuestion('${node.uniqueId}')"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="help-circle" class="lucide lucide-help-circle w-4 h-4"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><path d="M12 17h.01"></path></svg> Add question</a></li>
 </ul>
 </summary>
 <ul>`;
@@ -249,12 +244,12 @@ function generateNodeHTML(node) {
 </button>
 </a>
 <ul class="dropdown menu w-52 rounded-box bg-base-100 shadow-sm" popover id="popover-${node.uniqueId}" style="position-anchor:--anchor-${node.uniqueId}">
- <li id="${generateUUID()}"><a onclick="removeItem(this.closest('[data-nodeid]').dataset.nodeid)"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="trash" class="lucide lucide-trash w-4 h-4"><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"></path><path d="M3 6h18"></path><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg> Remove</a></li>
- <li id="${generateUUID()}"><a onclick="copyNode(this.closest('[data-nodeid]').dataset.nodeid)"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="copy" class="lucide lucide-copy w-4 h-4"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"></rect><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"></path></svg> Copy</a></li>
- <li id="${generateUUID()}"><a onclick="moveUp(this.closest('[data-nodeid]').dataset.nodeid)"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="arrow-up" class="lucide lucide-arrow-up w-4 h-4"><path d="m5 12 7-7 7 7"></path><path d="M12 19V5"></path></svg> Move up</a></li>
- <li id="${generateUUID()}"><a onclick="moveDown(this.closest('[data-nodeid]').dataset.nodeid)"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="arrow-down" class="lucide lucide-arrow-down w-4 h-4"><path d="M12 5v14"></path><path d="m19 12-7 7-7-7"></path></svg> Move down</a></li>
- <li id="${generateUUID()}"><a onclick="editItem(this, this.closest('[data-nodeid]').dataset.nodeid)"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="edit" class="lucide lucide-edit w-4 h-4"><path d="M12 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.375 2.625a1 1 0 0 1 3 3l-9.013 9.014a2 2 0 0 1-.853.505l-2.873.84a.5.5 0 0 1-.62-.62l.84-2.873a2 2 0 0 1 .506-.852z"></path></svg> Edit</a></li>
- <li id="${generateUUID()}"><a onclick="saveItem(this.closest('[data-nodeid]').dataset.nodeid)"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="save" class="lucide lucide-save w-4 h-4"><path d="M15.2 3a2 2 0 0 1 1.4.6l3.8 3.8a2 2 0 0 1 .6 1.4V19a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"></path><path d="M17 21v-7a1 1 0 0 0-1-1H8a1 1 0 0 0-1 1v7"></path><path d="M7 3v4a1 1 0 0 0 1 1h7"></path></svg> Save</a></li>
+ <li id="${generateUUID()}"><a onclick="removeItem('${node.uniqueId}')"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="trash" class="lucide lucide-trash w-4 h-4"><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"></path><path d="M3 6h18"></path><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg> Remove</a></li>
+ <li id="${generateUUID()}"><a onclick="copyNode('${node.uniqueId}')"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="copy" class="lucide lucide-copy w-4 h-4"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"></rect><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"></path></svg> Copy</a></li>
+ <li id="${generateUUID()}"><a onclick="moveUp('${node.uniqueId}')"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="arrow-up" class="lucide lucide-arrow-up w-4 h-4"><path d="m5 12 7-7 7 7"></path><path d="M12 19V5"></path></svg> Move up</a></li>
+ <li id="${generateUUID()}"><a onclick="moveDown('${node.uniqueId}')"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="arrow-down" class="lucide lucide-arrow-down w-4 h-4"><path d="M12 5v14"></path><path d="m19 12-7 7-7-7"></path></svg> Move down</a></li>
+ <li id="${generateUUID()}"><a onclick="editItem(this, '${node.uniqueId}')"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="edit" class="lucide lucide-edit w-4 h-4"><path d="M12 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.375 2.625a1 1 0 0 1 3 3l-9.013 9.014a2 2 0 0 1-.853.505l-2.873.84a.5.5 0 0 1-.62-.62l.84-2.873a2 2 0 0 1 .506-.852z"></path></svg> Edit</a></li>
+ <li id="${generateUUID()}"><a onclick="saveItem('${node.uniqueId}')"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="save" class="lucide lucide-save w-4 h-4"><path d="M15.2 3a2 2 0 0 1 1.4.6l3.8 3.8a2 2 0 0 1 .6 1.4V19a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"></path><path d="M17 21v-7a1 1 0 0 0-1-1H8a1 1 0 0 0-1 1v7"></path><path d="M7 3v4a1 1 0 0 0 1 1h7"></path></svg> Save</a></li>
 </ul>
 </li>`;
    }
@@ -312,7 +307,6 @@ async function addSub(nodeId) {
   if (node && node.type === 'folder') {
     console.log('Node is folder, creating new node');
     const newNode = {
-      uniqueId: 'node' + idCounter++,
       type: 'folder',
       name: 'New Item',
       question: '',
@@ -323,8 +317,8 @@ async function addSub(nodeId) {
       children: []
     };
     console.log('Adding node:', newNode);
-    await sidebarManager.addNode(node.id, newNode);
-    console.log('Node added, rendering sidebar');
+    const uniqueId = await sidebarManager.addNode(node.id, newNode);
+    console.log('Node added with uniqueId:', uniqueId);
     await renderSidebar();
     console.log('addSub completed');
   } else {
@@ -376,12 +370,8 @@ async function pasteAsChild(nodeId) {
     console.log('Copied node exists:', window.copiedNode);
     const pastedNode = JSON.parse(JSON.stringify(window.copiedNode));
     console.log('Pasting node:', pastedNode);
-    await sidebarManager.addNode(node.id, pastedNode);
-    console.log('Node added to DB');
-    const result = await sidebarManager.db.query('SELECT id FROM nodes WHERE uniqueId = $1', [pastedNode.uniqueId]);
-    console.log('New node ID:', result.rows[0].id);
-    await sidebarManager.regenerateIds({ id: result.rows[0].id }, node.id);
-    console.log('IDs regenerated, rendering sidebar');
+    const uniqueId = await sidebarManager.addNode(node.id, pastedNode);
+    console.log('Node added with uniqueId:', uniqueId);
     await renderSidebar();
     console.log('pasteAsChild completed');
   } else {
@@ -513,7 +503,6 @@ async function addQuestion(nodeId) {
     console.log('Parent is folder, creating new question');
     const newNode = {
       type: 'leaf',
-      uniqueId: 'node' + idCounter++,
       name: '',
       question: 'New Question',
       answer: '',
@@ -523,8 +512,8 @@ async function addQuestion(nodeId) {
       children: []
     };
     console.log('New question node:', newNode);
-    await sidebarManager.addNode(node.id, newNode);
-    console.log('Question added, rendering');
+    const uniqueId = await sidebarManager.addNode(node.id, newNode);
+    console.log('Question added with uniqueId:', uniqueId);
     await renderSidebar();
     console.log('addQuestion completed');
   } else {

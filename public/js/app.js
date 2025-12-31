@@ -1,6 +1,6 @@
 // app.js - Client-side logic for theme, language, and data management
 
-import { Collection } from 'https://cdn.skypack.dev/@signaldb/core';
+import { Collection } from 'https://esm.sh/@signaldb/core';
 
 // Collections
 const nodesCollection = new Collection('nodes');

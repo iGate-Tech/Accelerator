@@ -453,3 +453,5 @@ if (document.querySelector('.card')) {
   }
   animate();
 }
+
+// End of app.js

@@ -1,6 +1,6 @@
 // app.js - Client-side logic for theme, language, and data management
 
-import { createCollection } from 'https://cdn.skypack.dev/@signaldb/core';
+import { createCollection } from 'https://esm.sh/@signaldb/core';
 
 const nodesCollection = createCollection('nodes');
 
@@ -477,9 +477,6 @@ if (document.querySelector('.sidebar')) {
       updateSidebar();
     }
   };
-
-
-}
 
 // Question card animation (if present)
 if (document.querySelector('.card')) {

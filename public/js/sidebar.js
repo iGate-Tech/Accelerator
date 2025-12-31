@@ -15,26 +15,33 @@ class SidebarManager {
   }
 
   async init() {
-    // Create table if not exists
-    await this.db.exec(`
-      CREATE TABLE IF NOT EXISTS nodes (
-        id SERIAL PRIMARY KEY,
-        uniqueId TEXT UNIQUE NOT NULL,
-        type TEXT CHECK (type IN ('folder', 'leaf')),
-        name TEXT,
-        question TEXT,
-        answer TEXT,
-        prompt_en TEXT,
-        prompt_ar TEXT,
-        placeholder TEXT,
-        parent_id INTEGER REFERENCES nodes(id) ON DELETE CASCADE
-      );
-    `);
+    await this.db.ready;
 
-    // Migrate static data if table is empty
-    const existing = await this.db.query('SELECT COUNT(*) as count FROM nodes');
-    if (existing[0].count === 0) {
-      await this.migrateStaticData();
+    try {
+      // Create table if not exists
+      await this.db.exec(`
+        CREATE TABLE IF NOT EXISTS nodes (
+          id SERIAL PRIMARY KEY,
+          uniqueId TEXT UNIQUE NOT NULL,
+          type TEXT CHECK (type IN ('folder', 'leaf')),
+          name TEXT,
+          question TEXT,
+          answer TEXT,
+          prompt_en TEXT,
+          prompt_ar TEXT,
+          placeholder TEXT,
+          parent_id INTEGER REFERENCES nodes(id) ON DELETE CASCADE
+        );
+      `);
+
+      // Migrate static data if table is empty
+      const existing = await this.db.query('SELECT COUNT(*) as count FROM nodes');
+      console.log('Existing count:', existing);
+      if (existing[0].count === 0) {
+        await this.migrateStaticData();
+      }
+    } catch (e) {
+      console.error('DB init error:', e);
     }
   }
 

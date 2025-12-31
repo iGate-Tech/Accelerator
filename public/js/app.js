@@ -310,9 +310,6 @@ if (document.querySelector('.sidebar')) {
     nodesCollection.insert(newNode);
     updateSidebar();
   };
-    nodesCollection.insert(newNode);
-    updateSidebar();
-  };
 
   window.deleteItem = function(el) {
     let container = el.closest('details');

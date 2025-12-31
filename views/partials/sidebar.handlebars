@@ -1,88 +1,25 @@
-<!-- sidebar -->
-<div
-  class="sidebar relative w-[400px] bg-base-100 rounded-2xl p-3 shadow-sm border border-base-200 h-[85vh] overflow-visible"
->
+<!-- Hierarchical Sidebar -->
+  <div class="sidebar fixed left-0 top-16 w-[270px] bg-base-100 p-3 border-r border-base-200 h-[calc(100vh-4rem)] overflow-y-auto z-50">
   <!-- Tabs -->
-  <div class="flex items-center gap-1 mb-3 text-sm">
-    <span
-      class="px-3 py-1 rounded-lg bg-base-100 shadow-sm font-medium"
-    >Make</span>
-    <span class="px-3 py-1 text-base-content/60">Edit</span>
-    <span class="px-3 py-1 text-base-content/60">Reports</span>
-     <div class="ml-auto flex gap-2 text-base-content/60">
-       <i class="lucide lucide-search w-4 h-4" data-lucide="search"></i> <i class="lucide lucide-chevron-right w-4 h-4" data-lucide="chevron-right"></i>
-   </div>
-   </div>
+  <div class="tabs tabs-box mb-3">
+    <input type="radio" name="sidebar_tabs" class="tab" aria-label="Make" checked />
+    <input type="radio" name="sidebar_tabs" class="tab" aria-label="Edit" />
+    <input type="radio" name="sidebar_tabs" class="tab" aria-label="Reports" />
+    <button class="btn btn-ghost btn-sm ml-auto" popovertarget="root_popover" onclick="event.stopPropagation()">
+      <i class="lucide lucide-ellipsis-vertical w-4 h-4" data-lucide="ellipsis-vertical"></i>
+    </button>
+    <ul class="dropdown menu w-52 rounded-box bg-base-100 shadow-sm" popover id="root_popover">
+      <li><a onclick="addSubToRoot()">Add sub</a></li>
+      <li><a onclick="addLeafToRoot()">Add leaf</a></li>
+      <li><a onclick="pasteAsChildToRoot()">Paste as child</a></li>
+    </ul>
+  </div>
 
-  <ul class="menu  w-full">
-    {{#each this}}
+   <ul class="menu  w-full">
+     {{#each this}}
      <li>
-       <details class="dropdown">
-          <summary>
-            <i class="lucide lucide-folder w-4 h-4" data-lucide="folder"></i>
-            {{name}}
-            <button class="btn btn-ghost btn-sm" popovertarget="popover-top-{{@index}}" style="anchor-name:--anchor-top-{{@index}}">
-              <i class="lucide lucide-ellipsis-vertical w-4 h-4" data-lucide="ellipsis-vertical"></i>
-            </button>
-            <ul class="dropdown menu w-52 rounded-box bg-base-100 shadow-sm" popover id="popover-top-{{@index}}" style="position-anchor:--anchor-top-{{@index}}">
-              <li><a><i class="lucide lucide-edit w-4 h-4" data-lucide="edit"></i> Edit</a></li>
-              <li><a><i class="lucide lucide-save w-4 h-4" data-lucide="save"></i> Save</a></li>
-              <li><a><i class="lucide lucide-folder-plus w-4 h-4" data-lucide="folder-plus"></i> Add sub</a></li>
-              <li><a><i class="lucide lucide-trash w-4 h-4" data-lucide="trash"></i> Delete</a></li>
-            </ul>
-          </summary>
-        <ul>
-          {{#each sections}}
-           <li>
-             <details class="dropdown">
-          <summary>
-            <i class="lucide lucide-folder-open w-4 h-4" data-lucide="folder-open"></i>
-            {{name}}
-            <button class="btn btn-ghost btn-sm" popovertarget="popover-section-{{@../index}}-{{@index}}" style="anchor-name:--anchor-section-{{@../index}}-{{@index}}">
-              <i class="lucide lucide-ellipsis-vertical w-4 h-4" data-lucide="ellipsis-vertical"></i>
-            </button>
-            <ul class="dropdown menu w-52 rounded-box bg-base-100 shadow-sm" popover id="popover-section-{{@../index}}-{{@index}}" style="position-anchor:--anchor-section-{{@../index}}-{{@index}}">
-              <li><a><i class="lucide lucide-edit w-4 h-4" data-lucide="edit"></i> Edit</a></li>
-              <li><a><i class="lucide lucide-save w-4 h-4" data-lucide="save"></i> Save</a></li>
-              <li><a><i class="lucide lucide-folder-plus w-4 h-4" data-lucide="folder-plus"></i> Add sub</a></li>
-              <li><a><i class="lucide lucide-trash w-4 h-4" data-lucide="trash"></i> Delete</a></li>
-            </ul>
-          </summary>
-              <ul>
-                {{#each content}}
-                 <li>
-                   <details class="dropdown">
-            <summary>
-              <i class="lucide lucide-folder w-4 h-4" data-lucide="folder"></i>
-              Group {{@index}} ({{countQuestions this}} questions)
-              <button class="btn btn-ghost btn-sm" popovertarget="popover-content-{{@../../index}}-{{@../index}}-{{@index}}" style="anchor-name:--anchor-content-{{@../../index}}-{{@../index}}-{{@index}}">
-                <i class="lucide lucide-ellipsis-vertical w-4 h-4" data-lucide="ellipsis-vertical"></i>
-              </button>
-              <ul class="dropdown menu w-52 rounded-box bg-base-100 shadow-sm" popover id="popover-content-{{@../../index}}-{{@../index}}-{{@index}}" style="position-anchor:--anchor-content-{{@../../index}}-{{@../index}}-{{@index}}">
-                <li><a>Item 1</a></li>
-                <li><a>Item 2</a></li>
-              </ul>
-            </summary>
-                    <ul>
-                      {{#each .}}
-                      <li>
-                        <a>
-                          <i class="lucide lucide-file-text w-4 h-4" data-lucide="file-text"></i>
-                          {{question}}
-                        </a>
-                      </li>
-                      {{/each}}
-                    </ul>
-                  </details>
-                </li>
-                {{/each}}
-              </ul>
-            </details>
-          </li>
-          {{/each}}
-        </ul>
-      </details>
-    </li>
-    {{/each}}
-  </ul>
+        {{> node node=.}}
+     </li>
+     {{/each}}
+   </ul>
 </div>

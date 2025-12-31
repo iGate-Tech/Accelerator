@@ -2156,6 +2156,9 @@
   .hidden {
     display: none;
   }
+  .inline {
+    display: inline;
+  }
   .table {
     display: table;
   }
@@ -2264,6 +2267,9 @@
   }
   .w-\[370px\] {
     width: 370px;
+  }
+  .w-\[420px\] {
+    width: 420px;
   }
   .w-full {
     width: 100%;

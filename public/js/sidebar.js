@@ -1,5 +1,7 @@
 // sidebar.js - Sidebar functionality with PGLite integration
 
+import { PGlite } from 'https://cdn.jsdelivr.net/npm/@electric-sql/pglite/dist/index.js';
+
 // Initialize PGLite database
 const db = new PGlite();
 

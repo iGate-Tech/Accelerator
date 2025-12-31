@@ -1,8 +1,0 @@
-function intersection(...arrays) {
-  if (arrays.length === 0)
-    return [];
-  return [...new Set(arrays.reduce((a, b) => a.filter((c) => b.includes(c))))];
-}
-export {
-  intersection as default
-};

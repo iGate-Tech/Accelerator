@@ -1,115 +1,8 @@
 const express = require('express');
 const exphbs = require('express-handlebars');
 const path = require('path');
-const fs = require('fs');
 
 const port = 3000;
-
-// Load raw data for sidebar
-let hierarchicalData = JSON.parse(fs.readFileSync('hierarchical-data.json', 'utf8'));
-
-// Function to normalize children property
-function normalizeChildren(data) {
-  for (let node of data) {
-    if (node.childern && !node.children) {
-      node.children = node.childern;
-      delete node.childern;
-    }
-    if ('children' in node && (node.children === null || node.children === undefined)) {
-      node.children = [];
-    }
-    if (Array.isArray(node.children)) {
-      normalizeChildren(node.children);
-    }
-  }
-}
-
-function deleteNodeByUniqueId(data, uniqueId) {
-  for (let i = 0; i < data.length; i++) {
-    if (data[i].uniqueId === uniqueId) {
-      data.splice(i, 1);
-      return true;
-    }
-    if (data[i].children && deleteNodeByUniqueId(data[i].children, uniqueId)) {
-      return true;
-    }
-  }
-  return false;
-}
-
-function addNode(data, parentUniqueId, newNode) {
-  if (!parentUniqueId) {
-    data.push(newNode);
-    return true;
-  }
-  for (let i = 0; i < data.length; i++) {
-    if (data[i].uniqueId === parentUniqueId) {
-      if (!data[i].children) data[i].children = [];
-      data[i].children.push(newNode);
-      return true;
-    }
-    if (data[i].children && addNode(data[i].children, parentUniqueId, newNode)) {
-      return true;
-    }
-  }
-  return false;
-}
-
-function updateNode(data, uniqueId, updates) {
-  for (let i = 0; i < data.length; i++) {
-    if (data[i].uniqueId === uniqueId) {
-      Object.assign(data[i], updates);
-      return true;
-    }
-    if (data[i].children && updateNode(data[i].children, uniqueId, updates)) {
-      return true;
-    }
-  }
-  return false;
-}
-
-function getNodeByUniqueId(data, uniqueId) {
-  for (let i = 0; i < data.length; i++) {
-    if (data[i].uniqueId === uniqueId) {
-      return data[i];
-    }
-    if (data[i].children) {
-      const found = getNodeByUniqueId(data[i].children, uniqueId);
-      if (found) return found;
-    }
-  }
-  return null;
-}
-
-function copyNode(data, fromUniqueId, toParentUniqueId) {
-  console.log('Copying node', fromUniqueId, 'to parent', toParentUniqueId);
-  const node = getNodeByUniqueId(data, fromUniqueId);
-  if (!node) {
-    console.log('Node not found');
-    return false;
-  }
-  const copy = JSON.parse(JSON.stringify(node));
-  console.log('Original node:', node.name || node.question);
-  // Generate new id and uniqueId
-  copy.id = Date.now().toString();
-  copy.uniqueId = Math.random().toString(36).substr(2, 9);
-  console.log('New id:', copy.id, 'uniqueId:', copy.uniqueId);
-  // If it's a folder, recursively update ids
-  function updateIds(obj) {
-    if (obj.children && Array.isArray(obj.children)) {
-      obj.children.forEach(child => {
-        child.id = Date.now().toString() + Math.random().toString(36).substr(2, 9);
-        child.uniqueId = Math.random().toString(36).substr(2, 9);
-        updateIds(child);
-      });
-    }
-  }
-  updateIds(copy);
-  // Add to parent
-  const added = addNode(data, toParentUniqueId, copy);
-  console.log('Added to parent:', added);
-  return added ? copy : false;
-}
 
 const app = express();
 
@@ -135,9 +28,34 @@ app.use(express.json());
 // Static files
 app.use(express.static(path.join(__dirname, 'public')));
 
+// Serve initial data
+app.get('/data/hierarchical-data.json', (req, res) => {
+    res.sendFile(path.join(__dirname, 'hierarchical-data.json'));
+});
+
 // Routes
 app.get('/', (req, res) => {
     res.redirect('/home');
+});
+
+app.get('/home', (req, res) => {
+    res.render('home');
+});
+
+app.get('/dashboard', (req, res) => {
+    res.render('dashboard');
+});
+
+app.get('/explore', (req, res) => {
+    res.render('explore');
+});
+
+app.get('/portfolio', (req, res) => {
+    res.render('portfolio');
+});
+
+app.get('/help', (req, res) => {
+    res.render('help');
 });
 
 app.post('/delete-node/:id', (req, res) => {

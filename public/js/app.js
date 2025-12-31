@@ -454,4 +454,6 @@ if (document.querySelector('.card')) {
   animate();
 }
 
+console.log('app.js loaded');
+
 // End of app.js

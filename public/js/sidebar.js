@@ -306,8 +306,11 @@ async function renderSidebar() {
  * How it works: Finds the node by ID via DB, inserts new folder node as child, and re-renders the sidebar.
  */
 async function addSub(nodeId) {
+  console.log('addSub called with nodeId:', nodeId);
   const node = await sidebarManager.findNode(nodeId);
+  console.log('Node found:', node);
   if (node && node.type === 'folder') {
+    console.log('Node is folder, creating new node');
     const newNode = {
       uniqueId: 'node' + idCounter++,
       type: 'folder',
@@ -319,8 +322,13 @@ async function addSub(nodeId) {
       placeholder: '',
       children: []
     };
+    console.log('Adding node:', newNode);
     await sidebarManager.addNode(node.id, newNode);
+    console.log('Node added, rendering sidebar');
     await renderSidebar();
+    console.log('addSub completed');
+  } else {
+    console.log('Node not found or not a folder');
   }
 }
 
@@ -330,9 +338,12 @@ async function addSub(nodeId) {
  * How it works: Deletes the node from DB (CASCADE deletes children), and re-renders the sidebar.
  */
 async function removeItem(nodeId) {
-  console.log('Removing node', nodeId);
+  console.log('removeItem called with nodeId:', nodeId);
+  console.log('Deleting node from DB');
   await sidebarManager.deleteNode(nodeId);
+  console.log('Node deleted, rendering sidebar');
   await renderSidebar();
+  console.log('removeItem completed');
 }
 
 /**
@@ -341,9 +352,14 @@ async function removeItem(nodeId) {
  * How it works: Locates the node by ID via DB, creates a deep copy, and stores it in window.copiedNode.
  */
 async function copyNode(nodeId) {
+  console.log('copyNode called with nodeId:', nodeId);
   const node = await sidebarManager.findNode(nodeId);
+  console.log('Node to copy:', node);
   if (node) {
     window.copiedNode = JSON.parse(JSON.stringify(node));
+    console.log('Node copied to clipboard');
+  } else {
+    console.log('Node not found for copying');
   }
 }
 
@@ -353,13 +369,23 @@ async function copyNode(nodeId) {
  * How it works: Checks if there's a copied node, inserts it as child in DB with regenerated IDs, and re-renders the sidebar.
  */
 async function pasteAsChild(nodeId) {
+  console.log('pasteAsChild called with nodeId:', nodeId);
   const node = await sidebarManager.findNode(nodeId);
+  console.log('Parent node:', node);
   if (node && window.copiedNode) {
+    console.log('Copied node exists:', window.copiedNode);
     const pastedNode = JSON.parse(JSON.stringify(window.copiedNode));
+    console.log('Pasting node:', pastedNode);
     await sidebarManager.addNode(node.id, pastedNode);
+    console.log('Node added to DB');
     const result = await sidebarManager.db.query('SELECT id FROM nodes WHERE uniqueId = $1', [pastedNode.uniqueId]);
+    console.log('New node ID:', result.rows[0].id);
     await sidebarManager.regenerateIds({ id: result.rows[0].id }, node.id);
+    console.log('IDs regenerated, rendering sidebar');
     await renderSidebar();
+    console.log('pasteAsChild completed');
+  } else {
+    console.log('No parent node or copied node');
   }
 }
 
@@ -369,16 +395,28 @@ async function pasteAsChild(nodeId) {
  * How it works: Loads siblings, swaps with previous if possible, updates DB, and re-renders.
  */
 async function moveUp(nodeId) {
+  console.log('moveUp called with nodeId:', nodeId);
   const node = await sidebarManager.findNode(nodeId);
-  if (!node) return;
+  console.log('Node to move:', node);
+  if (!node) {
+    console.log('Node not found');
+    return;
+  }
   const result = await sidebarManager.db.query('SELECT * FROM nodes WHERE parent_id = $1 ORDER BY id', [node.parent_id]);
   const siblings = result.rows;
+  console.log('Siblings:', siblings);
   const index = siblings.findIndex(n => n.uniqueId === nodeId);
+  console.log('Index:', index);
   if (index > 0) {
+    console.log('Swapping with previous');
     [siblings[index - 1], siblings[index]] = [siblings[index], siblings[index - 1]];
     await sidebarManager.db.query('UPDATE nodes SET id = CASE WHEN id = $1 THEN $2 WHEN id = $2 THEN $1 END WHERE id IN ($1, $2)', [siblings[index - 1].id, siblings[index].id]);
+    console.log('DB updated, rendering');
+  } else {
+    console.log('Cannot move up');
   }
   await renderSidebar();
+  console.log('moveUp completed');
 }
 
 
@@ -388,16 +426,28 @@ async function moveUp(nodeId) {
  * How it works: Loads siblings, swaps with next if possible, updates DB, and re-renders.
  */
 async function moveDown(nodeId) {
+  console.log('moveDown called with nodeId:', nodeId);
   const node = await sidebarManager.findNode(nodeId);
-  if (!node) return;
+  console.log('Node to move:', node);
+  if (!node) {
+    console.log('Node not found');
+    return;
+  }
   const result = await sidebarManager.db.query('SELECT * FROM nodes WHERE parent_id = $1 ORDER BY id', [node.parent_id]);
   const siblings = result.rows;
+  console.log('Siblings:', siblings);
   const index = siblings.findIndex(n => n.uniqueId === nodeId);
+  console.log('Index:', index);
   if (index < siblings.length - 1) {
+    console.log('Swapping with next');
     [siblings[index], siblings[index + 1]] = [siblings[index + 1], siblings[index]];
     await sidebarManager.db.query('UPDATE nodes SET id = CASE WHEN id = $1 THEN $2 WHEN id = $2 THEN $1 END WHERE id IN ($1, $2)', [siblings[index].id, siblings[index + 1].id]);
+    console.log('DB updated, rendering');
+  } else {
+    console.log('Cannot move down');
   }
   await renderSidebar();
+  console.log('moveDown completed');
 }
 
 /**
@@ -406,22 +456,36 @@ async function moveDown(nodeId) {
  * How it works: Finds the node via DB, locates the span, creates input, on blur updates DB and re-renders.
  */
 async function editItem(el, nodeId) {
+  console.log('editItem called with el:', el, 'nodeId:', nodeId);
   const node = await sidebarManager.findNode(nodeId);
+  console.log('Node to edit:', node);
   if (node) {
     const mainEl = document.querySelector(`[data-nodeid="${nodeId}"]`);
+    console.log('Main element:', mainEl);
     const textEl = mainEl.querySelector('span');
+    console.log('Text element:', textEl);
     if (textEl) {
       const currentText = textEl.textContent;
+      console.log('Current text:', currentText);
       const input = document.createElement('input');
       input.value = currentText;
       input.onblur = async () => {
+        console.log('Input blurred, updating DB');
         const updates = node.type === 'folder' ? { name: input.value } : { question: input.value };
+        console.log('Updates:', updates);
         await sidebarManager.updateNode(nodeId, updates);
+        console.log('DB updated, rendering');
         await renderSidebar();
+        console.log('Edit completed');
       };
       textEl.replaceWith(input);
       input.focus();
+      console.log('Input focused');
+    } else {
+      console.log('Text element not found');
     }
+  } else {
+    console.log('Node not found');
   }
 }
 
@@ -431,7 +495,9 @@ async function editItem(el, nodeId) {
  * How it works: Re-renders the sidebar.
  */
 async function saveItem(nodeId) {
+  console.log('saveItem called with nodeId:', nodeId);
   await renderSidebar();
+  console.log('saveItem completed');
 }
 
 /**
@@ -440,8 +506,11 @@ async function saveItem(nodeId) {
  * How it works: Finds the node via DB, inserts new leaf as child, and re-renders.
  */
 async function addQuestion(nodeId) {
+  console.log('addQuestion called with nodeId:', nodeId);
   const node = await sidebarManager.findNode(nodeId);
+  console.log('Parent node:', node);
   if (node && node.type === 'folder') {
+    console.log('Parent is folder, creating new question');
     const newNode = {
       type: 'leaf',
       uniqueId: 'node' + idCounter++,
@@ -453,8 +522,13 @@ async function addQuestion(nodeId) {
       placeholder: '',
       children: []
     };
+    console.log('New question node:', newNode);
     await sidebarManager.addNode(node.id, newNode);
+    console.log('Question added, rendering');
     await renderSidebar();
+    console.log('addQuestion completed');
+  } else {
+    console.log('Parent not found or not a folder');
   }
 }
 

@@ -1,9 +1,9 @@
 // sidebar.js - Sidebar functionality with PGLite integration
 
-import { PGlite } from 'https://cdn.jsdelivr.net/npm/@electric-sql/pglite/dist/index.js';
-
-// Initialize PGLite database
+// Initialize PGLite database (assuming PGLite is loaded globally)
+console.log('Initializing PGLite...');
 const db = new PGlite();
+console.log('PGLite instance created');
 
 /**
  * SidebarManager class to handle DB operations and state.
@@ -15,7 +15,9 @@ class SidebarManager {
   }
 
   async init() {
+    console.log('Waiting for DB ready...');
     await this.db.ready;
+    console.log('DB ready, creating table...');
 
     try {
       // Create table if not exists
@@ -23,53 +25,69 @@ class SidebarManager {
         CREATE TABLE IF NOT EXISTS nodes (
           id SERIAL PRIMARY KEY,
           uniqueId TEXT UNIQUE NOT NULL,
-          type TEXT CHECK (type IN ('folder', 'leaf')),
+          type TEXT,
           name TEXT,
           question TEXT,
           answer TEXT,
           prompt_en TEXT,
           prompt_ar TEXT,
           placeholder TEXT,
-          parent_id INTEGER REFERENCES nodes(id) ON DELETE CASCADE
+          parent_id INTEGER
         );
       `);
+      console.log('Table created or exists');
 
       // Migrate static data if table is empty
       const existing = await this.db.query('SELECT COUNT(*) as count FROM nodes');
-      console.log('Existing count:', existing);
-      if (existing[0].count === 0) {
+      console.log('Existing count query result:', existing);
+      if (existing.rows[0].count === 0) {
+        console.log('No data found, migrating static data...');
         await this.migrateStaticData();
+      } else {
+        console.log('Data already exists, skipping migration');
       }
     } catch (e) {
       console.error('DB init error:', e);
     }
+    console.log('DB init completed');
   }
 
   async migrateStaticData() {
+    console.log('Starting migration of static data');
     const insertRecursive = async (nodes, parentId = null) => {
+      console.log(`Inserting ${nodes.length} nodes at parent ${parentId}`);
       for (const node of nodes) {
+        console.log(`Inserting node: ${node.uniqueId}`);
         const result = await this.db.query(
           'INSERT INTO nodes (uniqueId, type, name, question, answer, prompt_en, prompt_ar, placeholder, parent_id) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING id',
           [node.uniqueId, node.type, node.name, node.question, node.answer, node['prompt-en'], node['prompt-ar'], node.placeholder, parentId]
         );
-        const newId = result[0].id;
+        const newId = result.rows[0].id;
+        console.log(`Inserted node ${node.uniqueId} with id ${newId}`);
         if (node.children && node.children.length > 0) {
           await insertRecursive(node.children, newId);
         }
       }
     };
     await insertRecursive(hierarchicalData);
+    console.log('Migration completed');
   }
 
   async loadRoots() {
-    this.roots = await this.db.query('SELECT * FROM nodes WHERE parent_id IS NULL ORDER BY id');
+    console.log('Loading roots...');
+    const result = await this.db.query('SELECT * FROM nodes WHERE parent_id IS NULL ORDER BY id');
+    this.roots = result.rows;
+    console.log('Roots loaded:', this.roots.length);
     for (const root of this.roots) {
       root.children = await this.loadChildren(root.id);
     }
+    console.log('Roots with children loaded');
   }
 
   async loadChildren(parentId) {
-    const children = await this.db.query('SELECT * FROM nodes WHERE parent_id = $1 ORDER BY id', [parentId]);
+    const result = await this.db.query('SELECT * FROM nodes WHERE parent_id = $1 ORDER BY id', [parentId]);
+    const children = result.rows;
+    console.log(`Loaded ${children.length} children for parent ${parentId}`);
     for (const child of children) {
       child.children = await this.loadChildren(child.id);
     }
@@ -77,7 +95,8 @@ class SidebarManager {
   }
 
   async findNode(uniqueId) {
-    const [node] = await this.db.query('SELECT * FROM nodes WHERE uniqueId = $1', [uniqueId]);
+    const result = await this.db.query('SELECT * FROM nodes WHERE uniqueId = $1', [uniqueId]);
+    const [node] = result.rows;
     if (node) {
       node.children = await this.loadChildren(node.id);
     }
@@ -85,7 +104,7 @@ class SidebarManager {
   }
 
   async addNode(parentId, nodeData) {
-    const result = await this.db.query(
+    await this.db.query(
       'INSERT INTO nodes (uniqueId, type, name, question, answer, prompt_en, prompt_ar, placeholder, parent_id) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)',
       [nodeData.uniqueId, nodeData.type, nodeData.name, nodeData.question, nodeData.answer, nodeData['prompt-en'], nodeData['prompt-ar'], nodeData.placeholder, parentId]
     );
@@ -111,7 +130,61 @@ class SidebarManager {
   }
 }
 
+// Static seed data migrated to DB on init (reduced for performance)
+let hierarchicalData = [
+  {
+    "type": "folder",
+    "uniqueId": "root1",
+    "name": "Projects",
+    "question": "",
+    "answer": "",
+    "prompt-en": "",
+    "prompt-ar": "",
+    "placeholder": "",
+    "children": [
+      {
+        "type": "folder",
+        "uniqueId": "sub1",
+        "name": "Web Development",
+        "question": "",
+        "answer": "",
+        "prompt-en": "",
+        "prompt-ar": "",
+        "placeholder": "",
+        "children": [
+          {
+            "type": "leaf",
+            "uniqueId": "leaf1",
+            "name": "",
+            "question": "How to build a website?",
+            "answer": "Use HTML, CSS, JS",
+            "prompt-en": "Describe web dev basics",
+            "prompt-ar": "وصف أساسيات تطوير الويب",
+            "placeholder": "Enter your question",
+            "children": []
+          }
+        ]
+      }
+    ]
+  }
+];
+
 const sidebarManager = new SidebarManager(db);
+
+
+
+/**
+ * Generates a random UUID string.
+ * How it works: Replaces placeholders in a template with random hex values.
+ * Issues: Not cryptographically secure; use crypto.randomUUID() if available.
+ */
+function generateUUID() {
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+    const r = Math.random() * 16 | 0;
+    const v = c === 'x' ? r : (r & 0x3 | 0x8);
+    return v.toString(16);
+  });
+}
 
 /**
  * Generates HTML string for a single node in the sidebar hierarchy.
@@ -204,11 +277,18 @@ let idCounter = Date.now();
  * Potential improvements: Incremental updates, lazy-loading children.
  */
 async function renderSidebar() {
+  console.log('Starting renderSidebar...');
   await sidebarManager.loadRoots();
+  console.log('Roots loaded for rendering');
   const sidebarUl = document.querySelector('.sidebar ul.menu.w-full');
   if (sidebarUl) {
+    console.log('Generating HTML...');
     sidebarUl.innerHTML = sidebarManager.roots.map(generateNodeHTML).join('');
+    console.log('HTML set, creating icons...');
     lucide.createIcons();
+    console.log('Render completed');
+  } else {
+    console.error('Sidebar ul not found');
   }
 }
 
@@ -275,7 +355,8 @@ async function pasteAsChild(nodeId) {
   if (node && window.copiedNode) {
     const pastedNode = JSON.parse(JSON.stringify(window.copiedNode));
     await sidebarManager.addNode(node.id, pastedNode);
-    await sidebarManager.regenerateIds({ id: (await sidebarManager.db.query('SELECT id FROM nodes WHERE uniqueId = $1', [pastedNode.uniqueId]))[0].id }, node.id);
+    const result = await sidebarManager.db.query('SELECT id FROM nodes WHERE uniqueId = $1', [pastedNode.uniqueId]);
+    await sidebarManager.regenerateIds({ id: result.rows[0].id }, node.id);
     await renderSidebar();
   }
 }
@@ -288,16 +369,16 @@ async function pasteAsChild(nodeId) {
 async function moveUp(nodeId) {
   const node = await sidebarManager.findNode(nodeId);
   if (!node) return;
-  const siblings = await sidebarManager.db.query('SELECT * FROM nodes WHERE parent_id = $1 ORDER BY id', [node.parent_id]);
+  const result = await sidebarManager.db.query('SELECT * FROM nodes WHERE parent_id = $1 ORDER BY id', [node.parent_id]);
+  const siblings = result.rows;
   const index = siblings.findIndex(n => n.uniqueId === nodeId);
   if (index > 0) {
     [siblings[index - 1], siblings[index]] = [siblings[index], siblings[index - 1]];
-    // Update DB with new order (assuming we can swap IDs or add order column)
-    // For simplicity, swap IDs
     await sidebarManager.db.query('UPDATE nodes SET id = CASE WHEN id = $1 THEN $2 WHEN id = $2 THEN $1 END WHERE id IN ($1, $2)', [siblings[index - 1].id, siblings[index].id]);
   }
   await renderSidebar();
 }
+
 
 /**
  * Moves the specified node down within its siblings in the hierarchy.
@@ -307,7 +388,8 @@ async function moveUp(nodeId) {
 async function moveDown(nodeId) {
   const node = await sidebarManager.findNode(nodeId);
   if (!node) return;
-  const siblings = await sidebarManager.db.query('SELECT * FROM nodes WHERE parent_id = $1 ORDER BY id', [node.parent_id]);
+  const result = await sidebarManager.db.query('SELECT * FROM nodes WHERE parent_id = $1 ORDER BY id', [node.parent_id]);
+  const siblings = result.rows;
   const index = siblings.findIndex(n => n.uniqueId === nodeId);
   if (index < siblings.length - 1) {
     [siblings[index], siblings[index + 1]] = [siblings[index + 1], siblings[index]];
@@ -390,11 +472,16 @@ async function addQuestion(nodeId) {
 
 
 
+
+
 // Data management (for pages with sidebar) - now with PGLite
 if (document.querySelector('.sidebar')) {
+  console.log('Sidebar found, initializing...');
   (async () => {
+    console.log('Starting async init and render...');
     await sidebarManager.init();
     await renderSidebar();
+    console.log('Sidebar fully loaded');
   })();
 }
 

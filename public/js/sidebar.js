@@ -1,6 +1,8 @@
 // sidebar.js - Sidebar functionality with PGLite integration
 
-// Initialize PGLite database (assuming PGLite is loaded globally)
+import { PGlite } from 'https://cdn.jsdelivr.net/npm/@electric-sql/pglite/dist/index.js';
+
+// Initialize PGLite database
 console.log('Initializing PGLite...');
 const db = new PGlite();
 console.log('PGLite instance created');
@@ -473,6 +475,17 @@ async function addQuestion(nodeId) {
 
 
 
+
+// Expose functions to global scope for onclick handlers
+window.addSub = addSub;
+window.removeItem = removeItem;
+window.copyNode = copyNode;
+window.pasteAsChild = pasteAsChild;
+window.moveUp = moveUp;
+window.moveDown = moveDown;
+window.editItem = editItem;
+window.saveItem = saveItem;
+window.addQuestion = addQuestion;
 
 // Data management (for pages with sidebar) - now with PGLite
 if (document.querySelector('.sidebar')) {

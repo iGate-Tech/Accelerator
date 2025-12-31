@@ -5,7 +5,7 @@
         <path d="M31.6035 7.28044C31.1951 7.03803 30.7235 7.06833 30.3421 7.35872L26.4519 10.3182C25.9036 10.7348 25.5764 11.4317 25.5764 12.1868V21.1636C25.5764 24.2695 23.7757 26.9638 21.1966 27.7138L6.895 31.8726V14.5099C6.895 11.7171 8.5129 9.29549 10.8326 8.62128L31.4004 2.64179C31.9126 2.4928 32.2714 1.9701 32.2714 1.37165C32.2714 1.01561 32.1405 0.672189 31.9149 0.424727C31.687 0.177265 31.3823 0.0510083 31.0777 0.0611088L27.8352 0.177265C26.7972 0.215142 25.7615 0.3818 24.7551 0.674714L7.27635 5.75527C3.11314 6.9648 0.206787 11.2853 0.206787 16.2598V32.8423C0.206787 33.7033 0.716752 34.4508 1.44785 34.6629L5.68553 35.8876C5.8164 35.9255 5.95405 35.9457 6.09169 35.9457C6.22934 35.9457 6.36698 35.9255 6.49786 35.8876L24.8792 30.5444C29.2342 29.2793 32.2759 24.7594 32.2759 19.5526V8.52785C32.2759 8.00263 32.0209 7.52538 31.6103 7.28297L31.6035 7.28044Z" fill="rgb(158, 40, 181)"/>
       </svg>
     </a>
-    <div class="flex items-center gap-4">
+    <div class="hidden lg:flex items-center gap-4">
          <div class="flex flex-col items-center justify-center group">
            <div class="nav-bar h-1 bg-primary w-4 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
             <a href="/home" class="nav-link text-base-content/70 group-hover:text-base-content hover:text-base-content text-sm leading-[2.7]">
@@ -51,7 +51,19 @@ navLinks.forEach(link => {
    <div class="navbar-center">
    </div>
    <div class="navbar-end gap-4">
-      <div class="h-8 border-l border-base-content/20"></div>
+      <div class="dropdown dropdown-end lg:hidden">
+        <div tabindex="0" role="button" class="btn btn-ghost btn-circle">
+          <i data-lucide="menu" class="w-5 h-5"></i>
+        </div>
+        <ul tabindex="0" class="menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow bg-base-100 rounded-box w-52">
+          <li><a href="/home">Home</a></li>
+          <li><a href="/dashboard">Dashboard</a></li>
+          <li><a href="/explore">Explore</a></li>
+          <li><a href="/portfolio">Portfolio</a></li>
+          <li><a href="/help">Help</a></li>
+        </ul>
+      </div>
+      <div class="divider divider-vertical"></div>
       <label class="swap">
         <input type="checkbox" />
         <div class="swap-off text-sm font-semibold flex items-center gap-1">

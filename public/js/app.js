@@ -1,9 +1,9 @@
 // app.js - Client-side logic for theme, language, and data management
 
-import { createCollection } from 'https://esm.sh/signaldb';
-
-// Collections
-const nodesCollection = createCollection('nodes');
+// Use SignalDB from global
+const SignalDB = window.SignalDB;
+const db = new SignalDB();
+const nodesCollection = db.collection('nodes');
 
 // Theme functionality
 const themeController = document.getElementById('theme-controller');

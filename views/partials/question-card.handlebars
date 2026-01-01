@@ -28,64 +28,7 @@
         style="resize: none; overflow: hidden;"
       >{{{content}}}</textarea>
     </div>
-       {{> toolbar}}
-
-      <!-- Chat Section -->
-      <div id="chat-section" class="mt-4 max-h-64 overflow-y-auto">
-        <!-- Sample chat messages -->
-        <div class="chat chat-start">
-          <div class="chat-image avatar">
-            <div class="w-10 rounded-full">
-              <img src="/favicon.svg" alt="AI" />
-            </div>
-          </div>
-          <div class="chat-header">
-            AI Assistant
-            <time class="text-xs opacity-50">2 min ago</time>
-          </div>
-          <div class="chat-bubble">Hello, how can I help you today?</div>
-          <div class="chat-footer opacity-50">Delivered</div>
-        </div>
-        <div class="chat chat-end">
-          <div class="chat-image avatar">
-            <div class="w-10 rounded-full">
-              <img src="/avatar.png" alt="User" />
-            </div>
-          </div>
-          <div class="chat-header">
-            You
-            <time class="text-xs opacity-50">1 min ago</time>
-          </div>
-          <div class="chat-bubble">I need assistance with this question.</div>
-          <div class="chat-footer opacity-50">Seen</div>
-        </div>
-        <div class="chat chat-start">
-          <div class="chat-image avatar">
-            <div class="w-10 rounded-full">
-              <img src="/favicon.svg" alt="AI" />
-            </div>
-          </div>
-          <div class="chat-header">
-            AI Assistant
-            <time class="text-xs opacity-50">30 sec ago</time>
-          </div>
-          <div class="chat-bubble">Sure, let's dive in!</div>
-          <div class="chat-footer opacity-50">Delivered</div>
-        </div>
-      </div>
-
-      <!-- Chat Input -->
-      <div class="mt-4 flex gap-2">
-        <textarea
-          id="chat-input"
-          placeholder="Chat with AI..."
-          class="textarea textarea-bordered flex-1"
-          rows="2"
-        ></textarea>
-        <button class="btn btn-primary self-end" id="send-chat-btn">
-          <i data-lucide="send" class="lucide lucide-send w-4 h-4"></i>
-        </button>
-      </div>
+        {{> toolbar}}
 
       </div>
    </div>
@@ -140,43 +83,6 @@ window.updateQuestionCard = function() {
 
 // Initially update the card with server-rendered data
 window.updateQuestionCard();
-
-// Initialize chat functionality
-document.getElementById('send-chat-btn').addEventListener('click', () => {
-  const input = document.getElementById('chat-input');
-  const message = input.value.trim();
-  if (message) {
-    addChatMessage('user', message);
-    input.value = '';
-    // Simulate AI response
-    setTimeout(() => {
-      addChatMessage('ai', 'That\'s a great question! Let me think...');
-    }, 1000);
-  }
-});
-
-function addChatMessage(type, message) {
-  const chatSection = document.getElementById('chat-section');
-  const chatDiv = document.createElement('div');
-  chatDiv.className = `chat chat-${type === 'ai' ? 'start' : 'end'}`;
-  const now = new Date();
-  const time = now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-  chatDiv.innerHTML = `
-    <div class="chat-image avatar">
-      <div class="w-10 rounded-full">
-        <img src="${type === 'ai' ? '/favicon.svg' : '/avatar.png'}" alt="${type === 'ai' ? 'AI' : 'User'}" />
-      </div>
-    </div>
-    <div class="chat-header">
-      ${type === 'ai' ? 'AI Assistant' : 'You'}
-      <time class="text-xs opacity-50">${time}</time>
-    </div>
-    <div class="chat-bubble">${message}</div>
-    <div class="chat-footer opacity-50">${type === 'ai' ? 'Delivered' : 'Sent'}</div>
-  `;
-  chatSection.appendChild(chatDiv);
-  chatSection.scrollTop = chatSection.scrollHeight;
-}
 
 // Initialize Lucide icons for the card and toolbar
 if (window.lucide) {

@@ -1,16 +1,11 @@
-// pglite-worker.js - Shared worker for cross-tab sync
-console.time('PGLite worker init');
-import { PGlite } from 'https://cdn.jsdelivr.net/npm/@electric-sql/pglite/dist/index.js';
-import { live } from 'https://cdn.jsdelivr.net/npm/@electric-sql/pglite/live/index.js';
+// pglite-worker.js - Shared worker for PGLite cross-tab sync
+importScripts('https://cdn.jsdelivr.net/npm/@electric-sql/pglite/dist/index.js');
+importScripts('https://cdn.jsdelivr.net/npm/@electric-sql/pglite/live/index.js');
 
-const pg = await PGlite.create({
+const pg = new PGlite({
   dataDir: 'idb://my-database',
   extensions: { live }
 });
-console.log('PGLite created with live extension');
-
-// Setup schema if needed for other data
-// Settings now handled by localStorage
 
 const clients = new Set();
 
@@ -33,6 +28,15 @@ self.onconnect = (e) => {
         console.error('Worker query error:', error);
         port.postMessage({ id, error: error.message });
       }
+    } else if (type === 'exec') {
+      console.log('Worker received exec:', query);
+      try {
+        await pg.exec(query);
+        port.postMessage({ id, result: null });
+      } catch (error) {
+        console.error('Worker exec error:', error);
+        port.postMessage({ id, error: error.message });
+      }
     } else {
       console.warn('Unknown message type in worker:', e.data);
     }
@@ -42,24 +46,4 @@ self.onconnect = (e) => {
     clients.delete(port);
     console.log('Client disconnected, total clients:', clients.size);
   };
-
-  // Settings handled by localStorage
 };
-
-  port.onclose = () => {
-    clients.delete(port);
-  };
-
-  // Send current settings to new client
-  pg.query("SELECT * FROM settings", []).then(res => {
-    const settings = {};
-    res.rows.forEach(row => {
-      settings[row.key] = row.value;
-    });
-    port.postMessage({ type: 'settingsUpdate', settings });
-  });
-};
-
-// No live query for settings, using localStorage
-
-console.timeEnd('PGLite worker init');

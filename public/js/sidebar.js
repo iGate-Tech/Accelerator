@@ -1,29 +1,24 @@
-// sidebar.js - Sidebar functionality with PGLite integration
+// sidebar.js - Sidebar functionality with PGLite worker integration
 
-import { PGlite } from 'https://cdn.jsdelivr.net/npm/@electric-sql/pglite/dist/index.js';
-
-// Initialize PGLite database
-console.log('Initializing PGLite...');
-const db = new PGlite();
-console.log('PGLite instance created');
+// PGLite is now handled by worker, pg is available globally from pglite.js
+const pg = window.pg;
 
 /**
  * SidebarManager class to handle DB operations and state.
  */
 class SidebarManager {
-  constructor(db) {
-    this.db = db;
+  constructor() {
     this.roots = [];
   }
 
   async init() {
     console.log('Waiting for DB ready...');
-    await this.db.ready;
+    // Worker PGlite is always ready
     console.log('DB ready, creating table...');
 
     try {
       // Create table if not exists
-      await this.db.exec(`
+      await pg.exec(`
         CREATE TABLE IF NOT EXISTS nodes (
           id SERIAL PRIMARY KEY,
           type TEXT,
@@ -41,13 +36,13 @@ class SidebarManager {
       console.log('Table created or exists');
 
       // Add sort_order column if not exists
-      await this.db.exec(`
+      await pg.exec(`
         ALTER TABLE nodes ADD COLUMN IF NOT EXISTS sort_order INTEGER DEFAULT 0;
       `);
       console.log('Sort order column ensured');
 
        // Migrate static data if table is empty
-       const existing = await this.db.query('SELECT COUNT(*) as count FROM nodes');
+       const existing = await pg.query('SELECT COUNT(*) as count FROM nodes');
        console.log('Existing count query result:', existing);
        if (existing.rows[0].count === 0) {
          console.log('No data found, migrating static data...');
@@ -55,8 +50,8 @@ class SidebarManager {
        } else {
          console.log('Data already exists, skipping migration');
        }
-       // Ensure orders are set
-       await this.renumberOrders();
+        // Ensure orders are set
+        await this.renumberOrders();
     } catch (e) {
       console.error('DB init error:', e);
     }
@@ -70,7 +65,7 @@ class SidebarManager {
       for (let i = 0; i < nodes.length; i++) {
         const node = nodes[i];
         console.log(`Inserting node: ${node.name || node.question}`);
-        const result = await this.db.query(
+        const result = await pg.query(
           'INSERT INTO nodes (type, name, question, answer, prompt_en, prompt_ar, placeholder, parent_id, is_open, sort_order) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING id',
           [node.type, node.name, node.question, node.answer, node['prompt-en'], node['prompt-ar'], node.placeholder, parentId, false, orderStart + i]
         );
@@ -87,17 +82,17 @@ class SidebarManager {
 
   async renumberOrders() {
     console.log('Renumbering orders...');
-    const parents = await this.db.query('SELECT DISTINCT COALESCE(parent_id, -1) as parent FROM nodes');
+    const parents = await pg.query('SELECT DISTINCT COALESCE(parent_id, -1) as parent FROM nodes');
     for (const p of parents.rows) {
       const parentId = p.parent === -1 ? null : p.parent;
       let children;
       if (parentId === null) {
-        children = await this.db.query('SELECT id FROM nodes WHERE parent_id IS NULL ORDER BY id');
+        children = await pg.query('SELECT id FROM nodes WHERE parent_id IS NULL ORDER BY id');
       } else {
-        children = await this.db.query('SELECT id FROM nodes WHERE parent_id = $1 ORDER BY id', [parentId]);
+        children = await pg.query('SELECT id FROM nodes WHERE parent_id = $1 ORDER BY id', [parentId]);
       }
       for (let i = 0; i < children.rows.length; i++) {
-        await this.db.query('UPDATE nodes SET sort_order = $1 WHERE id = $2', [i, children.rows[i].id]);
+        await pg.query('UPDATE nodes SET sort_order = $1 WHERE id = $2', [i, children.rows[i].id]);
       }
     }
     console.log('Orders renumbered');
@@ -105,7 +100,7 @@ class SidebarManager {
 
   async loadRoots() {
     console.log('Loading roots...');
-    const result = await this.db.query('SELECT * FROM nodes WHERE parent_id IS NULL ORDER BY sort_order, id');
+    const result = await pg.query('SELECT * FROM nodes WHERE parent_id IS NULL ORDER BY sort_order, id');
     this.roots = result.rows;
     console.log('Roots loaded:', this.roots.map(r => ({id: r.id, is_open: r.is_open})));
     for (const root of this.roots) {
@@ -115,7 +110,7 @@ class SidebarManager {
   }
 
   async loadChildren(parentId) {
-    const result = await this.db.query('SELECT * FROM nodes WHERE parent_id = $1 ORDER BY sort_order, id', [parentId]);
+    const result = await pg.query('SELECT * FROM nodes WHERE parent_id = $1 ORDER BY sort_order, id', [parentId]);
     const children = result.rows;
     console.log(`Loaded ${children.length} children for parent ${parentId}`);
     for (const child of children) {
@@ -125,7 +120,7 @@ class SidebarManager {
   }
 
   async findNode(id) {
-    const result = await this.db.query('SELECT * FROM nodes WHERE id = $1', [id]);
+    const result = await pg.query('SELECT * FROM nodes WHERE id = $1', [id]);
     const [node] = result.rows;
     if (node) {
       node.children = await this.loadChildren(node.id);
@@ -134,9 +129,9 @@ class SidebarManager {
   }
 
   async addNode(parentId, nodeData) {
-    const maxOrderResult = await this.db.query('SELECT COALESCE(MAX(sort_order), 0) as max_order FROM nodes WHERE parent_id = $1', [parentId]);
+    const maxOrderResult = await pg.query('SELECT COALESCE(MAX(sort_order), 0) as max_order FROM nodes WHERE parent_id = $1', [parentId]);
     const maxOrder = maxOrderResult.rows[0].max_order;
-    const result = await this.db.query(
+    const result = await pg.query(
       'INSERT INTO nodes (type, name, question, answer, prompt_en, prompt_ar, placeholder, parent_id, is_open, sort_order) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING id',
       [nodeData.type, nodeData.name, nodeData.question, nodeData.answer, nodeData['prompt-en'], nodeData['prompt-ar'], nodeData.placeholder, parentId, false, maxOrder + 1]
     );
@@ -147,20 +142,20 @@ class SidebarManager {
     console.log('Updating node', id, 'with', updates);
     const fields = Object.keys(updates).map((key, i) => `${key} = $${i + 2}`).join(', ');
     const values = Object.values(updates);
-    await this.db.query(`UPDATE nodes SET ${fields} WHERE id = $1`, [id, ...values]);
+    await pg.query(`UPDATE nodes SET ${fields} WHERE id = $1`, [id, ...values]);
     console.log('Update query executed');
   }
 
   async deleteNode(id) {
-    await this.db.query('DELETE FROM nodes WHERE id = $1', [id]);
+    await pg.query('DELETE FROM nodes WHERE id = $1', [id]);
   }
 
   async insertNodeRecursive(parentId, nodeData, orderStart = null) {
     if (orderStart === null) {
-      const maxOrderResult = await this.db.query('SELECT COALESCE(MAX(sort_order), 0) as max_order FROM nodes WHERE parent_id = $1', [parentId]);
+      const maxOrderResult = await pg.query('SELECT COALESCE(MAX(sort_order), 0) as max_order FROM nodes WHERE parent_id = $1', [parentId]);
       orderStart = maxOrderResult.rows[0].max_order + 1;
     }
-    const result = await this.db.query(
+    const result = await pg.query(
       'INSERT INTO nodes (type, name, question, answer, prompt_en, prompt_ar, placeholder, parent_id, is_open, sort_order) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING id',
       [nodeData.type, nodeData.name, nodeData.question, nodeData.answer, nodeData.prompt_en || '', nodeData.prompt_ar || '', nodeData.placeholder || '', parentId, nodeData.is_open || false, orderStart]
     );
@@ -212,7 +207,7 @@ let hierarchicalData = [
   }
 ];
 
-const sidebarManager = new SidebarManager(db);
+const sidebarManager = new SidebarManager();
 
 
 
@@ -371,7 +366,7 @@ async function renderSidebar() {
  */
 async function renderUseTab() {
   console.log('Rendering Use tab...');
-  const result = await sidebarManager.db.query('SELECT * FROM nodes WHERE type = $1 ORDER BY id', ['leaf']);
+  const result = await pg.query('SELECT * FROM nodes WHERE type = $1 ORDER BY id', ['leaf']);
   const leaves = result.rows;
   const html = leaves.map(leaf => `<li><a onclick="loadQuestion('${leaf.id}')">${leaf.question || ''}</a></li>`).join('');
   const useUl = document.getElementById('use-tab-content');
@@ -386,9 +381,9 @@ async function renderUseTab() {
  */
 async function renderReportsTab() {
   console.log('Rendering Reports tab...');
-  const totalNodes = await sidebarManager.db.query('SELECT COUNT(*) as count FROM nodes');
-  const totalLeaves = await sidebarManager.db.query('SELECT COUNT(*) as count FROM nodes WHERE type = $1', ['leaf']);
-  const totalFolders = await sidebarManager.db.query('SELECT COUNT(*) as count FROM nodes WHERE type = $1', ['folder']);
+  const totalNodes = await pg.query('SELECT COUNT(*) as count FROM nodes');
+  const totalLeaves = await pg.query('SELECT COUNT(*) as count FROM nodes WHERE type = $1', ['leaf']);
+  const totalFolders = await pg.query('SELECT COUNT(*) as count FROM nodes WHERE type = $1', ['folder']);
   const html = `
     <li><strong>Total Nodes:</strong> ${totalNodes.rows[0].count}</li>
     <li><strong>Folders:</strong> ${totalFolders.rows[0].count}</li>
@@ -496,10 +491,10 @@ async function moveUp(nodeId) {
   }
   let siblings;
   if (node.parent_id === null) {
-    const result = await sidebarManager.db.query('SELECT * FROM nodes WHERE parent_id IS NULL ORDER BY sort_order, id');
+    const result = await pg.query('SELECT * FROM nodes WHERE parent_id IS NULL ORDER BY sort_order, id');
     siblings = result.rows;
   } else {
-    const result = await sidebarManager.db.query('SELECT * FROM nodes WHERE parent_id = $1 ORDER BY sort_order, id', [node.parent_id]);
+    const result = await pg.query('SELECT * FROM nodes WHERE parent_id = $1 ORDER BY sort_order, id', [node.parent_id]);
     siblings = result.rows;
   }
   console.log('Siblings:', siblings);
@@ -534,10 +529,10 @@ async function moveDown(nodeId) {
   }
   let siblings;
   if (node.parent_id === null) {
-    const result = await sidebarManager.db.query('SELECT * FROM nodes WHERE parent_id IS NULL ORDER BY sort_order, id');
+    const result = await pg.query('SELECT * FROM nodes WHERE parent_id IS NULL ORDER BY sort_order, id');
     siblings = result.rows;
   } else {
-    const result = await sidebarManager.db.query('SELECT * FROM nodes WHERE parent_id = $1 ORDER BY sort_order, id', [node.parent_id]);
+    const result = await pg.query('SELECT * FROM nodes WHERE parent_id = $1 ORDER BY sort_order, id', [node.parent_id]);
     siblings = result.rows;
   }
   console.log('Siblings:', siblings);
@@ -782,11 +777,11 @@ window.importData = async function(file) {
     try {
       const data = JSON.parse(e.target.result);
       // Clear existing data
-      await sidebarManager.db.exec('DELETE FROM nodes');
+      await pg.exec('DELETE FROM nodes');
       // Insert new data
       const insertRecursive = async (nodes, parentId = null) => {
         for (const node of nodes) {
-          const result = await sidebarManager.db.query(
+          const result = await pg.query(
             'INSERT INTO nodes (type, name, question, answer, prompt_en, prompt_ar, placeholder, parent_id, is_open, sort_order) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING id',
             [node.type, node.name, node.question, node.answer, node.prompt_en || '', node.prompt_ar || '', node.placeholder || '', parentId, node.is_open || false, node.sort_order || 0]
           );

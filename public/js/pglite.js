@@ -35,7 +35,17 @@ pg = {
       pendingQueries.set(id, { resolve, reject });
       worker.port.postMessage({ type: 'query', id, query, params });
     });
+  },
+  exec: (query) => {
+    return new Promise((resolve, reject) => {
+      const id = Math.random().toString(36);
+      pendingQueries.set(id, { resolve, reject });
+      worker.port.postMessage({ type: 'exec', id, query });
+    });
   }
 };
+
+// Make pg available globally for other scripts
+window.pg = pg;
 
 console.timeEnd('PGLite main init');

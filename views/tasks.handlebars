@@ -1,482 +1,230 @@
 {{!< main}}
 
-<style>
-.sidebar { display: none; }
-body { overflow: hidden; }
-</style>
-
-<div class="h-screen flex w-full bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
-  <!-- Agents Sidebar -->
-  <div class="w-80 bg-black/20 backdrop-blur-sm border-r border-white/10 p-6 overflow-y-auto">
-    <div class="mb-8">
-      <h2 class="text-2xl font-bold text-white mb-2">AI Agents</h2>
-      <p class="text-white/70 text-sm">Select an agent to chat with</p>
-    </div>
-
-    <div class="space-y-4">
-      <!-- System Agent -->
-      <div class="agent-card p-4 rounded-xl bg-white/10 hover:bg-white/20 transition-all cursor-pointer border border-white/20">
-        <div class="flex items-center gap-3 mb-3">
-          <div class="w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center">
-            <i data-lucide="brain" class="w-6 h-6 text-white"></i>
-          </div>
-          <div>
-            <h3 class="text-white font-semibold">System Agent</h3>
-            <p class="text-white/60 text-xs">Coordinator</p>
-          </div>
-        </div>
-        <p class="text-white/80 text-sm">Welcome and coordination</p>
-        <div class="mt-2 flex items-center gap-2">
-          <div class="w-2 h-2 bg-green-400 rounded-full"></div>
-          <span class="text-white/60 text-xs">Online</span>
-        </div>
-      </div>
-
-      <!-- Planner Agent -->
-      <div class="agent-card p-4 rounded-xl bg-white/10 hover:bg-white/20 transition-all cursor-pointer border border-white/20">
-        <div class="flex items-center gap-3 mb-3">
-          <div class="w-12 h-12 rounded-full bg-gradient-to-br from-cyan-500 to-blue-500 flex items-center justify-center">
-            <i data-lucide="calendar" class="w-6 h-6 text-white"></i>
-          </div>
-          <div>
-            <h3 class="text-white font-semibold">Planner Agent</h3>
-            <p class="text-white/60 text-xs">Strategy</p>
-          </div>
-        </div>
-        <p class="text-white/80 text-sm">Project planning & timelines</p>
-        <div class="mt-2 flex items-center gap-2">
-          <div class="w-2 h-2 bg-green-400 rounded-full"></div>
-          <span class="text-white/60 text-xs">Online</span>
-        </div>
-      </div>
-
-      <!-- Executor Agent -->
-      <div class="agent-card p-4 rounded-xl bg-white/10 hover:bg-white/20 transition-all cursor-pointer border border-white/20">
-        <div class="flex items-center gap-3 mb-3">
-          <div class="w-12 h-12 rounded-full bg-gradient-to-br from-green-500 to-emerald-500 flex items-center justify-center">
-            <i data-lucide="zap" class="w-6 h-6 text-white"></i>
-          </div>
-          <div>
-            <h3 class="text-white font-semibold">Executor Agent</h3>
-            <p class="text-white/60 text-xs">Action</p>
-          </div>
-        </div>
-        <p class="text-white/80 text-sm">Task execution & tracking</p>
-        <div class="mt-2 flex items-center gap-2">
-          <div class="w-2 h-2 bg-green-400 rounded-full"></div>
-          <span class="text-white/60 text-xs">Online</span>
-        </div>
-      </div>
-
-      <!-- Analyzer Agent -->
-      <div class="agent-card p-4 rounded-xl bg-white/10 hover:bg-white/20 transition-all cursor-pointer border border-white/20">
-        <div class="flex items-center gap-3 mb-3">
-          <div class="w-12 h-12 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center">
-            <i data-lucide="bar-chart-3" class="w-6 h-6 text-white"></i>
-          </div>
-          <div>
-            <h3 class="text-white font-semibold">Analyzer Agent</h3>
-            <p class="text-white/60 text-xs">Insights</p>
-          </div>
-        </div>
-        <p class="text-white/80 text-sm">Data analysis & reporting</p>
-        <div class="mt-2 flex items-center gap-2">
-          <div class="w-2 h-2 bg-green-400 rounded-full"></div>
-          <span class="text-white/60 text-xs">Online</span>
-        </div>
-      </div>
-
-      <!-- Collaborative Mode -->
-      <div class="agent-card p-4 rounded-xl bg-gradient-to-r from-purple-500/20 to-pink-500/20 hover:from-purple-500/30 hover:to-pink-500/30 transition-all cursor-pointer border border-purple-500/30 mt-6">
-        <div class="flex items-center gap-3 mb-3">
-          <div class="w-12 h-12 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 flex items-center justify-center">
-            <i data-lucide="users" class="w-6 h-6 text-white"></i>
-          </div>
-          <div>
-            <h3 class="text-white font-semibold">Multi-Agent</h3>
-            <p class="text-white/60 text-xs">Collaboration</p>
-          </div>
-        </div>
-        <p class="text-white/80 text-sm">All agents working together</p>
-        <div class="mt-2 flex items-center gap-2">
-          <div class="w-2 h-2 bg-yellow-400 rounded-full animate-pulse"></div>
-          <span class="text-white/60 text-xs">Active</span>
-        </div>
-      </div>
-    </div>
-
-    <!-- Quick Stats -->
-    <div class="mt-8 p-4 bg-white/5 rounded-xl border border-white/10">
-      <h4 class="text-white font-semibold mb-3">Today's Progress</h4>
-      <div class="space-y-2">
-        <div class="flex justify-between text-sm">
-          <span class="text-white/70">Tasks Completed</span>
-          <span class="text-green-400">8/12</span>
-        </div>
-        <div class="w-full bg-white/20 rounded-full h-2">
-          <div class="bg-green-400 h-2 rounded-full" style="width: 67%"></div>
-        </div>
-        <div class="flex justify-between text-sm">
-          <span class="text-white/70">Efficiency</span>
-          <span class="text-blue-400">92%</span>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Main Chat Area -->
-  <div class="flex-1 flex flex-col">
-    <!-- Chat Header -->
-    <div class="h-16 bg-black/20 backdrop-blur-sm border-b border-white/10 flex items-center justify-between px-6">
-      <div class="flex items-center gap-3">
-        <div class="w-10 h-10 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 flex items-center justify-center">
-          <i data-lucide="users" class="w-5 h-5 text-white"></i>
-        </div>
+<div class="p-6 w-full">
+  <!-- AI Agent Work Space Section -->
+  <div class="mt-12 max-w-4xl mx-auto ">
+    <div class="bg-base-100 border border-base-200 rounded-lg p-8 shadow-sm">
+      <div class="text-base leading-relaxed space-y-6">
         <div>
-          <h3 class="text-white font-semibold">Multi-Agent Chat</h3>
-          <p class="text-white/60 text-sm">All agents • Online</p>
+          <p>I've successfully analyzed your database structure and identified the key components for your ACC (Automated Code Compiler) system. Here's a comprehensive breakdown of what I found:</p>
+          <h3 class="text-lg font-semibold mt-4 mb-2">Database Schema Overview</h3>
+          <ul class="list-disc list-inside space-y-1">
+            <li><strong>Users Table:</strong> Stores user information including authentication details, preferences, and project associations</li>
+            <li><strong>Projects Table:</strong> Contains project metadata, configuration settings, and status tracking</li>
+            <li><strong>Tasks Table:</strong> Manages individual coding tasks with status, priority, and completion tracking</li>
+            <li><strong>Logs Table:</strong> Captures execution logs, error messages, and performance metrics</li>
+          </ul>
+          <p class="mt-4">The current implementation uses PGLite for local database operations, which provides excellent performance for development and testing environments.</p>
+        </div>
+
+        <div>
+          <p>Now let's examine the frontend architecture. Your application is built with:</p>
+          <h4 class="text-md font-semibold mt-4 mb-2">Technology Stack</h4>
+          <ul class="list-disc list-inside space-y-1">
+            <li><strong>Backend:</strong> Node.js with Express.js server</li>
+            <li><strong>Frontend:</strong> Handlebars templates with Tailwind CSS and DaisyUI components</li>
+            <li><strong>Database:</strong> PGLite (SQLite-compatible) for local development</li>
+            <li><strong>Build Tools:</strong> Tailwind CSS for styling, Nodemon for development</li>
+          </ul>
+          <p class="mt-4">The UI design follows a clean, modern approach with responsive layouts and accessibility considerations. The task management interface provides real-time progress tracking and interactive elements for user engagement.</p>
+          <blockquote class="border-l-4 border-primary pl-4 italic mt-4">
+            <p>Recommendation: Consider implementing real-time updates using WebSockets for better user experience in the task progress section.</p>
+          </blockquote>
+        </div>
+
+        <div>
+          <p>Based on the code analysis, here are the next steps I recommend for improving the ACC system:</p>
+          <ol class="list-decimal list-inside space-y-1 mt-4">
+            <li><strong>Optimize Database Queries:</strong> Implement indexing strategies for frequently accessed tables to improve query performance</li>
+            <li><strong>Enhance Error Handling:</strong> Add comprehensive error boundaries and logging mechanisms throughout the application</li>
+            <li><strong>Implement Caching:</strong> Introduce Redis or in-memory caching for frequently requested data</li>
+            <li><strong>Security Audit:</strong> Conduct a thorough security review of authentication and data validation processes</li>
+            <li><strong>Performance Monitoring:</strong> Set up monitoring tools to track application performance and identify bottlenecks</li>
+          </ol>
+          <p class="mt-4">Would you like me to start implementing any of these improvements? I can begin with the database optimization or error handling enhancements.</p>
+        </div>
+
+        <div>
+          <h3 class="text-lg font-semibold mt-6 mb-4">Markdown Rendering Examples</h3>
+
+          <h4 class="text-md font-semibold mt-4 mb-2">Headings</h4>
+          <h1 class="text-3xl font-bold mt-6 mb-2">Heading 1</h1>
+          <h2 class="text-2xl font-bold mt-5 mb-2">Heading 2</h2>
+          <h3 class="text-xl font-semibold mt-4 mb-2">Heading 3</h3>
+          <h4 class="text-lg font-semibold mt-3 mb-2">Heading 4</h4>
+          <h5 class="text-base font-semibold mt-2 mb-1">Heading 5</h5>
+          <h6 class="text-sm font-semibold mt-1 mb-1">Heading 6</h6>
+          <p>Multiple heading levels for content organization.</p>
+
+          <h4 class="text-md font-semibold mt-4 mb-2">Text Formatting</h4>
+          <p>You can use <strong>bold text</strong>, <em>italic text</em>, <code class="bg-base-200 px-1 rounded">inline code</code>, and <del>strikethrough</del>.</p>
+
+          <h4 class="text-md font-semibold mt-4 mb-2">Lists</h4>
+          <ul class="list-disc list-inside space-y-1">
+            <li>Unordered list item 1</li>
+            <li>Unordered list item 2
+              <ul class="list-circle list-inside ml-4 space-y-1">
+                <li>Nested item</li>
+                <li>Another nested item</li>
+              </ul>
+            </li>
+          </ul>
+
+          <ol class="list-decimal list-inside space-y-1 mt-2">
+            <li>Ordered list item 1</li>
+            <li>Ordered list item 2</li>
+          </ol>
+
+          <h4 class="text-md font-semibold mt-4 mb-2">Code Blocks</h4>
+          <pre class="bg-base-200 p-4 rounded-lg overflow-x-auto"><code>function helloWorld() {
+  console.log("Hello, World!");
+  return true;
+}</code></pre>
+
+          <h4 class="text-md font-semibold mt-4 mb-2">Blockquotes</h4>
+          <blockquote class="border-l-4 border-primary pl-4 italic">
+            <p>This is a blockquote that can span multiple lines and provide emphasis for important information or quotes from other sources.</p>
+          </blockquote>
+
+          <h4 class="text-md font-semibold mt-4 mb-2">Tables</h4>
+          <div class="overflow-x-auto">
+            <table class="table table-zebra w-full">
+              <thead>
+                <tr>
+                  <th>Feature</th>
+                  <th>Status</th>
+                  <th>Priority</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Database Optimization</td>
+                  <td><div class="badge badge-success">Completed</div></td>
+                  <td>High</td>
+                </tr>
+                <tr>
+                  <td>Error Handling</td>
+                  <td><div class="badge badge-warning">In Progress</div></td>
+                  <td>High</td>
+                </tr>
+                <tr>
+                  <td>Caching</td>
+                  <td><div class="badge badge-neutral">Pending</div></td>
+                  <td>Medium</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <h4 class="text-md font-semibold mt-4 mb-2">Links and Images</h4>
+          <p>Here's a <a href="#" class="link link-primary">sample link</a> and an inline image placeholder.</p>
+
+          <h4 class="text-md font-semibold mt-4 mb-2">Horizontal Rules</h4>
+          <hr class="my-4">
+          <p>Content separated by horizontal rules for better organization.</p>
         </div>
       </div>
-      <div class="flex gap-2">
-        <button class="btn btn-ghost btn-sm text-white">
-          <i data-lucide="more-vertical" class="w-4 h-4"></i>
-        </button>
-      </div>
-    </div>
-
-    <!-- Messages Area -->
-    <div id="chat-messages" class="flex-1 overflow-y-auto p-6 space-y-6 bg-gradient-to-b from-transparent to-black/10">
-      <!-- Welcome Message -->
-      <div class="message-wrapper animate-slide-in">
-        <div class="flex gap-4 max-w-4xl">
-          <div class="avatar">
-            <div class="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center">
-              <i data-lucide="brain" class="w-5 h-5 text-white"></i>
-            </div>
-          </div>
-          <div class="flex-1">
-            <div class="flex items-center gap-2 mb-2">
-              <span class="text-white font-semibold">System Agent</span>
-              <span class="text-white/50 text-xs">just now</span>
-            </div>
-            <div class="bg-white/10 backdrop-blur-sm rounded-2xl rounded-tl-md p-4 border border-white/20">
-              <p class="text-white/90">Welcome to the AI Task Manager! I'm here to help you organize, plan, and execute your tasks with the help of specialized AI agents.</p>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Planner Message -->
-      <div class="message-wrapper animate-slide-in" style="animation-delay: 0.2s">
-        <div class="flex gap-4 max-w-4xl">
-          <div class="avatar">
-            <div class="w-10 h-10 rounded-full bg-gradient-to-br from-cyan-500 to-blue-500 flex items-center justify-center">
-              <i data-lucide="calendar" class="w-5 h-5 text-white"></i>
-            </div>
-          </div>
-          <div class="flex-1">
-            <div class="flex items-center gap-2 mb-2">
-              <span class="text-white font-semibold">Planner Agent</span>
-              <span class="text-white/50 text-xs">2 min ago</span>
-            </div>
-            <div class="bg-white/10 backdrop-blur-sm rounded-2xl rounded-tl-md p-4 border border-white/20">
-              <p class="text-white/90">Hello! I'm the Planner Agent. I can help you break down complex tasks into manageable steps, set deadlines, and create project timelines. What would you like to plan today?</p>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- User Message -->
-      <div class="message-wrapper animate-slide-in" style="animation-delay: 0.4s">
-        <div class="flex flex-row-reverse gap-4 max-w-4xl ml-auto">
-          <div class="avatar">
-            <div class="w-10 h-10 rounded-full">
-              <img src="/avatar.png" alt="User" />
-            </div>
-          </div>
-          <div class="flex-1 text-right">
-            <div class="flex items-center justify-end gap-2 mb-2">
-              <span class="text-white/50 text-xs">1 min ago</span>
-              <span class="text-white font-semibold">You</span>
-            </div>
-            <div class="bg-gradient-to-r from-blue-500 to-purple-500 rounded-2xl rounded-tr-md p-4">
-              <p class="text-white">I need to organize my daily tasks and prioritize them.</p>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Executor Message with Tasks -->
-      <div class="message-wrapper animate-slide-in" style="animation-delay: 0.6s">
-        <div class="flex gap-4 max-w-4xl">
-          <div class="avatar">
-            <div class="w-10 h-10 rounded-full bg-gradient-to-br from-green-500 to-emerald-500 flex items-center justify-center">
-              <i data-lucide="zap" class="w-5 h-5 text-white"></i>
-            </div>
-          </div>
-          <div class="flex-1">
-            <div class="flex items-center gap-2 mb-2">
-              <span class="text-white font-semibold">Executor Agent</span>
-              <span class="text-white/50 text-xs">45 sec ago</span>
-            </div>
-            <div class="bg-white/10 backdrop-blur-sm rounded-2xl rounded-tl-md p-4 border border-white/20">
-              <p class="text-white/90 mb-4">Great! I'm the Executor Agent. I'll help you execute tasks efficiently. Based on your request, here's a prioritized task list:</p>
-
-              <div class="space-y-3">
-                <div class="flex items-center gap-3 p-3 bg-white/5 rounded-lg border border-white/10">
-                  <input type="checkbox" class="checkbox checkbox-primary" />
-                  <div>
-                    <span class="text-white font-medium">Review and respond to urgent emails</span>
-                    <div class="badge badge-primary badge-sm ml-2">High Priority</div>
-                  </div>
-                </div>
-                <div class="flex items-center gap-3 p-3 bg-white/5 rounded-lg border border-white/10">
-                  <input type="checkbox" class="checkbox checkbox-secondary" />
-                  <div>
-                    <span class="text-white font-medium">Complete project proposal draft</span>
-                    <div class="badge badge-secondary badge-sm ml-2">Medium Priority</div>
-                  </div>
-                </div>
-                <div class="flex items-center gap-3 p-3 bg-white/5 rounded-lg border border-white/10">
-                  <input type="checkbox" class="checkbox checkbox-accent" />
-                  <div>
-                    <span class="text-white font-medium">Schedule team meeting for next week</span>
-                    <div class="badge badge-accent badge-sm ml-2">Low Priority</div>
-                  </div>
-                </div>
-              </div>
-
-              <p class="text-white/90 mt-4">Which task would you like to start with?</p>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Analyzer Message -->
-      <div class="message-wrapper animate-slide-in" style="animation-delay: 0.8s">
-        <div class="flex gap-4 max-w-4xl">
-          <div class="avatar">
-            <div class="w-10 h-10 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center">
-              <i data-lucide="bar-chart-3" class="w-5 h-5 text-white"></i>
-            </div>
-          </div>
-          <div class="flex-1">
-            <div class="flex items-center gap-2 mb-2">
-              <span class="text-white font-semibold">Analyzer Agent</span>
-              <span class="text-white/50 text-xs">30 sec ago</span>
-            </div>
-            <div class="bg-white/10 backdrop-blur-sm rounded-2xl rounded-tl-md p-4 border border-white/20">
-              <p class="text-white/90 mb-4">As the Analyzer Agent, I can provide insights on your task completion patterns. Based on typical productivity data:</p>
-
-              <div class="grid grid-cols-3 gap-4">
-                <div class="bg-white/5 rounded-lg p-3 text-center border border-white/10">
-                  <div class="text-white/60 text-sm mb-1">Completed Today</div>
-                  <div class="text-2xl font-bold text-green-400">3</div>
-                </div>
-                <div class="bg-white/5 rounded-lg p-3 text-center border border-white/10">
-                  <div class="text-white/60 text-sm mb-1">Pending</div>
-                  <div class="text-2xl font-bold text-yellow-400">7</div>
-                </div>
-                <div class="bg-white/5 rounded-lg p-3 text-center border border-white/10">
-                  <div class="text-white/60 text-sm mb-1">Efficiency</div>
-                  <div class="text-2xl font-bold text-blue-400">85%</div>
-                </div>
-              </div>
-
-              <p class="text-white/90 mt-4">You're doing great! Try focusing on high-priority tasks first for even better productivity.</p>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- User Message -->
-      <div class="message-wrapper animate-slide-in" style="animation-delay: 1s">
-        <div class="flex flex-row-reverse gap-4 max-w-4xl ml-auto">
-          <div class="avatar">
-            <div class="w-10 h-10 rounded-full">
-              <img src="/avatar.png" alt="User" />
-            </div>
-          </div>
-          <div class="flex-1 text-right">
-            <div class="flex items-center justify-end gap-2 mb-2">
-              <span class="text-white/50 text-xs">15 sec ago</span>
-              <span class="text-white font-semibold">You</span>
-            </div>
-            <div class="bg-gradient-to-r from-blue-500 to-purple-500 rounded-2xl rounded-tr-md p-4">
-              <p class="text-white">Can you help me create a detailed plan for a new project?</p>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Collaborative Response -->
-      <div class="message-wrapper animate-slide-in" style="animation-delay: 1.2s">
-        <div class="flex gap-4 max-w-4xl">
-          <div class="avatar">
-            <div class="w-10 h-10 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 flex items-center justify-center">
-              <i data-lucide="users" class="w-5 h-5 text-white"></i>
-            </div>
-          </div>
-          <div class="flex-1">
-            <div class="flex items-center gap-2 mb-2">
-              <span class="text-white font-semibold">Multi-Agent Collaboration</span>
-              <span class="text-white/50 text-xs">just now</span>
-            </div>
-            <div class="bg-gradient-to-r from-purple-500/20 to-pink-500/20 rounded-2xl rounded-tl-md p-4 border border-purple-500/30">
-              <div class="text-purple-200 font-semibold mb-3 flex items-center gap-2">
-                <i data-lucide="zap" class="w-4 h-4"></i>
-                Multi-Agent Collaboration Active
-              </div>
-
-              <div class="space-y-2 mb-4">
-                <div class="flex items-center gap-2 text-sm">
-                  <div class="w-2 h-2 bg-blue-400 rounded-full animate-pulse"></div>
-                  <span class="text-blue-200">Planner: Breaking down project into phases...</span>
-                </div>
-                <div class="flex items-center gap-2 text-sm">
-                  <div class="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
-                  <span class="text-green-200">Executor: Allocating resources and timelines...</span>
-                </div>
-                <div class="flex items-center gap-2 text-sm">
-                  <div class="w-2 h-2 bg-purple-400 rounded-full animate-pulse"></div>
-                  <span class="text-purple-200">Analyzer: Analyzing risks and success factors...</span>
-                </div>
-              </div>
-
-              <div class="bg-white/10 rounded-xl p-4 border border-white/20">
-                <h4 class="font-semibold text-white mb-3 flex items-center gap-2">
-                  <i data-lucide="clipboard-list" class="w-4 h-4"></i>
-                  Project Plan: "New Feature Development"
-                </h4>
-                <ol class="list-decimal list-inside space-y-2 text-sm text-white/90">
-                  <li><strong class="text-blue-300">Phase 1:</strong> Requirements gathering (2 days)</li>
-                  <li><strong class="text-green-300">Phase 2:</strong> Design and prototyping (3 days)</li>
-                  <li><strong class="text-purple-300">Phase 3:</strong> Development and testing (5 days)</li>
-                  <li><strong class="text-pink-300">Phase 4:</strong> Deployment and monitoring (2 days)</li>
-                </ol>
-                <div class="mt-3 flex items-center justify-between text-xs">
-                  <span class="text-white/70">Estimated completion: 12 days</span>
-                  <span class="text-green-400 font-semibold">Success probability: 92%</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Input Area -->
-    <div class="h-20 bg-black/20 backdrop-blur-sm border-t border-white/10 p-4">
-      <div class="flex gap-4 items-end max-w-4xl">
-        <div class="flex-1 relative">
-          <textarea
-            id="task-chat-input"
-            placeholder="Ask the AI agents for help with your tasks..."
-            class="textarea w-full bg-white/10 border-white/20 text-white placeholder-white/50 resize-none rounded-xl"
-            rows="2"
-          ></textarea>
-          <button class="btn btn-primary btn-sm absolute right-2 bottom-2 rounded-full">
-            <i data-lucide="send" class="w-4 h-4"></i>
-          </button>
-        </div>
-        <button class="btn btn-ghost btn-circle text-white">
-          <i data-lucide="paperclip" class="w-5 h-5"></i>
-        </button>
-        <button class="btn btn-ghost btn-circle text-white">
-          <i data-lucide="mic" class="w-5 h-5"></i>
-        </button>
+      <div class="flex justify-between items-center mt-6 pt-6 border-t border-base-200">
+        <span class="text-xs text-base-content/60">2024-01-01 10:30 AM - 10:40 AM</span>
+        <div class="badge badge-ghost badge-sm">GPT-4</div>
       </div>
     </div>
   </div>
+
+   <!-- Agent Prompt Instruction Box -->
+   <div class="sticky bottom-6 mt-8 max-w-4xl mx-auto gap-0">
+     <div class="card-q gap-0 card bg-base-100 border border-base-200 shadow-2xl shadow-primary drop-shadow-md rounded-box">
+       <div class="card-body relative p-4 !gap-0">
+         <div class="collapse collapse-arrow bg-base-100 py-0">
+           <input type="checkbox" class="p-0" name="ai-tasks-accordion" />
+                       <div class="collapse-title font-semibold text-primary flex items-center gap-4 !p-0"><span class="loading loading-spinner loading-primary loading-sm"></span> AI Task Progress <span class="badge badge-primary badge-xs animate-pulse">Active</span></div>
+            <div class="collapse-content p-0">
+              <!-- Task Stats -->
+              <div class="flex flex-wrap gap-2 mt-4">
+                <div class="bg-primary/10 text-primary px-3 py-1 rounded-full flex items-center gap-1 text-xs">
+                  <i data-lucide="list" class="w-3 h-3"></i>
+                  Total Tasks: 5
+                </div>
+                <div class="bg-success/10 text-success px-3 py-1 rounded-full flex items-center gap-1 text-xs">
+                  <i data-lucide="check-circle" class="w-3 h-3"></i>
+                  Completed: 0
+                </div>
+                <div class="bg-accent/10 text-accent px-3 py-1 rounded-full flex items-center gap-1 text-xs">
+                  <i data-lucide="activity" class="w-3 h-3"></i>
+                  In Progress: 1
+                </div>
+                <div class="bg-info/10 text-info px-3 py-1 rounded-full flex items-center gap-1 text-xs">
+                  <i data-lucide="clock" class="w-3 h-3"></i>
+                  Est. Time: 2.5h
+                </div>
+                <div class="bg-warning/10 text-warning px-3 py-1 rounded-full flex items-center gap-1 text-xs">
+                  <i data-lucide="dollar-sign" class="w-3 h-3"></i>
+                  Credits: 125
+                </div>
+                <div class="bg-secondary/10 text-secondary px-3 py-1 rounded-full flex items-center gap-1 text-xs">
+                  <i data-lucide="trending-up" class="w-3 h-3"></i>
+                  Est. Credits: 50
+                </div>
+              </div>
+              <div class="space-y-4">
+                <!-- Database Setup -->
+               <div class="card">
+               <div class="card-body p-1">
+          
+                  <fieldset class="fieldset bg-base-100 border border-base-300 rounded-box p-4 mt-0">
+                    <legend class="fieldset-legend text-primary">Task Steps</legend>
+                    <div class="grid grid-cols-2 gap-2">
+                      <label class="label cursor-pointer">
+                        <input type="checkbox" checked="checked" class="checkbox checkbox-xs checkbox-primary">
+                        <span class="label-text">Planning - Reviewing database schemas</span>
+                      </label>
+                      <label class="label cursor-pointer">
+                        <input type="checkbox" checked="checked" class="checkbox checkbox-xs checkbox-primary">
+                        <span class="label-text">Design - Creating data models</span>
+                      </label>
+                      <label class="label cursor-pointer">
+                        <input type="checkbox" checked="checked" class="checkbox checkbox-xs checkbox-primary">
+                        <span class="label-text">Implementation - Coding the database setup</span>
+                      </label>
+                      <label class="label cursor-pointer">
+                        <input type="checkbox" class="checkbox checkbox-xs checkbox-neutral">
+                        <span class="label-text">Testing - Verifying database functionality</span>
+                      </label>
+                    </div>
+                  </fieldset>
+                  <div class="mt-1 flex items-center gap-2">
+                    <progress class="progress progress-primary flex-1 h-2" value="75" max="100"></progress>
+                    <span class="badge badge-primary badge-xs">75% Complete</span>
+                  </div>
+               </div>
+               </div>
+               <!-- Add other tasks similarly -->
+             </div>
+           </div>
+         </div>
+           <textarea class="textarea textarea-ghost w-full resize-none font-['Electrolize'] text-base-content text-2xl placeholder:text-base-content placeholder:text-2xl focus:ring-0 active:ring-0 focus:outline-none" placeholder="Enter your agent instructions here..."></textarea>
+           <div class="flex justify-between items-center mt-2">
+             <div class="flex gap-2">
+               <button class="bg-primary/10 text-primary px-3 py-1 rounded-full flex items-center gap-1 text-xs hover:bg-primary/20 transition cursor-pointer">
+                 <i data-lucide="sparkles" class="w-3 h-3"></i>
+                 Improve with AI
+               </button>
+               <button class="bg-secondary/10 text-secondary px-3 py-1 rounded-full flex items-center gap-1 text-xs hover:bg-secondary/20 transition cursor-pointer">
+                 <i data-lucide="lightbulb" class="w-3 h-3"></i>
+                 AI Suggestion
+               </button>
+               <button class="bg-error/10 text-error px-3 py-1 rounded-full flex items-center gap-1 text-xs hover:bg-error/20 transition cursor-pointer">
+                 <i data-lucide="rotate-ccw" class="w-3 h-3"></i>
+                 Reset
+               </button>
+             </div>
+             <button class="bg-success/10 text-success px-3 py-1 rounded-full flex items-center gap-1 text-xs hover:bg-success/20 transition cursor-pointer">
+               <i data-lucide="send" class="w-3 h-3"></i>
+               Send
+             </button>
+           </div>
+       </div>
+     </div>
+   </div>
+   </div>
 </div>
-
-<script>
-document.addEventListener('DOMContentLoaded', () => {
-  // Initialize Lucide icons
-  if (window.lucide) {
-    lucide.createIcons();
-  }
-
-  // Auto-scroll to bottom of chat
-  const chatMessages = document.getElementById('chat-messages');
-  if (chatMessages) {
-    chatMessages.scrollTop = chatMessages.scrollHeight;
-  }
-
-  // Agent selection functionality
-  const agentCards = document.querySelectorAll('.agent-card');
-  agentCards.forEach(card => {
-    card.addEventListener('click', () => {
-      // Remove active state from all cards
-      agentCards.forEach(c => c.classList.remove('ring-2', 'ring-white/50'));
-      // Add active state to clicked card
-      card.classList.add('ring-2', 'ring-white/50');
-
-      // Here you could switch the chat context
-      const agentName = card.querySelector('h3').textContent;
-      console.log('Selected agent:', agentName);
-    });
-  });
-
-  // Make first agent active by default
-  if (agentCards.length > 0) {
-    agentCards[0].classList.add('ring-2', 'ring-white/50');
-  }
-
-  // Typing indicator (simulate)
-  setTimeout(() => {
-    // Could add typing indicator here
-  }, 2000);
-});
-</script>
-
-<style>
-@keyframes slide-in {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.animate-slide-in {
-  animation: slide-in 0.6s ease-out forwards;
-}
-
-.agent-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 10px 25px rgba(0,0,0,0.3);
-}
-
-.message-wrapper {
-  opacity: 0;
-}
-
-/* Custom scrollbar */
-#chat-messages::-webkit-scrollbar {
-  width: 6px;
-}
-
-#chat-messages::-webkit-scrollbar-track {
-  background: rgba(255,255,255,0.1);
-  border-radius: 3px;
-}
-
-#chat-messages::-webkit-scrollbar-thumb {
-  background: rgba(255,255,255,0.3);
-  border-radius: 3px;
-}
-
-#chat-messages::-webkit-scrollbar-thumb:hover {
-  background: rgba(255,255,255,0.5);
-}
-
-/* Glass morphism effects */
-.backdrop-blur-sm {
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-}
-</style>

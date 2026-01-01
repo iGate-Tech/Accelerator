@@ -8,7 +8,8 @@ const translations = {
     dashboard: "Dashboard",
     explore: "Explore",
     portfolio: "Portfolio",
-    help: "Help"
+    help: "Help",
+    tasks: "Tasks"
   },
   ar: {
     title: "مرحباً <span class='text-primary'>ديمو</span>، ما هي فكرتك الكبيرة التالية؟",
@@ -17,7 +18,8 @@ const translations = {
     dashboard: "لوحة التحكم",
     explore: "استكشف",
     portfolio: "المحفظة",
-    help: "المساعدة"
+    help: "المساعدة",
+    tasks: "المهام"
   }
 };
 

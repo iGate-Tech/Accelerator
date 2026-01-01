@@ -29,8 +29,6 @@ app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 app.use('/node_modules', express.static(path.join(__dirname, 'node_modules')));
 
-
-
 // Routes
 app.get('/', (req, res) => {
     res.redirect('/home');
@@ -56,9 +54,9 @@ app.get('/help', (req, res) => {
     res.render('help');
 });
 
-
-
-
+app.get('/tasks', (req, res) => {
+    res.render('tasks');
+});
 
 app.listen(port, () => {
     console.log(`Server running at http://localhost:${port}`);

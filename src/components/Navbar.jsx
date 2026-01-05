@@ -12,6 +12,8 @@ const Navbar = () => {
     const updateOnlineStatus = () => setIsOnline(navigator.onLine);
     window.addEventListener('online', updateOnlineStatus);
     window.addEventListener('offline', updateOnlineStatus);
+    // Create Lucide icons
+    if (window.lucide) window.lucide.createIcons();
   });
 
   return (
@@ -79,6 +81,7 @@ const Navbar = () => {
           </ul>
         </div>
         <div class="divider divider-vertical"></div>
+        <i data-lucide={isOnline() ? 'wifi' : 'wifi-off'} class={`w-5 h-5 ${isOnline() ? 'text-success' : 'text-error'}`}></i>
         <label class="swap">
           <input id="langSwap" type="checkbox" checked={lang() === 'ar'} onChange={(e) => {
             const newLang = e.target.checked ? 'ar' : 'en';
@@ -267,10 +270,6 @@ const Navbar = () => {
               </li>
             </ul>
           </div>
-        </div>
-        <div class={`flex items-center gap-1 ml-2 ${isOnline() ? 'text-success' : 'text-error'}`}>
-          <i data-lucide={isOnline() ? 'wifi' : 'wifi-off'} class="w-4 h-4"></i>
-          <span class="text-xs">{isOnline() ? 'Online' : 'Offline'}</span>
         </div>
       </div>
     </div>

@@ -268,12 +268,10 @@ const Navbar = () => {
             </ul>
           </div>
         </div>
-        {!isOnline() && (
-          <div class="flex items-center gap-1 ml-2">
-            <i data-lucide="wifi-off" class="w-4 h-4 text-error"></i>
-            <span class="text-xs text-error">Offline</span>
-          </div>
-        )}
+        <div class={`flex items-center gap-1 ml-2 ${isOnline() ? 'text-success' : 'text-error'}`}>
+          <i data-lucide={isOnline() ? 'wifi' : 'wifi-off'} class="w-4 h-4"></i>
+          <span class="text-xs">{isOnline() ? 'Online' : 'Offline'}</span>
+        </div>
       </div>
     </div>
   );

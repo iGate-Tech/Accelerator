@@ -1,0 +1,77 @@
+<div class="mx-auto flex flex-col items-center justify-center gap-4 p-4">
+    <h1
+      id="question-card-title"
+      class="text-2xl sm:text-3xl md:text-4xl font-sans font-light text-foreground mb-2 sm:mb-2 text-center"
+      data-i18n="title"
+    >
+     {{{title}}}
+   </h1>
+
+       <div class="card-q bg-base-100 border border-base-200 shadow-2xl shadow-primary drop-shadow-md rounded-box w-full">
+        <div class="card-body relative p-1">
+          <textarea
+            id="question-content"
+            placeholder="{{placeholder}}"
+            data-i18n="placeholder"
+            class="textarea textarea-ghost w-full h-12 resize-none font-['Electrolize'] text-base-content text-2xl placeholder:text-base-content placeholder:text-2xl focus:ring-0 active:ring-0 focus:outline-none"
+            rows="3"
+            style="resize: none; overflow: hidden;"
+          >{{{content}}}</textarea>
+          <div class="flex justify-between items-center mt-2">
+            <div class="flex gap-2">
+              <button class="bg-primary/10 text-primary px-3 py-1 rounded-full flex items-center gap-1 text-xs hover:bg-primary/20 transition cursor-pointer">
+                <i data-lucide="sparkles" class="w-3 h-3"></i>
+                Improve with AI
+              </button>
+              <button class="bg-secondary/10 text-secondary px-3 py-1 rounded-full flex items-center gap-1 text-xs hover:bg-secondary/20 transition cursor-pointer">
+                <i data-lucide="lightbulb" class="w-3 h-3"></i>
+                AI Suggestion
+              </button>
+              <button class="bg-error/10 text-error px-3 py-1 rounded-full flex items-center gap-1 text-xs hover:bg-error/20 transition cursor-pointer">
+                <i data-lucide="rotate-ccw" class="w-3 h-3"></i>
+                Reset
+              </button>
+            </div>
+            <button class="bg-success/10 text-success px-3 py-1 rounded-full flex items-center gap-1 text-xs hover:bg-success/20 transition cursor-pointer">
+              <i data-lucide="send" class="w-3 h-3"></i>
+              Send
+            </button>
+          </div>
+        </div>
+      </div>
+   </div>
+<script>
+
+// Function to decode HTML entities
+function decodeHtmlEntities(str) {
+  const textarea = document.createElement('textarea');
+  textarea.innerHTML = str;
+  return textarea.value;
+}
+
+// Initialize reactive question object
+window.currentQuestion = {
+  title: decodeHtmlEntities('{{title}}'),
+  content: decodeHtmlEntities('{{content}}'),
+  placeholder: decodeHtmlEntities('{{placeholder}}')
+};
+
+// Function to update the UI from the currentQuestion object
+window.updateQuestionCard = function() {
+  const titleEl = document.getElementById('question-card-title');
+  const contentEl = document.getElementById('question-content');
+  if (titleEl) titleEl.innerHTML = window.currentQuestion.title || '';  // Use innerHTML to render HTML
+  if (contentEl) {
+    contentEl.value = window.currentQuestion.content || '';
+    contentEl.setAttribute('placeholder', window.currentQuestion.placeholder || '');
+  }
+};
+
+// Initially update the card with server-rendered data
+window.updateQuestionCard();
+
+// Initialize Lucide icons for the card and toolbar
+if (window.lucide) {
+  lucide.createIcons();
+}
+</script>

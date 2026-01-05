@@ -1,0 +1,44 @@
+{{#if node.isFolder}}
+<details class="dropdown w-full" data-nodeid="{{node.uniqueId}}">
+  <summary>
+    <i class="lucide lucide-folder w-4 h-4 flex-shrink-0 min-w-4 min-h-4" data-lucide="folder"></i>
+    <span class="node-name">{{node.name}}</span>
+     <button class="btn btn-ghost btn-sm" popovertarget="popover-{{node.uniqueId}}" style="anchor-name:--anchor-{{node.uniqueId}}" onclick="event.stopPropagation()">
+      <i class="lucide lucide-ellipsis-vertical w-4 h-4" data-lucide="ellipsis-vertical"></i>
+    </button>
+    <ul class="dropdown menu w-52 rounded-box bg-base-100 shadow-sm" popover id="popover-{{node.uniqueId}}" style="position-anchor:--anchor-{{node.uniqueId}}">
+      <li><a onclick="editItem(this)"><i class="lucide lucide-edit w-4 h-4" data-lucide="edit"></i> Edit</a></li>
+      <li><a onclick="saveItem(this)"><i class="lucide lucide-save w-4 h-4" data-lucide="save"></i> Save</a></li>
+      <li><a onclick="copyNode(this)"><i class="lucide lucide-copy w-4 h-4" data-lucide="copy"></i> Copy</a></li>
+      <li><a onclick="pasteAsChild(this)"><i class="lucide lucide-clipboard-paste w-4 h-4" data-lucide="clipboard-paste"></i> Paste as child</a></li>
+      <li><a onclick="addSub(this)"><i class="lucide lucide-folder-plus w-4 h-4" data-lucide="folder-plus"></i> Add sub</a></li>
+      <li><a onclick="addLeaf(this)"><i class="lucide lucide-file-plus w-4 h-4" data-lucide="file-plus"></i> Add leaf</a></li>
+      <li><a onclick="deleteItem(this)"><i class="lucide lucide-trash w-4 h-4" data-lucide="trash"></i> Delete</a></li>
+    </ul>
+  </summary>
+  <ul>
+    {{#each node.children}}
+    <li>
+      {{> hierarchical-node node=.}}
+    </li>
+    {{/each}}
+  </ul>
+</details>
+{{else}}
+<a href="#" class="flex justify-between items-center" data-nodeid="{{node.uniqueId}}">
+  <span class="flex items-center">
+    <i class="lucide lucide-file-text w-4 h-4 flex-shrink-0 min-w-4 min-h-4" data-lucide="file-text"></i>
+    <span class="node-name ml-2">{{node.question}}</span>
+  </span>
+  <button class="btn btn-ghost btn-sm" popovertarget="popover-{{node.uniqueId}}" style="anchor-name:--anchor-{{node.uniqueId}}">
+    <i class="lucide lucide-ellipsis-vertical w-4 h-4" data-lucide="ellipsis-vertical"></i>
+  </button>
+</a>
+<ul class="dropdown menu w-52 rounded-box bg-base-100 shadow-sm" popover id="popover-{{node.uniqueId}}" style="position-anchor:--anchor-{{node.uniqueId}}">
+  <li><a onclick="editItem(this)"><i class="lucide lucide-edit w-4 h-4" data-lucide="edit"></i> Edit</a></li>
+  <li><a onclick="saveItem(this)"><i class="lucide lucide-save w-4 h-4" data-lucide="save"></i> Save</a></li>
+  <li><a onclick="copyNode(this)"><i class="lucide lucide-copy w-4 h-4" data-lucide="copy"></i> Copy</a></li>
+  <li><a onclick="pasteAsChild(this)"><i class="lucide lucide-clipboard-paste w-4 h-4" data-lucide="clipboard-paste"></i> Paste as child</a></li>
+  <li><a onclick="deleteItem(this)"><i class="lucide lucide-trash w-4 h-4" data-lucide="trash"></i> Delete</a></li>
+</ul>
+{{/if}}

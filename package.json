@@ -1,16 +1,16 @@
 {
-  "name": "acc-agent",
+  "name": "Accelerator",
   "version": "1.0.0",
   "description": "AI-powered startup accelerator tool using XState for state management and OpenAI for simulations",
   "repository": "https://github.com/iGate-Tech/Accelerator.git",
-  "main": "app.js",
+  "main": "server.js",
   "scripts": {
-    "start": "npm run build-css && node app.js",
-    "dev": "concurrently \"npm run dev-css\" \"nodemon\"",
-    "build-css": "npx @tailwindcss/cli -i input.css -o ./public/output.css",
-    "dev-css": "npm run watch-css",
-    "watch-css": "npx @tailwindcss/cli -i input.css -o ./public/output.css --watch",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "npm run build && node server.js",
+    "dev": "concurrently \"vite\" \"node server.js\"",
+    "build": "vite build",
+    "preview": "vite preview",
+    "push": "git add . && git commit -m 'Update' && git push",
+    "test": "vitest"
   },
   "keywords": [],
   "author": "",
@@ -18,23 +18,33 @@
   "type": "commonjs",
   "dependencies": {
     "@electric-sql/pglite": "^0.3.14",
+    "@solidjs/router": "^0.15.4",
     "@tailwindcss/cli": "^4.1.18",
     "@tailwindcss/typography": "^0.5.19",
+    "@xstate/solid": "^2.0.0",
     "body-parser": "^2.2.1",
     "daisyui": "^5.5.14",
     "dotenv": "^17.2.3",
     "express": "^5.2.1",
-    "express-handlebars": "^8.0.4",
     "fast-sort": "^3.4.1",
     "lucide": "^0.562.0",
     "marked": "^17.0.1",
     "openai": "^6.15.0",
+    "solid-icons": "^1.1.0",
+    "solid-js": "^1.9.10",
     "tailwindcss": "^3.4.19",
+    "vite": "^7.3.0",
+    "vite-plugin-solid": "^2.11.10",
     "xstate": "^5.25.0"
   },
   "devDependencies": {
+    "@tailwindcss/postcss": "^4.1.18",
+    "autoprefixer": "^10.4.23",
     "concurrently": "^9.2.1",
     "nodemon": "^3.1.11",
-    "tailwindcss": "^4.1.18"
+    "postcss-preset-env": "^10.6.0",
+    "tailwindcss": "^4.1.18",
+    "vite-plugin-pwa": "^1.2.0",
+    "vitest": "^4.0.16"
   }
 }

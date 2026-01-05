@@ -7,11 +7,20 @@ import favicon from "../assets/favicon.svg";
 
 const Layout = (props) => {
   const navigate = useNavigate();
-  const { lang, setLang } = useContext(LangContext);
+  const { lang, setLang, serverReachable, setServerReachable } = useContext(LangContext);
 
   createEffect(() => {
     document.documentElement.setAttribute('dir', lang() === 'ar' ? 'rtl' : 'ltr');
   });
+
+  const checkServerConnectivity = async () => {
+    try {
+      const response = await fetch('/api/llm/stream', { method: 'HEAD', signal: AbortSignal.timeout(5000) });
+      setServerReachable(response.ok);
+    } catch {
+      setServerReachable(false);
+    }
+  };
 
   onMount(async () => {
     await initDb();
@@ -21,6 +30,10 @@ const Layout = (props) => {
     // Set favicon
     const link = document.querySelector('link[rel="icon"]');
     if (link) link.href = favicon;
+
+    // Check server connectivity initially and every 30 seconds
+    await checkServerConnectivity();
+    setInterval(checkServerConnectivity, 30000);
 
     // Initialize theme
     const savedTheme = localStorage.getItem('theme') || 'light';

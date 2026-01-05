@@ -1,5 +1,12 @@
-@import url('https://fonts.googleapis.com/css2?family=Electrolize&display=swap');
 @import "tailwindcss";
+
+@font-face {
+  font-family: 'Electrolize';
+  font-style: normal;
+  font-weight: 400;
+  src: url('/fonts/electrolize.woff2') format('woff2');
+  font-display: swap;
+}
 
 @source "./public/**/*.js";
 
@@ -40,7 +47,24 @@
   --size-field: 0.21875rem;
   --border: 1px;
   --depth: 1;
-   --noise: 0;
+    --noise: 0;
+}
+
+.custom-textarea {
+  font-family: 'Electrolize', monospace !important;
+  border-radius: var(--rounded-box, 1rem);
+  border: 1px solid oklch(var(--bc)/0.2);
+  background-color: transparent;
+  padding: 0.5rem 0.75rem;
+  resize: none;
+  width: 100%;
+  color: oklch(var(--color-base-content));
+  transition: border-color 0.2s ease;
+}
+
+.custom-textarea:focus {
+  outline: none;
+  border-color: oklch(var(--color-primary));
 }
 
 @plugin "daisyui/theme" {

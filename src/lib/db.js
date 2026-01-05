@@ -87,6 +87,33 @@ export const addMessage = async (message) => {
   }
 };
 
+export const clearAllTasks = async () => {
+  try {
+    const db = await getDb();
+    await db.query('DELETE FROM tasks');
+  } catch (e) {
+    console.log('DB not ready, skipping clearAllTasks');
+  }
+};
+
+export const clearAllMessages = async () => {
+  try {
+    const db = await getDb();
+    await db.query('DELETE FROM messages');
+  } catch (e) {
+    console.log('DB not ready, skipping clearAllMessages');
+  }
+};
+
+export const updateTask = async (id, content) => {
+  try {
+    const db = await getDb();
+    await db.query('UPDATE tasks SET content = $1 WHERE id = $2', [content, id]);
+  } catch (e) {
+    console.log('DB not ready, skipping updateTask');
+  }
+};
+
 export const getPortfolio = async () => {
   try {
     const db = await getDb();
@@ -123,4 +150,13 @@ export const setSetting = async (key, value) => {
   } catch (e) {
     console.log('Failed to save setting');
   }
+};
+
+export const saveProgress = async (progress) => {
+  await setSetting('progress', JSON.stringify(progress));
+};
+
+export const loadProgress = async () => {
+  const data = await getSetting('progress');
+  return data ? JSON.parse(data) : null;
 };

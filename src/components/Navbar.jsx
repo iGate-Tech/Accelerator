@@ -1,17 +1,14 @@
-import { A } from "@solidjs/router";
+import { A, useLocation } from "@solidjs/router";
 import { useContext, createSignal, onMount } from "solid-js";
 import { LangContext } from "../context/LangContext";
 import { translations } from "../lib/translations";
 import avatar from "../assets/avatar.png";
 
 const Navbar = () => {
-  const { lang, setLang } = useContext(LangContext);
-  const [isOnline, setIsOnline] = createSignal(navigator.onLine);
+  const { lang, setLang, serverReachable } = useContext(LangContext);
+  const location = useLocation();
 
   onMount(() => {
-    const updateOnlineStatus = () => setIsOnline(navigator.onLine);
-    window.addEventListener('online', updateOnlineStatus);
-    window.addEventListener('offline', updateOnlineStatus);
     // Create Lucide icons
     if (window.lucide) window.lucide.createIcons();
   });
@@ -25,42 +22,37 @@ const Navbar = () => {
           </svg>
         </A>
         <div class="hidden lg:flex items-center gap-4">
-          <div class="flex flex-col items-center justify-center group">
-            <div class="nav-bar h-1 bg-primary w-4 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-              <A href="/" class="nav-link text-base-content/70 group-hover:text-base-content hover:text-base-content text-sm leading-[2.7]">
+            <div class="flex flex-col items-center justify-center group">
+              <div class="nav-bar h-1 bg-primary w-4 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-300" classList={{ 'opacity-100': location.pathname === '/' }}></div>
+              <A href="/" class="nav-link text-base-content/70 hover:text-base-content text-sm leading-[2.7]" classList={{ 'text-base-content': location.pathname === '/' }}>
                 <span class="nav-text">{translations[lang()].home}</span>
               </A>
             </div>
             <div class="flex flex-col items-center justify-center group">
-              <div class="nav-bar h-1 bg-primary w-4 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-              <A href="/dashboard" class="nav-link text-base-content/70 group-hover:text-base-content hover:text-base-content text-sm leading-[2.7]">
+              <div class="nav-bar h-1 bg-primary w-4 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-300" classList={{ 'opacity-100': location.pathname === '/dashboard' }}></div>
+              <A href="/dashboard" class="nav-link text-base-content/70 hover:text-base-content text-sm leading-[2.7]" classList={{ 'text-base-content': location.pathname === '/dashboard' }}>
                 <span class="nav-text">{translations[lang()].dashboard}</span>
               </A>
             </div>
             <div class="flex flex-col items-center justify-center group">
-              <div class="nav-bar h-1 bg-primary w-4 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-              <A href="/explore" class="nav-link text-base-content/70 group-hover:text-base-content hover:text-base-content text-sm leading-[2.7]">
+              <div class="nav-bar h-1 bg-primary w-4 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-300" classList={{ 'opacity-100': location.pathname === '/explore' }}></div>
+              <A href="/explore" class="nav-link text-base-content/70 hover:text-base-content text-sm leading-[2.7]" classList={{ 'text-base-content': location.pathname === '/explore' }}>
                 <span class="nav-text">{translations[lang()].explore}</span>
               </A>
             </div>
             <div class="flex flex-col items-center justify-center group">
-              <div class="nav-bar h-1 bg-primary w-4 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-              <A href="/portfolio" class="nav-link text-base-content/70 group-hover:text-base-content hover:text-base-content text-sm leading-[2.7]">
+              <div class="nav-bar h-1 bg-primary w-4 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-300" classList={{ 'opacity-100': location.pathname === '/portfolio' }}></div>
+              <A href="/portfolio" class="nav-link text-base-content/70 hover:text-base-content text-sm leading-[2.7]" classList={{ 'text-base-content': location.pathname === '/portfolio' }}>
                 <span class="nav-text">{translations[lang()].portfolio}</span>
               </A>
             </div>
             <div class="flex flex-col items-center justify-center group">
-              <div class="nav-bar h-1 bg-primary w-4 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-              <A href="/help" class="nav-link text-base-content/70 group-hover:text-base-content hover:text-base-content text-sm leading-[2.7]">
+              <div class="nav-bar h-1 bg-primary w-4 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-300" classList={{ 'opacity-100': location.pathname === '/help' }}></div>
+              <A href="/help" class="nav-link text-base-content/70 hover:text-base-content text-sm leading-[2.7]" classList={{ 'text-base-content': location.pathname === '/help' }}>
                 <span class="nav-text">{translations[lang()].help}</span>
               </A>
             </div>
-            <div class="flex flex-col items-center justify-center group">
-              <div class="nav-bar h-1 bg-primary w-4 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-              <A href="/tasks" class="nav-link text-base-content/70 group-hover:text-base-content hover:text-base-content text-sm leading-[2.7]">
-                <span class="nav-text">{translations[lang()].tasks}</span>
-              </A>
-          </div>
+
         </div>
       </div>
 
@@ -72,16 +64,15 @@ const Navbar = () => {
             <i data-lucide="menu" class="w-5 h-5"></i>
           </div>
           <ul tabindex="0" class="menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow bg-base-100 rounded-box w-52">
-            <li><A href="/">Home</A></li>
-            <li><A href="/dashboard">Dashboard</A></li>
-            <li><A href="/explore">Explore</A></li>
-            <li><A href="/portfolio">Portfolio</A></li>
-            <li><A href="/help">Help</A></li>
-            <li><A href="/tasks">Tasks</A></li>
+            <li classList={{ active: location.pathname === '/' }}><A href="/">Home</A></li>
+            <li classList={{ active: location.pathname === '/dashboard' }}><A href="/dashboard">Dashboard</A></li>
+            <li classList={{ active: location.pathname === '/explore' }}><A href="/explore">Explore</A></li>
+            <li classList={{ active: location.pathname === '/portfolio' }}><A href="/portfolio">Portfolio</A></li>
+            <li classList={{ active: location.pathname === '/help' }}><A href="/help">Help</A></li>
           </ul>
         </div>
         <div class="divider divider-vertical"></div>
-        <i data-lucide={isOnline() ? 'wifi' : 'wifi-off'} class={`w-5 h-5 ${isOnline() ? 'text-success' : 'text-error'}`}></i>
+        <i data-lucide={serverReachable() ? 'wifi' : 'wifi-off'} class={`w-5 h-5 ${serverReachable() ? 'text-success' : 'text-error'}`}></i>
         <label class="swap">
           <input id="langSwap" type="checkbox" checked={lang() === 'ar'} onChange={(e) => {
             const newLang = e.target.checked ? 'ar' : 'en';

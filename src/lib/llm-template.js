@@ -273,8 +273,8 @@ function injectTemplateData(templateStr, data, options = {}) {
       const value = resolveNestedKey(data, key);
       if (value !== undefined) {
         try {
-          const replacement = JSON.stringify(value);
-          return `{{${key}: ${replacement}}}`;
+          const replacement = typeof value === 'string' ? value : JSON.stringify(value);
+          return replacement;
         } catch {
           return match;
         }
@@ -286,8 +286,8 @@ function injectTemplateData(templateStr, data, options = {}) {
       const value = resolveNestedKey(data, key);
       if (value !== undefined) {
         try {
-          const replacement = JSON.stringify(value);
-          return `{{${key}: ${replacement}}}`;
+          const replacement = typeof value === 'string' ? value : JSON.stringify(value);
+          return replacement;
         } catch {
           return match;
         }
@@ -417,6 +417,24 @@ function mergeTemplateData(target, source) {
 }
 
 /**
+ * Renders filled templates as plain text by replacing {{key: value}} with value
+ */
+function renderFilledTemplate(templateText) {
+  return templateText.replace(/\{\{(\s*)([\w.\-]+)\s*:\s*([^}]+)\}\}/g, (match, ws1, key, valueStr) => {
+    try {
+      const value = JSON.parse(valueStr.trim());
+      if (typeof value === 'string') {
+        return value;
+      } else {
+        return JSON.stringify(value, null, 2);
+      }
+    } catch {
+      return match;
+    }
+  });
+}
+
+/**
  * Unified bidirectional processor.
  * - Extracts data
  * - Merges input
@@ -443,5 +461,6 @@ export {
   injectTemplateData,
   resetTemplatePlaceholders,
   mergeTemplateData,
+  renderFilledTemplate,
   processLLMTemplate
 };

@@ -1,4 +1,4 @@
-import { createMachine, assign } from 'xstate';
+import { createStore } from 'solid-js/store';
 import { extractTemplateData, injectTemplateData, mergeTemplateData } from './llm-template';
 
 export const stepOrder = [
@@ -10,56 +10,57 @@ export const stepOrder = [
 ];
 
 const stepPrompts = {
-  step2: `Analyze the problem {{problem}} in detail. Who suffers from this problem the most? Identify the primary affected groups, including specific roles, industries, company sizes, and demographics. Provide evidence or reasoning for why these groups are impacted. Also, estimate the scale of impact (number of people/companies affected). Respond with {{strugglers: "detailed list of affected groups"}, {impactScale: "estimated scale"}, {evidence: "supporting reasoning"}}`,
-  step3: `Evaluate the severity and frequency of the problem {{problem}}. On a scale of 1-10, rate the severity (how much it disrupts operations or causes pain) and frequency (how often it occurs daily/weekly/monthly). Provide specific examples of consequences when the problem arises. Explain how this compares to similar problems in the industry. Respond with {{severity: "level 1-10 with explanation"}, {frequency: "rate with timeframe"}, {consequences: "examples of impact"}, {comparison: "industry comparison"}}`,
-  step4: `Research and list all current solutions people use to address {{problem}}. Categorize them into manual processes, software tools, outsourced services, and any emerging technologies. For each category, provide 2-3 specific examples with pros and cons. Estimate adoption rates and market share if possible. Respond with {{alternatives: "categorized list with examples"}, {adoptionRates: "estimates"}, {prosCons: "summary"}}`,
-  step5: `Analyze why current {{alternatives}} fail or underperform in solving {{problem}}. Identify specific gaps in cost-effectiveness, speed, user adoption, accuracy, scalability, compliance, or user experience. Provide data or examples from user feedback, industry reports, or case studies. Quantify the impact of these gaps where possible. Respond with {{gaps: "detailed analysis"}, {quantifiedImpact: "metrics or examples"}, {userFeedback: "key insights"}}`,
-  step6: `Develop a detailed user persona for someone suffering from {{problem}}. Include demographics (age, gender, education), professional details (role, industry, company size, seniority), psychographics (goals, challenges, motivations), and geographic location. Describe their daily workflow, pain points, and decision-making process for solutions. Use data from industry reports or typical profiles. Respond with {{persona: "comprehensive persona description"}, {workflow: "daily routine"}, {decisionProcess: "how they choose solutions"}}`,
-  step7: `Assess the urgency of solving {{problem}} for the target user persona. Is it a must-have (critical blocker) or nice-to-have (enhancement)? Describe the consequences of not solving it, including operational impacts, financial costs, opportunity losses, and user satisfaction. Provide examples from similar problems. Respond with {{urgency: "must-have or nice-to-have with rating"}, {consequences: "detailed impacts"}, {examples: "comparable scenarios"}}`,
-  step8: `Gather evidence validating {{problem}} exists and affects users significantly. Include quantitative data (surveys, metrics, market reports) and qualitative insights (interviews, user stories, expert opinions). Source from reliable publications, case studies, or direct research. Explain how this evidence supports the problem statement. Respond with {{evidence: "comprehensive validation data"}, {sources: "list of references"}, {supportAnalysis: "how evidence confirms the problem"}}`,
-  step9: `Design a comprehensive solution for {{problem}}. Describe what the solution does in 1-2 sentences, focusing on user benefits rather than technical implementation. Explain how it directly addresses the key gaps in current solutions. Include core features, target outcomes, and how it differs from alternatives. Ensure it aligns with the user persona and urgency. Respond with {{solution: "clear description"}, {coreFeatures: "list of key features"}, {addressedGaps: "how it solves gaps"}, {differentiation: "unique advantages"}}`,
-  step10: `Craft a compelling value proposition for {{solution}} addressing {{problem}}. Clearly articulate why customers will choose it over existing {{alternatives}}. Focus on unique benefits, cost savings, efficiency gains, and competitive advantages. Use data from problem analysis and user validation. Respond with {{valueProp: "concise value statement"}, {uniqueBenefits: "key differentiators"}, {quantifiedValue: "metrics like cost savings"}, {targetCustomers: "who it appeals to"}}`,
-  step11: `List key features of {{solution}} and map each feature to a customer benefit. Respond with {{features: "your list"}}`,
-  step12: `Determine the optimal business model for {{solution}} based on {{persona}}, {{market}}, and {{solution}} characteristics. Choose from SaaS, Marketplace, License, Usage-based, or other models. Justify your choice with pros/cons, scalability factors, and alignment with user needs. Consider regulatory and operational feasibility. Respond with {{modelType: "chosen model with justification"}, {prosCons: "advantages and disadvantages"}, {scalability: "growth potential"}, {feasibility: "implementation considerations"}}`,
-  step13: `Design revenue streams for {{solution}} using the {{modelType}} model. Identify primary, secondary, and potential future streams. Include pricing tiers, add-ons, partnerships, or data monetization. Estimate revenue potential and customer willingness to pay. Respond with {{revenue: "list of streams with descriptions"}, {pricingTiers: "suggested tiers"}, {monetizationPotential: "estimated revenue"}, {customerWTP: "willingness to pay analysis"}}`,
-  step14: `Develop a pricing strategy for {{solution}} in the {{modelType}} model. Consider cost-plus, value-based, competition-based, or freemium approaches. Factor in {{persona}} budget constraints, {{market}} size, and {{features}}. Explain pricing logic and why customers will pay. Respond with {{pricing: "strategy with model"}, {tiers: "detailed pricing structure"}, {logic: "rationale and assumptions"}, {customerAcceptance: "expected adoption"}}`,
-  step15: `Build competitive moats for {{solution}} to prevent copying. Analyze technology barriers, data advantages, cost efficiencies, network effects, brand strength, and IP protection. Prioritize 2-3 strongest moats. Provide examples of how they'll be implemented. Respond with {{moat: "prioritized list of moats"}, {implementation: "how to build them"}, {examples: "comparable company moats"}, {sustainability: "long-term defensibility"}}`,
-  step16: `What assumptions must be true for {{solution}} to succeed? List biggest risks. Respond with {{risks: "your list"}}`,
-  step17: `Define your target market for {{solution}} clearly by industry, size, and customer type. Respond with {{market: "your definition"}}`,
-  step18: `Estimate Total Addressable Market (TAM) for {{market}}. Explain your calculation method. Respond with {{tam: "your number"}}`,
-  step19: `Estimate your Serviceable Available Market (SAM) for {{market}}. Who can you realistically reach? Respond with {{sam: "your number"}}`,
-  step20: `Estimate Serviceable Obtainable Market (SOM) for {{market}}. What share can you capture initially? Respond with {{som: "your number"}}`,
-  validate_tam_sam_som: `Check if {{tam}} >= {{sam}} >= {{som}}. Respond with {{valid: true/false, message: "details"}}`,
-  step21: `What trends or tailwinds support {{market}} growth? Include growth rates if known. Respond with {{growth: "your rate"}}`,
-  step22: `List direct and indirect competitors in {{market}}. Explain how {{solution}} differs. Respond with {{landscape: "your description"}}`,
-  step23: `How will you enter {{market}} and acquire your first customers? Respond with {{gtm: "your strategy"}}`,
-  step24: `What channels will you use to acquire customers in {{market}}? Rank by priority. Respond with {{channels: "your list"}}`,
-  step25: `Describe your sales motion for {{market}}: self-serve, inside sales, or enterprise sales. Respond with {{sales: "your strategy"}}`,
-  step26: `How will you retain customers and grow revenue in {{market}} over time? Respond with {{retention: "your strategy"}}`,
-  step27: `Explain how revenue is generated per customer for {{modelType}} over time. Respond with {{revenueLogic: "your flow"}}`,
-  step28: `Provide CAC, LTV, and gross margin assumptions for {{modelType}}. Respond with {{economics: "your details"}}`,
-  step29: `List major fixed and variable costs for {{solution}}. Respond with {{costs: "your structure"}}`,
-  step30: `Provide 3-year revenue and expense projections for {{solution}}. Respond with {{projections: "your summary"}}`,
-  step31: `What is your monthly burn rate and runway for {{solution}}? Respond with {{burn: "your amount"}}`,
-  step32: `When does {{solution}} become profitable? Respond with {{breakeven: "your point"}}`,
-  step33: `Provide traction, team strength, market size ({{tam}}), and risk level for {{solution}}. Respond with {{inputs: "your details"}}`,
-  step34: `Using {{inputs}}, calculate valuation for {{solution}} using blended Scorecard/Berkus/VC/DCF-light. Respond with {{valuation: "your number"}}`,
-  step35: `What funding stage are you raising for {{solution}}? (Pre-seed, Seed, Series A, etc.). Respond with {{stage: "your level"}}`,
-  step36: `How much capital are you raising for {{solution}} and why? Respond with {{ask: "your number"}}`,
-  validate_deck_ask: `Ensure {{valuation}} aligns with {{ask}}. Respond with {{valid: true/false, message: "details"}}`,
-  step37: `How will the raised funds for {{solution}} be allocated? Respond with {{use: "your plan"}}`,
-  step38: `What is your expected pre-money valuation for {{solution}}? Must align with {{valuation}}. Respond with {{preMoney: "your number"}}`,
-  validate_pre_money: `Check {{preMoney}} < {{ask}}. Respond with {{valid: true/false, message: "details"}}`,
-  step39: `What type of investors are you targeting for {{solution}}? Respond with {{investors: "your profile"}}`,
-  step40: `What milestones will this funding round for {{solution}} unlock? Respond with {{milestones: "your list"}}`,
-  step41: `List founding team members and their roles for {{solution}}. Respond with {{team: "your roles"}}`,
-  step42: `What key skills are missing in the team for {{solution}} today? Respond with {{gaps: "your skills"}}`,
-  step43: `Describe your hiring plan for {{solution}} for the next 12–24 months. Respond with {{hiring: "your plan"}}`,
-  step44: `List advisors, board members, or governance structure for {{solution}}. Respond with {{advisors: "your list"}}`,
-  step45: `What is the legal structure of the company for {{solution}}? Respond with {{entity: "your type"}}`,
-  step46: `How is intellectual property for {{solution}} owned and protected? Respond with {{ip: "your details"}}`,
-  step47: `What key contracts and compliance requirements exist for {{solution}}? Respond with {{contracts: "your list"}}`,
-  step48: `What legal or regulatory risks could impact an AI-powered legal document review platform? Respond with {{legalRisks: "your list"}}`
+  system: "You are an AI-powered startup accelerator. The user has provided this problem: {{problem}}. Greet the user warmly and acknowledge the problem, confirming you are ready to begin the 48-step process.",
+  step2: "Analyze the problem {{problem}}. Provide a detailed explanation of who suffers from it most, the scale of impact, and supporting evidence. Embed the key facts as {{strugglers: \"list of affected groups\"}}, {{impactScale: \"estimated scale\"}}, {{evidence: \"brief reasoning\"}}.",
+  step3: "Evaluate the severity and frequency of {{problem}}. Provide a detailed assessment including consequences and industry comparison. Embed the key facts as {{severity: \"level and reason\"}}, {{frequency: \"rate\"}}, {{consequences: \"examples\"}}, {{comparison: \"industry context\"}}.",
+  step4: "List and categorize current solutions for {{problem}}, including examples with pros/cons and adoption estimates. Embed the key facts as {{alternatives: \"categorized list with examples\"}, {adoptionRates: \"estimates\"}, {prosCons: \"summary\"}}.",
+  step5: "Analyze why current {{alternatives}} fail for {{problem}}. Identify gaps in cost, speed, etc., with quantified impacts and user feedback. Embed the key facts as {{gaps: \"gaps list\"}, {quantifiedImpact: \"metrics\"}, {userFeedback: \"insights\"}}.",
+  step6: "Develop a detailed user persona for someone suffering from {{problem}}. Include demographics, professional details, psychographics, location, workflow, and decision process. Embed the key facts as {{persona: \"profile\"}, {workflow: \"routines\"}, {decisionProcess: \"how they choose\"}}.",
+  step7: "Assess the urgency for {{persona}} to solve {{problem}}. Determine if must-have or nice-to-have, with consequences and examples. Embed the key facts as {{urgency: \"level\"}, {consequences: \"impacts\"}, {examples: \"scenarios\"}}.",
+  step8: "Gather and validate evidence for {{problem}}. Include quantitative and qualitative data, sources, and how it supports the problem. Embed the key facts as {{evidence: \"data points\"}, {sources: \"references\"}, {supportAnalysis: \"confirmation\"}}.",
+  step9: "Design a comprehensive solution for {{problem}}. Describe benefits, core features, how it addresses {{gaps}}, outcomes, and differentiation. Ensure alignment with {{persona}}. Embed the key facts as {{solution: \"description\"}, {coreFeatures: \"list\"}, {addressedGaps: \"how\"}, {differentiation: \"advantages\"}}.",
+  step10: "Craft a compelling value proposition for {{solution}} compared to {{alternatives}}. Highlight benefits, savings, and advantages using {{evidence}}. Embed the key facts as {{valueProp: \"statement\"}, {uniqueBenefits: \"list\"}, {quantifiedValue: \"metrics\"}, {targetCustomers: \"who\"}}.",
+  step11: "List key features of {{solution}} and map each to a customer benefit. Embed the key facts as {{features: \"feature: benefit; ...\"}}.",
+  step12: "Determine the optimal business model for {{solution}} based on {{persona}}. Choose from options and justify with pros/cons, scalability, and feasibility. Embed the key facts as {{modelType: \"chosen model\"}, {prosCons: \"list\"}, {scalability: \"potential\"}, {feasibility: \"considerations\"}}.",
+  step13: "Design revenue streams for {{solution}} using {{modelType}}. Identify primary, secondary, future streams with pricing and estimates. Embed the key facts as {{revenue: \"streams list\"}, {pricingTiers: \"tiers\"}, {monetizationPotential: \"estimate\"}, {customerWTP: \"analysis\"}}.",
+  step14: "Develop a pricing strategy for {{solution}} in {{modelType}}. Consider approaches, factor {{persona}} and {{market}}, explain logic and acceptance. Embed the key facts as {{pricing: \"strategy\"}, {tiers: \"structure\"}, {logic: \"rationale\"}, {customerAcceptance: \"adoption\"}}.",
+  step15: "Build competitive moats for {{solution}}. Analyze barriers like tech, data, etc., prioritize, provide implementation and examples. Embed the key facts as {{moat: \"list\"}, {implementation: \"how\"}, {examples: \"companies\"}, {sustainability: \"defensibility\"}}.",
+  step16: "List key assumptions that must be true and major risks for {{solution}} success. Embed the key facts as {{assumptions: \"list\"}, {risks: \"list\"}}.",
+  step17: "Clearly define the target market for {{solution}} by industry, size, and customer type. Embed the key facts as {{market: \"definition\"}}.",
+  step18: "Estimate the Total Addressable Market (TAM) for {{market}}. Explain the calculation method. Embed the key facts as {{tam: \"number\"}, {calculation: \"method\"}}.",
+  step19: "Estimate the Serviceable Available Market (SAM) for {{market}}. Describe realistic reach. Embed the key facts as {{sam: \"number\"}, {reach: \"description\"}}.",
+  step20: "Estimate the Serviceable Obtainable Market (SOM) for {{market}}. Explain initial capture share rationale. Embed the key facts as {{som: \"number\"}, {capture: \"rationale\"}}.",
+  validate_tam_sam_som: "Check if {{tam}} >= {{sam}} >= {{som}}. Provide validation and reason. Embed the key facts as {{valid: true/false}, {message: \"reason\"}}.",
+  step21: "Identify trends or tailwinds supporting {{market}} growth. Include rates if known. Embed the key facts as {{trends: \"list\"}, {growthRate: \"rate\"}}.",
+  step22: "List direct and indirect competitors in {{market}}. Explain how {{solution}} differs. Embed the key facts as {{competitors: \"list\"}, {differentiation: \"how\"}}.",
+  step23: "Develop a strategy to enter {{market}} and acquire first customers. Embed the key facts as {{entryStrategy: \"plan\"}, {acquisition: \"methods\"}}.",
+  step24: "Identify channels to acquire customers in {{market}}. Rank by priority. Embed the key facts as {{channels: \"ranked list\"}}.",
+  step25: "Describe the sales motion for {{market}}: self-serve, inside sales, or enterprise. Embed the key facts as {{salesMotion: \"type and strategy\"}}.",
+  step26: "Develop strategies to retain customers and grow revenue in {{market}}. Embed the key facts as {{retention: \"plan\"}, {growth: \"methods\"}}.",
+  step27: "Explain how revenue is generated per customer in {{modelType}}. Embed the key facts as {{revenueLogic: \"flow\"}}.",
+  step28: "Provide Customer Acquisition Cost (CAC), Lifetime Value (LTV), and gross margin assumptions for {{modelType}}. Embed the key facts as {{cac: \"cost\"}, {ltv: \"value\"}, {margin: \"percentage\"}}.",
+  step29: "List major fixed and variable costs for {{solution}}. Embed the key facts as {{fixedCosts: \"list\"}, {variableCosts: \"list\"}}.",
+  step30: "Provide 3-year revenue and expense projections for {{solution}}. Embed the key facts as {{year1: \"rev/exp\"}, {year2: \"rev/exp\"}, {year3: \"rev/exp\"}}.",
+  step31: "Calculate the monthly burn rate and runway for {{solution}}. Embed the key facts as {{burnRate: \"amount\"}, {runway: \"months\"}}.",
+  step32: "Determine when {{solution}} will break even. Embed the key facts as {{breakeven: \"timeframe\"}}.",
+  step33: "Provide current traction, team strength, market size ({{tam}}), and risk level for {{solution}}. Embed the key facts as {{traction: \"level\"}, {team: \"strength\"}, {marketSize: \"tam\"}, {risk: \"level\"}}.",
+  step34: "Calculate the valuation for {{solution}} using Scorecard, Berkus, VC, and DCF-light methods with {{inputs}}. Embed the key facts as {{valuation: \"number\"}, {method: \"blend details\"}}.",
+  step35: "Determine the appropriate funding stage for {{solution}}: Pre-seed, Seed, Series A, etc. Embed the key facts as {{stage: \"level\"}}.",
+  step36: "Determine how much capital to raise for {{solution}} and provide the rationale. Embed the key facts as {{ask: \"amount\"}, {rationale: \"why\"}}.",
+  validate_deck_ask: "Check if {{valuation}} aligns with {{ask}}. Provide validation and message. Embed the key facts as {{valid: true/false}, {message: \"reason\"}}.",
+  step37: "Plan the allocation of raised funds for {{solution}}. Embed the key facts as {{allocation: \"breakdown\"}}.",
+  step38: "Calculate the expected pre-money valuation for {{solution}}, ensuring alignment with {{valuation}}. Embed the key facts as {{preMoney: \"number\"}}.",
+  validate_pre_money: "Validate if {{preMoney}} < {{ask}}. Provide result and message. Embed the key facts as {{valid: true/false}, {message: \"reason\"}}.",
+  step39: "Identify target investor types for {{solution}}. Embed the key facts as {{investors: \"types\"}}.",
+  step40: "List milestones unlocked by this funding round for {{solution}}. Embed the key facts as {{milestones: \"list\"}}.",
+  step41: "List founding team members for {{solution}} and their roles. Embed the key facts as {{team: \"member: role; ...\"}}.",
+  step42: "Identify key skills missing in the team for {{solution}}. Embed the key facts as {{gaps: \"skills list\"}}.",
+  step43: "Develop a hiring plan for {{solution}} for the next 12-24 months. Embed the key facts as {{hiring: \"plan\"}}.",
+  step44: "List advisors, board members, and governance structure for {{solution}}. Embed the key facts as {{advisors: \"list\"}}.",
+  step45: "Determine the legal structure for the {{solution}} company. Embed the key facts as {{entity: \"type\"}}.",
+  step46: "Plan intellectual property ownership and protection for {{solution}}. Embed the key facts as {{ip: \"details\"}}.",
+  step47: "Identify key contracts and compliance requirements for {{solution}}. Embed the key facts as {{contracts: \"list\"}, {compliance: \"requirements\"}}.",
+  step48: "Identify legal and regulatory risks for AI-powered legal document review. Embed the key facts as {{risks: \"list\"}}."
 };
 
 function fillPrompt(template, ctx) {
@@ -182,90 +183,103 @@ const initialContext = {
   valueProp: '', features: '', modelType: '', revenue: '', pricing: '', moat: '', risks: ''
 };
 
-export const startupMachine = createMachine({
-  id: 'startup',
-  initial: 'idle',
-  context: initialContext,
-  states: {
-    idle: {
-      on: {
-        START_PROCESS: {
-          target: 'processing',
-          actions: assign((context, event) => ({
-            problem: event.problem || context.problem,
-            currentStep: 'step2',
-            stepName: 'Problem Analysis',
-            currentModel: 'Idea Model',
-            currentSection: 'Problem Identification',
-            uiStatus: 'processing',
-            uiMessage: 'Starting Problem Analysis...',
-            completedSteps: 1,
-            currentPrompt: fillPrompt(getPromptForStep('step2'), { ...context, problem: event.problem || context.problem })
-          }))
-        },
-        RESET: {
-          actions: assign(initialContext)
-        }
-      }
-    },
-    processing: {
-      on: {
-        PAUSE: 'pause',
-        RESET: {
-          target: 'idle',
-          actions: assign(initialContext)
-        },
-        RECEIVE_RESPONSE: [
-          {
-            target: 'completed',
-            guard: (context, event) => getNextStep(context.currentStep) === 'done',
-            actions: assign((context, event) => {
-              const extracted = extractFromResponse(event.response || '');
-              const updatedContext = mergeTemplateData(context, extracted);
-              return {
-                ...updatedContext,
-                llmResponse: event.response || '',
-                currentStep: 'done',
-                completedSteps: context.completedSteps + 1,
-                uiProgress: 100,
-                uiStatus: 'completed',
-                uiMessage: '🎉 All 48 steps completed successfully!'
-              };
-            })
-          },
-          {
-            actions: assign((context, event) => {
-              const extracted = extractFromResponse(event.response || '');
-              const updatedContext = mergeTemplateData(context, extracted);
-              const nextStep = getNextStep(context.currentStep);
-              return {
-                ...updatedContext,
-                llmResponse: event.response || '',
-                currentStep: nextStep,
-                stepName: stepNames[nextStep] || 'Next Step',
-                currentModel: modelMap[nextStep] || 'System',
-                currentSection: sectionMap[nextStep] || 'Initialization',
-                completedSteps: context.completedSteps + 1,
-                uiProgress: Math.min((context.completedSteps + 1) / 48 * 100, 100),
-                uiMessage: `Step ${context.completedSteps + 1} complete. Moving to ${stepNames[nextStep] || 'next step'}...`,
-                currentPrompt: fillPrompt(getPromptForStep(nextStep), updatedContext)
-              };
-            })
-          }
-        ]
-      }
-    },
-    pause: {
-      on: {
-        RESUME: 'processing',
-        RESET: {
-          target: 'idle',
-          actions: assign(initialContext)
-        }
-      }
-    },
-    completed: {
-      type: 'final'
-    }
-  }
+const getNextStep = (currentStep) => {
+  const index = stepOrder.indexOf(currentStep);
+  return stepOrder[index + 1] || 'done';
+};
+
+export const [machineStore, setMachineStore] = createStore({
+  state: 'idle',
+  context: initialContext
 });
+
+export const startProcess = (problem) => {
+  setMachineStore('state', 'processing');
+  setMachineStore('context', (prev) => ({
+    ...prev,
+    problem: problem || prev.problem,
+    currentStep: 'system',
+    stepName: 'Initialization',
+    currentModel: 'System',
+    currentSection: 'Initialization',
+    uiStatus: 'processing',
+    uiMessage: 'Starting initialization...',
+    completedSteps: 0,
+    currentPrompt: fillPrompt(getPromptForStep('system'), { ...prev, problem: problem || prev.problem })
+  }));
+};
+
+export const receiveResponse = (response, setAutoProgress, setTasksList, tasksList) => {
+  if (typeof response === 'undefined') {
+    console.error('receiveResponse called with undefined response');
+    return;
+  }
+  // Add the response as a task
+  const newTask = { content: response, model: 'Llama-3.2-3B-Free', prompt: machineStore.context.currentPrompt || '', timestamp: new Date().toISOString() };
+  setTasksList([...tasksList(), newTask]);
+  const nextStep = getNextStep(machineStore.context.currentStep);
+  if (nextStep === 'done') {
+    setMachineStore('context', (prev) => {
+      const extracted = extractFromResponse(response || '');
+      let dataToMerge = extracted;
+      if (extracted.response && typeof extracted.response === 'object') {
+        dataToMerge = extracted.response;
+      }
+      const updatedCtx = mergeTemplateData(prev, dataToMerge);
+      return {
+        ...updatedCtx,
+        llmResponse: response || '',
+        currentStep: 'done',
+        completedSteps: prev.completedSteps + 1,
+        uiProgress: 100,
+        uiStatus: 'completed',
+        uiMessage: '🎉 All 48 steps completed successfully!'
+      };
+    });
+  } else {
+    setMachineStore('context', (prev) => {
+      const extracted = extractFromResponse(response || '');
+      let dataToMerge = extracted;
+      if (extracted.response && typeof extracted.response === 'object') {
+        dataToMerge = extracted.response;
+      }
+      const updatedContextElse = mergeTemplateData(prev, dataToMerge);
+      console.log('Extracted data:', dataToMerge);
+      const isSys = prev.currentStep === 'system';
+      if (isSys) {
+        updatedContextElse.greeting = response;
+        updatedContextElse.acknowledgment = 'Problem acknowledged and ready to proceed.';
+      }
+      const newCompletedSteps = isSys ? 1 : prev.completedSteps + 1;
+      const progress = (newCompletedSteps / 48) * 100;
+      const message = isSys ? 'Initialization complete. Starting step 1...' : `Step ${newCompletedSteps} complete. Moving to ${stepNames[nextStep] || 'next step'}...`;
+      return {
+        ...updatedContextElse,
+        llmResponse: response || '',
+        currentStep: nextStep,
+        stepName: stepNames[nextStep] || 'Next Step',
+        currentModel: modelMap[nextStep] || 'System',
+        currentSection: sectionMap[nextStep] || 'Initialization',
+        completedSteps: newCompletedSteps,
+        uiProgress: Math.min(progress, 100),
+        uiMessage: message,
+        currentPrompt: fillPrompt(getPromptForStep(nextStep), updatedContextElse)
+      };
+    });
+    if (setAutoProgress) setAutoProgress(true);
+  }
+};
+
+
+export const pause = () => {
+  setMachineStore('state', 'pause');
+};
+
+export const resume = () => {
+  setMachineStore('state', 'processing');
+};
+
+export const reset = () => {
+  setMachineStore('state', 'idle');
+  setMachineStore('context', initialContext);
+};

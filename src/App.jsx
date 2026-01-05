@@ -2,13 +2,12 @@ import { Router, Route } from "@solidjs/router";
 import { lazy } from "solid-js";
 import { LangProvider } from "./context/LangContext";
 import Layout from "./components/Layout";
-import Home from "./components/Home";
 import Dashboard from "./components/Dashboard";
 import Explore from "./components/Explore";
 import Portfolio from "./components/Portfolio";
 import Help from "./components/Help";
 
-const Tasks = lazy(() => import("./components/Tasks"));
+const Home = lazy(() => import("./components/Home"));
 
 const App = () => (
   <LangProvider>
@@ -19,7 +18,6 @@ const App = () => (
         <Route path="explore" component={Explore} />
         <Route path="portfolio" component={Portfolio} />
         <Route path="help" component={Help} />
-        <Route path="tasks" component={Tasks} />
       </Route>
     </Router>
   </LangProvider>

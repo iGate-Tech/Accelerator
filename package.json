@@ -1,7 +1,8 @@
 {
   "name": "acc-agent",
   "version": "1.0.0",
-  "description": "",
+  "description": "AI-powered startup accelerator tool using XState for state management and OpenAI for simulations",
+  "repository": "https://github.com/iGate-Tech/Accelerator.git",
   "main": "app.js",
   "scripts": {
     "start": "npm run build-css && node app.js",

@@ -6,6 +6,7 @@ export default defineConfig({
   plugins: [
     solidPlugin(),
     VitePWA({
+      disable: process.env.NODE_ENV === 'development',
       registerType: 'autoUpdate',
       includeAssets: ['favicon.svg', 'avatar.png'],
       manifest: {

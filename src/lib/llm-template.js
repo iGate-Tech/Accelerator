@@ -229,9 +229,29 @@ function extractTemplateData(templateText, options = {}) {
                   obj[subKey] = subValue;
                 }
               }
-            } catch (subE) {
-              console.log('JSON parse error for sub-value:', subValueStr, subE.message);
-            }
+             } catch (subE) {
+               console.log('JSON parse error for sub-value:', subValueStr, subE.message);
+               // Treat as string if not valid JSON
+               if (expandNestedKeys && subKey.includes('.')) {
+                 _assignNestedKey(obj, subKey, subValueStr, duplicateHandling);
+               } else {
+                 if (subKey in obj) {
+                   if (duplicateHandling === 'error') {
+                     throw new Error(`Duplicate key '${subKey}'`);
+                   } else if (duplicateHandling === 'array') {
+                     if (!Array.isArray(obj[subKey])) {
+                       obj[subKey] = [obj[subKey]];
+                     }
+                     obj[subKey].push(subValueStr);
+                   } else {
+                     // lastWins
+                     obj[subKey] = subValueStr;
+                   }
+                 } else {
+                   obj[subKey] = subValueStr;
+                 }
+               }
+             }
           }
         }
         // Skip setting value since we handled it here

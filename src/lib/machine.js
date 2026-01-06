@@ -10,7 +10,7 @@ export const stepOrder = [
 ];
 
 const stepPrompts = {
-  system: "You are an AI-powered startup accelerator. The user has provided this problem: {{problem}}. Greet the user warmly and acknowledge the problem, confirming you are ready to begin the 48-step process.",
+  system: "You are an AI-powered startup accelerator, an expert guide helping entrepreneurs validate and build successful startups through a structured 48-step process. The user has shared this problem: {{problem}}. \n\nYour task is to warmly greet the user, acknowledge the problem they described, and enthusiastically confirm your readiness to begin the comprehensive 48-step accelerator journey. Additionally, rephrase and improve the problem statement to make it clearer, more specific, and highlight its market potential – explain why it matters and how it could be addressed. Embed the enhanced version as {{improvedProblem: \"rephrased and explained problem description\"}}.\n\nExplain briefly that this process covers problem validation, user research, solution design, business modeling, market analysis, financial planning, funding strategy, team building, and legal foundations – all tailored to turn their idea into a viable startup.\n\nProvide a friendly, encouraging response that builds excitement and trust. Embed the key elements as {{greeting: \"warm, personalized greeting message\"}}, {{acknowledgment: \"detailed acknowledgment of the problem and its importance\"}}, {{readiness: \"enthusiastic confirmation to start the 48-step process\"}}.",
   step2: "Analyze the problem {{problem}}. Provide a detailed explanation of who suffers from it most, the scale of impact, and supporting evidence. Embed the key facts as {{strugglers: \"list of affected groups\"}}, {{impactScale: \"estimated scale\"}}, {{evidence: \"brief reasoning\"}}.",
   step3: "Evaluate the severity and frequency of {{problem}}. Provide a detailed assessment including consequences and industry comparison. Embed the key facts as {{severity: \"level and reason\"}}, {{frequency: \"rate\"}}, {{consequences: \"examples\"}}, {{comparison: \"industry context\"}}.",
   step4: "List and categorize current solutions for {{problem}}, including examples with pros/cons and adoption estimates. Embed the key facts as {{alternatives: \"categorized list with examples\"}, {adoptionRates: \"estimates\"}, {prosCons: \"summary\"}}.",
@@ -129,7 +129,7 @@ const stepNames = {
 
 
 
-const modelMap = {
+export const modelMap = {
   'system': 'System',
   'step2': 'Idea Model', 'step3': 'Idea Model', 'step4': 'Idea Model', 'step5': 'Idea Model', 'step6': 'Idea Model', 'step7': 'Idea Model', 'step8': 'Idea Model',
   'step9': 'Business Model', 'step10': 'Business Model', 'step11': 'Business Model', 'step12': 'Business Model', 'step13': 'Business Model', 'step14': 'Business Model', 'step15': 'Business Model', 'step16': 'Business Model',
@@ -140,7 +140,7 @@ const modelMap = {
   'step45': 'Legal Model', 'step46': 'Legal Model', 'step47': 'Legal Model', 'step48': 'Legal Model'
 };
 
-const sectionMap = {
+export const sectionMap = {
   'system': 'Initialization',
   'step2': 'Problem Identification',
   'step3': 'Problem Assessment', 'step4': 'Problem Assessment', 'step5': 'Problem Assessment',
@@ -183,7 +183,7 @@ const initialContext = {
   valueProp: '', features: '', modelType: '', revenue: '', pricing: '', moat: '', risks: ''
 };
 
-const getNextStep = (currentStep) => {
+export const getNextStep = (currentStep) => {
   const index = stepOrder.indexOf(currentStep);
   return stepOrder[index + 1] || 'done';
 };

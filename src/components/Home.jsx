@@ -4,6 +4,8 @@ import { getTasks, addTask, addMessage, clearAllTasks, clearAllMessages, updateT
 import { setMachineStore } from "../lib/machine";
 import { marked } from 'marked';
 import { renderFilledTemplate } from '../lib/llm-template';
+import ResponseSection from './ResponseSection';
+import AgentInterface from './AgentInterface';
 
 const Tasks = () => {
   const [prompt, setPrompt] = createSignal("");
@@ -14,11 +16,11 @@ const Tasks = () => {
   const [editContent, setEditContent] = createSignal("");
     const [agentBoxClass, setAgentBoxClass] = createSignal("fixed inset-0 bg-base-200 transition-all duration-500 ease-in-out z-50 flex justify-center items-center");
     const [agentContentClass, setAgentContentClass] = createSignal("relative max-w-2xl");
-    const [greetingClass, setGreetingClass] = createSignal("text-center py-0 h-0 overflow-hidden transition-all duration-300 opacity-0");
+     const [greetingClass, setGreetingClass] = createSignal("text-center py-4 h-auto overflow-visible transition-all duration-300 opacity-100");
     const [error, setError] = createSignal("");
     const [isLoading, setIsLoading] = createSignal(false);
     const [autoProgress, setAutoProgress] = createSignal(false);
-    const [tasksList, setTasksList] = createSignal([]);
+     const [tasksList, setTasksList] = createSignal([]);
 
     const currentContent = createMemo(() => streamingContent() || machineStore.context.llmResponse);
 
@@ -102,12 +104,13 @@ const Tasks = () => {
       while (true) {
         const { done, value } = await reader.read();
         if (done) break;
-         chunks.push(decoder.decode(value, { stream: true }));
-         if (options.streamToTextarea) {
-           setPrompt(chunks.join(''));
-         } else {
-           setStreamingContent(chunks.join(''));
-         }
+          const chunkText = decoder.decode(value, { stream: true });
+          chunks.push(chunkText);
+          if (options.streamToTextarea) {
+            setPrompt(chunks.join(''));
+          } else {
+            setStreamingContent(chunks.join(''));
+          }
          // Small delay to ensure UI updates are visible
          await new Promise(resolve => setTimeout(resolve, 50));
       }
@@ -123,17 +126,16 @@ const Tasks = () => {
   };
 
   const handleStart = async () => {
-    setGreetingClass("text-center py-0 h-0 overflow-hidden transition-all duration-300 opacity-0");
-    setAgentBoxClass("fixed bottom-0 left-0 right-0 bg-transparent z-50 w-full h-auto flex justify-center items-start");
-    setStreamingContent("");
-    setIsAccordionOpen(true);
-    // Reset textarea height to prevent it from being tall during processing
-    if (textareaRef) {
-      textareaRef.style.height = '3rem';
-    }
-     startProcess(prompt());
-      await handleLLMCall(machineStore.context.currentPrompt, 0);
-  };
+     setAgentBoxClass("fixed bottom-0 left-0 right-0 bg-transparent z-50 w-full h-auto flex justify-center items-start");
+     setStreamingContent("");
+     setIsAccordionOpen(true);
+     // Reset textarea height to prevent it from being tall during processing
+     if (textareaRef) {
+       textareaRef.style.height = '3rem';
+     }
+      startProcess(prompt());
+       await handleLLMCall(machineStore.context.currentPrompt, 0);
+   };
 
   const handlePause = () => {
     pause();
@@ -169,94 +171,70 @@ const Tasks = () => {
     }
   };
 
-  const handleReset = async () => {
-    reset();
-    setStreamingContent('');
-    setError('');
-    setAutoProgress(false);
-    setTasksList([]);
-    setIsAccordionOpen(false);
-    await clearAllTasks();
-    await clearAllMessages();
-  };
+   const handleReset = async () => {
+     reset();
+     setStreamingContent('');
+     setError('');
+     setAutoProgress(false);
+     setTasksList([]);
+     setIsAccordionOpen(false);
+     setPrompt(''); // Clear the prompt
+     if (textareaRef) {
+       textareaRef.style.height = '3rem'; // Reset textarea height
+     }
+     await clearAllTasks();
+     await clearAllMessages();
+   };
 
   const handleSaveProgress = async () => {
     await saveProgress({state: machineStore.state, context: machineStore.context});
   };
 
-  const getBadgeClass = () => {
-    const classes = {
-      idle: 'badge-neutral',
-      processing: 'badge-primary',
-      pause: 'badge-warning',
-      completed: 'badge-success'
-    };
-    return classes[machineStore.state] || 'badge-neutral';
-  };
 
-   const getStateIcon = () => {
-     const icons = {
-       idle: 'clock',
-       processing: 'cog',
-       pause: 'pause-circle',
-       completed: 'check'
-     };
-     return icons[machineStore.state] || 'help-circle';
-   };
 
-  const getModelIcon = (model) => {
-    const icons = {
-      'Idea Model': 'lightbulb',
-      'Business Model': 'briefcase',
-      'Financial Model': 'dollar-sign',
-      'Funding Model': 'trending-up',
-      'Marketing Model': 'megaphone',
-      'Team Model': 'users',
-      'Legal Model': 'scale',
-      'System': 'settings'
-    };
-    return icons[model] || 'help-circle';
-  };
+    onMount(async () => {
+      // Load progress
+      const progress = await loadProgress();
+      if (progress) {
+        setMachineStore(progress);
+      }
 
-   onMount(async () => {
-     // Create Lucide icons
-     if (window.lucide) window.lucide.createIcons();
+      // Load tasks
+      const loadedTasks = await getTasks();
+      setTasksList(loadedTasks);
 
-     // Load progress
-     const progress = await loadProgress();
-     if (progress) {
-       setMachineStore(progress);
-     }
+      // Set initial textarea height
+      if (textareaRef) {
+        textareaRef.style.height = 'auto';
+        textareaRef.style.height = textareaRef.scrollHeight + 'px';
+      }
 
-     // Load tasks
-     const loadedTasks = await getTasks();
-     setTasksList(loadedTasks);
-
-     // Set initial textarea height
-     if (textareaRef) {
-       textareaRef.style.height = 'auto';
-       textareaRef.style.height = textareaRef.scrollHeight + 'px';
-     }
-   });
+      // Create Lucide icons after a delay to ensure script loaded
+      setTimeout(() => {
+        if (window.lucide) window.lucide.createIcons();
+      }, 100);
+    });
 
     createEffect(() => {
       machineStore.state;
       if (window.lucide) window.lucide.createIcons();
     });
 
-    createEffect(() => {
-      prompt(); // trigger on prompt change (for streaming)
-      if (machineStore.state === 'idle' && textareaRef) {
-        textareaRef.style.height = 'auto';
-        textareaRef.style.height = textareaRef.scrollHeight + 'px';
-      }
+
+
+     createEffect(() => {
+      machineStore.context.completedSteps;
+      machineStore.context.currentModel;
+      if (window.lucide) window.lucide.createIcons();
     });
 
-   createEffect(() => {
-     machineStore.context.completedSteps;
-     machineStore.context.currentModel;
-     if (window.lucide) window.lucide.createIcons();
-   });
+     createEffect(() => {
+       if (machineStore.state === 'idle') {
+         setGreetingClass("text-center py-4 h-auto overflow-visible transition-all duration-300 opacity-100");
+       } else {
+         setGreetingClass("text-center py-0 h-0 overflow-hidden transition-all duration-300 opacity-0");
+       }
+     });
 
   createEffect(() => {
     if (autoProgress() && !isLoading() && machineStore.state === 'processing') {
@@ -303,240 +281,43 @@ const Tasks = () => {
      }
    });
 
-  return (
-    <div class="relative flex flex-col">
-      {/* AI Agent Work Space Section */}
-      <div class="flex-1 overflow-y-auto p-4">
-         <div id="contentDiv" class="max-w-6xl mx-auto space-y-6 pb-48">
-
-              {/* Response History */}
-              <h3 class="text-lg font-semibold mb-4">Response History</h3>
-              {/* All Tasks */}
-              <For each={tasksList()}>
-               {(task) => (
-                 <div class="card bg-base-100 shadow-md">
-                   <div class="card-body">
-                     <Show when={editingTaskId() === task.id} fallback={
-                        <>
-                          <div class="prose max-w-none" innerHTML={marked.parse(renderFilledTemplate(task.content))}></div>
-                         <div class="flex gap-2 mt-2">
-                           <button onClick={() => { setEditingTaskId(task.id); setEditContent(task.content); }} class="btn btn-xs">Edit</button>
-                         </div>
-                       </>
-                     }>
-                       <textarea value={editContent()} onInput={(e) => setEditContent(e.target.value)} class="textarea textarea-bordered w-full"></textarea>
-                       <div class="flex gap-2 mt-2">
-                         <button onClick={async () => { await updateTask(task.id, editContent()); setTasksList(tasksList().map(t => t.id === task.id ? {...t, content: editContent()} : t)); setEditingTaskId(null); }} class="btn btn-xs btn-primary">Save</button>
-                         <button onClick={() => setEditingTaskId(null)} class="btn btn-xs">Cancel</button>
-                       </div>
-                     </Show>
-                     <div class="text-sm text-gray-500">{new Date(task.timestamp).toLocaleString()} - {task.model}</div>
-                   </div>
-                 </div>
-               )}
-             </For>
-
-              {/* Current Response */}
-               <Show when={isLoading() && streamingContent()}>
-                 <div ref={streamingRef} class="card bg-base-100 shadow-md">
-                   <div class="card-body">
-                     <h3 class="text-lg font-semibold mb-2">Current Response</h3>
-                     <div class="prose max-w-none" innerHTML={marked.parse(streamingContent())}></div>
-                     <div class="text-sm text-gray-500">Streaming... - {machineStore.context.currentModel}</div>
-                   </div>
-                 </div>
-               </Show>
-        </div>
-      </div>
-
-      <div id="agentBox" class={agentBoxClass()}>
-         <div id="agentContent" class={agentContentClass()}>
-          <div class="flex flex-col gap-4 p-6">
-            <div id="greetingDiv" class={greetingClass()}>
-              <h1 class="text-2xl sm:text-3xl md:text-4xl font-sans font-light text-base-content mb-2 sm:mb-2">
-                Hi <span class='text-primary'>Ahmed</span>, what's your next big idea?
-              </h1>
-            </div>
-            <div ref={cardRef} class="card-q gap-0 card bg-base-100 border border-base-200 shadow-2xl shadow-primary drop-shadow-md rounded-box">
-              <div class="card-body relative p-4 !gap-0">
-                <div class="collapse collapse-arrow bg-base-100 py-0">
-                  <input
-                    type="checkbox"
-                    class="p-0"
-                    name="ai-tasks-accordion"
-                    checked={isAccordionOpen()}
-                    onChange={() => setIsAccordionOpen(!isAccordionOpen())}
-                  />
-                    <div class="collapse-title font-semibold text-primary flex items-center gap-4 !p-0">
-                      <Show when={machineStore.state === 'processing' || isLoading()}>
-                        <span class="loading loading-spinner loading-primary loading-sm"></span>
-                      </Show>
-                      <span id="stepDisplay">
-                        {machineStore.state === 'idle' ? 'System - Initialization' : `${machineStore.context.currentModel} - ${machineStore.context.currentSection} - ${machineStore.context.stepName}`}
-                      </span>
-                      <span id="agent-status-badge" class={`badge ${getBadgeClass()} badge-sm flex items-center gap-1`}>
-                        <i data-lucide={getStateIcon()} class="w-3 h-3"></i>
-                        {machineStore.context.uiStatus}
-                      </span>
-                   </div>
-                  <div class="collapse-content p-0">
-                     {/* Task Stats */}
-                      <div class="flex flex-wrap gap-2 mt-4 items-center justify-between">
-                         <div class="bg-info/10 text-info px-3 py-1 rounded-full flex items-center gap-1 text-xs">
-                           <i data-lucide="clock" class="w-3 h-3"></i>
-                           Est. Time: {Math.round(((stepOrder.length - 1 - machineStore.context.completedSteps) * 15 / 60) * 10) / 10} min
-                         </div>
-                         <div class="bg-warning/10 text-warning px-3 py-1 rounded-full flex items-center gap-1 text-xs">
-                           <i data-lucide="dollar-sign" class="w-3 h-3"></i>
-                           Credits: {machineStore.context.completedSteps * 10} / {(stepOrder.length - 1) * 10}
-                         </div>
-                      </div>
-                    <div class="space-y-4">
-                      {/* Database Setup */}
-                      <div class="card">
-                        <div class="card-body p-1">
-                          <fieldset class="fieldset bg-base-100  border border-base-300 rounded-box p-4 mt-0">
-                            <legend class="fieldset-legend text-primary">Task Steps</legend>
-                              <div class="grid grid-cols-2 gap-4 text-base-content/30">
-                                {(() => {
-                                  const modelsWithChecked = createMemo(() => [
-                                    { name: 'Idea Model', icon: 'lightbulb', color: 'warning' },
-                                    { name: 'Business Model', icon: 'briefcase', color: 'primary' },
-                                    { name: 'Financial Model', icon: 'dollar-sign', color: 'success' },
-                                    { name: 'Funding Model', icon: 'trending-up', color: 'secondary' },
-                                    { name: 'Marketing Model', icon: 'megaphone', color: 'accent' },
-                                    { name: 'Team Model', icon: 'users', color: 'info' },
-                                    { name: 'Legal Model', icon: 'scale', color: 'error' }
-                                  ].map(model => ({ ...model, checked: machineStore.context.completedSteps >= (modelCumul[model.name] || 0) })));
-                                  return (
-                                    <For each={modelsWithChecked()}>
-                                      {(model) => (
-                                        <label class="label cursor-pointer ">
-                                          <span class="w-4 h-4 flex items-center justify-center">
-                                             {model.checked ? <i data-lucide="circle-check" class="w-4 h-4 text-base-content/30"></i> :
-                                              model.name === machineStore.context.currentModel ? <i data-lucide="circle-dot-dashed" class="w-4 h-4 text-base-content/30"></i> :
-                                              <i data-lucide="circle-minus" class="w-4 h-4 text-base-content/30"></i>}
-                                          </span>
-                                           <span class={`label-text flex items-center gap-1 text-base-content/30`}>
-                                            {model.name === machineStore.context.currentModel}
-                                            {model.name}
-                                          </span>
-                                        </label>
-                                      )}
-                                    </For>
-                                  );
-                                })()}
-                             </div>
-                          </fieldset>
-                           <div class="mt-1 flex items-center gap-2">
-                              <progress
-                                id="agent-progress"
-                                class="progress progress-primary flex-1 h-2"
-                                value={machineStore.context.uiProgress}
-                                max="100"
-                              ></progress>
-                               <span class="badge badge-primary badge-xs">{machineStore.context.completedSteps} / {stepOrder.length - 1} Complete</span>
-                           </div>
-
-                         </div>
-                       </div>
-                     </div>
-                   </div>
-                 </div>
-                {/* Form */}
-                <form id="taskForm">
-                  <input type="hidden" name="action" id="action" value="send" />
-                  <input type="hidden" name="taskContent" value="" />
-                  <input type="hidden" name="taskTimestamp" value={new Date().toLocaleString()} />
-                  <input type="hidden" name="taskModel" value="Llama-3.2-3B-Free" />
-                     <textarea
-                       ref={textareaRef}
-                       name="prompt"
-                       id="promptTextarea"
-                        class={`custom-textarea text-base-content text-lg sm:text-xl md:text-2xl placeholder:text-base-content placeholder:text-lg sm:placeholder:text-xl md:placeholder:text-2xl focus:ring-0 active:ring-0 ${machineStore.state !== 'idle' ? 'opacity-50 cursor-not-allowed' : ''}`}
-                        style="resize: none; overflow: hidden; min-height: 3rem;"
-                        placeholder="Enter your problem statement here..."
-                        value={prompt()}
-                        onInput={(e) => {
-                          setPrompt(e.target.value);
-                          if (textareaRef) {
-                            textareaRef.style.height = 'auto';
-                            textareaRef.style.height = textareaRef.scrollHeight + 'px';
-                          }
-                        }}
-                        onKeyDown={(e) => {
-                          if (e.key === 'Enter' && !e.shiftKey) {
-                            e.preventDefault();
-                            if (machineStore.state === 'idle') handleStart();
-                          }
-                        }}
-                        disabled={machineStore.state !== 'idle'}
-                     ></textarea>
-                    <Show when={machineStore.state === 'pause'}>
-                      <div class="text-warning text-sm mt-2">Agent is paused. Click Resume to continue.</div>
-                    </Show>
-                  <div class="flex justify-between items-center mt-2">
-                      <div class="flex gap-2">
-                        <Show when={machineStore.state === 'idle'}>
-                          <button type="button" onClick={handleImprove} class="bg-primary/10 text-primary px-3 py-1 rounded-full flex items-center gap-1 text-xs hover:bg-primary/20 transition cursor-pointer">
-                            <i data-lucide="sparkles" class="w-3 h-3"></i>
-                            Improve with AI
-                          </button>
-                          <button type="button" onClick={handleSuggest} class="bg-secondary/10 text-secondary px-3 py-1 rounded-full flex items-center gap-1 text-xs hover:bg-secondary/20 transition cursor-pointer">
-                            <i data-lucide="lightbulb" class="w-3 h-3"></i>
-                            AI Suggestion
-                          </button>
-                          <button type="button" onClick={handleReset} class="bg-error/10 text-error px-3 py-1 rounded-full flex items-center gap-1 text-xs hover:bg-error/20 transition cursor-pointer">
-                            <i data-lucide="rotate-ccw" class="w-3 h-3"></i>
-                            Reset
-                          </button>
-                        </Show>
-                         <Show when={machineStore.state === 'processing'}>
-                           <button type="button" onClick={handleSaveProgress} class="bg-info/10 text-info px-3 py-1 rounded-full flex items-center gap-1 text-xs hover:bg-info/20 transition cursor-pointer">
-                             <i data-lucide="save" class="w-3 h-3"></i>
-                             Save Progress
-                           </button>
-                         </Show>
-                      </div>
-                      <Show when={machineStore.state === 'idle'}>
-                        <button
-                          type="button"
-                          class="bg-success/10 text-success px-3 py-1 rounded-full flex items-center gap-1 text-xs hover:bg-success/20 transition cursor-pointer"
-                          onClick={handleStart}
-                        >
-                          <i data-lucide="play" class="w-3 h-3"></i>
-                          Start
-                        </button>
-                      </Show>
-                      <Show when={machineStore.state === 'processing'}>
-                        <button
-                          type="button"
-                          class="bg-warning/10 text-warning px-3 py-1 rounded-full flex items-center gap-1 text-xs hover:bg-warning/20 transition cursor-pointer"
-                          onClick={handlePause}
-                        >
-                          <i data-lucide="pause" class="w-3 h-3"></i>
-                          Pause
-                        </button>
-                      </Show>
-                      <Show when={machineStore.state === 'pause'}>
-                        <button
-                          type="button"
-                          class="bg-success/10 text-success px-3 py-1 rounded-full flex items-center gap-1 text-xs hover:bg-success/20 transition cursor-pointer"
-                          onClick={handleResume}
-                        >
-                          <i data-lucide="play" class="w-3 h-3"></i>
-                          Resume
-                        </button>
-                      </Show>
-                  </div>
-                </form>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
+   return (
+     <div class="relative flex flex-col">
+       <ResponseSection
+         tasksList={tasksList}
+         editingTaskId={editingTaskId}
+         setEditingTaskId={setEditingTaskId}
+         editContent={editContent}
+         setEditContent={setEditContent}
+         updateTask={updateTask}
+         setTasksList={setTasksList}
+         isLoading={isLoading}
+         streamingContent={streamingContent}
+         machineStore={machineStore}
+         streamingRef={streamingRef}
+       />
+        <AgentInterface
+          agentBoxClass={agentBoxClass}
+          agentContentClass={agentContentClass}
+          greetingClass={greetingClass}
+          cardRef={cardRef}
+          isAccordionOpen={isAccordionOpen}
+          setIsAccordionOpen={setIsAccordionOpen}
+          isLoading={isLoading}
+          machineStore={machineStore}
+          textareaRef={textareaRef}
+          prompt={prompt}
+          setPrompt={setPrompt}
+          handleImprove={handleImprove}
+          handleSuggest={handleSuggest}
+          handleReset={handleReset}
+          handleSaveProgress={handleSaveProgress}
+          handleStart={handleStart}
+          handlePause={handlePause}
+          handleResume={handleResume}
+        />
+     </div>
+   );
 };
 
 // Step names from machine

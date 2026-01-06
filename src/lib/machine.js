@@ -73,7 +73,7 @@ function getPromptForStep(step) {
 
 const extractFromResponse = extractTemplateData;
 
-const stepNames = {
+export const stepNames = {
   step2: 'Problem Analysis',
   step3: 'Severity Assessment',
   step4: 'Current Solutions',

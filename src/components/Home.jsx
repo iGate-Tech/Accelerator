@@ -1,11 +1,74 @@
 import { createSignal, For, createResource, onMount, createEffect, Show, createMemo } from "solid-js";
-import { machineStore, startProcess, receiveResponse, pause, resume, reset, modelCumul, stepOrder, getNextStep, modelMap, sectionMap } from "../lib/machine";
+import { machineStore, startProcess, receiveResponse, pause, resume, reset, modelCumul, stepOrder, getNextStep, modelMap, sectionMap, stepNames, fillPrompt } from "../lib/machine";
 import { getTasks, addTask, addMessage, clearAllTasks, clearAllMessages, updateTask, saveProgress, loadProgress } from "../lib/db";
 import { setMachineStore } from "../lib/machine";
 import { marked } from 'marked';
 import { renderFilledTemplate } from '../lib/llm-template';
-import ResponseSection from './ResponseSection';
-import AgentInterface from './AgentInterface';
+ import ResponseSection from './ResponseSection';
+ import AgentInterface from './AgentInterface';
+
+ const promptToStepName = {
+   "You are an AI-powered startup accelerator": stepNames.system,
+   "Analyze the problem": stepNames.step2,
+   "Evaluate the severity": stepNames.step3,
+   "List and categorize current solutions": stepNames.step4,
+   "Analyze why current": stepNames.step5,
+   "Develop a detailed user persona": stepNames.step6,
+   "Assess the urgency": stepNames.step7,
+   "Gather and validate evidence": stepNames.step8,
+   "Design a comprehensive solution": stepNames.step9,
+   "Craft a compelling value proposition": stepNames.step10,
+   "List key features": stepNames.step11,
+   "Determine the optimal business model": stepNames.step12,
+   "Design revenue streams": stepNames.step13,
+   "Develop a pricing strategy": stepNames.step14,
+   "Build competitive moats": stepNames.step15,
+   "List key assumptions": stepNames.step16,
+   "Clearly define the target market": stepNames.step17,
+   "Estimate the Total Addressable Market": stepNames.step18,
+   "Estimate the Serviceable Available Market": stepNames.step19,
+   "Estimate the Serviceable Obtainable Market": stepNames.step20,
+   "Check if": stepNames.validate_tam_sam_som,
+   "Identify trends": stepNames.step21,
+   "List direct and indirect competitors": stepNames.step22,
+   "Develop a strategy to enter": stepNames.step23,
+   "Identify channels": stepNames.step24,
+   "Describe the sales motion": stepNames.step25,
+   "Develop strategies to retain": stepNames.step26,
+   "Explain how revenue is generated": stepNames.step27,
+   "Provide Customer Acquisition Cost": stepNames.step28,
+   "List major fixed and variable costs": stepNames.step29,
+   "Provide 3-year revenue": stepNames.step30,
+   "Calculate the monthly burn rate": stepNames.step31,
+   "Determine when": stepNames.step32,
+   "Provide current traction": stepNames.step33,
+   "Calculate the valuation": stepNames.step34,
+   "Determine the appropriate funding stage": stepNames.step35,
+   "Determine how much capital": stepNames.step36,
+   "Check if {{valuation}}": stepNames.validate_deck_ask,
+   "Plan the allocation": stepNames.step37,
+   "Calculate the expected pre-money": stepNames.step38,
+   "Validate if {{preMoney}}": stepNames.validate_pre_money,
+   "Identify target investor types": stepNames.step39,
+   "List milestones": stepNames.step40,
+   "List founding team members": stepNames.step41,
+   "Identify key skills": stepNames.step42,
+   "Develop a hiring plan": stepNames.step43,
+   "List advisors": stepNames.step44,
+   "Determine the legal structure": stepNames.step45,
+   "Plan intellectual property": stepNames.step46,
+   "Identify key contracts": stepNames.step47,
+   "Identify legal and regulatory risks": stepNames.step48
+ };
+
+ const getStepName = (task) => {
+   for (let key in promptToStepName) {
+     if (task.prompt && task.prompt.includes(key)) {
+       return promptToStepName[key];
+     }
+   }
+   return "Unknown Step";
+ };
 
 const Tasks = () => {
   const [prompt, setPrompt] = createSignal("");
@@ -21,14 +84,16 @@ const Tasks = () => {
     const [isLoading, setIsLoading] = createSignal(false);
     const [autoProgress, setAutoProgress] = createSignal(false);
      const [tasksList, setTasksList] = createSignal([]);
+     const [activeCardId, setActiveCardId] = createSignal(null);
 
-    const currentContent = createMemo(() => streamingContent() || machineStore.context.llmResponse);
+     const currentContent = createMemo(() => streamingContent() || machineStore.context.llmResponse);
 
     // Load initial tasks - removed for now
 
-   let cardRef;
-   let streamingRef;
-   let textareaRef;
+    let cardRef;
+    let streamingRef;
+    let textareaRef;
+    let taskRefs = {};
 
   const advanceToNextStep = () => {
     setMachineStore('context', (prev) => {
@@ -71,7 +136,7 @@ const Tasks = () => {
       const result = await callLLM(prompt, retryCount, options);
       await addMessage({ type: 'user', content: prompt });
       await addMessage({ type: 'ai', content: result });
-       receiveResponse(result, setAutoProgress, setTasksList, tasksList);
+       receiveResponse(result, setAutoProgress, setTasksList, tasksList, addTask);
        setStreamingContent('');
     } catch (e) {
       console.log('LLM call failed, advancing to next step:', e.message);
@@ -199,11 +264,11 @@ const Tasks = () => {
         setMachineStore(progress);
       }
 
-      // Load tasks
-      const loadedTasks = await getTasks();
-      setTasksList(loadedTasks);
+       // Load tasks
+       const loadedTasks = await getTasks();
+       setTasksList(loadedTasks);
 
-      // Set initial textarea height
+       // Set initial textarea height
       if (textareaRef) {
         textareaRef.style.height = 'auto';
         textareaRef.style.height = textareaRef.scrollHeight + 'px';
@@ -274,28 +339,58 @@ const Tasks = () => {
      }
    });
 
-   createEffect(() => {
-     streamingContent();
-     if (streamingRef) {
-       streamingRef.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-     }
-   });
+    createEffect(() => {
+      streamingContent();
+      setTimeout(() => {
+        const element = document.getElementById('streaming');
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth', block: 'end' });
+        }
+      }, 100);
+    });
 
-   return (
+    createEffect(() => {
+      if (activeCardId()) {
+        setTimeout(() => {
+          const element = document.getElementById(activeCardId());
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth', block: 'end' });
+        }
+        }, 100);
+      }
+    });
+
+    createEffect(() => {
+      if (isLoading() && streamingContent()) {
+        setActiveCardId('streaming');
+      } else {
+        // Find the latest task matching the current step
+        const currentStepName = machineStore.context.stepName;
+        const matchingTask = [...tasksList()].reverse().find(task =>
+          getStepName(task) === currentStepName
+        );
+        setActiveCardId(matchingTask ? matchingTask.id : null);
+      }
+    });
+
+    return (
      <div class="relative flex flex-col">
-       <ResponseSection
-         tasksList={tasksList}
-         editingTaskId={editingTaskId}
-         setEditingTaskId={setEditingTaskId}
-         editContent={editContent}
-         setEditContent={setEditContent}
-         updateTask={updateTask}
-         setTasksList={setTasksList}
-         isLoading={isLoading}
-         streamingContent={streamingContent}
-         machineStore={machineStore}
-         streamingRef={streamingRef}
-       />
+        <ResponseSection
+          tasksList={tasksList}
+          editingTaskId={editingTaskId}
+          setEditingTaskId={setEditingTaskId}
+          editContent={editContent}
+          setEditContent={setEditContent}
+          updateTask={updateTask}
+          setTasksList={setTasksList}
+          isLoading={isLoading}
+          streamingContent={streamingContent}
+          machineStore={machineStore}
+          streamingRef={streamingRef}
+          activeCardId={activeCardId}
+          setActiveCardId={setActiveCardId}
+          taskRefs={taskRefs}
+        />
         <AgentInterface
           agentBoxClass={agentBoxClass}
           agentContentClass={agentContentClass}
@@ -320,58 +415,6 @@ const Tasks = () => {
    );
 };
 
-// Step names from machine
-const stepNames = {
-  step2: 'Problem Analysis',
-  step3: 'Severity Assessment',
-  step4: 'Current Solutions',
-  step5: 'Solution Gaps',
-  step6: 'User Persona',
-  step7: 'Urgency Assessment',
-  step8: 'Problem Validation',
-  step9: 'Solution Design',
-  step10: 'Value Proposition',
-  step11: 'Key Features',
-  step12: 'Business Model',
-  step13: 'Revenue Streams',
-  step14: 'Pricing Strategy',
-  step15: 'Competitive Moats',
-  step16: 'Risk Analysis',
-  step17: 'Target Market',
-  step18: 'Total Addressable Market',
-  step19: 'Serviceable Available Market',
-  step20: 'Serviceable Obtainable Market',
-  validate_tam_sam_som: 'Market Validation',
-  step21: 'Market Trends',
-  step22: 'Competitive Landscape',
-  step23: 'Market Entry',
-  step24: 'Customer Acquisition',
-  step25: 'Sales Strategy',
-  step26: 'Customer Retention',
-  step27: 'Revenue Logic',
-  step28: 'Unit Economics',
-  step29: 'Cost Structure',
-  step30: 'Financial Projections',
-  step31: 'Monthly Burn Rate',
-  step32: 'Profitability Timeline',
-  step33: 'Valuation Inputs',
-  step34: 'Company Valuation',
-  step35: 'Funding Stage',
-  step36: 'Funding Amount',
-  validate_deck_ask: 'Funding Validation',
-  step37: 'Fund Allocation',
-  step38: 'Pre-Money Valuation',
-  validate_pre_money: 'Valuation Check',
-  step39: 'Target Investors',
-  step40: 'Funding Milestones',
-  step41: 'Founding Team',
-  step42: 'Team Gaps',
-  step43: 'Hiring Plan',
-  step44: 'Advisors & Board',
-  step45: 'Legal Structure',
-  step46: 'IP Protection',
-  step47: 'Contracts & Compliance',
-  step48: 'Legal Risks'
-};
+
 
 export default Tasks;

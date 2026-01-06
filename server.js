@@ -8,6 +8,16 @@ const port = 3000;
 const app = express();
 
 // Middleware
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  if (req.method === 'OPTIONS') {
+    res.sendStatus(200);
+  } else {
+    next();
+  }
+});
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
@@ -58,73 +68,52 @@ app.post('/api/llm/stream', async (req, res) => {
 
     try {
         res.setHeader('Content-Type', 'text/plain');
-        const systemPrompt = `You are the iGate Accelerator Agent — an expert AI assistant guiding entrepreneurs through a rigorous 48-step startup validation and acceleration process.
+        const systemPrompt = `You are the iGate Accelerator Agent — an expert startup advisor guiding founders through a 51-step validation and acceleration process.
 
-Your mission is to deliver clear, complete, and actionable guidance for each step. Every response must be practical, data-driven, and aligned with real-world startup best practices. Think like a startup advisor, venture analyst, and product strategist combined.
+Your primary responsibility is to produce **rich, well-structured Markdown**.
 
-OUTPUT FORMAT (MANDATORY)
+────────────────────────────────────────────────────────────────
+MANDATORY FORMAT
 
-You MUST format ALL responses in valid Markdown. Use headings (# ##), lists (-), bold (**text**), italics (*text*), and other Markdown elements for structure and emphasis.
+- ALWAYS respond in valid Markdown
+- Use headings (## ###), bullet lists, numbered steps, tables, and emphasis
+- Prefer clarity, hierarchy, and depth over brevity
+- Responses MUST look like a polished startup playbook page
 
-Additionally, you MUST embed ALL key facts, extractable information, and highlighted data using the LLMTemplate placeholder format within the text. Think of this as mandatory structured extraction for every piece of data that can be parsed or emphasized.
+────────────────────────────────────────────────────────────────
+EMBEDDED DATA (SECONDARY RULE)
 
-Filled placeholder format:
-{{key: "concise value"}}
+- Embed ONLY important, atomic facts using this format:
+  {{key: "value"}}
+- Use placeholders for numbers, metrics, roles, markets, tools, or decisions
+- NEVER embed placeholders in headings, lists labels, or tables
+- Do NOT force placeholders into every paragraph
 
-Rules:
-- Provide comprehensive, readable explanations and analysis in full Markdown format.
-- Embed ALL extractable and highlighted information (e.g., metrics, lists, names, values) in {{key: "value"}} format within the Markdown text – do not leave any out.
-- The key MUST match the expected output variable name.
-- The value should be concise and in JSON format (string, number, object, array).
-- Do NOT respond with only placeholders; always include full explanatory Markdown text.
+────────────────────────────────────────────────────────────────
+PLACEHOLDER RULES
 
-Examples:
-### Problem Analysis
-The problem affects **{{strugglers: "developers and managers"}}** in tech companies, with an impact scale of **{{impactScale: "10 million"}}**.
+- JSON only (string, number, array, object)
+- No markdown, no sentences inside placeholders
+- Max 2 placeholders per paragraph
 
-**Evidence:**
-- {{evidence: "Surveys showing 70% dissatisfaction"}}
-- Industry reports indicate similar issues.
+────────────────────────────────────────────────────────────────
+CONTENT RULES
 
-CONTENT REQUIREMENTS
+- Fully answer the task with detailed Markdown
+- Break ideas into steps and sections
+- Use examples and assumptions
+- Markdown quality is more important than placeholder coverage
 
-For every response:
-- Fully answer the question with detailed explanations in Markdown
-- No shallow or partial responses
-- Break complex ideas into clear steps
-- Use structured reasoning with Markdown formatting
-- Reference real-world examples when relevant
-- Clearly state assumptions when making recommendations
-- Prioritize clarity, precision, and usefulness
-- Embed key facts using the placeholder format within Markdown
-- Ensure ALL information suitable for extraction (e.g., numbers, lists, categories, highlights) is embedded in placeholders to enable full data parsing
-
-Your responses should help founders:
-- Validate ideas
-- Reduce uncertainty
-- Make confident decisions
-- Progress to the next validation step
-
-STYLE AND TONE
+────────────────────────────────────────────────────────────────
+STYLE
 
 - Professional
-- Encouraging
-- Objective
-- Evidence-based
 - Practical
-- No hype, no fluff
+- Evidence-based
+- No hype
 
-STRICT RULES
-
-- Always format in valid Markdown
-- Always provide full explanatory text in Markdown
-- Embed key facts using {{key: "value"}} format
-- Respect the LLMTemplate grammar for embedded facts
-- Never output invalid JSON in placeholders
-- Never omit embedding ANY extractable or highlighted information – embed ALL such data in {{key: "value"}} format.
-- Never mix markdown formatting inside placeholders
-
-You are a structured reasoning engine that provides human-readable Markdown guidance with embedded structured data.`;
+Do NOT repeat the prompt. Treat the user input as a task and deliver a complete Markdown response.
+`;
 
         const stream = await openai.chat.completions.create({
             model: AI_MODEL,
@@ -139,9 +128,11 @@ You are a structured reasoning engine that provides human-readable Markdown guid
         for await (const chunk of stream) {
             const content = chunk.choices[0]?.delta?.content || '';
             aiResponse += content;
-            res.write(content.replace(/<[^>]*>/g, ''));
+            res.write(content);
         }
         res.end();
+
+        console.log('Full LLM Response:', aiResponse);
 
         // No longer update server-side history
     } catch (error) {

@@ -1,7 +1,7 @@
  import { For, Show } from "solid-js";
  import { marked } from 'marked';
  import { renderFilledTemplate } from '../lib/llm-template';
- import { sectionMap, stepNames } from '../lib/machine';
+ import { sectionMap, stepNames, modelMap } from '../lib/machine';
 
  const promptToSection = {
    "You are an AI-powered startup accelerator": sectionMap.system,
@@ -129,48 +129,63 @@
    return "Unknown Step";
  };
 
- const ResponseSection = (props) => {
-  return (
-    <div class="flex-1 overflow-y-auto p-4">
+  const ResponseSection = (props) => {
+   return (
+     <div class="flex-1 overflow-y-auto p-4">
       <div id="contentDiv" class="max-w-6xl mx-auto space-y-6 pb-48">
-        {/* Response History */}
-        <h3 class="text-lg font-semibold mb-4">Response History</h3>
-        {/* All Tasks */}
-        <For each={props.tasksList()}>
-          {(task) => (
-             <div class="card bg-base-100 shadow-md">
-               <div class="card-body">
-                 <div class="text-lg font-semibold mb-2 p-2 bg-primary text-primary-content rounded-lg">{task.model} - {getSection(task)} - {getStepName(task)}</div>
-                 <Show when={props.editingTaskId() === task.id} fallback={
-                  <>
-                    <div class="prose max-w-none" innerHTML={marked.parse(renderFilledTemplate(task.content))}></div>
-                    <div class="flex gap-2 mt-2">
-                      <button onClick={() => { props.setEditingTaskId(task.id); props.setEditContent(task.content); }} class="btn btn-xs">Edit</button>
+         {/* All Tasks */}
+          <For each={props.tasksList()}>
+            {(task) => (
+                <div id={task.id} class={`card shadow-lg rounded-xl border border-base-300 overflow-hidden bg-base-200 ${props.activeCardId() === task.id ? 'ring-2 ring-primary' : ''}`} ref={(el) => (props.taskRefs[task.id] = el)} onClick={() => props.setActiveCardId(task.id)}>
+                  {/* Header */}
+                  <div class="flex items-center justify-between px-4 py-3 bg-base-300/40">
+                    <div class="flex items-center gap-2">
+                      <span class="badge badge-outline badge-sm">{modelMap[task.step] || task.model}</span>
+                      <span class="font-semibold text-sm">{getSection(task)} - {getStepName(task)}</span>
                     </div>
-                  </>
-                }>
-                  <textarea value={props.editContent()} onInput={(e) => props.setEditContent(e.target.value)} class="textarea textarea-bordered w-full"></textarea>
-                  <div class="flex gap-2 mt-2">
-                    <button onClick={async () => { await props.updateTask(task.id, props.editContent()); props.setTasksList(props.tasksList().map(t => t.id === task.id ? {...t, content: props.editContent()} : t)); props.setEditingTaskId(null); }} class="btn btn-xs btn-primary">Save</button>
-                    <button onClick={() => props.setEditingTaskId(null)} class="btn btn-xs">Cancel</button>
+                    <div class="flex items-center gap-2 text-base-content/70">
+                      <i data-lucide="trash" class="w-4 h-4" onClick={(e) => { e.stopPropagation(); /* delete action */ }}></i>
+                    </div>
                   </div>
-                </Show>
-                 <div class="mt-4 p-2 bg-base-200 rounded text-sm">{new Date(task.timestamp).toLocaleString()} - {task.model}</div>
-              </div>
-            </div>
-          )}
-        </For>
+                  {/* Body */}
+                  <div class="card-body px-5 py-4 bg-base-100">
+                    <div class="prose max-w-none" innerHTML={marked.parse(renderFilledTemplate(task.content), { sanitize: false })}></div>
+                  </div>
+                  {/* Footer */}
+                  <div class="flex items-center gap-2 px-4 py-3 bg-base-300/30 text-sm text-base-content/70">
+                    <span>{new Date(task.timestamp).toLocaleString()}</span>
+                    <span class="ml-auto text-xs opacity-60">{task.model}</span>
+                  </div>
+             </div>
+           )}
+         </For>
 
-        {/* Current Response */}
-         <Show when={props.isLoading() && props.streamingContent()}>
-           <div ref={props.streamingRef} class="card bg-base-100 shadow-md">
-             <div class="card-body">
-               <div class="text-lg font-semibold mb-2 p-2 bg-primary text-primary-content rounded-lg">{props.machineStore.context.currentModel} - {props.machineStore.context.currentSection} - {props.machineStore.context.stepName}</div>
-              <div class="prose max-w-none" innerHTML={marked.parse(props.streamingContent())}></div>
-               <div class="mt-4 p-2 bg-base-200 rounded text-sm">Streaming... - {props.machineStore.context.currentModel}</div>
-            </div>
-          </div>
-        </Show>
+         {/* Current Response */}
+           <Show when={props.isLoading() && props.streamingContent()}>
+              <div id="streaming" ref={props.streamingRef} class={`card shadow-lg rounded-xl border border-base-300 overflow-hidden bg-base-200 ${props.activeCardId() === 'streaming' ? 'ring-2 ring-primary' : ''}`} onClick={() => props.setActiveCardId('streaming')}>
+                {/* Header */}
+                <div class="flex items-center justify-between px-4 py-3 bg-base-300/40">
+                  <div class="flex items-center gap-2">
+                    <span class="badge badge-outline badge-sm">{props.machineStore.context.currentModel}</span>
+                    <span class="font-semibold text-sm">{props.machineStore.context.currentSection} - {props.machineStore.context.stepName}</span>
+                  </div>
+                  <div class="flex items-center gap-2 text-base-content/70">
+                    <i data-lucide="loader" class="w-4 h-4 animate-spin"></i>
+                    <span class="text-xs">Running</span>
+                  </div>
+                </div>
+                {/* Body */}
+                <div class="card-body px-5 py-4 bg-base-100 space-y-3">
+                   <div class="prose max-w-none" innerHTML={marked.parse(props.streamingContent(), { sanitize: false })}></div>
+                </div>
+                {/* Footer */}
+                <div class="flex items-center gap-2 px-4 py-3 bg-base-300/30 text-sm text-base-content/70">
+                  <span class="inline-block w-2 h-2 rounded-full bg-primary animate-pulse"></span>
+                  <span>Streaming…</span>
+                  <span class="ml-auto text-xs opacity-60">{props.machineStore.context.currentModel}</span>
+                </div>
+           </div>
+         </Show>
       </div>
     </div>
   );

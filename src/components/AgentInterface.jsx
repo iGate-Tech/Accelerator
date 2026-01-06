@@ -26,10 +26,14 @@ const getStateIcon = () => {
     createEffect(() => {
       props.prompt(); // trigger on value change
       if (props.textareaRef) {
-        setTimeout(() => {
-          props.textareaRef.style.height = 'auto';
-          props.textareaRef.style.height = props.textareaRef.scrollHeight + 'px';
-        }, 10);
+        if (props.machineStore.state === 'idle') {
+          setTimeout(() => {
+            props.textareaRef.style.height = 'auto';
+            props.textareaRef.style.height = props.textareaRef.scrollHeight + 'px';
+          }, 10);
+        } else {
+          props.textareaRef.style.height = '3rem';
+        }
       }
     });
 
@@ -82,35 +86,38 @@ const getStateIcon = () => {
                       <div class="card-body p-1">
                         <fieldset class="fieldset bg-base-100  border border-base-300 rounded-box p-4 mt-0">
                           <legend class="fieldset-legend text-primary">Task Steps</legend>
-                          <div class="grid grid-cols-2 gap-4 text-base-content/30">
-                            {(() => {
-                              const modelsWithChecked = createMemo(() => [
-                                { name: 'Idea Model', icon: 'lightbulb', color: 'warning' },
-                                { name: 'Business Model', icon: 'briefcase', color: 'primary' },
-                                { name: 'Financial Model', icon: 'dollar-sign', color: 'success' },
-                                { name: 'Funding Model', icon: 'trending-up', color: 'secondary' },
-                                { name: 'Marketing Model', icon: 'megaphone', color: 'accent' },
-                                { name: 'Team Model', icon: 'users', color: 'info' },
-                                { name: 'Legal Model', icon: 'scale', color: 'error' }
-                              ].map(model => ({ ...model, checked: props.machineStore.context.completedSteps >= (modelCumul[model.name] || 0) })));
-                              return (
-                                <For each={modelsWithChecked()}>
-                                  {(model) => (
-                                    <label class="label cursor-pointer ">
-                                      <span class="w-4 h-4 flex items-center justify-center">
-                                        {model.checked ? <i data-lucide="circle-check" class="w-4 h-4 text-base-content/30"></i> :
-                                         model.name === props.machineStore.context.currentModel ? <i data-lucide="circle-dot-dashed" class="w-4 h-4 text-base-content/30"></i> :
-                                         <i data-lucide="circle-minus" class="w-4 h-4 text-base-content/30"></i>}
-                                      </span>
-                                      <span class={`label-text flex items-center gap-1 text-base-content/30`}>
-                                        {model.name === props.machineStore.context.currentModel}
-                                        {model.name}
-                                      </span>
-                                    </label>
-                                  )}
-                                </For>
-                              );
-                            })()}
+                           <div class="grid grid-cols-2 md:grid-cols-3 gap-4 text-base-content/30">
+                             {(() => {
+                               const modelsWithChecked = createMemo(() => [
+                                 { name: 'Idea Model', icon: 'lightbulb', color: 'warning' },
+                                 { name: 'Business Model', icon: 'briefcase', color: 'primary' },
+                                 { name: 'Financial Model', icon: 'dollar-sign', color: 'success' },
+                                 { name: 'Funding Model', icon: 'trending-up', color: 'secondary' },
+                                 { name: 'Marketing Model', icon: 'megaphone', color: 'accent' },
+                                 { name: 'Team Model', icon: 'users', color: 'info' },
+                                 { name: 'Legal Model', icon: 'scale', color: 'error' },
+                                 { name: 'Technical Model', icon: 'cpu', color: 'neutral' },
+                                 { name: 'Pitch Deck Report', icon: 'file-text', color: 'base' },
+                                 { name: 'Business Plan Report', icon: 'file-text', color: 'ghost' },
+                                 { name: 'Valuation Report', icon: 'file-text', color: 'warning' }
+                               ].map(model => ({ ...model, checked: props.machineStore.context.completedSteps >= (modelCumul[model.name] || 0) })));
+                               return (
+                                 <For each={modelsWithChecked()}>
+                                   {(model) => (
+                                     <label class="label cursor-pointer ">
+                                       <span class="w-4 h-4 flex items-center justify-center">
+                                         {model.checked ? <i data-lucide="circle-check" class={`w-4 h-4 text-success`}></i> :
+                                          model.name === props.machineStore.context.currentModel ? <i data-lucide="circle-dot-dashed" class={`w-4 h-4 text-primary`}></i> :
+                                          <i data-lucide="circle-minus" class={`w-4 h-4 text-base-content/30`}></i>}
+                                       </span>
+                                       <span class={`label-text flex items-center gap-1 ${model.checked ? 'text-success' : model.name === props.machineStore.context.currentModel ? 'text-primary' : 'text-base-content/30'}`}>
+                                         {model.name}
+                                       </span>
+                                     </label>
+                                   )}
+                                 </For>
+                               );
+                             })()}
                           </div>
                         </fieldset>
                         <div class="mt-1 flex items-center gap-2">
@@ -161,58 +168,58 @@ const getStateIcon = () => {
                 <Show when={props.machineStore.state === 'pause'}>
                   <div class="text-warning text-sm mt-2">Agent is paused. Click Resume to continue.</div>
                 </Show>
-                <div class="flex justify-between items-center mt-2">
-                  <div class="flex gap-2">
+                 <div class="flex justify-between items-center mt-2 gap-2">
+                   <div class="flex gap-2">
                     <Show when={props.machineStore.state === 'idle'}>
-                      <button type="button" onClick={props.handleImprove} class="bg-primary/10 text-primary px-3 py-1 rounded-full flex items-center gap-1 text-xs hover:bg-primary/20 transition cursor-pointer">
-                        <i data-lucide="sparkles" class="w-3 h-3"></i>
-                        Improve with AI
-                      </button>
-                      <button type="button" onClick={props.handleSuggest} class="bg-secondary/10 text-secondary px-3 py-1 rounded-full flex items-center gap-1 text-xs hover:bg-secondary/20 transition cursor-pointer">
-                        <i data-lucide="lightbulb" class="w-3 h-3"></i>
-                        AI Suggestion
-                      </button>
-                      <button type="button" onClick={props.handleReset} class="bg-error/10 text-error px-3 py-1 rounded-full flex items-center gap-1 text-xs hover:bg-error/20 transition cursor-pointer">
-                        <i data-lucide="rotate-ccw" class="w-3 h-3"></i>
-                        Reset
-                      </button>
+                       <button type="button" onClick={props.handleImprove} class="bg-primary/10 text-primary px-3 py-1 rounded-full flex items-center gap-1 text-xs hover:bg-primary/20 transition cursor-pointer">
+                         <i data-lucide="sparkles" class="w-3 h-3"></i>
+                         <span class="hidden sm:inline">Improve with AI</span>
+                       </button>
+                       <button type="button" onClick={props.handleSuggest} class="bg-secondary/10 text-secondary px-3 py-1 rounded-full flex items-center gap-1 text-xs hover:bg-secondary/20 transition cursor-pointer">
+                         <i data-lucide="lightbulb" class="w-3 h-3"></i>
+                         <span class="hidden sm:inline">AI Suggestion</span>
+                       </button>
+                       <button type="button" onClick={props.handleReset} class="bg-error/10 text-error px-3 py-1 rounded-full flex items-center gap-1 text-xs hover:bg-error/20 transition cursor-pointer">
+                         <i data-lucide="rotate-ccw" class="w-3 h-3"></i>
+                         <span class="hidden sm:inline">Reset</span>
+                       </button>
                     </Show>
                     <Show when={props.machineStore.state === 'processing'}>
-                      <button type="button" onClick={props.handleSaveProgress} class="bg-info/10 text-info px-3 py-1 rounded-full flex items-center gap-1 text-xs hover:bg-info/20 transition cursor-pointer">
-                        <i data-lucide="save" class="w-3 h-3"></i>
-                        Save Progress
-                      </button>
+                       <button type="button" onClick={props.handleSaveProgress} class="bg-info/10 text-info px-3 py-1 rounded-full flex items-center gap-1 text-xs hover:bg-info/20 transition cursor-pointer">
+                         <i data-lucide="save" class="w-3 h-3"></i>
+                         <span class="hidden sm:inline">Save Progress</span>
+                       </button>
                     </Show>
                   </div>
                   <Show when={props.machineStore.state === 'idle'}>
-                    <button
-                      type="button"
-                      class="bg-success/10 text-success px-3 py-1 rounded-full flex items-center gap-1 text-xs hover:bg-success/20 transition cursor-pointer"
-                      onClick={props.handleStart}
-                    >
-                      <i data-lucide="play" class="w-3 h-3"></i>
-                      Start
-                    </button>
+                     <button
+                       type="button"
+                       class="bg-success/10 text-success px-3 py-1 rounded-full flex items-center gap-1 text-xs hover:bg-success/20 transition cursor-pointer"
+                       onClick={props.handleStart}
+                     >
+                       <i data-lucide="play" class="w-3 h-3"></i>
+                       <span class="hidden sm:inline">Start</span>
+                     </button>
                   </Show>
                   <Show when={props.machineStore.state === 'processing'}>
-                    <button
-                      type="button"
-                      class="bg-warning/10 text-warning px-3 py-1 rounded-full flex items-center gap-1 text-xs hover:bg-warning/20 transition cursor-pointer"
-                      onClick={props.handlePause}
-                    >
-                      <i data-lucide="pause" class="w-3 h-3"></i>
-                      Pause
-                    </button>
+                     <button
+                       type="button"
+                       class="bg-warning/10 text-warning px-3 py-1 rounded-full flex items-center gap-1 text-xs hover:bg-warning/20 transition cursor-pointer"
+                       onClick={props.handlePause}
+                     >
+                       <i data-lucide="pause" class="w-3 h-3"></i>
+                       <span class="hidden sm:inline">Pause</span>
+                     </button>
                   </Show>
                   <Show when={props.machineStore.state === 'pause'}>
-                    <button
-                      type="button"
-                      class="bg-success/10 text-success px-3 py-1 rounded-full flex items-center gap-1 text-xs hover:bg-success/20 transition cursor-pointer"
-                      onClick={props.handleResume}
-                    >
-                      <i data-lucide="play" class="w-3 h-3"></i>
-                      Resume
-                    </button>
+                     <button
+                       type="button"
+                       class="bg-success/10 text-success px-3 py-1 rounded-full flex items-center gap-1 text-xs hover:bg-success/20 transition cursor-pointer"
+                       onClick={props.handleResume}
+                     >
+                       <i data-lucide="play" class="w-3 h-3"></i>
+                       <span class="hidden sm:inline">Resume</span>
+                     </button>
                   </Show>
                 </div>
               </form>

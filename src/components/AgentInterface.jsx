@@ -40,13 +40,13 @@ const getStateIcon = () => {
    return (
     <div id="agentBox" class={props.agentBoxClass()}>
       <div id="agentContent" class={props.agentContentClass()}>
-        <div class="flex flex-col gap-4 p-6">
+         <div class="flex flex-col gap-4">
           <div id="greetingDiv" class={props.greetingClass()}>
             <h1 class="text-2xl sm:text-3xl md:text-4xl font-sans font-light text-base-content mb-2 sm:mb-2">
               Hi <span class='text-primary'>Ahmed</span>, what's your next big idea?
             </h1>
           </div>
-          <div ref={props.cardRef} class="card-q gap-0 card bg-base-100 border border-base-200 shadow-2xl shadow-primary drop-shadow-md rounded-box">
+          <div ref={props.cardRef} class="card bg-base-100 border border-base-200 shadow-2xl shadow-primary drop-shadow-md rounded-box">
             <div class="card-body relative p-4 !gap-0">
               <div class="collapse collapse-arrow bg-base-100 py-0">
                 <input

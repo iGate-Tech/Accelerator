@@ -5,16 +5,17 @@ let dbPromise;
 const getDb = async () => {
   if (!dbPromise) {
     dbPromise = (async () => {
-      const db = new PGlite();
-      await db.exec(`
-        CREATE TABLE IF NOT EXISTS tasks (
-          id SERIAL PRIMARY KEY,
-          content TEXT,
-          timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-          model TEXT,
-          prompt TEXT
-        );
-      `);
+      const db = new PGlite({ dataDir: 'idb://accelerator-db-v3' });
+       await db.exec(`
+         CREATE TABLE IF NOT EXISTS tasks (
+           id SERIAL PRIMARY KEY,
+           project_id INTEGER,
+           content TEXT,
+           timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+           model TEXT,
+           prompt TEXT
+         );
+       `);
       await db.exec(`
         CREATE TABLE IF NOT EXISTS messages (
           id SERIAL PRIMARY KEY,
@@ -30,13 +31,20 @@ const getDb = async () => {
           description TEXT
         );
       `);
-      await db.exec(`
-        CREATE TABLE IF NOT EXISTS settings (
-          id SERIAL PRIMARY KEY,
-          key TEXT UNIQUE,
-          value TEXT
-        );
-      `);
+       await db.exec(`
+         CREATE TABLE IF NOT EXISTS settings (
+           id SERIAL PRIMARY KEY,
+           key TEXT UNIQUE,
+           value TEXT
+         );
+       `);
+       await db.exec(`
+         CREATE TABLE IF NOT EXISTS projects (
+           id SERIAL PRIMARY KEY,
+           name TEXT,
+           createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+         );
+       `);
       console.log('Database initialized lazily');
       return db;
     })();
@@ -45,28 +53,39 @@ const getDb = async () => {
 };
 
 export const initDb = async () => {
-  // DB init is now lazy in getDb
+  await getDb();
 };
 
-export const getTasks = async () => {
-  try {
-    const db = await getDb();
-    const res = await db.query('SELECT * FROM tasks ORDER BY timestamp DESC');
-    return res.rows;
-  } catch (e) {
-    console.log('DB not ready, returning empty');
-    return [];
-  }
-};
+ export const getTasks = async (project_id = null) => {
+   console.log('getTasks called with project_id:', project_id);
+   try {
+     const db = await getDb();
+     let query = 'SELECT * FROM tasks';
+     let params = [];
+     if (project_id) {
+       query += ' WHERE project_id = $1';
+       params = [project_id];
+     }
+     query += ' ORDER BY timestamp DESC';
+     const res = await db.query(query, params);
+     console.log('Query executed, res:', res);
+     console.log('Tasks loaded:', res.rows);
+     return res.rows;
+   } catch (e) {
+     console.log('DB error in getTasks:', e);
+     return [];
+   }
+ };
 
-export const addTask = async (task) => {
-  try {
-    const db = await getDb();
-    await db.query('INSERT INTO tasks (content, model, prompt) VALUES ($1, $2, $3)', [task.content, task.model, task.prompt]);
-  } catch (e) {
-    console.log('DB not ready, skipping addTask');
-  }
-};
+ export const addTask = async (task, project_id) => {
+   try {
+     const db = await getDb();
+     await db.query('INSERT INTO tasks (content, model, prompt, project_id) VALUES ($1, $2, $3, $4)', [task.content, task.model, task.prompt, project_id]);
+     console.log('Task added:', task, 'for project:', project_id);
+   } catch (e) {
+     console.log('DB error in addTask:', e);
+   }
+ };
 
 export const getMessages = async () => {
   try {
@@ -159,4 +178,55 @@ export const saveProgress = async (progress) => {
 export const loadProgress = async () => {
   const data = await getSetting('progress');
   return data ? JSON.parse(data) : null;
+};
+
+ export const getProjects = async () => {
+   try {
+     const db = await getDb();
+     const res = await db.query('SELECT * FROM projects ORDER BY createdAt DESC');
+     console.log('Projects loaded:', res.rows);
+     return res.rows;
+   } catch (e) {
+     console.log('DB error in getProjects:', e);
+     return [];
+   }
+ };
+
+ export const getProjectByName = async (name) => {
+   try {
+     const db = await getDb();
+     const res = await db.query('SELECT * FROM projects WHERE name = $1', [name]);
+     return res.rows[0];
+   } catch (e) {
+     console.log('DB not ready, returning null');
+     return null;
+   }
+ };
+
+ export const addProject = async (project) => {
+   try {
+     const db = await getDb();
+     const res = await db.query('INSERT INTO projects (name) VALUES ($1) RETURNING id', [project.name]);
+     return res.rows[0].id;
+   } catch (e) {
+     console.log('DB error in addProject:', e);
+   }
+ };
+
+export const updateProject = async (id, project) => {
+  try {
+    const db = await getDb();
+    await db.query('UPDATE projects SET name = $1 WHERE id = $2', [project.name, id]);
+  } catch (e) {
+    console.log('DB not ready, skipping updateProject');
+  }
+};
+
+export const deleteProject = async (id) => {
+  try {
+    const db = await getDb();
+    await db.query('DELETE FROM projects WHERE id = $1', [id]);
+  } catch (e) {
+    console.log('DB not ready, skipping deleteProject');
+  }
 };

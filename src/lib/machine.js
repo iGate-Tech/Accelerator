@@ -281,7 +281,17 @@ export const receiveResponse = async (response, setAutoProgress, setTasksList, t
     return;
   }
   // Add the response as a task
-  const newTask = { content: response, model: 'Llama-3.2-3B-Free', step: machineStore.context.currentStep, prompt: machineStore.context.currentPrompt || '', timestamp: new Date().toISOString() };
+  const currentStep = machineStore.context.currentStep;
+  const newTask = {
+    content: response,
+    model: modelMap[currentStep] || 'Unknown',
+    llm_model: 'Llama-3.2-3B-Free',
+    section: sectionMap[currentStep] || 'Unknown',
+    stepName: stepNames[currentStep] || 'Unknown',
+    step: currentStep,
+    prompt: machineStore.context.currentPrompt || '',
+    timestamp: new Date().toISOString()
+  };
    setTasksList([...(tasksList() || []), newTask]);
   if (addTask) await addTask(newTask);
   const nextStep = getNextStep(machineStore.context.currentStep);

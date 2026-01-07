@@ -25,14 +25,12 @@ import {
 import {
     getTasks,
     addTask,
-    addMessage,
     clearAllTasks,
-    clearAllMessages,
     updateTask,
-    saveProgress,
-    loadProgress,
     addProject,
-    getProjectByName
+    updateProject,
+    getProjectByName,
+    getProjectById
 } from "../lib/db";
 import {setMachineStore} from "../lib/machine";
 import {marked} from 'marked';
@@ -125,6 +123,32 @@ const Tasks = () => {
 
     const currentContent = createMemo(() => streamingContent() || machineStore.context.llmResponse);
 
+    // Adjust UI based on project selection and tasks
+    createEffect(() => {
+      const hasProject = currentProjectId() !== null;
+      const hasTasks = tasksList().length > 0;
+      if (hasProject && hasTasks) {
+        setAgentBoxClass("flex items-start max-w-6xl w-full mx-auto"); // Auto height when project has tasks
+      } else {
+        setAgentBoxClass("flex items-center h-[calc(100vh-4rem)] max-w-6xl w-full mx-auto"); // Full height otherwise
+      }
+      if (hasTasks) {
+        setGreetingClass("hidden");
+        setIsAccordionOpen(true);
+      } else {
+        setGreetingClass("text-center py-4 h-auto overflow-visible transition-all duration-300 opacity-100");
+        setIsAccordionOpen(false);
+      }
+    });
+
+    // Save progress to current project
+    createEffect(() => {
+      machineStore.context; // trigger on change
+      if (currentProjectId()) {
+        updateProject(currentProjectId(), machineStore.context);
+      }
+    });
+
     // Load initial tasks - removed for now
 
     let cardRef;
@@ -175,8 +199,6 @@ const Tasks = () => {
         }
         try {
             const result = await callLLM(prompt, retryCount, options);
-            await addMessage({type: 'user', content: prompt});
-            await addMessage({type: 'ai', content: result});
             receiveResponse(result, setAutoProgress, setTasksList, tasksList, (task) => {
                 console.log('Adding task for project:', currentProjectId());
                 addTask(task, currentProjectId());
@@ -250,7 +272,7 @@ const Tasks = () => {
     };
 
     const handleStart = async () => {
-        setAgentBoxClass("flex pb-20 items-center max-w-6xl w-full mx-auto");
+        setAgentBoxClass("flex items-center max-w-6xl w-full mx-auto");
         setStreamingContent("");
         setIsAccordionOpen(true);
         // Reset textarea height to prevent it from being tall during processing
@@ -258,10 +280,12 @@ const Tasks = () => {
             textareaRef.style.height = '3rem';
         }
         startProcess(prompt());
-        const projectName = prompt().split('\n')[0].trim();
-        const projectId = await addProject({name: projectName, createdAt: new Date()});
-        setCurrentProjectId(projectId);
-        window.dispatchEvent(new CustomEvent('projectAdded'));
+        if (!currentProjectId()) {
+            const projectName = prompt().split('\n')[0].trim();
+            const projectId = await addProject({name: projectName, description: prompt(), createdAt: new Date()});
+            setCurrentProjectId(projectId);
+            window.dispatchEvent(new CustomEvent('projectAdded'));
+        }
         await handleLLMCall(machineStore.context.currentPrompt, 0);
     };
 
@@ -281,13 +305,16 @@ const Tasks = () => {
         }`;
         try {
             const result = await callLLM(improvedPrompt, 0, {streamToTextarea: true});
-            await addMessage({type: 'user', content: improvedPrompt});
-            await addMessage({type: 'ai', content: result});
             setPrompt(result);
             const projectName = result.split('\n')[0].trim();
-            const projectId = await addProject({name: projectName, createdAt: new Date()});
-            setCurrentProjectId(projectId);
-            window.dispatchEvent(new CustomEvent('projectAdded'));
+            if (currentProjectId()) {
+                await updateProject(currentProjectId(), {name: projectName, description: result});
+                window.dispatchEvent(new CustomEvent('projectUpdated'));
+            } else {
+                const projectId = await addProject({name: projectName, description: result, createdAt: new Date()});
+                setCurrentProjectId(projectId);
+                window.dispatchEvent(new CustomEvent('projectAdded'));
+            }
         } catch (e) { // Error handled
         }
     };
@@ -296,14 +323,23 @@ const Tasks = () => {
         const suggestPrompt = `Suggest a compelling startup idea in the legal tech space. Start with the idea name followed by ': ' and then provide a brief description, target market, and unique value proposition in simple English, in only 3 lines. Do not generate in markdown.`;
         try {
             const result = await callLLM(suggestPrompt, 0, {streamToTextarea: true});
-            await addMessage({type: 'user', content: suggestPrompt});
-            await addMessage({type: 'ai', content: result});
             setPrompt(result);
-            const projectName = result.split('\n')[0].trim();
-            const projectId = await addProject({name: projectName, createdAt: new Date()});
-            setCurrentProjectId(projectId);
-            window.dispatchEvent(new CustomEvent('projectAdded'));
-        } catch (e) { // Error handled
+            const lines = result.split('\n').map(l => l.trim()).filter(l => l);
+            const firstLine = lines[0] || '';
+            let projectName = firstLine.replace(/^#+\s*/, '').split(':')[0].trim();
+            if (!projectName) projectName = 'Unnamed Idea';
+            if (currentProjectId()) {
+                await updateProject(currentProjectId(), {name: projectName, description: result});
+                console.log('Updated existing project with name:', projectName, 'description length:', result.length);
+                window.dispatchEvent(new CustomEvent('projectUpdated'));
+            } else {
+                const projectId = await addProject({name: projectName, description: result, createdAt: new Date()});
+                console.log('Created new project with name:', projectName, 'description length:', result.length);
+                setCurrentProjectId(projectId);
+                window.dispatchEvent(new CustomEvent('projectAdded'));
+            }
+        } catch (e) {
+            console.error('Error in handleSuggest:', e);
         }
     };
 
@@ -315,23 +351,14 @@ const Tasks = () => {
         setTasksList([]);
         setIsAccordionOpen(false);
         setPrompt(''); // Clear the prompt
+        setCurrentProjectId(null); // Unselect current project
         if (textareaRef) {
             textareaRef.style.height = '3rem'; // Reset textarea height
         }
         await clearAllTasks();
-        await clearAllMessages();
     };
-
-    const handleSaveProgress = async () => {
-        await saveProgress({state: machineStore.state, context: machineStore.context});
-    };
-
 
     onMount(async () => { // Load progress
-        const progress = await loadProgress();
-        if (progress) {
-            setMachineStore(progress);
-        }
 
         // Set initial textarea height
         if (textareaRef) {
@@ -341,10 +368,38 @@ const Tasks = () => {
 
         // Listen for open project
         window.addEventListener('openProject', async (e) => {
-            const project = await getProjectByName(e.detail);
+            const project = await getProjectById(e.detail);
             if (project) {
                 setCurrentProjectId(project.id);
-                setPrompt(e.detail);
+                setPrompt(project.description || '');
+                setMachineStore('context', {
+                  problem: '',
+                  solution: '',
+                  currentStep: project.currentStep || 'system',
+                  completedSteps: project.completedSteps || 0,
+                  stepName: project.stepName || 'System Initialization',
+                  currentModel: project.currentModel || 'System',
+                  currentSection: project.currentSection || 'Initialization',
+                  uiProgress: project.uiProgress || 0,
+                  uiMessage: project.uiMessage || 'Ready to start the 48-step accelerator process',
+                  uiStatus: project.uiStatus || 'idle',
+                  currentPrompt: '',
+                  llmResponse: '',
+                  strugglers: '',
+                  alternatives: '',
+                  gaps: '',
+                  persona: '',
+                  urgency: '',
+                  evidence: '',
+                  valueProp: '',
+                  features: '',
+                  modelType: '',
+                  revenue: '',
+                  pricing: '',
+                  moat: '',
+                  risks: '',
+                  tasks_list: ''
+                });
             }
         });
 
@@ -474,7 +529,7 @@ const Tasks = () => {
                 activeCardId={activeCardId}
                 setActiveCardId={setActiveCardId}
                 taskRefs={taskRefs}/>
-            <AgentInterface agentBoxClass={agentBoxClass}
+            <AgentInterface agentBoxClass={agentBoxClass} currentProjectId={currentProjectId}
                 agentContentClass={agentContentClass}
                 greetingClass={greetingClass}
                 cardRef={cardRef}
@@ -488,7 +543,6 @@ const Tasks = () => {
                 handleImprove={handleImprove}
                 handleSuggest={handleSuggest}
                 handleReset={handleReset}
-                handleSaveProgress={handleSaveProgress}
                 handleStart={handleStart}
                 handlePause={handlePause}
                 handleResume={handleResume}/>

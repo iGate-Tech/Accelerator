@@ -79,9 +79,9 @@ const getStepName = (task) =>
 
 const ResponseSection = (props) => {
   return (
-    <div class="flex-1 overflow-y-auto p-4">
+    <div class="flex-1 p-4">
       <Show when={props.tasksList().length > 0 || (props.isLoading() && props.streamingContent())}>
-        <div id="contentDiv" class="max-w-6xl mx-auto space-y-6 pt-48">
+        <div id="contentDiv" class="max-w-6xl mx-auto space-y-6 mt-15 h-[calc(100vh-20rem)] overflow-y-auto">
 
           {/* Past Tasks */}
           <For each={props.tasksList()}>
@@ -109,8 +109,8 @@ const ResponseSection = (props) => {
                   />
                 </div>
 
-                {/* Body */}
-                <div class="card-body px-5 py-4 bg-base-100">
+                 {/* Body */}
+                 <div class="card-body px-5 py-4 bg-base-100">
                   <div
                     class="prose max-w-none"
                     innerHTML={marked.parse(renderFilledTemplate(task.content))}
@@ -145,14 +145,14 @@ const ResponseSection = (props) => {
                   </span>
                 </div>
                 <i data-lucide="loader" class="w-4 h-4 animate-spin" />
-              </div>
+               </div>
 
-              <div class="card-body px-5 py-4 bg-base-100">
-                <div
-                  class="prose max-w-none"
-                  innerHTML={marked.parse(props.streamingContent())}
-                />
-              </div>
+               <div class="card-body px-5 py-4 bg-base-100">
+                 <div
+                   class="prose max-w-none"
+                   innerHTML={marked.parse(props.streamingContent())}
+                 />
+               </div>
 
               <div class="flex items-center px-4 py-3 bg-base-300/30 text-sm opacity-70">
                 <span class="animate-pulse">Streaming…</span>

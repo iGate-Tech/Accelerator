@@ -69,11 +69,11 @@ const MainLayout = (props) => {
             <GlobalError />
             <ToastContainer />
             <Navbar />
-             <div
-                 class={`flex max-h-[calc(100vw-30rem)]  ${
-                     currentLang() === 'ar' ? 'flex-row-reverse' : ''
-                 }`}
-             >
+              <div
+                  class={`flex h-[calc(100vh-4rem)] ${
+                      currentLang() === 'ar' ? 'flex-row-reverse' : ''
+                  }`}
+              >
                 <Sidebar />
                 <main class="flex-1 px-5 overflow-auto">
                     {props.children}

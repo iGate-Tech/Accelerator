@@ -9,7 +9,7 @@ export const stepOrder = [
   'step39', 'step40',    'step41', 'step42', 'step43', 'step44', 'step45', 'step46', 'step47', 'step48', 'step49', 'step50', 'step51', 'done'
 ];
 
-const stepPrompts = {
+export const stepPrompts = {
    system: `You are the iGate Accelerator Agent — an expert startup advisor guiding entrepreneurs through a structured 51-step startup validation and acceleration journey.
 
 The user has shared the following problem:

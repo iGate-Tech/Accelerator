@@ -1,89 +1,11 @@
 import { createContext, createSignal, useContext, onMount } from "solid-js";
+import { authAPI, dataAPI } from "../lib/data";
 
 const UserContext = createContext();
 
 export const UserProvider = (props) => {
-  const [user, setUser] = createSignal({
-    profile: {
-      name: "John Doe",
-      email: "john.doe@example.com",
-      avatar: "/src/assets/avatar.png",
-      joinDate: new Date().toISOString().split('T')[0],
-      bio: "Entrepreneur and startup enthusiast"
-    },
-    preferences: {
-      theme: localStorage.getItem('theme') || 'light',
-      language: localStorage.getItem('lang') || 'en',
-      notifications: {
-        email: true,
-        browser: true,
-        projectUpdates: true,
-        marketing: false
-      },
-      privacy: {
-        profileVisibility: 'public',
-        dataSharing: false
-      }
-    },
-    subscription: {
-      plan: "Pro",
-      status: "active",
-      credits: 500,
-      maxCredits: 1000,
-      renewalDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-      billingCycle: "monthly",
-      price: 29.99
-    },
-    billing: {
-      paymentMethods: [
-        {
-          id: "card_1",
-          type: "credit_card",
-          last4: "4242",
-          brand: "Visa",
-          expiryMonth: 12,
-          expiryYear: 2025,
-          isDefault: true
-        }
-      ],
-      invoices: [
-        {
-          id: "inv_001",
-          date: "2024-01-01",
-          amount: 29.99,
-          status: "paid",
-          downloadUrl: "#"
-        },
-        {
-          id: "inv_002",
-          date: "2023-12-01",
-          amount: 29.99,
-          status: "paid",
-          downloadUrl: "#"
-        }
-      ]
-    },
-    credits: {
-      balance: 500,
-      transactions: [
-        {
-          id: "txn_001",
-          type: "usage",
-          amount: -50,
-          description: "AI Accelerator Session - Project Analysis",
-          date: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
-          projectId: "proj_123"
-        },
-        {
-          id: "txn_002",
-          type: "purchase",
-          amount: 500,
-          description: "Credit Purchase - Pro Plan",
-          date: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString()
-        }
-      ]
-    }
-  });
+  const [user, setUser] = createSignal(null);
+  const [isAuthenticated, setIsAuthenticated] = createSignal(false);
 
   const updateUser = (updates) => {
     setUser(prev => {
@@ -94,12 +16,22 @@ export const UserProvider = (props) => {
     });
   };
 
-  const updateProfile = (profileUpdates) => {
-    updateUser({ profile: { ...user().profile, ...profileUpdates } });
+  const updateProfile = async (profileUpdates) => {
+    try {
+      await updateUser(user().id, { profile: { ...user().profile, ...profileUpdates } });
+      setUser(prev => ({ ...prev, profile: { ...prev.profile, ...profileUpdates } }));
+    } catch (error) {
+      console.error('Error updating profile:', error);
+    }
   };
 
-  const updatePreferences = (preferenceUpdates) => {
-    updateUser({ preferences: { ...user().preferences, ...preferenceUpdates } });
+  const updatePreferences = async (preferenceUpdates) => {
+    try {
+      await updateUser(user().id, { profile: { ...user().profile, preferences: { ...user().preferences, ...preferenceUpdates } } });
+      setUser(prev => ({ ...prev, profile: { ...prev.profile, preferences: { ...prev.preferences, ...preferenceUpdates } } }));
+    } catch (error) {
+      console.error('Error updating preferences:', error);
+    }
   };
 
   const updateSubscription = (subscriptionUpdates) => {
@@ -122,82 +54,75 @@ export const UserProvider = (props) => {
     });
   };
 
-  const logout = () => {
-    // Clear all user data
-    localStorage.removeItem('userData');
-    localStorage.removeItem('theme');
-    localStorage.removeItem('lang');
-    localStorage.removeItem('tutorial-progress');
-
-    // Reset user to default
-    setUser({
-      profile: {
-        name: "Guest User",
-        email: "",
-        avatar: "/src/assets/avatar.png",
-        joinDate: new Date().toISOString().split('T')[0],
-        bio: ""
-      },
-      preferences: {
-        theme: 'light',
-        language: 'en',
-        notifications: {
-          email: false,
-          browser: false,
-          projectUpdates: false,
-          marketing: false
-        },
-        privacy: {
-          profileVisibility: 'private',
-          dataSharing: false
-        }
-      },
-      subscription: {
-        plan: "Free",
-        status: "inactive",
-        credits: 0,
-        maxCredits: 100,
-        renewalDate: null,
-        billingCycle: null,
-        price: 0
-      },
-      billing: {
-        paymentMethods: [],
-        invoices: []
-      },
-      credits: {
-        balance: 0,
-        transactions: []
+  // Auth functions
+  const login = async (email, password) => {
+    try {
+      const result = await authAPI.login(email, password);
+      if (result.success) {
+        setUser(result.user);
+        setIsAuthenticated(true);
+        localStorage.setItem('userToken', result.token);
+        return true;
+      } else {
+        console.error('Login failed:', result.error);
+        return false;
       }
-    });
-
-    // Redirect to home
-    window.location.href = '/';
+    } catch (error) {
+      console.error('Login error:', error);
+      return false;
+    }
   };
 
-  onMount(() => {
-    // Load user data from localStorage if available
-    const savedUserData = localStorage.getItem('userData');
-    if (savedUserData) {
-      try {
-        const parsedData = JSON.parse(savedUserData);
-        setUser(parsedData);
-      } catch (e) {
-        console.log('Error loading user data:', e);
-      }
+  const logout = async () => {
+    try {
+      await authAPI.logout();
+      setUser(null);
+      setIsAuthenticated(false);
+      window.location.href = '/login';
+    } catch (error) {
+      console.error('Logout error:', error);
+      // Force logout even if API fails
+      localStorage.removeItem('userToken');
+      setUser(null);
+      setIsAuthenticated(false);
+      window.location.href = '/login';
     }
+  };
+
+  const checkAuth = async () => {
+    const token = localStorage.getItem('userToken');
+    if (!token) return false;
+
+    const result = await authAPI.getCurrentUser();
+    if (!result.success) {
+      localStorage.removeItem('userToken');
+      return false;
+    }
+
+    setUser(result.user);
+    setIsAuthenticated(true);
+    return true;
+  };
+
+
+
+  onMount(async () => {
+    await checkAuth();
   });
 
   return (
     <UserContext.Provider value={{
       user,
+      isAuthenticated,
+      login,
+      logout,
+      checkAuth,
       updateUser,
       updateProfile,
       updatePreferences,
       updateSubscription,
       updateCredits,
-      addCreditTransaction,
-      logout
+      addCreditTransaction
     }}>
       {props.children}
     </UserContext.Provider>

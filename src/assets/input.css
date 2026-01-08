@@ -48,6 +48,36 @@
 @plugin "@tailwindcss/typography";
 @plugin "daisyui";
 
+body {
+  overflow: hidden;
+}
+
+main {
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+/* Toast animations */
+@keyframes slideInRight {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes shrink {
+  from { width: 100%; }
+  to { width: 0%; }
+}
+
+.toast-enter {
+  animation: slideInRight 0.3s ease-out;
+}
+
 /* RTL Support with tailwindcss-rtl */
 /* All RTL conversions are now handled automatically by the tailwindcss-rtl plugin */
 /* Custom RTL adjustments for specific components */
@@ -163,6 +193,10 @@
 }
 
 /* Dropdowns and Menus */
+[dir="rtl"] .dropdown-content {
+  text-align: right;
+}
+
 .rtl .dropdown-content {
   text-align: right;
   right: 0;

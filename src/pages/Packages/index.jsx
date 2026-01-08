@@ -2,6 +2,7 @@ import { createSignal, onMount, For, Show, useContext } from "solid-js";
 import { useUser } from "../../context/UserContext";
 import { LangContext } from "../../context/LangContext";
 import { translations } from "../../assets/translations/translations-index.js";
+import { toastManager } from "../../lib/feedback";
 
 const Packages = () => {
   const { user, updateSubscription } = useUser();
@@ -98,7 +99,7 @@ const Packages = () => {
         renewalDate: new Date(Date.now() + (billingCycle() === 'yearly' ? 365 : 30) * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
       });
 
-      alert(`Successfully ${planId === user().subscription.plan ? 'renewed' : 'upgraded to'} ${plan.name} plan!`);
+      toastManager.success(`Successfully ${planId === user().subscription.plan ? 'renewed' : 'upgraded to'} ${plan.name} plan (${billingCycle()}) for $${billingCycle() === 'yearly' ? plan.price.yearly : plan.price.monthly}/${billingCycle() === 'yearly' ? 'year' : 'month'}! Credits increased to ${plan.credits}.`);
     }
   };
 
@@ -110,7 +111,7 @@ const Packages = () => {
         credits: 100,
         maxCredits: 100
       });
-      alert('Subscription cancelled. You now have access to the Free plan.');
+      toastManager.warning(`Subscription cancelled. Downgraded to Free plan with 100 credits. Lost access to ${user().subscription.plan} features.`);
     }
   };
 

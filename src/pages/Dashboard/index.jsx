@@ -1,16 +1,24 @@
-import { createSignal, createResource, createMemo, onMount, For, Show, useContext } from "solid-js";
+import { createSignal, createResource, createMemo, onMount, For, Show, useContext, createEffect } from "solid-js";
 import { A, useNavigate } from "@solidjs/router";
 import { getProjects } from "../../lib/db";
-import { LangContext } from "../../context/LangContext";
+import { useUser } from "../../context/UserContext";
+import { useLanguage } from "../../hooks/useLanguage";
 import { dashboardTranslations } from "../../assets/translations/translations-index.js";
+import { formatRelativeTime } from "../../lib/utils";
 import ProjectCard from "../../components/ui/ProjectCard";
 
 const Dashboard = () => {
   const navigate = useNavigate();
-  const { lang } = useContext(LangContext);
+  const { t } = useLanguage();
+  const { isAuthenticated } = useUser();
   const [projects, { refetch }] = createResource(getProjects);
 
-  const t = () => dashboardTranslations[lang()];
+  // Redirect if not authenticated
+  createEffect(() => {
+    if (!isAuthenticated()) {
+      navigate('/login', { replace: true });
+    }
+  });
 
   const stats = createMemo(() => {
     if (!projects()) return {};
@@ -92,20 +100,7 @@ const Dashboard = () => {
     return mins > 0 ? `${hours}h ${mins}m` : `${hours}h`;
   };
 
-  const formatDate = (dateString) => {
-    if (!dateString) return t().unknownDate;
-    const date = new Date(dateString);
-    const now = new Date();
-    const diffTime = Math.abs(now - date);
-    const diffMinutes = Math.floor(diffTime / (1000 * 60));
-
-    if (diffMinutes < 1) return t().justNow;
-    if (diffMinutes < 60) return `${diffMinutes}m ago`;
-    const diffHours = Math.floor(diffMinutes / 60);
-    if (diffHours < 24) return `${diffHours}h ago`;
-    const diffDays = Math.floor(diffHours / 24);
-    return `${diffDays}d ago`; // TODO: Translate time units
-  };
+  const formatDate = (dateString) => formatRelativeTime(dateString, t());
 
   onMount(async () => {
     if (window.lucide) window.lucide.createIcons();

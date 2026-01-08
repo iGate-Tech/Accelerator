@@ -75,6 +75,56 @@ worker({
       );
     `);
 
+    // Users table for authentication
+    await db.exec(`
+      CREATE TABLE IF NOT EXISTS users (
+        id BIGSERIAL PRIMARY KEY,
+        email TEXT UNIQUE NOT NULL,
+        password_hash TEXT NOT NULL,
+        profile JSONB,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      );
+    `);
+
+    // Sessions table for auth tokens
+    await db.exec(`
+      CREATE TABLE IF NOT EXISTS sessions (
+        id BIGSERIAL PRIMARY KEY,
+        user_id BIGINT REFERENCES users(id) ON DELETE CASCADE,
+        token TEXT UNIQUE NOT NULL,
+        expires_at TIMESTAMP NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      );
+    `);
+
+    // Credits table for transactions
+    await db.exec(`
+      CREATE TABLE IF NOT EXISTS credits (
+        id BIGSERIAL PRIMARY KEY,
+        user_id BIGINT REFERENCES users(id) ON DELETE CASCADE,
+        type TEXT NOT NULL, -- 'usage', 'purchase', 'bonus'
+        amount REAL NOT NULL,
+        description TEXT,
+        balance_after REAL,
+        date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      );
+    `);
+
+    // Billing table for invoices/payments
+    await db.exec(`
+      CREATE TABLE IF NOT EXISTS billing (
+        id BIGSERIAL PRIMARY KEY,
+        user_id BIGINT REFERENCES users(id) ON DELETE CASCADE,
+        type TEXT NOT NULL, -- 'invoice', 'payment'
+        amount REAL NOT NULL,
+        status TEXT DEFAULT 'pending',
+        description TEXT,
+        date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        due_date TIMESTAMP
+      );
+    `);
+
     console.log('Database schema initialized successfully');
     return db;
   },

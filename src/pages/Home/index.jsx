@@ -20,6 +20,7 @@ import {
     modelMap,
     sectionMap,
     stepNames,
+    stepPrompts,
     fillPrompt
 } from "../../lib/machine";
 import {
@@ -32,68 +33,25 @@ import {
     getProjectByName,
     getProjectById
 } from "../../lib/db";
+import { handleLLMProjectUpdate } from "../../lib/utils";
 import {setMachineStore} from "../../lib/machine";
 import {marked} from 'marked';
 import {renderFilledTemplate} from '../../lib/llm-template';
 import ResponseSection from '../../components/ui/ResponseSection';
 import AgentInterface from '../../components/features/home/AgentInterface';
+import RouteGuard from '../../components/common/RouteGuard';
 import { useContext } from "solid-js";
 import { LangContext } from "../../context/LangContext";
 import { translations } from "../../assets/translations/translations-index.js";
+import { toastManager } from "../../lib/feedback";
 
-const promptToStepName = {
-    "You are an AI-powered startup accelerator": stepNames.system,
-    "Analyze the problem": stepNames.step2,
-    "Evaluate the severity": stepNames.step3,
-    "List and categorize current solutions": stepNames.step4,
-    "Analyze why current": stepNames.step5,
-    "Develop a detailed user persona": stepNames.step6,
-    "Assess the urgency": stepNames.step7,
-    "Gather and validate evidence": stepNames.step8,
-    "Design a comprehensive solution": stepNames.step9,
-    "Craft a compelling value proposition": stepNames.step10,
-    "List key features": stepNames.step11,
-    "Determine the optimal business model": stepNames.step12,
-    "Design revenue streams": stepNames.step13,
-    "Develop a pricing strategy": stepNames.step14,
-    "Build competitive moats": stepNames.step15,
-    "List key assumptions": stepNames.step16,
-    "Clearly define the target market": stepNames.step17,
-    "Estimate the Total Addressable Market": stepNames.step18,
-    "Estimate the Serviceable Available Market": stepNames.step19,
-    "Estimate the Serviceable Obtainable Market": stepNames.step20,
-    "Check if": stepNames.validate_tam_sam_som,
-    "Identify trends": stepNames.step21,
-    "List direct and indirect competitors": stepNames.step22,
-    "Develop a strategy to enter": stepNames.step23,
-    "Identify channels": stepNames.step24,
-    "Describe the sales motion": stepNames.step25,
-    "Develop strategies to retain": stepNames.step26,
-    "Explain how revenue is generated": stepNames.step27,
-    "Provide Customer Acquisition Cost": stepNames.step28,
-    "List major fixed and variable costs": stepNames.step29,
-    "Provide 3-year revenue": stepNames.step30,
-    "Calculate the monthly burn rate": stepNames.step31,
-    "Determine when": stepNames.step32,
-    "Provide current traction": stepNames.step33,
-    "Calculate the valuation": stepNames.step34,
-    "Determine the appropriate funding stage": stepNames.step35,
-    "Determine how much capital": stepNames.step36,
-    "Check if  {{valuation}}": stepNames.validate_deck_ask,
-    "Plan the allocation": stepNames.step37,
-    "Calculate the expected pre-money": stepNames.step38,
-    "Validate if  {{preMoney}}": stepNames.validate_pre_money,
-    "Identify target investor types": stepNames.step39,
-    "List milestones": stepNames.step40,
-    "List founding team members": stepNames.step41,
-    "Identify key skills": stepNames.step42,
-    "Develop a hiring plan": stepNames.step43,
-    "List advisors": stepNames.step44,
-    "Determine the legal structure": stepNames.step45,
-    "Plan intellectual property": stepNames.step46,
-    "Identify key contracts": stepNames.step47,
-    "Identify legal and regulatory risks": stepNames.step48
-};
+// Generate prompt to step name mapping dynamically
+const promptToStepName = Object.fromEntries(
+  Object.entries(stepPrompts).map(([key, prompt]) => [
+    prompt.split('\n')[0].trim(),
+    stepNames[key]
+  ])
+);
 
 const getStepName = (task) => {
     for (let key in promptToStepName) {
@@ -124,10 +82,9 @@ const Tasks = () => {
     const [isAccordionOpen, setIsAccordionOpen] = createSignal(false);
     const [editingTaskId, setEditingTaskId] = createSignal(null);
     const [editContent, setEditContent] = createSignal("");
-    const [agentBoxClass, setAgentBoxClass] = createSignal("flex items-center h-[calc(100vh-4rem)] max-w-6xl w-full mx-auto");
+    const [agentBoxClass, setAgentBoxClass] = createSignal("flex items-center h-[calc(100vh-24rem)] max-w-6xl w-full mx-auto");
     const [agentContentClass, setAgentContentClass] = createSignal("relative w-full");
     const [greetingClass, setGreetingClass] = createSignal("text-center py-4 h-auto overflow-visible transition-all duration-300 opacity-100");
-    const [error, setError] = createSignal("");
     const [isLoading, setIsLoading] = createSignal(false);
     const [autoProgress, setAutoProgress] = createSignal(false);
     const [tasksList, setTasksList] = createSignal([]);
@@ -225,9 +182,6 @@ const Tasks = () => {
 
     const callLLM = async (prompt, retryCount = 0, options = {}) => {
         try {
-            if (retryCount === 0) 
-                setError("");
-            
             setIsLoading(true);
             const response = await fetch('/api/llm/stream', {
                 method: 'POST',
@@ -239,11 +193,7 @@ const Tasks = () => {
             if (! response.ok) {
                 if (response.status === 429) {
                     const waitTime = 60000 * (2 ** retryCount); // Exponential backoff: 60s, 120s, 240s, etc.
-                    setError(`Rate limit hit. Retrying in ${
-                        waitTime / 1000
-                    } seconds... (Attempt ${
-                        retryCount + 1
-                    })`);
+                    toastManager.warning(`Rate limit exceeded for prompt (${prompt.length} chars). Retrying in ${waitTime / 1000} seconds... (Attempt ${retryCount + 1}/3)`);
                     await new Promise(resolve => setTimeout(resolve, waitTime));
                     return callLLM(prompt, retryCount + 1);
                 }
@@ -272,9 +222,7 @@ const Tasks = () => {
             console.log('LLM response received:', chunks.join('').length, 'chars');
             return chunks.join('');
         } catch (e) {
-            setError(`Failed to get AI response: ${
-                e.message
-            }`);
+            toastManager.error(`Failed to get AI response for prompt (${prompt.length} chars): ${e.message}. Process paused.`);
             // Continue to next step on any error, only pause on button press
             setAutoProgress(true);
             throw e;
@@ -296,6 +244,7 @@ const Tasks = () => {
             const projectName = prompt().split('\n')[0].trim();
             const projectId = await addProject({name: projectName, description: prompt(), createdAt: new Date()});
             setCurrentProjectId(projectId);
+            toastManager.success(`New project "${projectName}" created (ID: ${projectId}) with ${prompt().length} chars description. Accelerator process started.`);
             window.dispatchEvent(new CustomEvent('projectAdded'));
         }
         await handleLLMCall(machineStore.context.currentPrompt, 0);
@@ -312,53 +261,25 @@ const Tasks = () => {
     };
 
     const handleImprove = async () => {
-        const improvedPrompt = `${t().improvePrompt} ${
-            prompt()
-        }`;
-        try {
-            const result = await callLLM(improvedPrompt, 0, {streamToTextarea: true});
-            setPrompt(result);
-            const projectName = result.split('\n')[0].trim();
-            if (currentProjectId()) {
-                await updateProject(currentProjectId(), {name: projectName, description: result});
-                window.dispatchEvent(new CustomEvent('projectUpdated'));
-            } else {
-                const projectId = await addProject({name: projectName, description: result, createdAt: new Date()});
-                setCurrentProjectId(projectId);
-                window.dispatchEvent(new CustomEvent('projectAdded'));
-            }
-        } catch (e) { // Error handled
-        }
+        const improvedPrompt = `${t().improvePrompt} ${prompt()}`;
+        const extractProjectName = (result) => result.split('\n')[0].trim();
+        await handleLLMProjectUpdate(callLLM, improvedPrompt, extractProjectName, currentProjectId, setCurrentProjectId, setPrompt);
     };
 
     const handleSuggest = async () => {
         const suggestPrompt = t().suggestPrompt;
-        try {
-            const result = await callLLM(suggestPrompt, 0, {streamToTextarea: true});
-            setPrompt(result);
+        const extractProjectName = (result) => {
             const lines = result.split('\n').map(l => l.trim()).filter(l => l);
             const firstLine = lines[0] || '';
             let projectName = firstLine.replace(/^#+\s*/, '').split(':')[0].trim();
-            if (!projectName) projectName = 'Unnamed Idea';
-            if (currentProjectId()) {
-                await updateProject(currentProjectId(), {name: projectName, description: result});
-                console.log('Updated existing project with name:', projectName, 'description length:', result.length);
-                window.dispatchEvent(new CustomEvent('projectUpdated'));
-            } else {
-                const projectId = await addProject({name: projectName, description: result, createdAt: new Date()});
-                console.log('Created new project with name:', projectName, 'description length:', result.length);
-                setCurrentProjectId(projectId);
-                window.dispatchEvent(new CustomEvent('projectAdded'));
-            }
-        } catch (e) {
-            console.error('Error in handleSuggest:', e);
-        }
+            return projectName || 'Unnamed Idea';
+        };
+        await handleLLMProjectUpdate(callLLM, suggestPrompt, extractProjectName, currentProjectId, setCurrentProjectId, setPrompt);
     };
 
     const handleReset = async () => {
         reset();
         setStreamingContent('');
-        setError('');
         setAutoProgress(false);
         setTasksList([]);
         setIsAccordionOpen(false);
@@ -532,7 +453,8 @@ const Tasks = () => {
     });
 
     return (
-        <div class={`relative flex flex-col ${currentLang() === 'ar' ? 'rtl' : 'ltr'}`}>
+        <RouteGuard requireAuth={true}>
+            <div class={`relative flex flex-col ${currentLang() === 'ar' ? 'rtl' : 'ltr'}`}>
             <ResponseSection tasksList={tasksList}
                 editingTaskId={editingTaskId}
                 setEditingTaskId={setEditingTaskId}
@@ -566,6 +488,7 @@ const Tasks = () => {
                 handlePause={handlePause}
                 handleResume={handleResume}/>
         </div>
+        </RouteGuard>
     );
 };
 

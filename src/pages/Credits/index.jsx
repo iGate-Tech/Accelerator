@@ -2,6 +2,7 @@ import { createSignal, onMount, For, Show, useContext } from "solid-js";
 import { useUser } from "../../context/UserContext";
 import { LangContext } from "../../context/LangContext";
 import { translations } from "../../assets/translations/translations-index.js";
+import { toastManager } from "../../lib/feedback";
 
 const Credits = () => {
   const { user, addCreditTransaction } = useUser();
@@ -58,7 +59,7 @@ const Credits = () => {
     setTimeout(() => {
       if (packageData.recurring) {
         // Handle recurring subscription
-        alert(`Successfully subscribed to ${packageData.name}!`);
+        toastManager.success(`Successfully subscribed to ${packageData.name} for $${packageData.price}/month! Recurring billing activated.`);
       } else {
         // Add credits to balance
         addCreditTransaction({
@@ -66,7 +67,8 @@ const Credits = () => {
           amount: packageData.credits,
           description: `Purchased ${packageData.name}`
         });
-        alert(`Successfully purchased ${packageData.credits} credits!`);
+        const newBalance = (user().credits.balance || 0) + packageData.credits;
+        toastManager.success(`Successfully purchased ${packageData.credits} credits for $${packageData.price}! New balance: ${newBalance} credits.`);
       }
     }, 1000);
   };

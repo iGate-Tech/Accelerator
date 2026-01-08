@@ -2,6 +2,7 @@ import { createSignal, onMount, For, Show, useContext } from "solid-js";
 import { useUser } from "../../context/UserContext";
 import { LangContext } from "../../context/LangContext";
 import { translations } from "../../assets/translations/translations-index.js";
+import { toastManager } from "../../lib/feedback";
 
 const Billing = () => {
   const { user } = useUser();
@@ -11,30 +12,32 @@ const Billing = () => {
 
   const t = () => translations[lang()];
 
-  const paymentMethods = user().billing.paymentMethods;
-  const invoices = user().billing.invoices;
+  const billing = user()?.billing || { paymentMethods: [], invoices: [] };
+  const paymentMethods = billing.paymentMethods;
+  const invoices = billing.invoices;
 
   const addPaymentMethod = () => {
     // Simulate adding a payment method
-    alert('Payment method added successfully! (This is a demo)');
+    toastManager.success('Payment method added successfully! Card ending in ****1234 has been saved as your default payment method. (Demo)');
     setShowAddCardModal(false);
   };
 
   const removePaymentMethod = (id) => {
     if (confirm('Are you sure you want to remove this payment method?')) {
       // In a real app, this would call an API
-      alert('Payment method removed (demo)');
+      toastManager.success(`Payment method ending in ****${paymentMethods.find(m => m.id === id)?.last4 || '0000'} removed successfully. (Demo)`);
     }
   };
 
   const downloadInvoice = (invoice) => {
     // Simulate downloading invoice
-    alert(`${t().downloadingInvoice} ${invoice.id}... (This is a demo)`);
+    toastManager.info(`Downloading invoice ${invoice.id} for $${invoice.amount.toFixed(2)} dated ${new Date(invoice.date).toLocaleDateString()}... (Demo)`);
   };
 
   const cancelSubscription = () => {
     if (confirm('Are you sure you want to cancel your subscription? This will take effect at the end of your current billing period.')) {
-      alert('Subscription cancellation scheduled. You will continue to have access until the end of your billing period.');
+      const renewalDate = user().subscription.renewalDate ? new Date(user().subscription.renewalDate).toLocaleDateString() : 'end of current period';
+      toastManager.warning(`Subscription cancellation scheduled for ${user().subscription.plan} plan. You will continue to have access until ${renewalDate}. Credits remaining: ${user().credits.balance}.`);
     }
   };
 

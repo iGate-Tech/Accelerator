@@ -121,7 +121,7 @@ const Sidebar = () => {
 
   return (
     <aside
-      class="sidebar fixed top-16 w-80 h-[calc(100vh-4rem)] bg-base-100 border-base-200 overflow-y-auto hidden lg:block z-[55]"
+      class="sidebar top-16 w-80 h-[calc(100vh-4rem)] bg-base-100 border-base-200 overflow-y-auto hidden lg:block z-[55]"
       classList={{
         'start-0 border-e': currentLang() === 'en',
         'end-0 border-s': currentLang() === 'ar'

@@ -1,4 +1,5 @@
 import { PGliteWorker } from '@electric-sql/pglite/worker';
+import { toastManager } from './feedback';
 
 let pgInstance = null;
 
@@ -14,12 +15,75 @@ export const getPg = async () => {
       }
     );
     console.log('PGLiteWorker instance created');
+
+    // Seed initial data after database is ready
+    await seedInitialData();
   }
   return pgInstance;
 };
 
 export const initDb = async () => {
   // Worker initializes automatically
+  await seedInitialData();
+};
+
+// Generic helper for SELECT operations
+export const getEntities = async (table, selectFields = '*', whereClause = '', orderBy = '', params = []) => {
+  const pg = await getPg();
+  const query = `SELECT ${selectFields} FROM ${table} ${whereClause} ${orderBy}`;
+  try {
+    const res = await pg.query(query, params);
+    return res.rows;
+  } catch (error) {
+    console.log(`DB error in getEntities for ${table}: ${error.message}`);
+    return [];
+  }
+};
+
+// Generic helper for UPDATE operations
+export const updateEntity = async (table, idField, id, updates, options = {}) => {
+  const pg = await getPg();
+  const fields = [];
+  const values = [];
+  let paramIndex = 1;
+
+  // Handle special fields or calculations if provided
+  if (options.beforeUpdate) {
+    options.beforeUpdate(updates);
+  }
+
+  for (const [key, value] of Object.entries(updates)) {
+    if (value !== undefined) {
+      const dbField = options.fieldMappings?.[key] || key;
+      fields.push(`${dbField} = $${paramIndex}`);
+      values.push(value);
+      paramIndex++;
+    }
+  }
+
+  // Add always-update fields
+  if (options.alwaysUpdate) {
+    for (const [field, value] of Object.entries(options.alwaysUpdate)) {
+      fields.push(`${field} = ${value}`);
+    }
+  }
+
+  if (fields.length === 0) {
+    console.log(`No fields to update for ${table} with id ${id}`);
+    return { success: false, error: 'No fields to update' };
+  }
+
+  values.push(id);
+  const query = `UPDATE ${table} SET ${fields.join(', ')} WHERE ${idField} = $${paramIndex}`;
+
+  try {
+    const res = await pg.query(query, values);
+    console.log(`Updated ${table}:`, id, 'with query:', query, 'values:', values);
+    return { success: true, data: res.rows[0] };
+  } catch (error) {
+    console.log(`DB error in updateEntity for ${table}: ${error.message}`);
+    return { success: false, error: error.message };
+  }
 };
 
   export const getTasks = async (project_id = null) => {
@@ -76,15 +140,9 @@ export const updateTask = async (id, content) => {
 
 
   export const getProjects = async () => {
-    try {
-      const pg = await getPg();
-      const res = await pg.query('SELECT * FROM Projects ORDER BY createdAt DESC');
-      console.log('Projects loaded:', res.rows);
-      return res.rows;
-    } catch (e) {
-      console.log('Error loading projects:', e);
-      return [];
-    }
+    const projects = await getEntities('Projects', '*', '', 'ORDER BY createdAt DESC');
+    console.log('Projects loaded:', projects);
+    return projects;
   };
 
  export const getProjectByName = async (name) => {
@@ -136,109 +194,46 @@ export const updateTask = async (id, content) => {
       const newProject = res.rows[0];
       console.log('Added project:', newProject);
       return newProject.id;
-    } catch (e) {
-      console.log('Error adding project:', e);
-    }
+     } catch (e) {
+       console.log('Error adding project:', e);
+       toastManager.error(`Failed to add project "${project.name}" (${project.description?.length || 0} chars description): ${e.message}`);
+     }
   };
 
   export const updateProject = async (id, project) => {
-    console.log('Updating project', id, 'with fields:', Object.keys(project));
-    try {
-      const pg = await getPg();
-      const fields = [];
-      const values = [];
-      let paramIndex = 1;
-
-      if (project.name !== undefined) {
-        fields.push(`name = $${paramIndex++}`);
-        values.push(project.name);
-      }
-      if (project.description !== undefined) {
-        fields.push(`description = $${paramIndex++}`);
-        values.push(project.description);
-      }
-      if (project.currentStep !== undefined) {
-        fields.push(`currentStep = $${paramIndex++}`);
-        values.push(project.currentStep);
-      }
-       if (project.completedSteps !== undefined) {
-         fields.push(`completedSteps = $${paramIndex++}`);
-         values.push(project.completedSteps);
-         // Auto-calculate consumed credits and time based on completed steps
-         fields.push(`consumedCredits = $${paramIndex++}`);
-         values.push(project.completedSteps * 10);
-         fields.push(`consumedTime = $${paramIndex++}`);
-         values.push(project.completedSteps * 30);
-       }
-      if (project.stepName !== undefined) {
-        fields.push(`stepName = $${paramIndex++}`);
-        values.push(project.stepName);
-      }
-      if (project.currentModel !== undefined) {
-        fields.push(`currentModel = $${paramIndex++}`);
-        values.push(project.currentModel);
-      }
-      if (project.currentSection !== undefined) {
-        fields.push(`currentSection = $${paramIndex++}`);
-        values.push(project.currentSection);
-      }
-      if (project.uiProgress !== undefined) {
-        fields.push(`uiProgress = $${paramIndex++}`);
-        values.push(project.uiProgress);
-      }
-      if (project.uiMessage !== undefined) {
-        fields.push(`uiMessage = $${paramIndex++}`);
-        values.push(project.uiMessage);
-      }
-       if (project.uiStatus !== undefined) {
-         fields.push(`uiStatus = $${paramIndex++}`);
-         values.push(project.uiStatus);
-       }
-       if (project.totalCredits !== undefined) {
-         fields.push(`totalCredits = $${paramIndex++}`);
-         values.push(project.totalCredits);
-       }
-       if (project.consumedCredits !== undefined) {
-         fields.push(`consumedCredits = $${paramIndex++}`);
-         values.push(project.consumedCredits);
-       }
-       if (project.totalTime !== undefined) {
-         fields.push(`totalTime = $${paramIndex++}`);
-         values.push(project.totalTime);
-       }
-       if (project.consumedTime !== undefined) {
-         fields.push(`consumedTime = $${paramIndex++}`);
-         values.push(project.consumedTime);
-       }
-       if (project.totalSteps !== undefined) {
-         fields.push(`totalSteps = $${paramIndex++}`);
-         values.push(project.totalSteps);
-         // Recalculate totalCredits and totalTime when totalSteps changes
-         fields.push(`totalCredits = $${paramIndex++}`);
-         values.push(project.totalSteps * 10);
-         fields.push(`totalTime = $${paramIndex++}`);
-         values.push(project.totalSteps * 30);
-       }
-
-       if (fields.length > 0) {
-        const query = `UPDATE Projects SET ${fields.join(', ')} WHERE id = $${paramIndex}`;
-        values.push(id);
-        await pg.query(query, values);
-        console.log('Updated project:', id, 'with query:', query, 'values:', values);
-      }
-    } catch (e) {
-      console.log('Error updating project:', e);
+  console.log('Updating project', id, 'with fields:', Object.keys(project));
+  try {
+    // Handle special calculations
+    const processedProject = { ...project };
+    if (project.completedSteps !== undefined) {
+      processedProject.consumedCredits = project.completedSteps * 10;
+      processedProject.consumedTime = project.completedSteps * 30;
     }
-  };
+    if (project.totalSteps !== undefined) {
+      processedProject.totalCredits = project.totalSteps * 10;
+      processedProject.totalTime = project.totalSteps * 30;
+    }
+
+    const result = await updateEntity('Projects', 'id', id, processedProject);
+    if (!result.success) {
+      throw new Error(result.error);
+    }
+    console.log('Updated project:', id);
+   } catch (e) {
+     console.log('Error updating project:', e);
+     toastManager.error(`Failed to update project ${id} (${Object.keys(project).length} fields): ${e.message}`);
+   }
+};
 
  export const deleteProject = async (id) => {
     try {
       const pg = await getPg();
       await pg.query('DELETE FROM Projects WHERE id = $1', [id]);
       console.log('Deleted project:', id);
-    } catch (e) {
-      console.log('Error deleting project:', e);
-    }
+     } catch (e) {
+       console.log('Error deleting project:', e);
+       toastManager.error(`Failed to delete project ${id}: ${e.message}`);
+     }
   };
 
  export const deleteAllProjects = async () => {
@@ -253,15 +248,9 @@ export const updateTask = async (id, content) => {
 
 // Groups functions
 export const getGroups = async () => {
-  try {
-    const pg = await getPg();
-    const res = await pg.query('SELECT * FROM Groups ORDER BY createdAt DESC');
-    console.log('Groups loaded:', res.rows);
-    return res.rows;
-  } catch (e) {
-    console.log('Error loading groups:', e);
-    return [];
-  }
+  const groups = await getEntities('Groups', '*', '', 'ORDER BY createdAt DESC');
+  console.log('Groups loaded:', groups);
+  return groups;
 };
 
 export const getGroupById = async (id) => {
@@ -285,40 +274,23 @@ export const addGroup = async (group) => {
     const newGroup = res.rows[0];
     console.log('Added group:', newGroup);
     return newGroup.id;
-  } catch (e) {
-    console.log('Error adding group:', e);
-  }
+   } catch (e) {
+     console.log('Error adding group:', e);
+     toastManager.error(`Failed to add group "${group.name}": ${e.message}`);
+   }
 };
 
 export const updateGroup = async (id, group) => {
   try {
-    const pg = await getPg();
-    const fields = [];
-    const values = [];
-    let paramIndex = 1;
-
-    if (group.name !== undefined) {
-      fields.push(`name = $${paramIndex++}`);
-      values.push(group.name);
+    const result = await updateEntity('Groups', 'id', id, group);
+    if (!result.success) {
+      throw new Error(result.error);
     }
-    if (group.description !== undefined) {
-      fields.push(`description = $${paramIndex++}`);
-      values.push(group.description);
-    }
-    if (group.color !== undefined) {
-      fields.push(`color = $${paramIndex++}`);
-      values.push(group.color);
-    }
-
-    if (fields.length > 0) {
-      const query = `UPDATE Groups SET ${fields.join(', ')} WHERE id = $${paramIndex}`;
-      values.push(id);
-      await pg.query(query, values);
-      console.log('Updated group:', id);
-    }
-  } catch (e) {
-    console.log('Error updating group:', e);
-  }
+    console.log('Updated group:', id);
+   } catch (e) {
+     console.log('Error updating group:', e);
+     toastManager.error(`Failed to update group ${id} (${Object.keys(group).length} fields): ${e.message}`);
+   }
 };
 
 export const deleteGroup = async (id) => {
@@ -329,9 +301,10 @@ export const deleteGroup = async (id) => {
     // Then delete the group
     await pg.query('DELETE FROM Groups WHERE id = $1', [id]);
     console.log('Deleted group:', id);
-  } catch (e) {
-    console.log('Error deleting group:', e);
-  }
+   } catch (e) {
+     console.log('Error deleting group:', e);
+     toastManager.error(`Failed to delete group ${id}: ${e.message}`);
+   }
 };
 
 export const exportAllProjects = async () => {
@@ -412,4 +385,249 @@ export const getGroupsWithProjects = async () => {
     console.log('Error getting groups with projects:', e);
     return [];
   }
+};
+
+// User functions
+export const createUser = async (email, passwordHash, profile = {}) => {
+  try {
+    const pg = await getPg();
+    const res = await pg.query(
+      'INSERT INTO users (email, password_hash, profile) VALUES ($1, $2, $3) RETURNING *',
+      [email, passwordHash, JSON.stringify(profile)]
+    );
+    console.log('User created:', res.rows[0]);
+    return res.rows[0];
+  } catch (e) {
+    console.log('Error creating user:', e);
+    throw e;
+  }
+};
+
+export const getUserByEmail = async (email) => {
+  try {
+    const pg = await getPg();
+    const res = await pg.query('SELECT * FROM users WHERE email = $1', [email]);
+    return res.rows[0];
+  } catch (e) {
+    console.log('Error getting user by email:', e);
+    return null;
+  }
+};
+
+export const getUserById = async (id) => {
+  try {
+    const pg = await getPg();
+    const res = await pg.query('SELECT * FROM users WHERE id = $1', [id]);
+    return res.rows[0];
+  } catch (e) {
+    console.log('Error getting user by id:', e);
+    return null;
+  }
+};
+
+export const updateUser = async (id, updates) => {
+  try {
+    const processedUpdates = { ...updates };
+    if (updates.profile !== undefined) {
+      processedUpdates.profile = JSON.stringify(updates.profile);
+    }
+    const result = await updateEntity('users', 'id', id, processedUpdates, {
+      alwaysUpdate: { 'updated_at': 'CURRENT_TIMESTAMP' }
+    });
+    if (!result.success) {
+      throw new Error(result.error);
+    }
+    console.log('Updated user:', id);
+  } catch (e) {
+    console.log('Error updating user:', e);
+    throw e;
+  }
+};
+
+export const deleteUser = async (id) => {
+  try {
+    const pg = await getPg();
+    await pg.query('DELETE FROM users WHERE id = $1', [id]);
+    console.log('Deleted user:', id);
+  } catch (e) {
+    console.log('Error deleting user:', e);
+    throw e;
+  }
+};
+
+// Session functions
+export const createSession = async (userId, token, expiresAt) => {
+  try {
+    const pg = await getPg();
+    const res = await pg.query(
+      'INSERT INTO sessions (user_id, token, expires_at) VALUES ($1, $2, $3) RETURNING *',
+      [userId, token, expiresAt]
+    );
+    console.log('Session created:', res.rows[0]);
+    return res.rows[0];
+  } catch (e) {
+    console.log('Error creating session:', e);
+    throw e;
+  }
+};
+
+export const getSessionByToken = async (token) => {
+  try {
+    const pg = await getPg();
+    const res = await pg.query(
+      'SELECT s.*, u.* FROM sessions s JOIN users u ON s.user_id = u.id WHERE s.token = $1 AND s.expires_at > CURRENT_TIMESTAMP',
+      [token]
+    );
+    return res.rows[0];
+  } catch (e) {
+    console.log('Error getting session by token:', e);
+    return null;
+  }
+};
+
+export const deleteSession = async (token) => {
+  try {
+    const pg = await getPg();
+    await pg.query('DELETE FROM sessions WHERE token = $1', [token]);
+    console.log('Deleted session:', token);
+  } catch (e) {
+    console.log('Error deleting session:', e);
+  }
+};
+
+export const deleteExpiredSessions = async () => {
+  try {
+    const pg = await getPg();
+    await pg.query('DELETE FROM sessions WHERE expires_at <= CURRENT_TIMESTAMP');
+    console.log('Deleted expired sessions');
+  } catch (e) {
+    console.log('Error deleting expired sessions:', e);
+  }
+};
+
+// Credits functions
+export const addCreditTransaction = async (userId, type, amount, description) => {
+  try {
+    const pg = await getPg();
+    // Get current balance
+    const balanceRes = await pg.query(
+      'SELECT COALESCE(SUM(amount), 0) as balance FROM credits WHERE user_id = $1',
+      [userId]
+    );
+    const currentBalance = balanceRes.rows[0].balance;
+    const newBalance = currentBalance + amount;
+
+    const res = await pg.query(
+      'INSERT INTO credits (user_id, type, amount, description, balance_after) VALUES ($1, $2, $3, $4, $5) RETURNING *',
+      [userId, type, amount, description, newBalance]
+    );
+    console.log('Credit transaction added:', res.rows[0]);
+    return res.rows[0];
+  } catch (e) {
+    console.log('Error adding credit transaction:', e);
+    throw e;
+  }
+};
+
+export const getUserCredits = async (userId) => {
+  return await getEntities('credits', '*', 'WHERE user_id = $1', 'ORDER BY date DESC', [userId]);
+};
+
+export const getUserCreditBalance = async (userId) => {
+  try {
+    const pg = await getPg();
+    const res = await pg.query(
+      'SELECT COALESCE(SUM(amount), 0) as balance FROM credits WHERE user_id = $1',
+      [userId]
+    );
+    return res.rows[0].balance;
+  } catch (e) {
+    console.log('Error getting user credit balance:', e);
+    return 0;
+  }
+};
+
+// Billing functions
+export const addBillingRecord = async (userId, type, amount, description, dueDate = null) => {
+  try {
+    const pg = await getPg();
+    const res = await pg.query(
+      'INSERT INTO billing (user_id, type, amount, description, due_date) VALUES ($1, $2, $3, $4, $5) RETURNING *',
+      [userId, type, amount, description, dueDate]
+    );
+    console.log('Billing record added:', res.rows[0]);
+    return res.rows[0];
+  } catch (e) {
+    console.log('Error adding billing record:', e);
+    throw e;
+  }
+};
+
+export const getUserBilling = async (userId) => {
+  try {
+    const pg = await getPg();
+    const res = await pg.query(
+      'SELECT * FROM billing WHERE user_id = $1 ORDER BY date DESC',
+      [userId]
+    );
+    return res.rows;
+  } catch (e) {
+    console.log('Error getting user billing:', e);
+    return [];
+  }
+};
+
+export const updateBillingStatus = async (id, status) => {
+  try {
+    const pg = await getPg();
+    await pg.query('UPDATE billing SET status = $1 WHERE id = $2', [status, id]);
+    console.log('Updated billing status:', id, status);
+  } catch (e) {
+    console.log('Error updating billing status:', e);
+  }
+};
+
+// Seeding function for initial data
+export const seedInitialData = async () => {
+  try {
+    const pg = await getPg();
+
+    // Check if users table is empty
+    const userCount = await pg.query('SELECT COUNT(*) as count FROM users');
+    if (userCount.rows[0].count > 0) {
+      console.log('Database already seeded');
+      return;
+    }
+
+    console.log('Seeding initial data...');
+
+    // Create a sample user
+    const sampleProfile = {
+      name: "John Doe",
+      email: "john.doe@example.com",
+      avatar: "/src/assets/avatar.png",
+      joinDate: new Date().toISOString().split('T')[0],
+      bio: "Entrepreneur and startup enthusiast"
+    };
+
+    const user = await createUser('john.doe@example.com', 'password', sampleProfile);
+
+    // Add sample credit transactions
+    await addCreditTransaction(user.id, 'purchase', 500, 'Initial credit purchase');
+    await addCreditTransaction(user.id, 'usage', -50, 'AI Accelerator Session - Project Analysis');
+
+    // Add sample billing record
+    await addBillingRecord(user.id, 'invoice', 29.99, 'Pro Plan Monthly Subscription', new Date(Date.now() + 30 * 24 * 60 * 60 * 1000));
+
+    console.log('Initial data seeded successfully');
+  } catch (e) {
+    console.log('Error seeding data:', e);
+  }
+};
+
+// Offline sync - placeholder for future Supabase sync
+export const syncData = async () => {
+  // For now, just clean up expired sessions
+  await deleteExpiredSessions();
+  console.log('Data sync completed');
 };

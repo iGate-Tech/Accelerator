@@ -1,21 +1,15 @@
 import {onMount, createEffect, createSignal, useContext} from "solid-js";
-import {useNavigate} from "@solidjs/router";
 import {LangContext} from "../../context/LangContext";
-import {getPg} from "../../lib/db";
-
+import {useUser} from "../../context/UserContext";
 import Navbar from "./Navbar";
 import Sidebar from "./Sidebar";
+import { GlobalLoading, GlobalError, ToastContainer } from "./GlobalUI";
 import favicon from "../../assets/favicon.svg";
 
-const Layout = (props) => {
-    const navigate = useNavigate();
-    const context = useContext(LangContext) || {
-        lang: () => 'ar',
-        setLang: () => {},
-        serverReachable: () => true,
-        setServerReachable: () => {}
-    };
-    const {lang, setLang, serverReachable, setServerReachable} = context;
+const MainLayout = (props) => {
+    const context = useContext(LangContext) || { lang: () => 'ar', setLang: () => {}, serverReachable: () => true, setServerReachable: () => {} };
+  const {lang, setLang, serverReachable, setServerReachable} = context;
+  const { isAuthenticated } = useUser();
 
     // Make component reactive to language changes
     const [currentLang, setCurrentLang] = createSignal(lang());
@@ -29,32 +23,27 @@ const Layout = (props) => {
 
     const checkServerConnectivity = async () => {
         try {
-            const response = await fetch('/api/llm/stream', {
+            const response = await fetch('http://localhost:3000/api/llm/stream', {
                 method: 'HEAD',
                 signal: AbortSignal.timeout(5000)
             });
             setServerReachable(response.ok);
         } catch {
             setServerReachable(false);
-        }};
+        }
+    };
 
     onMount(async () => {
-        console.log('Layout onMount: initializing worker');
-        // Initialize worker early
-        await getPg();
-        console.log('Worker initialized');
-        // Create Lucide icons
-        if (window.lucide) 
-            window.lucide.createIcons();
-        
+        console.log('MainLayout onMount');
 
+        // Create Lucide icons
+        if (window.lucide)
+            window.lucide.createIcons();
 
         // Set favicon
         const link = document.querySelector('link[rel="icon"]');
-        if (link) 
+        if (link)
             link.href = favicon;
-        
-
 
         // Check server connectivity initially and every 30 seconds
         await checkServerConnectivity();
@@ -64,39 +53,34 @@ const Layout = (props) => {
         const savedTheme = localStorage.getItem('theme') || 'light';
         document.documentElement.setAttribute('data-theme', savedTheme);
         const themeController = document.getElementById('theme-controller');
-        if (themeController) 
+        if (themeController)
             themeController.checked = savedTheme === 'dark';
-        
-
 
         // Initialize language
         setLang(localStorage.getItem('lang') || 'en');
         const langSwap = document.getElementById('langSwap');
-        if (langSwap) 
+        if (langSwap)
             langSwap.checked = lang() === 'ar';
-        
-
-
     });
 
     return (
         <>
-            <Navbar/>
-            <div class="flex">
-                <Sidebar/>
-                <div class="px-5"
-                    style={
-                        {
-                            'margin-left': currentLang() === 'ar' ? '0' : '20rem',
-                            'margin-right': currentLang() === 'ar' ? '20rem' : '0'
-                        }
-                }>
-                    {
-                    props.children
-                } </div>
+            <GlobalLoading />
+            <GlobalError />
+            <ToastContainer />
+            <Navbar />
+             <div
+                 class={`flex max-h-[calc(100vw-30rem)]  ${
+                     currentLang() === 'ar' ? 'flex-row-reverse' : ''
+                 }`}
+             >
+                <Sidebar />
+                <main class="flex-1 px-5 overflow-auto">
+                    {props.children}
+                </main>
             </div>
         </>
     );
 };
 
-export default Layout;
+export default MainLayout;

@@ -355,7 +355,7 @@ const Portfolio = () => {
           </For>
 
           {/* Ungrouped Projects */}
-          <div class="bg-base-100 rounded-box p-6 shadow-sm border border-base-200">
+          <div class="bg-base-100 rounded-box p-6 shadow-sm border border-base-200 mt-10">
             <h3 class="text-xl font-semibold mb-4 flex items-center gap-2">
               <i data-lucide="folder-minus" class="w-5 h-5"></i>
               {t().ungroupedProjects}

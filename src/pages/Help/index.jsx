@@ -18,28 +18,17 @@ const Help = () => {
 
 
 
-  onMount(() => {
-    if (window.lucide) window.lucide.createIcons();
+   onMount(() => {
+     // Load tutorial progress from localStorage
+     const savedProgress = localStorage.getItem('tutorial-progress');
+     if (savedProgress) {
+       setCompletedSteps(new Set(JSON.parse(savedProgress)));
+       setTutorialProgress(JSON.parse(savedProgress).length);
+     }
 
-    // Load tutorial progress from localStorage
-    const savedProgress = localStorage.getItem('tutorial-progress');
-    if (savedProgress) {
-      setCompletedSteps(new Set(JSON.parse(savedProgress)));
-      setTutorialProgress(JSON.parse(savedProgress).length);
-    }
-
-    // Keyboard navigation
-    document.addEventListener('keydown', handleKeyPress);
-  });
-
-  createEffect(() => {
-    if (window.lucide) window.lucide.createIcons();
-  });
-
-  createEffect(() => {
-    activeSection(); // React to tab changes
-    if (window.lucide) window.lucide.createIcons();
-  });
+     // Keyboard navigation
+     document.addEventListener('keydown', handleKeyPress);
+   });
 
   createEffect(() => {
     setCurrentLang(lang());
@@ -538,10 +527,14 @@ Use consistent naming conventions and color coding for easy navigation.`
                  {(step, index) => (
                   <div class={`card shadow-sm transition-all duration-200 ${step.completed ? 'bg-success/10 border-success/20' : 'bg-base-200'}`}>
                     <div class="card-body">
-                      <div class="flex items-center gap-3 mb-3">
-                        <div class={`p-2 rounded-lg ${step.completed ? 'bg-success/20' : 'bg-primary/10'}`}>
-                          <i data-lucide={step.icon} class={`w-6 h-6 ${step.completed ? 'text-success' : 'text-primary'}`}></i>
-                        </div>
+                       <div class="flex items-center gap-3 mb-3">
+                         <div class={`p-2 rounded-lg ${step.completed ? 'bg-success/20' : 'bg-primary/10'}`}>
+                           {step.icon === 'lightbulb' && <svg class={`w-6 h-6 ${step.completed ? 'text-success' : 'text-primary'}`} fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="24" height="24" viewBox="0 0 24 24"><path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"/><path d="M9 18h6"/><path d="M10 22h4"/></svg>}
+                           {step.icon === 'route' && <svg class={`w-6 h-6 ${step.completed ? 'text-success' : 'text-primary'}`} fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="24" height="24" viewBox="0 0 24 24"><circle cx="6" cy="19" r="3"/><path d="M9 19h8.5a3.5 3.5 0 0 0 0-7h-11a3.5 3.5 0 0 1 0-7H15"/><circle cx="18" cy="5" r="3"/></svg>}
+                           {step.icon === 'bar-chart' && <svg class={`w-6 h-6 ${step.completed ? 'text-success' : 'text-primary'}`} fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="24" height="24" viewBox="0 0 24 24"><line x1="12" x2="12" y1="20" y2="10"/><line x1="18" x2="18" y1="20" y2="4"/><line x1="6" x2="6" y1="20" y2="16"/></svg>}
+                           {step.icon === 'folder' && <svg class={`w-6 h-6 ${step.completed ? 'text-success' : 'text-primary'}`} fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="24" height="24" viewBox="0 0 24 24"><path d="M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.93a2 2 0 0 1-1.66-.9l-.82-1.2A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13c0 1.1.9 2 2 2Z"/></svg>}
+                           {step.icon === 'compass' && <svg class={`w-6 h-6 ${step.completed ? 'text-success' : 'text-primary'}`} fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="24" height="24" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polygon points="16.24,7.76 14.12,14.12 7.76,16.24 14.12,18.36 16.24,25 18.36,18.36 25,16.24 18.36,14.12"/></svg>}
+                         </div>
                         <div class="flex-1">
                           <h3 class="card-title text-lg">{step.title}</h3>
                             {step.completed && (

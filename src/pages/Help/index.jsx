@@ -33,14 +33,24 @@ const Help = () => {
    });
 
    createEffect(() => {
-     if (window.lucide) window.lucide.createIcons();
+     if (window.lucide) {
+       // Small delay to ensure DOM is updated
+       setTimeout(() => window.lucide.createIcons(), 10);
+     }
    });
 
-  createEffect(() => {
-    setCurrentLang(lang());
-  });
+   createEffect(() => {
+     setCurrentLang(lang());
+   });
 
-  const handleKeyPress = (e) => {
+   createEffect(() => {
+     activeSection();
+     if (window.lucide) {
+       setTimeout(() => window.lucide.createIcons(), 10);
+     }
+   });
+
+   const handleKeyPress = (e) => {
     // Ctrl+K for search
     if (e.ctrlKey && e.key === 'k') {
       e.preventDefault();

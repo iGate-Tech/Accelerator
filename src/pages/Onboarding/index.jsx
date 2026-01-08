@@ -84,12 +84,12 @@ const Onboarding = () => {
           <div class="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-primary to-secondary rounded-full mb-6 shadow-lg">
             <i data-lucide="rocket" class="w-10 h-10 text-white"></i>
           </div>
-          <h1 class="text-5xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent mb-4">
-            Welcome to Accelerator
-          </h1>
-          <p class="text-xl text-base-content/70 max-w-2xl mx-auto">
-            Let's get you set up with everything you need to start building your startup
-          </p>
+           <h1 class="text-5xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent mb-4">
+             {t().welcomeToAccelerator}
+           </h1>
+           <p class="text-xl text-base-content/70 max-w-2xl mx-auto">
+             {t().setupMessage}
+           </p>
         </div>
 
         {/* Progress Indicator */}
@@ -98,24 +98,24 @@ const Onboarding = () => {
             <ul class="steps w-full max-w-2xl mx-auto bg-base-100 p-4 rounded-xl shadow-sm border border-base-200 md:steps-horizontal steps-vertical">
               <li class={`step ${step() >= 1 ? 'step-primary' : ''}`}>
                 <div class="step-circle"></div>
-                <span class="step-title">Profile</span>
+                 <span class="step-title">{t().profile}</span>
               </li>
               <li class={`step ${step() >= 2 ? 'step-primary' : ''}`}>
                 <div class="step-circle"></div>
-                <span class="step-title">Package</span>
+                 <span class="step-title">{t().package}</span>
               </li>
               <li class={`step ${step() >= 3 ? 'step-primary' : ''}`}>
                 <div class="step-circle"></div>
-                <span class="step-title">Payment</span>
+                 <span class="step-title">{t().payment}</span>
               </li>
               <li class={`step ${step() >= 4 ? 'step-primary' : ''}`}>
                 <div class="step-circle"></div>
-                <span class="step-title">Welcome</span>
+                 <span class="step-title">{t().welcome}</span>
               </li>
             </ul>
           </div>
           <div class="text-center">
-            <div class="text-sm text-base-content/60">Step {step()} of 4</div>
+             <div class="text-sm text-base-content/60">{t().stepOf.replace('{step}', step())}</div>
             <progress
               class="progress progress-primary w-64 mx-auto mt-2"
               value={step()}
@@ -135,15 +135,15 @@ const Onboarding = () => {
                   <div class="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-primary/20 to-primary/10 rounded-full mb-4">
                     <i data-lucide="user" class="w-8 h-8 text-primary"></i>
                   </div>
-                  <h2 class="text-3xl font-bold mb-2">Set up your profile</h2>
-                  <p class="text-base-content/60">Tell us a bit about yourself to personalize your experience</p>
+                   <h2 class="text-3xl font-bold mb-2">{t().setupProfile}</h2>
+                   <p class="text-base-content/60">{t().tellAboutYourself}</p>
                 </div>
 
                 <div class="space-y-6">
                   <div class="form-control">
                     <label class="label">
-                      <span class="label-text font-semibold">Bio</span>
-                      <span class="label-text-alt text-base-content/50">Tell us about yourself</span>
+                       <span class="label-text font-semibold">{t().bio}</span>
+                       <span class="label-text-alt text-base-content/50">{t().tellUsAboutYourself}</span>
                     </label>
                     <textarea
                       class="textarea textarea-bordered w-full min-h-24 resize-none"
@@ -155,18 +155,18 @@ const Onboarding = () => {
 
                   <div class="form-control">
                     <label class="label">
-                      <span class="label-text font-semibold">Interests</span>
-                      <span class="label-text-alt text-base-content/50">What areas interest you most?</span>
+                       <span class="label-text font-semibold">{t().interests}</span>
+                       <span class="label-text-alt text-base-content/50">{t().whatInterestsYou}</span>
                     </label>
                     <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
-                      {[
-                        { name: 'Technology', icon: 'cpu' },
-                        { name: 'Business', icon: 'briefcase' },
-                        { name: 'Design', icon: 'palette' },
-                        { name: 'Marketing', icon: 'megaphone' },
-                        { name: 'Finance', icon: 'dollar-sign' },
-                        { name: 'AI/ML', icon: 'brain' }
-                      ].map((interest) => (
+                       {[
+                         { name: t().technology, icon: 'cpu' },
+                         { name: t().business, icon: 'briefcase' },
+                         { name: t().design, icon: 'palette' },
+                         { name: t().marketing, icon: 'megaphone' },
+                         { name: t().finance, icon: 'dollar-sign' },
+                         { name: t().aiMl, icon: 'brain' }
+                       ].map((interest) => (
                         <label class={`flex items-center gap-3 p-4 border-2 rounded-lg cursor-pointer transition-all duration-200 ${
                           onboardingData().interests.includes(interest.name)
                             ? 'border-primary bg-primary/5 shadow-md scale-105'
@@ -194,8 +194,8 @@ const Onboarding = () => {
 
                   <div class="form-control">
                     <label class="label">
-                      <span class="label-text font-semibold">Goals</span>
-                      <span class="label-text-alt text-base-content/50">What do you want to achieve?</span>
+                       <span class="label-text font-semibold">{t().goals}</span>
+                       <span class="label-text-alt text-base-content/50">{t().whatAchieve}</span>
                     </label>
                     <textarea
                       class="textarea textarea-bordered w-full min-h-24 resize-none"
@@ -215,40 +215,40 @@ const Onboarding = () => {
                   <div class="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-secondary/20 to-secondary/10 rounded-full mb-4">
                     <i data-lucide="package" class="w-8 h-8 text-secondary"></i>
                   </div>
-                  <h2 class="text-3xl font-bold mb-2">Choose your package</h2>
-                  <p class="text-base-content/60">Select the plan that best fits your needs</p>
+                   <h2 class="text-3xl font-bold mb-2">{t().choosePackage}</h2>
+                   <p class="text-base-content/60">{t().selectPlan}</p>
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                   {[
                     {
                       id: 'free',
-                      name: 'Free',
+                       name: t().free,
                       credits: 100,
                       price: 0,
                       period: 'forever',
                       popular: false,
-                      features: ['Basic AI features', 'Limited calls', 'Community support'],
+                       features: [t().basicAiFeatures, 'Limited calls', 'Community support'],
                       color: 'neutral'
                     },
                     {
                       id: 'pro',
-                      name: 'Pro',
+                       name: t().pro,
                       credits: 1000,
                       price: 9.99,
                       period: 'month',
                       popular: true,
-                      features: ['All AI features', 'Priority support', 'Advanced analytics', 'Export capabilities'],
+                       features: [t().allAiFeatures, 'Priority support', 'Advanced analytics', t().exportCapabilities],
                       color: 'primary'
                     },
                     {
                       id: 'enterprise',
-                      name: 'Enterprise',
+                       name: t().enterprise,
                       credits: 5000,
                       price: 29.99,
                       period: 'month',
                       popular: false,
-                      features: ['Everything in Pro', 'Custom integrations', 'Dedicated support', 'Team collaboration'],
+                       features: [t().everythingInPro, 'Custom integrations', 'Dedicated support', 'Team collaboration'],
                       color: 'secondary'
                     }
                   ].map((pkg) => (
@@ -262,7 +262,7 @@ const Onboarding = () => {
                     >
                       <div class="card-body p-6 text-center">
                         {pkg.popular && (
-                          <div class="badge badge-primary badge-sm mb-2">Most Popular</div>
+                          <div class="badge badge-primary badge-sm mb-2">{t().mostPopular}</div>
                         )}
                         <h3 class="card-title justify-center text-xl mb-2">{pkg.name}</h3>
                         <div class="mb-4">
@@ -288,8 +288,8 @@ const Onboarding = () => {
                 <div class="alert alert-info">
                   <i data-lucide="info" class="w-5 h-5"></i>
                   <div>
-                    <h4 class="font-bold">Flexible Plans</h4>
-                    <p>You can change your plan anytime. Credits roll over monthly and never expire.</p>
+                     <h4 class="font-bold">{t().flexiblePlans}</h4>
+                     <p>{t().planChangeMessage}</p>
                   </div>
                 </div>
               </div>
@@ -302,8 +302,8 @@ const Onboarding = () => {
                   <div class="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-accent/20 to-accent/10 rounded-full mb-4">
                     <i data-lucide="credit-card" class="w-8 h-8 text-accent"></i>
                   </div>
-                  <h2 class="text-3xl font-bold mb-2">Add payment method</h2>
-                  <p class="text-base-content/60">Securely add your payment information</p>
+                   <h2 class="text-3xl font-bold mb-2">{t().addPaymentMethod}</h2>
+                   <p class="text-base-content/60">{t().securelyAddPayment}</p>
                 </div>
 
                 <div class="mx-auto">
@@ -315,7 +315,7 @@ const Onboarding = () => {
                     <div class="space-y-4">
                       <div class="form-control">
                         <label class="label">
-                          <span class="label-text font-semibold">Card Type</span>
+                           <span class="label-text font-semibold">{t().cardType}</span>
                         </label>
                         <select
                           class="select select-bordered w-full"
@@ -331,7 +331,7 @@ const Onboarding = () => {
 
                       <div class="form-control">
                         <label class="label">
-                          <span class="label-text font-semibold">Card Number</span>
+                           <span class="label-text font-semibold">{t().cardNumber}</span>
                         </label>
                         <input
                           type="text"
@@ -345,7 +345,7 @@ const Onboarding = () => {
                       <div class="grid grid-cols-2 gap-4">
                         <div class="form-control">
                           <label class="label">
-                            <span class="label-text font-semibold">Expiry Date</span>
+                             <span class="label-text font-semibold">{t().expiryDate}</span>
                           </label>
                           <input
                             type="text"
@@ -357,7 +357,7 @@ const Onboarding = () => {
                         </div>
                         <div class="form-control">
                           <label class="label">
-                            <span class="label-text font-semibold">CVV</span>
+                             <span class="label-text font-semibold">{t().cvv}</span>
                           </label>
                           <input
                             type="text"
@@ -374,8 +374,8 @@ const Onboarding = () => {
                   <div class="alert alert-success mt-6">
                     <i data-lucide="shield" class="w-5 h-5"></i>
                     <div>
-                      <h4 class="font-bold">Secure Payment</h4>
-                      <p>Your payment information is encrypted and secure. We never store your CVV.</p>
+                       <h4 class="font-bold">{t().securePayment}</h4>
+                       <p>{t().paymentSecurityMessage}</p>
                     </div>
                   </div>
                 </div>
@@ -388,42 +388,42 @@ const Onboarding = () => {
                 <div class="inline-flex items-center justify-center w-24 h-24 bg-gradient-to-br from-success/20 to-success/10 rounded-full mb-6">
                   <i data-lucide="check-circle" class="w-12 h-12 text-success"></i>
                 </div>
-                <h2 class="text-4xl font-bold mb-4">Welcome to Accelerator!</h2>
-                <p class="text-xl text-base-content/70 mb-8 max-w-2xl mx-auto">
-                  You're all set up and ready to start building your startup. Let's turn your ideas into reality!
-                </p>
+                 <h2 class="text-4xl font-bold mb-4">{t().welcomeToAcceleratorExclaim}</h2>
+                 <p class="text-xl text-base-content/70 mb-8 max-w-2xl mx-auto">
+                   {t().allSetMessage}
+                 </p>
 
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
                   <div class="stat bg-base-200 rounded-lg p-4">
                     <div class="stat-figure text-primary">
                       <i data-lucide="user" class="w-6 h-6"></i>
                     </div>
-                    <div class="stat-title">Profile</div>
-                    <div class="stat-value text-lg">Complete</div>
-                    <div class="stat-desc">Personalized experience</div>
+                     <div class="stat-title">{t().profile}</div>
+                     <div class="stat-value text-lg">{t().complete}</div>
+                     <div class="stat-desc">{t().personalizedExperience}</div>
                   </div>
 
                   <div class="stat bg-base-200 rounded-lg p-4">
                     <div class="stat-figure text-secondary">
                       <i data-lucide="package" class="w-6 h-6"></i>
                     </div>
-                    <div class="stat-title">Package</div>
-                    <div class="stat-value text-lg">{onboardingData().selectedPackage || 'Free'}</div>
-                    <div class="stat-desc">Ready to use</div>
+                     <div class="stat-title">{t().package}</div>
+                     <div class="stat-value text-lg">{onboardingData().selectedPackage || t().free}</div>
+                     <div class="stat-desc">{t().readyToUse}</div>
                   </div>
 
                   <div class="stat bg-base-200 rounded-lg p-4">
                     <div class="stat-figure text-accent">
                       <i data-lucide="credit-card" class="w-6 h-6"></i>
                     </div>
-                    <div class="stat-title">Payment</div>
-                    <div class="stat-value text-lg">Set up</div>
-                    <div class="stat-desc">Secure & ready</div>
+                     <div class="stat-title">{t().payment}</div>
+                     <div class="stat-value text-lg">{t().setUp}</div>
+                     <div class="stat-desc">{t().secureReady}</div>
                   </div>
                 </div>
 
                 <div class="text-6xl mb-6">🚀</div>
-                <p class="text-base-content/60">Click "Get Started" to begin your journey</p>
+                 <p class="text-base-content/60">{t().clickGetStarted}</p>
               </div>
             )}
 
@@ -441,7 +441,7 @@ const Onboarding = () => {
               disabled={step() === 1}
             >
               <i data-lucide="arrow-left" class="w-5 h-5"></i>
-              Previous
+               {t().previous}
             </button>
 
             <div class="flex flex-col items-center gap-2">
@@ -467,16 +467,16 @@ const Onboarding = () => {
               {loading() ? (
                 <>
                   <span class="loading loading-spinner loading-sm"></span>
-                  Processing...
+                   {t().processing}
                 </>
               ) : step() === 4 ? (
                 <>
-                  Get Started
+                   {t().getStarted}
                   <i data-lucide="rocket" class="w-5 h-5"></i>
                 </>
               ) : (
                 <>
-                  Next
+                  {t().next}
                   <i data-lucide="arrow-right" class="w-5 h-5"></i>
                 </>
               )}

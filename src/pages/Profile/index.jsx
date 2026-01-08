@@ -57,9 +57,9 @@ const Profile = () => {
       {/* Header */}
       <div class="text-center">
         <h1 class="text-4xl font-bold text-base-content mb-4">{t().profile}</h1>
-        <p class="text-lg text-base-content/70">
-          View and manage your profile information
-        </p>
+         <p class="text-lg text-base-content/70">
+           {t().viewManageProfile}
+         </p>
       </div>
 
       {/* Profile Overview Card */}
@@ -93,11 +93,11 @@ const Profile = () => {
             <div class="flex flex-col gap-2">
               <button class="btn btn-primary btn-sm">
                 <i data-lucide="edit" class="w-4 h-4 mr-1"></i>
-                Edit Profile
+                   {t().editProfile}
               </button>
               <div class="flex items-center gap-2 text-sm text-base-content/60">
                 <div class="w-2 h-2 bg-success rounded-full animate-pulse"></div>
-                Online
+                 {t().online}
               </div>
             </div>
           </div>
@@ -111,13 +111,13 @@ const Profile = () => {
             <div class="card-body">
               <h3 class="card-title">
                 <i data-lucide="user" class="w-5 h-5 mr-2"></i>
-                Personal Information
+                 {t().personalInformation}
               </h3>
               <div class="space-y-4">
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <label class="label">
-                      <span class="label-text font-medium">Full Name</span>
+                       <span class="label-text font-medium">{t().fullName}</span>
                     </label>
                     <div class="flex items-center gap-2 p-3 bg-base-200 rounded-lg">
                       <i data-lucide="user" class="w-4 h-4 text-base-content/60"></i>
@@ -126,7 +126,7 @@ const Profile = () => {
                   </div>
                   <div>
                     <label class="label">
-                      <span class="label-text font-medium">Email Address</span>
+                       <span class="label-text font-medium">{t().emailAddress}</span>
                     </label>
                     <div class="flex items-center gap-2 p-3 bg-base-200 rounded-lg">
                       <i data-lucide="mail" class="w-4 h-4 text-base-content/60"></i>
@@ -136,15 +136,15 @@ const Profile = () => {
                 </div>
                 <div>
                   <label class="label">
-                    <span class="label-text font-medium">Bio</span>
+                     <span class="label-text font-medium">{t().bio}</span>
                   </label>
                   <div class="p-3 bg-base-200 rounded-lg">
-                    <p class="text-base-content/80">{user().profile.bio || 'No bio added yet.'}</p>
+                     <p class="text-base-content/80">{user().profile.bio || t().noBioYet}</p>
                   </div>
                 </div>
                 <div>
                   <label class="label">
-                    <span class="label-text font-medium">Member Since</span>
+                     <span class="label-text font-medium">{t().memberSince}</span>
                   </label>
                   <div class="flex items-center gap-2 p-3 bg-base-200 rounded-lg">
                     <i data-lucide="calendar" class="w-4 h-4 text-base-content/60"></i>
@@ -160,7 +160,7 @@ const Profile = () => {
             <div class="card-body">
               <h3 class="card-title">
                 <i data-lucide="activity" class="w-5 h-5 mr-2"></i>
-                Recent Activity
+                 {t().recentActivity}
               </h3>
               <div class="space-y-3">
                 {credits().slice(0, 5).map((transaction) => (
@@ -182,7 +182,7 @@ const Profile = () => {
                 {user().credits.transactions.length === 0 && (
                   <div class="text-center py-8 text-base-content/60">
                     <i data-lucide="inbox" class="w-8 h-8 mx-auto mb-2 opacity-50"></i>
-                    <p>No recent activity</p>
+                     <p>{t().noRecentActivity}</p>
                   </div>
                 )}
               </div>
@@ -197,25 +197,25 @@ const Profile = () => {
             <div class="card-body">
               <h3 class="card-title">
                 <i data-lucide="credit-card" class="w-5 h-5 mr-2"></i>
-                Subscription
+                 {t().subscription}
               </h3>
               <div class="space-y-4">
                 <div class="flex justify-between items-center">
-                  <span class="font-medium">Plan</span>
+                   <span class="font-medium">{t().plan}</span>
                   <span class="badge badge-primary">{user().subscription.plan}</span>
                 </div>
                 <div class="flex justify-between items-center">
-                  <span class="font-medium">Status</span>
+                   <span class="font-medium">{t().status}</span>
                   <span class={`badge ${user().subscription.status === 'active' ? 'badge-success' : 'badge-warning'}`}>
                     {user().subscription.status}
                   </span>
                 </div>
                 <div class="flex justify-between items-center">
-                  <span class="font-medium">Credits</span>
+                   <span class="font-medium">{t().credits}</span>
                   <span class="font-semibold">{user().credits.balance} / {user().subscription.maxCredits}</span>
                 </div>
                 <div class="flex justify-between items-center">
-                  <span class="font-medium">Renewal</span>
+                   <span class="font-medium">{t().renewal}</span>
                   <span class="text-sm">{formatDate(user().subscription.renewalDate)}</span>
                 </div>
                 <div class="w-full bg-base-200 rounded-full h-2">
@@ -233,24 +233,24 @@ const Profile = () => {
             <div class="card-body">
               <h3 class="card-title">
                 <i data-lucide="bar-chart" class="w-5 h-5 mr-2"></i>
-                Statistics
+                 {t().statistics}
               </h3>
               <div class="space-y-3">
                 <div class="flex justify-between">
-                  <span>Total Credits Used</span>
+                   <span>{t().totalCreditsUsed}</span>
                   <span class="font-semibold">{credits().filter(c => c.type === 'usage').reduce((sum, c) => sum + Math.abs(c.amount), 0)}</span>
                 </div>
                 <div class="flex justify-between">
-                  <span>Projects</span>
+                   <span>{t().projects}</span>
                   <span class="font-semibold">0</span>
                 </div>
                 <div class="flex justify-between">
-                  <span>Storage Used</span>
+                   <span>{t().storageUsed}</span>
                   <span class="font-semibold">0 MB</span>
                 </div>
                 {getLastActivity() && (
                   <div class="flex justify-between">
-                    <span>Last Activity</span>
+                     <span>{t().lastActivity}</span>
                     <span class="font-semibold text-sm">
                       {formatDate(getLastActivity().toISOString().split('T')[0])}
                     </span>
@@ -265,20 +265,20 @@ const Profile = () => {
             <div class="card-body">
               <h3 class="card-title">
                 <i data-lucide="settings" class="w-5 h-5 mr-2"></i>
-                Quick Actions
+                 {t().quickActions}
               </h3>
               <div class="space-y-2">
                 <button class="btn btn-outline btn-sm w-full justify-start">
                   <i data-lucide="edit" class="w-4 h-4 mr-2"></i>
-                  Edit Profile
+                  {t().editProfile}
                 </button>
                 <button class="btn btn-outline btn-sm w-full justify-start">
                   <i data-lucide="key" class="w-4 h-4 mr-2"></i>
-                  Change Password
+                   {t().changePassword}
                 </button>
                 <button class="btn btn-outline btn-sm w-full justify-start">
                   <i data-lucide="download" class="w-4 h-4 mr-2"></i>
-                  Export Data
+                   {t().exportData}
                 </button>
               </div>
             </div>

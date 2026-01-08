@@ -11,6 +11,9 @@ import { billingTranslations } from './translations-billing.js';
 import { sidebarTranslations } from './translations-sidebar.js';
 import { agentTranslations } from './translations-agent.js';
 import { helpTranslations } from './translations-help.js';
+import { authTranslations } from './translations-auth.js';
+import { onboardingTranslations } from './translations-onboarding.js';
+import { profileTranslations } from './translations-profile.js';
 
 // Exports
 export { navigationTranslations };
@@ -25,6 +28,9 @@ export { billingTranslations };
 export { sidebarTranslations };
 export { agentTranslations };
 export { helpTranslations };
+export { authTranslations };
+export { onboardingTranslations };
+export { profileTranslations };
 
 export const translations = {
   en: {
@@ -40,6 +46,9 @@ export const translations = {
     ...sidebarTranslations.en,
     ...agentTranslations.en,
     ...helpTranslations.en,
+    ...authTranslations.en,
+    ...onboardingTranslations.en,
+    ...profileTranslations.en,
   },
   ar: {
     ...navigationTranslations.ar,
@@ -54,5 +63,8 @@ export const translations = {
     ...sidebarTranslations.ar,
     ...agentTranslations.ar,
     ...helpTranslations.ar,
+    ...authTranslations.ar,
+    ...onboardingTranslations.ar,
+    ...profileTranslations.ar,
   }
 };

@@ -43,7 +43,7 @@ const ForgotPassword = () => {
     <div class="card max-w-md mx-auto shadow-2xl bg-base-100 border border-base-300 backdrop-blur-sm">
         <div class="card-body">
            <div class="text-center mb-8">
-             <img src="/src/assets/iGate-tech-logo.svg" alt="iGate Logo" class="h-12 w-auto mx-auto mb-4" />
+             <img src="/src/assets/iGate-tech-logo.svg" alt="iGate Logo" class="h-12 w-auto block mx-auto mb-6" />
               <h2 class="text-2xl font-bold">{t().resetPassword}</h2>
               <p class="text-base-content/60">{t().enterEmailReset}</p>
           </div>

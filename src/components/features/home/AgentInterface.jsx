@@ -66,16 +66,15 @@ const AgentInterface = (props) => {
             }
           }
 
-         // Animate card entrance with scale and shadow
-         anime({
-           targets: cardRef,
-           scale: [0.95, 1],
-           opacity: [0, 1],
-           boxShadow: ['0 0 0 rgba(0,0,0,0)', '0 25px 50px -12px rgba(0, 0, 0, 0.25)'],
-           duration: 600,
-           easing: 'easeOutBack',
-           delay: 400
-         });
+          // Animate card entrance with scale
+          anime({
+            targets: cardRef,
+            scale: [0.95, 1],
+            opacity: [0, 1],
+            duration: 600,
+            easing: 'easeOutExpo',
+            delay: 300
+          });
 
          // Animate buttons with stagger and rotation
          anime({

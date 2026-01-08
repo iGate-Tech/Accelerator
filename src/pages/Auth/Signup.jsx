@@ -123,7 +123,7 @@ const Signup = () => {
     <RouteGuard>
       <div class="w-full max-w-md mx-auto">
 
-         <div class="card w-full shadow-2xl bg-base-100 border border-base-300 backdrop-blur-sm">
+         <div class="card w-full py-6 shadow-2xl bg-base-100 border border-base-300 backdrop-blur-sm">
         <div class="card-body">
           <div class="text-center mb-8">
              <img src="/src/assets/iGate-tech-logo.svg" alt="iGate Logo" class="h-12 w-auto block mx-auto mb-6" />

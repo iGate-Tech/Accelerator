@@ -3,6 +3,7 @@ import { useNavigate } from "@solidjs/router";
 import { useUser } from "../../context/UserContext";
 import { useLanguage } from "../../hooks/useLanguage";
 import { toastManager } from "../../lib/feedback";
+import RouteGuard from "../../components/common/RouteGuard";
 
 const ForgotPassword = () => {
   const navigate = useNavigate();
@@ -40,58 +41,62 @@ const ForgotPassword = () => {
   });
 
   return (
-    <div class="card max-w-md mx-auto shadow-2xl bg-base-100 border border-base-300 backdrop-blur-sm">
-        <div class="card-body">
-           <div class="text-center mb-8">
-             <img src="/src/assets/iGate-tech-logo.svg" alt="iGate Logo" class="h-12 w-auto block mx-auto mb-6" />
+    <RouteGuard>
+      <div class="w-full max-w-md mx-auto">
+        <div class="card w-full py-6 shadow-2xl bg-base-100 border border-base-300 backdrop-blur-sm">
+          <div class="card-body">
+            <div class="text-center mb-8">
+              <img src="/src/assets/iGate-tech-logo.svg" alt="iGate Logo" class="h-12 w-auto block mx-auto mb-6" />
               <h2 class="text-2xl font-bold">{t().resetPassword}</h2>
               <p class="text-base-content/60">{t().enterEmailReset}</p>
-          </div>
-
-          <form onSubmit={handleReset} class="space-y-4">
-            <div>
-               <label class="label">
-                 <span class="label-text">{t().email}</span>
-               </label>
-               <input
-                 type="email"
-                 placeholder={t().emailPlaceholder}
-                 class="input input-bordered w-full"
-                 value={email()}
-                 onInput={(e) => setEmail(e.target.value)}
-                 required
-               />
             </div>
 
-            <button
-              type="submit"
-              class="btn btn-primary w-full"
-              disabled={loading()}
-            >
-              {loading() && <span class="loading loading-spinner loading-sm"></span>}
-               {t().sendResetLink}
-            </button>
-          </form>
+            <form onSubmit={handleReset} class="space-y-4">
+              <div>
+                <label class="label">
+                  <span class="label-text">{t().email}</span>
+                </label>
+                <input
+                  type="email"
+                  placeholder={t().emailPlaceholder}
+                  class="input input-bordered w-full"
+                  value={email()}
+                  onInput={(e) => setEmail(e.target.value)}
+                  required
+                />
+              </div>
 
-           <div class="text-center">
-             <button class="btn btn-ghost btn-sm" onClick={() => navigate('/login')}>
-               {t().backToLogin}
-             </button>
-           </div>
-         </div>
+              <button
+                type="submit"
+                class="btn btn-primary w-full"
+                disabled={loading()}
+              >
+                {loading() && <span class="loading loading-spinner loading-sm"></span>}
+                {t().sendResetLink}
+              </button>
+            </form>
 
-         {/* Footer */}
-         <footer class="mt-8 text-center text-sm text-base-content/60">
-           <div class="flex flex-wrap justify-center space-x-6 mb-4">
-             <a href="/help" class="link link-hover">{t().help}</a>
-             <a href="/privacy-policy" class="link link-hover">{t().privacyPolicy}</a>
-             <a href="/terms-of-service" class="link link-hover">{t().termsOfService}</a>
-             <a href="/status" class="link link-hover">{t().statusPage}</a>
-             <a href="/changelog" class="link link-hover">{t().changelog}</a>
-           </div>
-            <p>© {new Date().getFullYear()} iGate. <em>"One Gate, Endless Possibilities."</em></p>
-         </footer>
-       </div>
+            <div class="text-center">
+              <button class="btn btn-ghost btn-sm" onClick={() => navigate('/login')}>
+                {t().backToLogin}
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Footer */}
+        <footer class="mt-8 text-center text-sm text-base-content/60">
+          <div class="flex flex-wrap justify-center space-x-6 mb-4">
+            <a href="/help" class="link link-hover">{t().help}</a>
+            <a href="/privacy-policy" class="link link-hover">{t().privacyPolicy}</a>
+            <a href="/terms-of-service" class="link link-hover">{t().termsOfService}</a>
+            <a href="/status" class="link link-hover">{t().statusPage}</a>
+            <a href="/changelog" class="link link-hover">{t().changelog}</a>
+          </div>
+          <p>© {new Date().getFullYear()} iGate. <em>"One Gate, Endless Possibilities."</em></p>
+        </footer>
+      </div>
+    </RouteGuard>
   );
 };
 

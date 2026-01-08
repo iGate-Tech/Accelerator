@@ -1,7 +1,7 @@
 import { createSignal, createEffect, onMount, For, Show, createResource, useContext } from "solid-js";
 import { useNavigate, A } from "@solidjs/router";
-import { LangContext } from "../context/LangContext";
-import { translations } from "../assets/translations/translations-index.js";
+import { LangContext } from "../../context/LangContext";
+import { translations } from "../../assets/translations/translations-index.js";
 
 const Help = () => {
   const navigate = useNavigate();
@@ -408,7 +408,7 @@ Use consistent naming conventions and color coding for easy navigation.`
    ];
 
   return (
-     <div class={`max-w-6xl mx-auto space-y-12 mt-20 py-8 ${currentLang() === 'ar' ? 'rtl' : 'ltr'}`}>
+     <div class={`max-w-6xl mx-auto space-y-12  py-8 ${currentLang() === 'ar' ? 'rtl' : 'ltr'}`}>
        {/* Header with Search */}
        <div class="text-center py-8">
          <h1 class="text-4xl font-bold text-base-content mb-4">{t().helpDocumentation}</h1>

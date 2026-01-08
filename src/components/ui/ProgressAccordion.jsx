@@ -1,5 +1,5 @@
 import { Show, For, createMemo, onMount } from "solid-js";
-import { stepOrder, modelCumul } from "../lib/machine";
+import { stepOrder, modelCumul } from "../../lib/machine";
 
 const getBadgeClass = (state) => {
   const classes = {

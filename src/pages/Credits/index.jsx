@@ -1,7 +1,7 @@
 import { createSignal, onMount, For, Show, useContext } from "solid-js";
-import { useUser } from "../context/UserContext";
-import { LangContext } from "../context/LangContext";
-import { translations } from "../assets/translations/translations-index.js";
+import { useUser } from "../../context/UserContext";
+import { LangContext } from "../../context/LangContext";
+import { translations } from "../../assets/translations/translations-index.js";
 
 const Credits = () => {
   const { user, addCreditTransaction } = useUser();
@@ -84,7 +84,7 @@ const Credits = () => {
   });
 
   return (
-    <div class="max-w-6xl mx-auto space-y-8 mt-20">
+    <div class="max-w-6xl mx-auto space-y-8 ">
       {/* Header */}
       <div class="text-center">
         <h1 class="text-4xl font-bold text-base-content mb-4">{t().creditsUsage}</h1>

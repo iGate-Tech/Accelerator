@@ -1,9 +1,9 @@
 import { createSignal, createResource, createMemo, onMount, For, Show, useContext } from "solid-js";
 import { A, useNavigate } from "@solidjs/router";
-import { getProjects } from "../lib/db";
-import { LangContext } from "../context/LangContext";
-import { dashboardTranslations } from "../assets/translations/translations-index.js";
-import ProjectCard from "./ProjectCard";
+import { getProjects } from "../../lib/db";
+import { LangContext } from "../../context/LangContext";
+import { dashboardTranslations } from "../../assets/translations/translations-index.js";
+import ProjectCard from "../../components/ui/ProjectCard";
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -116,7 +116,7 @@ const Dashboard = () => {
   });
 
   return (
-    <div class="space-y-8 mt-20">
+    <div class="space-y-8 ">
       {/* Header */}
       <div class="text-center py-6">
         <h1 class="text-4xl font-bold text-base-content mb-2">{t().dashboard}</h1>

@@ -9,10 +9,10 @@ import {
   deleteGroup,
   addProjectToGroup,
   removeProjectFromGroup
-} from "../lib/db";
-import { LangContext } from "../context/LangContext";
-import { translations } from "../assets/translations/translations-index.js";
-import ProjectCard from "./ProjectCard";
+} from "../../lib/db";
+import { LangContext } from "../../context/LangContext";
+import { translations } from "../../assets/translations/translations-index.js";
+import ProjectCard from "../../components/ui/ProjectCard";
 
 const Portfolio = () => {
   const navigate = useNavigate();
@@ -140,7 +140,7 @@ const Portfolio = () => {
   ];
 
   return (
-    <div class={`space-y-6 mt-20 ${currentLang() === 'ar' ? 'rtl' : 'ltr'}`}>
+    <div class={`space-y-6  ${currentLang() === 'ar' ? 'rtl' : 'ltr'}`}>
       {/* Header */}
       <div class="flex justify-between items-center">
         <div>

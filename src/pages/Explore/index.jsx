@@ -1,9 +1,9 @@
 import { createSignal, createResource, createMemo, onMount, For, Show, createEffect, useContext } from "solid-js";
 import { A, useNavigate } from "@solidjs/router";
-import { getProjects } from "../lib/db";
-import { LangContext } from "../context/LangContext";
-import { translations } from "../assets/translations/translations-index.js";
-import ProjectCard from "./ProjectCard";
+import { getProjects } from "../../lib/db";
+import { LangContext } from "../../context/LangContext";
+import { translations } from "../../assets/translations/translations-index.js";
+import ProjectCard from "../../components/ui/ProjectCard";
 
 const Explore = () => {
   const { lang } = useContext(LangContext);
@@ -82,7 +82,7 @@ const Explore = () => {
   ];
 
   return (
-    <div class={`space-y-6 mt-20 ${currentLang() === 'ar' ? 'rtl' : 'ltr'}`}>
+    <div class={`space-y-6  ${currentLang() === 'ar' ? 'rtl' : 'ltr'}`}>
       {/* Header */}
       <div class="text-center py-8">
         <h1 class="text-4xl font-bold text-base-content mb-4">{t().exploreProjects}</h1>

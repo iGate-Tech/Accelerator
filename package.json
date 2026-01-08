@@ -23,6 +23,7 @@
     "@tailwindcss/cli": "^4.1.18",
     "@tailwindcss/typography": "^0.5.19",
     "@xstate/solid": "^2.0.0",
+    "animate.css": "^4.1.1",
     "body-parser": "^2.2.1",
     "daisyui": "^5.5.14",
     "dotenv": "^17.2.3",

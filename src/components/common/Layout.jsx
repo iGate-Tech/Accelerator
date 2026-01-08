@@ -1,11 +1,11 @@
 import {onMount, createEffect, createSignal, useContext} from "solid-js";
 import {useNavigate} from "@solidjs/router";
-import {LangContext} from "../context/LangContext";
-import {getPg} from "../lib/db";
+import {LangContext} from "../../context/LangContext";
+import {getPg} from "../../lib/db";
 
 import Navbar from "./Navbar";
 import Sidebar from "./Sidebar";
-import favicon from "../assets/favicon.svg";
+import favicon from "../../assets/favicon.svg";
 
 const Layout = (props) => {
     const navigate = useNavigate();

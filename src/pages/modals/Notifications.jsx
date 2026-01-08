@@ -1,6 +1,6 @@
 import { createSignal, onMount, createEffect, useContext } from "solid-js";
-import { LangContext } from "../context/LangContext";
-import { translations } from "../assets/translations/translations-index.js";
+import { LangContext } from "../../context/LangContext";
+import { translations } from "../../assets/translations/translations-index.js";
 
 const Notifications = () => {
   const { lang } = useContext(LangContext);

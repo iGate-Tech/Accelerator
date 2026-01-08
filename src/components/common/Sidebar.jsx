@@ -1,9 +1,9 @@
 import { A, useLocation, useNavigate } from "@solidjs/router";
 import { useContext, onMount, createSignal, createEffect, For, Show, createMemo } from "solid-js";
-import { LangContext } from "../context/LangContext";
-import { useUser } from "../context/UserContext";
-import { translations } from "../assets/translations/translations-index.js";
-import { getProjects, updateProject, deleteProject, deleteAllProjects, exportAllProjects } from "../lib/db";
+import { LangContext } from "../../context/LangContext";
+import { useUser } from "../../context/UserContext";
+import { translations } from "../../assets/translations/translations-index.js";
+import { getProjects, updateProject, deleteProject, deleteAllProjects, exportAllProjects } from "../../lib/db";
 
 const Sidebar = () => {
   const { lang } = useContext(LangContext);

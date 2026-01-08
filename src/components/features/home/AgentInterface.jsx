@@ -1,10 +1,10 @@
  import { Show, For, createMemo, createEffect, useContext } from "solid-js";
  import { createSignal } from "solid-js";
- import { machineStore, stepOrder, modelCumul } from "../lib/machine";
- import ProgressAccordion from "./ProgressAccordion";
- import { getProjectById } from "../lib/db";
- import { LangContext } from "../context/LangContext";
- import { translations } from "../assets/translations/translations-index.js";
+  import { machineStore, stepOrder, modelCumul } from "../../../lib/machine";
+  import ProgressAccordion from "../../ui/ProgressAccordion";
+  import { getProjectById } from "../../../lib/db";
+  import { LangContext } from "../../../context/LangContext";
+  import { translations } from "../../../assets/translations/translations-index.js";
 
 const getBadgeClass = () => {
   const classes = {

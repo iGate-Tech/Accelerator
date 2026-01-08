@@ -2,22 +2,22 @@ import { Router, Route } from "@solidjs/router";
 import { lazy } from "solid-js";
 import { LangProvider } from "./context/LangContext";
 import { UserProvider } from "./context/UserContext";
-import Layout from "./components/Layout";
-import Dashboard from "./components/Dashboard";
-import Explore from "./components/Explore";
-import Portfolio from "./components/Portfolio";
-import Help from "./components/Help";
-import Settings from "./components/Settings";
-import Packages from "./components/Packages";
-import Credits from "./components/Credits";
-import Billing from "./components/Billing";
-import PrivacyPolicy from "./components/PrivacyPolicy";
-import TermsOfService from "./components/TermsOfService";
-import StatusPage from "./components/StatusPage";
-import Changelog from "./components/Changelog";
-import Notifications from "./components/Notifications";
+import Layout from "./components/common/Layout";
+import Dashboard from "./pages/Dashboard";
+import Explore from "./pages/Explore";
+import Portfolio from "./pages/Portfolio";
+import Help from "./pages/Help";
+import Settings from "./pages/Settings";
+import Packages from "./pages/Packages";
+import Credits from "./pages/Credits";
+import Billing from "./pages/Billing";
+import PrivacyPolicy from "./pages/modals/PrivacyPolicy";
+import TermsOfService from "./pages/modals/TermsOfService";
+import StatusPage from "./pages/modals/StatusPage";
+import Changelog from "./pages/modals/Changelog";
+import Notifications from "./pages/modals/Notifications";
 
-const Home = lazy(() => import("./components/Home"));
+const Home = lazy(() => import("./pages/Home"));
 
 const App = () => (
   <LangProvider>

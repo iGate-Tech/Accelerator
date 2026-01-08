@@ -1,9 +1,9 @@
 import { A, useLocation, useNavigate } from "@solidjs/router";
 import { useContext, createSignal, onMount, createEffect } from "solid-js";
-import { LangContext } from "../context/LangContext";
-import { useUser } from "../context/UserContext";
-import { translations } from "../assets/translations/translations-index.js";
-import avatar from "../assets/avatar.png";
+import { LangContext } from "../../context/LangContext";
+import { useUser } from "../../context/UserContext";
+import { translations } from "../../assets/translations/translations-index.js";
+import avatar from "../../assets/avatar.png";
 
 const Navbar = () => {
   const { lang, setLang, serverReachable } = useContext(LangContext);
@@ -104,7 +104,7 @@ const Navbar = () => {
           <div tabindex="0" role="button" class="btn btn-ghost btn-circle">
             <i data-lucide="menu" class="w-5 h-5"></i>
           </div>
-            <ul tabindex="0" class="menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow-lg bg-base-100 rounded-lg w-52 border border-base-200">
+             <ul tabindex="0" class="menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow-xl bg-base-100 rounded-lg w-52 border border-base-200">
               <li classList={{ active: location.pathname === '/' }}><A href="/" class="flex items-center gap-2"><i data-lucide="home" class="w-4 h-4"></i>{t().home}</A></li>
               <li classList={{ active: location.pathname === '/dashboard' }}><A href="/dashboard" class="flex items-center gap-2"><i data-lucide="bar-chart" class="w-4 h-4"></i>{t().dashboard}</A></li>
               <li classList={{ active: location.pathname === '/explore' }}><A href="/explore" class="flex items-center gap-2"><i data-lucide="search" class="w-4 h-4"></i>{t().explore}</A></li>
@@ -141,16 +141,16 @@ const Navbar = () => {
          <div class={`dropdown ${currentLang() === 'ar' ? 'dropdown-right' : 'dropdown-left'}`}>
            <div tabindex="0" role="button" class="btn btn-ghost btn-circle relative">
              <i data-lucide="bell" class="w-5 h-5"></i>
-              {notifications().filter(n => !n.read).length > 0 && (
-                <span class="badge badge-primary absolute -top-1 -right-1 w-5 h-5 text-xs animate-ping">{notifications().filter(n => !n.read).length}</span>
-              )}
+               {notifications().filter(n => !n.read).length > 0 && (
+                 <span class="badge badge-primary absolute -top-1 -right-1 w-5 h-5 text-xs animate-pulse">{notifications().filter(n => !n.read).length}</span>
+               )}
            </div>
-            <ul tabindex="0" class="menu menu-sm dropdown-content mt-3 z-10 p-0 shadow-lg bg-base-100 rounded-lg w-64 max-h-96 overflow-y-auto overflow-x-hidden border border-base-200 transition-all duration-200">
+             <ul tabindex="0" class="menu menu-sm dropdown-content mt-3 z-10 p-0 shadow-xl bg-base-100 rounded-lg w-64 max-h-96 overflow-y-auto overflow-x-hidden border border-base-200 transition-all duration-200">
               <li class="p-4 pb-2 text-xs uppercase font-semibold text-base-content/60 border-b border-base-200">{t().notifications}</li>
               <li class="px-4 py-2">
                 <div class="tabs tabs-boxed">
-                  <a class={`tab tab-xs ${dropdownFilter() === 'all' ? 'tab-active' : ''}`} onClick={() => setDropdownFilter('all')}>All</a>
-                  <a class={`tab tab-xs ${dropdownFilter() === 'unread' ? 'tab-active' : ''}`} onClick={() => setDropdownFilter('unread')}>Unread</a>
+                  <a class={`tab tab-xs ${dropdownFilter() === 'all' ? 'tab-active' : ''}`} onClick={(e) => { e.stopPropagation(); setDropdownFilter('all'); }}>All</a>
+                  <a class={`tab tab-xs ${dropdownFilter() === 'unread' ? 'tab-active' : ''}`} onClick={(e) => { e.stopPropagation(); setDropdownFilter('unread'); }}>Unread</a>
                 </div>
               </li>
 
@@ -160,8 +160,8 @@ const Navbar = () => {
                   {dropdownFilter() === 'unread' ? 'No unread notifications' : 'No notifications'}
                 </li>
               ) : (
-                filteredDropdown().map((notif, index) => (
-                  <li key={index} class={`p-3 hover:bg-base-200 dark:hover:bg-base-700 cursor-pointer transition-all duration-200 ${!notif.read ? 'bg-primary/5 border-l-4 border-primary animate-pulse' : ''}`} onClick={() => setNotifications(notifications().map((n, i) => i === index ? {...n, read: true} : n))}>
+                 filteredDropdown().map((notif, index) => (
+                   <li key={index} class={`p-3 hover:bg-base-200 dark:hover:bg-base-700 cursor-pointer transition-all duration-200 ${!notif.read ? 'bg-primary/5 border-l-4 border-primary animate-pulse' : ''}`} onClick={(e) => { e.stopPropagation(); setNotifications(notifications().map((n, i) => i === index ? {...n, read: true} : n)); }}>
                     <div class="flex items-start gap-3">
                       <div class={`p-1 rounded-full ${notif.type === 'newMessage' ? 'bg-info text-info-content' : notif.type === 'systemUpdate' ? 'bg-success text-success-content' : 'bg-warning text-warning-content'}`}>
                         <i data-lucide={notif.type === 'newMessage' ? 'message-circle' : notif.type === 'systemUpdate' ? 'settings' : 'clock'} class="w-4 h-4"></i>
@@ -178,7 +178,7 @@ const Navbar = () => {
               )}
               <li class="p-3 border-t border-base-200">
                 <div class="flex gap-2">
-                  <button class="btn btn-sm btn-primary flex-1" onClick={() => setNotifications(notifications().map(n => ({...n, read: true})))}>
+                  <button class="btn btn-sm btn-primary flex-1" disabled={notifications().every(n => n.read)} onClick={(e) => { e.stopPropagation(); setNotifications(notifications().map(n => ({...n, read: true}))); }}>
                     <i data-lucide="check-circle" class="w-4 h-4"></i>
                     Mark all
                   </button>
@@ -191,33 +191,47 @@ const Navbar = () => {
             </ul>
           </div>
 
-          <div class={`dropdown dropdown-top ${currentLang() === 'ar' ? 'dropdown-right' : 'dropdown-left'}`}>
-            <div tabindex="0" role="button" class="btn btn-ghost btn-circle avatar">
+          <div class={`dropdown dropdown-bottom ${currentLang() === 'ar' ? 'dropdown-right' : 'dropdown-left'}`}>
+            <div tabindex="0" role="button" class="btn btn-ghost btn-circle avatar relative">
               <div class="w-8 rounded-full">
                 <img src={avatar} alt="User avatar" />
               </div>
+              <div class="absolute bottom-0 right-0 w-3 h-3 bg-success border-2 border-base-100 rounded-full"></div>
             </div>
-             <ul tabindex="0" class="menu menu-sm dropdown-content mt-3 z-[1] p-0 shadow-lg bg-base-100 rounded-lg w-64 border border-base-200 transition-all duration-200">
-               <li class="p-4 pb-2 text-xs uppercase font-semibold text-base-content/60 border-b border-base-200 flex items-center gap-2"><i data-lucide="user" class="w-4 h-4"></i>User Account</li>
-              <li class="p-4 border-b border-base-200">
-                <div class="flex items-center gap-3">
-                  <div class="avatar">
-                    <div class="w-10 rounded-full">
+             <ul tabindex="0" class="menu menu-sm dropdown-content mt-3 z-10 p-0 shadow-xl bg-base-100 rounded-xl w-72 border border-base-200 transition-all duration-300 overflow-hidden">
+              <li class="p-5 border-b border-base-200 bg-gradient-to-br from-primary/5 via-base-100 to-secondary/5">
+                <div class="flex items-center gap-4">
+                  <div class="avatar relative">
+                    <div class="w-14 rounded-full ring ring-primary/20">
                       <img src={avatar} alt="Avatar" />
                     </div>
+                    <div class="absolute bottom-0 right-0 w-4 h-4 bg-success border-2 border-base-100 rounded-full"></div>
                   </div>
-                  <div class="flex-1 min-w-0">
-                    <div class="font-semibold text-base-content">{user()?.name}</div>
-                    <div class="text-sm text-base-content/60">{user()?.email}</div>
-                  </div>
+                   <div class="flex-1 min-w-0">
+                     <div class="font-bold text-base-content text-lg">John Doe</div>
+                     <div class="text-sm text-base-content/70">john.doe@example.com</div>
+                     <div class="text-xs text-base-content/80 mt-1">Package: Pro</div>
+                     <div class="text-xs text-base-content/80 mt-1">Credits: 150</div>
+                     <div class="flex items-center gap-1 mt-1">
+                       <div class="w-2 h-2 bg-success rounded-full animate-pulse"></div>
+                       <span class="text-xs text-success font-medium">Online</span>
+                     </div>
+                   </div>
                 </div>
               </li>
-              <li><A href="/settings" class="flex items-center gap-2"><i data-lucide="settings" class="w-4 h-4"></i> Settings</A></li>
-              <li><A href="/packages" class="flex items-center gap-2"><i data-lucide="package" class="w-4 h-4"></i> Packages</A></li>
-              <li><A href="/credits" class="flex items-center gap-2"><i data-lucide="credit-card" class="w-4 h-4"></i> Credits</A></li>
-               <li><A href="/billing" class="flex items-center gap-2"><i data-lucide="receipt" class="w-4 h-4"></i> Billing</A></li>
-               <li><A href="/notifications" class="flex items-center gap-2"><i data-lucide="bell" class="w-4 h-4"></i> Notifications</A></li>
-                <li class="hover:bg-error/10 hover:text-error transition-colors duration-200"><button onClick={logout} class="flex items-center gap-2 w-full text-left"><i data-lucide="log-out" class="w-4 h-4"></i> Logout</button></li>
+              <li class="px-4 py-2">
+                <div class="text-xs uppercase font-bold text-base-content/60 tracking-wider">Account Management</div>
+              </li>
+              <li><A href="/settings" class="flex items-center gap-3 px-4 py-3 hover:bg-base-200/50 rounded-lg mx-2 my-1 transition-colors"><i data-lucide="settings" class="w-5 h-5 text-base-content/70"></i> <span class="font-medium">Settings</span></A></li>
+              <li><A href="/notifications" class="flex items-center gap-3 px-4 py-3 hover:bg-base-200/50 rounded-lg mx-2 my-1 transition-colors"><i data-lucide="bell" class="w-5 h-5 text-base-content/70"></i> <span class="font-medium">Notifications</span></A></li>
+              <li class="px-4 py-2">
+                <div class="text-xs uppercase font-bold text-base-content/60 tracking-wider">Billing & Subscription</div>
+              </li>
+              <li><A href="/packages" class="flex items-center gap-3 px-4 py-3 hover:bg-base-200/50 rounded-lg mx-2 my-1 transition-colors"><i data-lucide="package" class="w-5 h-5 text-base-content/70"></i> <span class="font-medium">Packages</span></A></li>
+              <li><A href="/credits" class="flex items-center gap-3 px-4 py-3 hover:bg-base-200/50 rounded-lg mx-2 my-1 transition-colors"><i data-lucide="credit-card" class="w-5 h-5 text-base-content/70"></i> <span class="font-medium">Credits</span></A></li>
+              <li><A href="/billing" class="flex items-center gap-3 px-4 py-3 hover:bg-base-200/50 rounded-lg mx-2 my-1 transition-colors"><i data-lucide="receipt" class="w-5 h-5 text-base-content/70"></i> <span class="font-medium">Billing</span></A></li>
+               <li class="border-t border-base-200 my-1"></li>
+              <li class="hover:bg-error/10 hover:text-error transition-colors duration-200 rounded-lg mx-2 my-1"><button onClick={logout} class="flex items-center gap-3 w-full text-left px-4 py-3 font-medium"><i data-lucide="log-out" class="w-5 h-5"></i> Logout</button></li>
             </ul>
           </div>
 

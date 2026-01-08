@@ -1,8 +1,8 @@
 import { createSignal, onMount, For, Show, createEffect, useContext } from "solid-js";
 import { useNavigate } from "@solidjs/router";
-import { useUser } from "../context/UserContext";
-import { LangContext } from "../context/LangContext";
-import { translations } from "../assets/translations/translations-index.js";
+import { useUser } from "../../context/UserContext";
+import { LangContext } from "../../context/LangContext";
+import { translations } from "../../assets/translations/translations-index.js";
 
 const Settings = () => {
   const navigate = useNavigate();
@@ -98,7 +98,7 @@ const Settings = () => {
   });
 
   return (
-    <div class={`max-w-4xl mx-auto space-y-8 mt-20 ${currentLang() === 'ar' ? 'rtl' : 'ltr'}`}>
+    <div class={`max-w-4xl mx-auto space-y-8  ${currentLang() === 'ar' ? 'rtl' : 'ltr'}`}>
       {/* Header */}
       <div class="text-center">
         <h1 class="text-4xl font-bold text-base-content mb-4">{t().accountSettings}</h1>

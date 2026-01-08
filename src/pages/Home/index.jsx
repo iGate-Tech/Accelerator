@@ -21,7 +21,7 @@ import {
     sectionMap,
     stepNames,
     fillPrompt
-} from "../lib/machine";
+} from "../../lib/machine";
 import {
     getTasks,
     addTask,
@@ -31,15 +31,15 @@ import {
     updateProject,
     getProjectByName,
     getProjectById
-} from "../lib/db";
-import {setMachineStore} from "../lib/machine";
+} from "../../lib/db";
+import {setMachineStore} from "../../lib/machine";
 import {marked} from 'marked';
-import {renderFilledTemplate} from '../lib/llm-template';
-import ResponseSection from './ResponseSection';
-import AgentInterface from './AgentInterface';
+import {renderFilledTemplate} from '../../lib/llm-template';
+import ResponseSection from '../../components/ui/ResponseSection';
+import AgentInterface from '../../components/features/home/AgentInterface';
 import { useContext } from "solid-js";
-import { LangContext } from "../context/LangContext";
-import { translations } from "../assets/translations/translations-index.js";
+import { LangContext } from "../../context/LangContext";
+import { translations } from "../../assets/translations/translations-index.js";
 
 const promptToStepName = {
     "You are an AI-powered startup accelerator": stepNames.system,

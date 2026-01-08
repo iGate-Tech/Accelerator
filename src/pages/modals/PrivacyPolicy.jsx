@@ -1,6 +1,6 @@
 import { createSignal, createEffect, onMount, useContext } from "solid-js";
-import { LangContext } from "../context/LangContext";
-import { translations } from "../assets/translations/translations-index.js";
+import { LangContext } from "../../context/LangContext";
+import { translations } from "../../assets/translations/translations-index.js";
 
 const PrivacyPolicy = () => {
   const { lang } = useContext(LangContext);
@@ -12,7 +12,7 @@ const PrivacyPolicy = () => {
   });
 
   return (
-    <div class={`max-w-4xl mx-auto space-y-8 mt-20 py-8 ${currentLang() === 'ar' ? 'rtl' : 'ltr'}`}>
+    <div class={`max-w-4xl mx-auto space-y-8  py-8 ${currentLang() === 'ar' ? 'rtl' : 'ltr'}`}>
       <div class="text-center">
         <h1 class="text-4xl font-bold text-base-content mb-4">{t().privacyPolicy}</h1>
         <p class="text-lg text-base-content/70">

@@ -1,7 +1,7 @@
 import { For, Show } from "solid-js";
 import { marked } from "marked";
-import { renderFilledTemplate } from "../lib/llm-template";
-import { sectionMap, stepNames, modelMap } from "../lib/machine";
+import { renderFilledTemplate } from "../../lib/llm-template";
+import { sectionMap, stepNames, modelMap } from "../../lib/machine";
 
 /* ---------- Prompt Maps ---------- */
 

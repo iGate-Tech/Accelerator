@@ -41,7 +41,7 @@ export const authTranslations = {
     statusPage: 'Status Page',
     changelog: 'Changelog',
     help: 'Help',
-    copyright: '© {year} iGate. Built with ❤️ for entrepreneurs.'
+    copyright: '© {year} iGate. Built With ❤️ For Entrepreneurs.'
   },
   ar: {
     // Login

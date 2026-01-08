@@ -100,7 +100,7 @@ export const helpTranslations = {
       community: 'Community',
       avgResponse: 'Avg Response',
      responseTime: 'Support response time',
-      copyright: '© {year} iGate. Built with ❤️ for entrepreneurs.',
+      copyright: '© {year} iGate. Built With ❤️ For Entrepreneurs.',
      privacyPolicy: 'Privacy Policy',
      termsService: 'Terms of Service',
      statusPage: 'Status Page',

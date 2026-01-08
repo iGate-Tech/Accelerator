@@ -1031,9 +1031,9 @@ Use consistent naming conventions and color coding for easy navigation.`
                <A href="/status" class="link link-hover">{t().statusPage}</A>
                <A href="/changelog" class="link link-hover">{t().changelog}</A>
             </div>
-           <p class="text-xs text-base-content/40 mt-4">
-             {t().copyright}
-           </p>
+            <p class="text-xs text-base-content/40 mt-4">
+              {t().copyright.replace('{year}', new Date().getFullYear())}
+            </p>
          </div>
        </div>
     </div>

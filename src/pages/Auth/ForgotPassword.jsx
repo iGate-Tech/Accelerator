@@ -91,7 +91,7 @@ const ForgotPassword = () => {
              <a href="/status" class="link link-hover">{t().statusPage}</a>
              <a href="/changelog" class="link link-hover">{t().changelog}</a>
            </div>
-           <p>{t().copyright}</p>
+            <p>{t().copyright.replace('{year}', new Date().getFullYear())}</p>
          </footer>
        </div>
   );

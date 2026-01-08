@@ -41,7 +41,7 @@ export const authTranslations = {
     statusPage: 'Status Page',
     changelog: 'Changelog',
     help: 'Help',
-    copyright: '© 2026 iGate Startup Accelerator. Built with ❤️ for entrepreneurs.'
+    copyright: '© {year} iGate Startup Accelerator. Built with ❤️ for entrepreneurs.'
   },
   ar: {
     // Login
@@ -84,6 +84,6 @@ export const authTranslations = {
     statusPage: 'صفحة الحالة',
     changelog: 'سجل التغييرات',
     help: 'المساعدة',
-    copyright: '© 2026 iGate Startup Accelerator. بنيت بـ❤️ للرياديين.'
+    copyright: '© {year} iGate Startup Accelerator. بنيت بـ❤️ للرياديين.'
   }
 };

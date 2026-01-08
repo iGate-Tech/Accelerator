@@ -14,6 +14,10 @@ import { helpTranslations } from './translations-help.js';
 import { authTranslations } from './translations-auth.js';
 import { onboardingTranslations } from './translations-onboarding.js';
 import { profileTranslations } from './translations-profile.js';
+import { privacyTranslations } from './translations-privacy.js';
+import { termsTranslations } from './translations-terms.js';
+import { statusTranslations } from './translations-status.js';
+import { changelogTranslations } from './translations-changelog.js';
 
 // Exports
 export { navigationTranslations };
@@ -31,6 +35,10 @@ export { helpTranslations };
 export { authTranslations };
 export { onboardingTranslations };
 export { profileTranslations };
+export { privacyTranslations };
+export { termsTranslations };
+export { statusTranslations };
+export { changelogTranslations };
 
 export const translations = {
   en: {
@@ -49,6 +57,10 @@ export const translations = {
     ...authTranslations.en,
     ...onboardingTranslations.en,
     ...profileTranslations.en,
+    ...privacyTranslations.en,
+    ...termsTranslations.en,
+    ...statusTranslations.en,
+    ...changelogTranslations.en,
   },
   ar: {
     ...navigationTranslations.ar,
@@ -66,5 +78,9 @@ export const translations = {
     ...authTranslations.ar,
     ...onboardingTranslations.ar,
     ...profileTranslations.ar,
+    ...privacyTranslations.ar,
+    ...termsTranslations.ar,
+    ...statusTranslations.ar,
+    ...changelogTranslations.ar,
   }
 };

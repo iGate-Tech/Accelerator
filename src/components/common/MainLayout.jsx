@@ -1,4 +1,4 @@
-import {onMount, createEffect, createSignal, useContext} from "solid-js";
+import {onMount, createEffect, createSignal, useContext, Show} from "solid-js";
 import {LangContext} from "../../context/LangContext";
 import {useUser} from "../../context/UserContext";
 import Navbar from "./Navbar";
@@ -69,12 +69,14 @@ const MainLayout = (props) => {
             <GlobalError />
             <ToastContainer />
             <Navbar />
-              <div class="flex h-[calc(100vh-4rem)]">
-                 <Sidebar />
-                 <main class="flex-1 px-5 overflow-auto">
-                     {props.children}
-                 </main>
-             </div>
+            <div class="flex h-[calc(100vh-4rem)]">
+              <Show when={isAuthenticated()}>
+                <Sidebar />
+              </Show>
+              <main class={`px-5 overflow-auto ${isAuthenticated() ? 'flex-1' : 'flex-1'}`}>
+                {props.children}
+              </main>
+            </div>
         </>
     );
 };

@@ -26,9 +26,9 @@ files.forEach(file => {
     return;
   }
 
-  // Extract keys (simplified)
-  const enKeys = enMatch[1].match(/[a-zA-Z_]+(?=\s*:)/g) || [];
-  const arKeys = arMatch[1].match(/[a-zA-Z_]+(?=\s*:)/g) || [];
+  // Extract keys (match lines that start with key:)
+  const enKeys = enMatch[1].split('\n').map(line => line.trim()).filter(line => line.match(/^[a-zA-Z_]+:/)).map(line => line.match(/^([a-zA-Z_]+):/)[1]);
+  const arKeys = arMatch[1].split('\n').map(line => line.trim()).filter(line => line.match(/^[a-zA-Z_]+:/)).map(line => line.match(/^([a-zA-Z_]+):/)[1]);
 
   const missingInAr = enKeys.filter(k => !arKeys.includes(k));
   const missingInEn = arKeys.filter(k => !enKeys.includes(k));

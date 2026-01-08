@@ -21,41 +21,41 @@ const Changelog = () => {
       version: "v2.1.0",
       date: "January 8, 2026",
       changes: [
-        { type: "feature", text: "Added iGate branding and company name to footer" },
-        { type: "feature", text: "New Privacy Policy, Terms of Service, Status Page, and Changelog pages" },
-        { type: "improvement", text: "Updated copyright year to 2026" },
-        { type: "fix", text: "Fixed footer link navigation" }
+        { type: "feature", textKey: "v210Feature1" },
+        { type: "feature", textKey: "v210Feature2" },
+        { type: "improvement", textKey: "v210Improvement1" },
+        { type: "fix", textKey: "v210Fix1" }
       ]
     },
     {
       version: "v2.0.0",
       date: "December 15, 2025",
       changes: [
-        { type: "feature", text: "Complete UI redesign with dark mode support" },
-        { type: "feature", text: "Multi-language support (English and Arabic)" },
-        { type: "feature", text: "Offline capability with local PGLite database" },
-        { type: "improvement", text: "Enhanced AI processing with better prompt engineering" },
-        { type: "improvement", text: "Improved portfolio organization and tagging" }
+        { type: "feature", textKey: "v200Feature1" },
+        { type: "feature", textKey: "v200Feature2" },
+        { type: "feature", textKey: "v200Feature3" },
+        { type: "improvement", textKey: "v200Improvement1" },
+        { type: "improvement", textKey: "v200Improvement2" }
       ]
     },
     {
       version: "v1.5.0",
       date: "October 20, 2025",
       changes: [
-        { type: "feature", text: "Added project export functionality (JSON, PDF)" },
-        { type: "feature", text: "Real-time progress tracking and analytics" },
-        { type: "improvement", text: "Better error handling and user feedback" },
-        { type: "fix", text: "Fixed issue with project state persistence" }
+        { type: "feature", textKey: "v150Feature1" },
+        { type: "feature", textKey: "v150Feature2" },
+        { type: "improvement", textKey: "v150Improvement1" },
+        { type: "fix", textKey: "v150Fix1" }
       ]
     },
     {
       version: "v1.0.0",
       date: "August 1, 2025",
       changes: [
-        { type: "feature", text: "Initial release of Startup Accelerator" },
-        { type: "feature", text: "51-step structured business plan methodology" },
-        { type: "feature", text: "AI-powered analysis and recommendations" },
-        { type: "feature", text: "Local data storage with IndexedDB" }
+        { type: "feature", textKey: "v100Feature1" },
+        { type: "feature", textKey: "v100Feature2" },
+        { type: "feature", textKey: "v100Feature3" },
+        { type: "feature", textKey: "v100Feature4" }
       ]
     }
   ];
@@ -83,7 +83,7 @@ const Changelog = () => {
       <div class="text-center">
         <h1 class="text-4xl font-bold text-base-content mb-4">{t().changelog}</h1>
         <p class="text-lg text-base-content/70">
-          Latest updates and improvements to the Startup Accelerator
+          {t().latestUpdatesAndImprovements}
         </p>
       </div>
 
@@ -98,32 +98,31 @@ const Changelog = () => {
               )}
             </div>
 
-            <div class="space-y-3">
-              {release.changes.map(change => (
-                <div class="flex items-start gap-3">
-                  <i data-lucide={getChangeIcon(change.type)} class={`w-4 h-4 mt-0.5 ${getChangeColor(change.type)}`}></i>
-                  <span class="text-sm">{change.text}</span>
-                </div>
-              ))}
-            </div>
+              <div class="space-y-3">
+                {release.changes.map(change => (
+                  <div class="flex items-start gap-3">
+                    <i data-lucide={getChangeIcon(change.type)} class={`w-4 h-4 mt-0.5 ${getChangeColor(change.type)}`}></i>
+                    <span class="text-sm">{t()[change.textKey]}</span>
+                  </div>
+                ))}
+              </div>
           </div>
         ))}
       </div>
 
       <div class="bg-base-100 rounded-box p-6 shadow">
-        <h2 class="text-2xl font-bold mb-4">How to Stay Updated</h2>
+        <h2 class="text-2xl font-bold mb-4">{t().howToStayUpdated}</h2>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
-            <h3 class="font-semibold mb-2">Automatic Updates</h3>
+            <h3 class="font-semibold mb-2">{t().automaticUpdates}</h3>
             <p class="text-sm text-base-content/70">
-              The application checks for updates automatically. You'll be notified
-              when a new version is available.
+              {t().automaticUpdatesDesc}
             </p>
           </div>
           <div>
-            <h3 class="font-semibold mb-2">Manual Check</h3>
+            <h3 class="font-semibold mb-2">{t().manualCheck}</h3>
             <p class="text-sm text-base-content/70">
-              You can manually check for updates in Settings > About section.
+              {t().manualCheckDesc}
             </p>
           </div>
         </div>
@@ -132,10 +131,9 @@ const Changelog = () => {
       <div class="alert alert-info">
         <i data-lucide="info" class="w-5 h-5"></i>
         <div>
-          <h3 class="font-bold">Version History</h3>
+          <h3 class="font-bold">{t().versionHistory}</h3>
           <p>
-            This changelog shows the most recent updates. For older versions,
-            check our GitHub repository or documentation archives.
+            {t().versionHistoryDesc}
           </p>
         </div>
       </div>

@@ -59,13 +59,11 @@ const Explore = () => {
     navigate('/');
   };
 
-  onMount(() => {
-    if (window.lucide) window.lucide.createIcons();
-
-    // Listen for project updates
-    window.addEventListener('projectAdded', () => refetch());
-    window.addEventListener('projectUpdated', () => refetch());
-  });
+   onMount(() => {
+     // Listen for project updates
+     window.addEventListener('projectAdded', () => refetch());
+     window.addEventListener('projectUpdated', () => refetch());
+   });
 
   const statusOptions = [
     { value: "all", label: t().allStatus, icon: "layers" },
@@ -96,16 +94,16 @@ const Explore = () => {
         <div class="flex flex-col lg:flex-row gap-4 items-center">
           {/* Search */}
           <div class="flex-1 w-full lg:w-auto">
-            <div class="relative">
-              <i data-lucide="search" class="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-base-content/50"></i>
-              <input
-                type="text"
-                placeholder={t().searchProjects}
-                class="input input-bordered w-full pl-10"
-                value={search()}
-                onInput={(e) => setSearch(e.target.value)}
-              />
-            </div>
+              <div class="relative">
+               <svg class="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-base-content/50" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16" viewBox="0 0 24 24"><path d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z"/></svg>
+               <input
+                 type="text"
+                 placeholder={t().searchProjects}
+                 class="input input-bordered w-full pl-10"
+                 value={search()}
+                 onInput={(e) => setSearch(e.target.value)}
+               />
+             </div>
           </div>
 
           {/* Status Filter */}
@@ -157,9 +155,9 @@ const Explore = () => {
         <Show
           when={filteredAndSortedProjects().length > 0}
           fallback={
-            <div class="text-center py-16">
-              <i data-lucide="folder-x" class="w-16 h-16 mx-auto mb-4 text-base-content/30"></i>
-              <h3 class="text-xl font-semibold text-base-content mb-2">{t().noProjectsFound}</h3>
+             <div class="text-center py-16">
+               <svg class="w-16 h-16 mx-auto mb-4 text-base-content/30" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="64" height="64" viewBox="0 0 24 24"><path d="M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.93a2 2 0 0 1-1.66-.9l-.82-1.2A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13c0 1.1.9 2 2 2Z"/><path d="m9.5 10.5 5 5"/><path d="m14.5 10.5-5 5"/></svg>
+               <h3 class="text-xl font-semibold text-base-content mb-2">{t().noProjectsFound}</h3>
               <p class="text-base-content/70 mb-6">
                 {search() || statusFilter() !== "all"
                   ? t().tryAdjustingSearch
@@ -167,12 +165,12 @@ const Explore = () => {
               </p>
               {!search() && statusFilter() === "all" && (
                  <A
-                  href="/"
-                  class="btn btn-primary"
-                >
-                  <i data-lucide="plus" class="w-4 h-4 mr-2"></i>
-                  {t().createNewProject}
-                </A>
+                   href="/"
+                   class="btn btn-primary"
+                 >
+                   <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16" viewBox="0 0 24 24"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
+                   {t().createNewProject}
+                 </A>
               )}
             </div>
           }
@@ -195,18 +193,18 @@ const Explore = () => {
       <Show when={projects() && projects().length > 0}>
         <div class="bg-base-100 rounded-box p-4 shadow-sm border border-base-200">
           <div class="flex justify-center items-center gap-6 text-sm text-base-content/60">
-            <div class="flex items-center gap-2">
-              <i data-lucide="folder" class="w-4 h-4"></i>
-              <span>{projects().length} {t().totalProjects}</span>
-            </div>
-            <div class="flex items-center gap-2">
-              <i data-lucide="check-circle" class="w-4 h-4"></i>
-              <span>{projects().filter(p => p.uiStatus === 'completed').length} {t().completed}</span>
-            </div>
-            <div class="flex items-center gap-2">
-              <i data-lucide="loader" class="w-4 h-4"></i>
-              <span>{projects().filter(p => p.uiStatus === 'processing').length} {t().inProgress}</span>
-            </div>
+             <div class="flex items-center gap-2">
+               <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16" viewBox="0 0 24 24"><path d="M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.93a2 2 0 0 1-1.66-.9l-.82-1.2A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13c0 1.1.9 2 2 2Z"/></svg>
+               <span>{projects().length} {t().totalProjects}</span>
+             </div>
+             <div class="flex items-center gap-2">
+               <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22,4 12,14.01 9,11.01"/></svg>
+               <span>{projects().filter(p => p.uiStatus === 'completed').length} {t().completed}</span>
+             </div>
+             <div class="flex items-center gap-2">
+               <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16" viewBox="0 0 24 24"><path d="M12 2v4"/><path d="m16.2 7.8 2.9-2.9"/><path d="M18 12h4"/><path d="m16.2 16.2 2.9 2.9"/><path d="M12 18v4"/><path d="m4.9 19.1 2.9-2.9"/><path d="M2 12h4"/><path d="m4.9 4.9 2.9 2.9"/></svg>
+               <span>{projects().filter(p => p.uiStatus === 'processing').length} {t().inProgress}</span>
+             </div>
           </div>
         </div>
       </Show>

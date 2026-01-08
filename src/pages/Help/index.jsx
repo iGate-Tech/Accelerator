@@ -416,12 +416,23 @@ Use consistent naming conventions and color coding for easy navigation.`
 
   return (
       <div class={`max-w-6xl mx-auto space-y-12 py-8 ${currentLang() === 'ar' ? 'rtl' : 'ltr'}`}>
-       {/* Header with Search */}
-       <div class="text-center py-8">
-         <h1 class="text-4xl font-bold text-base-content mb-4">{t().helpDocumentation}</h1>
-         <p class="text-lg text-base-content/70 max-w-2xl mx-auto mb-6">
-           {t().everythingYouNeed}
-         </p>
+        {/* Header with Search */}
+        <div class="text-center py-8">
+          {/* Back Button */}
+          <div class="mb-6 text-left">
+            <button
+              onClick={() => window.history.back()}
+              class="btn btn-ghost btn-sm"
+            >
+              <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16" viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"/></svg>
+              Back
+            </button>
+          </div>
+
+          <h1 class="text-4xl font-bold text-base-content mb-4">{t().helpDocumentation}</h1>
+          <p class="text-lg text-base-content/70 max-w-2xl mx-auto mb-6">
+            {t().everythingYouNeed}
+          </p>
 
          {/* Global Search */}
          <div class="max-w-md mx-auto">

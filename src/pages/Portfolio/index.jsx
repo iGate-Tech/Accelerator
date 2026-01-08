@@ -141,21 +141,40 @@ const Portfolio = () => {
 
   return (
     <div class={`space-y-6  ${currentLang() === 'ar' ? 'rtl' : 'ltr'}`}>
-      {/* Header */}
-      <div class="flex justify-between items-center">
-        <div>
-          <h1 class="text-4xl font-bold text-base-content">{t().portfolio}</h1>
-          <p class="text-base-content/70 mt-2">
-            {t().organizeProjects}
-          </p>
-        </div>
-        <button
-          class="btn btn-primary"
-          onClick={() => setShowCreateGroupModal(true)}
-        >
-          {t().createGroup}
-        </button>
-      </div>
+       {/* Header */}
+       <div class="flex justify-between items-center">
+         {currentLang() === 'ar' ? (
+           <>
+             <button
+               class="btn btn-primary"
+               onClick={() => setShowCreateGroupModal(true)}
+             >
+               {t().createGroup}
+             </button>
+             <div>
+               <h1 class="text-4xl font-bold text-base-content">{t().portfolio}</h1>
+               <p class="text-base-content/70 mt-2">
+                 {t().organizeProjects}
+               </p>
+             </div>
+           </>
+         ) : (
+           <>
+             <div>
+               <h1 class="text-4xl font-bold text-base-content">{t().portfolio}</h1>
+               <p class="text-base-content/70 mt-2">
+                 {t().organizeProjects}
+               </p>
+             </div>
+             <button
+               class="btn btn-primary"
+               onClick={() => setShowCreateGroupModal(true)}
+             >
+               {t().createGroup}
+             </button>
+           </>
+         )}
+       </div>
 
       {/* Create Group Modal */}
       <Show when={showCreateGroupModal()}>

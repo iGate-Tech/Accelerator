@@ -140,7 +140,7 @@ const Portfolio = () => {
   ];
 
   return (
-    <div class={`space-y-6  ${currentLang() === 'ar' ? 'rtl' : 'ltr'}`}>
+    <div class={`space-y-6 mt-10 ${currentLang() === 'ar' ? 'rtl' : 'ltr'}`}>
        {/* Header */}
        <div class="flex justify-between items-center">
          {currentLang() === 'ar' ? (

@@ -562,13 +562,13 @@ Use consistent naming conventions and color coding for easy navigation.`
             </div>
 
             <div class="flex gap-4">
-              <button
-                 class="btn btn-outline"
-                 onClick={resetTutorial}
-               >
-                 <i data-lucide="rotate-ccw" class="w-4 h-4 mr-2"></i>
-                 {t().resetProgress}
-               </button>
+               <button
+                  class="btn btn-outline"
+                  onClick={resetTutorial}
+                >
+                  <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16" viewBox="0 0 24 24"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/></svg>
+                  {t().resetProgress}
+                </button>
                 <div class="alert alert-info flex-1">
                   <i data-lucide="info" class="w-5 h-5"></i>
                   <div>

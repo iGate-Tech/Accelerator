@@ -1,4 +1,5 @@
 import { createSignal, createEffect, onMount, useContext } from "solid-js";
+import { useNavigate } from "@solidjs/router";
 import { LangContext } from "../../context/LangContext";
 import { translations } from "../../assets/translations/translations-index.js";
 
@@ -43,7 +44,18 @@ const StatusPage = () => {
   };
 
   return (
-    <div class={`max-w-4xl mx-auto space-y-8  py-8 ${currentLang() === 'ar' ? 'rtl' : 'ltr'}`}>
+    <div class={`max-w-4xl mx-auto space-y-8 py-8 ${currentLang() === 'ar' ? 'rtl' : 'ltr'}`}>
+      {/* Back Button */}
+      <div class="mb-6">
+        <button
+          onClick={() => window.history.back()}
+          class="btn btn-ghost btn-sm"
+        >
+          <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16" viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"/></svg>
+          Back
+        </button>
+      </div>
+
       <div class="text-center">
         <h1 class="text-4xl font-bold text-base-content mb-4">{t().statusPage}</h1>
         <p class="text-lg text-base-content/70">

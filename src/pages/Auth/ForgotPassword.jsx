@@ -40,7 +40,7 @@ const ForgotPassword = () => {
   });
 
   return (
-    <div class="card w-full shadow-2xl bg-base-100 border border-base-300 backdrop-blur-sm">
+    <div class="card max-w-md mx-auto shadow-2xl bg-base-100 border border-base-300 backdrop-blur-sm">
         <div class="card-body">
           <div class="text-center mb-8">
             <svg width="48" height="52" viewBox="0 0 33 36" fill="none" xmlns="http://www.w3.org/2000/svg" class="mx-auto mb-4">
@@ -84,7 +84,7 @@ const ForgotPassword = () => {
 
          {/* Footer */}
          <footer class="mt-8 text-center text-sm text-base-content/60">
-           <div class="flex justify-center space-x-6 mb-4">
+           <div class="flex flex-wrap justify-center space-x-6 mb-4">
              <a href="/help" class="link link-hover">{t().help}</a>
              <a href="/privacy-policy" class="link link-hover">{t().privacyPolicy}</a>
              <a href="/terms-of-service" class="link link-hover">{t().termsOfService}</a>

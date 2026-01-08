@@ -93,8 +93,6 @@ const ForgotPassword = () => {
            <p>{t().copyright}</p>
          </footer>
        </div>
-        </div>
-      </div>
   );
 };
 

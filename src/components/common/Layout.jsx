@@ -82,7 +82,7 @@ const Layout = (props) => {
     return (
         <>
             <Navbar/>
-            <div class="flex">
+            <div class="flex" classList={{ 'flex-row-reverse': currentLang() === 'ar' }}>
                 <Sidebar/>
                 <div class="px-5"
                     style={
@@ -91,9 +91,8 @@ const Layout = (props) => {
                             'margin-right': currentLang() === 'ar' ? '20rem' : '0'
                         }
                 }>
-                    {
-                    props.children
-                } </div>
+                    {props.children}
+                </div>
             </div>
         </>
     );

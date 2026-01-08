@@ -33,7 +33,14 @@ export const authTranslations = {
     email: 'Email',
     emailPlaceholder: 'john.doe@example.com',
     sendResetLink: 'Send Reset Link',
-    backToLogin: 'Back to Login'
+    backToLogin: 'Back to Login',
+
+    // Footer
+    privacyPolicy: 'Privacy Policy',
+    termsOfService: 'Terms of Service',
+    statusPage: 'Status Page',
+    changelog: 'Changelog',
+    copyright: '© 2026 iGate Startup Accelerator. Built with ❤️ for entrepreneurs.'
   },
   ar: {
     // Login
@@ -68,6 +75,13 @@ export const authTranslations = {
     email: 'البريد الإلكتروني',
     emailPlaceholder: 'john.doe@example.com',
     sendResetLink: 'إرسال رابط إعادة التعيين',
-    backToLogin: 'العودة إلى تسجيل الدخول'
+    backToLogin: 'العودة إلى تسجيل الدخول',
+
+    // Footer
+    privacyPolicy: 'سياسة الخصوصية',
+    termsOfService: 'شروط الخدمة',
+    statusPage: 'صفحة الحالة',
+    changelog: 'سجل التغييرات',
+    copyright: '© 2026 iGate Startup Accelerator. بنيت بـ❤️ للرياديين.'
   }
 };

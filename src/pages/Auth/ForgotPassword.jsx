@@ -1,19 +1,15 @@
-import { createSignal, onMount, useContext, createEffect } from "solid-js";
+import { createSignal, onMount, createEffect } from "solid-js";
 import { useNavigate } from "@solidjs/router";
-import { LangContext } from "../../context/LangContext";
 import { useUser } from "../../context/UserContext";
-import { translations } from "../../assets/translations/translations-index.js";
+import { useLanguage } from "../../hooks/useLanguage";
 import { toastManager } from "../../lib/feedback";
 
 const ForgotPassword = () => {
   const navigate = useNavigate();
-  const { lang } = useContext(LangContext);
   const { isAuthenticated } = useUser();
-  const [currentLang, setCurrentLang] = createSignal(lang());
+  const { t } = useLanguage();
   const [email, setEmail] = createSignal('');
   const [loading, setLoading] = createSignal(false);
-
-  const t = () => translations[currentLang()];
 
   // Redirect if already authenticated
   createEffect(() => {
@@ -79,11 +75,24 @@ const ForgotPassword = () => {
             </button>
           </form>
 
-          <div class="text-center">
+           <div class="text-center">
              <button class="btn btn-ghost btn-sm" onClick={() => navigate('/login')}>
                {t().backToLogin}
              </button>
-          </div>
+           </div>
+         </div>
+
+         {/* Footer */}
+         <footer class="mt-8 text-center text-sm text-base-content/60">
+           <div class="flex justify-center space-x-6 mb-4">
+             <a href="/privacy-policy" class="link link-hover">{t().privacyPolicy}</a>
+             <a href="/terms-of-service" class="link link-hover">{t().termsOfService}</a>
+             <a href="/status" class="link link-hover">{t().statusPage}</a>
+             <a href="/changelog" class="link link-hover">{t().changelog}</a>
+           </div>
+           <p>{t().copyright}</p>
+         </footer>
+       </div>
         </div>
       </div>
   );

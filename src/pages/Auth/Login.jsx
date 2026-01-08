@@ -138,13 +138,24 @@ const Login = () => {
              {t().createNewAccount}
            </button>
 
-          <div class="text-center text-sm text-base-content/60">
+           <div class="text-center text-sm text-base-content/60">
              <a href="/forgot-password" class="link link-primary">{t().forgotPassword}</a>
-          </div>
-          </div>
+           </div>
+           </div>
+         </div>
+
+         {/* Footer */}
+         <footer class="mt-8 text-center text-sm text-base-content/60">
+           <div class="flex justify-center space-x-6 mb-4">
+             <a href="/privacy-policy" class="link link-hover">{t().privacyPolicy}</a>
+             <a href="/terms-of-service" class="link link-hover">{t().termsOfService}</a>
+             <a href="/status" class="link link-hover">{t().statusPage}</a>
+             <a href="/changelog" class="link link-hover">{t().changelog}</a>
+           </div>
+           <p>{t().copyright}</p>
+         </footer>
         </div>
-       </div>
-     </RouteGuard>
+      </RouteGuard>
   );
 };
 

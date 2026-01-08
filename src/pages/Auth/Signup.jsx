@@ -1,8 +1,7 @@
-import { createSignal, onMount, useContext, createEffect } from "solid-js";
+import { createSignal, onMount, createEffect } from "solid-js";
 import { useNavigate } from "@solidjs/router";
-import { LangContext } from "../../context/LangContext";
 import { useUser } from "../../context/UserContext";
-import { translations } from "../../assets/translations/translations-index.js";
+import { useLanguage } from "../../hooks/useLanguage";
 import { createUser } from "../../lib/db";
 import { sanitizeInput, isValidEmail } from "../../lib/security";
 import { toastManager } from "../../lib/feedback";
@@ -10,9 +9,8 @@ import RouteGuard from "../../components/common/RouteGuard";
 
 const Signup = () => {
   const navigate = useNavigate();
-  const { lang } = useContext(LangContext);
   const { login, isAuthenticated } = useUser();
-  const [currentLang, setCurrentLang] = createSignal(lang());
+  const { t } = useLanguage();
   const [formData, setFormData] = createSignal({
     name: '',
     email: '',
@@ -24,8 +22,6 @@ const Signup = () => {
   let passwordButton;
   let confirmButton;
   const [loading, setLoading] = createSignal(false);
-
-  const t = () => translations[currentLang()];
 
   // Redirect if already authenticated
   createEffect(() => {
@@ -239,10 +235,21 @@ const Signup = () => {
            <div class="text-center text-xs text-base-content/60">
              {t().termsAgreement}
            </div>
-            </div>
+             </div>
+           </div>
+
+           {/* Footer */}
+           <footer class="mt-8 text-center text-sm text-base-content/60">
+             <div class="flex justify-center space-x-6 mb-4">
+               <a href="/privacy-policy" class="link link-hover">{t().privacyPolicy}</a>
+               <a href="/terms-of-service" class="link link-hover">{t().termsOfService}</a>
+               <a href="/status" class="link link-hover">{t().statusPage}</a>
+               <a href="/changelog" class="link link-hover">{t().changelog}</a>
+             </div>
+             <p>{t().copyright}</p>
+           </footer>
           </div>
-         </div>
-      </RouteGuard>
+       </RouteGuard>
    );
 };
 

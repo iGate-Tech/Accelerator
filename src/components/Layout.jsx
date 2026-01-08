@@ -1,7 +1,7 @@
-import {onMount, createEffect, useContext} from "solid-js";
+import {onMount, createEffect, createSignal, useContext} from "solid-js";
 import {useNavigate} from "@solidjs/router";
 import {LangContext} from "../context/LangContext";
-import {initDb} from "../lib/db";
+import {getPg} from "../lib/db";
 
 import Navbar from "./Navbar";
 import Sidebar from "./Sidebar";
@@ -9,10 +9,17 @@ import favicon from "../assets/favicon.svg";
 
 const Layout = (props) => {
     const navigate = useNavigate();
-    const {lang, setLang, serverReachable, setServerReachable} = useContext(LangContext);
+    const context = useContext(LangContext) || { lang: () => 'ar', setLang: () => {}, serverReachable: () => true, setServerReachable: () => {} };
+  const {lang, setLang, serverReachable, setServerReachable} = context;
+
+    // Make component reactive to language changes
+    const [currentLang, setCurrentLang] = createSignal(lang());
 
     createEffect(() => {
-        document.documentElement.setAttribute('dir', lang() === 'ar' ? 'rtl' : 'ltr');
+        const newLang = lang();
+        setCurrentLang(newLang);
+        document.documentElement.setAttribute('dir', newLang === 'ar' ? 'rtl' : 'ltr');
+        console.log('Language changed to:', newLang);
     });
 
     const checkServerConnectivity = async () => {
@@ -27,7 +34,10 @@ const Layout = (props) => {
         }};
 
     onMount(async () => {
-        await initDb();
+        console.log('Layout onMount: initializing worker');
+        // Initialize worker early
+        await getPg();
+        console.log('Worker initialized');
         // Create Lucide icons
         if (window.lucide) 
             window.lucide.createIcons();
@@ -67,7 +77,13 @@ const Layout = (props) => {
         <>
             <Navbar/>
             <Sidebar/>
-            <div class="px-5 lg:ml-80">
+            <div
+                class="px-5"
+                style={{
+                    'margin-left': currentLang() === 'ar' ? '0' : '20rem',
+                    'margin-right': currentLang() === 'ar' ? '20rem' : '0'
+                }}
+            >
                 {
                 props.children
             } </div>

@@ -37,6 +37,9 @@ import {marked} from 'marked';
 import {renderFilledTemplate} from '../lib/llm-template';
 import ResponseSection from './ResponseSection';
 import AgentInterface from './AgentInterface';
+import { useContext } from "solid-js";
+import { LangContext } from "../context/LangContext";
+import { translations } from "../assets/translations/translations-index.js";
 
 const promptToStepName = {
     "You are an AI-powered startup accelerator": stepNames.system,
@@ -102,6 +105,15 @@ const getStepName = (task) => {
 };
 
 const Tasks = () => {
+    const { lang } = useContext(LangContext);
+    const [currentLang, setCurrentLang] = createSignal(lang());
+
+    const t = () => translations[currentLang()];
+
+    createEffect(() => {
+        setCurrentLang(lang());
+    });
+
     const [currentProjectId, setCurrentProjectId] = createSignal(null);
     const [prompt, setPrompt] = createSignal("");
     const [tasks, {
@@ -130,7 +142,7 @@ const Tasks = () => {
       if (hasProject && hasTasks) {
         setAgentBoxClass("flex items-start max-w-6xl w-full mx-auto"); // Auto height when project has tasks
       } else {
-        setAgentBoxClass("flex items-center h-[calc(100vh-4rem)] max-w-6xl w-full mx-auto"); // Full height otherwise
+        setAgentBoxClass("flex items-center h-[calc(100vh-4rem)] max-w-6xl mx-auto"); // Full height otherwise
       }
       if (hasTasks) {
         setGreetingClass("hidden");
@@ -172,7 +184,7 @@ const Tasks = () => {
                 const isSystem = prev.currentStep === 'system';
                 const newCompletedSteps = isSystem ? 1 : prev.completedSteps + 1;
                 const progress = (newCompletedSteps / 48) * 100;
-                const message = isSystem ? 'Initialization complete. Starting step 1...' : `Step ${newCompletedSteps} complete. Moving to ${
+                const message = isSystem ? t().initializationComplete : `Step ${newCompletedSteps} complete. Moving to ${
                     stepNames[nextStep] || 'next step'
                 }...`;
                 return {
@@ -300,7 +312,7 @@ const Tasks = () => {
     };
 
     const handleImprove = async () => {
-        const improvedPrompt = `Improve this startup idea for better clarity, specificity, and market potential. Start with the improved idea name followed by ': ' and then provide a concise description in simple English, in only 3 lines. Do not generate in markdown: ${
+        const improvedPrompt = `${t().improvePrompt} ${
             prompt()
         }`;
         try {
@@ -320,7 +332,7 @@ const Tasks = () => {
     };
 
     const handleSuggest = async () => {
-        const suggestPrompt = `Suggest a compelling startup idea in the legal tech space. Start with the idea name followed by ': ' and then provide a brief description, target market, and unique value proposition in simple English, in only 3 lines. Do not generate in markdown.`;
+        const suggestPrompt = t().suggestPrompt;
         try {
             const result = await callLLM(suggestPrompt, 0, {streamToTextarea: true});
             setPrompt(result);
@@ -369,6 +381,7 @@ const Tasks = () => {
         // Listen for open project
         window.addEventListener('openProject', async (e) => {
             const project = await getProjectById(e.detail);
+            console.log('Selected project data:', project);
             if (project) {
                 setCurrentProjectId(project.id);
                 setPrompt(project.description || '');
@@ -381,7 +394,7 @@ const Tasks = () => {
                   currentModel: project.currentModel || 'System',
                   currentSection: project.currentSection || 'Initialization',
                   uiProgress: project.uiProgress || 0,
-                  uiMessage: project.uiMessage || 'Ready to start the 48-step accelerator process',
+                  uiMessage: project.uiMessage || t().uiMessage,
                   uiStatus: project.uiStatus || 'idle',
                   currentPrompt: '',
                   llmResponse: '',
@@ -401,6 +414,11 @@ const Tasks = () => {
                   tasks_list: ''
                 });
             }
+        });
+
+        // Listen for reset agent
+        window.addEventListener('resetAgent', () => {
+            handleReset();
         });
 
         // Create Lucide icons after a delay to ensure script loaded
@@ -514,7 +532,7 @@ const Tasks = () => {
     });
 
     return (
-        <div class="relative  flex flex-col">
+        <div class={`relative flex flex-col ${currentLang() === 'ar' ? 'rtl' : 'ltr'}`}>
             <ResponseSection tasksList={tasksList}
                 editingTaskId={editingTaskId}
                 setEditingTaskId={setEditingTaskId}
@@ -540,6 +558,7 @@ const Tasks = () => {
                 textareaRef={textareaRef}
                 prompt={prompt}
                 setPrompt={setPrompt}
+                tasksList={tasksList}
                 handleImprove={handleImprove}
                 handleSuggest={handleSuggest}
                 handleReset={handleReset}

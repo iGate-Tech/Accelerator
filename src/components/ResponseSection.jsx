@@ -102,11 +102,14 @@ const ResponseSection = (props) => {
                       {getSection(task)} – {getStepName(task)}
                     </span>
                   </div>
-                  <i
-                    data-lucide="trash"
-                    class="w-4 h-4 cursor-pointer"
-                    onClick={(e) => e.stopPropagation()}
-                  />
+                   <i
+                     data-lucide="copy"
+                     class="w-4 h-4 cursor-pointer"
+                     onClick={(e) => {
+                       e.stopPropagation();
+                       navigator.clipboard.writeText(task.content);
+                     }}
+                   />
                 </div>
 
                  {/* Body */}

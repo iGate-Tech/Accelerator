@@ -22,6 +22,7 @@ const getStateIcon = (state) => {
 };
 
 const ProgressAccordion = (props) => {
+  console.log('ProgressAccordion props.project:', props.project);
   onMount(() => {
     if (window.lucide) window.lucide.createIcons();
   });
@@ -48,16 +49,16 @@ const ProgressAccordion = (props) => {
       </div>
       <div class="collapse-content p-0">
         {/* Task Stats */}
-        <div class="flex flex-wrap gap-2 mt-4 items-center justify-between">
-          <div class="bg-info/10 text-info px-3 py-1 rounded-full flex items-center gap-1 text-xs">
-            <i data-lucide="clock" class="w-3 h-3"></i>
-            Est. Time: {Math.round(((stepOrder.length - 1 - props.machineStore.context.completedSteps) * 15 / 60) * 10) / 10} min
-          </div>
-          <div class="bg-warning/10 text-warning px-3 py-1 rounded-full flex items-center gap-1 text-xs">
-            <i data-lucide="dollar-sign" class="w-3 h-3"></i>
-            Credits: {props.machineStore.context.completedSteps * 10} / {(stepOrder.length - 1) * 10}
-          </div>
-        </div>
+         <div class="flex flex-wrap gap-2 mt-4 items-center justify-between">
+           <div class="bg-info/10 text-info px-3 py-1 rounded-full flex items-center gap-1 text-xs">
+             <i data-lucide="clock" class="w-3 h-3"></i>
+             Time: {props.project && props.project.consumedTime !== undefined ? Math.round(props.project.consumedTime / 60 * 10) / 10 : 0} / {props.project && props.project.totalTime ? Math.round(props.project.totalTime / 60 * 10) / 10 : 0} min
+           </div>
+           <div class="bg-warning/10 text-warning px-3 py-1 rounded-full flex items-center gap-1 text-xs">
+             <i data-lucide="dollar-sign" class="w-3 h-3"></i>
+             Credits: {props.project && props.project.consumedCredits !== undefined ? props.project.consumedCredits : 0} / {props.project && props.project.totalCredits ? props.project.totalCredits : 0}
+           </div>
+         </div>
         <div class="space-y-4">
           {/* Database Setup */}
           <div class="card">

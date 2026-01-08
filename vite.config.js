@@ -3,6 +3,9 @@ import solidPlugin from 'vite-plugin-solid';
 import { VitePWA } from 'vite-plugin-pwa';
 
 export default defineConfig({
+  worker: {
+    format: 'es'
+  },
   plugins: [
     solidPlugin(),
     VitePWA({

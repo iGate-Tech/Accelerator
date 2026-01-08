@@ -1,17 +1,718 @@
 @import "tailwindcss";
 
+/* Electrolize font */
+
 @font-face {
   font-family: 'Electrolize';
   font-style: normal;
   font-weight: 400;
-  src: url('/fonts/electrolize.woff2') format('woff2');
   font-display: swap;
+  src: url('./fonts/electrolize.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: 'IBM Plex Sans Arabic';
+  font-style: normal;
+  font-weight: 200;
+  font-display: swap;
+  src: url('./fonts/ibm-plex-sans-arabic-200.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'IBM Plex Sans Arabic';
+  font-style: normal;
+  font-weight: 300;
+  font-display: swap;
+  src: url('./fonts/ibm-plex-sans-arabic-300.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'IBM Plex Sans Arabic';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('./fonts/ibm-plex-sans-arabic-400.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'IBM Plex Sans Arabic';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url('./fonts/ibm-plex-sans-arabic-500.ttf') format('truetype');
 }
 
 @source "./public/**/*.js";
 
 @plugin "@tailwindcss/typography";
 @plugin "daisyui";
+
+/* RTL Support with tailwindcss-rtl */
+/* All RTL conversions are now handled automatically by the tailwindcss-rtl plugin */
+/* Custom RTL adjustments for specific components */
+
+.rtl .sidebar {
+  /* Sidebar positioning handled by Tailwind RTL plugin */
+}
+
+.ltr .sidebar {
+  /* Sidebar positioning handled by Tailwind RTL plugin */
+}
+
+.ltr {
+  direction: ltr;
+  text-align: left;
+}
+
+/* Sidebar RTL positioning - Force positioning */
+.sidebar.rtl {
+  right: 0 !important;
+  left: auto !important;
+  border-left: 1px solid hsl(var(--b2)) !important;
+  border-right: none !important;
+}
+
+.sidebar.ltr {
+  left: 0 !important;
+  right: auto !important;
+  border-right: 1px solid hsl(var(--b2)) !important;
+  border-left: none !important;
+}
+
+.rtl .menu li > details > summary::after {
+  transform: rotate(90deg) translateX(-50%);
+  left: 0.5rem;
+  right: auto;
+}
+
+.rtl .menu li > details[open] > summary::after {
+  transform: rotate(270deg) translateX(-50%);
+}
+
+.rtl .dropdown-content {
+  left: auto;
+  right: 0;
+}
+
+.rtl .dropdown-left .dropdown-content {
+  left: auto;
+  right: 100%;
+}
+
+.rtl .badge {
+  margin-left: 0.5rem;
+  margin-right: 0;
+}
+
+.rtl .flex.items-center.gap-3 > * {
+  margin-left: 0.75rem;
+  margin-right: 0;
+}
+
+.rtl .menu li > a > i,
+.rtl .menu li > details > summary > i {
+  margin-left: 0.5rem;
+  margin-right: 0;
+}
+
+.rtl .menu li > a,
+.rtl .menu li > details > summary {
+  justify-content: flex-end;
+}
+
+.rtl .justify-between {
+  flex-direction: row-reverse;
+}
+
+.rtl .collapse-title {
+  text-align: right;
+}
+
+.rtl .collapse-content {
+  text-align: right;
+}
+
+.rtl .text-left {
+  text-align: right !important;
+}
+
+.rtl .text-right {
+  text-align: left !important;
+}
+
+/* Comprehensive RTL Support */
+.rtl {
+  direction: rtl;
+  text-align: right;
+}
+
+/* Navigation */
+.rtl .navbar {
+  flex-direction: row-reverse;
+}
+
+.rtl .navbar-start {
+  margin-right: auto;
+  margin-left: 0;
+}
+
+.rtl .navbar-end {
+  margin-left: auto;
+  margin-right: 0;
+}
+
+/* Dropdowns and Menus */
+.rtl .dropdown-content {
+  text-align: right;
+  right: 0;
+  left: auto;
+}
+
+.rtl .menu li a,
+.rtl .menu li button {
+  justify-content: flex-end;
+  text-align: right;
+}
+
+.rtl .menu li > details > summary::after {
+  transform: rotate(90deg) translateX(-50%);
+  left: 0.5rem;
+  right: auto;
+}
+
+.rtl .menu li > details[open] > summary::after {
+  transform: rotate(270deg);
+}
+
+/* Cards and Content */
+.rtl .card-body {
+  text-align: right;
+}
+
+.rtl .card-title {
+  text-align: right;
+}
+
+.rtl .card-actions {
+  justify-content: flex-start;
+}
+
+/* Buttons */
+.rtl .btn {
+  flex-direction: row-reverse;
+}
+
+.rtl .btn .btn-icon {
+  margin-left: 0.5rem;
+  margin-right: 0;
+}
+
+/* Badges */
+.rtl .badge {
+  flex-direction: row-reverse;
+}
+
+/* Statistics */
+.rtl .stat {
+  text-align: right;
+}
+
+.rtl .stat-title {
+  text-align: right;
+}
+
+.rtl .stat-value {
+  text-align: right;
+}
+
+/* Tabs */
+.rtl .tabs {
+  flex-direction: row-reverse;
+}
+
+.rtl .tab {
+  margin-left: 0;
+  margin-right: 1rem;
+}
+
+.rtl .tab:first-child {
+  margin-right: 0;
+}
+
+.rtl .tab:last-child {
+  margin-left: 0;
+}
+
+/* Forms */
+.rtl .form-control {
+  text-align: right;
+}
+
+.rtl input,
+.rtl textarea,
+.rtl select {
+  text-align: right;
+}
+
+.rtl .label {
+  text-align: right;
+  flex-direction: row-reverse;
+}
+
+.rtl .input-group .input {
+  border-radius: 0 0.5rem 0.5rem 0;
+}
+
+.rtl .input-group .btn {
+  border-radius: 0.5rem 0 0 0.5rem;
+}
+
+/* Tables */
+.rtl table {
+  text-align: right;
+}
+
+.rtl th,
+.rtl td {
+  text-align: right;
+}
+
+/* Alerts and Toasts */
+.rtl .alert {
+  text-align: right;
+}
+
+.rtl .toast {
+  left: auto;
+  right: 1rem;
+}
+
+/* Modals */
+.rtl .modal {
+  text-align: right;
+}
+
+.rtl .modal .modal-action {
+  justify-content: flex-start;
+}
+
+/* Collapse/Accordion */
+.rtl .collapse-arrow .collapse-title::after {
+  left: 0.5rem;
+  right: auto;
+  transform: rotate(90deg);
+}
+
+.rtl .collapse-arrow[open] .collapse-title::after {
+  transform: rotate(270deg);
+}
+
+/* Progress and Steps */
+.rtl .steps {
+  flex-direction: row-reverse;
+}
+
+.rtl .step {
+  flex-direction: row-reverse;
+}
+
+/* Sidebar specific */
+.rtl .sidebar {
+  left: auto;
+  right: 0;
+}
+
+.rtl .sidebar .menu li a .icon {
+  margin-left: 0.5rem;
+  margin-right: 0;
+}
+
+/* Search inputs */
+.rtl .input-group .input ~ .btn {
+  border-radius: 0.5rem 0 0 0.5rem;
+}
+
+.rtl .relative .absolute.left-3 {
+  left: auto;
+  right: 0.75rem;
+}
+
+.rtl .relative .absolute.right-3 {
+  right: auto;
+  left: 0.75rem;
+}
+
+/* Grid and Flex */
+.rtl .justify-between {
+  flex-direction: row-reverse;
+}
+
+.rtl .justify-end {
+  justify-content: flex-start;
+}
+
+.rtl .justify-start {
+  justify-content: flex-end;
+}
+
+.rtl .items-start {
+  align-items: flex-end;
+}
+
+.rtl .items-end {
+  align-items: flex-start;
+}
+
+/* Spacing adjustments */
+.rtl .ml-1 { margin-left: 0; margin-right: 0.25rem; }
+.rtl .ml-2 { margin-left: 0; margin-right: 0.5rem; }
+.rtl .ml-3 { margin-left: 0; margin-right: 0.75rem; }
+.rtl .ml-4 { margin-left: 0; margin-right: 1rem; }
+
+.rtl .mr-1 { margin-right: 0; margin-left: 0.25rem; }
+.rtl .mr-2 { margin-right: 0; margin-left: 0.5rem; }
+.rtl .mr-3 { margin-right: 0; margin-left: 0.75rem; }
+.rtl .mr-4 { margin-right: 0; margin-left: 1rem; }
+
+.rtl .pl-1 { padding-left: 0; padding-right: 0.25rem; }
+.rtl .pl-2 { padding-left: 0; padding-right: 0.5rem; }
+.rtl .pl-3 { padding-left: 0; padding-right: 0.75rem; }
+.rtl .pl-4 { padding-left: 0; padding-right: 1rem; }
+
+.rtl .pr-1 { padding-right: 0; padding-left: 0.25rem; }
+.rtl .pr-2 { padding-right: 0; padding-left: 0.5rem; }
+.rtl .pr-3 { padding-right: 0; padding-left: 0.75rem; }
+.rtl .pr-4 { padding-right: 0; padding-left: 1rem; }
+
+/* Specific component fixes */
+.rtl .prose {
+  text-align: right;
+}
+
+.rtl .prose ul,
+.rtl .prose ol {
+  padding-right: 1.5rem;
+  padding-left: 0;
+}
+
+.rtl .prose blockquote {
+  border-right: 4px solid #e5e7eb;
+  border-left: none;
+  padding-right: 1rem;
+  padding-left: 0;
+}
+
+/* Help page specific RTL fixes */
+.rtl .help-page .card-body {
+  text-align: right;
+}
+
+.rtl .help-page .badge {
+  margin-left: 0.5rem;
+  margin-right: 0;
+}
+
+.rtl .help-page .progress {
+  direction: ltr; /* Keep progress bar LTR */
+}
+
+.rtl .help-page .dropdown-content {
+  text-align: right;
+  right: 0;
+  left: auto;
+}
+
+.rtl .help-page .grid {
+  gap: 1rem;
+}
+
+.rtl .help-page .space-y-1 > * + * {
+  margin-top: 0.25rem;
+}
+
+.rtl .help-page .space-y-4 > * + * {
+  margin-top: 1rem;
+}
+
+.rtl .help-page .space-y-6 > * + * {
+  margin-top: 1.5rem;
+}
+
+.rtl .help-page .space-y-8 > * + * {
+  margin-top: 2rem;
+}
+
+/* FAQ section RTL */
+.rtl .help-page details {
+  text-align: right;
+}
+
+.rtl .help-page summary {
+  text-align: right;
+  cursor: pointer;
+}
+
+.rtl .help-page summary::marker {
+  margin-left: 0.5rem;
+  margin-right: 0;
+}
+
+/* Search input RTL */
+.rtl .help-page .input-group .input {
+  text-align: right;
+}
+
+.rtl .help-page .input-group .input ~ .btn {
+  border-radius: 0.5rem 0 0 0.5rem;
+}
+
+/* Navigation tabs RTL */
+.rtl .help-page .tabs {
+  flex-direction: row-reverse;
+}
+
+.rtl .help-page .tab {
+  margin-left: 0;
+  margin-right: 1rem;
+}
+
+.rtl .help-page .tab:first-child {
+  margin-right: 0;
+}
+
+/* Getting started steps RTL */
+.rtl .help-page .step-card {
+  text-align: right;
+}
+
+.rtl .help-page .step-icon {
+  margin-left: 0.75rem;
+  margin-right: 0;
+}
+
+/* Video tutorials RTL */
+.rtl .help-page .video-grid {
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+}
+
+/* Contact form RTL */
+.rtl .help-page .form-control {
+  text-align: right;
+}
+
+.rtl .help-page .label {
+  text-align: right;
+  flex-direction: row-reverse;
+}
+
+.rtl .help-page textarea {
+  text-align: right;
+}
+
+/* Menu active state styling */
+.menu-active {
+  background-color: hsl(var(--primary) / 0.1);
+  color: hsl(var(--primary));
+  font-weight: 600;
+}
+
+.menu-active:hover {
+  background-color: hsl(var(--primary) / 0.15);
+}
+
+/* Sidebar menu styling */
+.sidebar .menu li {
+  margin-bottom: 0.25rem;
+}
+
+.sidebar .menu li details summary {
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  transition: all 0.2s ease;
+}
+
+.sidebar .menu li details summary:hover {
+  background-color: hsl(var(--base-content) / 0.05);
+}
+
+.sidebar .menu li details[open] summary {
+  background-color: hsl(var(--primary) / 0.05);
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+/* Help page menu active states */
+.help-page .menu-active {
+  background-color: hsl(var(--primary));
+  color: hsl(var(--primary-content));
+  border-radius: 0.375rem;
+}
+
+.help-page .menu-active:hover {
+  background-color: hsl(var(--primary) / 0.9);
+}
+
+/* Additional gap fixes for Help page */
+.rtl .help-page .card {
+  margin-bottom: 1.5rem;
+}
+
+.rtl .help-page .grid > * {
+  margin-bottom: 1rem;
+}
+
+.rtl .help-page .faq-item {
+  margin-bottom: 1rem;
+  padding: 1rem;
+  border-radius: 0.5rem;
+}
+
+.rtl .help-page .faq-item summary {
+  margin-bottom: 0.5rem;
+}
+
+.rtl .help-page .step-card {
+  margin-bottom: 1rem;
+  padding: 1.5rem;
+}
+
+.rtl .help-page .getting-started-progress {
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+}
+
+.rtl .help-page .section-header {
+  margin-bottom: 1.5rem;
+}
+
+.rtl .help-page .feature-card {
+  margin-bottom: 1rem;
+  padding: 1.25rem;
+}
+
+.rtl .help-page .tutorial-card {
+  margin-bottom: 1rem;
+  padding: 1.25rem;
+}
+
+.rtl .help-page .contact-form .form-control {
+  margin-bottom: 1rem;
+}
+
+/* Fix for progress section in getting started */
+.rtl .help-page .progress-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+.rtl .help-page .progress-section .progress-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.rtl .help-page .progress-section .progress-bar {
+  width: 100%;
+  margin-top: 0.5rem;
+}
+
+/* FAQ dropdown spacing */
+.rtl .help-page .dropdown-content {
+  margin-top: 0.25rem;
+  padding: 0.5rem;
+}
+
+.rtl .help-page .dropdown-content select {
+  width: 100%;
+}
+
+/* Search section spacing */
+.rtl .help-page .search-section {
+  margin-bottom: 2rem;
+}
+
+.rtl .help-page .search-section .input-group {
+  max-width: 28rem;
+  margin: 0 auto;
+}
+
+.rtl .navbar-start {
+  margin-right: auto;
+  margin-left: 0;
+}
+
+.rtl .navbar-end {
+  margin-left: auto;
+  margin-right: 0;
+}
+
+.rtl .dropdown-content {
+  text-align: right;
+}
+
+.rtl .menu li a,
+.rtl .menu li button {
+  justify-content: flex-end;
+}
+
+.rtl .collapse-arrow .collapse-title::after {
+  left: 0.5rem;
+  right: auto;
+  transform: rotate(90deg);
+}
+
+.rtl .collapse-arrow[open] .collapse-title::after {
+  transform: rotate(270deg);
+}
+
+/* Main content RTL adjustments */
+.rtl .card-body {
+  text-align: right;
+}
+
+.rtl .btn {
+  flex-direction: row-reverse;
+}
+
+.rtl .badge {
+  flex-direction: row-reverse;
+}
+
+.rtl .stat {
+  text-align: right;
+}
+
+.rtl .tabs {
+  flex-direction: row-reverse;
+}
+
+.rtl .tab {
+  margin-left: 0;
+  margin-right: 1rem;
+}
+
+.rtl .tab:first-child {
+  margin-right: 0;
+}
+
+/* Form RTL adjustments */
+.rtl .form-control {
+  text-align: right;
+}
+
+.rtl .label {
+  flex-direction: row-reverse;
+  justify-content: flex-end;
+}
+
+.rtl input,
+.rtl textarea,
+.rtl select {
+  text-align: right;
+}
 
 
 
@@ -65,6 +766,11 @@
 .custom-textarea:focus {
   outline: none;
   border-color: oklch(var(--color-primary));
+}
+
+/* Arabic font support */
+html {
+  font-family: 'IBM Plex Sans Arabic', 'Inter', system-ui, sans-serif;
 }
 
 @plugin "daisyui/theme" {

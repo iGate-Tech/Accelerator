@@ -85,15 +85,15 @@ const Login = () => {
                <label class="label">
                  <span class="label-text">{t().email}</span>
                </label>
-              <input
-                type="email"
-                placeholder="john.doe@example.com"
-                class="input input-bordered w-full"
-                value={email()}
-                onInput={(e) => setEmail(e.target.value)}
-                autocomplete="email"
-                required
-              />
+               <input
+                 type="email"
+                 placeholder={t().emailPlaceholder}
+                 class="input input-bordered w-full"
+                 value={email()}
+                 onInput={(e) => setEmail(e.target.value)}
+                 autocomplete="email"
+                 required
+               />
             </div>
 
             <div>
@@ -101,15 +101,15 @@ const Login = () => {
                  <span class="label-text">{t().password}</span>
                </label>
               <div class="relative">
-                <input
-                  type={showPassword() ? "text" : "password"}
-                  placeholder="Enter your password"
-                  class="input input-bordered w-full pr-10"
-                  value={password()}
-                  onInput={(e) => setPassword(e.target.value)}
-                  autocomplete="current-password"
-                  required
-                />
+                 <input
+                   type={showPassword() ? "text" : "password"}
+                   placeholder={t().passwordPlaceholder}
+                   class="input input-bordered w-full pr-10"
+                   value={password()}
+                   onInput={(e) => setPassword(e.target.value)}
+                   autocomplete="current-password"
+                   required
+                 />
                 <button
                   type="button"
                   class="absolute right-3 top-1/2 -translate-y-1/2 btn btn-ghost btn-sm btn-circle"

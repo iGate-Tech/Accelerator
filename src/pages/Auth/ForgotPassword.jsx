@@ -59,14 +59,14 @@ const ForgotPassword = () => {
                <label class="label">
                  <span class="label-text">{t().email}</span>
                </label>
-              <input
-                type="email"
-                placeholder="john.doe@example.com"
-                class="input input-bordered w-full"
-                value={email()}
-                onInput={(e) => setEmail(e.target.value)}
-                required
-              />
+               <input
+                 type="email"
+                 placeholder={t().emailPlaceholder}
+                 class="input input-bordered w-full"
+                 value={email()}
+                 onInput={(e) => setEmail(e.target.value)}
+                 required
+               />
             </div>
 
             <button

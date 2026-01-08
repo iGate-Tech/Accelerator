@@ -141,30 +141,30 @@ const Signup = () => {
                <label class="label">
                  <span class="label-text">{t().fullName}</span>
                </label>
-              <input
-                type="text"
-                placeholder="John Doe"
-                class="input input-bordered w-full"
-                value={formData().name}
-                onInput={(e) => updateFormData('name', e.target.value)}
-                autocomplete="name"
-                required
-              />
+               <input
+                 type="text"
+                 placeholder={t().fullNamePlaceholder}
+                 class="input input-bordered w-full"
+                 value={formData().name}
+                 onInput={(e) => updateFormData('name', e.target.value)}
+                 autocomplete="name"
+                 required
+               />
             </div>
 
             <div>
                <label class="label">
                  <span class="label-text">{t().email}</span>
                </label>
-              <input
-                type="email"
-                placeholder="john.doe@example.com"
-                class="input input-bordered w-full"
-                value={formData().email}
-                onInput={(e) => updateFormData('email', e.target.value)}
-                autocomplete="email"
-                required
-              />
+               <input
+                 type="email"
+                 placeholder={t().emailPlaceholder}
+                 class="input input-bordered w-full"
+                 value={formData().email}
+                 onInput={(e) => updateFormData('email', e.target.value)}
+                 autocomplete="email"
+                 required
+               />
             </div>
 
             <div>
@@ -172,16 +172,16 @@ const Signup = () => {
                  <span class="label-text">{t().password}</span>
                </label>
               <div class="relative">
-                <input
-                  type={showPassword() ? "text" : "password"}
-                  placeholder="Create a password"
-                  class="input input-bordered w-full pr-10"
-                  value={formData().password}
-                  onInput={(e) => updateFormData('password', e.target.value)}
-                  autocomplete="new-password"
-                  required
-                  minLength="6"
-                />
+                 <input
+                   type={showPassword() ? "text" : "password"}
+                   placeholder={t().createPasswordPlaceholder}
+                   class="input input-bordered w-full pr-10"
+                   value={formData().password}
+                   onInput={(e) => updateFormData('password', e.target.value)}
+                   autocomplete="new-password"
+                   required
+                   minLength="6"
+                 />
                 <button
                   type="button"
                   class="absolute right-3 top-1/2 -translate-y-1/2 btn btn-ghost btn-sm btn-circle"
@@ -199,15 +199,15 @@ const Signup = () => {
                  <span class="label-text">{t().confirmPassword}</span>
                </label>
               <div class="relative">
-                <input
-                  type={showConfirmPassword() ? "text" : "password"}
-                  placeholder="Confirm your password"
-                  class="input input-bordered w-full pr-10"
-                  value={formData().confirmPassword}
-                  onInput={(e) => updateFormData('confirmPassword', e.target.value)}
-                  autocomplete="new-password"
-                  required
-                />
+                 <input
+                   type={showConfirmPassword() ? "text" : "password"}
+                   placeholder={t().confirmPasswordPlaceholder}
+                   class="input input-bordered w-full pr-10"
+                   value={formData().confirmPassword}
+                   onInput={(e) => updateFormData('confirmPassword', e.target.value)}
+                   autocomplete="new-password"
+                   required
+                 />
                 <button
                   type="button"
                   class="absolute right-3 top-1/2 -translate-y-1/2 btn btn-ghost btn-sm btn-circle"

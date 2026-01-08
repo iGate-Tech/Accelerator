@@ -145,12 +145,12 @@ const Onboarding = () => {
                        <span class="label-text font-semibold">{t().bio}</span>
                        <span class="label-text-alt text-base-content/50">{t().tellUsAboutYourself}</span>
                     </label>
-                    <textarea
-                      class="textarea textarea-bordered w-full min-h-24 resize-none"
-                      placeholder="I'm a startup founder passionate about building innovative solutions..."
-                      value={onboardingData().bio}
-                      onInput={(e) => updateData('bio', e.target.value)}
-                    ></textarea>
+                     <textarea
+                       class="textarea textarea-bordered w-full min-h-24 resize-none"
+                       placeholder={t().bioPlaceholder}
+                       value={onboardingData().bio}
+                       onInput={(e) => updateData('bio', e.target.value)}
+                     ></textarea>
                   </div>
 
                   <div class="form-control">
@@ -197,12 +197,12 @@ const Onboarding = () => {
                        <span class="label-text font-semibold">{t().goals}</span>
                        <span class="label-text-alt text-base-content/50">{t().whatAchieve}</span>
                     </label>
-                    <textarea
-                      class="textarea textarea-bordered w-full min-h-24 resize-none"
-                      placeholder="I want to validate my startup idea, build an MVP, and find product-market fit..."
-                      value={onboardingData().goals}
-                      onInput={(e) => updateData('goals', e.target.value)}
-                    ></textarea>
+                     <textarea
+                       class="textarea textarea-bordered w-full min-h-24 resize-none"
+                       placeholder={t().goalsPlaceholder}
+                       value={onboardingData().goals}
+                       onInput={(e) => updateData('goals', e.target.value)}
+                     ></textarea>
                   </div>
                 </div>
               </div>
@@ -333,13 +333,13 @@ const Onboarding = () => {
                         <label class="label">
                            <span class="label-text font-semibold">{t().cardNumber}</span>
                         </label>
-                        <input
-                          type="text"
-                          class="input input-bordered w-full"
-                          placeholder="1234 5678 9012 3456"
-                          value={onboardingData().paymentMethod.number}
-                          onInput={(e) => updateData('paymentMethod', { ...onboardingData().paymentMethod, number: e.target.value })}
-                        />
+                         <input
+                           type="text"
+                           class="input input-bordered w-full"
+                           placeholder={t().cardNumberPlaceholder}
+                           value={onboardingData().paymentMethod.number}
+                           onInput={(e) => updateData('paymentMethod', { ...onboardingData().paymentMethod, number: e.target.value })}
+                         />
                       </div>
 
                       <div class="grid grid-cols-2 gap-4">
@@ -347,25 +347,25 @@ const Onboarding = () => {
                           <label class="label">
                              <span class="label-text font-semibold">{t().expiryDate}</span>
                           </label>
-                          <input
-                            type="text"
-                            class="input input-bordered w-full"
-                            placeholder="MM/YY"
-                            value={onboardingData().paymentMethod.expiry}
-                            onInput={(e) => updateData('paymentMethod', { ...onboardingData().paymentMethod, expiry: e.target.value })}
-                          />
+                           <input
+                             type="text"
+                             class="input input-bordered w-full"
+                             placeholder={t().expiryPlaceholder}
+                             value={onboardingData().paymentMethod.expiry}
+                             onInput={(e) => updateData('paymentMethod', { ...onboardingData().paymentMethod, expiry: e.target.value })}
+                           />
                         </div>
                         <div class="form-control">
                           <label class="label">
                              <span class="label-text font-semibold">{t().cvv}</span>
                           </label>
-                          <input
-                            type="text"
-                            class="input input-bordered w-full"
-                            placeholder="123"
-                            value={onboardingData().paymentMethod.cvv}
-                            onInput={(e) => updateData('paymentMethod', { ...onboardingData().paymentMethod, cvv: e.target.value })}
-                          />
+                           <input
+                             type="text"
+                             class="input input-bordered w-full"
+                             placeholder={t().cvvPlaceholder}
+                             value={onboardingData().paymentMethod.cvv}
+                             onInput={(e) => updateData('paymentMethod', { ...onboardingData().paymentMethod, cvv: e.target.value })}
+                           />
                         </div>
                       </div>
                     </div>

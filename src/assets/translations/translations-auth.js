@@ -41,7 +41,7 @@ export const authTranslations = {
     statusPage: 'Status Page',
     changelog: 'Changelog',
     help: 'Help',
-    copyright: '© {year} iGate. Built With ❤️ For Entrepreneurs.'
+    copyright: '© {year} iGate. One Gate, Endless Possibilities.'
   },
   ar: {
     // Login
@@ -84,6 +84,6 @@ export const authTranslations = {
     statusPage: 'صفحة الحالة',
     changelog: 'سجل التغييرات',
     help: 'المساعدة',
-    copyright: '© {year} iGate. بنيت بـ❤️ للرياديين.'
+    copyright: '© {year} iGate. One Gate, Endless Possibilities.'
   }
 };

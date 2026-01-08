@@ -177,7 +177,7 @@ const Navbar = () => {
   </button>
 
   <div class="dropdown-content mt-3 z-50 w-72 max-w-[calc(100vw-1rem)] rounded-xl bg-base-100 shadow-xl border border-base-200 overflow-hidden">
-    
+
     {/* Header */}
     <div class="px-4 py-3 border-b border-base-200 text-xs font-semibold uppercase text-base-content/60">
       {t().notifications || 'Notifications'}

@@ -153,7 +153,7 @@ const Login = () => {
              <a href="/status" class="link link-hover">{t().statusPage}</a>
              <a href="/changelog" class="link link-hover">{t().changelog}</a>
            </div>
-            <p>© {new Date().getFullYear()} iGate. <em>One Gate, Endless Possibilities.</em></p>
+            <p>© {new Date().getFullYear()} iGate. <em>"One Gate, Endless Possibilities."</em></p>
          </footer>
         </div>
       </RouteGuard>

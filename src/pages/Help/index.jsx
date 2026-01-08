@@ -1032,7 +1032,7 @@ Use consistent naming conventions and color coding for easy navigation.`
                <A href="/changelog" class="link link-hover">{t().changelog}</A>
             </div>
             <p class="text-xs text-base-content/40 mt-4">
-              © {new Date().getFullYear()} iGate. <em>One Gate, Endless Possibilities.</em>
+              © {new Date().getFullYear()} iGate. <em>"One Gate, Endless Possibilities."</em>
             </p>
          </div>
        </div>

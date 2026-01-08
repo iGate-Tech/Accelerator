@@ -1,4 +1,5 @@
 import { createSignal, createEffect, onMount, useContext } from "solid-js";
+import { useNavigate } from "@solidjs/router";
 import { LangContext } from "../../context/LangContext";
 import { translations } from "../../assets/translations/translations-index.js";
 

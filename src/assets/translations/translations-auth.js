@@ -40,6 +40,7 @@ export const authTranslations = {
     termsOfService: 'Terms of Service',
     statusPage: 'Status Page',
     changelog: 'Changelog',
+    help: 'Help',
     copyright: '© 2026 iGate Startup Accelerator. Built with ❤️ for entrepreneurs.'
   },
   ar: {
@@ -82,6 +83,7 @@ export const authTranslations = {
     termsOfService: 'شروط الخدمة',
     statusPage: 'صفحة الحالة',
     changelog: 'سجل التغييرات',
+    help: 'المساعدة',
     copyright: '© 2026 iGate Startup Accelerator. بنيت بـ❤️ للرياديين.'
   }
 };

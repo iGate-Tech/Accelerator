@@ -147,6 +147,7 @@ const Login = () => {
          {/* Footer */}
          <footer class="mt-8 text-center text-sm text-base-content/60">
            <div class="flex justify-center space-x-6 mb-4">
+             <a href="/help" class="link link-hover">{t().help}</a>
              <a href="/privacy-policy" class="link link-hover">{t().privacyPolicy}</a>
              <a href="/terms-of-service" class="link link-hover">{t().termsOfService}</a>
              <a href="/status" class="link link-hover">{t().statusPage}</a>

@@ -23,9 +23,10 @@ This will start:
 - **Frontend**: SolidJS/Vite development server on port 5173 with hot reloading
 - **Backend**: Express API server on port 3000
 - **Supabase**: Local PostgreSQL database on port 5432
-- **Supabase Studio**: Web UI on port 3001
 
 The frontend automatically proxies API calls to the backend service.
+
+**Note**: Supabase Studio is not included in the Docker setup. Use the hosted Supabase Studio at https://supabase.com/dashboard or run it locally if needed.
 
 ## Production Setup
 
@@ -95,9 +96,9 @@ docker system prune -a  # Remove unused containers and images
 - **Database**: postgres
 - **Password**: postgres
 
-### Supabase Studio
-- **Ports**: 3001
-- **Access**: http://localhost:3001
+### Supabase Database
+- **Ports**: 5432
+- **Access**: Use your preferred PostgreSQL client or Supabase Studio (hosted)
 
 ## SSL Configuration (Production)
 

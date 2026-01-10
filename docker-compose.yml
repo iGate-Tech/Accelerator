@@ -32,18 +32,7 @@ services:
     networks:
       - accelerator-network
 
-  supabase-studio:
-    image: supabase/supabase-studio:latest
-    ports:
-      - "3001:3000"
-    environment:
-      - SUPABASE_URL=http://supabase:5432
-      - SUPABASE_ANON_KEY=your-anon-key-here
-      - SUPABASE_SERVICE_ROLE_KEY=your-service-role-key-here
-    depends_on:
-      - supabase
-    networks:
-      - accelerator-network
+
 
 volumes:
   supabase_data:

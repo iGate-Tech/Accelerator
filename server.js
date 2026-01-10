@@ -152,13 +152,19 @@ Do NOT repeat the prompt. Treat the user input as a task and deliver a complete 
     }
 });
 
-// Catch-all handler for SPA - serve index.html for any unmatched GET request
-app.get('/*', (req, res) => {
+// Catch-all handler for SPA - serve index.html for any unmatched request
+app.use((req, res, next) => {
     // Skip API routes and static files
     if (req.path.startsWith('/api') || req.path.includes('.')) {
-        return res.status(404).send('Not found');
+        return next();
     }
-    res.sendFile(path.join(__dirname, 'dist', 'index.html'));
+
+    // Only serve index.html for GET requests (SPA routing)
+    if (req.method === 'GET') {
+        res.sendFile(path.join(__dirname, 'dist', 'index.html'));
+    } else {
+        next();
+    }
 });
 
 app.listen(port, () => {

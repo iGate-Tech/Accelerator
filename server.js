@@ -153,7 +153,11 @@ Do NOT repeat the prompt. Treat the user input as a task and deliver a complete 
 });
 
 // Catch-all handler for SPA - serve index.html for any unmatched GET request
-app.get('*', (req, res) => {
+app.get('/*', (req, res) => {
+    // Skip API routes and static files
+    if (req.path.startsWith('/api') || req.path.includes('.')) {
+        return res.status(404).send('Not found');
+    }
     res.sendFile(path.join(__dirname, 'dist', 'index.html'));
 });
 

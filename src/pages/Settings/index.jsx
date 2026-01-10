@@ -148,6 +148,8 @@ const Settings = () => {
   const removeAvatar = async () => {
     try {
       await updateProfile({ avatar: '/src/assets/avatar.png' });
+      setAvatarPreview(null);
+      setAvatarFile(null);
       toastManager.success('Avatar removed successfully!');
     } catch (error) {
       toastManager.error('Failed to remove avatar');
@@ -224,9 +226,9 @@ const Settings = () => {
             <h2 class="text-2xl font-bold">{t().profileInfo}</h2>
 
              <div class="flex items-center gap-6">
-               <div class="avatar">
+                 <div class="avatar">
                  <div class="w-24 rounded-full ring ring-primary ring-offset-base-100 ring-offset-2">
-                   <img src={avatarPreview() || user().profile.avatar} alt="Profile" />
+                   <img src={avatarPreview() || user().avatar || '/src/assets/avatar.png'} alt="Profile" />
                  </div>
                </div>
                <div class="flex-1">

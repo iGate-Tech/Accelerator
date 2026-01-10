@@ -122,6 +122,16 @@ CREATE TABLE IF NOT EXISTS packages (
   sync_status TEXT DEFAULT 'local'
 );
 
+CREATE TABLE IF NOT EXISTS profiles (
+  id UUID REFERENCES auth.users(id) ON DELETE CASCADE PRIMARY KEY,
+  avatar TEXT DEFAULT '/src/assets/avatar.png',
+  bio TEXT,
+  preferences JSONB DEFAULT '{"notifications": {"email": true, "browser": false, "projectUpdates": true}, "privacy": {"profileVisibility": "private", "dataSharing": false}}',
+  synced_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  last_modified TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  sync_status TEXT DEFAULT 'local'
+);
+
 CREATE TABLE IF NOT EXISTS user_subscriptions (
   id BIGSERIAL PRIMARY KEY,
   user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
@@ -165,41 +175,8 @@ ALTER TABLE credits ENABLE ROW LEVEL SECURITY;
 ALTER TABLE billing ENABLE ROW LEVEL SECURITY;
 ALTER TABLE notifications ENABLE ROW LEVEL SECURITY;
 ALTER TABLE packages ENABLE ROW LEVEL SECURITY;
+ALTER TABLE profiles ENABLE ROW LEVEL SECURITY;
 ALTER TABLE user_subscriptions ENABLE ROW LEVEL SECURITY;
-
--- Grant schema usage
-GRANT USAGE ON SCHEMA public TO anon, authenticated;
-
--- Grant table privileges to authenticated users
-GRANT SELECT, INSERT, UPDATE, DELETE ON projects TO authenticated;
-GRANT SELECT, INSERT, UPDATE, DELETE ON tasks TO authenticated;
-GRANT SELECT, INSERT, UPDATE, DELETE ON groups TO authenticated;
-GRANT SELECT, INSERT, DELETE ON project_groups TO authenticated;
-GRANT SELECT, INSERT, UPDATE, DELETE ON credits TO authenticated;
-GRANT SELECT, INSERT, UPDATE, DELETE ON billing TO authenticated;
-GRANT SELECT, INSERT, UPDATE ON notifications TO authenticated;
-GRANT SELECT ON packages TO authenticated;
-GRANT SELECT ON user_subscriptions TO authenticated;
-
--- Grant SELECT to anon (RLS will deny access)
-GRANT SELECT ON projects TO anon;
-GRANT SELECT ON tasks TO anon;
-GRANT SELECT ON groups TO anon;
-GRANT SELECT ON project_groups TO anon;
-GRANT SELECT ON credits TO anon;
-GRANT SELECT ON billing TO anon;
-GRANT SELECT ON packages TO anon;
-
--- Clean up any existing policies
-DO $$
-DECLARE
-    pol record;
-BEGIN
-    FOR pol IN SELECT schemaname, tablename, policyname FROM pg_policies WHERE schemaname = 'public'
-    LOOP
-        EXECUTE 'DROP POLICY IF EXISTS ' || quote_ident(pol.policyname) || ' ON ' || quote_ident(pol.schemaname) || '.' || quote_ident(pol.tablename);
-    END LOOP;
-END $$;
 
 -- Create comprehensive RLS policies for user data isolation
 -- Deny anon access to satisfy Data API requirements
@@ -332,6 +309,15 @@ FOR SELECT TO authenticated;
 
 CREATE POLICY "Users can view own subscriptions" ON user_subscriptions
 FOR SELECT TO authenticated USING (auth.uid() = user_id);
+
+CREATE POLICY "Users can view own profile" ON profiles
+FOR SELECT TO authenticated USING (auth.uid() = id);
+
+CREATE POLICY "Users can insert own profile" ON profiles
+FOR INSERT TO authenticated WITH CHECK (auth.uid() = id);
+
+CREATE POLICY "Users can update own profile" ON profiles
+FOR UPDATE TO authenticated USING (auth.uid() = id);
 
 -- Insert sample packages (only if not exists)
 INSERT INTO packages (name, description, price, credits_included, features)

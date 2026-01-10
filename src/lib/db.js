@@ -699,6 +699,45 @@ export const getUserSubscription = async (userId) => {
   }
 };
 
+export const getUserProfile = async (userId) => {
+  try {
+    const pg = await getPg();
+    const res = await pg.query(
+      'SELECT * FROM profiles WHERE id = $1',
+      [userId]
+    );
+    return res.rows[0] || null;
+  } catch (error) {
+    console.error('Error getting user profile:', error);
+    return null;
+  }
+};
+
+export const createUserProfile = async (userId, profileData = {}) => {
+  try {
+    const pg = await getPg();
+    const res = await pg.query(
+      'INSERT INTO profiles (id, avatar, bio, preferences, synced_at, last_modified, sync_status) VALUES ($1, $2, $3, $4, $5, $6, $7) ON CONFLICT (id) DO NOTHING RETURNING *',
+      [
+        userId,
+        profileData.avatar || '/src/assets/avatar.png',
+        profileData.bio || '',
+        JSON.stringify(profileData.preferences || {
+          notifications: { email: true, browser: false, projectUpdates: true },
+          privacy: { profileVisibility: 'private', dataSharing: false }
+        }),
+        new Date(),
+        new Date(),
+        'local'
+      ]
+    );
+    return res.rows[0];
+  } catch (error) {
+    console.error('Error creating user profile:', error);
+    throw error;
+  }
+};
+
 export const updateBillingStatus = async (id, status) => {
   try {
     const pg = await getPg();

@@ -65,11 +65,11 @@ const Profile = () => {
       <div class="card bg-gradient-to-br from-primary/5 via-base-100 to-secondary/5 border border-primary/20">
         <div class="card-body">
           <div class="flex flex-col md:flex-row items-center gap-6">
-            <div class="avatar">
-              <div class="w-32 h-32 rounded-full ring ring-primary/30 ring-offset-base-100 ring-offset-4">
-                <img src={user().profile.avatar} alt="Profile avatar" />
-              </div>
-            </div>
+             <div class="avatar">
+               <div class="w-32 h-32 rounded-full ring ring-primary/30 ring-offset-base-100 ring-offset-4">
+                 <img src={user().avatar || '/src/assets/avatar.png'} alt="Profile avatar" />
+               </div>
+             </div>
             <div class="flex-1 text-center md:text-left">
               <h2 class="text-3xl font-bold text-base-content">{user().profile.name}</h2>
               <p class="text-xl text-base-content/70 mb-2">{user().profile.email}</p>

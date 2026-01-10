@@ -1,6 +1,7 @@
 import { createContext, createSignal, useContext, onMount } from "solid-js";
 import { supabase, getCurrentUser, signIn, signUp, signOut, resetPassword } from "../lib/supabase";
 import { dataAPI } from "../lib/data";
+import { updateEntity, getUserProfile } from "../lib/db";
 
 const UserContext = createContext();
 
@@ -20,19 +21,50 @@ export const UserProvider = (props) => {
 
   const updateProfile = async (profileUpdates) => {
     try {
-      await updateUser(user().id, { profile: { ...user().profile, ...profileUpdates } });
-      setUser(prev => ({ ...prev, profile: { ...prev.profile, ...profileUpdates } }));
+      // Handle avatar separately
+      const updates = { ...profileUpdates };
+      if (updates.avatar) {
+        setUser(prev => ({ ...prev, avatar: updates.avatar }));
+        delete updates.avatar;
+      }
+
+      // Update local state for profile fields
+      if (Object.keys(updates).length > 0) {
+        setUser(prev => ({ ...prev, profile: { ...prev.profile, ...updates } }));
+      }
+
+      // Update database
+      const dbUpdates = {};
+      if (profileUpdates.avatar) dbUpdates.avatar = profileUpdates.avatar;
+      if (profileUpdates.bio) dbUpdates.bio = profileUpdates.bio;
+
+      if (Object.keys(dbUpdates).length > 0) {
+        dbUpdates.last_modified = new Date();
+        await updateEntity('profiles', 'id', user().id, dbUpdates);
+      }
     } catch (error) {
       console.error('Error updating profile:', error);
+      // Revert local state on error
+      setUser(prev => ({ ...prev, avatar: prev.avatar, profile: prev.profile }));
+      throw error;
     }
   };
 
   const updatePreferences = async (preferenceUpdates) => {
     try {
-      await updateUser(user().id, { profile: { ...user().profile, preferences: { ...user().preferences, ...preferenceUpdates } } });
+      // Update local state first
       setUser(prev => ({ ...prev, profile: { ...prev.profile, preferences: { ...prev.preferences, ...preferenceUpdates } } }));
+
+      // Update database
+      await updateEntity('profiles', 'id', user().id, {
+        preferences: { ...user().profile.preferences, ...preferenceUpdates },
+        last_modified: new Date()
+      });
     } catch (error) {
       console.error('Error updating preferences:', error);
+      // Revert local state on error
+      setUser(prev => ({ ...prev, profile: { ...prev.profile, preferences: user().profile.preferences } }));
+      throw error;
     }
   };
 
@@ -117,11 +149,25 @@ export const UserProvider = (props) => {
       if (error) throw error;
       if (data.session) {
         setSession(data.session);
+
+        // Load or create user profile from database
+        let profileData = await getUserProfile(data.session.user.id);
+        if (!profileData) {
+          profileData = await createUserProfile(data.session.user.id, data.session.user.user_metadata);
+        }
+
         setUser({
           id: data.session.user.id,
           email: data.session.user.email,
-          profile: data.session.user.user_metadata || {},
-          preferences: {
+          avatar: profileData.avatar,
+          profile: {
+            name: data.session.user.user_metadata?.name || '',
+            email: data.session.user.email,
+            bio: profileData.bio || '',
+            joinDate: data.session.user.created_at,
+            ...data.session.user.user_metadata
+          },
+          preferences: profileData.preferences || {
             notifications: { email: true, browser: false, projectUpdates: true },
             privacy: { profileVisibility: 'private', dataSharing: false }
           },

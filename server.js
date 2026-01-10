@@ -52,6 +52,16 @@ app.get('/sw.js', (req, res) => {
     res.sendFile(path.join(__dirname, 'public/sw.js'));
 });
 
+// Health check and root route
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'dist', 'index.html'));
+});
+
+// Test route to verify server is working
+app.get('/health', (req, res) => {
+    res.json({ status: 'ok', message: 'Server is running' });
+});
+
 // LLM API Route
 app.post('/api/llm/stream', async (req, res) => {
     const prompt = req.body.prompt || 'Hello';
@@ -142,8 +152,8 @@ Do NOT repeat the prompt. Treat the user input as a task and deliver a complete 
     }
 });
 
-// Catch-all handler for SPA
-app.use((req, res) => {
+// Catch-all handler for SPA - serve index.html for any unmatched GET request
+app.get('*', (req, res) => {
     res.sendFile(path.join(__dirname, 'dist', 'index.html'));
 });
 

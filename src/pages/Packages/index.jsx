@@ -111,7 +111,7 @@ const Packages = () => {
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 lg:gap-6 -mt-16 relative z-10">
               <For each={packages()}>
                 {(pkg, index) => (
-                  <div class={`relative bg-base-100 rounded-3xl shadow-xl border-2 overflow-hidden transition-all duration-300 hover:shadow-2xl ${
+                  <div class={`relative bg-base-100 rounded-3xl shadow-xl border-2 transition-all duration-300 hover:shadow-2xl ${
                     pkg.name === 'Pro'
                       ? 'border-primary lg:transform lg:scale-105 lg:z-10'
                       : pkg.name === 'Enterprise'
@@ -119,14 +119,14 @@ const Packages = () => {
                         : 'border-base-300'
                   }`}>
 
-                    {/* Popular Badge */}
-                    <Show when={pkg.name === 'Pro'}>
-                      <div class="absolute -top-4 left-1/2 transform -translate-x-1/2 z-20">
-                        <span class="bg-gradient-to-r from-primary to-primary-focus text-base-100 px-6 py-2 rounded-full text-sm font-bold shadow-lg">
-                          🔥 Most Popular
-                        </span>
-                      </div>
-                    </Show>
+                     {/* Popular Badge */}
+                     <Show when={pkg.name === 'Pro'}>
+                       <div class="absolute -top-3 left-1/2 transform -translate-x-1/2 z-30">
+                         <span class="bg-gradient-to-r from-primary to-primary-focus text-base-100 px-4 py-1.5 rounded-full text-xs font-bold shadow-lg whitespace-nowrap">
+                           🔥 Most Popular
+                         </span>
+                       </div>
+                     </Show>
 
                     {/* Header */}
                     <div class={`p-8 text-center ${pkg.name === 'Pro' ? 'bg-gradient-to-br from-primary/10 to-primary/20' : 'bg-base-200'}`}>

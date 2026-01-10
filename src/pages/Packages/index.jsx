@@ -100,7 +100,7 @@ const Packages = () => {
         </div>
       </div>
 
-      <div class="container mx-auto px-4 py-16">
+      <div class="container mx-auto px-4 py-24">
         <Show when={!packages.loading} fallback={
           <div class="flex justify-center items-center py-20">
             <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
@@ -189,10 +189,10 @@ const Packages = () => {
             </div>
 
             {/* Testimonials Section */}
-            <div class="mt-20 text-center">
-              <h2 class="text-3xl font-bold mb-12">Trusted by Startup Founders</h2>
-              <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-                <div class="bg-base-100 p-6 rounded-xl shadow-sm border border-base-300 border-base-300">
+            <div class="mt-32 text-center">
+              <h2 class="text-3xl font-bold mb-16">Trusted by Startup Founders</h2>
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
+                <div class="bg-base-100 p-6 rounded-xl shadow-sm border border-base-300">
                   <div class="flex items-center mb-4">
                     <div class="w-12 h-12 bg-info/20 rounded-full flex items-center justify-center mr-4">
                       <span class="text-info font-bold">SJ</span>
@@ -205,7 +205,7 @@ const Packages = () => {
                   <p class="text-base-content/80 italic">"The Pro plan helped us validate our MVP in just 2 weeks. The AI insights were game-changing."</p>
                 </div>
 
-                <div class="bg-base-100 p-6 rounded-xl shadow-sm border border-base-300 border-base-300">
+                <div class="bg-base-100 p-6 rounded-xl shadow-sm border border-base-300">
                   <div class="flex items-center mb-4">
                     <div class="w-12 h-12 bg-success/20 rounded-full flex items-center justify-center mr-4">
                       <span class="text-success font-bold">MR</span>
@@ -218,7 +218,7 @@ const Packages = () => {
                   <p class="text-base-content/80 italic">"Enterprise plan gave us the tools to scale from idea to Series A. Worth every penny."</p>
                 </div>
 
-                <div class="bg-base-100 p-6 rounded-xl shadow-sm border border-base-300 border-base-300">
+                <div class="bg-base-100 p-6 rounded-xl shadow-sm border border-base-300">
                   <div class="flex items-center mb-4">
                     <div class="w-12 h-12 bg-secondary/20 rounded-full flex items-center justify-center mr-4">
                       <span class="text-secondary font-bold">AL</span>
@@ -234,23 +234,23 @@ const Packages = () => {
             </div>
 
             {/* FAQ Section */}
-            <div class="mt-20 bg-base-100 rounded-2xl p-8 shadow-sm border border-base-300 border-base-300">
-              <h2 class="text-3xl font-bold text-center mb-8">Frequently Asked Questions</h2>
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <div>
-                  <h3 class="font-semibold mb-2">Can I change plans anytime?</h3>
+            <div class="mt-32 bg-base-100 rounded-2xl p-12 shadow-sm border border-base-300">
+              <h2 class="text-3xl font-bold text-center mb-12">Frequently Asked Questions</h2>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-12">
+                <div class="mb-6">
+                  <h3 class="font-semibold mb-3">Can I change plans anytime?</h3>
                   <p class="text-base-content/70">Yes, you can upgrade or downgrade your plan at any time. Changes take effect immediately.</p>
                 </div>
-                <div>
-                  <h3 class="font-semibold mb-2">What happens to unused credits?</h3>
+                <div class="mb-6">
+                  <h3 class="font-semibold mb-3">What happens to unused credits?</h3>
                   <p class="text-base-content/70">Credits roll over to the next month. Enterprise plans have unlimited carryover.</p>
                 </div>
-                <div>
-                  <h3 class="font-semibold mb-2">Is there a free trial?</h3>
+                <div class="mb-6">
+                  <h3 class="font-semibold mb-3">Is there a free trial?</h3>
                   <p class="text-base-content/70">All paid plans come with a 30-day free trial. No credit card required to start.</p>
                 </div>
-                <div>
-                  <h3 class="font-semibold mb-2">Do you offer refunds?</h3>
+                <div class="mb-6">
+                  <h3 class="font-semibold mb-3">Do you offer refunds?</h3>
                   <p class="text-base-content/70">Yes, we offer a 30-day money-back guarantee if you're not satisfied.</p>
                 </div>
               </div>

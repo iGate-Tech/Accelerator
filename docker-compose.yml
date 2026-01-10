@@ -3,8 +3,8 @@ version: '3.8'
 services:
   app:
     build: .
-    ports:
-      - "3000:3000"
+    expose:
+      - "3000"
     environment:
       - NODE_ENV=production
       # Add your environment variables here
@@ -19,11 +19,16 @@ services:
       - supabase
     networks:
       - accelerator-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
   supabase:
     image: supabase/postgres:15.1.0.147
-    ports:
-      - "5432:5432"
+    expose:
+      - "5432"
     environment:
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: postgres
@@ -31,8 +36,11 @@ services:
       - supabase_data:/var/lib/postgresql/data
     networks:
       - accelerator-network
-
-
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
 volumes:
   supabase_data:

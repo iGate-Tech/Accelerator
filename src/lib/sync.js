@@ -1,4 +1,5 @@
 import { supabase, fromSupabase, insertIntoSupabase, updateInSupabase, deleteFromSupabase, selectFromSupabase, getCurrentUser } from './supabase';
+import { createSignal } from "solid-js";
 import { getPg, updateEntity } from './db';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -13,10 +14,12 @@ export const SYNC_STATUS = {
 // Tables to sync
 const SYNC_TABLES = ['projects', 'tasks', 'groups', 'project_groups', 'credits', 'billing'];
 
+// Reactive sync status
+export const [syncInProgress, setSyncInProgress] = createSignal(false);
+
 class SyncService {
   constructor() {
     this.isOnline = navigator.onLine;
-    this.syncInProgress = false;
     this.lastSyncTime = null;
 
     // Listen for online/offline events
@@ -31,7 +34,7 @@ class SyncService {
   }
 
   async performSync() {
-    if (!this.isOnline || this.syncInProgress) return;
+    if (!this.isOnline || syncInProgress()) return;
 
     // Refresh session to ensure valid token
     try {
@@ -54,7 +57,7 @@ class SyncService {
       return;
     }
 
-    this.syncInProgress = true;
+    setSyncInProgress(true);
     console.log('Starting sync...');
 
     try {
@@ -67,7 +70,7 @@ class SyncService {
     } catch (error) {
       console.error('Sync failed:', error);
     } finally {
-      this.syncInProgress = false;
+      setSyncInProgress(false);
     }
   }
 
@@ -229,7 +232,7 @@ class SyncService {
   getSyncStatus() {
     return {
       isOnline: this.isOnline,
-      syncInProgress: this.syncInProgress,
+      syncInProgress: syncInProgress(),
       lastSyncTime: this.lastSyncTime
     };
   }

@@ -4,7 +4,7 @@ import { LangContext } from "../../context/LangContext";
 import { useUser } from "../../context/UserContext";
 import { translations } from "../../assets/translations/translations-index.js";
 import { getProjects, updateProject, deleteProject, deleteAllProjects, exportAllProjects } from "../../lib/db";
-import { getSyncStatus, performSync } from "../../lib/sync";
+import { getSyncStatus, performSync, syncInProgress } from "../../lib/sync";
 import { toastManager } from "../../lib/feedback";
 
 const Sidebar = () => {
@@ -167,29 +167,29 @@ const Sidebar = () => {
                     toastManager.error('Sync failed: ' + error.message);
                   }
                 }}
-                disabled={syncStatus().syncInProgress}
+                disabled={syncInProgress()}
                 class={`flex items-center gap-3 px-4 py-3 transition-all duration-200 ${
-                  syncStatus().syncInProgress
+                  syncInProgress()
                     ? 'bg-base-300 cursor-not-allowed opacity-75'
                     : 'hover:bg-base-300 cursor-pointer'
                 }`}
               >
                 <div class={`p-1 rounded transition-all duration-300 ${
-                  syncStatus().syncInProgress ? 'bg-warning/20 animate-pulse' : 'bg-success/10'
+                  syncInProgress() ? 'bg-warning/20 animate-pulse' : 'bg-success/10'
                 }`}>
                   <i
                     data-lucide="refresh-ccw"
                     class={`w-4 h-4 transition-all duration-300 ${
-                      syncStatus().syncInProgress
+                      syncInProgress()
                         ? 'text-warning animate-spin'
                         : 'text-success'
                     }`}
                   ></i>
                 </div>
                 <span class="font-medium">
-                  {syncStatus().syncInProgress ? 'Syncing...' : 'Sync Data'}
+                  {syncInProgress() ? 'Syncing...' : 'Sync Data'}
                 </span>
-                <Show when={syncStatus().syncInProgress}>
+                <Show when={syncInProgress()}>
                   <span class="loading loading-spinner loading-xs text-warning"></span>
                 </Show>
               </button>

@@ -24,20 +24,7 @@ export default defineConfig({
         categories: ['productivity', 'business'],
         lang: 'en-US',
         dir: 'ltr',
-        icons: [
-          {
-            src: 'avatar.png',
-            sizes: '192x192',
-            type: 'image/png',
-            purpose: 'any maskable'
-          },
-          {
-            src: 'avatar.png',
-            sizes: '512x512',
-            type: 'image/png',
-            purpose: 'any maskable'
-          }
-        ]
+        icons: []
       },
       workbox: {
         globPatterns: ['**/*.{js,css,html,ico,png,svg}'],

@@ -7,7 +7,7 @@ import RouteGuard from "../../components/common/RouteGuard";
 
 const ForgotPassword = () => {
   const navigate = useNavigate();
-  const { isAuthenticated } = useUser();
+  const { isAuthenticated, forgotPassword } = useUser();
   const { t } = useLanguage();
   const [email, setEmail] = createSignal('');
   const [loading, setLoading] = createSignal(false);
@@ -24,11 +24,15 @@ const ForgotPassword = () => {
     setLoading(true);
 
     try {
-      // Mock password reset - in real app, send email
-      toastManager.success(`Password reset request processed for ${email()}. If an account with this email exists, a reset link has been sent. Check your inbox and spam folder.`);
-      setTimeout(() => {
-        navigate('/login');
-      }, 3000);
+      const result = await forgotPassword(email());
+      if (result.success) {
+        toastManager.success(`Password reset request processed for ${email()}. If an account with this email exists, a reset link has been sent. Check your inbox and spam folder.`);
+        setTimeout(() => {
+          navigate('/login');
+        }, 3000);
+      } else {
+        toastManager.error(`Failed to send reset email to ${email()}. ${result.error}`);
+      }
     } catch (err) {
       toastManager.error(`Failed to send reset email to ${email()}. Error: ${err.message}. Please try again.`);
     } finally {

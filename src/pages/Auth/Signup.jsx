@@ -2,14 +2,13 @@ import { createSignal, onMount, createEffect } from "solid-js";
 import { useNavigate } from "@solidjs/router";
 import { useUser } from "../../context/UserContext";
 import { useLanguage } from "../../hooks/useLanguage";
-import { createUser } from "../../lib/db";
 import { sanitizeInput, isValidEmail } from "../../lib/security";
 import { toastManager } from "../../lib/feedback";
 import RouteGuard from "../../components/common/RouteGuard";
 
 const Signup = () => {
   const navigate = useNavigate();
-  const { login, isAuthenticated } = useUser();
+  const { login, signup, isAuthenticated } = useUser();
   const { t } = useLanguage();
   const [formData, setFormData] = createSignal({
     name: '',
@@ -82,9 +81,22 @@ const Signup = () => {
       };
 
       console.log('Creating user with email:', sanitizedEmail);
-      // Create user in database
-      const newUser = await createUser(sanitizedEmail, password, profile);
-      console.log('User created successfully:', newUser);
+      // Create user with Supabase
+      const result = await signup(sanitizedEmail, password, profile);
+      if (!result.success) {
+        toastManager.error(`Registration failed for ${sanitizedEmail}. ${result.error}`);
+        setLoading(false);
+        return;
+      }
+
+      // Check if email confirmation is required
+      if (result.needsConfirmation) {
+        toastManager.success(`Account created successfully for ${sanitizedEmail}! Please check your email and click the confirmation link to activate your account.`);
+        setTimeout(() => {
+          navigate('/login');
+        }, 3000);
+        return;
+      }
 
       // Log in the user
       const loginSuccess = await login(sanitizedEmail, password);
@@ -101,7 +113,7 @@ const Signup = () => {
       }
     } catch (err) {
       console.error('Signup error:', err);
-      if (err.message?.includes('UNIQUE constraint failed') || err.message?.includes('duplicate key') || err.message?.includes('already exists')) {
+      if (err.message?.includes('User already registered')) {
         toastManager.error(`Registration failed for ${sanitizedEmail}. An account with this email already exists. Please try logging in or use a different email.`);
       } else {
         toastManager.error(`Registration failed for ${sanitizedEmail}. Error: ${err.message}. Please try again.`);

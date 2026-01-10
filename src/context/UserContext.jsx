@@ -1,11 +1,13 @@
 import { createContext, createSignal, useContext, onMount } from "solid-js";
-import { authAPI, dataAPI } from "../lib/data";
+import { supabase, getCurrentUser, signIn, signUp, signOut, resetPassword } from "../lib/supabase";
+import { dataAPI } from "../lib/data";
 
 const UserContext = createContext();
 
 export const UserProvider = (props) => {
   const [user, setUser] = createSignal(null);
   const [isAuthenticated, setIsAuthenticated] = createSignal(false);
+  const [session, setSession] = createSignal(null);
 
   const updateUser = (updates) => {
     setUser(prev => {
@@ -57,57 +59,111 @@ export const UserProvider = (props) => {
   // Auth functions
   const login = async (email, password) => {
     try {
-      const result = await authAPI.login(email, password);
-      if (result.success) {
-        setUser(result.user);
-        setIsAuthenticated(true);
-        localStorage.setItem('userToken', result.token);
+      const data = await signIn(email, password);
+      if (data && data.user) {
+        // Session will be set by onAuthStateChange
         return true;
-      } else {
-        console.error('Login failed:', result.error);
-        return false;
       }
+      return false;
     } catch (error) {
       console.error('Login error:', error);
+      if (error.message?.includes('Email not confirmed') || error.message?.includes('confirmation')) {
+        throw new Error('Please check your email and confirm your account before logging in.');
+      }
       return false;
     }
   };
 
   const logout = async () => {
     try {
-      await authAPI.logout();
-      setUser(null);
-      setIsAuthenticated(false);
-      window.location.href = '/login';
+      await signOut();
+      // Session will be cleared by onAuthStateChange
     } catch (error) {
       console.error('Logout error:', error);
-      // Force logout even if API fails
-      localStorage.removeItem('userToken');
-      setUser(null);
-      setIsAuthenticated(false);
-      window.location.href = '/login';
+    }
+  };
+
+  const signup = async (email, password, profile = {}) => {
+    try {
+      const result = await signUp(email, password, profile);
+      if (result.user) {
+        // Session will be set by onAuthStateChange if confirmed
+        return {
+          success: true,
+          user: result.user,
+          needsConfirmation: result.needsConfirmation
+        };
+      }
+      return { success: false, error: 'No user data returned' };
+    } catch (error) {
+      console.error('Signup error:', error);
+      return { success: false, error: error.message || error };
+    }
+  };
+
+  const forgotPassword = async (email) => {
+    try {
+      await resetPassword(email);
+      return { success: true };
+    } catch (error) {
+      console.error('Password reset error:', error);
+      return { success: false, error: error.message };
     }
   };
 
   const checkAuth = async () => {
-    const token = localStorage.getItem('userToken');
-    if (!token) return false;
-
-    const result = await authAPI.getCurrentUser();
-    if (!result.success) {
-      localStorage.removeItem('userToken');
+    try {
+      const { data, error } = await supabase.auth.getSession();
+      if (error) throw error;
+      if (data.session) {
+        setSession(data.session);
+        setUser({
+          id: data.session.user.id,
+          email: data.session.user.email,
+          profile: data.session.user.user_metadata || {},
+          preferences: {
+            notifications: { email: true, browser: false, projectUpdates: true },
+            privacy: { profileVisibility: 'private', dataSharing: false }
+          },
+          subscription: { plan: 'free', status: 'active', price: 0, renewalDate: null, maxCredits: 100 },
+          credits: { balance: 0, transactions: [] }
+        });
+        setIsAuthenticated(true);
+        return true;
+      }
+      return false;
+    } catch (error) {
+      console.error('Auth check error:', error);
       return false;
     }
-
-    setUser(result.user);
-    setIsAuthenticated(true);
-    return true;
   };
 
 
 
   onMount(async () => {
     await checkAuth();
+
+    // Listen for auth state changes
+    supabase.auth.onAuthStateChange((event, session) => {
+      setSession(session);
+      if (session) {
+        setUser({
+          id: session.user.id,
+          email: session.user.email,
+          profile: session.user.user_metadata || {},
+          preferences: {
+            notifications: { email: true, browser: false, projectUpdates: true },
+            privacy: { profileVisibility: 'private', dataSharing: false }
+          },
+          subscription: { plan: 'free', status: 'active', price: 0, renewalDate: null, maxCredits: 100 },
+          credits: { balance: 0, transactions: [] }
+        });
+        setIsAuthenticated(true);
+      } else {
+        setUser(null);
+        setIsAuthenticated(false);
+      }
+    });
   });
 
   return (
@@ -116,6 +172,8 @@ export const UserProvider = (props) => {
       isAuthenticated,
       login,
       logout,
+      signup,
+      forgotPassword,
       checkAuth,
       updateUser,
       updateProfile,

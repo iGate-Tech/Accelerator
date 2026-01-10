@@ -1,6 +1,7 @@
  import { Show, For, createMemo, createEffect, useContext, onMount } from "solid-js";
  import { createSignal } from "solid-js";
-  import { animate as anime, stagger } from 'animejs';
+  // import { animate as anime, stagger } from 'animejs';
+  const anime = () => {}; // dummy function to avoid errors
     import { machineStore, stepOrder, modelCumul } from "../../../lib/machine";
    import ProgressAccordion from "../../ui/ProgressAccordion";
    import { getProjectById } from "../../../lib/db";
@@ -52,18 +53,18 @@ const AgentInterface = (props) => {
          if (greetingText) {
            const letters = greetingText.innerText.split('');
            greetingText.innerHTML = letters.map(letter => `<span class="letter">${letter}</span>`).join('');
-            try {
-              anime({
-                targets: '.letter',
-                opacity: [0, 1],
-                translateY: [20, 0],
-                duration: 600,
-                easing: 'easeOutExpo',
-               delay: stagger(50, { start: 200 })
-            });
-            } catch (e) {
-              console.warn('Anime animation failed:', e);
-            }
+             // try {
+             //   anime({
+             //     targets: '.letter',
+             //     opacity: [0, 1],
+             //     translateY: [20, 0],
+             //     duration: 600,
+             //     easing: 'easeOutExpo',
+             //    delay: stagger(50, { start: 200 })
+             // });
+             // } catch (e) {
+             //   console.warn('Anime animation failed:', e);
+             // }
           }
 
           // Animate card entrance with scale
@@ -84,7 +85,7 @@ const AgentInterface = (props) => {
            opacity: [0, 1],
            duration: 500,
            easing: 'easeOutBack',
-            delay: stagger(100, { start: 800 })
+             delay: (el, i) => 800 + i * 100
          });
        });
 

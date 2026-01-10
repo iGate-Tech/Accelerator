@@ -68,8 +68,46 @@ const Login = () => {
   });
 
   return (
-    <RouteGuard>
-      <div class="w-full max-w-md mx-auto">
+  <RouteGuard>
+<style>{`
+.btnshadow{
+   	position: relative;
+   	margin: 10px auto;
+
+    background: #010002;
+    
+   }
+  
+   .btnshadow:before,
+   .btnshadow:after{
+   	content: '';
+   	position: absolute;
+   	
+   	background: linear-gradient(45deg,#fb0094,#0000ff,#00ff00,#ffff00,#ff0000,#fb0094,#0000ff,#00ff00,#ffff00,#ff0000);
+   	background-size: 200% 200%;
+   	width: calc(100% + 3px);
+   	height: calc(100% + 3px);
+   	border-radius: 8px;
+   	z-index: -1;
+    animation: animate 4s ease alternate infinite;
+   }
+   .btnshadow:after{
+   	filter: blur(5px);
+   }
+   @keyframes animate{
+   	0%{
+   		background-position: 0 50%;
+   	}
+   	50%{
+   		background-position: 100% 50%;
+   	}
+   	100%{
+   		background-position: 0% 50%;
+   	}
+   }
+`}</style>
+
+    <div class="w-full max-w-md mx-auto">
         {/* Logo */}
          
          <div class="card w-full py-6 shadow-2xl bg-base-100 border border-base-300 backdrop-blur-sm">
@@ -124,11 +162,14 @@ const Login = () => {
 
             <button
               type="submit"
-              class="btn btn-primary w-full"
+              class="w-full btn btnshadow"
               disabled={loading()}
             >
+              <div class="bg-base-100">
+
               {loading() && <span class="loading loading-spinner loading-sm"></span>}
                {t().signIn}
+              </div>
             </button>
           </form>
 

@@ -53,41 +53,42 @@ const Billing = () => {
         <p class="text-lg text-base-content/70">
           {t().manageSubscription}.
         </p>
+       </div>
+
+       <Show when={user()}>
+         <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+           {/* Current Subscription */}
+           <div class="bg-base-100 rounded-box p-6 shadow-sm border border-base-200">
+             <h2 class="text-2xl font-bold mb-6">{t().currentSubscription}</h2>
+
+             <div class="space-y-4">
+               <div class="flex justify-between items-center">
+                 <span class="font-medium">Plan</span>
+                 <span class="font-semibold">{user().subscription.plan}</span>
+               </div>
+               <div class="flex justify-between items-center">
+                 <span class="font-medium">Status</span>
+                 <div class={`badge ${user().subscription.status === 'active' ? 'badge-success' : 'badge-neutral'}`}>
+                   {user().subscription.status}
+                 </div>
+               </div>
+               <div class="flex justify-between items-center">
+                 <span class="font-medium">Billing Cycle</span>
+                 <span>{user().subscription.billingCycle}</span>
+               </div>
+               <div class="flex justify-between items-center">
+                 <span class="font-medium">Amount</span>
+                 <span class="font-semibold">${user().subscription.price}/month</span>
+               </div>
+               <Show when={user().subscription.renewalDate}>
+                 <div class="flex justify-between items-center">
+                   <span class="font-medium">Next Billing</span>
+                   <span>{new Date(user().subscription.renewalDate).toLocaleDateString()}</span>
+         </div>
+        </Show>
       </div>
 
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        {/* Current Subscription */}
-        <div class="bg-base-100 rounded-box p-6 shadow-sm border border-base-200">
-          <h2 class="text-2xl font-bold mb-6">{t().currentSubscription}</h2>
-
-          <div class="space-y-4">
-            <div class="flex justify-between items-center">
-              <span class="font-medium">Plan</span>
-              <span class="font-semibold">{user().subscription.plan}</span>
-            </div>
-            <div class="flex justify-between items-center">
-              <span class="font-medium">Status</span>
-              <div class={`badge ${user().subscription.status === 'active' ? 'badge-success' : 'badge-neutral'}`}>
-                {user().subscription.status}
-              </div>
-            </div>
-            <div class="flex justify-between items-center">
-              <span class="font-medium">Billing Cycle</span>
-              <span>{user().subscription.billingCycle}</span>
-            </div>
-            <div class="flex justify-between items-center">
-              <span class="font-medium">Amount</span>
-              <span class="font-semibold">${user().subscription.price}/month</span>
-            </div>
-            <Show when={user().subscription.renewalDate}>
-              <div class="flex justify-between items-center">
-                <span class="font-medium">Next Billing</span>
-                <span>{new Date(user().subscription.renewalDate).toLocaleDateString()}</span>
-              </div>
-            </Show>
-          </div>
-
-          <div class="divider"></div>
+             <div class="divider"></div>
 
           <div class="flex gap-3">
             <button class="btn btn-outline flex-1">
@@ -154,11 +155,23 @@ const Billing = () => {
                 </button>
               </div>
             </Show>
-          </div>
-        </div>
-      </div>
+           </div>
+         </div>
+       </div>
+       </Show>
 
-      {/* Billing History */}
+       <Show when={!user()}>
+         <div class="text-center py-12">
+           <i data-lucide="lock" class="w-16 h-16 mx-auto mb-4 text-base-content/50"></i>
+           <h2 class="text-2xl font-bold mb-2">Authentication Required</h2>
+           <p class="text-base-content/70 mb-4">Please log in to view your billing information.</p>
+           <button class="btn btn-primary" onClick={() => navigate('/login')}>
+             Log In
+           </button>
+         </div>
+       </Show>
+
+       {/* Billing History */}
       <div class="bg-base-100 rounded-box p-8 shadow-sm border border-base-200">
         <h2 class="text-2xl font-bold mb-6">{t().billingHistory}</h2>
 

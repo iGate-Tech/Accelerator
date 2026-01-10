@@ -1,4 +1,4 @@
-import { Router, Route } from "@solidjs/router";
+import { Router, Route, Navigate } from "@solidjs/router";
 import { lazy, createEffect, useContext } from "solid-js";
 import { LangProvider } from "./context/LangContext";
 import { UserProvider, useUser } from "./context/UserContext";
@@ -25,20 +25,25 @@ import Notifications from "./pages/modals/Notifications";
 
 const Home = lazy(() => import("./pages/Home"));
 
+const ProtectedRoute = (props) => {
+  const { isAuthenticated } = useUser();
+  return isAuthenticated() ? props.children : <Navigate href="/login" />;
+};
+
 const AppRoutes = () => {
   return (
     <Router>
       <Route path="/" component={MainLayout}>
-        <Route path="" component={Home} />
-        <Route path="dashboard" component={Dashboard} />
-        <Route path="explore" component={Explore} />
-        <Route path="portfolio" component={Portfolio} />
+        <Route path="" component={() => <ProtectedRoute><Home /></ProtectedRoute>} />
+        <Route path="dashboard" component={() => <ProtectedRoute><Dashboard /></ProtectedRoute>} />
+        <Route path="explore" component={() => <ProtectedRoute><Explore /></ProtectedRoute>} />
+        <Route path="portfolio" component={() => <ProtectedRoute><Portfolio /></ProtectedRoute>} />
         <Route path="help" component={Help} />
-        <Route path="profile" component={Profile} />
-        <Route path="settings" component={Settings} />
-        <Route path="packages" component={Packages} />
-        <Route path="credits" component={Credits} />
-        <Route path="billing" component={Billing} />
+        <Route path="profile" component={() => <ProtectedRoute><Profile /></ProtectedRoute>} />
+        <Route path="settings" component={() => <ProtectedRoute><Settings /></ProtectedRoute>} />
+        <Route path="packages" component={() => <ProtectedRoute><Packages /></ProtectedRoute>} />
+        <Route path="credits" component={() => <ProtectedRoute><Credits /></ProtectedRoute>} />
+        <Route path="billing" component={() => <ProtectedRoute><Billing /></ProtectedRoute>} />
         <Route path="privacy-policy" component={PrivacyPolicy} />
         <Route path="terms-of-service" component={TermsOfService} />
         <Route path="status" component={StatusPage} />

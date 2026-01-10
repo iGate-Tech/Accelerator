@@ -1,5 +1,7 @@
 import { PGliteWorker } from '@electric-sql/pglite/worker';
 import { toastManager } from './feedback';
+import { performSync } from './sync';
+import { v4 as uuidv4 } from 'uuid';
 
 let pgInstance = null;
 
@@ -8,11 +10,9 @@ export const getPg = async () => {
     console.log('Creating PGLiteWorker instance');
     pgInstance = new PGliteWorker(
       new Worker(new URL('../workers/pglite-worker.js', import.meta.url), {
-        type: 'module',
+        type: 'module'
       }),
-      {
-        dataDir: 'idb://accelerator-db-v6',
-      }
+      { dataDir: 'idb://accelerator-db-v7' }
     );
     console.log('PGLiteWorker instance created');
 
@@ -68,6 +68,10 @@ export const updateEntity = async (table, idField, id, updates, options = {}) =>
     }
   }
 
+  // Always update sync fields
+  fields.push(`last_modified = CURRENT_TIMESTAMP`);
+  fields.push(`sync_status = 'local'`);
+
   if (fields.length === 0) {
     console.log(`No fields to update for ${table} with id ${id}`);
     return { success: false, error: 'No fields to update' };
@@ -110,7 +114,7 @@ export const updateEntity = async (table, idField, id, updates, options = {}) =>
   export const addTask = async (task, project_id) => {
     try {
       const pg = await getPg();
-      await pg.query('INSERT INTO tasks (content, model, llm_model, section, stepName, prompt, project_id) VALUES ($1, $2, $3, $4, $5, $6, $7)', [task.content, task.model, task.llm_model, task.section, task.stepName, task.prompt, project_id]);
+      await pg.query('INSERT INTO tasks (content, model, llm_model, section, stepName, prompt, project_id, synced_at, last_modified, sync_status) VALUES ($1, $2, $3, $4, $5, $6, $7, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, \'local\')', [task.content, task.model, task.llm_model, task.section, task.stepName, task.prompt, project_id]);
       console.log('Task added:', task, 'for project:', project_id);
     } catch (e) {
       console.log('DB error in addTask:', e);
@@ -173,24 +177,24 @@ export const updateTask = async (id, content) => {
        const defaultTotalSteps = 51;
        const totalSteps = project.totalSteps || defaultTotalSteps;
        const completedSteps = project.completedSteps || 0;
-       const res = await pg.query('INSERT INTO Projects (name, description, currentStep, completedSteps, stepName, currentModel, currentSection, uiProgress, uiMessage, uiStatus, totalCredits, consumedCredits, totalTime, consumedTime, totalSteps, createdAt) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16) RETURNING *', [
-         project.name,
-         project.description,
-         project.currentStep || 'system',
-         completedSteps,
-         project.stepName || 'System Initialization',
-         project.currentModel || 'System',
-         project.currentSection || 'Initialization',
-         project.uiProgress || 0,
-         project.uiMessage || 'Ready to start the 48-step accelerator process',
-         project.uiStatus || 'idle',
-         project.totalCredits || (totalSteps * 10),
-         completedSteps * 10,
-         totalSteps * 30,
-         completedSteps * 30,
-         totalSteps,
-         project.createdAt || new Date()
-       ]);
+        const res = await pg.query('INSERT INTO Projects (name, description, currentStep, completedSteps, stepName, currentModel, currentSection, uiProgress, uiMessage, uiStatus, totalCredits, consumedCredits, totalTime, consumedTime, totalSteps, createdAt, synced_at, last_modified, sync_status) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, \'local\') RETURNING *', [
+          project.name,
+          project.description,
+          project.currentStep || 'system',
+          completedSteps,
+          project.stepName || 'System Initialization',
+          project.currentModel || 'System',
+          project.currentSection || 'Initialization',
+          project.uiProgress || 0,
+          project.uiMessage || 'Ready to start the 48-step accelerator process',
+          project.uiStatus || 'idle',
+          project.totalCredits || (totalSteps * 10),
+          completedSteps * 10,
+          totalSteps * 30,
+          completedSteps * 30,
+          totalSteps,
+          project.createdAt || new Date()
+        ]);
       const newProject = res.rows[0];
       console.log('Added project:', newProject);
       return newProject.id;
@@ -391,9 +395,10 @@ export const getGroupsWithProjects = async () => {
 export const createUser = async (email, passwordHash, profile = {}) => {
   try {
     const pg = await getPg();
+    const id = uuidv4();
     const res = await pg.query(
-      'INSERT INTO users (email, password_hash, profile) VALUES ($1, $2, $3) RETURNING *',
-      [email, passwordHash, JSON.stringify(profile)]
+      'INSERT INTO users (id, email, password_hash, profile) VALUES ($1, $2, $3, $4) RETURNING *',
+      [id, email, passwordHash, JSON.stringify(profile)]
     );
     console.log('User created:', res.rows[0]);
     return res.rows[0];
@@ -509,25 +514,28 @@ export const deleteExpiredSessions = async () => {
 export const addCreditTransaction = async (userId, type, amount, description) => {
   try {
     const pg = await getPg();
-    // Get current balance
-    const balanceRes = await pg.query(
-      'SELECT COALESCE(SUM(amount), 0) as balance FROM credits WHERE user_id = $1',
-      [userId]
+    const id = uuidv4();
+    const transaction = {
+      id,
+      user_id: userId,
+      type,
+      amount,
+      description,
+      balance_after: 0, // TODO: calculate
+      date: new Date().toISOString()
+    };
+    await pg.query(
+      'INSERT INTO credits (id, user_id, type, amount, description, balance_after, date, synced_at, last_modified, sync_status) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)',
+      [id, userId, type, amount, description, transaction.balance_after, transaction.date, new Date(), new Date(), 'local']
     );
-    const currentBalance = balanceRes.rows[0].balance;
-    const newBalance = currentBalance + amount;
-
-    const res = await pg.query(
-      'INSERT INTO credits (user_id, type, amount, description, balance_after) VALUES ($1, $2, $3, $4, $5) RETURNING *',
-      [userId, type, amount, description, newBalance]
-    );
-    console.log('Credit transaction added:', res.rows[0]);
-    return res.rows[0];
-  } catch (e) {
-    console.log('Error adding credit transaction:', e);
-    throw e;
+    return transaction;
+  } catch (error) {
+    console.error('Error adding credit transaction:', error);
+    throw error;
   }
 };
+
+
 
 export const getUserCredits = async (userId) => {
   return await getEntities('credits', '*', 'WHERE user_id = $1', 'ORDER BY date DESC', [userId]);
@@ -625,9 +633,12 @@ export const seedInitialData = async () => {
   }
 };
 
-// Offline sync - placeholder for future Supabase sync
+// Sync data with Supabase
 export const syncData = async () => {
-  // For now, just clean up expired sessions
-  await deleteExpiredSessions();
-  console.log('Data sync completed');
+  try {
+    await performSync();
+    console.log('Data sync completed');
+  } catch (error) {
+    console.error('Sync failed:', error);
+  }
 };

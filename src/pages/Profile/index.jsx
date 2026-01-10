@@ -19,9 +19,7 @@ const Profile = () => {
     }
   });
 
-  createEffect(() => {
-    setCurrentLang(lang());
-  });
+
 
   onMount(async () => {
     if (window.lucide) window.lucide.createIcons();
@@ -60,9 +58,10 @@ const Profile = () => {
          <p class="text-lg text-base-content/70">
            {t().viewManageProfile}
          </p>
-      </div>
+       </div>
 
-      {/* Profile Overview Card */}
+       <Show when={user()}>
+         {/* Profile Overview Card */}
       <div class="card bg-gradient-to-br from-primary/5 via-base-100 to-secondary/5 border border-primary/20">
         <div class="card-body">
           <div class="flex flex-col md:flex-row items-center gap-6">
@@ -131,9 +130,9 @@ const Profile = () => {
                     <div class="flex items-center gap-2 p-3 bg-base-200 rounded-lg">
                       <i data-lucide="mail" class="w-4 h-4 text-base-content/60"></i>
                       <span>{user().profile.email}</span>
-                    </div>
-                  </div>
-                </div>
+          </div>
+        </div>
+      </div>
                 <div>
                   <label class="label">
                      <span class="label-text font-medium">{t().bio}</span>
@@ -284,8 +283,20 @@ const Profile = () => {
             </div>
           </div>
         </div>
+        </div>
+       </Show>
+
+       <Show when={!user()}>
+         <div class="text-center py-12">
+           <i data-lucide="lock" class="w-16 h-16 mx-auto mb-4 text-base-content/50"></i>
+           <h2 class="text-2xl font-bold mb-2">Authentication Required</h2>
+           <p class="text-base-content/70 mb-4">Please log in to view your profile.</p>
+           <button class="btn btn-primary" onClick={() => navigate('/login')}>
+             Log In
+           </button>
+         </div>
+       </Show>
       </div>
-    </div>
   );
 };
 

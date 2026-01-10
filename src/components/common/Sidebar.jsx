@@ -4,6 +4,8 @@ import { LangContext } from "../../context/LangContext";
 import { useUser } from "../../context/UserContext";
 import { translations } from "../../assets/translations/translations-index.js";
 import { getProjects, updateProject, deleteProject, deleteAllProjects, exportAllProjects } from "../../lib/db";
+import { getSyncStatus, performSync } from "../../lib/sync";
+import { toastManager } from "../../lib/feedback";
 
 const Sidebar = () => {
   const { lang } = useContext(LangContext);
@@ -13,6 +15,7 @@ const Sidebar = () => {
   const [projects, setProjects] = createSignal([]);
   const [searchQuery, setSearchQuery] = createSignal("");
   const [editingProjectId, setEditingProjectId] = createSignal(null);
+  const [syncStatus, setSyncStatus] = createSignal(getSyncStatus());
 
   const [currentLang, setCurrentLang] = createSignal(lang());
 
@@ -86,7 +89,7 @@ const Sidebar = () => {
       a.click();
       URL.revokeObjectURL(url);
     } else {
-      alert(t().exportAllProjects + ' ' + t().failed);
+      toastManager.error(t().exportAllProjects + ' ' + t().failed);
     }
   };
 
@@ -153,6 +156,25 @@ const Sidebar = () => {
               <span class="font-medium">{t().help}</span>
             </A>
           </li>
+          <li>
+            <a onclick={async () => {
+              try {
+                await performSync();
+                setSyncStatus(getSyncStatus());
+                toastManager.success('Sync completed successfully!');
+              } catch (error) {
+                toastManager.error('Sync failed: ' + error.message);
+              }
+            }} class="flex items-center gap-3 px-4 py-3 hover:bg-base-300 transition-colors">
+              <div class="p-1 bg-success/10 rounded">
+                <i data-lucide="refresh-ccw" class="w-4 h-4 text-success"></i>
+              </div>
+              <span class="font-medium">Sync Data</span>
+              <Show when={syncStatus().syncInProgress}>
+                <span class="loading loading-spinner loading-xs"></span>
+              </Show>
+            </a>
+          </li>
         </ul>
         <section class="menu bg-base-200 rounded-box w-full">
           <li>
@@ -199,7 +221,7 @@ const Sidebar = () => {
                   </a>
                 </li>
                 <li>
-                  <a onclick={() => alert(t().backupAllData + ' - ' + 'Coming soon!')} class="flex items-center gap-2">
+                  <a onclick={() => toastManager.info(t().backupAllData + ' - ' + 'Coming soon!')} class="flex items-center gap-2">
                     <i data-lucide="archive" class="w-4 h-4"></i>
                     {t().backupAllData}
                   </a>
@@ -469,8 +491,8 @@ const Sidebar = () => {
                         <li><a onclick={() => { setEditingProjectId(project.id); setTimeout(() => { const span = document.querySelector(`[data-project-id="${project.id}"]`); if (span) { span.focus(); const range = document.createRange(); range.selectNodeContents(span); const sel = window.getSelection(); sel.removeAllRanges(); sel.addRange(range); } }, 0); }}><i data-lucide="edit" class="w-4 h-4"></i>{t().rename}</a></li>
                         <li><a onclick={() => handleProjectAction('delete', project.id)}><i data-lucide="trash" class="w-4 h-4"></i>{t().delete}</a></li>
                         <li><a onclick={() => window.dispatchEvent(new CustomEvent('openProject', { detail: project.id }))}><i data-lucide="folder-open" class="w-4 h-4"></i>{t().open}</a></li>
-                        <li><a onclick={() => alert(t().exportProject + ': ' + project.name)}><i data-lucide="download" class="w-4 h-4"></i>{t().exportProject}</a></li>
-                        <li><a onclick={() => alert(t().exportReports + ': ' + project.name)}><i data-lucide="file-text" class="w-4 h-4"></i>{t().exportReports}</a></li>
+                        <li><a onclick={() => toastManager.info(t().exportProject + ': ' + project.name)}><i data-lucide="download" class="w-4 h-4"></i>{t().exportProject}</a></li>
+                        <li><a onclick={() => toastManager.info(t().exportReports + ': ' + project.name)}><i data-lucide="file-text" class="w-4 h-4"></i>{t().exportReports}</a></li>
                       </ul>
                     </li>
                   )}

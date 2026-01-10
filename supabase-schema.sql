@@ -247,14 +247,7 @@ CREATE POLICY "Deny anon billing" ON billing FOR ALL TO anon USING (false);
 DROP POLICY IF EXISTS "Users can view own projects" ON projects;
 DROP POLICY IF EXISTS "Users can view own projects and public projects" ON projects;
 CREATE POLICY "Users can view own projects and public projects" ON projects
-FOR SELECT TO authenticated USING (
-  auth.uid() = user_id OR public = true OR
-  EXISTS (
-    SELECT 1 FROM project_groups pg
-    JOIN portfolio_collaborators pc ON pg.group_id = pc.portfolio_id
-    WHERE pg.project_id = projects.id AND pc.user_id = auth.uid()
-  )
-);
+FOR SELECT TO authenticated USING (auth.uid() = user_id OR public = true);
 
 DROP POLICY IF EXISTS "Users can insert own projects" ON projects;
 CREATE POLICY "Users can insert own projects" ON projects
@@ -304,13 +297,7 @@ FOR DELETE TO authenticated USING (auth.uid() = user_id);
 
 DROP POLICY IF EXISTS "Users can view own groups" ON groups;
 CREATE POLICY "Users can view own groups" ON groups
-FOR SELECT TO authenticated USING (
-  auth.uid() = user_id OR
-  EXISTS (
-    SELECT 1 FROM portfolio_collaborators pc
-    WHERE pc.portfolio_id = groups.id AND pc.user_id = auth.uid()
-  )
-);
+FOR SELECT TO authenticated USING (auth.uid() = user_id);
 
 DROP POLICY IF EXISTS "Users can insert own groups" ON groups;
 CREATE POLICY "Users can insert own groups" ON groups
@@ -410,34 +397,18 @@ FOR INSERT TO authenticated WITH CHECK (auth.uid() = id);
 CREATE POLICY "Users can update own profile" ON profiles
 FOR UPDATE TO authenticated USING (auth.uid() = id);
 
--- Portfolio Collaborators policies
-CREATE POLICY "Portfolio owners can view collaborators" ON portfolio_collaborators
-FOR SELECT TO authenticated USING (
-  EXISTS (
-    SELECT 1 FROM groups WHERE id = portfolio_id AND user_id = auth.uid()
-  ) OR user_id = auth.uid()
-);
+-- Portfolio Collaborators policies (simplified to avoid circular dependencies)
+CREATE POLICY "Users can view portfolio collaborators" ON portfolio_collaborators
+FOR SELECT TO authenticated USING (auth.uid() = user_id);
 
-CREATE POLICY "Portfolio owners can add collaborators" ON portfolio_collaborators
-FOR INSERT TO authenticated WITH CHECK (
-  EXISTS (
-    SELECT 1 FROM groups WHERE id = portfolio_id AND user_id = auth.uid()
-  )
-);
+CREATE POLICY "Users can add portfolio collaborators" ON portfolio_collaborators
+FOR INSERT TO authenticated WITH CHECK (auth.uid() = user_id);
 
-CREATE POLICY "Portfolio owners can update collaborators" ON portfolio_collaborators
-FOR UPDATE TO authenticated USING (
-  EXISTS (
-    SELECT 1 FROM groups WHERE id = portfolio_id AND user_id = auth.uid()
-  )
-);
+CREATE POLICY "Users can update portfolio collaborators" ON portfolio_collaborators
+FOR UPDATE TO authenticated USING (auth.uid() = user_id);
 
-CREATE POLICY "Portfolio owners can remove collaborators" ON portfolio_collaborators
-FOR DELETE TO authenticated USING (
-  EXISTS (
-    SELECT 1 FROM groups WHERE id = portfolio_id AND user_id = auth.uid()
-  )
-);
+CREATE POLICY "Users can remove portfolio collaborators" ON portfolio_collaborators
+FOR DELETE TO authenticated USING (auth.uid() = user_id);
 
 -- Portfolio Invitations policies
 CREATE POLICY "Portfolio owners can view invitations" ON portfolio_invitations

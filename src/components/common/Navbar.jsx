@@ -202,9 +202,9 @@ const Navbar = () => {
   <div class="dropdown-content mt-3 z-50 w-72 max-w-[calc(100vw-1rem)] rounded-xl bg-base-100 shadow-xl border border-base-200 overflow-hidden">
     
     {/* Header */}
-    <div class="px-4 py-3 border-b border-base-200 text-xs font-semibold uppercase text-base-content/60">
-      {t().notifications || 'Notifications'}
-    </div>
+     <div class="px-4 py-3 border-b border-base-200 text-xs font-semibold uppercase text-base-content">
+       {t().notifications || 'Notifications'}
+     </div>
 
     {/* Tabs */}
     <div class="px-3 py-2 border-b border-base-200">
@@ -289,14 +289,14 @@ const Navbar = () => {
                       : 'Notification'}
                   </div>
 
-                 <div class="text-xs text-base-content/70 mt-1 break-words">
-                   {notif.text}
-                 </div>
+                  <div class="text-xs text-base-content mt-1 break-words">
+                    {notif.text}
+                  </div>
 
                  <div class="flex items-center gap-2 mt-1">
-                   <span class="text-xs text-base-content/50">
-                     {timeAgo(notif.time)}
-                   </span>
+                    <span class="text-xs text-base-content/70">
+                      {timeAgo(notif.time)}
+                    </span>
 
                    {!notif.read && (
                      <span class="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
@@ -378,13 +378,13 @@ const Navbar = () => {
                     <div class="font-bold text-base-content text-lg">
                       {user()?.profile?.name ?? 'John Doe'}
                     </div>
-                    <div class="text-sm text-base-content/70">
+                    <div class="text-sm text-base-content">
                       {user()?.profile?.email ?? 'john.doe@example.com'}
                     </div>
-                    <div class="text-xs text-base-content/80 mt-1">
+                    <div class="text-xs text-base-content mt-1">
                       Package: {user()?.subscription?.plan ?? 'Pro'}
                     </div>
-                    <div class="text-xs text-base-content/80 mt-1">
+                    <div class="text-xs text-base-content mt-1">
                       Credits: {user()?.credits?.balance ?? 150}
                     </div>
                     <div class="flex items-center gap-1 mt-1">

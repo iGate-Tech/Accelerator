@@ -21,7 +21,7 @@ make dev
 
 This will start:
 - **Frontend**: SolidJS/Vite development server on port 5173 with hot reloading
-- **Backend**: Express API server on port 3000
+- **Backend**: Express API server on port 9000
 - **Supabase**: Local PostgreSQL database on port 5432
 
 The frontend automatically proxies API calls to the backend service.
@@ -88,7 +88,7 @@ docker system prune -a  # Remove unused containers and images
 ### Backend Service
 - **Development**: Runs `npm run dev:server`
 - **Production**: Built into single container
-- **Ports**: 3000
+- **Ports**: 9000
 
 ### Supabase Service
 - **Image**: supabase/postgres:15.1.0.147
@@ -106,7 +106,7 @@ For HTTPS in production, place your SSL certificates in the `ssl/` directory and
 
 ## Troubleshooting
 
-1. **Port conflicts**: Ensure ports 3000, 5173, 5432, 3001 are available
+1. **Port conflicts**: Ensure ports 9000, 5173, 5432 are available
 2. **Environment variables**: Check that `.env` file exists and contains required variables
 3. **Build issues**: Try `docker-compose build --no-cache`
 4. **Database connection**: Use Supabase Studio at http://localhost:3001 to manage local database

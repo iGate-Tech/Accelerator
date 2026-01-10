@@ -5,7 +5,7 @@ worker({
   async init(options) {
     console.log('Worker init called with options:', options);
     const db = new PGlite({
-      dataDir: options.dataDir || 'idb://accelerator-db-v7'
+      dataDir: options.dataDir || 'idb://accelerator-db-v18'
     });
 
     console.log('PGLite instance created');
@@ -57,10 +57,80 @@ worker({
         totalTime REAL,
         consumedTime REAL,
         totalSteps INTEGER,
+        public BOOLEAN DEFAULT false,
+        problem TEXT,
+        solution TEXT,
+        strugglers TEXT,
+        alternatives TEXT,
+        gaps TEXT,
+        persona TEXT,
+        urgency TEXT,
+        evidence TEXT,
+        valueProp TEXT,
+        features TEXT,
+        modelType TEXT,
+        revenue TEXT,
+        pricing TEXT,
+        moat TEXT,
+        risks TEXT,
+        assumptions TEXT,
+        market TEXT,
+        tam TEXT,
+        sam TEXT,
+        som TEXT,
+        competitors TEXT,
+        differentiation TEXT,
+        marketTrends TEXT,
+        fixedCosts TEXT,
+        variableCosts TEXT,
+        year1 TEXT,
+        year2 TEXT,
+        year3 TEXT,
+        burnRate TEXT,
+        runway TEXT,
+        breakeven TEXT,
+        traction TEXT,
+        team TEXT,
+        risk TEXT,
+        valuation TEXT,
+        stage TEXT,
+        ask TEXT,
+        allocation TEXT,
+        preMoney TEXT,
+        investors TEXT,
+        milestones TEXT,
+        teamGaps TEXT,
+        hiring TEXT,
+        advisors TEXT,
+        entity TEXT,
+        ip TEXT,
+        contracts TEXT,
+        compliance TEXT,
+        pitchDeck TEXT,
+        businessPlan TEXT,
+        valuationReport TEXT,
+        currentPrompt TEXT,
+        llmResponse TEXT,
         createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         synced_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         last_modified TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         sync_status TEXT DEFAULT 'local'
+      );
+    `);
+
+    // Add public column to existing Projects table if it doesn't exist
+    await db.exec(`
+      ALTER TABLE Projects ADD COLUMN IF NOT EXISTS public BOOLEAN DEFAULT false;
+    `);
+
+    await db.exec(`
+      CREATE TABLE IF NOT EXISTS project_votes (
+        id BIGSERIAL PRIMARY KEY,
+        project_id BIGINT REFERENCES Projects(id) ON DELETE CASCADE,
+        user_id TEXT REFERENCES users(id) ON DELETE CASCADE,
+        vote_type TEXT NOT NULL CHECK (vote_type IN ('upvote', 'downvote')),
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        UNIQUE(project_id, user_id)
       );
     `);
 
@@ -195,6 +265,41 @@ worker({
         synced_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         last_modified TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         sync_status TEXT DEFAULT 'local'
+      );
+    `);
+
+    // Portfolio Collaboration Tables
+    await db.exec(`
+      CREATE TABLE IF NOT EXISTS portfolio_collaborators (
+        id BIGSERIAL PRIMARY KEY,
+        portfolio_id BIGINT REFERENCES Groups(id) ON DELETE CASCADE,
+        user_id TEXT REFERENCES users(id) ON DELETE CASCADE,
+        inviter_id TEXT REFERENCES users(id) ON DELETE CASCADE,
+        role TEXT DEFAULT 'editor',
+        joined_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        synced_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        last_modified TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        sync_status TEXT DEFAULT 'local',
+        UNIQUE(portfolio_id, user_id)
+      );
+    `);
+
+    await db.exec(`
+      CREATE TABLE IF NOT EXISTS portfolio_invitations (
+        id BIGSERIAL PRIMARY KEY,
+        portfolio_id BIGINT REFERENCES Groups(id) ON DELETE CASCADE,
+        inviter_id TEXT REFERENCES users(id) ON DELETE CASCADE,
+        invitee_email TEXT NOT NULL,
+        role TEXT DEFAULT 'editor',
+        status TEXT DEFAULT 'pending',
+        message TEXT,
+        invited_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        expires_at TIMESTAMP DEFAULT (CURRENT_TIMESTAMP + INTERVAL '7 days'),
+        responded_at TIMESTAMP,
+        synced_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        last_modified TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        sync_status TEXT DEFAULT 'local',
+        UNIQUE(portfolio_id, invitee_email, status)
       );
     `);
 

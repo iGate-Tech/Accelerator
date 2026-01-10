@@ -3,7 +3,7 @@
 
 import { toastManager } from './feedback';
 
-const API_BASE_URL = 'http://localhost:3000';
+const API_BASE_URL = '';
 
 export const apiClient = {
   // LLM API calls

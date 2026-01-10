@@ -111,7 +111,7 @@ worker({
 
     await db.exec(`
       CREATE TABLE IF NOT EXISTS credits (
-        id BIGSERIAL PRIMARY KEY,
+        id TEXT PRIMARY KEY,
         user_id TEXT REFERENCES users(id) ON DELETE CASCADE,
         type TEXT NOT NULL,
         amount REAL NOT NULL,
@@ -126,7 +126,7 @@ worker({
 
     await db.exec(`
       CREATE TABLE IF NOT EXISTS billing (
-        id BIGSERIAL PRIMARY KEY,
+        id TEXT PRIMARY KEY,
         user_id TEXT REFERENCES users(id) ON DELETE CASCADE,
         type TEXT NOT NULL,
         amount REAL NOT NULL,
@@ -134,6 +134,64 @@ worker({
         description TEXT,
         date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         due_date TIMESTAMP,
+        synced_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        last_modified TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        sync_status TEXT DEFAULT 'local'
+      );
+    `);
+
+    await db.exec(`
+      CREATE TABLE IF NOT EXISTS notifications (
+        id TEXT PRIMARY KEY,
+        user_id TEXT REFERENCES users(id) ON DELETE CASCADE,
+        type TEXT NOT NULL,
+        title TEXT NOT NULL,
+        message TEXT NOT NULL,
+        read BOOLEAN DEFAULT false,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        synced_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        last_modified TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        sync_status TEXT DEFAULT 'local'
+      );
+    `);
+
+    await db.exec(`
+      CREATE TABLE IF NOT EXISTS packages (
+        id TEXT PRIMARY KEY,
+        name TEXT NOT NULL,
+        description TEXT,
+        price REAL NOT NULL,
+        credits_included INTEGER NOT NULL,
+        features JSONB,
+        active BOOLEAN DEFAULT true,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        synced_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        last_modified TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        sync_status TEXT DEFAULT 'local'
+      );
+    `);
+
+    await db.exec(`
+      CREATE TABLE IF NOT EXISTS profiles (
+        id TEXT PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
+        avatar TEXT DEFAULT '/src/assets/avatar.png',
+        bio TEXT,
+        preferences JSONB DEFAULT '{"notifications": {"email": true, "browser": false, "projectUpdates": true}, "privacy": {"profileVisibility": "private", "dataSharing": false}}',
+        synced_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        last_modified TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        sync_status TEXT DEFAULT 'local'
+      );
+    `);
+
+    await db.exec(`
+      CREATE TABLE IF NOT EXISTS user_subscriptions (
+        id TEXT PRIMARY KEY,
+        user_id TEXT REFERENCES users(id) ON DELETE CASCADE,
+        package_id TEXT REFERENCES packages(id),
+        status TEXT DEFAULT 'active',
+        start_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        end_date TIMESTAMP,
+        auto_renew BOOLEAN DEFAULT true,
         synced_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         last_modified TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         sync_status TEXT DEFAULT 'local'

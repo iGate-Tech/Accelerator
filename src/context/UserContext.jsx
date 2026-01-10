@@ -1,7 +1,7 @@
 import { createContext, createSignal, useContext, onMount } from "solid-js";
 import { supabase, getCurrentUser, signIn, signUp, signOut, resetPassword } from "../lib/supabase";
 import { dataAPI } from "../lib/data";
-import { updateEntity, getUserProfile } from "../lib/db";
+import { updateEntity, getUserProfile, createUserProfile, getUserById, createUser } from "../lib/db";
 
 const UserContext = createContext();
 
@@ -150,47 +150,105 @@ export const UserProvider = (props) => {
       if (data.session) {
         setSession(data.session);
 
-        // Load or create user profile from database
-        let profileData = await getUserProfile(data.session.user.id);
-        if (!profileData) {
-          profileData = await createUserProfile(data.session.user.id, data.session.user.user_metadata);
+        // Ensure user exists in local database
+        let localUser = await getUserById(data.session.user.id);
+        if (!localUser) {
+          try {
+            localUser = await createUser(
+              data.session.user.email,
+              'supabase_auth', // placeholder password since we're using Supabase auth
+              {
+                name: data.session.user.user_metadata?.name || data.session.user.email.split('@')[0],
+                email: data.session.user.email,
+                avatar: data.session.user.user_metadata?.avatar_url || '/src/assets/avatar.png',
+                joinDate: data.session.user.created_at,
+                bio: data.session.user.user_metadata?.bio || '',
+              },
+              data.session.user.id // Pass the Supabase user ID
+            );
+          } catch (error) {
+            console.error('Error creating local user:', error);
+            // Continue without local user for now
+          }
+        }
+
+        // Load or create user profile (only if local user exists)
+        let profileData = null;
+        if (localUser) {
+          try {
+            profileData = await getUserProfile(data.session.user.id);
+            if (!profileData) {
+              profileData = await createUserProfile(data.session.user.id, data.session.user.user_metadata);
+            }
+          } catch (error) {
+            console.log('Profile creation skipped:', error.message);
+          }
+        }
+
+        // Get actual credit balance (fallback to 0 if user creation failed)
+        let creditBalance = 0;
+        if (localUser) {
+          try {
+            const { getCreditBalance } = await import('../lib/db');
+            creditBalance = await getCreditBalance(data.session.user.id);
+          } catch (error) {
+            console.log('Could not get credit balance:', error.message);
+          }
+        }
+
+        // Get actual subscription data (fallback to free if none exists)
+        let subscriptionData = { plan: 'free', status: 'active', price: 0, renewalDate: null, maxCredits: 100 };
+        if (localUser) {
+          try {
+            const { getUserSubscription } = await import('../lib/db');
+            const userSubscription = await getUserSubscription(data.session.user.id);
+            if (userSubscription) {
+              subscriptionData = {
+                plan: userSubscription.name,
+                status: userSubscription.status,
+                price: userSubscription.price,
+                renewalDate: userSubscription.end_date,
+                maxCredits: userSubscription.credits_included
+              };
+            }
+          } catch (error) {
+            console.log('Could not get subscription data:', error.message);
+          }
         }
 
         setUser({
           id: data.session.user.id,
           email: data.session.user.email,
-          avatar: profileData.avatar,
+          avatar: profileData?.avatar || data.session.user.user_metadata?.avatar_url || '/src/assets/avatar.png',
           profile: {
-            name: data.session.user.user_metadata?.name || '',
+            name: data.session.user.user_metadata?.name || data.session.user.email.split('@')[0],
             email: data.session.user.email,
-            bio: profileData.bio || '',
+            bio: profileData?.bio || '',
             joinDate: data.session.user.created_at,
             ...data.session.user.user_metadata
           },
-          preferences: profileData.preferences || {
-            notifications: { email: true, browser: false, projectUpdates: true },
-            privacy: { profileVisibility: 'private', dataSharing: false }
-          },
-          subscription: { plan: 'free', status: 'active', price: 0, renewalDate: null, maxCredits: 100 },
-          credits: { balance: 0, transactions: [] }
+           preferences: profileData?.preferences || {
+             notifications: { email: true, browser: false, projectUpdates: true },
+             privacy: { profileVisibility: 'private', dataSharing: false }
+           },
+           subscription: subscriptionData,
+           credits: { balance: creditBalance, transactions: [] }
         });
         setIsAuthenticated(true);
 
-        // Create welcome notification for new users
-        try {
-          const { getUserNotifications, createNotification } = await import('../lib/db');
-          const notifications = await getUserNotifications(data.session.user.id);
-          if (notifications.length === 0) {
-            await createNotification(
-              data.session.user.id,
-              'system',
-              'Welcome to iGate Accelerator! 🎉',
-              'Thank you for joining! You have 100 free credits to start building your startup. Explore the dashboard and let our AI agent guide you through the validation process.'
-            );
+        // Create sample notifications for new users
+        if (localUser) {
+          try {
+            const { seedSampleNotifications } = await import('../lib/db');
+            await seedSampleNotifications(data.session.user.id);
+          } catch (error) {
+            console.error('Could not create sample notifications:', error.message);
           }
-        } catch (error) {
-          console.log('Welcome notification creation skipped:', error.message);
         }
+
+        // For production: Don't create sample data, let users build their own data
+        // Users will see empty states until they interact with the app
+        console.log('User authenticated successfully:', data.session.user.email);
 
         return true;
       }
@@ -253,6 +311,26 @@ export const UserProvider = (props) => {
 export const useUser = () => {
   const context = useContext(UserContext);
   if (!context) {
+    // During development hot reloading, the context might temporarily be unavailable
+    // Return a safe mock context to prevent crashes
+    if (import.meta.hot) {
+      return {
+        user: () => null,
+        isAuthenticated: () => false,
+        login: async () => {},
+        signup: async () => {},
+        logout: async () => {},
+        updateUser: () => {},
+        updateProfile: () => {},
+        updatePreferences: () => {},
+        updateSubscription: () => {},
+        updateCredits: () => {},
+        addCreditTransaction: () => {},
+        checkAuth: async () => {},
+        forgotPassword: async () => {}
+      };
+    }
+    // In production, this should never happen
     throw new Error("useUser must be used within a UserProvider");
   }
   return context;

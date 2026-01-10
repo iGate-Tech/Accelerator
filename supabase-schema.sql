@@ -319,15 +319,15 @@ FOR INSERT TO authenticated WITH CHECK (auth.uid() = id);
 CREATE POLICY "Users can update own profile" ON profiles
 FOR UPDATE TO authenticated USING (auth.uid() = id);
 
--- Insert sample packages (only if not exists)
+-- Insert production-ready packages
 INSERT INTO packages (name, description, price, credits_included, features)
-SELECT 'Free', 'Basic features for getting started', 0, 100, '["Basic AI assistance", "Limited projects", "Community support"]'
+SELECT 'Free', 'Perfect for exploring our platform and testing basic features', 0, 50, '["AI-powered business plan generation", "Basic market analysis", "Financial projections", "3 projects maximum", "Community support", "Basic export options"]'
 WHERE NOT EXISTS (SELECT 1 FROM packages WHERE name = 'Free');
 
 INSERT INTO packages (name, description, price, credits_included, features)
-SELECT 'Pro', 'Advanced features for professionals', 29.99, 1000, '["Advanced AI models", "Unlimited projects", "Priority support", "API access"]'
+SELECT 'Pro', 'Advanced tools for growing startups and entrepreneurs', 49.99, 1000, '["Everything in Free plan", "Unlimited projects", "Advanced market research", "Competitive analysis", "Pitch deck generation", "Financial modeling", "Priority customer support", "Advanced export formats", "API access", "Custom templates"]'
 WHERE NOT EXISTS (SELECT 1 FROM packages WHERE name = 'Pro');
 
 INSERT INTO packages (name, description, price, credits_included, features)
-SELECT 'Enterprise', 'Full suite for teams', 99.99, 5000, '["All Pro features", "Team collaboration", "Custom integrations", "Dedicated support"]'
+SELECT 'Enterprise', 'Complete solution for scaling companies and teams', 199.99, 5000, '["Everything in Pro plan", "Team collaboration tools", "Advanced analytics dashboard", "Custom integrations", "White-label options", "Dedicated success manager", "Priority feature requests", "Advanced security features", "Custom AI model training", "24/7 premium support"]'
 WHERE NOT EXISTS (SELECT 1 FROM packages WHERE name = 'Enterprise');

@@ -1,0 +1,54 @@
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    ports:
+      - "5173:5173"  # Vite dev server port
+      - "3000:3000"  # Express server port
+    environment:
+      - NODE_ENV=development
+    volumes:
+      - .:/app
+      - /app/node_modules
+      # Mount .env file for environment variables
+      - ./.env:/app/.env:ro
+    depends_on:
+      - supabase
+    networks:
+      - accelerator-network
+    command: npm run dev
+
+  supabase:
+    image: supabase/postgres:15.1.0.147
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: postgres
+    volumes:
+      - supabase_data:/var/lib/postgresql/data
+    networks:
+      - accelerator-network
+
+  supabase-studio:
+    image: supabase/supabase-studio:latest
+    ports:
+      - "3001:3000"
+    environment:
+      - SUPABASE_URL=http://supabase:5432
+      - SUPABASE_ANON_KEY=your-anon-key-here
+      - SUPABASE_SERVICE_ROLE_KEY=your-service-role-key-here
+    depends_on:
+      - supabase
+    networks:
+      - accelerator-network
+
+volumes:
+  supabase_data:
+
+networks:
+  accelerator-network:
+    driver: bridge

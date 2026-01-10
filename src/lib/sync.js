@@ -21,15 +21,20 @@ class SyncService {
   constructor() {
     this.isOnline = navigator.onLine;
     this.lastSyncTime = null;
+    this.syncTimeout = null;
 
     // Listen for online/offline events
     window.addEventListener('online', () => {
       this.isOnline = true;
-      this.performSync();
+      this.debouncedSync();
     });
 
     window.addEventListener('offline', () => {
       this.isOnline = false;
+      if (this.syncTimeout) {
+        clearTimeout(this.syncTimeout);
+        this.syncTimeout = null;
+      }
     });
   }
 
@@ -72,6 +77,15 @@ class SyncService {
     } finally {
       setSyncInProgress(false);
     }
+  }
+
+  debouncedSync() {
+    if (this.syncTimeout) {
+      clearTimeout(this.syncTimeout);
+    }
+    this.syncTimeout = setTimeout(() => {
+      this.performSync();
+    }, 5000); // Debounce sync by 5 seconds
   }
 
   async syncTable(tableName) {

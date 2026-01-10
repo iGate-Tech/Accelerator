@@ -75,10 +75,9 @@ const Portfolio = () => {
   };
 
   const handleDeleteGroup = async (groupId) => {
-    if (confirm("Are you sure you want to delete this group? Projects will remain ungrouped.")) {
-      await deleteGroup(groupId);
-      await refreshData();
-    }
+    toastManager.warning("Deleting group - projects will remain ungrouped.");
+    await deleteGroup(groupId);
+    await refreshData();
   };
 
   const handleDragStart = (e, project) => {

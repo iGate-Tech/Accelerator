@@ -3,7 +3,7 @@ import { useNavigate } from "@solidjs/router";
 import { useUser } from "../../context/UserContext";
 import { LangContext } from "../../context/LangContext";
 import { translations } from "../../assets/translations/translations-index.js";
-import { supabase } from "../../lib/supabase";
+import { supabase, supabaseAdmin } from "../../lib/supabase";
 import { toastManager } from "../../lib/feedback";
 
 const Settings = () => {
@@ -163,16 +163,35 @@ const Settings = () => {
     toastManager.success(`Theme changed to ${theme}`);
   };
 
-  const deleteAccount = () => {
-    if (confirm('Are you sure you want to delete your account? This action cannot be undone.')) {
-      if (confirm('This will permanently delete all your data. Are you absolutely sure?')) {
-        // In a real app, this would call an API
-        showMessage('Account deletion initiated. You will be logged out.');
-        setTimeout(() => {
-          localStorage.clear();
-          navigate('/');
-        }, 2000);
+  const deleteAccount = async () => {
+    if (!confirm('Are you sure you want to delete your account? This action cannot be undone and will permanently delete all your data.')) {
+      return;
+    }
+
+    toastManager.warning('Deleting account - this action cannot be undone.');
+    try {
+      if (supabaseAdmin) {
+        // Use admin client to delete user completely
+        const { error } = await supabaseAdmin.auth.admin.deleteUser(user().id);
+        if (error) {
+          console.error('Error deleting account:', error);
+          toastManager.error('Error deleting account. Please contact support.');
+          return;
+        }
+      } else {
+        // Fallback: sign out user (data remains but user can't access)
+        await supabase.auth.signOut();
+        toastManager.info('Account access removed. Data may still exist for compliance.');
       }
+
+      toastManager.success('Account deleted successfully. You will be logged out.');
+      setTimeout(() => {
+        localStorage.clear();
+        navigate('/');
+      }, 2000);
+    } catch (error) {
+      console.error('Error deleting account:', error);
+      toastManager.error('Error deleting account. Please contact support.');
     }
   };
 

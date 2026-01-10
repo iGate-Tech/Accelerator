@@ -255,12 +255,13 @@ const Tasks = () => {
         if (textareaRef) {
             textareaRef.style.height = '3rem';
         }
-        startProcess(prompt());
+        startProcess("Please help me start a new project");
         if (!currentProjectId()) {
-            const projectName = prompt().split('\n')[0].trim();
-            const projectId = await addProject({name: projectName, description: prompt(), createdAt: new Date()});
+            const projectName = "New Project";
+            const description = "AI-powered startup accelerator project";
+            const projectId = await addProject({name: projectName, description, createdAt: new Date()});
             setCurrentProjectId(projectId);
-            toastManager.success(`New project "${projectName}" created (ID: ${projectId}) with ${prompt().length} chars description. Accelerator process started.`);
+            toastManager.success(`New project "${projectName}" created (ID: ${projectId}) with ${description.length} chars description. Accelerator process started.`);
             window.dispatchEvent(new CustomEvent('projectAdded'));
         }
         await handleLLMCall(machineStore.context.currentPrompt, 0);
@@ -277,7 +278,7 @@ const Tasks = () => {
     };
 
     const handleImprove = async () => {
-        const improvedPrompt = `${t().improvePrompt} ${prompt()}`;
+        const improvedPrompt = `${t().improvePrompt} Please improve my startup idea`;
         const extractProjectName = (result) => result.split('\n')[0].trim();
         await handleLLMProjectUpdate(callLLM, improvedPrompt, extractProjectName, currentProjectId, setCurrentProjectId, setPrompt);
     };

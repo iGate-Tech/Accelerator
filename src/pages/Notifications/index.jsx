@@ -14,6 +14,13 @@ const Notifications = () => {
     }
   );
 
+  // Force refresh on mount to ensure fresh data
+  onMount(() => {
+    if (user()?.id) {
+      refetch();
+    }
+  });
+
   const markAsRead = async (notificationId) => {
     try {
       await markNotificationRead(notificationId, user().id);

@@ -55,10 +55,9 @@ const Sidebar = () => {
         break;
 
       case 'delete':
-        if (confirm(t().delete + ' "' + project.name + '"? ' + t().confirm.toLowerCase())) {
-          await deleteProject(projectId);
-          await loadProjects();
-        }
+        toastManager.warning(t().delete + ' "' + project.name + '"');
+        await deleteProject(projectId);
+        await loadProjects();
         break;
 
       case 'open':
@@ -71,11 +70,10 @@ const Sidebar = () => {
   };
 
   const handleDeleteAllProjects = async () => {
-    const message = t().deleteAllProjects + '? ' + t().confirm.toLowerCase();
-    if (confirm(message)) {
-      await deleteAllProjects();
-      await loadProjects();
-    }
+    const message = t().deleteAllProjects;
+    toastManager.warning(message);
+    await deleteAllProjects();
+    await loadProjects();
   };
 
   const handleExportAllProjects = async () => {

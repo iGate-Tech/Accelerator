@@ -1,12 +1,14 @@
 import { A, useLocation } from "@solidjs/router";
 import {
   createSignal,
+  createResource,
   Show,
   For,
 } from "solid-js";
 import { useUser } from "../../context/UserContext";
 import { useLanguage } from "../../hooks/useLanguage";
 import { useLucideIcons } from "../../hooks/useLucideIcons";
+import { getUserNotifications, markNotificationRead } from "../../lib/db";
 import avatar from "../../assets/avatar.png";
 
 const Navbar = () => {
@@ -20,18 +22,39 @@ const Navbar = () => {
   const logout = userContext.logout ?? (() => {});
 
   const location = useLocation();
-  const [notifications, setNotifications] = createSignal([
-    { type: 'newMessage', text: 'You have a new message from John Doe', read: false, time: new Date(Date.now() - 5 * 60 * 1000) },
-    { type: 'systemUpdate', text: 'Your account has been updated successfully', read: false, time: new Date(Date.now() - 2 * 60 * 60 * 1000) },
-    { type: 'reminder', text: 'Don\'t forget your meeting at 3 PM', read: false, time: new Date(Date.now() - 24 * 60 * 60 * 1000) }
-  ]);
   const [dropdownFilter, setDropdownFilter] = createSignal('all');
+
+  // Fetch real notifications from database
+  const [notifications, { refetch: refetchNotifications }] = createResource(
+    () => user()?.id,
+    async (userId) => {
+      if (!userId) return [];
+      try {
+        const userNotifications = await getUserNotifications(userId);
+        // Transform database notifications to match the expected format
+        return userNotifications.slice(0, 5).map(notification => ({
+          id: notification.id,
+          type: notification.type === 'system' ? 'systemUpdate' :
+                notification.type === 'billing' ? 'billing' :
+                notification.type === 'credits' ? 'credits' :
+                notification.type === 'update' ? 'systemUpdate' : 'newMessage',
+          text: notification.message,
+          read: notification.read || false,
+          time: new Date(notification.created_at)
+        }));
+      } catch (error) {
+        console.error('Error fetching notifications:', error);
+        return [];
+      }
+    }
+  );
 
   let navbarRef;
 
   const filteredDropdown = () => {
-    if (dropdownFilter() === 'unread') return notifications().filter(n => !n.read);
-    return notifications();
+    const notifs = notifications() || [];
+    if (dropdownFilter() === 'unread') return notifs.filter(n => !n.read);
+    return notifs;
   };
 
   const timeAgo = (date) => {
@@ -169,11 +192,11 @@ const Navbar = () => {
    <button class="btn btn-ghost btn-circle relative">
      <i data-lucide="bell" class="w-5 h-5"></i>
 
-    <Show when={notifications().some(n => !n.read)}>
-      <span class="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-primary text-xs text-primary-content">
-        {notifications().filter(n => !n.read).length}
-      </span>
-    </Show>
+     <Show when={(notifications() || []).some(n => !n.read)}>
+       <span class="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-primary text-xs text-primary-content">
+         {(notifications() || []).filter(n => !n.read).length}
+       </span>
+     </Show>
   </button>
 
   <div class="dropdown-content mt-3 z-50 w-72 max-w-[calc(100vw-1rem)] rounded-xl bg-base-100 shadow-xl border border-base-200 overflow-hidden">
@@ -216,44 +239,55 @@ const Navbar = () => {
       >
         <For each={filteredDropdown()}>
           {(notif, index) => (
-             <div
-               class={`px-4 py-3 flex gap-3 items-center cursor-pointer hover:bg-base-200 transition ${
-                 !notif.read ? 'bg-primary/5' : ''
-               }`}
-               onClick={(e) => {
-                 e.stopPropagation();
-                 setNotifications(prev =>
-                   prev.map((n, i) =>
-                     i === index() ? { ...n, read: true } : n
-                   )
-                 );
-               }}
-             >
-               {/* Icon */}
-               <div class={`mt-1 p-2 rounded-full shrink-0 ${
-                 notif.type === 'newMessage' ? 'bg-blue-500 text-white' :
-                 notif.type === 'systemUpdate' ? 'bg-green-500 text-white' :
-                 'bg-yellow-500 text-black'
-               }`}>
-                 <i
-                   data-lucide={
-                     notif.type === 'newMessage' ? 'message-circle' :
-                     notif.type === 'systemUpdate' ? 'settings' :
-                     'clock'
-                   }
-                   class="w-4 h-4"
-                 ></i>
-               </div>
+              <div
+                class={`px-4 py-3 flex gap-3 items-center cursor-pointer hover:bg-base-200 transition ${
+                  !notif.read ? 'bg-primary/5' : ''
+                }`}
+                onClick={async (e) => {
+                  e.stopPropagation();
+                  if (!notif.read && notif.id) {
+                    try {
+                      await markNotificationRead(notif.id, user()?.id);
+                      refetchNotifications();
+                    } catch (error) {
+                      console.error('Error marking notification as read:', error);
+                    }
+                  }
+                }}
+              >
+                {/* Icon */}
+                <div class={`mt-1 p-2 rounded-full shrink-0 ${
+                  notif.type === 'newMessage' || notif.type === 'message' ? 'bg-blue-500 text-white' :
+                  notif.type === 'systemUpdate' || notif.type === 'system' || notif.type === 'update' ? 'bg-green-500 text-white' :
+                  notif.type === 'billing' ? 'bg-purple-500 text-white' :
+                  notif.type === 'credits' ? 'bg-yellow-500 text-black' :
+                  'bg-gray-500 text-white'
+                }`}>
+                  <i
+                    data-lucide={
+                      notif.type === 'newMessage' || notif.type === 'message' ? 'message-circle' :
+                      notif.type === 'systemUpdate' || notif.type === 'system' || notif.type === 'update' ? 'settings' :
+                      notif.type === 'billing' ? 'credit-card' :
+                      notif.type === 'credits' ? 'dollar-sign' :
+                      'bell'
+                    }
+                    class="w-4 h-4"
+                  ></i>
+                </div>
 
                {/* Content */}
                <div class="flex-1 min-w-0">
-                 <div class="text-sm font-medium truncate text-base-content">
-                   {notif.type === 'newMessage'
-                     ? 'New Message'
-                     : notif.type === 'systemUpdate'
-                     ? 'System Update'
-                     : 'Reminder'}
-                 </div>
+                  <div class="text-sm font-medium truncate text-base-content">
+                    {notif.type === 'newMessage' || notif.type === 'message'
+                      ? 'New Message'
+                      : notif.type === 'systemUpdate' || notif.type === 'system' || notif.type === 'update'
+                      ? 'System Update'
+                      : notif.type === 'billing'
+                      ? 'Billing Update'
+                      : notif.type === 'credits'
+                      ? 'Credit Update'
+                      : 'Notification'}
+                  </div>
 
                  <div class="text-xs text-base-content/70 mt-1 break-words">
                    {notif.text}
@@ -277,19 +311,30 @@ const Navbar = () => {
 
     {/* Footer */}
     <div class="p-3 border-t border-base-200 flex gap-2">
-       <button
-         class="btn btn-sm btn-primary flex-1"
-         disabled={notifications().every(n => n.read)}
-         onClick={(e) => {
-           e.stopPropagation();
-           setNotifications(prev =>
-             prev.map(n => ({ ...n, read: true }))
-           );
-         }}
-       >
-         <i data-lucide="check-circle" class="w-4 h-4"></i>
-         Mark all
-       </button>
+        <button
+          class="btn btn-sm btn-primary flex-1"
+          disabled={!(notifications() || []).some(n => !n.read)}
+          onClick={async (e) => {
+            e.stopPropagation();
+            const unreadNotifications = (notifications() || []).filter(n => !n.read);
+            if (unreadNotifications.length > 0) {
+              try {
+                // Mark all unread notifications as read
+                await Promise.all(
+                  unreadNotifications.map(notif =>
+                    markNotificationRead(notif.id, user()?.id)
+                  )
+                );
+                refetchNotifications();
+              } catch (error) {
+                console.error('Error marking all notifications as read:', error);
+              }
+            }
+          }}
+        >
+          <i data-lucide="check-circle" class="w-4 h-4"></i>
+          Mark all
+        </button>
 
        <A href="/notifications" class="btn btn-sm btn-ghost flex-1">
          <i data-lucide="eye" class="w-4 h-4"></i>

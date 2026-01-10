@@ -12,7 +12,7 @@ export const getPg = async () => {
       new Worker(new URL('../workers/pglite-worker.js', import.meta.url), {
         type: 'module'
       }),
-      { dataDir: 'idb://accelerator-db-v7' }
+      { dataDir: 'idb://accelerator-db-v15' }
     );
     console.log('PGLiteWorker instance created');
 
@@ -29,9 +29,9 @@ export const initDb = async () => {
 
 // Generic helper for SELECT operations
 export const getEntities = async (table, selectFields = '*', whereClause = '', orderBy = '', params = []) => {
-  const pg = await getPg();
-  const query = `SELECT ${selectFields} FROM ${table} ${whereClause} ${orderBy}`;
   try {
+    const pg = await getPg();
+    const query = `SELECT ${selectFields} FROM ${table} ${whereClause} ${orderBy}`;
     const res = await pg.query(query, params);
     return res.rows;
   } catch (error) {
@@ -69,12 +69,23 @@ export const updateEntity = async (table, idField, id, updates, options = {}) =>
   }
 
   // Always update sync fields
-  fields.push(`last_modified = CURRENT_TIMESTAMP`);
+  if (!updates.last_modified) {
+    fields.push(`last_modified = CURRENT_TIMESTAMP`);
+  }
   fields.push(`sync_status = 'local'`);
 
   if (fields.length === 0) {
     console.log(`No fields to update for ${table} with id ${id}`);
     return { success: false, error: 'No fields to update' };
+  }
+
+  // Add always-update fields (skip if already in updates)
+  if (options.alwaysUpdate) {
+    for (const [field, value] of Object.entries(options.alwaysUpdate)) {
+      if (!updates.hasOwnProperty(field)) {
+        fields.push(`${field} = ${value}`);
+      }
+    }
   }
 
   values.push(id);
@@ -392,13 +403,13 @@ export const getGroupsWithProjects = async () => {
 };
 
 // User functions
-export const createUser = async (email, passwordHash, profile = {}) => {
+export const createUser = async (email, passwordHash, profile = {}, userId = null) => {
   try {
     const pg = await getPg();
-    const id = uuidv4();
+    const id = userId || uuidv4();
     const res = await pg.query(
-      'INSERT INTO users (id, email, password_hash, profile) VALUES ($1, $2, $3, $4) RETURNING *',
-      [id, email, passwordHash, JSON.stringify(profile)]
+      'INSERT INTO users (id, email, password_hash, profile, synced_at, last_modified, sync_status) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *',
+      [id, email, passwordHash, JSON.stringify(profile), new Date(), new Date(), 'local']
     );
     console.log('User created:', res.rows[0]);
     return res.rows[0];
@@ -559,9 +570,10 @@ export const getUserCreditBalance = async (userId) => {
 export const addBillingRecord = async (userId, type, amount, description, dueDate = null) => {
   try {
     const pg = await getPg();
+    const id = uuidv4();
     const res = await pg.query(
-      'INSERT INTO billing (user_id, type, amount, description, due_date) VALUES ($1, $2, $3, $4, $5) RETURNING *',
-      [userId, type, amount, description, dueDate]
+      'INSERT INTO billing (id, user_id, type, amount, description, due_date, synced_at, last_modified, sync_status) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING *',
+      [id, userId, type, amount, description, dueDate, new Date(), new Date(), 'local']
     );
     console.log('Billing record added:', res.rows[0]);
     return res.rows[0];
@@ -624,10 +636,11 @@ export const getCreditTransactions = async (userId) => {
   }
 };
 
-export const createNotification = async (userId, type, title, message) => {
+export const createNotification = async (userId, type, title, message, createdAt = null) => {
   try {
     const pg = await getPg();
     const id = uuidv4();
+    const timestamp = createdAt || new Date().toISOString();
     const notification = {
       id,
       user_id: userId,
@@ -635,11 +648,11 @@ export const createNotification = async (userId, type, title, message) => {
       title,
       message,
       read: false,
-      created_at: new Date().toISOString()
+      created_at: timestamp
     };
     await pg.query(
-      'INSERT INTO notifications (id, user_id, type, title, message, read, synced_at, last_modified, sync_status) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)',
-      [id, userId, type, title, message, false, new Date(), new Date(), 'local']
+      'INSERT INTO notifications (id, user_id, type, title, message, read, created_at, synced_at, last_modified, sync_status) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)',
+      [id, userId, type, title, message, false, timestamp, new Date(), new Date(), 'local']
     );
     return notification;
   } catch (error) {
@@ -699,6 +712,48 @@ export const getUserSubscription = async (userId) => {
   }
 };
 
+export const createUserSubscription = async (userId, packageId, subscriptionData = {}) => {
+  try {
+    const pg = await getPg();
+    const id = uuidv4();
+    const startDate = subscriptionData.startDate || new Date();
+    const endDate = subscriptionData.endDate || new Date(Date.now() + 30 * 24 * 60 * 60 * 1000); // 30 days from now
+
+    const res = await pg.query(
+      'INSERT INTO user_subscriptions (id, user_id, package_id, status, start_date, end_date, auto_renew, synced_at, last_modified, sync_status) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING *',
+      [id, userId, packageId, subscriptionData.status || 'active', startDate, endDate, subscriptionData.autoRenew !== false, new Date(), new Date(), 'local']
+    );
+
+    // Add initial credits for the subscription
+    const packageData = await pg.query('SELECT * FROM packages WHERE id = $1', [packageId]);
+    if (packageData.rows[0]) {
+      await addCreditTransaction(userId, 'subscription', packageData.rows[0].credits_included, `Credits for ${packageData.rows[0].name} subscription`);
+    }
+
+    console.log('User subscription created:', res.rows[0]);
+    return res.rows[0];
+  } catch (error) {
+    console.error('Error creating user subscription:', error);
+    throw error;
+  }
+};
+
+export const updateUserSubscription = async (userId, subscriptionId, updates) => {
+  try {
+    const result = await updateEntity('user_subscriptions', 'id', subscriptionId, updates, {
+      alwaysUpdate: { 'updated_at': 'CURRENT_TIMESTAMP' }
+    });
+    if (!result.success) {
+      throw new Error(result.error);
+    }
+    console.log('Updated user subscription:', subscriptionId);
+    return result.data;
+  } catch (error) {
+    console.error('Error updating user subscription:', error);
+    throw error;
+  }
+};
+
 export const getUserProfile = async (userId) => {
   try {
     const pg = await getPg();
@@ -749,40 +804,150 @@ export const updateBillingStatus = async (id, status) => {
 };
 
 // Seeding function for initial data
+export const seedPackages = async () => {
+  try {
+    const pg = await getPg();
+
+    // Check if packages table is empty
+    const packageCount = await pg.query('SELECT COUNT(*) as count FROM packages');
+    if (packageCount.rows[0].count > 0) {
+      console.log('Packages already seeded');
+      return;
+    }
+
+    console.log('Seeding packages...');
+
+    // Production-ready packages with realistic features and pricing
+    const packages = [
+      {
+        name: 'Free',
+        description: 'Perfect for exploring our platform and testing basic features',
+        price: 0,
+        credits_included: 50,
+        features: JSON.stringify([
+          'AI-powered business plan generation',
+          'Basic market analysis',
+          'Financial projections',
+          '3 projects maximum',
+          'Community support',
+          'Basic export options'
+        ])
+      },
+      {
+        name: 'Pro',
+        description: 'Advanced tools for growing startups and entrepreneurs',
+        price: 49.99,
+        credits_included: 1000,
+        features: JSON.stringify([
+          'Everything in Free plan',
+          'Unlimited projects',
+          'Advanced market research',
+          'Competitive analysis',
+          'Pitch deck generation',
+          'Financial modeling',
+          'Priority customer support',
+          'Advanced export formats',
+          'API access',
+          'Custom templates'
+        ])
+      },
+      {
+        name: 'Enterprise',
+        description: 'Complete solution for scaling companies and teams',
+        price: 199.99,
+        credits_included: 5000,
+        features: JSON.stringify([
+          'Everything in Pro plan',
+          'Team collaboration tools',
+          'Advanced analytics dashboard',
+          'Custom integrations',
+          'White-label options',
+          'Dedicated success manager',
+          'Priority feature requests',
+          'Advanced security features',
+          'Custom AI model training',
+          '24/7 premium support'
+        ])
+      }
+    ];
+
+    for (const pkg of packages) {
+      const packageId = uuidv4();
+      await pg.query(
+        'INSERT INTO packages (id, name, description, price, credits_included, features, synced_at, last_modified, sync_status) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)',
+        [packageId, pkg.name, pkg.description, pkg.price, pkg.credits_included, pkg.features, new Date(), new Date(), 'local']
+      );
+    }
+
+    console.log('Packages seeded successfully');
+  } catch (e) {
+    console.log('Error seeding packages:', e);
+  }
+};
+
 export const seedInitialData = async () => {
   try {
     const pg = await getPg();
 
-    // Check if users table is empty
-    const userCount = await pg.query('SELECT COUNT(*) as count FROM users');
-    if (userCount.rows[0].count > 0) {
-      console.log('Database already seeded');
-      return;
-    }
-
     console.log('Seeding initial data...');
 
-    // Create a sample user
-    const sampleProfile = {
-      name: "John Doe",
-      email: "john.doe@example.com",
-      avatar: "/src/assets/avatar.png",
-      joinDate: new Date().toISOString().split('T')[0],
-      bio: "Entrepreneur and startup enthusiast"
-    };
-
-    const user = await createUser('john.doe@example.com', 'password', sampleProfile);
-
-    // Add sample credit transactions
-    await addCreditTransaction(user.id, 'purchase', 500, 'Initial credit purchase');
-    await addCreditTransaction(user.id, 'usage', -50, 'AI Accelerator Session - Project Analysis');
-
-    // Add sample billing record
-    await addBillingRecord(user.id, 'invoice', 29.99, 'Pro Plan Monthly Subscription', new Date(Date.now() + 30 * 24 * 60 * 60 * 1000));
+    // Seed packages (these are system-wide, not user-specific)
+    await seedPackages();
 
     console.log('Initial data seeded successfully');
   } catch (e) {
     console.log('Error seeding data:', e);
+  }
+};
+
+export const seedSampleNotifications = async (userId) => {
+  try {
+    const pg = await getPg();
+
+    // Check if user already has notifications
+    const existingNotifications = await pg.query('SELECT COUNT(*) as count FROM notifications WHERE user_id = $1', [userId]);
+    if (existingNotifications.rows[0].count > 0) {
+      return; // User already has notifications
+    }
+
+    const sampleNotifications = [
+      {
+        type: 'system',
+        title: 'Welcome to Accelerator Platform',
+        message: 'Your account has been successfully created. Complete your profile to unlock all features and start building your startup.',
+        created_at: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString() // 3 days ago
+      },
+      {
+        type: 'credits',
+        title: 'Welcome Credits Added',
+        message: 'You\'ve received 50 free AI credits to explore our platform. Use them to generate business plans, market analysis, or pitch decks.',
+        created_at: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString() // 3 days ago
+      },
+      {
+        type: 'system',
+        title: 'Account Verification Complete',
+        message: 'Your email has been verified. You now have full access to all platform features and can start creating projects.',
+        created_at: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString() // 2 days ago
+      },
+      {
+        type: 'update',
+        title: 'Platform Update: Enhanced AI Models',
+        message: 'We\'ve upgraded our AI models with improved accuracy and faster processing. Your existing projects will automatically benefit from these improvements.',
+        created_at: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString() // 1 day ago
+      },
+      {
+        type: 'system',
+        title: 'Getting Started Guide Available',
+        message: 'Check out our comprehensive getting started guide in the Help section. Learn how to maximize your startup acceleration journey.',
+        created_at: new Date(Date.now() - 12 * 60 * 60 * 1000).toISOString() // 12 hours ago
+      }
+    ];
+
+    for (const notification of sampleNotifications) {
+      await createNotification(userId, notification.type, notification.title, notification.message, notification.created_at);
+    }
+  } catch (e) {
+    console.log('Error creating sample notifications:', e);
   }
 };
 

@@ -382,9 +382,9 @@ Use consistent naming conventions and color coding for easy navigation.`
     // Simulate form submission
     console.log('Submitting contact form:', contactForm());
     // In a real app, this would send to an API
-    setShowContactForm(false);
-    setContactForm({ name: '', email: '', subject: '', message: '' });
-     alert(t().thankYouFeedback);
+     setShowContactForm(false);
+     setContactForm({ name: '', email: '', subject: '', message: '' });
+     toastManager.success(t().thankYouFeedback);
   };
 
    const quickActions = [
@@ -684,8 +684,8 @@ Use consistent naming conventions and color coding for easy navigation.`
              <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                <For each={videoTutorials()}>
                  {(video) => (
-                  <div class="card bg-base-200 shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer"
-                       onClick={() => alert(`Playing: ${video.title}`)}>
+                   <div class="card bg-base-200 shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer"
+                        onClick={() => toastManager.info(`Playing: ${video.title}`)}>
                     <figure class="px-4 pt-4">
                       <div class="bg-base-300 rounded-lg h-32 flex items-center justify-center">
                         <i data-lucide="play-circle" class="w-12 h-12 text-primary"></i>

@@ -95,6 +95,46 @@ CREATE TABLE IF NOT EXISTS billing (
   sync_status TEXT DEFAULT 'local'
 );
 
+CREATE TABLE IF NOT EXISTS notifications (
+  id BIGSERIAL PRIMARY KEY,
+  user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
+  type TEXT NOT NULL, -- 'system', 'billing', 'credits', 'update'
+  title TEXT NOT NULL,
+  message TEXT NOT NULL,
+  read BOOLEAN DEFAULT false,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  synced_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  last_modified TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  sync_status TEXT DEFAULT 'local'
+);
+
+CREATE TABLE IF NOT EXISTS packages (
+  id BIGSERIAL PRIMARY KEY,
+  name TEXT NOT NULL,
+  description TEXT,
+  price REAL NOT NULL,
+  credits_included INTEGER NOT NULL,
+  features JSONB,
+  active BOOLEAN DEFAULT true,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  synced_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  last_modified TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  sync_status TEXT DEFAULT 'local'
+);
+
+CREATE TABLE IF NOT EXISTS user_subscriptions (
+  id BIGSERIAL PRIMARY KEY,
+  user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
+  package_id BIGINT REFERENCES packages(id),
+  status TEXT DEFAULT 'active', -- 'active', 'cancelled', 'expired'
+  start_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  end_date TIMESTAMP,
+  auto_renew BOOLEAN DEFAULT true,
+  synced_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  last_modified TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  sync_status TEXT DEFAULT 'local'
+);
+
 -- Enable Row Level Security on all tables
 ALTER TABLE projects ENABLE ROW LEVEL SECURITY;
 ALTER TABLE tasks ENABLE ROW LEVEL SECURITY;
@@ -102,6 +142,9 @@ ALTER TABLE groups ENABLE ROW LEVEL SECURITY;
 ALTER TABLE project_groups ENABLE ROW LEVEL SECURITY;
 ALTER TABLE credits ENABLE ROW LEVEL SECURITY;
 ALTER TABLE billing ENABLE ROW LEVEL SECURITY;
+ALTER TABLE notifications ENABLE ROW LEVEL SECURITY;
+ALTER TABLE packages ENABLE ROW LEVEL SECURITY;
+ALTER TABLE user_subscriptions ENABLE ROW LEVEL SECURITY;
 
 -- Grant schema usage
 GRANT USAGE ON SCHEMA public TO anon, authenticated;
@@ -113,6 +156,9 @@ GRANT SELECT, INSERT, UPDATE, DELETE ON groups TO authenticated;
 GRANT SELECT, INSERT, DELETE ON project_groups TO authenticated;
 GRANT SELECT, INSERT, UPDATE, DELETE ON credits TO authenticated;
 GRANT SELECT, INSERT, UPDATE, DELETE ON billing TO authenticated;
+GRANT SELECT, INSERT, UPDATE ON notifications TO authenticated;
+GRANT SELECT ON packages TO authenticated;
+GRANT SELECT ON user_subscriptions TO authenticated;
 
 -- Grant SELECT to anon (RLS will deny access)
 GRANT SELECT ON projects TO anon;
@@ -121,6 +167,7 @@ GRANT SELECT ON groups TO anon;
 GRANT SELECT ON project_groups TO anon;
 GRANT SELECT ON credits TO anon;
 GRANT SELECT ON billing TO anon;
+GRANT SELECT ON packages TO anon;
 
 -- Clean up any existing policies
 DO $$
@@ -249,3 +296,31 @@ CREATE POLICY "Users can update own billing" ON billing
 FOR UPDATE TO authenticated
 USING (auth.uid() = user_id)
 WITH CHECK (auth.uid() = user_id);
+
+CREATE POLICY "Users can view own notifications" ON notifications
+FOR SELECT TO authenticated USING (auth.uid() = user_id);
+
+CREATE POLICY "Users can insert own notifications" ON notifications
+FOR INSERT TO authenticated WITH CHECK (auth.uid() = user_id);
+
+CREATE POLICY "Users can update own notifications" ON notifications
+FOR UPDATE TO authenticated USING (auth.uid() = user_id);
+
+CREATE POLICY "Everyone can view packages" ON packages
+FOR SELECT TO authenticated;
+
+CREATE POLICY "Users can view own subscriptions" ON user_subscriptions
+FOR SELECT TO authenticated USING (auth.uid() = user_id);
+
+-- Insert sample packages (only if not exists)
+INSERT INTO packages (name, description, price, credits_included, features)
+SELECT 'Free', 'Basic features for getting started', 0, 100, '["Basic AI assistance", "Limited projects", "Community support"]'
+WHERE NOT EXISTS (SELECT 1 FROM packages WHERE name = 'Free');
+
+INSERT INTO packages (name, description, price, credits_included, features)
+SELECT 'Pro', 'Advanced features for professionals', 29.99, 1000, '["Advanced AI models", "Unlimited projects", "Priority support", "API access"]'
+WHERE NOT EXISTS (SELECT 1 FROM packages WHERE name = 'Pro');
+
+INSERT INTO packages (name, description, price, credits_included, features)
+SELECT 'Enterprise', 'Full suite for teams', 99.99, 5000, '["All Pro features", "Team collaboration", "Custom integrations", "Dedicated support"]'
+WHERE NOT EXISTS (SELECT 1 FROM packages WHERE name = 'Enterprise');

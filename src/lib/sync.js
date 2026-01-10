@@ -12,7 +12,7 @@ export const SYNC_STATUS = {
 };
 
 // Tables to sync
-const SYNC_TABLES = ['projects', 'tasks', 'groups', 'project_groups', 'credits', 'billing'];
+const SYNC_TABLES = ['projects', 'tasks', 'groups', 'project_groups', 'credits', 'billing', 'notifications'];
 
 // Reactive sync status
 export const [syncInProgress, setSyncInProgress] = createSignal(false);

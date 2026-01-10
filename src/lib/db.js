@@ -585,6 +585,120 @@ export const getUserBilling = async (userId) => {
   }
 };
 
+export const consumeCredits = async (userId, amount, description) => {
+  try {
+    // Add a consumption transaction
+    await addCreditTransaction(userId, 'usage', -amount, description);
+    return true;
+  } catch (error) {
+    console.error('Error consuming credits:', error);
+    throw error;
+  }
+};
+
+export const getCreditBalance = async (userId) => {
+  try {
+    const pg = await getPg();
+    const result = await pg.query(
+      'SELECT COALESCE(SUM(amount), 0) as balance FROM credits WHERE user_id = $1',
+      [userId]
+    );
+    return result.rows[0].balance || 0;
+  } catch (error) {
+    console.error('Error getting credit balance:', error);
+    return 0;
+  }
+};
+
+export const getCreditTransactions = async (userId) => {
+  try {
+    const pg = await getPg();
+    const result = await pg.query(
+      'SELECT * FROM credits WHERE user_id = $1 ORDER BY date DESC',
+      [userId]
+    );
+    return result.rows;
+  } catch (error) {
+    console.error('Error getting credit transactions:', error);
+    return [];
+  }
+};
+
+export const createNotification = async (userId, type, title, message) => {
+  try {
+    const pg = await getPg();
+    const id = uuidv4();
+    const notification = {
+      id,
+      user_id: userId,
+      type,
+      title,
+      message,
+      read: false,
+      created_at: new Date().toISOString()
+    };
+    await pg.query(
+      'INSERT INTO notifications (id, user_id, type, title, message, read, synced_at, last_modified, sync_status) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)',
+      [id, userId, type, title, message, false, new Date(), new Date(), 'local']
+    );
+    return notification;
+  } catch (error) {
+    console.error('Error creating notification:', error);
+    throw error;
+  }
+};
+
+export const getUserNotifications = async (userId) => {
+  try {
+    const pg = await getPg();
+    const res = await pg.query(
+      'SELECT * FROM notifications WHERE user_id = $1 ORDER BY created_at DESC',
+      [userId]
+    );
+    return res.rows;
+  } catch (error) {
+    console.error('Error getting user notifications:', error);
+    return [];
+  }
+};
+
+export const markNotificationRead = async (notificationId, userId) => {
+  try {
+    await updateEntity('notifications', 'id', notificationId, { read: true });
+    return true;
+  } catch (error) {
+    console.error('Error marking notification read:', error);
+    return false;
+  }
+};
+
+export const getPackages = async () => {
+  try {
+    const pg = await getPg();
+    const res = await pg.query(
+      'SELECT * FROM packages WHERE active = true ORDER BY price ASC'
+    );
+    return res.rows;
+  } catch (error) {
+    console.error('Error getting packages:', error);
+    return [];
+  }
+};
+
+export const getUserSubscription = async (userId) => {
+  try {
+    const pg = await getPg();
+    const res = await pg.query(
+      'SELECT us.*, p.name, p.description, p.price, p.credits_included FROM user_subscriptions us JOIN packages p ON us.package_id = p.id WHERE us.user_id = $1 AND us.status = $2 ORDER BY us.start_date DESC LIMIT 1',
+      [userId, 'active']
+    );
+    return res.rows[0] || null;
+  } catch (error) {
+    console.error('Error getting user subscription:', error);
+    return null;
+  }
+};
+
 export const updateBillingStatus = async (id, status) => {
   try {
     const pg = await getPg();

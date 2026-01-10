@@ -129,6 +129,23 @@ export const UserProvider = (props) => {
           credits: { balance: 0, transactions: [] }
         });
         setIsAuthenticated(true);
+
+        // Create welcome notification for new users
+        try {
+          const { getUserNotifications, createNotification } = await import('../lib/db');
+          const notifications = await getUserNotifications(data.session.user.id);
+          if (notifications.length === 0) {
+            await createNotification(
+              data.session.user.id,
+              'system',
+              'Welcome to iGate Accelerator! 🎉',
+              'Thank you for joining! You have 100 free credits to start building your startup. Explore the dashboard and let our AI agent guide you through the validation process.'
+            );
+          }
+        } catch (error) {
+          console.log('Welcome notification creation skipped:', error.message);
+        }
+
         return true;
       }
       return false;

@@ -31,8 +31,12 @@ import {
     addProject,
     updateProject,
     getProjectByName,
-    getProjectById
+    getProjectById,
+    consumeCredits,
+    getCreditBalance
 } from "../../lib/db";
+import { useUser } from "../../context/UserContext";
+import { toastManager } from "../../lib/feedback";
 import { handleLLMProjectUpdate } from "../../lib/utils";
 import {setMachineStore} from "../../lib/machine";
 import {marked} from 'marked';
@@ -43,7 +47,6 @@ import RouteGuard from '../../components/common/RouteGuard';
 import { useContext } from "solid-js";
 import { LangContext } from "../../context/LangContext";
 import { translations } from "../../assets/translations/translations-index.js";
-import { toastManager } from "../../lib/feedback";
 
 // Generate prompt to step name mapping dynamically
 const promptToStepName = Object.fromEntries(
@@ -64,6 +67,7 @@ const getStepName = (task) => {
 
 const Tasks = () => {
     const { lang } = useContext(LangContext);
+    const { user } = useUser();
     const [currentLang, setCurrentLang] = createSignal(lang());
 
     const t = () => translations[currentLang()];
@@ -182,6 +186,18 @@ const Tasks = () => {
 
     const callLLM = async (prompt, retryCount = 0, options = {}) => {
         try {
+            // Check and consume credits
+            const currentUser = user();
+            if (currentUser && currentUser.id) {
+                const balance = await getCreditBalance(currentUser.id);
+                if (balance < 10) {
+                    toastManager.error('Insufficient credits. You need at least 10 credits to use AI features.');
+                    return;
+                }
+                await consumeCredits(currentUser.id, 10, `AI Request: ${prompt.substring(0, 50)}...`);
+                toastManager.info('Consumed 10 credits for AI request');
+            }
+
             setIsLoading(true);
             const response = await fetch('/api/llm/stream', {
                 method: 'POST',

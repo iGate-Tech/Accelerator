@@ -1,327 +1,115 @@
-import { createSignal, onMount, For, Show, useContext } from "solid-js";
+import { createSignal, createResource, For, Show, onMount } from "solid-js";
 import { useUser } from "../../context/UserContext";
-import { LangContext } from "../../context/LangContext";
-import { translations } from "../../assets/translations/translations-index.js";
+import { getCreditBalance, getCreditTransactions } from "../../lib/db";
 import { toastManager } from "../../lib/feedback";
 
 const Credits = () => {
-  const { user, addCreditTransaction } = useUser();
-  const { lang } = useContext(LangContext);
-  const [selectedPackage, setSelectedPackage] = createSignal(null);
-  const [showPurchaseModal, setShowPurchaseModal] = createSignal(false);
+  const { user } = useUser();
 
-  const t = () => translations[lang()];
-
-  const creditPackages = [
-    {
-      id: "starter",
-      name: "Starter Pack",
-      credits: 500,
-      price: 9.99,
-      popular: false,
-      description: "Perfect for getting started"
-    },
-    {
-      id: "professional",
-      name: "Professional Pack",
-      credits: 1500,
-      price: 24.99,
-      popular: true,
-      description: "Most popular choice"
-    },
-    {
-      id: "enterprise",
-      name: "Enterprise Pack",
-      credits: 5000,
-      price: 69.99,
-      popular: false,
-      description: "For power users"
-    },
-    {
-      id: "unlimited",
-      name: "Unlimited Monthly",
-      credits: "unlimited",
-      price: 49.99,
-      popular: false,
-      description: "Unlimited AI sessions",
-      recurring: true
+  const [balance, { refetch: refetchBalance }] = createResource(
+    () => user()?.id,
+    async (userId) => {
+      if (!userId) return 0;
+      return await getCreditBalance(userId);
     }
-  ];
+  );
 
-  const purchaseCredits = async (packageData) => {
-    // Simulate payment processing
-    const confirmPurchase = confirm(`Purchase ${packageData.name} for $${packageData.price}?`);
-    if (!confirmPurchase) return;
+  const [transactions, { refetch: refetchTransactions }] = createResource(
+    () => user()?.id,
+    async (userId) => {
+      if (!userId) return [];
+      return await getCreditTransactions(userId);
+    }
+  );
 
-    // Simulate API call delay
-    setShowPurchaseModal(false);
-
-    setTimeout(() => {
-      if (packageData.recurring) {
-        // Handle recurring subscription
-        toastManager.success(`Successfully subscribed to ${packageData.name} for $${packageData.price}/month! Recurring billing activated.`);
-      } else {
-        // Add credits to balance
-        addCreditTransaction({
-          type: "purchase",
-          amount: packageData.credits,
-          description: `Purchased ${packageData.name}`
-        });
-        const newBalance = (user().credits.balance || 0) + packageData.credits;
-        toastManager.success(`Successfully purchased ${packageData.credits} credits for $${packageData.price}! New balance: ${newBalance} credits.`);
-      }
-    }, 1000);
+  const getTransactionIcon = (type) => {
+    switch (type) {
+      case 'purchase': return '🛒';
+      case 'usage': return '⚡';
+      case 'bonus': return '🎁';
+      case 'refund': return '↩️';
+      default: return '💰';
+    }
   };
 
-  const usageBreakdown = [
-    { category: "Project Analysis", credits: 150, percentage: 30 },
-    { category: "Market Research", credits: 120, percentage: 24 },
-    { category: "Financial Modeling", credits: 100, percentage: 20 },
-    { category: "Competitor Analysis", credits: 80, percentage: 16 },
-    { category: "Other", credits: 50, percentage: 10 }
-  ];
-
-  onMount(() => {
-    if (window.lucide) window.lucide.createIcons();
-  });
+  const getTransactionColor = (amount) => {
+    return amount > 0 ? 'text-green-600' : 'text-red-600';
+  };
 
   return (
-    <div class="max-w-6xl mx-auto space-y-8 ">
-      {/* Header */}
-      <div class="text-center">
-        <h1 class="text-4xl font-bold text-base-content mb-4">{t().creditsUsage}</h1>
-        <p class="text-lg text-base-content/70">
-          {t().manageAccount.toLowerCase() + ' ' + t().credits.toLowerCase()}.
-        </p>
-      </div>
+    <div class="container mx-auto px-4 py-8">
+      <div class="max-w-4xl mx-auto">
+        <h1 class="text-3xl font-bold mb-8">Credits</h1>
 
-      {/* Credit Balance Overview */}
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div class="card bg-gradient-to-br from-blue-500 to-blue-600 text-white shadow-lg">
-          <div class="card-body">
-            <div class="flex items-center justify-between">
-              <div>
-                <h3 class="text-lg font-semibold">Available Credits</h3>
-                <p class="text-3xl font-bold">{user().credits.balance.toLocaleString()}</p>
+        {/* Balance Card */}
+        <div class="bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-xl p-8 mb-8 shadow-lg">
+          <div class="flex items-center justify-between">
+            <div>
+              <h2 class="text-2xl font-bold mb-2">Current Balance</h2>
+              <div class="text-4xl font-bold">
+                <Show when={!balance.loading} fallback={<span class="loading loading-spinner loading-lg"></span>}>
+                  {balance()} Credits
+                </Show>
               </div>
-              <i data-lucide="credit-card" class="w-10 h-10 opacity-80"></i>
+            </div>
+            <div class="text-6xl opacity-20">💰</div>
+          </div>
+        </div>
+
+        {/* Purchase Options */}
+        <div class="bg-white rounded-xl p-6 mb-8 shadow-sm border">
+          <h3 class="text-xl font-semibold mb-4">Purchase Credits</h3>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div class="border rounded-lg p-4 hover:shadow-md transition-shadow">
+              <h4 class="font-semibold">100 Credits</h4>
+              <p class="text-2xl font-bold text-green-600">$9.99</p>
+              <button class="btn btn-primary btn-sm mt-2 w-full">Purchase</button>
+            </div>
+            <div class="border rounded-lg p-4 hover:shadow-md transition-shadow">
+              <h4 class="font-semibold">500 Credits</h4>
+              <p class="text-2xl font-bold text-green-600">$39.99</p>
+              <button class="btn btn-primary btn-sm mt-2 w-full">Purchase</button>
+            </div>
+            <div class="border rounded-lg p-4 hover:shadow-md transition-shadow">
+              <h4 class="font-semibold">1000 Credits</h4>
+              <p class="text-2xl font-bold text-green-600">$69.99</p>
+              <button class="btn btn-primary btn-sm mt-2 w-full">Purchase</button>
             </div>
           </div>
         </div>
 
-        <div class="card bg-gradient-to-br from-green-500 to-green-600 text-white shadow-lg">
-          <div class="card-body">
-            <div class="flex items-center justify-between">
-              <div>
-                <h3 class="text-lg font-semibold">Monthly Limit</h3>
-                <p class="text-3xl font-bold">{user().subscription.maxCredits.toLocaleString()}</p>
+        {/* Transaction History */}
+        <div class="bg-white rounded-xl p-6 shadow-sm border">
+          <h3 class="text-xl font-semibold mb-4">Transaction History</h3>
+          <Show when={!transactions.loading} fallback={<div class="text-center py-8">Loading transactions...</div>}>
+            <Show when={transactions().length > 0} fallback={
+              <div class="text-center py-8">
+                <div class="text-4xl mb-4">📊</div>
+                <p class="text-gray-600">No transactions yet</p>
               </div>
-              <i data-lucide="target" class="w-10 h-10 opacity-80"></i>
-            </div>
-          </div>
-        </div>
-
-        <div class="card bg-gradient-to-br from-purple-500 to-purple-600 text-white shadow-lg">
-          <div class="card-body">
-            <div class="flex items-center justify-between">
-              <div>
-                <h3 class="text-lg font-semibold">Usage Rate</h3>
-                <p class="text-3xl font-bold">
-                  {user().subscription.maxCredits > 0
-                    ? Math.round((1 - user().credits.balance / user().subscription.maxCredits) * 100)
-                    : 0
-                  }%
-                </p>
-              </div>
-              <i data-lucide="trending-up" class="w-10 h-10 opacity-80"></i>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        {/* Usage Breakdown */}
-        <div class="bg-base-100 rounded-box p-6 shadow-sm border border-base-200">
-          <h2 class="text-2xl font-bold mb-6">{t().analytics}</h2>
-
-          <div class="space-y-4">
-            <For each={usageBreakdown}>
-              {(item) => (
-                <div class="flex items-center justify-between">
-                  <div class="flex items-center gap-3">
-                    <div class="w-3 h-3 rounded-full bg-primary"></div>
-                    <span class="font-medium">{item.category}</span>
-                  </div>
-                  <div class="text-right">
-                    <span class="font-semibold">{item.credits}</span>
-                    <span class="text-sm text-base-content/60 ml-2">({item.percentage}%)</span>
-                  </div>
-                </div>
-              )}
-            </For>
-          </div>
-
-          <div class="mt-6">
-            <div class="text-sm font-semibold mb-2">Monthly Progress</div>
-            <progress
-              class="progress progress-primary w-full h-3"
-              value={user().subscription.maxCredits - user().credits.balance}
-              max={user().subscription.maxCredits}
-            ></progress>
-            <div class="text-xs text-base-content/60 mt-1">
-              {user().subscription.maxCredits - user().credits.balance} credits used this month
-            </div>
-          </div>
-        </div>
-
-        {/* Recent Transactions */}
-        <div class="bg-base-100 rounded-box p-6 shadow-sm border border-base-200">
-          <h2 class="text-2xl font-bold mb-6">{t().recentTransactions}</h2>
-
-          <div class="space-y-4">
-            <For each={user().credits.transactions.slice(0, 5)}>
-              {(transaction) => (
-                <div class="flex items-center justify-between py-3 border-b border-base-200 last:border-b-0">
-                  <div class="flex items-center gap-3">
-                    <div class={`p-2 rounded-full ${
-                      transaction.type === 'purchase' ? 'bg-success/10 text-success' :
-                      transaction.type === 'usage' ? 'bg-warning/10 text-warning' :
-                      'bg-info/10 text-info'
-                    }`}>
-                      <i data-lucide={
-                        transaction.type === 'purchase' ? 'plus' :
-                        transaction.type === 'usage' ? 'minus' :
-                        'arrow-right'
-                      } class="w-4 h-4"></i>
-                    </div>
-                    <div>
-                      <div class="font-medium">{transaction.description}</div>
-                      <div class="text-xs text-base-content/60">
-                        {new Date(transaction.date).toLocaleDateString()}
+            }>
+              <div class="space-y-4">
+                <For each={transactions()}>
+                  {(transaction) => (
+                    <div class="flex items-center justify-between p-4 border rounded-lg">
+                      <div class="flex items-center space-x-4">
+                        <div class="text-2xl">{getTransactionIcon(transaction.type)}</div>
+                        <div>
+                          <p class="font-medium">{transaction.description}</p>
+                          <p class="text-sm text-gray-500">
+                            {new Date(transaction.date).toLocaleDateString()}
+                          </p>
+                        </div>
+                      </div>
+                      <div class={`font-bold text-lg ${getTransactionColor(transaction.amount)}`}>
+                        {transaction.amount > 0 ? '+' : ''}{transaction.amount}
                       </div>
                     </div>
-                  </div>
-                  <div class={`font-semibold ${
-                    transaction.amount > 0 ? 'text-success' : 'text-error'
-                  }`}>
-                    {transaction.amount > 0 ? '+' : ''}{transaction.amount}
-                  </div>
-                </div>
-              )}
-            </For>
-          </div>
-
-          <Show when={user().credits.transactions.length === 0}>
-            <div class="text-center py-8 text-base-content/50">
-              <i data-lucide="receipt" class="w-12 h-12 mx-auto mb-2"></i>
-              <p>No transactions yet</p>
-            </div>
-          </Show>
-        </div>
-      </div>
-
-      {/* Purchase Credits */}
-      <div class="bg-base-100 rounded-box p-8 shadow-sm border border-base-200">
-        <div class="flex justify-between items-center mb-6">
-          <div>
-            <h2 class="text-2xl font-bold">{t().purchaseCredits}</h2>
-            <p class="text-base-content/70">{t().topUpCredits}</p>
-          </div>
-          <Show when={user().credits.balance < 100}>
-            <div class="badge badge-warning">{t().lowBalance}</div>
-          </Show>
-        </div>
-
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          <For each={creditPackages}>
-            {(pkg) => (
-              <div class={`card shadow-sm border transition-all duration-200 hover:shadow-md ${
-                pkg.popular ? 'border-primary bg-primary/5' : 'border-base-200'
-              }`}>
-                <div class="card-body">
-                  <div class="flex justify-between items-start mb-3">
-                    <h3 class="card-title text-lg">{pkg.name}</h3>
-                    <Show when={pkg.popular}>
-                      <div class="badge badge-primary">Popular</div>
-                    </Show>
-                  </div>
-
-                  <div class="mb-3">
-                    <div class="text-2xl font-bold">${pkg.price}</div>
-                    <Show when={!pkg.recurring}>
-                      <div class="text-sm text-base-content/60">one-time purchase</div>
-                    </Show>
-                    <Show when={pkg.recurring}>
-                      <div class="text-sm text-base-content/60">per month</div>
-                    </Show>
-                  </div>
-
-                  <div class="mb-4">
-                    <div class="text-sm font-semibold mb-1">Credits</div>
-                    <div class="text-xl font-bold text-primary">
-                      {pkg.recurring ? '∞' : pkg.credits.toLocaleString()}
-                    </div>
-                  </div>
-
-                  <p class="text-sm text-base-content/70 mb-4">{pkg.description}</p>
-
-                  <button
-                    class="btn btn-primary w-full"
-                    onClick={() => purchaseCredits(pkg)}
-                  >
-                    {pkg.recurring ? 'Subscribe' : 'Purchase'}
-                  </button>
-                </div>
+                  )}
+                </For>
               </div>
-            )}
-          </For>
-        </div>
-      </div>
-
-      {/* Usage Tips */}
-      <div class="bg-base-100 rounded-box p-8 shadow-sm border border-base-200">
-        <h2 class="text-2xl font-bold mb-6">Credit Saving Tips</h2>
-
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div class="flex gap-4">
-            <div class="p-3 bg-primary/10 rounded-lg">
-              <i data-lucide="lightbulb" class="w-6 h-6 text-primary"></i>
-            </div>
-            <div>
-              <h3 class="font-semibold mb-1">Batch Your Questions</h3>
-              <p class="text-sm text-base-content/70">Combine multiple related questions into one AI session to save credits.</p>
-            </div>
-          </div>
-
-          <div class="flex gap-4">
-            <div class="p-3 bg-success/10 rounded-lg">
-              <i data-lucide="target" class="w-6 h-6 text-success"></i>
-            </div>
-            <div>
-              <h3 class="font-semibold mb-1">Use Templates</h3>
-              <p class="text-sm text-base-content/70">Start with pre-built templates to reduce the number of AI interactions needed.</p>
-            </div>
-          </div>
-
-          <div class="flex gap-4">
-            <div class="p-3 bg-warning/10 rounded-lg">
-              <i data-lucide="clock" class="w-6 h-6 text-warning"></i>
-            </div>
-            <div>
-              <h3 class="font-semibold mb-1">Plan Ahead</h3>
-              <p class="text-sm text-base-content/70">Prepare detailed descriptions before starting to minimize follow-up questions.</p>
-            </div>
-          </div>
-
-          <div class="flex gap-4">
-            <div class="p-3 bg-info/10 rounded-lg">
-              <i data-lucide="refresh-cw" class="w-6 h-6 text-info"></i>
-            </div>
-            <div>
-              <h3 class="font-semibold mb-1">Review & Edit</h3>
-              <p class="text-sm text-base-content/70">Use the edit feature instead of starting new sessions for minor changes.</p>
-            </div>
-          </div>
+            </Show>
+          </Show>
         </div>
       </div>
     </div>

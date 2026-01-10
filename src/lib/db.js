@@ -775,7 +775,7 @@ export const createUserProfile = async (userId, profileData = {}) => {
       'INSERT INTO profiles (id, avatar, bio, preferences, synced_at, last_modified, sync_status) VALUES ($1, $2, $3, $4, $5, $6, $7) ON CONFLICT (id) DO NOTHING RETURNING *',
       [
         userId,
-        profileData.avatar || '/src/assets/avatar.png',
+        profileData.avatar || avatar,
         profileData.bio || '',
         JSON.stringify(profileData.preferences || {
           notifications: { email: true, browser: false, projectUpdates: true },

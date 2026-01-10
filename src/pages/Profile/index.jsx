@@ -4,6 +4,7 @@ import { useUser } from "../../context/UserContext";
 import { useLanguage } from "../../hooks/useLanguage";
 import { getUserCredits, getUserCreditBalance } from "../../lib/db";
 import { formatLocaleDate } from "../../lib/utils";
+import avatar from "../../assets/avatar.png";
 
 const Profile = () => {
   const navigate = useNavigate();
@@ -67,7 +68,7 @@ const Profile = () => {
           <div class="flex flex-col md:flex-row items-center gap-6">
              <div class="avatar">
                <div class="w-32 h-32 rounded-full ring ring-primary/30 ring-offset-base-100 ring-offset-4">
-                 <img src={user().avatar || '/src/assets/avatar.png'} alt="Profile avatar" />
+                  <img src={user().avatar || avatar} alt="Profile avatar" />
                </div>
              </div>
             <div class="flex-1 text-center md:text-left">

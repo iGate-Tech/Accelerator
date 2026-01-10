@@ -5,6 +5,7 @@ import { LangContext } from "../../context/LangContext";
 import { translations } from "../../assets/translations/translations-index.js";
 import { supabase, supabaseAdmin } from "../../lib/supabase";
 import { toastManager } from "../../lib/feedback";
+import avatar from "../../assets/avatar.png";
 
 const Settings = () => {
   const navigate = useNavigate();
@@ -147,7 +148,7 @@ const Settings = () => {
 
   const removeAvatar = async () => {
     try {
-      await updateProfile({ avatar: '/src/assets/avatar.png' });
+      await updateProfile({ avatar: avatar });
       setAvatarPreview(null);
       setAvatarFile(null);
       toastManager.success('Avatar removed successfully!');
@@ -247,7 +248,7 @@ const Settings = () => {
              <div class="flex items-center gap-6">
                  <div class="avatar">
                  <div class="w-24 rounded-full ring ring-primary ring-offset-base-100 ring-offset-2">
-                   <img src={avatarPreview() || user().avatar || '/src/assets/avatar.png'} alt="Profile" />
+                   <img src={avatarPreview() || user().avatar || avatar} alt="Profile" />
                  </div>
                </div>
                <div class="flex-1">
@@ -288,7 +289,7 @@ const Settings = () => {
                      <i data-lucide="x" class="w-4 h-4 mr-1"></i>
                      Cancel
                    </button>
-                   <Show when={!avatarPreview() && user().profile.avatar !== '/src/assets/avatar.png'}>
+                   <Show when={!avatarPreview() && user().profile.avatar !== avatar}>
                      <button
                        class="btn btn-error btn-sm"
                        onClick={removeAvatar}

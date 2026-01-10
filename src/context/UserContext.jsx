@@ -2,6 +2,7 @@ import { createContext, createSignal, useContext, onMount } from "solid-js";
 import { supabase, getCurrentUser, signIn, signUp, signOut, resetPassword } from "../lib/supabase";
 import { dataAPI } from "../lib/data";
 import { updateEntity, getUserProfile, createUserProfile, getUserById, createUser } from "../lib/db";
+import avatar from "../assets/avatar.png";
 
 const UserContext = createContext();
 
@@ -160,7 +161,7 @@ export const UserProvider = (props) => {
               {
                 name: data.session.user.user_metadata?.name || data.session.user.email.split('@')[0],
                 email: data.session.user.email,
-                avatar: data.session.user.user_metadata?.avatar_url || '/src/assets/avatar.png',
+                avatar: data.session.user.user_metadata?.avatar_url || avatar,
                 joinDate: data.session.user.created_at,
                 bio: data.session.user.user_metadata?.bio || '',
               },
@@ -219,7 +220,7 @@ export const UserProvider = (props) => {
         setUser({
           id: data.session.user.id,
           email: data.session.user.email,
-          avatar: profileData?.avatar || data.session.user.user_metadata?.avatar_url || '/src/assets/avatar.png',
+          avatar: profileData?.avatar || data.session.user.user_metadata?.avatar_url || avatar,
           profile: {
             name: data.session.user.user_metadata?.name || data.session.user.email.split('@')[0],
             email: data.session.user.email,

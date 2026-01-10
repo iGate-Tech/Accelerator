@@ -5,6 +5,8 @@ import { useLanguage } from "../../hooks/useLanguage";
 import { sanitizeInput, isValidEmail } from "../../lib/security";
 import { toastManager } from "../../lib/feedback";
 import RouteGuard from "../../components/common/RouteGuard";
+import logo from "../../assets/iGate-tech-logo.svg";
+import avatar from "../../assets/avatar.png";
 
 const Signup = () => {
   const navigate = useNavigate();
@@ -75,7 +77,7 @@ const Signup = () => {
       const profile = {
         name: sanitizedName,
         email: sanitizedEmail,
-        avatar: "/src/assets/avatar.png",
+        avatar: avatar,
         joinDate: new Date().toISOString().split('T')[0],
         bio: ""
       };
@@ -138,7 +140,7 @@ const Signup = () => {
          <div class="card w-full py-6 shadow-2xl bg-base-100 border border-base-300 backdrop-blur-sm">
         <div class="card-body">
           <div class="text-center mb-8">
-             <img src="/src/assets/iGate-tech-logo.svg" alt="iGate Logo" class="h-12 w-auto block mx-auto mb-6" />
+             <img src={logo} alt="iGate Logo" class="h-12 w-auto block mx-auto mb-6" />
 
              <h2 class="text-2xl font-bold">{t().createAccount}</h2>
              <p class="text-base-content/60">{t().joinJourney}</p>

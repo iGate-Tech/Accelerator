@@ -1,10 +1,11 @@
 import { createSignal, onMount, useContext, createEffect } from "solid-js";
-import { useLanguage } from "../../hooks/useLanguage";
 import { useNavigate } from "@solidjs/router";
 import { useUser } from "../../context/UserContext";
+import { useLanguage } from "../../hooks/useLanguage";
 import { sanitizeInput, isValidEmail } from "../../lib/security";
 import { toastManager } from "../../lib/feedback";
 import RouteGuard from "../../components/common/RouteGuard";
+import logo from "../../assets/iGate-tech-logo.svg";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -113,7 +114,7 @@ const Login = () => {
          <div class="card w-full py-6 shadow-2xl bg-base-100 border border-base-300 backdrop-blur-sm">
         <div class="card-body">
           <div class="text-center mb-8">
-             <img src="/src/assets/iGate-tech-logo.svg" alt="iGate Logo" class="h-12 w-auto block mx-auto mb-6" />
+             <img src={logo} alt="iGate Logo" class="h-12 w-auto block mx-auto mb-6" />
             <h2 class="text-2xl font-bold">{t().welcomeBack}</h2>
             <p class="text-base-content/60">{t().signInToAccount}</p>
           </div>

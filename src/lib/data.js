@@ -62,7 +62,7 @@ export const authAPI = {
       const profile = {
         name: userData.name,
         email: userData.email,
-        avatar: "/src/assets/avatar.png",
+        avatar: avatar,
         joinDate: new Date().toISOString().split('T')[0],
         bio: ""
       };

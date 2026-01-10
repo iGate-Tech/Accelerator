@@ -156,25 +156,44 @@ const Sidebar = () => {
               <span class="font-medium">{t().help}</span>
             </A>
           </li>
-          <li>
-            <a onclick={async () => {
-              try {
-                await performSync();
-                setSyncStatus(getSyncStatus());
-                toastManager.success('Sync completed successfully!');
-              } catch (error) {
-                toastManager.error('Sync failed: ' + error.message);
-              }
-            }} class="flex items-center gap-3 px-4 py-3 hover:bg-base-300 transition-colors">
-              <div class="p-1 bg-success/10 rounded">
-                <i data-lucide="refresh-ccw" class="w-4 h-4 text-success"></i>
-              </div>
-              <span class="font-medium">Sync Data</span>
-              <Show when={syncStatus().syncInProgress}>
-                <span class="loading loading-spinner loading-xs"></span>
-              </Show>
-            </a>
-          </li>
+            <li>
+              <button
+                onclick={async () => {
+                  try {
+                    await performSync();
+                    setSyncStatus(getSyncStatus());
+                    toastManager.success('Sync completed successfully!');
+                  } catch (error) {
+                    toastManager.error('Sync failed: ' + error.message);
+                  }
+                }}
+                disabled={syncStatus().syncInProgress}
+                class={`flex items-center gap-3 px-4 py-3 transition-all duration-200 ${
+                  syncStatus().syncInProgress
+                    ? 'bg-base-300 cursor-not-allowed opacity-75'
+                    : 'hover:bg-base-300 cursor-pointer'
+                }`}
+              >
+                <div class={`p-1 rounded transition-all duration-300 ${
+                  syncStatus().syncInProgress ? 'bg-warning/20 animate-pulse' : 'bg-success/10'
+                }`}>
+                  <i
+                    data-lucide="refresh-ccw"
+                    class={`w-4 h-4 transition-all duration-300 ${
+                      syncStatus().syncInProgress
+                        ? 'text-warning animate-spin'
+                        : 'text-success'
+                    }`}
+                  ></i>
+                </div>
+                <span class="font-medium">
+                  {syncStatus().syncInProgress ? 'Syncing...' : 'Sync Data'}
+                </span>
+                <Show when={syncStatus().syncInProgress}>
+                  <span class="loading loading-spinner loading-xs text-warning"></span>
+                </Show>
+              </button>
+            </li>
         </ul>
         <section class="menu bg-base-200 rounded-box w-full">
           <li>

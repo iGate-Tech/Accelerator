@@ -39,4 +39,37 @@ const Layout = (props) => {
         }
     };
 
+    onMount(async () => {
+        console.log('Layout onMount');
+
+        // Create Lucide icons
+        if (window.lucide)
+            window.lucide.createIcons();
+
+        // Initialize theme
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        document.documentElement.setAttribute('data-theme', savedTheme);
+        const themeController = document.getElementById('theme-controller');
+        if (themeController)
+            themeController.checked = savedTheme === 'dark';
+
+        // Check server connectivity periodically
+        checkServerConnectivity();
+        const interval = setInterval(checkServerConnectivity, 30000); // Check every 30 seconds
+
+        return () => clearInterval(interval);
+    });
+
+    return (
+        <>
+            <link rel="icon" href={favicon} />
+            <Navbar />
+            <main class="min-h-screen bg-base-200">
+                {props.children}
+            </main>
+            <ToastContainer />
+        </>
+    );
+};
+
 export default Layout;

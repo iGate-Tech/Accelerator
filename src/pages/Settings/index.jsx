@@ -3,6 +3,8 @@ import { useNavigate } from "@solidjs/router";
 import { useUser } from "../../context/UserContext";
 import { LangContext } from "../../context/LangContext";
 import { translations } from "../../assets/translations/translations-index.js";
+import { supabase } from "../../lib/supabase";
+import { toastManager } from "../../lib/feedback";
 
 const Settings = () => {
   const navigate = useNavigate();
@@ -21,6 +23,10 @@ const Settings = () => {
   });
   const [saving, setSaving] = createSignal(false);
   const [message, setMessage] = createSignal('');
+  const [avatarFile, setAvatarFile] = createSignal(null);
+  const [avatarPreview, setAvatarPreview] = createSignal(null);
+  const [uploadingAvatar, setUploadingAvatar] = createSignal(false);
+  const [currentTheme, setCurrentTheme] = createSignal(localStorage.getItem('theme') || 'light');
 
   const t = () => translations[currentLang()];
 
@@ -31,6 +37,7 @@ const Settings = () => {
   const tabs = [
     { id: 'profile', label: 'Profile', icon: 'user' },
     { id: 'preferences', label: 'Preferences', icon: 'settings' },
+    { id: 'appearance', label: 'Appearance', icon: 'palette' },
     { id: 'account', label: 'Account', icon: 'shield' },
     { id: 'data', label: 'Data & Privacy', icon: 'database' }
   ];
@@ -74,6 +81,84 @@ const Settings = () => {
     a.click();
     URL.revokeObjectURL(url);
     showMessage('Data exported successfully!');
+  };
+
+  const handleAvatarChange = (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      // Validate file type
+      if (!file.type.startsWith('image/')) {
+        toastManager.error('Please select a valid image file');
+        return;
+      }
+
+      // Validate file size (max 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        toastManager.error('Image size must be less than 5MB');
+        return;
+      }
+
+      setAvatarFile(file);
+
+      // Create preview
+      const reader = new FileReader();
+      reader.onload = (e) => setAvatarPreview(e.target.result);
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const uploadAvatar = async () => {
+    if (!avatarFile()) return;
+
+    setUploadingAvatar(true);
+    try {
+      const fileExt = avatarFile().name.split('.').pop();
+      const fileName = `${user().id}_${Date.now()}.${fileExt}`;
+      const filePath = `avatars/${fileName}`;
+
+      // Upload to Supabase Storage
+      const { data, error } = await supabase.storage
+        .from('avatars')
+        .upload(filePath, avatarFile(), {
+          cacheControl: '3600',
+          upsert: false
+        });
+
+      if (error) throw error;
+
+      // Get public URL
+      const { data: { publicUrl } } = supabase.storage
+        .from('avatars')
+        .getPublicUrl(filePath);
+
+      // Update user profile
+      await updateProfile({ avatar: publicUrl });
+
+      setAvatarFile(null);
+      setAvatarPreview(null);
+      toastManager.success('Avatar updated successfully!');
+    } catch (error) {
+      console.error('Avatar upload error:', error);
+      toastManager.error('Failed to upload avatar');
+    } finally {
+      setUploadingAvatar(false);
+    }
+  };
+
+  const removeAvatar = async () => {
+    try {
+      await updateProfile({ avatar: '/src/assets/avatar.png' });
+      toastManager.success('Avatar removed successfully!');
+    } catch (error) {
+      toastManager.error('Failed to remove avatar');
+    }
+  };
+
+  const changeTheme = (theme) => {
+    setCurrentTheme(theme);
+    document.documentElement.setAttribute('data-theme', theme);
+    localStorage.setItem('theme', theme);
+    toastManager.success(`Theme changed to ${theme}`);
   };
 
   const deleteAccount = () => {
@@ -138,21 +223,67 @@ const Settings = () => {
           <div class="space-y-6">
             <h2 class="text-2xl font-bold">{t().profileInfo}</h2>
 
-            <div class="flex items-center gap-6">
-              <div class="avatar">
-                <div class="w-24 rounded-full ring ring-primary ring-offset-base-100 ring-offset-2">
-                  <img src={user().profile.avatar} alt="Profile" />
-                </div>
-              </div>
-              <div>
-                <h3 class="text-lg font-semibold">{user().profile.name}</h3>
-                <p class="text-base-content/60">{user().profile.email}</p>
-                <button class="btn btn-outline btn-sm mt-2">
-                  <i data-lucide="camera" class="w-4 h-4 mr-1"></i>
-                  {t().changePhoto}
-                </button>
-              </div>
-            </div>
+             <div class="flex items-center gap-6">
+               <div class="avatar">
+                 <div class="w-24 rounded-full ring ring-primary ring-offset-base-100 ring-offset-2">
+                   <img src={avatarPreview() || user().profile.avatar} alt="Profile" />
+                 </div>
+               </div>
+               <div class="flex-1">
+                 <h3 class="text-lg font-semibold">{user().profile.name}</h3>
+                 <p class="text-base-content/60">{user().profile.email}</p>
+                 <div class="flex gap-2 mt-2">
+                   <label class="btn btn-outline btn-sm cursor-pointer">
+                     <i data-lucide="camera" class="w-4 h-4 mr-1"></i>
+                     {t().changePhoto}
+                     <input
+                       type="file"
+                       accept="image/*"
+                       class="hidden"
+                       onChange={handleAvatarChange}
+                     />
+                   </label>
+                   <Show when={avatarPreview()}>
+                     <button
+                       class="btn btn-primary btn-sm"
+                       onClick={uploadAvatar}
+                       disabled={uploadingAvatar()}
+                     >
+                       <Show when={uploadingAvatar()}>
+                         <span class="loading loading-spinner loading-sm"></span>
+                       </Show>
+                       <i data-lucide="upload" class="w-4 h-4 mr-1"></i>
+                       Upload
+                     </button>
+                   </Show>
+                   <button
+                     class="btn btn-ghost btn-sm"
+                     onClick={() => {
+                       setAvatarFile(null);
+                       setAvatarPreview(null);
+                     }}
+                     disabled={uploadingAvatar()}
+                   >
+                     <i data-lucide="x" class="w-4 h-4 mr-1"></i>
+                     Cancel
+                   </button>
+                   <Show when={!avatarPreview() && user().profile.avatar !== '/src/assets/avatar.png'}>
+                     <button
+                       class="btn btn-error btn-sm"
+                       onClick={removeAvatar}
+                     >
+                       <i data-lucide="trash" class="w-4 h-4 mr-1"></i>
+                       Remove
+                     </button>
+                   </Show>
+                 </div>
+                 <Show when={avatarFile()}>
+                   <p class="text-sm text-base-content/60 mt-1">
+                     Selected: {avatarFile().name} ({(avatarFile().size / 1024 / 1024).toFixed(2)} MB)
+                   </p>
+                 </Show>
+               </div>
+             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
@@ -302,6 +433,71 @@ const Settings = () => {
                 </Show>
                 Save Preferences
               </button>
+            </div>
+          </div>
+        </Show>
+
+        {/* Appearance Tab */}
+        <Show when={activeTab() === 'appearance'}>
+          <div class="space-y-6">
+            <h2 class="text-2xl font-bold">Appearance</h2>
+
+            <div class="space-y-6">
+              <div>
+                <h3 class="text-lg font-semibold mb-4">Theme</h3>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <button
+                    class={`p-4 border-2 rounded-lg transition-all ${
+                      currentTheme() === 'light'
+                        ? 'border-primary bg-primary/10'
+                        : 'border-base-300 hover:border-base-content/20'
+                    }`}
+                    onClick={() => changeTheme('light')}
+                  >
+                    <div class="text-center">
+                      <div class="w-12 h-12 bg-white border border-base-300 rounded-lg mx-auto mb-2 flex items-center justify-center">
+                        <div class="w-6 h-6 bg-yellow-400 rounded-full"></div>
+                      </div>
+                      <h4 class="font-medium">Light</h4>
+                      <p class="text-sm text-base-content/60">Clean and bright</p>
+                    </div>
+                  </button>
+
+                  <button
+                    class={`p-4 border-2 rounded-lg transition-all ${
+                      currentTheme() === 'dark'
+                        ? 'border-primary bg-primary/10'
+                        : 'border-base-300 hover:border-base-content/20'
+                    }`}
+                    onClick={() => changeTheme('dark')}
+                  >
+                    <div class="text-center">
+                      <div class="w-12 h-12 bg-gray-900 border border-base-300 rounded-lg mx-auto mb-2 flex items-center justify-center">
+                        <div class="w-6 h-6 bg-gray-600 rounded-full"></div>
+                      </div>
+                      <h4 class="font-medium">Dark</h4>
+                      <p class="text-sm text-base-content/60">Easy on the eyes</p>
+                    </div>
+                  </button>
+
+                  <button
+                    class={`p-4 border-2 rounded-lg transition-all ${
+                      currentTheme() === 'auto'
+                        ? 'border-primary bg-primary/10'
+                        : 'border-base-300 hover:border-base-content/20'
+                    }`}
+                    onClick={() => changeTheme('auto')}
+                  >
+                    <div class="text-center">
+                      <div class="w-12 h-12 bg-gradient-to-r from-yellow-400 to-gray-600 border border-base-300 rounded-lg mx-auto mb-2 flex items-center justify-center">
+                        <div class="w-6 h-6 bg-gray-800 rounded-full"></div>
+                      </div>
+                      <h4 class="font-medium">Auto</h4>
+                      <p class="text-sm text-base-content/60">Follow system</p>
+                    </div>
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
         </Show>

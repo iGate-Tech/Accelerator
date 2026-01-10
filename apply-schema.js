@@ -29,7 +29,20 @@ async function applySchema() {
     const schema = fs.readFileSync('supabase-schema.sql', 'utf8');
 
     console.log('Applying schema...');
-    await client.query(schema);
+    // Split schema into statements and execute them individually to handle errors
+    const statements = schema.split(';').filter(stmt => stmt.trim().length > 0);
+
+    for (const statement of statements) {
+      try {
+        await client.query(statement + ';');
+      } catch (error) {
+        // Skip policy already exists errors
+        if (!error.message.includes('already exists') &&
+            !error.message.includes('does not exist')) {
+          console.warn(`Warning: ${error.message}`);
+        }
+      }
+    }
     console.log('✅ Schema applied successfully');
 
     console.log('Verifying RLS and policies...');

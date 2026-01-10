@@ -18,11 +18,11 @@ RUN npm run build
 
 # Create a non-root user
 RUN addgroup -g 1001 -S nodejs
-RUN adduser -S nextjs -u 1001
+RUN adduser -S solidjs -u 1001
 
 # Change ownership of the app directory
-RUN chown -R nextjs:nodejs /app
-USER nextjs
+RUN chown -R solidjs:nodejs /app
+USER solidjs
 
 # Expose port
 EXPOSE 3000

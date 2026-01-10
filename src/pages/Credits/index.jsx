@@ -51,7 +51,7 @@ const Credits = () => {
   return (
     <div class="min-h-screen bg-gradient-to-br from-success/5 via-base-100 to-primary/5">
       {/* Header */}
-      <div class="bg-gradient-to-r from-success to-primary text-primary-content py-16">
+      <div class="bg-gradient-to-r from-success to-primary text-base-100 py-16">
         <div class="container mx-auto px-4 text-center">
           <h1 class="text-5xl font-bold mb-4">Credit Management</h1>
           <p class="text-xl opacity-90 max-w-2xl mx-auto">
@@ -143,7 +143,7 @@ const Credits = () => {
             </div>
 
             <div class="flex justify-center space-x-4">
-              <a href="/packages" class="bg-primary hover:bg-primary-focus text-primary-content px-8 py-3 rounded-xl font-semibold transition-colors">
+              <a href="/packages" class="bg-primary hover:bg-primary-focus text-base-100 px-8 py-3 rounded-xl font-semibold transition-colors">
                 View Subscription Plans
               </a>
                <button

@@ -120,7 +120,7 @@ const ProjectCard = (props) => {
         {/* Hover overlay for actions */}
         {isHovered() && onClick && (
           <div class="absolute inset-0 bg-primary/5 rounded-lg flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity duration-200">
-            <div class="bg-primary text-primary-content px-3 py-1 rounded-full text-sm font-medium">
+            <div class="bg-primary text-base-100 px-3 py-1 rounded-full text-sm font-medium">
               <i data-lucide="eye" class="w-4 h-4 mr-1 inline"></i>
               View Project
             </div>

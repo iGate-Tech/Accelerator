@@ -71,7 +71,7 @@ const Packages = () => {
   return (
     <div class="min-h-screen bg-gradient-to-br from-primary/5 via-base-100 to-secondary/5">
       {/* Hero Section */}
-      <div class="bg-gradient-to-r from-primary to-secondary text-primary-content py-20">
+      <div class="bg-gradient-to-r from-primary to-secondary text-base-100 py-20">
         <div class="container mx-auto px-4 text-center">
           <h1 class="text-5xl font-bold mb-6">Choose Your Growth Plan</h1>
           <p class="text-xl opacity-90 mb-8 max-w-2xl mx-auto">
@@ -122,7 +122,7 @@ const Packages = () => {
                     {/* Popular Badge */}
                     <Show when={pkg.name === 'Pro'}>
                       <div class="absolute -top-4 left-1/2 transform -translate-x-1/2 z-20">
-                        <span class="bg-gradient-to-r from-primary to-primary-focus text-primary-content px-6 py-2 rounded-full text-sm font-bold shadow-lg">
+                        <span class="bg-gradient-to-r from-primary to-primary-focus text-base-100 px-6 py-2 rounded-full text-sm font-bold shadow-lg">
                           🔥 Most Popular
                         </span>
                       </div>
@@ -170,7 +170,7 @@ const Packages = () => {
                             ? 'bg-success/20 text-success border border-success/30 cursor-not-allowed'
                             : pkg.name === 'Starter'
                             ? 'bg-base-200 text-base-content/80 hover:bg-base-300 border border-base-300'
-                            : 'bg-gradient-to-r from-primary to-primary-focus text-primary-content hover:from-primary-focus hover:to-primary-focus shadow-lg hover:shadow-xl transform hover:-translate-y-0.5'
+                            : 'bg-gradient-to-r from-primary to-primary-focus text-base-100 hover:from-primary-focus hover:to-primary-focus shadow-lg hover:shadow-xl transform hover:-translate-y-0.5'
                         }`}
                       >
                         {subscription() && subscription().name === pkg.name

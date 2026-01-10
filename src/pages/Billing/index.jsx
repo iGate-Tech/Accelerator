@@ -53,7 +53,7 @@ const Billing = () => {
   return (
     <div class="min-h-screen bg-gradient-to-br from-primary/5 via-base-100 to-secondary/5">
       {/* Header */}
-      <div class="bg-gradient-to-r from-primary to-secondary text-primary-content py-16">
+      <div class="bg-gradient-to-r from-primary to-secondary text-base-100 py-16">
         <div class="container mx-auto px-4 text-center">
           <h1 class="text-5xl font-bold mb-4">Billing & Payments</h1>
           <p class="text-xl opacity-90 max-w-2xl mx-auto">
@@ -112,7 +112,7 @@ const Billing = () => {
               </div>
 
               <div class="flex space-x-4 mt-8">
-                <button class="bg-primary hover:bg-primary-focus text-primary-content px-6 py-3 rounded-xl font-semibold transition-colors">
+                <button class="bg-primary hover:bg-primary-focus text-base-100 px-6 py-3 rounded-xl font-semibold transition-colors">
                   Upgrade Plan
                 </button>
                 <button class="bg-base-200 hover:bg-base-300 text-base-content/80 px-6 py-3 rounded-xl font-semibold transition-colors">
@@ -150,7 +150,7 @@ const Billing = () => {
           <div class="bg-base-100 rounded-2xl shadow-xl p-8 mb-12 border border-base-200">
             <div class="flex items-center justify-between mb-8">
               <h2 class="text-3xl font-bold text-base-content">Payment Methods</h2>
-              <button class="bg-primary hover:bg-primary-focus text-primary-content px-6 py-3 rounded-xl font-semibold transition-colors">
+              <button class="bg-primary hover:bg-primary-focus text-base-100 px-6 py-3 rounded-xl font-semibold transition-colors">
                 Add Payment Method
               </button>
             </div>
@@ -159,7 +159,7 @@ const Billing = () => {
               {/* Primary Card */}
               <div class="border-2 border-primary/30 bg-primary/10 p-6 rounded-xl relative">
                 <div class="flex items-center justify-between mb-4">
-                  <span class="bg-primary text-primary-content px-3 py-1 rounded-full text-xs font-bold">PRIMARY</span>
+                  <span class="bg-primary text-base-100 px-3 py-1 rounded-full text-xs font-bold">PRIMARY</span>
                   <span class="text-gray-500 text-sm">Expires 12/26</span>
                 </div>
                 <div class="flex items-center justify-between">
@@ -277,7 +277,7 @@ const Billing = () => {
                 Our support team is here to help with any billing questions, payment issues, or subscription changes.
               </p>
               <div class="flex justify-center space-x-4">
-                <button class="bg-primary hover:bg-primary-focus text-primary-content px-6 py-3 rounded-xl font-semibold transition-colors">
+                <button class="bg-primary hover:bg-primary-focus text-base-100 px-6 py-3 rounded-xl font-semibold transition-colors">
                   Contact Support
                 </button>
                 <button class="bg-base-100 hover:bg-base-200 text-base-content px-6 py-3 rounded-xl font-semibold border border-base-300 transition-colors">

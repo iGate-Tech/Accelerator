@@ -193,7 +193,7 @@ const Navbar = () => {
      <i data-lucide="bell" class="w-5 h-5"></i>
 
      <Show when={(notifications() || []).some(n => !n.read)}>
-       <span class="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-primary text-xs text-primary-content">
+        <span class="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-primary text-xs text-base-100">
          {(notifications() || []).filter(n => !n.read).length}
        </span>
      </Show>

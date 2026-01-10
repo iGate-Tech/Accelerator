@@ -23,6 +23,7 @@ CREATE TABLE IF NOT EXISTS projects (
   totalTime REAL,
   consumedTime REAL,
   totalSteps INTEGER,
+  public BOOLEAN DEFAULT false,
   createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   synced_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   last_modified TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -145,6 +146,47 @@ CREATE TABLE IF NOT EXISTS user_subscriptions (
   sync_status TEXT DEFAULT 'local'
 );
 
+-- Portfolio Collaboration Tables
+CREATE TABLE IF NOT EXISTS portfolio_collaborators (
+  id BIGSERIAL PRIMARY KEY,
+  portfolio_id BIGINT REFERENCES groups(id) ON DELETE CASCADE,
+  user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
+  inviter_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
+  role TEXT DEFAULT 'editor', -- 'editor', 'viewer'
+  joined_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  synced_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  last_modified TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  sync_status TEXT DEFAULT 'local',
+  UNIQUE(portfolio_id, user_id)
+);
+
+CREATE TABLE IF NOT EXISTS portfolio_invitations (
+  id BIGSERIAL PRIMARY KEY,
+  portfolio_id BIGINT REFERENCES groups(id) ON DELETE CASCADE,
+  inviter_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
+  invitee_email TEXT NOT NULL,
+  role TEXT DEFAULT 'editor', -- 'editor', 'viewer'
+  status TEXT DEFAULT 'pending', -- 'pending', 'accepted', 'rejected', 'expired'
+  message TEXT,
+  invited_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  expires_at TIMESTAMP DEFAULT (CURRENT_TIMESTAMP + INTERVAL '7 days'),
+  responded_at TIMESTAMP,
+  synced_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  last_modified TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  sync_status TEXT DEFAULT 'local',
+  UNIQUE(portfolio_id, invitee_email, status) -- Prevent duplicate pending invitations
+);
+
+-- Voting system for public projects
+CREATE TABLE IF NOT EXISTS project_votes (
+  id BIGSERIAL PRIMARY KEY,
+  project_id BIGINT REFERENCES projects(id) ON DELETE CASCADE,
+  user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
+  vote_type TEXT NOT NULL CHECK (vote_type IN ('upvote', 'downvote')),
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE(project_id, user_id)
+);
+
 -- Create storage bucket for avatars
 INSERT INTO storage.buckets (id, name, public)
 VALUES ('avatars', 'avatars', true)
@@ -177,6 +219,9 @@ ALTER TABLE notifications ENABLE ROW LEVEL SECURITY;
 ALTER TABLE packages ENABLE ROW LEVEL SECURITY;
 ALTER TABLE profiles ENABLE ROW LEVEL SECURITY;
 ALTER TABLE user_subscriptions ENABLE ROW LEVEL SECURITY;
+ALTER TABLE portfolio_collaborators ENABLE ROW LEVEL SECURITY;
+ALTER TABLE portfolio_invitations ENABLE ROW LEVEL SECURITY;
+ALTER TABLE project_votes ENABLE ROW LEVEL SECURITY;
 
 -- Create comprehensive RLS policies for user data isolation
 -- Deny anon access to satisfy Data API requirements
@@ -200,8 +245,16 @@ CREATE POLICY "Deny anon billing" ON billing FOR ALL TO anon USING (false);
 
 -- Authenticated user policies
 DROP POLICY IF EXISTS "Users can view own projects" ON projects;
-CREATE POLICY "Users can view own projects" ON projects
-FOR SELECT TO authenticated USING (auth.uid() = user_id);
+DROP POLICY IF EXISTS "Users can view own projects and public projects" ON projects;
+CREATE POLICY "Users can view own projects and public projects" ON projects
+FOR SELECT TO authenticated USING (
+  auth.uid() = user_id OR public = true OR
+  EXISTS (
+    SELECT 1 FROM project_groups pg
+    JOIN portfolio_collaborators pc ON pg.group_id = pc.portfolio_id
+    WHERE pg.project_id = projects.id AND pc.user_id = auth.uid()
+  )
+);
 
 DROP POLICY IF EXISTS "Users can insert own projects" ON projects;
 CREATE POLICY "Users can insert own projects" ON projects
@@ -210,8 +263,22 @@ FOR INSERT TO authenticated WITH CHECK (auth.uid() = user_id);
 DROP POLICY IF EXISTS "Users can update own projects" ON projects;
 CREATE POLICY "Users can update own projects" ON projects
 FOR UPDATE TO authenticated
-USING (auth.uid() = user_id)
-WITH CHECK (auth.uid() = user_id);
+USING (
+  auth.uid() = user_id OR
+  EXISTS (
+    SELECT 1 FROM project_groups pg
+    JOIN portfolio_collaborators pc ON pg.group_id = pc.portfolio_id
+    WHERE pg.project_id = projects.id AND pc.user_id = auth.uid() AND pc.role = 'editor'
+  )
+)
+WITH CHECK (
+  auth.uid() = user_id OR
+  EXISTS (
+    SELECT 1 FROM project_groups pg
+    JOIN portfolio_collaborators pc ON pg.group_id = pc.portfolio_id
+    WHERE pg.project_id = projects.id AND pc.user_id = auth.uid() AND pc.role = 'editor'
+  )
+);
 
 DROP POLICY IF EXISTS "Users can delete own projects" ON projects;
 CREATE POLICY "Users can delete own projects" ON projects
@@ -237,7 +304,13 @@ FOR DELETE TO authenticated USING (auth.uid() = user_id);
 
 DROP POLICY IF EXISTS "Users can view own groups" ON groups;
 CREATE POLICY "Users can view own groups" ON groups
-FOR SELECT TO authenticated USING (auth.uid() = user_id);
+FOR SELECT TO authenticated USING (
+  auth.uid() = user_id OR
+  EXISTS (
+    SELECT 1 FROM portfolio_collaborators pc
+    WHERE pc.portfolio_id = groups.id AND pc.user_id = auth.uid()
+  )
+);
 
 DROP POLICY IF EXISTS "Users can insert own groups" ON groups;
 CREATE POLICY "Users can insert own groups" ON groups
@@ -255,17 +328,35 @@ FOR DELETE TO authenticated USING (auth.uid() = user_id);
 
 DROP POLICY IF EXISTS "Users can view own project_groups" ON project_groups;
 CREATE POLICY "Users can view own project_groups" ON project_groups
-FOR SELECT TO authenticated USING (auth.uid() = user_id);
+FOR SELECT TO authenticated USING (
+  auth.uid() = user_id OR
+  EXISTS (
+    SELECT 1 FROM portfolio_collaborators pc
+    WHERE pc.portfolio_id = project_groups.group_id AND pc.user_id = auth.uid()
+  )
+);
 
 DROP POLICY IF EXISTS "Users can insert own project_groups" ON project_groups;
 CREATE POLICY "Users can insert own project_groups" ON project_groups
-FOR INSERT TO authenticated WITH CHECK (auth.uid() = user_id);
+FOR INSERT TO authenticated WITH CHECK (
+  auth.uid() = user_id OR
+  EXISTS (
+    SELECT 1 FROM portfolio_collaborators pc
+    WHERE pc.portfolio_id = project_groups.group_id AND pc.user_id = auth.uid() AND pc.role = 'editor'
+  )
+);
 
 
 
 DROP POLICY IF EXISTS "Users can delete own project_groups" ON project_groups;
 CREATE POLICY "Users can delete own project_groups" ON project_groups
-FOR DELETE TO authenticated USING (auth.uid() = user_id);
+FOR DELETE TO authenticated USING (
+  auth.uid() = user_id OR
+  EXISTS (
+    SELECT 1 FROM portfolio_collaborators pc
+    WHERE pc.portfolio_id = project_groups.group_id AND pc.user_id = auth.uid() AND pc.role = 'editor'
+  )
+);
 
 DROP POLICY IF EXISTS "Users can view own credits" ON credits;
 CREATE POLICY "Users can view own credits" ON credits
@@ -318,6 +409,87 @@ FOR INSERT TO authenticated WITH CHECK (auth.uid() = id);
 
 CREATE POLICY "Users can update own profile" ON profiles
 FOR UPDATE TO authenticated USING (auth.uid() = id);
+
+-- Portfolio Collaborators policies
+CREATE POLICY "Portfolio owners can view collaborators" ON portfolio_collaborators
+FOR SELECT TO authenticated USING (
+  EXISTS (
+    SELECT 1 FROM groups WHERE id = portfolio_id AND user_id = auth.uid()
+  ) OR user_id = auth.uid()
+);
+
+CREATE POLICY "Portfolio owners can add collaborators" ON portfolio_collaborators
+FOR INSERT TO authenticated WITH CHECK (
+  EXISTS (
+    SELECT 1 FROM groups WHERE id = portfolio_id AND user_id = auth.uid()
+  )
+);
+
+CREATE POLICY "Portfolio owners can update collaborators" ON portfolio_collaborators
+FOR UPDATE TO authenticated USING (
+  EXISTS (
+    SELECT 1 FROM groups WHERE id = portfolio_id AND user_id = auth.uid()
+  )
+);
+
+CREATE POLICY "Portfolio owners can remove collaborators" ON portfolio_collaborators
+FOR DELETE TO authenticated USING (
+  EXISTS (
+    SELECT 1 FROM groups WHERE id = portfolio_id AND user_id = auth.uid()
+  )
+);
+
+-- Portfolio Invitations policies
+CREATE POLICY "Portfolio owners can view invitations" ON portfolio_invitations
+FOR SELECT TO authenticated USING (
+  EXISTS (
+    SELECT 1 FROM groups WHERE id = portfolio_id AND user_id = auth.uid()
+  )
+);
+
+CREATE POLICY "Portfolio owners can create invitations" ON portfolio_invitations
+FOR INSERT TO authenticated WITH CHECK (
+  EXISTS (
+    SELECT 1 FROM groups WHERE id = portfolio_id AND user_id = auth.uid()
+  )
+);
+
+CREATE POLICY "Portfolio owners can update invitations" ON portfolio_invitations
+FOR UPDATE TO authenticated USING (
+  EXISTS (
+    SELECT 1 FROM groups WHERE id = portfolio_id AND user_id = auth.uid()
+  )
+);
+
+CREATE POLICY "Portfolio owners can delete invitations" ON portfolio_invitations
+FOR DELETE TO authenticated USING (
+  EXISTS (
+    SELECT 1 FROM groups WHERE id = portfolio_id AND user_id = auth.uid()
+  )
+);
+
+-- Project Votes policies
+CREATE POLICY "Users can view all votes on public projects" ON project_votes
+FOR SELECT TO authenticated USING (
+  EXISTS (
+    SELECT 1 FROM projects WHERE id = project_id AND public = true
+  )
+);
+
+CREATE POLICY "Users can vote on public projects" ON project_votes
+FOR INSERT TO authenticated WITH CHECK (
+  EXISTS (
+    SELECT 1 FROM projects WHERE id = project_id AND public = true
+  ) AND auth.uid() = user_id
+);
+
+CREATE POLICY "Users can update their own votes" ON project_votes
+FOR UPDATE TO authenticated
+USING (auth.uid() = user_id)
+WITH CHECK (auth.uid() = user_id);
+
+CREATE POLICY "Users can delete their own votes" ON project_votes
+FOR DELETE TO authenticated USING (auth.uid() = user_id);
 
 -- Insert production-ready packages
 INSERT INTO packages (name, description, price, credits_included, features)

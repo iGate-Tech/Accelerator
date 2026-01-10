@@ -167,10 +167,6 @@ app.use((req, res, next) => {
     }
 });
 
-module.exports = app;
-
-if (require.main === module) {
-    app.listen(port, () => {
-        console.log(`Server running at http://localhost:${port}`);
-    });
-}
+app.listen(port, () => {
+    console.log(`Server running at http://localhost:${port}`);
+});

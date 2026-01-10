@@ -11,7 +11,7 @@ export default defineConfig({
     VitePWA({
       disable: process.env.NODE_ENV === 'development',
       registerType: 'autoUpdate',
-      includeAssets: ['favicon.svg', 'avatar.png'],
+      includeAssets: ['avatar.png'],
       manifest: {
         name: 'Accelerator AI',
         short_name: 'Accelerator',

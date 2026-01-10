@@ -58,7 +58,7 @@ app.get('/', (req, res) => {
 });
 
 // Test route to verify server is working
-app.get('/health', (req, res) => {
+app.get('/api/health', (req, res) => {
     res.json({ status: 'ok', message: 'Server is running' });
 });
 

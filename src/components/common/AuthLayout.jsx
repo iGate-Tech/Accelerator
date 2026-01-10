@@ -63,7 +63,7 @@ const AuthLayout = (props) => {
 
     return (
         <>
-            <link rel="icon" href={favicon} />
+            <link rel="icon" href="/favicon.svg" />
             <Navbar />
             <main class="min-h-screen bg-base-200">
                 {props.children}

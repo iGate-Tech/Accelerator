@@ -359,9 +359,9 @@ const Navbar = () => {
         >
           <div class="dropdown dropdown-bottom dropdown-end">
             <button class="btn btn-ghost btn-circle avatar relative">
-              <div class="w-8 rounded-full">
-                <img src={user()?.profile?.avatar ?? avatar} alt="User avatar" />
-              </div>
+               <div class="w-8 rounded-full">
+                 <img src={user()?.profile?.avatar && user()?.profile?.avatar !== '/src/assets/avatar.png' ? user()?.profile?.avatar : avatar} alt="User avatar" />
+               </div>
               <div class="absolute bottom-0 right-0 w-3 h-3 bg-success border-2 border-base-100 rounded-full"></div>
             </button>
 
@@ -370,7 +370,7 @@ const Navbar = () => {
                 <div class="flex items-center gap-4">
                   <div class="avatar relative">
                     <div class="w-14 rounded-full ring ring-primary/20">
-                      <img src={user()?.profile?.avatar ?? avatar} alt="Avatar" />
+                      <img src={user()?.profile?.avatar && user()?.profile?.avatar !== '/src/assets/avatar.png' ? user()?.profile?.avatar : avatar} alt="Avatar" />
                     </div>
                     <div class="absolute bottom-0 right-0 w-4 h-4 bg-success border-2 border-base-100 rounded-full"></div>
                   </div>

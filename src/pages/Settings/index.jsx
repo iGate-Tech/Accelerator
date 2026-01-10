@@ -248,7 +248,7 @@ const Settings = () => {
              <div class="flex items-center gap-6">
                  <div class="avatar">
                  <div class="w-24 rounded-full ring ring-primary ring-offset-base-100 ring-offset-2">
-                   <img src={avatarPreview() || user().avatar || avatar} alt="Profile" />
+                    <img src={avatarPreview() || (user().avatar && user().avatar !== '/src/assets/avatar.png' ? user().avatar : avatar)} alt="Profile" />
                  </div>
                </div>
                <div class="flex-1">

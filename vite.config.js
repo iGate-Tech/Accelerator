@@ -80,7 +80,7 @@ export default defineConfig({
    server: {
      proxy: {
        '/api': process.env.NODE_ENV === 'production' ? false : {
-         target: process.env.DOCKER_ENV === 'true' ? 'http://backend:3000' : 'http://localhost:9000',
+         target: process.env.DOCKER_ENV === 'true' ? 'http://backend:3000' : 'http://localhost:3000',
          changeOrigin: true
        }
      }

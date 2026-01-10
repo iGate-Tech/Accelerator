@@ -26,8 +26,8 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.dev
-    ports:
-      - "9000:3000"  # Express server port
+    expose:
+      - "3000"  # Express server port
     environment:
       - NODE_ENV=development
     volumes:

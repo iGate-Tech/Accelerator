@@ -1,6 +1,7 @@
 import { PGliteWorker } from '@electric-sql/pglite/worker';
 import { toastManager } from './feedback';
 import { performSync } from './sync';
+import { getCurrentUser } from './supabase';
 import { v4 as uuidv4 } from 'uuid';
 
 let pgInstance = null;
@@ -12,7 +13,7 @@ export const getPg = async () => {
       new Worker(new URL('../workers/pglite-worker.js', import.meta.url), {
         type: 'module'
       }),
-      { dataDir: 'idb://accelerator-db-v15' }
+      { dataDir: 'idb://accelerator-db-v18' }
     );
     console.log('PGLiteWorker instance created');
 
@@ -101,16 +102,28 @@ export const updateEntity = async (table, idField, id, updates, options = {}) =>
   }
 };
 
-  export const getTasks = async (project_id = null) => {
-    console.log('getTasks called with project_id:', project_id);
+  export const getTasks = async (project_id = null, userId = null) => {
+    console.log('getTasks called with project_id:', project_id, 'userId:', userId);
     try {
       const pg = await getPg();
       let query = 'SELECT * FROM tasks';
       let params = [];
+      let conditions = [];
+
       if (project_id) {
-        query += ' WHERE project_id = $1';
-        params = [project_id];
+        conditions.push('project_id = $' + (params.length + 1));
+        params.push(project_id);
       }
+
+      if (userId) {
+        conditions.push('user_id = $' + (params.length + 1));
+        params.push(userId);
+      }
+
+      if (conditions.length > 0) {
+        query += ' WHERE ' + conditions.join(' AND ');
+      }
+
       query += ' ORDER BY timestamp DESC';
       const res = await pg.query(query, params);
       console.log('Query executed, res:', res);
@@ -154,11 +167,53 @@ export const updateTask = async (id, content) => {
 
 
 
-  export const getProjects = async () => {
-    const projects = await getEntities('Projects', '*', '', 'ORDER BY createdAt DESC');
-    console.log('Projects loaded:', projects);
-    return projects;
-  };
+    export const getProjects = async (userId = null) => {
+      const whereClause = userId ? 'WHERE user_id = $1' : '';
+      const params = userId ? [userId] : [];
+      const projects = await getEntities('Projects', '*', whereClause, 'ORDER BY createdAt DESC', params);
+      console.log('Projects loaded:', projects);
+      return projects;
+    };
+
+   export const getPublicProjects = async () => {
+     const projects = await getEntities('Projects', '*', 'WHERE public = true', 'ORDER BY createdAt DESC');
+     console.log('Public projects loaded:', projects);
+     return projects;
+   };
+
+   export const getPublicProjectsWithVotes = async (currentUserId) => {
+     try {
+       const pg = await getPg();
+       const res = await pg.query(`
+         SELECT
+           p.*,
+           COALESCE(v.user_vote, null) as user_vote,
+           COALESCE(vs.upvotes, 0) as upvotes,
+           COALESCE(vs.downvotes, 0) as downvotes
+         FROM Projects p
+         LEFT JOIN (
+           SELECT project_id,
+                  vote_type as user_vote
+           FROM project_votes
+           WHERE user_id = $1
+         ) v ON p.id = v.project_id
+         LEFT JOIN (
+           SELECT project_id,
+                  COUNT(CASE WHEN vote_type = 'upvote' THEN 1 END) as upvotes,
+                  COUNT(CASE WHEN vote_type = 'downvote' THEN 1 END) as downvotes
+           FROM project_votes
+           GROUP BY project_id
+         ) vs ON p.id = vs.project_id
+         WHERE p.public = true
+         ORDER BY (COALESCE(vs.upvotes, 0) - COALESCE(vs.downvotes, 0)) DESC, p.createdAt DESC
+       `, [currentUserId]);
+       console.log('Public projects with votes loaded:', res.rows);
+       return res.rows;
+     } catch (e) {
+       console.log('Error getting public projects with votes:', e);
+       return [];
+     }
+   };
 
  export const getProjectByName = async (name) => {
     try {
@@ -188,24 +243,29 @@ export const updateTask = async (id, content) => {
        const defaultTotalSteps = 51;
        const totalSteps = project.totalSteps || defaultTotalSteps;
        const completedSteps = project.completedSteps || 0;
-        const res = await pg.query('INSERT INTO Projects (name, description, currentStep, completedSteps, stepName, currentModel, currentSection, uiProgress, uiMessage, uiStatus, totalCredits, consumedCredits, totalTime, consumedTime, totalSteps, createdAt, synced_at, last_modified, sync_status) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, \'local\') RETURNING *', [
-          project.name,
-          project.description,
-          project.currentStep || 'system',
-          completedSteps,
-          project.stepName || 'System Initialization',
-          project.currentModel || 'System',
-          project.currentSection || 'Initialization',
-          project.uiProgress || 0,
-          project.uiMessage || 'Ready to start the 48-step accelerator process',
-          project.uiStatus || 'idle',
-          project.totalCredits || (totalSteps * 10),
-          completedSteps * 10,
-          totalSteps * 30,
-          completedSteps * 30,
-          totalSteps,
-          project.createdAt || new Date()
-        ]);
+         const res = await pg.query('INSERT INTO Projects (name, description, currentStep, completedSteps, stepName, currentModel, currentSection, uiProgress, uiMessage, uiStatus, totalCredits, consumedCredits, totalTime, consumedTime, totalSteps, createdAt, public, problem, solution, currentPrompt, llmResponse, synced_at, last_modified, sync_status) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, \'local\') RETURNING *', [
+           project.name,
+           project.description,
+           project.currentStep || 'system',
+           completedSteps,
+           project.stepName || 'System Initialization',
+           project.currentModel || 'System',
+           project.currentSection || 'Initialization',
+           project.uiProgress || 0,
+           project.uiMessage || 'Ready to start the 48-step accelerator process',
+           project.uiStatus || 'idle',
+           project.totalCredits || (totalSteps * 10),
+           completedSteps * 10,
+           totalSteps * 30,
+           completedSteps * 30,
+           totalSteps,
+           project.createdAt || new Date(),
+           project.public || false,
+           project.problem || '',
+           project.solution || '',
+           project.currentPrompt || '',
+           project.llmResponse || ''
+         ]);
       const newProject = res.rows[0];
       console.log('Added project:', newProject);
       return newProject.id;
@@ -213,7 +273,7 @@ export const updateTask = async (id, content) => {
        console.log('Error adding project:', e);
        toastManager.error(`Failed to add project "${project.name}" (${project.description?.length || 0} chars description): ${e.message}`);
      }
-  };
+   };
 
   export const updateProject = async (id, project) => {
   console.log('Updating project', id, 'with fields:', Object.keys(project));
@@ -251,22 +311,91 @@ export const updateTask = async (id, content) => {
      }
   };
 
- export const deleteAllProjects = async () => {
-    try {
-      const pg = await getPg();
-      await pg.query('DELETE FROM Projects');
-      console.log('Deleted all projects');
-    } catch (e) {
-      console.log('Error deleting all projects:', e);
-    }
-  };
+  export const deleteAllProjects = async () => {
+     try {
+       const pg = await getPg();
+       await pg.query('DELETE FROM Projects');
+       console.log('Deleted all projects');
+     } catch (e) {
+       console.log('Error deleting all projects:', e);
+     }
+   };
+
+   export const toggleProjectPublic = async (projectId, isPublic) => {
+     try {
+       const result = await updateEntity('Projects', 'id', projectId, { public: isPublic });
+       if (!result.success) {
+         throw new Error(result.error);
+       }
+       console.log(`Project ${projectId} set to ${isPublic ? 'public' : 'private'}`);
+       return result;
+     } catch (e) {
+       console.log('Error toggling project public status:', e);
+       toastManager.error(`Failed to update project visibility: ${e.message}`);
+       return { success: false, error: e.message };
+     }
+   };
+
+   export const voteOnProject = async (projectId, userId, voteType) => {
+     try {
+       const pg = await getPg();
+
+       // Check if user already voted
+       const existingVote = await pg.query(
+         'SELECT id, vote_type FROM project_votes WHERE project_id = $1 AND user_id = $2',
+         [projectId, userId]
+       );
+
+       if (existingVote.rows.length > 0) {
+         const currentVote = existingVote.rows[0];
+         if (currentVote.vote_type === voteType) {
+           // User is removing their vote
+           await pg.query('DELETE FROM project_votes WHERE id = $1', [currentVote.id]);
+           return { action: 'removed', voteType: null };
+         } else {
+           // User is changing their vote
+           await pg.query('UPDATE project_votes SET vote_type = $1 WHERE id = $2', [voteType, currentVote.id]);
+           return { action: 'changed', voteType };
+         }
+       } else {
+         // User is adding a new vote
+         await pg.query(
+           'INSERT INTO project_votes (project_id, user_id, vote_type) VALUES ($1, $2, $3)',
+           [projectId, userId, voteType]
+         );
+         return { action: 'added', voteType };
+       }
+     } catch (e) {
+       console.log('Error voting on project:', e);
+       toastManager.error(`Failed to vote on project: ${e.message}`);
+       return { success: false, error: e.message };
+     }
+   };
+
+   export const getProjectVotes = async (projectId) => {
+     try {
+       const pg = await getPg();
+       const res = await pg.query(`
+         SELECT vote_type, COUNT(*) as count
+         FROM project_votes
+         WHERE project_id = $1
+         GROUP BY vote_type
+       `, [projectId]);
+       return res.rows;
+     } catch (e) {
+       console.log('Error getting project votes:', e);
+       return [];
+     }
+   };
 
 // Groups functions
-export const getGroups = async () => {
-  const groups = await getEntities('Groups', '*', '', 'ORDER BY createdAt DESC');
-  console.log('Groups loaded:', groups);
-  return groups;
-};
+ export const getGroups = async (userId = null) => {
+   const whereClause = userId ? 'WHERE user_id = $1' : '';
+   const params = userId ? [userId] : [];
+   const groups = await getEntities('Groups', '*', whereClause, 'ORDER BY createdAt DESC', params);
+   console.log('Groups loaded:', groups);
+   return groups;
+ };
 
 export const getGroupById = async (id) => {
   try {
@@ -312,7 +441,7 @@ export const deleteGroup = async (id) => {
   try {
     const pg = await getPg();
     // First remove all project-group relationships
-    await pg.query('DELETE FROM ProjectGroups WHERE group_id = $1', [id]);
+    await pg.query('DELETE FROM project_groups WHERE group_id = $1', [id]);
     // Then delete the group
     await pg.query('DELETE FROM Groups WHERE id = $1', [id]);
     console.log('Deleted group:', id);
@@ -322,9 +451,9 @@ export const deleteGroup = async (id) => {
    }
 };
 
-export const exportAllProjects = async () => {
+export const exportAllProjects = async (userId = null) => {
   try {
-    const projects = await getProjects();
+    const projects = await getProjects(userId);
     return JSON.stringify(projects, null, 2);
   } catch (e) {
     return null;
@@ -335,7 +464,7 @@ export const addProjectToGroup = async (projectId, groupId) => {
   try {
     const pg = await getPg();
     await pg.query(
-      'INSERT INTO ProjectGroups (project_id, group_id, addedAt) VALUES ($1, $2, $3) ON CONFLICT (project_id, group_id) DO NOTHING',
+      'INSERT INTO project_groups (project_id, group_id, addedAt) VALUES ($1, $2, $3) ON CONFLICT (project_id, group_id) DO NOTHING',
       [projectId, groupId, new Date()]
     );
     console.log('Added project', projectId, 'to group', groupId);
@@ -347,7 +476,7 @@ export const addProjectToGroup = async (projectId, groupId) => {
 export const removeProjectFromGroup = async (projectId, groupId) => {
   try {
     const pg = await getPg();
-    await pg.query('DELETE FROM ProjectGroups WHERE project_id = $1 AND group_id = $2', [projectId, groupId]);
+    await pg.query('DELETE FROM project_groups WHERE project_id = $1 AND group_id = $2', [projectId, groupId]);
     console.log('Removed project', projectId, 'from group', groupId);
   } catch (e) {
     console.log('Error removing project from group:', e);
@@ -360,7 +489,7 @@ export const getProjectsInGroup = async (groupId) => {
     const res = await pg.query(`
       SELECT p.*, pg.addedAt as addedToGroupAt
       FROM Projects p
-      JOIN ProjectGroups pg ON p.id = pg.project_id
+      JOIN project_groups pg ON p.id = pg.project_id
       WHERE pg.group_id = $1
       ORDER BY pg.addedAt DESC
     `, [groupId]);
@@ -371,14 +500,23 @@ export const getProjectsInGroup = async (groupId) => {
   }
 };
 
-export const getUngroupedProjects = async () => {
+export const getUngroupedProjects = async (userId = null) => {
   try {
     const pg = await getPg();
-    const res = await pg.query(`
+    let query = `
       SELECT * FROM Projects
-      WHERE id NOT IN (SELECT project_id FROM ProjectGroups)
-      ORDER BY createdAt DESC
-    `);
+      WHERE id NOT IN (SELECT project_id FROM project_groups)
+    `;
+    let params = [];
+
+    if (userId) {
+      query += ' AND user_id = $1';
+      params.push(userId);
+    }
+
+    query += ' ORDER BY createdAt DESC';
+
+    const res = await pg.query(query, params);
     return res.rows;
   } catch (e) {
     console.log('Error getting ungrouped projects:', e);
@@ -386,9 +524,9 @@ export const getUngroupedProjects = async () => {
   }
 };
 
-export const getGroupsWithProjects = async () => {
+export const getGroupsWithProjects = async (userId = null) => {
   try {
-    const groups = await getGroups();
+    const groups = await getGroups(userId);
     const groupsWithProjects = await Promise.all(
       groups.map(async (group) => ({
         ...group,
@@ -526,13 +664,18 @@ export const addCreditTransaction = async (userId, type, amount, description) =>
   try {
     const pg = await getPg();
     const id = uuidv4();
+    // Calculate current balance
+    const balanceResult = await pg.query('SELECT SUM(amount) as balance FROM credits WHERE user_id = $1', [userId]);
+    const currentBalance = balanceResult.rows[0]?.balance || 0;
+    const balance_after = currentBalance + amount;
+
     const transaction = {
       id,
       user_id: userId,
       type,
       amount,
       description,
-      balance_after: 0, // TODO: calculate
+      balance_after,
       date: new Date().toISOString()
     };
     await pg.query(
@@ -677,7 +820,8 @@ export const getUserNotifications = async (userId) => {
 
 export const markNotificationRead = async (notificationId, userId) => {
   try {
-    await updateEntity('notifications', 'id', notificationId, { read: true });
+    const pg = await getPg();
+    await pg.query('UPDATE notifications SET read = true WHERE id = $1 AND user_id = $2', [notificationId, userId]);
     return true;
   } catch (error) {
     console.error('Error marking notification read:', error);
@@ -724,16 +868,77 @@ export const createUserSubscription = async (userId, packageId, subscriptionData
       [id, userId, packageId, subscriptionData.status || 'active', startDate, endDate, subscriptionData.autoRenew !== false, new Date(), new Date(), 'local']
     );
 
-    // Add initial credits for the subscription
+    // Get package data
     const packageData = await pg.query('SELECT * FROM packages WHERE id = $1', [packageId]);
     if (packageData.rows[0]) {
-      await addCreditTransaction(userId, 'subscription', packageData.rows[0].credits_included, `Credits for ${packageData.rows[0].name} subscription`);
+      const pkg = packageData.rows[0];
+
+      // Add initial credits for the subscription
+      await addCreditTransaction(userId, 'subscription', pkg.credits_included, `Credits for ${pkg.name} subscription`);
+
+      // Create billing record for paid subscriptions
+      if (pkg.price > 0) {
+        await addBillingRecord(
+          userId,
+          'subscription',
+          pkg.price,
+          `${pkg.name} subscription - ${pkg.price}/month`,
+          endDate
+        );
+      }
     }
 
     console.log('User subscription created:', res.rows[0]);
     return res.rows[0];
   } catch (error) {
     console.error('Error creating user subscription:', error);
+    throw error;
+  }
+};
+
+export const changeUserSubscription = async (userId, newPackageId, currentSubscription = null) => {
+  try {
+    const pg = await getPg();
+
+    // Cancel current subscription if it exists
+    if (currentSubscription) {
+      await updateEntity('user_subscriptions', 'id', currentSubscription.id, {
+        status: 'cancelled',
+        end_date: new Date(),
+        last_modified: new Date()
+      });
+    }
+
+    // Create new subscription
+    const newSubscription = await createUserSubscription(userId, newPackageId);
+
+    // Handle credit adjustments for plan changes
+    if (currentSubscription) {
+      const currentPackage = await pg.query('SELECT * FROM packages WHERE id = $1', [currentSubscription.package_id]);
+      const newPackage = await pg.query('SELECT * FROM packages WHERE id = $1', [newPackageId]);
+
+      if (currentPackage.rows[0] && newPackage.rows[0]) {
+        const currentCredits = currentPackage.rows[0].credits_included;
+        const newCredits = newPackage.rows[0].credits_included;
+
+        // If upgrading, add the difference in credits
+        if (newCredits > currentCredits) {
+          const creditDifference = newCredits - currentCredits;
+          await addCreditTransaction(
+            userId,
+            'subscription_upgrade',
+            creditDifference,
+            `Additional credits for upgrading to ${newPackage.rows[0].name}`
+          );
+        }
+        // If downgrading, we could potentially remove credits, but for now let's keep them
+        // In a real app, you might want to prorate or adjust credits
+      }
+    }
+
+    return newSubscription;
+  } catch (error) {
+    console.error('Error changing user subscription:', error);
     throw error;
   }
 };
@@ -952,6 +1157,163 @@ export const seedSampleNotifications = async (userId) => {
 };
 
 // Sync data with Supabase
+// Portfolio Collaboration Functions
+export const inviteCollaborator = async (portfolioId, inviteeEmail, role = 'editor', message = '') => {
+  try {
+    const pg = await getPg();
+    const inviterId = await getCurrentUserId(); // Need to implement this
+    const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // 7 days
+
+    const res = await pg.query(
+      'INSERT INTO portfolio_invitations (portfolio_id, inviter_id, invitee_email, role, message, expires_at) VALUES ($1, $2, $3, $4, $5, $6) ON CONFLICT (portfolio_id, invitee_email, status) DO NOTHING RETURNING *',
+      [portfolioId, inviterId, inviteeEmail, role, message, expiresAt]
+    );
+
+    return res.rows[0];
+  } catch (error) {
+    console.error('Error inviting collaborator:', error);
+    throw error;
+  }
+};
+
+export const getPortfolioInvitations = async (portfolioId) => {
+  try {
+    const pg = await getPg();
+    const res = await pg.query(
+      'SELECT pi.*, g.name as portfolio_name FROM portfolio_invitations pi JOIN groups g ON pi.portfolio_id = g.id WHERE pi.portfolio_id = $1 ORDER BY pi.invited_at DESC',
+      [portfolioId]
+    );
+    return res.rows;
+  } catch (error) {
+    console.error('Error getting portfolio invitations:', error);
+    return [];
+  }
+};
+
+export const getUserInvitations = async (userEmail) => {
+  try {
+    const pg = await getPg();
+    const res = await pg.query(
+      'SELECT pi.*, g.name as portfolio_name, u.email as inviter_email FROM portfolio_invitations pi JOIN groups g ON pi.portfolio_id = g.id LEFT JOIN auth.users u ON pi.inviter_id = u.id WHERE pi.invitee_email = $1 AND pi.status = $2 AND pi.expires_at > CURRENT_TIMESTAMP ORDER BY pi.invited_at DESC',
+      [userEmail, 'pending']
+    );
+    return res.rows;
+  } catch (error) {
+    console.error('Error getting user invitations:', error);
+    return [];
+  }
+};
+
+export const respondToInvitation = async (invitationId, status) => {
+  try {
+    const pg = await getPg();
+    const userId = await getCurrentUserId(); // Need to implement this
+
+    // Update invitation status
+    await pg.query(
+      'UPDATE portfolio_invitations SET status = $1, responded_at = CURRENT_TIMESTAMP WHERE id = $2',
+      [status, invitationId]
+    );
+
+    if (status === 'accepted') {
+      // Get invitation details
+      const invitation = await pg.query('SELECT * FROM portfolio_invitations WHERE id = $1', [invitationId]);
+      if (invitation.rows[0]) {
+        const inv = invitation.rows[0];
+
+        // Add user as collaborator
+        await pg.query(
+          'INSERT INTO portfolio_collaborators (portfolio_id, user_id, inviter_id, role) VALUES ($1, $2, $3, $4)',
+          [inv.portfolio_id, userId, inv.inviter_id, inv.role]
+        );
+
+        // Create notification for inviter
+        await createNotification(
+          inv.inviter_id,
+          'system',
+          'Invitation Accepted',
+          `Your invitation to collaborate on portfolio "${await getGroupName(inv.portfolio_id)}" has been accepted.`
+        );
+      }
+    }
+
+    return true;
+  } catch (error) {
+    console.error('Error responding to invitation:', error);
+    throw error;
+  }
+};
+
+export const getPortfolioCollaborators = async (portfolioId) => {
+  try {
+    const pg = await getPg();
+    const res = await pg.query(
+      'SELECT pc.*, u.email, p.bio, p.avatar FROM portfolio_collaborators pc JOIN auth.users u ON pc.user_id = u.id LEFT JOIN profiles p ON pc.user_id = p.id WHERE pc.portfolio_id = $1 ORDER BY pc.joined_at ASC',
+      [portfolioId]
+    );
+    return res.rows;
+  } catch (error) {
+    console.error('Error getting portfolio collaborators:', error);
+    return [];
+  }
+};
+
+export const removeCollaborator = async (portfolioId, userId) => {
+  try {
+    const pg = await getPg();
+    await pg.query(
+      'DELETE FROM portfolio_collaborators WHERE portfolio_id = $1 AND user_id = $2',
+      [portfolioId, userId]
+    );
+
+    // Create notification for removed user
+    await createNotification(
+      userId,
+      'system',
+      'Removed from Portfolio',
+      `You have been removed from portfolio "${await getGroupName(portfolioId)}".`
+    );
+
+    return true;
+  } catch (error) {
+    console.error('Error removing collaborator:', error);
+    throw error;
+  }
+};
+
+export const updateCollaboratorRole = async (portfolioId, userId, role) => {
+  try {
+    const pg = await getPg();
+    await pg.query(
+      'UPDATE portfolio_collaborators SET role = $1 WHERE portfolio_id = $2 AND user_id = $3',
+      [role, portfolioId, userId]
+    );
+    return true;
+  } catch (error) {
+    console.error('Error updating collaborator role:', error);
+    throw error;
+  }
+};
+
+// Helper functions
+const getCurrentUserId = async () => {
+  const user = await getCurrentUser();
+  if (!user) {
+    throw new Error('User not authenticated');
+  }
+  return user.id;
+};
+
+const getGroupName = async (groupId) => {
+  try {
+    const pg = await getPg();
+    const res = await pg.query('SELECT name FROM groups WHERE id = $1', [groupId]);
+    return res.rows[0]?.name || 'Unknown Portfolio';
+  } catch (error) {
+    return 'Unknown Portfolio';
+  }
+};
+
 export const syncData = async () => {
   try {
     await performSync();

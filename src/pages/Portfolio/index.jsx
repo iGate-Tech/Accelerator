@@ -8,18 +8,25 @@ import {
   updateGroup,
   deleteGroup,
   addProjectToGroup,
-  removeProjectFromGroup
+  removeProjectFromGroup,
+  inviteCollaborator,
+  getPortfolioInvitations,
+  getPortfolioCollaborators,
+  removeCollaborator,
+  updateCollaboratorRole
 } from "../../lib/db";
 import { LangContext } from "../../context/LangContext";
+import { useUser } from "../../context/UserContext";
 import { translations } from "../../assets/translations/translations-index.js";
 import ProjectCard from "../../components/ui/ProjectCard";
 
 const Portfolio = () => {
   const navigate = useNavigate();
   const { lang } = useContext(LangContext);
+  const { user } = useUser();
   const [currentLang, setCurrentLang] = createSignal(lang());
-  const [groups, { refetch: refetchGroups }] = createResource(getGroupsWithProjects);
-  const [ungroupedProjects, { refetch: refetchUngrouped }] = createResource(getUngroupedProjects);
+  const [groups, { refetch: refetchGroups }] = createResource(() => user()?.id, getGroupsWithProjects);
+  const [ungroupedProjects, { refetch: refetchUngrouped }] = createResource(() => user()?.id, getUngroupedProjects);
   const [showCreateGroupModal, setShowCreateGroupModal] = createSignal(false);
   const [newGroupName, setNewGroupName] = createSignal("");
   const [newGroupDescription, setNewGroupDescription] = createSignal("");
@@ -27,8 +34,15 @@ const Portfolio = () => {
   const [editingGroup, setEditingGroup] = createSignal(null);
   const [editGroupName, setEditGroupName] = createSignal("");
   const [editGroupDescription, setEditGroupDescription] = createSignal("");
-  const [draggedProject, setDraggedProject] = createSignal(null);
-  const [draggedOverGroup, setDraggedOverGroup] = createSignal(null);
+   const [draggedProject, setDraggedProject] = createSignal(null);
+   const [draggedOverGroup, setDraggedOverGroup] = createSignal(null);
+   const [showInviteModal, setShowInviteModal] = createSignal(false);
+   const [selectedPortfolio, setSelectedPortfolio] = createSignal(null);
+   const [inviteeEmail, setInviteeEmail] = createSignal("");
+   const [invitationMessage, setInvitationMessage] = createSignal("");
+   const [invitationRole, setInvitationRole] = createSignal("editor");
+   const [collaborators, { refetch: refetchCollaborators }] = createResource(() => selectedPortfolio(), getPortfolioCollaborators);
+   const [invitations, { refetch: refetchInvitations }] = createResource(() => selectedPortfolio(), getPortfolioInvitations);
 
   const t = () => translations[currentLang()];
 
@@ -115,10 +129,59 @@ const Portfolio = () => {
     await refreshData();
   };
 
-  const handleProjectClick = (project) => {
-    window.dispatchEvent(new CustomEvent('openProject', { detail: project.id }));
-    navigate('/');
-  };
+   const handleProjectClick = (project) => {
+     window.dispatchEvent(new CustomEvent('openProject', { detail: project.id }));
+     navigate('/');
+   };
+
+   const handleInviteCollaborator = async () => {
+     if (!inviteeEmail().trim() || !selectedPortfolio()) return;
+
+     try {
+       await inviteCollaborator(
+         selectedPortfolio(),
+         inviteeEmail().trim(),
+         invitationRole(),
+         invitationMessage().trim()
+       );
+
+       setInviteeEmail("");
+       setInvitationMessage("");
+       setInvitationRole("editor");
+       setShowInviteModal(false);
+       await refetchInvitations();
+       toastManager.success("Invitation sent successfully!");
+     } catch (error) {
+       toastManager.error("Failed to send invitation: " + error.message);
+     }
+   };
+
+   const handleManageCollaborators = (groupId) => {
+     setSelectedPortfolio(groupId);
+     setShowInviteModal(true);
+     refetchCollaborators();
+     refetchInvitations();
+   };
+
+   const handleRemoveCollaborator = async (userId) => {
+     try {
+       await removeCollaborator(selectedPortfolio(), userId);
+       await refetchCollaborators();
+       toastManager.success("Collaborator removed successfully!");
+     } catch (error) {
+       toastManager.error("Failed to remove collaborator: " + error.message);
+     }
+   };
+
+   const handleUpdateCollaboratorRole = async (userId, role) => {
+     try {
+       await updateCollaboratorRole(selectedPortfolio(), userId, role);
+       await refetchCollaborators();
+       toastManager.success("Collaborator role updated!");
+     } catch (error) {
+       toastManager.error("Failed to update role: " + error.message);
+     }
+   };
 
   onMount(async () => {
     if (window.lucide) window.lucide.createIcons();
@@ -238,9 +301,136 @@ const Portfolio = () => {
             </div>
           </div>
         </div>
-      </Show>
+       </Show>
 
-      {/* Groups and Ungrouped Projects */}
+       {/* Invite Collaborator Modal */}
+       <Show when={showInviteModal()}>
+         <div class="modal modal-open">
+           <div class="modal-box max-w-2xl">
+             <h3 class="font-bold text-lg mb-4">{t().inviteCollaborator}</h3>
+             <div class="space-y-4">
+               <div>
+                 <label class="label">
+                   <span class="label-text">{t().emailAddress}</span>
+                 </label>
+                 <input
+                   type="email"
+                   placeholder="colleague@example.com"
+                   class="input input-bordered w-full"
+                   value={inviteeEmail()}
+                   onInput={(e) => setInviteeEmail(e.target.value)}
+                 />
+               </div>
+               <div>
+                 <label class="label">
+                   <span class="label-text">{t().role}</span>
+                 </label>
+                 <select
+                   class="select select-bordered w-full"
+                   value={invitationRole()}
+                   onInput={(e) => setInvitationRole(e.target.value)}
+                 >
+                   <option value="editor">{t().editor}</option>
+                   <option value="viewer">{t().viewer}</option>
+                 </select>
+               </div>
+               <div>
+                 <label class="label">
+                   <span class="label-text">{t().messageOptional}</span>
+                 </label>
+                 <textarea
+                   placeholder={t().invitationMessagePlaceholder}
+                   class="textarea textarea-bordered w-full"
+                   value={invitationMessage()}
+                   onInput={(e) => setInvitationMessage(e.target.value)}
+                   rows="3"
+                 ></textarea>
+               </div>
+
+               {/* Current Collaborators */}
+               <Show when={collaborators() && collaborators().length > 0}>
+                 <div>
+                   <h4 class="font-semibold mb-2">{t().currentCollaborators}</h4>
+                   <div class="space-y-2 max-h-40 overflow-y-auto">
+                     <For each={collaborators()}>
+                       {(collaborator) => (
+                         <div class="flex items-center justify-between p-2 bg-base-200 rounded">
+                           <div class="flex items-center gap-2">
+                             <img
+                               src={collaborator.avatar || '/src/assets/avatar.png'}
+                               alt={collaborator.email}
+                               class="w-8 h-8 rounded-full"
+                             />
+                             <div>
+                               <p class="text-sm font-medium">{collaborator.email}</p>
+                               <p class="text-xs text-base-content/60 capitalize">{collaborator.role}</p>
+                             </div>
+                           </div>
+                           <div class="flex items-center gap-2">
+                             <select
+                               class="select select-xs"
+                               value={collaborator.role}
+                               onInput={(e) => handleUpdateCollaboratorRole(collaborator.user_id, e.target.value)}
+                             >
+                               <option value="editor">{t().editor}</option>
+                               <option value="viewer">{t().viewer}</option>
+                             </select>
+                             <button
+                               class="btn btn-ghost btn-xs text-error"
+                               onClick={() => handleRemoveCollaborator(collaborator.user_id)}
+                             >
+                               <i data-lucide="x" class="w-4 h-4"></i>
+                             </button>
+                           </div>
+                         </div>
+                       )}
+                     </For>
+                   </div>
+                 </div>
+               </Show>
+
+               {/* Pending Invitations */}
+               <Show when={invitations() && invitations().length > 0}>
+                 <div>
+                   <h4 class="font-semibold mb-2">{t().pendingInvitations}</h4>
+                   <div class="space-y-2 max-h-40 overflow-y-auto">
+                     <For each={invitations()}>
+                       {(invitation) => (
+                         <div class="flex items-center justify-between p-2 bg-base-200 rounded">
+                           <div>
+                             <p class="text-sm font-medium">{invitation.invitee_email}</p>
+                             <p class="text-xs text-base-content/60 capitalize">{invitation.role} • {invitation.status}</p>
+                           </div>
+                           <div class="text-xs text-base-content/60">
+                             {new Date(invitation.invited_at).toLocaleDateString()}
+                           </div>
+                         </div>
+                       )}
+                     </For>
+                   </div>
+                 </div>
+               </Show>
+             </div>
+             <div class="modal-action">
+               <button
+                 class="btn"
+                 onClick={() => setShowInviteModal(false)}
+               >
+                 {t().cancel}
+               </button>
+               <button
+                 class="btn btn-primary"
+                 onClick={handleInviteCollaborator}
+                 disabled={!inviteeEmail().trim()}
+               >
+                 {t().sendInvitation}
+               </button>
+             </div>
+           </div>
+         </div>
+       </Show>
+
+       {/* Groups and Ungrouped Projects */}
       <Show
         when={!groups.loading && !ungroupedProjects.loading}
         fallback={
@@ -294,20 +484,27 @@ const Portfolio = () => {
                       </Show>
                     )}
                   </div>
-                  <div class="flex items-center gap-2">
-                    <button
-                      class="btn btn-ghost btn-sm"
-                      onClick={() => handleEditGroup(group)}
-                    >
-                      <i data-lucide={editingGroup() === group.id ? "check" : "edit"} class="w-4 h-4"></i>
-                    </button>
-                    <button
-                      class="btn btn-ghost btn-sm text-error"
-                      onClick={() => handleDeleteGroup(group.id)}
-                    >
-                      <i data-lucide="trash" class="w-4 h-4"></i>
-                    </button>
-                  </div>
+                   <div class="flex items-center gap-2">
+                     <button
+                       class="btn btn-ghost btn-sm"
+                       onClick={() => handleManageCollaborators(group.id)}
+                       title="Manage Collaborators"
+                     >
+                       <i data-lucide="users" class="w-4 h-4"></i>
+                     </button>
+                     <button
+                       class="btn btn-ghost btn-sm"
+                       onClick={() => handleEditGroup(group)}
+                     >
+                       <i data-lucide={editingGroup() === group.id ? "check" : "edit"} class="w-4 h-4"></i>
+                     </button>
+                     <button
+                       class="btn btn-ghost btn-sm text-error"
+                       onClick={() => handleDeleteGroup(group.id)}
+                     >
+                       <i data-lucide="trash" class="w-4 h-4"></i>
+                     </button>
+                   </div>
                 </div>
 
                 {/* Drop Zone */}

@@ -140,11 +140,11 @@ const Notifications = () => {
                 <div class="card-body p-4">
                   <div class="flex items-start gap-4">
                     <div class={`p-2 rounded-full ${
-                      notif.type === 'newMessage' || notif.type === 'message' ? 'bg-blue-500 text-white' :
-                      notif.type === 'systemUpdate' || notif.type === 'system' || notif.type === 'update' ? 'bg-green-500 text-white' :
-                      notif.type === 'billing' ? 'bg-purple-500 text-white' :
-                      notif.type === 'credits' ? 'bg-yellow-500 text-black' :
-                      'bg-gray-500 text-white'
+                      notif.type === 'newMessage' || notif.type === 'message' ? 'bg-info text-info-content' :
+                      notif.type === 'systemUpdate' || notif.type === 'system' || notif.type === 'update' ? 'bg-success text-success-content' :
+                      notif.type === 'billing' ? 'bg-secondary text-secondary-content' :
+                      notif.type === 'credits' ? 'bg-warning text-warning-content' :
+                      'bg-neutral text-neutral-content'
                     }`}>
                       <i
                         data-lucide={

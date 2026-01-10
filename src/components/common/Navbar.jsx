@@ -1,4 +1,4 @@
-import { A, useLocation } from "@solidjs/router";
+import { A, useLocation, useNavigate } from "@solidjs/router";
 import {
   createSignal,
   createResource,
@@ -22,6 +22,7 @@ const Navbar = () => {
   const logout = userContext.logout ?? (() => {});
 
   const location = useLocation();
+  const navigate = useNavigate();
   const [dropdownFilter, setDropdownFilter] = createSignal('all');
 
   // Fetch real notifications from database
@@ -45,6 +46,43 @@ const Navbar = () => {
       } catch (error) {
         console.error('Error fetching notifications:', error);
         return [];
+      }
+    }
+  );
+
+  // Fetch real credit balance
+  const [creditBalance] = createResource(
+    () => user()?.id,
+    async (userId) => {
+      if (!userId) return 0;
+      try {
+        const { getCreditBalance } = await import('../../lib/db');
+        return await getCreditBalance(userId);
+      } catch (error) {
+        console.error('Error fetching credit balance:', error);
+        return 0;
+      }
+    }
+  );
+
+  // Fetch real subscription data
+  const [subscription] = createResource(
+    () => user()?.id,
+    async (userId) => {
+      if (!userId) return { plan: 'free' };
+      try {
+        const { getUserSubscription } = await import('../../lib/db');
+        const userSubscription = await getUserSubscription(userId);
+        return userSubscription ? {
+          plan: userSubscription.name,
+          status: userSubscription.status,
+          price: userSubscription.price,
+          renewalDate: userSubscription.end_date,
+          maxCredits: userSubscription.credits_included
+        } : { plan: 'free' };
+      } catch (error) {
+        console.error('Error fetching subscription:', error);
+        return { plan: 'free' };
       }
     }
   );
@@ -132,8 +170,9 @@ const Navbar = () => {
               <li><A href="/" class="flex items-center gap-2"><i data-lucide="home" class="w-4 h-4"></i>Home</A></li>
               <li><A href="/dashboard" class="flex items-center gap-2"><i data-lucide="bar-chart" class="w-4 h-4"></i>Dashboard</A></li>
               <li><A href="/explore" class="flex items-center gap-2"><i data-lucide="search" class="w-4 h-4"></i>Explore</A></li>
-              <li><A href="/portfolio" class="flex items-center gap-2"><i data-lucide="briefcase" class="w-4 h-4"></i>Portfolio</A></li>
-              <li><A href="/help" class="flex items-center gap-2"><i data-lucide="help-circle" class="w-4 h-4"></i>Help</A></li>
+               <li><A href="/portfolio" class="flex items-center gap-2"><i data-lucide="briefcase" class="w-4 h-4"></i>Portfolio</A></li>
+               <li><A href="/invitations" class="flex items-center gap-2"><i data-lucide="user-plus" class="w-4 h-4"></i>Invitations</A></li>
+               <li><A href="/help" class="flex items-center gap-2"><i data-lucide="help-circle" class="w-4 h-4"></i>Help</A></li>
             </Show>
           </ul>
         </div>
@@ -359,9 +398,9 @@ const Navbar = () => {
         >
           <div class="dropdown dropdown-bottom dropdown-end">
             <button class="btn btn-ghost btn-circle avatar relative">
-               <div class="w-8 rounded-full">
-                 <img src={user()?.profile?.avatar && user()?.profile?.avatar !== '/src/assets/avatar.png' ? user()?.profile?.avatar : avatar} alt="User avatar" />
-               </div>
+                <div class="w-8 rounded-full">
+                  <img src={user()?.avatar && user()?.avatar !== '/src/assets/avatar.png' ? user()?.avatar : avatar} alt="User avatar" />
+                </div>
               <div class="absolute bottom-0 right-0 w-3 h-3 bg-success border-2 border-base-100 rounded-full"></div>
             </button>
 
@@ -369,9 +408,9 @@ const Navbar = () => {
               <li class="p-5 border-b border-base-200 bg-gradient-to-br from-primary/5 via-base-100 to-secondary/5">
                 <div class="flex items-center gap-4">
                   <div class="avatar relative">
-                    <div class="w-14 rounded-full ring ring-primary/20">
-                      <img src={user()?.profile?.avatar && user()?.profile?.avatar !== '/src/assets/avatar.png' ? user()?.profile?.avatar : avatar} alt="Avatar" />
-                    </div>
+                     <div class="w-14 rounded-full ring ring-primary/20">
+                       <img src={user()?.avatar && user()?.avatar !== '/src/assets/avatar.png' ? user()?.avatar : avatar} alt="Avatar" />
+                     </div>
                     <div class="absolute bottom-0 right-0 w-4 h-4 bg-success border-2 border-base-100 rounded-full"></div>
                   </div>
                   <div class="flex-1 min-w-0">
@@ -381,12 +420,12 @@ const Navbar = () => {
                     <div class="text-sm text-base-content">
                       {user()?.profile?.email ?? 'john.doe@example.com'}
                     </div>
-                    <div class="text-xs text-base-content mt-1">
-                      Package: {user()?.subscription?.plan ?? 'Pro'}
-                    </div>
-                    <div class="text-xs text-base-content mt-1">
-                      Credits: {user()?.credits?.balance ?? 150}
-                    </div>
+                     <div class="text-xs text-base-content mt-1">
+                       Package: {subscription()?.plan ?? 'free'}
+                     </div>
+                     <div class="text-xs text-base-content mt-1">
+                       Credits: {creditBalance() ?? 0}
+                     </div>
                     <div class="flex items-center gap-1 mt-1">
                       <div class="w-2 h-2 bg-success rounded-full animate-pulse"></div>
                       <span class="text-xs text-success font-medium">Online</span>
@@ -415,7 +454,7 @@ const Navbar = () => {
 
               <li class="border-t border-base-200 my-1"></li>
               <li class="hover:bg-error/10 hover:text-error transition-colors duration-200 rounded-lg mx-2 my-1">
-                <button onClick={logout} class="flex items-center gap-3 w-full text-left px-4 py-3 font-medium">
+                <button onClick={async () => { await logout(); navigate('/login'); }} class="flex items-center gap-3 w-full text-left px-4 py-3 font-medium">
                   <i data-lucide="log-out" class="w-5 h-5"></i> Logout
                 </button>
               </li>

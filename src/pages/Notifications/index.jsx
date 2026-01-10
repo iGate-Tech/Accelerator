@@ -5,6 +5,7 @@ import { toastManager } from "../../lib/feedback";
 
 const Notifications = () => {
   const { user } = useUser();
+  const [filter, setFilter] = createSignal('all'); // all, unread
 
   const [notifications, { refetch }] = createResource(
     () => user()?.id,
@@ -31,6 +32,27 @@ const Notifications = () => {
     }
   };
 
+  const markAllAsRead = async () => {
+    try {
+      const unreadNotifications = notifications().filter(n => !n.read);
+      if (unreadNotifications.length === 0) {
+        toastManager.info('No unread notifications');
+        return;
+      }
+      await Promise.all(unreadNotifications.map(n => markNotificationRead(n.id, user().id)));
+      refetch();
+      toastManager.success(`Marked ${unreadNotifications.length} notifications as read`);
+    } catch (error) {
+      toastManager.error('Failed to mark all notifications as read');
+    }
+  };
+
+  const filteredNotifications = () => {
+    const notifs = notifications() || [];
+    if (filter() === 'unread') return notifs.filter(n => !n.read);
+    return notifs;
+  };
+
   const getNotificationIcon = (type) => {
     switch (type) {
       case 'system': return '🔔';
@@ -43,29 +65,51 @@ const Notifications = () => {
 
   const getNotificationColor = (type) => {
     switch (type) {
-      case 'system': return 'border-blue-500 bg-blue-50';
-      case 'billing': return 'border-green-500 bg-green-50';
-      case 'credits': return 'border-yellow-500 bg-yellow-50';
-      case 'update': return 'border-purple-500 bg-purple-50';
-      default: return 'border-gray-500 bg-gray-50';
+      case 'system': return 'border-info bg-info/10';
+      case 'billing': return 'border-success bg-success/10';
+      case 'credits': return 'border-warning bg-warning/10';
+      case 'update': return 'border-secondary bg-secondary/10';
+      default: return 'border-neutral bg-neutral/10';
     }
   };
 
   return (
     <div class="container mx-auto px-4 py-8">
       <div class="max-w-4xl mx-auto">
-        <h1 class="text-3xl font-bold mb-8">Notifications</h1>
+        <div class="flex justify-between items-center mb-8">
+          <h1 class="text-3xl font-bold">Notifications</h1>
+          <button
+            class="btn btn-primary"
+            onClick={markAllAsRead}
+            disabled={!notifications() || notifications().every(n => n.read)}
+          >
+            Mark All as Read
+          </button>
+        </div>
+
+        <div class="tabs tabs-boxed mb-6">
+          <a class={`tab ${filter() === 'all' ? 'tab-active' : ''}`} onClick={() => setFilter('all')}>
+            All ({notifications()?.length || 0})
+          </a>
+          <a class={`tab ${filter() === 'unread' ? 'tab-active' : ''}`} onClick={() => setFilter('unread')}>
+            Unread ({notifications()?.filter(n => !n.read).length || 0})
+          </a>
+        </div>
 
         <Show when={!notifications.loading} fallback={<div class="text-center py-8">Loading notifications...</div>}>
-          <Show when={notifications().length > 0} fallback={
+          <Show when={filteredNotifications().length > 0} fallback={
             <div class="text-center py-12">
               <div class="text-6xl mb-4">🔔</div>
-              <h3 class="text-xl font-semibold mb-2">No notifications yet</h3>
-              <p class="text-gray-600">You'll receive notifications about your account activity here.</p>
+              <h3 class="text-xl font-semibold mb-2">
+                {filter() === 'unread' ? 'No unread notifications' : 'No notifications yet'}
+              </h3>
+              <p class="text-base-content/60">
+                {filter() === 'unread' ? 'All caught up!' : 'You\'ll receive notifications about your account activity here.'}
+              </p>
             </div>
           }>
             <div class="space-y-4">
-              <For each={notifications()}>
+              <For each={filteredNotifications()}>
                 {(notification) => (
                   <div class={`border-l-4 rounded-lg p-6 shadow-sm ${getNotificationColor(notification.type)} ${!notification.read ? 'bg-opacity-100' : 'bg-opacity-50'}`}>
                     <div class="flex items-start justify-between">
@@ -73,8 +117,8 @@ const Notifications = () => {
                         <div class="text-2xl">{getNotificationIcon(notification.type)}</div>
                         <div class="flex-1">
                           <h3 class="font-semibold text-lg mb-1">{notification.title}</h3>
-                          <p class="text-gray-700 mb-3">{notification.message}</p>
-                          <p class="text-sm text-gray-500">
+                          <p class="text-base-content mb-3">{notification.message}</p>
+                          <p class="text-sm text-base-content/60">
                             {new Date(notification.created_at).toLocaleDateString()} at {new Date(notification.created_at).toLocaleTimeString()}
                           </p>
                         </div>

@@ -65,7 +65,7 @@ const AuthLayout = (props) => {
         <>
             <link rel="icon" href="/favicon.svg" />
             <Navbar />
-            <main class="min-h-screen bg-base-200">
+            <main class="min-h-screen bg-base-200 flex items-center justify-center">
                 {props.children}
             </main>
             <ToastContainer />

@@ -1,6 +1,7 @@
 import { createSignal, createResource, createMemo, onMount, For, Show, createEffect, useContext } from "solid-js";
 import { A, useNavigate } from "@solidjs/router";
-import { getProjects } from "../../lib/db";
+import { getPublicProjectsWithVotes } from "../../lib/db";
+import { getCurrentUser } from "../../lib/supabase";
 import { LangContext } from "../../context/LangContext";
 import { translations } from "../../assets/translations/translations-index.js";
 import ProjectCard from "../../components/ui/ProjectCard";
@@ -11,7 +12,16 @@ const Explore = () => {
   const [search, setSearch] = createSignal("");
   const [statusFilter, setStatusFilter] = createSignal("all");
   const [sortBy, setSortBy] = createSignal("createdAt");
-  const [projects] = createResource(getProjects);
+  const [currentUserId, setCurrentUserId] = createSignal(null);
+
+  const fetchProjects = async () => {
+    const user = await getCurrentUser();
+    const userId = user ? user.id : null;
+    setCurrentUserId(userId);
+    return await getPublicProjectsWithVotes(userId);
+  };
+
+  const [projects, { refetch }] = createResource(fetchProjects);
 
   const t = () => translations[currentLang()];
 
@@ -43,6 +53,10 @@ const Explore = () => {
           const aProgress = (a.completedSteps || 0) / (a.totalSteps || 51);
           const bProgress = (b.completedSteps || 0) / (b.totalSteps || 51);
           return bProgress - aProgress;
+        case "votes":
+          const aScore = (a.upvotes || 0) - (a.downvotes || 0);
+          const bScore = (b.upvotes || 0) - (b.downvotes || 0);
+          return bScore - aScore;
         case "createdAt":
         default:
           return new Date(b.createdAt) - new Date(a.createdAt);
@@ -57,6 +71,11 @@ const Explore = () => {
     window.dispatchEvent(new CustomEvent('openProject', { detail: project.id }));
     // Navigate to home page
     navigate('/');
+  };
+
+  const handleVote = (projectId, result) => {
+    // Refetch projects to update vote counts
+    refetch();
   };
 
    onMount(() => {
@@ -76,7 +95,8 @@ const Explore = () => {
   const sortOptions = [
     { value: "createdAt", label: t().recentlyCreated, icon: "clock" },
     { value: "name", label: t().name, icon: "sort-alpha" },
-    { value: "progress", label: t().progress, icon: "trending-up" }
+    { value: "progress", label: t().progress, icon: "trending-up" },
+    { value: "votes", label: "Most Voted", icon: "thumbs-up" }
   ];
 
   return (
@@ -181,6 +201,8 @@ const Explore = () => {
                 <ProjectCard
                   project={project}
                   onClick={handleProjectClick}
+                  showVotes={true}
+                  onVote={handleVote}
                   className="h-full"
                 />
               )}

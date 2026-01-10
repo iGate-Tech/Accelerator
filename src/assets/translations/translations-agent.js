@@ -8,7 +8,8 @@ export const agentTranslations = {
      pause: 'Pause',
      resume: 'Resume',
      reset: 'Reset',
-     greeting: "Hi Ahmed, what's your next big idea?",
+      greetingPrefix: "Hi",
+      greetingSuffix: ", what's your next big idea?",
      placeholder: "Enter your problem statement here...",
    },
    ar: {
@@ -19,7 +20,8 @@ export const agentTranslations = {
      pause: 'إيقاف مؤقت',
      resume: 'استئناف',
      reset: 'إعادة تعيين',
-     greeting: "مرحباً أحمد، ما هي فكرتك الكبيرة التالية؟",
+      greetingPrefix: "مرحباً",
+      greetingSuffix: "، ما هي فكرتك الكبيرة التالية؟",
      placeholder: "أدخل بيان المشكلة هنا...",
    }
 };

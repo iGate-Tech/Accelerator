@@ -131,7 +131,7 @@ const Dashboard = () => {
       >
         {/* Stats Cards */}
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          <div class="card bg-gradient-to-br from-blue-500 to-blue-600 text-white shadow-lg">
+          <div class="card bg-gradient-to-br from-primary to-primary/80 text-primary-content shadow-lg">
             <div class="card-body">
               <div class="flex items-center justify-between">
                 <div>
@@ -143,7 +143,7 @@ const Dashboard = () => {
             </div>
           </div>
 
-          <div class="card bg-gradient-to-br from-green-500 to-green-600 text-white shadow-lg">
+          <div class="card bg-gradient-to-br from-success to-success/80 text-success-content shadow-lg">
             <div class="card-body">
               <div class="flex items-center justify-between">
                 <div>
@@ -155,7 +155,7 @@ const Dashboard = () => {
             </div>
           </div>
 
-          <div class="card bg-gradient-to-br from-orange-500 to-orange-600 text-white shadow-lg">
+          <div class="card bg-gradient-to-br from-warning to-warning/80 text-warning-content shadow-lg">
             <div class="card-body">
               <div class="flex items-center justify-between">
                 <div>
@@ -167,7 +167,7 @@ const Dashboard = () => {
             </div>
           </div>
 
-          <div class="card bg-gradient-to-br from-purple-500 to-purple-600 text-white shadow-lg">
+          <div class="card bg-gradient-to-br from-secondary to-secondary/80 text-secondary-content shadow-lg">
             <div class="card-body">
               <div class="flex items-center justify-between">
                 <div>
@@ -208,15 +208,17 @@ const Dashboard = () => {
                 }
               >
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <For each={recentProjects()}>
-                    {(project) => (
-                      <ProjectCard
-                        project={project}
-                        onClick={handleProjectClick}
-                        compact={true}
-                      />
-                    )}
-                  </For>
+                   <For each={recentProjects()}>
+                     {(project) => (
+                       <ProjectCard
+                         project={project}
+                         onClick={handleProjectClick}
+                         showVisibilityToggle={true}
+                         onVisibilityChange={() => refetch()}
+                         compact={true}
+                       />
+                     )}
+                   </For>
                 </div>
               </Show>
             </div>
@@ -241,9 +243,9 @@ const Dashboard = () => {
                     {(activity) => (
                       <div class="flex items-start gap-3">
                         <div class={`p-2 rounded-full ${
-                          activity.type === 'created' ? 'bg-blue-100 text-blue-600' :
-                          activity.type === 'completed' ? 'bg-green-100 text-green-600' :
-                          'bg-gray-100 text-gray-600'
+                          activity.type === 'created' ? 'bg-info/10 text-info' :
+                          activity.type === 'completed' ? 'bg-success/10 text-success' :
+                          'bg-base-200 text-base-content/70'
                         }`}>
                           <i
                             data-lucide={

@@ -2,6 +2,7 @@ import { createContext, createSignal, useContext, onMount } from "solid-js";
 import { supabase, getCurrentUser, signIn, signUp, signOut, resetPassword } from "../lib/supabase";
 import { dataAPI } from "../lib/data";
 import { updateEntity, getUserProfile, createUserProfile, getUserById, createUser } from "../lib/db";
+import { toastManager } from "../lib/feedback";
 import avatar from "../assets/avatar.png";
 
 const UserContext = createContext();
@@ -27,6 +28,14 @@ export const UserProvider = (props) => {
       if (updates.avatar) {
         setUser(prev => ({ ...prev, avatar: updates.avatar }));
         delete updates.avatar;
+      }
+
+      // Handle name update via Supabase
+      if (updates.name) {
+        const { error } = await supabase.auth.updateUser({
+          data: { name: updates.name }
+        });
+        if (error) throw error;
       }
 
       // Update local state for profile fields
@@ -73,6 +82,19 @@ export const UserProvider = (props) => {
     updateUser({ subscription: { ...user().subscription, ...subscriptionUpdates } });
   };
 
+  const refreshUserData = async () => {
+    try {
+      const { data, error } = await supabase.auth.getSession();
+      if (error) throw error;
+      if (data.session) {
+        // Refresh all user data including credits and subscription
+        await checkAuth();
+      }
+    } catch (error) {
+      console.error('Error refreshing user data:', error);
+    }
+  };
+
   const updateCredits = (creditUpdates) => {
     updateUser({ credits: { ...user().credits, ...creditUpdates } });
   };
@@ -110,9 +132,11 @@ export const UserProvider = (props) => {
   const logout = async () => {
     try {
       await signOut();
+      toastManager.success('Logged out successfully');
       // Session will be cleared by onAuthStateChange
     } catch (error) {
       console.error('Logout error:', error);
+      toastManager.error('Logout failed');
     }
   };
 
@@ -302,7 +326,8 @@ export const UserProvider = (props) => {
       updatePreferences,
       updateSubscription,
       updateCredits,
-      addCreditTransaction
+      addCreditTransaction,
+      refreshUserData
     }}>
       {props.children}
     </UserContext.Provider>

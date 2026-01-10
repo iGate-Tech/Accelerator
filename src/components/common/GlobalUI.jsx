@@ -100,15 +100,15 @@ const ToastContainer = () => {
         >
           {/* Subtle background pattern */}
           <div class="absolute inset-0 opacity-10">
-            <div class="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent"></div>
+            <div class="absolute inset-0 bg-gradient-to-br from-base-100/20 to-transparent"></div>
           </div>
 
           <div class="relative flex items-start gap-4">
             <div class={`flex-shrink-0 rounded-full p-2 ${
-              toast.type === 'success' ? 'bg-white/20' :
-              toast.type === 'error' ? 'bg-white/20' :
-              toast.type === 'warning' ? 'bg-black/20' :
-              'bg-white/20'
+              toast.type === 'success' ? 'bg-success/10' :
+              toast.type === 'error' ? 'bg-error/10' :
+              toast.type === 'warning' ? 'bg-warning/10' :
+              'bg-info/10'
             }`}>
               {getIcon(toast.type)}
             </div>
@@ -116,7 +116,7 @@ const ToastContainer = () => {
               <p class="text-sm font-semibold leading-tight">{toast.message}</p>
             </div>
             <button
-              class="flex-shrink-0 rounded-full p-1 hover:bg-white/20 transition-colors duration-200 group"
+              class="flex-shrink-0 rounded-full p-1 hover:bg-base-100/20 transition-colors duration-200 group"
               onClick={() => removeToast(toast.id)}
               aria-label="Close toast"
             >
@@ -129,9 +129,9 @@ const ToastContainer = () => {
 
           {/* Progress bar for auto-dismiss */}
           {toast.duration && toast.duration > 0 && (
-            <div class="absolute bottom-0 left-0 right-0 h-1 bg-white/20">
+            <div class="absolute bottom-0 left-0 right-0 h-1 bg-base-100/20">
               <div
-                class="h-full bg-white/60 transition-all duration-75 ease-linear"
+                class="h-full bg-base-content/60 transition-all duration-75 ease-linear"
                 style={{
                   'animation': `shrink ${toast.duration}ms linear forwards`,
                   'transform-origin': 'left'

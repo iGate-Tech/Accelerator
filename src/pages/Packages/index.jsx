@@ -1,10 +1,12 @@
 import { createSignal, createResource, For, Show } from "solid-js";
 import { useUser } from "../../context/UserContext";
-import { getPackages, getUserSubscription, createUserSubscription } from "../../lib/db";
+import { useNavigate } from "@solidjs/router";
+import { getPackages, getUserSubscription, createUserSubscription, changeUserSubscription } from "../../lib/db";
 import { toastManager } from "../../lib/feedback";
 
 const Packages = () => {
-  const { user } = useUser();
+  const navigate = useNavigate();
+  const { user, refreshUserData } = useUser();
 
   const [packages, { refetch: refetchPackages }] = createResource(async () => {
     return await getPackages();
@@ -20,28 +22,39 @@ const Packages = () => {
 
   const handleSubscribe = async (packageData) => {
     try {
-      // Check if user already has an active subscription
       const currentSubscription = subscription();
+
+      // Check if user already has this active subscription
       if (currentSubscription && currentSubscription.name === packageData.name) {
         toastManager.info(`You already have the ${packageData.name} plan!`);
         return;
       }
 
-      // For free plan, create subscription immediately
-      if (packageData.price === 0) {
-        await createUserSubscription(user().id, packageData.id);
-        toastManager.success(`Successfully subscribed to ${packageData.name} plan!`);
-        refetchSubscription();
-        return;
+      // Handle subscription changes
+      if (currentSubscription) {
+        // Changing plans - use changeUserSubscription
+        await changeUserSubscription(user().id, packageData.id, currentSubscription);
+        toastManager.success(`Successfully changed to ${packageData.name} plan!`);
+      } else {
+        // New subscription - use createUserSubscription
+        if (packageData.price === 0) {
+          await createUserSubscription(user().id, packageData.id);
+          toastManager.success(`Successfully subscribed to ${packageData.name} plan!`);
+        } else {
+          // For paid plans, show payment required message (in real app, integrate payment processor)
+          toastManager.info(`Payment processing for ${packageData.name} plan would happen here. Subscription created for demo purposes.`);
+
+          // For demo purposes, create the subscription anyway
+          await createUserSubscription(user().id, packageData.id);
+          toastManager.success(`Demo: Subscribed to ${packageData.name} plan!`);
+        }
       }
 
-      // For paid plans, show payment required message (in real app, integrate payment processor)
-      toastManager.info(`Payment processing for ${packageData.name} plan would happen here. Subscription created for demo purposes.`);
-
-      // For demo purposes, create the subscription anyway
-      await createUserSubscription(user().id, packageData.id);
-      toastManager.success(`Demo: Subscribed to ${packageData.name} plan!`);
+      // Refresh data across all resources
       refetchSubscription();
+
+      // Also refresh user context to update credits and subscription data
+      await refreshUserData();
 
     } catch (error) {
       console.error('Subscription error:', error);
@@ -131,7 +144,7 @@ const Packages = () => {
                     {/* Header */}
                     <div class={`p-8 text-center ${pkg.name === 'Pro' ? 'bg-gradient-to-br from-primary/10 to-primary/20' : 'bg-base-200'}`}>
                       <div class="w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-primary to-secondary rounded-2xl flex items-center justify-center">
-                        <span class="text-2xl text-white font-bold">{pkg.name[0]}</span>
+                        <span class="text-2xl text-primary-content font-bold">{pkg.name[0]}</span>
                       </div>
                       <h3 class="text-2xl font-bold mb-2">{pkg.name}</h3>
                       <div class="text-center">

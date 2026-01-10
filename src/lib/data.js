@@ -125,7 +125,7 @@ export const dataAPI = {
   // Project operations
   getProjects: async (userId) => {
     return await apiWrapper(async () => {
-      const projects = await getProjects();
+      const projects = await getProjects(userId);
       return { data: projects };
     });
   },

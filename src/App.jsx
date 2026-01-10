@@ -24,6 +24,7 @@ const TermsOfService = lazy(() => import("./pages/modals/TermsOfService"));
 const StatusPage = lazy(() => import("./pages/modals/StatusPage"));
 const Changelog = lazy(() => import("./pages/modals/Changelog"));
 const Notifications = lazy(() => import("./pages/modals/Notifications"));
+const Invitations = lazy(() => import("./pages/Invitations"));
 
 const ProtectedRoute = (props) => {
   const { isAuthenticated } = useUser();
@@ -49,6 +50,7 @@ const AppRoutes = () => {
         <Route path="status" component={StatusPage} />
         <Route path="changelog" component={Changelog} />
         <Route path="notifications" component={Notifications} />
+        <Route path="invitations" component={() => <ProtectedRoute><Invitations /></ProtectedRoute>} />
       </Route>
       <Route path="/" component={AuthLayout}>
         <Route path="login" component={Login} />

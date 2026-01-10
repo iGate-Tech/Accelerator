@@ -4,7 +4,7 @@ import { getCreditBalance, getCreditTransactions, addCreditTransaction } from ".
 import { toastManager } from "../../lib/feedback";
 
 const Credits = () => {
-  const { user } = useUser();
+  const { user, refreshUserData } = useUser();
 
   const [balance, { refetch: refetchBalance }] = createResource(
     () => user()?.id,
@@ -32,6 +32,13 @@ const Credits = () => {
     }
   };
 
+  onMount(async () => {
+    if (user()) {
+      // Refresh user data to ensure latest credits and subscription
+      await refreshUserData();
+    }
+  });
+
   const getTransactionColor = (amount) => {
     return amount > 0 ? 'text-success' : 'text-error';
   };
@@ -48,13 +55,45 @@ const Credits = () => {
     }
   };
 
+  const exportCSV = () => {
+    const transactions = credits() || [];
+    if (transactions.length === 0) {
+      toastManager.info('No transactions to export');
+      return;
+    }
+
+    const csvContent = [
+      ['Date', 'Type', 'Description', 'Amount', 'Balance After'],
+      ...transactions.map(t => [
+        new Date(t.date).toLocaleDateString(),
+        t.type,
+        t.description,
+        t.amount,
+        t.balance_after
+      ])
+    ].map(row => row.map(cell => `"${cell}"`).join(',')).join('\n');
+
+    const blob = new Blob([csvContent], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `credits-transactions-${new Date().toISOString().split('T')[0]}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+    toastManager.success('CSV exported successfully');
+  };
+
+  const setAutoRecharge = () => {
+    toastManager.info('Auto-recharge settings modal would open here');
+  };
+
   return (
     <div class="min-h-screen bg-gradient-to-br from-success/5 via-base-100 to-primary/5">
       {/* Header */}
       <div class="bg-gradient-to-r from-success to-primary text-base-100 py-16">
         <div class="container mx-auto px-4 text-center">
           <h1 class="text-5xl font-bold mb-4">Credit Management</h1>
-          <p class="text-xl opacity-90 max-w-2xl mx-auto">
+          <p class="text-xl text-base-100/80 max-w-2xl mx-auto">
             Monitor your AI usage, purchase credits, and track your spending history
           </p>
         </div>
@@ -79,7 +118,7 @@ const Credits = () => {
                   </div>
                   <p class="text-base-content/70 mt-2">≈ ${(balance() * 0.1).toFixed(2)} worth of AI processing</p>
                 </div>
-                <div class="text-8xl opacity-10">⚡</div>
+                <div class="text-8xl text-base-content/10">⚡</div>
               </div>
 
               {/* Usage Stats */}
@@ -111,10 +150,16 @@ const Credits = () => {
                  >
                    Buy Credits
                  </button>
-                <button class="w-full bg-base-100 border-2 border-base-300 text-base-content/80 py-3 px-4 rounded-xl font-semibold hover:bg-base-200 transition-all duration-200">
+                <button
+                  class="w-full bg-base-100 border-2 border-base-300 text-base-content/80 py-3 px-4 rounded-xl font-semibold hover:bg-base-200 transition-all duration-200"
+                  onClick={() => toastManager.info('Usage report would open here')}
+                >
                   View Usage Report
                 </button>
-                <button class="w-full bg-base-100 border-2 border-base-300 text-base-content/80 py-3 px-4 rounded-xl font-semibold hover:bg-base-200 transition-all duration-200">
+                <button
+                  class="w-full bg-base-100 border-2 border-base-300 text-base-content/80 py-3 px-4 rounded-xl font-semibold hover:bg-base-200 transition-all duration-200"
+                  onClick={setAutoRecharge}
+                >
                   Set Auto-recharge
                 </button>
               </div>
@@ -159,7 +204,10 @@ const Credits = () => {
           <div class="bg-base-100 rounded-2xl shadow-xl p-8 border border-base-200">
             <div class="flex items-center justify-between mb-8">
               <h2 class="text-3xl font-bold text-base-content">Transaction History</h2>
-              <button class="bg-base-200 hover:bg-base-300 text-base-content/80 px-4 py-2 rounded-lg font-medium transition-colors">
+              <button
+                class="bg-base-200 hover:bg-base-300 text-base-content/80 px-4 py-2 rounded-lg font-medium transition-colors"
+                onClick={exportCSV}
+              >
                 Export CSV
               </button>
             </div>
@@ -192,7 +240,7 @@ const Credits = () => {
                           <tr class="border-b border-base-200 hover:bg-base-200 transition-colors">
                             <td class="py-4 px-4">
                               <div class="flex items-center">
-                                <span class="text-2xl mr-3">{getTransactionIcon(transaction.type)}</span>
+                                <span class="text-2xl mr-3 text-base-content">{getTransactionIcon(transaction.type)}</span>
                                 <span class="font-medium capitalize">{transaction.type}</span>
                               </div>
                             </td>

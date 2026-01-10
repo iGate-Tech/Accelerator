@@ -81,7 +81,9 @@ const Tasks = () => {
     const [tasks, {
             refetch
         }
-    ] = createResource(currentProjectId, getTasks);
+    ] = createResource(() => ({ projectId: currentProjectId(), userId: user()?.id }), async ({ projectId, userId }) => {
+      return await getTasks(projectId, userId);
+    });
     const [streamingContent, setStreamingContent] = createSignal("");
     const [isAccordionOpen, setIsAccordionOpen] = createSignal(false);
     const [editingTaskId, setEditingTaskId] = createSignal(null);

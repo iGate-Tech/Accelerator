@@ -34,7 +34,8 @@ const Sidebar = () => {
 
   const loadProjects = async () => {
     try {
-      const projs = await getProjects() || [];
+      const currentUser = user();
+      const projs = await getProjects(currentUser?.id) || [];
       setProjects(projs);
     } catch (error) {
       console.error('Failed to load projects:', error);
@@ -77,7 +78,8 @@ const Sidebar = () => {
   };
 
   const handleExportAllProjects = async () => {
-    const data = await exportAllProjects();
+    const currentUser = user();
+    const data = await exportAllProjects(currentUser?.id);
     if (data) {
       const blob = new Blob([data], { type: 'application/json' });
       const url = URL.createObjectURL(blob);

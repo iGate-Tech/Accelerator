@@ -1,12 +1,13 @@
- import { Show, For, createMemo, createEffect, useContext, onMount } from "solid-js";
- import { createSignal } from "solid-js";
-  // import { animate as anime, stagger } from 'animejs';
-  const anime = () => {}; // dummy function to avoid errors
-    import { machineStore, stepOrder, modelCumul } from "../../../lib/machine";
-   import ProgressAccordion from "../../ui/ProgressAccordion";
-   import { getProjectById } from "../../../lib/db";
-   import { LangContext } from "../../../context/LangContext";
-   import { translations } from "../../../assets/translations/translations-index.js";
+  import { Show, For, createMemo, createEffect, useContext, onMount } from "solid-js";
+  import { createSignal } from "solid-js";
+   // import { animate as anime, stagger } from 'animejs';
+   const anime = () => {}; // dummy function to avoid errors
+     import { machineStore, stepOrder, modelCumul } from "../../../lib/machine";
+    import ProgressAccordion from "../../ui/ProgressAccordion";
+    import { getProjectById } from "../../../lib/db";
+    import { LangContext } from "../../../context/LangContext";
+    import { translations } from "../../../assets/translations/translations-index.js";
+    import { useUser } from "../../../context/UserContext";
 
 const getBadgeClass = () => {
   const classes = {
@@ -29,9 +30,10 @@ const getStateIcon = () => {
 };
 
 const AgentInterface = (props) => {
-      const { lang } = useContext(LangContext);
-      const [currentLang, setCurrentLang] = createSignal(lang());
-      const [currentProject, setCurrentProject] = createSignal(null);
+       const { lang } = useContext(LangContext);
+       const { user } = useUser();
+       const [currentLang, setCurrentLang] = createSignal(lang());
+       const [currentProject, setCurrentProject] = createSignal(null);
 
       // Animation refs
       let greetingRef;
@@ -49,22 +51,23 @@ const AgentInterface = (props) => {
        // Initial animations
        onMount(() => {
          // Animate greeting fade in with letter stagger
-         const greetingText = greetingRef.querySelector('h1');
-         if (greetingText) {
-           const letters = greetingText.innerText.split('');
-           greetingText.innerHTML = letters.map(letter => `<span class="letter">${letter}</span>`).join('');
-             // try {
-             //   anime({
-             //     targets: '.letter',
-             //     opacity: [0, 1],
-             //     translateY: [20, 0],
-             //     duration: 600,
-             //     easing: 'easeOutExpo',
-             //    delay: stagger(50, { start: 200 })
-             // });
-             // } catch (e) {
-             //   console.warn('Anime animation failed:', e);
-             // }
+          const greetingText = greetingRef.querySelector('h1');
+          if (greetingText) {
+            // Animation code commented out to preserve color spans
+            // const letters = greetingText.innerText.split('');
+            // greetingText.innerHTML = letters.map(letter => `<span class="letter">${letter}</span>`).join('');
+              // try {
+              //   anime({
+              //     targets: '.letter',
+              //     opacity: [0, 1],
+              //     translateY: [20, 0],
+              //     duration: 600,
+              //     easing: 'easeOutExpo',
+              //    delay: stagger(50, { start: 200 })
+              // });
+              // } catch (e) {
+              //   console.warn('Anime animation failed:', e);
+              // }
           }
 
           // Animate card entrance with scale
@@ -148,15 +151,20 @@ const AgentInterface = (props) => {
        });
      };
 
-     // Button hover animations
-     const handleButtonHover = (buttonRef) => {
-       anime({
-         targets: buttonRef,
-         scale: 1.05,
-         duration: 200,
-         easing: 'easeOutQuad'
-       });
-     };
+       const userName = () => {
+         const name = user()?.profile?.name;
+         return name ? name.split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ') : '';
+       };
+
+      // Button hover animations
+      const handleButtonHover = (buttonRef) => {
+        anime({
+          targets: buttonRef,
+          scale: 1.05,
+          duration: 200,
+          easing: 'easeOutQuad'
+        });
+      };
 
      const handleButtonLeave = (buttonRef) => {
        anime({
@@ -201,9 +209,9 @@ const AgentInterface = (props) => {
         <div id="agentContent" class={props.agentContentClass()}>
           <div class="flex flex-col gap-4">
            <div ref={greetingRef} id="greetingDiv" class={props.greetingClass()}>
-              <h1 class="text-2xl sm:text-3xl md:text-4xl font-sans font-light text-base-content mb-2 sm:mb-2">
-                <span innerHTML={t().greeting.replace('Ahmed', '<span class="text-primary">Ahmed</span>')}></span>
-              </h1>
+                <h1 class="text-2xl sm:text-3xl md:text-4xl font-sans font-light mb-2 sm:mb-2">
+                  <span class="text-base-content">{t().greetingPrefix}</span> <span class="text-primary">{userName()}</span><span class="text-base-content">{t().greetingSuffix}</span>
+                </h1>
            </div>
            <div
              ref={cardRef}

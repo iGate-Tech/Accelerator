@@ -23,7 +23,7 @@ const MainLayout = (props) => {
 
     const checkServerConnectivity = async () => {
         try {
-            const response = await fetch('/api/llm/stream', {
+            const response = await fetch('/api/health', {
                 method: 'HEAD',
                 signal: AbortSignal.timeout(5000)
             });

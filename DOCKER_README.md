@@ -20,9 +20,12 @@ make dev
 ```
 
 This will start:
-- **App**: SolidJS/Vite development server on port 5173, Express API on port 3000
+- **Frontend**: SolidJS/Vite development server on port 5173 with hot reloading
+- **Backend**: Express API server on port 3000
 - **Supabase**: Local PostgreSQL database on port 5432
 - **Supabase Studio**: Web UI on port 3001
+
+The frontend automatically proxies API calls to the backend service.
 
 ## Production Setup
 
@@ -76,10 +79,15 @@ docker system prune -a  # Remove unused containers and images
 
 ## Services
 
-### App Service
-- **Development**: Runs `npm run dev` with hot reloading
-- **Production**: Runs `npm start` serving built static files
-- **Ports**: 5173 (dev), 3000 (API)
+### Frontend Service
+- **Development**: Runs `npm run dev:vite` with hot reloading
+- **Ports**: 5173
+- **Proxies API calls** to backend service
+
+### Backend Service
+- **Development**: Runs `npm run dev:server`
+- **Production**: Built into single container
+- **Ports**: 3000
 
 ### Supabase Service
 - **Image**: supabase/postgres:15.1.0.147

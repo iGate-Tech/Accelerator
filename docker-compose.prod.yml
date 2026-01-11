@@ -4,9 +4,10 @@ services:
   app:
     build: .
     ports:
-      - "4000:3000"
+      - "4000:4000"
     environment:
       - NODE_ENV=production
+      - PORT=4000
 
     volumes:
       # Mount .env file for environment variables

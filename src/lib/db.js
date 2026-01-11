@@ -43,14 +43,21 @@ class DatabaseWorker {
         pendingRequests.clear();
       };
 
-      // Initialize the database
-      await this.sendMessage('init', { dataDir: 'idb://accelerator-db-v19' });
+      // Initialize the database with timeout
+      console.log('Initializing database...');
+      await Promise.race([
+        this.sendMessage('init', { dataDir: 'idb://accelerator-db-v19' }),
+        new Promise((_, reject) => setTimeout(() => reject(new Error('Database init timeout')), 10000))
+      ]);
       this.initialized = true;
 
       console.log('Database worker initialized successfully');
     } catch (error) {
       console.error('Failed to initialize database worker:', error);
-      throw new Error(`Database initialization failed: ${error.message}`);
+      // Set a flag to indicate database is unavailable
+      this.dbUnavailable = true;
+      console.warn('Database unavailable, app will work in limited mode');
+      // Don't throw error - let app continue with limited functionality
     }
 
     // Check if database is already seeded
@@ -425,6 +432,9 @@ export const getPg = async () => {
   if (!pgInstance) {
     pgInstance = new DatabaseWorker();
     await pgInstance.init();
+  }
+  if (pgInstance.dbUnavailable) {
+    throw new Error('Database unavailable - operating in limited mode');
   }
   return pgInstance;
 };

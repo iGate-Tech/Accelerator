@@ -229,15 +229,27 @@ export const UserProvider = (props) => {
         const userData = data.session.user;
         console.log('session user:', userData);
 
-        // Fetch profile data from database
-        const profileData = await getUserProfile(userData.id);
-        console.log('profile data:', profileData);
+        // Fetch profile data from database with error handling
+        let profileData = null;
+        try {
+          profileData = await Promise.race([
+            getUserProfile(userData.id),
+            new Promise((_, reject) => setTimeout(() => reject(new Error('Profile fetch timeout')), 3000))
+          ]);
+          console.log('profile data:', profileData);
+        } catch (error) {
+          console.error('Failed to fetch profile data:', error);
+          profileData = null; // Continue with null profile data
+        }
 
-        // Fetch subscription data from database
+        // Fetch subscription data from database with error handling
         let subscriptionData = { plan: 'free', status: 'active', price: 0, renewalDate: null, maxCredits: 100 };
         try {
           const { getUserSubscription } = await import('../lib/db');
-          const userSubscription = await getUserSubscription(userData.id);
+          const userSubscription = await Promise.race([
+            getUserSubscription(userData.id),
+            new Promise((_, reject) => setTimeout(() => reject(new Error('Subscription fetch timeout')), 3000))
+          ]);
           if (userSubscription) {
             subscriptionData = {
               plan: userSubscription.name,
@@ -250,6 +262,7 @@ export const UserProvider = (props) => {
           console.log('subscription data:', subscriptionData);
         } catch (error) {
           console.error('Error fetching subscription:', error);
+          // Continue with default subscription data
         }
 
         // Merge session data with profile and subscription data
@@ -291,7 +304,17 @@ export const UserProvider = (props) => {
 
 
   onMount(async () => {
-    await checkAuth();
+    try {
+      console.log('Starting checkAuth...');
+      await checkAuth();
+      console.log('checkAuth completed');
+    } catch (error) {
+      console.error('checkAuth failed:', error);
+      // Set default state if checkAuth fails
+      setUser(null);
+      setIsAuthenticated(false);
+      setSession(null);
+    }
 
     // Listen for auth state changes
     supabase.auth.onAuthStateChange(async (event, session) => {
@@ -299,15 +322,29 @@ export const UserProvider = (props) => {
         console.log('onAuthStateChange:', event, !!session, session?.user?.email);
         setSession(session);
         if (session && session.user && typeof session.user.id === 'string') {
-          // Fetch profile data from database
-          const profileData = await getUserProfile(session.user.id);
-          console.log('profile data in auth change:', profileData);
+          console.log('Fetching user data for authenticated user...');
 
-          // Fetch subscription data from database
+          // Fetch profile data from database with timeout and error handling
+          let profileData = null;
+          try {
+            profileData = await Promise.race([
+              getUserProfile(session.user.id),
+              new Promise((_, reject) => setTimeout(() => reject(new Error('Profile fetch timeout')), 3000))
+            ]);
+            console.log('profile data in auth change:', profileData);
+          } catch (error) {
+            console.error('Failed to fetch profile data:', error);
+            profileData = null; // Continue with null profile data
+          }
+
+          // Fetch subscription data from database with timeout
           let subscriptionData = { plan: 'free', status: 'active', price: 0, renewalDate: null, maxCredits: 100 };
           try {
             const { getUserSubscription } = await import('../lib/db');
-            const userSubscription = await getUserSubscription(session.user.id);
+            const userSubscription = await Promise.race([
+              getUserSubscription(session.user.id),
+              new Promise((_, reject) => setTimeout(() => reject(new Error('Subscription fetch timeout')), 5000))
+            ]);
             if (userSubscription) {
               subscriptionData = {
                 plan: userSubscription.name,
@@ -320,6 +357,7 @@ export const UserProvider = (props) => {
             console.log('subscription data in auth change:', subscriptionData);
           } catch (error) {
             console.error('Error fetching subscription in auth change:', error);
+            // Continue with default subscription data
           }
 
           setUser({

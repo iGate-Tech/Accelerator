@@ -139,6 +139,9 @@ export const dataAPI = {
 
   updateProject: async (projectId, updates) => {
     return await apiWrapper(async () => {
+      if (!updates || typeof updates !== 'object') {
+        throw new Error(`Invalid updates data: ${JSON.stringify(updates)}`);
+      }
       await updateProject(projectId, updates);
       return {};
     });

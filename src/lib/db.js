@@ -660,6 +660,11 @@ export const clearAllTasks = async () => {
    };
 
     export const updateProject = async (id, project) => {
+    if (!project || typeof project !== 'object') {
+      const errorMsg = `Invalid project data: ${JSON.stringify(project)}`;
+      console.error('updateProject called with invalid project data:', project);
+      throw new Error(errorMsg);
+    }
     console.log('Updating project', id, 'with fields:', Object.keys(project));
     try {
       const { getCurrentUser } = await import('./supabase');

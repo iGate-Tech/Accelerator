@@ -138,7 +138,11 @@ const Tasks = () => {
         }
         // Only update if there are fields to update
         if (Object.keys(filteredContext).length > 0) {
-          updateProject(currentProjectId(), filteredContext);
+          try {
+            updateProject(currentProjectId(), filteredContext);
+          } catch (error) {
+            console.error('Failed to update project in createEffect:', error);
+          }
         }
       }
     });

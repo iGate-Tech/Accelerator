@@ -32,7 +32,6 @@ const ProtectedRoute = (props) => {
 };
 
 const AppRoutes = () => {
-  console.log('AppRoutes component rendering');
   return (
     <Router>
        <Route path="/" component={MainLayout}>
@@ -63,15 +62,12 @@ const AppRoutes = () => {
   );
 };
 
-const App = () => {
-  console.log('App component rendering');
-  return (
-    <LangProvider>
-      <UserProvider>
-        <AppRoutes />
-      </UserProvider>
-    </LangProvider>
-  );
-};
+const App = () => (
+  <LangProvider>
+    <UserProvider>
+      <AppRoutes />
+    </UserProvider>
+  </LangProvider>
+);
 
 export default App;

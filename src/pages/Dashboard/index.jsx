@@ -1,6 +1,6 @@
 import { createSignal, createResource, createMemo, onMount, For, Show, useContext, createEffect } from "solid-js";
 import { A, useNavigate } from "@solidjs/router";
-import { getProjects } from "../../lib/db";
+import { getProjects, getUserActivities } from "../../lib/db";
 import { useUser } from "../../context/UserContext";
 import { useLanguage } from "../../hooks/useLanguage";
 import { dashboardTranslations } from "../../assets/translations/translations-index.js";
@@ -10,8 +10,20 @@ import ProjectCard from "../../components/ui/ProjectCard";
 const Dashboard = () => {
   const navigate = useNavigate();
   const { t } = useLanguage();
-  const { isAuthenticated } = useUser();
+  const { isAuthenticated, user } = useUser();
   const [projects, { refetch }] = createResource(getProjects);
+  const [activities, { refetch: refetchActivities }] = createResource(
+    () => user()?.id,
+    async (userId) => {
+      if (!userId) return [];
+      try {
+        return await getUserActivities(userId, 20, 0);
+      } catch (e) {
+        console.error('Error fetching activities:', e);
+        return [];
+      }
+    }
+  );
 
   // Redirect if not authenticated
   createEffect(() => {
@@ -58,34 +70,15 @@ const Dashboard = () => {
   });
 
   const recentActivity = createMemo(() => {
-    if (!projects()) return [];
+    if (!activities()) return [];
 
-    // Mock activity data - in a real app, you'd have an activity log table
-    const activities = [];
-
-    // Add creation activities
-    projects().forEach(project => {
-      activities.push({
-        type: 'created',
-        message: `Project "${project.name || t().unnamedProject}" ${t().wasCreated}`,
-        timestamp: project.createdAt,
-        projectId: project.id
-      });
-    });
-
-    // Add completion activities
-    projects().filter(p => p.uiStatus === 'completed').forEach(project => {
-      activities.push({
-        type: 'completed',
-        message: `Project "${project.name || 'Unnamed'}" was completed`,
-        timestamp: new Date(), // Mock completion date
-        projectId: project.id
-      });
-    });
-
-    return activities
-      .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))
-      .slice(0, 10);
+    return activities().map(activity => ({
+      type: activity.action_type,
+      message: activity.description,
+      timestamp: activity.timestamp,
+      projectId: activity.entity_id,
+      entityType: activity.entity_type
+    }));
   });
 
   const handleProjectClick = (project) => {
@@ -238,32 +231,35 @@ const Dashboard = () => {
                   </div>
                 }
               >
-                <div class="space-y-4">
-                  <For each={recentActivity()}>
-                    {(activity) => (
-                      <div class="flex items-start gap-3">
-                        <div class={`p-2 rounded-full ${
-                          activity.type === 'created' ? 'bg-info/10 text-info' :
-                          activity.type === 'completed' ? 'bg-success/10 text-success' :
-                          'bg-base-200 text-base-content/70'
-                        }`}>
-                          <i
-                            data-lucide={
-                              activity.type === 'created' ? 'plus' :
-                              activity.type === 'completed' ? 'check' :
-                              'activity'
-                            }
-                            class="w-4 h-4"
-                          ></i>
-                        </div>
-                        <div class="flex-1 min-w-0">
-                          <p class="text-sm text-base-content">{activity.message}</p>
-                          <p class="text-xs text-base-content/60">{formatDate(activity.timestamp)}</p>
-                        </div>
-                      </div>
-                    )}
-                  </For>
-                </div>
+                 <div class="space-y-4">
+                   <For each={recentActivity()}>
+                     {(activity) => (
+                       <div class="flex items-start gap-3">
+                         <div class={`p-2 rounded-full ${
+                           activity.type.includes('created') ? 'bg-info/10 text-info' :
+                           activity.type.includes('completed') || activity.type.includes('credit') ? 'bg-success/10 text-success' :
+                           activity.type.includes('deleted') ? 'bg-error/10 text-error' :
+                           'bg-base-200 text-base-content/70'
+                         }`}>
+                           <i
+                             data-lucide={
+                               activity.type.includes('created') ? 'plus' :
+                               activity.type.includes('completed') || activity.type.includes('credit') ? 'check' :
+                               activity.type.includes('updated') ? 'edit' :
+                               activity.type.includes('deleted') ? 'trash' :
+                               'activity'
+                             }
+                             class="w-4 h-4"
+                           ></i>
+                         </div>
+                         <div class="flex-1 min-w-0">
+                           <p class="text-sm text-base-content">{activity.message}</p>
+                           <p class="text-xs text-base-content/60">{formatDate(activity.timestamp)}</p>
+                         </div>
+                       </div>
+                     )}
+                   </For>
+                 </div>
               </Show>
             </div>
 

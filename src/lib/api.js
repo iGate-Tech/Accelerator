@@ -2,14 +2,32 @@
 // Easily replaceable with Supabase or other backends
 
 import { toastManager } from './feedback';
+import { getCreditBalance, consumeCredits } from './db';
+import { activityLogger } from './activity';
 
 const API_BASE_URL = '';
 
 export const apiClient = {
   // LLM API calls
   llm: {
-    stream: async (prompt) => {
+    stream: async (prompt, options = {}) => {
+      const { userId, creditsCost = 5, skipCreditCheck = false } = options;
+
       try {
+        // Consume credits if userId provided and not skipping
+        if (userId && !skipCreditCheck) {
+          const balance = await getCreditBalance(userId);
+          if (balance < creditsCost) {
+            throw new Error('Insufficient credits. You need at least ' + creditsCost + ' credits to use AI features.');
+          }
+          await consumeCredits(userId, creditsCost, `AI Processing: ${prompt.substring(0, 50)}...`);
+
+          // Log activity
+          if (activityLogger.user) {
+            activityLogger.logAI('used', null, 'LLM Stream', { creditsUsed: creditsCost, promptLength: prompt.length });
+          }
+        }
+
         const response = await fetch(`${API_BASE_URL}/api/llm/stream`, {
           method: 'POST',
           headers: {

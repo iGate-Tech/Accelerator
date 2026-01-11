@@ -16,33 +16,43 @@ class DatabaseWorker {
   async init() {
     if (this.initialized) return;
 
-    console.log('Creating database worker instance');
-    this.worker = new Worker('/src/workers/pglite-worker-v2.js', {
-      type: 'module'
-    });
+    try {
+      console.log('Creating database worker instance');
+      this.worker = new Worker(new URL('../workers/pglite-worker-v2.js', import.meta.url), {
+        type: 'module'
+      });
 
-    this.worker.onmessage = (e) => {
-      const { id, success, result, error, type } = e.data;
-      const resolver = pendingRequests.get(id);
-      if (resolver) {
-        pendingRequests.delete(id);
-        if (success) {
-          resolver.resolve(result);
-        } else {
-          resolver.reject(new Error(error));
+      this.worker.onmessage = (e) => {
+        const { id, success, result, error, type } = e.data;
+        const resolver = pendingRequests.get(id);
+        if (resolver) {
+          pendingRequests.delete(id);
+          if (success) {
+            resolver.resolve(result);
+          } else {
+            resolver.reject(new Error(error));
+          }
         }
-      }
-    };
+      };
 
-    this.worker.onerror = (error) => {
-      console.error('Worker error:', error);
-    };
+      this.worker.onerror = (error) => {
+        console.error('Worker error:', error);
+        // Reject all pending requests on worker error
+        for (const [id, resolver] of pendingRequests) {
+          resolver.reject(new Error('Database worker error'));
+        }
+        pendingRequests.clear();
+      };
 
-    // Initialize the database
-    await this.sendMessage('init', { dataDir: 'idb://accelerator-db-v19' });
-    this.initialized = true;
+      // Initialize the database
+      await this.sendMessage('init', { dataDir: 'idb://accelerator-db-v19' });
+      this.initialized = true;
 
-    console.log('Database worker initialized');
+      console.log('Database worker initialized successfully');
+    } catch (error) {
+      console.error('Failed to initialize database worker:', error);
+      throw new Error(`Database initialization failed: ${error.message}`);
+    }
 
     // Check if database is already seeded
     const alreadySeeded = await isSeeded();
@@ -396,9 +406,18 @@ class DatabaseWorker {
      return await this.sendMessage('markItemConflict', { tableName, idField, id, error, retryCount });
    }
 
-   async resolveConflict(localItem, remoteItem) {
-     return await this.sendMessage('resolveConflict', { localItem, remoteItem });
-   }
+  async resolveConflict(localItem, remoteItem) {
+    return await this.sendMessage('resolveConflict', { localItem, remoteItem });
+  }
+
+  // Activity operations
+  async logActivity(data) {
+    return await this.sendMessage('logActivity', data);
+  }
+
+  async getUserActivities(data) {
+    return await this.sendMessage('getUserActivities', data);
+  }
 }
 
 let pgInstance = null;
@@ -562,39 +581,62 @@ export const clearAllTasks = async () => {
        const user = await getCurrentUser();
        if (!user) throw new Error('User not authenticated');
 
-       const pg = await getPg();
-       const newProject = await pg.addProject(project, user.id);
-       console.log('Added project:', newProject);
-       triggerSync();
-       return newProject.id;
+        const pg = await getPg();
+        const newProject = await pg.addProject(project, user.id);
+        console.log('Added project:', newProject);
+
+        // Log activity
+        const { logActivity } = await import('./activity');
+        await logActivity(user.id, 'project_created', 'project', newProject.id, `Created project "${project.name}"`, { projectName: project.name });
+
+        triggerSync();
+        return newProject.id;
      } catch (e) {
        console.log('Error adding project:', e);
        toastManager.error(`Failed to add project "${project.name}" (${project.description?.length || 0} chars description): ${e.message}`);
      }
    };
 
-   export const updateProject = async (id, project) => {
-   console.log('Updating project', id, 'with fields:', Object.keys(project));
-   try {
-     const pg = await getPg();
-     const result = await pg.updateProject(id, project);
-     if (!result.success) {
-       throw new Error(result.error);
-     }
-     console.log('Updated project:', id);
-    } catch (e) {
-      console.log('Error updating project:', e);
-      toastManager.error(`Failed to update project ${id} (${Object.keys(project).length} fields): ${e.message}`);
-    }
- };
-
-   export const deleteProject = async (id) => {
+    export const updateProject = async (id, project) => {
+    console.log('Updating project', id, 'with fields:', Object.keys(project));
     try {
-        const pg = await getPg();
-         await pg.deleteProject(id);
-        console.log('Deleted project:', id);
-        triggerSync();
-       } catch (e) {
+      const { getCurrentUser } = await import('./supabase');
+      const user = await getCurrentUser();
+      if (!user) throw new Error('User not authenticated');
+
+      const pg = await getPg();
+      const result = await pg.updateProject(id, project);
+      if (!result.success) {
+        throw new Error(result.error);
+      }
+      console.log('Updated project:', id);
+
+      // Log activity
+      const { logActivity } = await import('./activity');
+      await logActivity(user.id, 'project_updated', 'project', id, `Updated project`, { fields: Object.keys(project) });
+
+     } catch (e) {
+       console.log('Error updating project:', e);
+       toastManager.error(`Failed to update project ${id} (${Object.keys(project).length} fields): ${e.message}`);
+     }
+  };
+
+    export const deleteProject = async (id) => {
+     try {
+         const { getCurrentUser } = await import('./supabase');
+         const user = await getCurrentUser();
+         if (!user) throw new Error('User not authenticated');
+
+         const pg = await getPg();
+          await pg.deleteProject(id);
+         console.log('Deleted project:', id);
+
+         // Log activity
+         const { logActivity } = await import('./activity');
+         await logActivity(user.id, 'project_deleted', 'project', id, `Deleted project`, {});
+
+         triggerSync();
+        } catch (e) {
          console.log('Error deleting project:', e);
          toastManager.error(`Failed to delete project ${id}: ${e.message}`);
        }
@@ -951,17 +993,40 @@ export const exportAllProjects = async (userId = null) => {
    }
  };
 
- export const getCreditTransactions = async (userId) => {
-   try {
-     const pg = await getPg();
-     return await pg.getCreditTransactions(userId);
-   } catch (error) {
-     console.error('Error getting credit transactions:', error);
-     return [];
-   }
- };
+  export const getCreditTransactions = async (userId) => {
+    try {
+      const pg = await getPg();
+      return await pg.getCreditTransactions(userId);
+    } catch (error) {
+      console.error('Error getting credit transactions:', error);
+      return [];
+    }
+  };
 
- export const createNotification = async (userId, type, title, message, createdAt = null) => {
+    // Activity functions
+export const logActivity = async (userId, actionType, entityType, entityId, description, metadata = {}) => {
+  try {
+    const pg = await getPg();
+    const activity = await pg.logActivity({ userId, actionType, entityType, entityId, description, metadata });
+    triggerSync();
+    return activity;
+  } catch (error) {
+    console.error('Error logging activity:', error);
+    throw error;
+  }
+};
+
+export const getUserActivities = async (userId, limit = 50, offset = 0) => {
+  try {
+    const pg = await getPg();
+    return await pg.getUserActivities({ userId, limit, offset });
+  } catch (error) {
+    console.error('Error getting user activities:', error);
+    return [];
+  }
+};
+
+  export const createNotification = async (userId, type, title, message, createdAt = null) => {
    try {
      const pg = await getPg();
      const notification = await pg.createNotification(userId, type, title, message, createdAt);
@@ -1167,15 +1232,10 @@ export const exportAllProjects = async (userId = null) => {
    try {
      const userId = await getCurrentUserId();
      const pg = await getPg();
-     const result = await pg.respondToInvitation(invitationId, status, userId);
+    const result = await pg.respondToInvitation(invitationId, status, userId);
 
-     if (status === 'accepted') {
-       // Get invitation details for notification
-       const invitations = await pg.getPortfolioInvitations(null); // This won't work, need to get specific invitation
-       // For now, just trigger sync and return
-     }
-
-     triggerSync();
+    triggerSync();
+    return result;
      return result;
    } catch (error) {
      console.error('Error responding to invitation:', error);

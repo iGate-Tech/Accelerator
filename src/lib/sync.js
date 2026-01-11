@@ -27,6 +27,7 @@ const SYNC_TABLES = [
   { name: 'project_groups', idField: ['project_id', 'group_id'] }, // depends on projects, groups
   { name: 'credits', idField: 'id' },
   { name: 'billing', idField: 'id' },
+  // { name: 'user_activities', idField: 'id' }, // Temporarily disabled until Supabase schema is updated
   { name: 'notifications', idField: 'id' },
   { name: 'profiles', idField: 'user_id' }
 ];

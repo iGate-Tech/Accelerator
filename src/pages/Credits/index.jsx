@@ -1,10 +1,12 @@
-import { createSignal, createResource, For, Show, onMount } from "solid-js";
+import { createSignal, createResource, For, Show, onMount, createEffect } from "solid-js";
 import { useUser } from "../../context/UserContext";
 import { getCreditBalance, getCreditTransactions, addCreditTransaction } from "../../lib/db";
 import { toastManager } from "../../lib/feedback";
+import { useActivityLogger } from "../../lib/activity";
 
 const Credits = () => {
-  const { user, refreshUserData } = useUser();
+  const { user, refreshUserData, updatePreferences } = useUser();
+  const activityLogger = useActivityLogger();
 
   const [balance, { refetch: refetchBalance }] = createResource(
     () => user()?.id,
@@ -32,6 +34,14 @@ const Credits = () => {
     }
   );
 
+  const [usageReportModal, setUsageReportModal] = createSignal(false);
+  const [autoRechargeModal, setAutoRechargeModal] = createSignal(false);
+  const [autoRechargeSettings, setAutoRechargeSettings] = createSignal({
+    enabled: false,
+    threshold: 50,
+    amount: 100
+  });
+
   const getTransactionIcon = (type) => {
     switch (type) {
       case 'purchase': return '🛒';
@@ -49,14 +59,49 @@ const Credits = () => {
     }
   });
 
+  createEffect(() => {
+    if (user()) {
+      setAutoRechargeSettings(user().preferences?.autoRecharge || { enabled: false, threshold: 50, amount: 100 });
+    }
+  });
+
   const getTransactionColor = (amount) => {
     return amount > 0 ? 'text-success' : 'text-error';
+  };
+
+  const getCreditHealth = () => {
+    const txns = transactions() || [];
+    const purchased = txns.filter(t => t.type === 'purchase').reduce((sum, t) => sum + t.amount, 0);
+    const used = txns.filter(t => t.type === 'usage').reduce((sum, t) => sum + Math.abs(t.amount), 0);
+    const totalCreditsEver = purchased + used;
+    const usageRate = totalCreditsEver > 0 ? (used / totalCreditsEver) * 100 : 0;
+
+    let status, color;
+    if (usageRate < 30) {
+      status = 'Excellent';
+      color = 'text-success';
+    } else if (usageRate < 60) {
+      status = 'Healthy';
+      color = 'text-success';
+    } else if (usageRate < 80) {
+      status = 'Moderate';
+      color = 'text-warning';
+    } else {
+      status = 'High Usage';
+      color = 'text-error';
+    }
+
+    return { usageRate, status, color };
   };
 
   const handleBuyCredits = async (amount = 100) => {
     try {
       await addCreditTransaction(user().id, 'purchase', amount, `Purchased ${amount} credits`);
       toastManager.success(`Successfully purchased ${amount} credits!`);
+
+      // Log credit purchase
+      activityLogger.logCredit('purchased', amount);
+
       refetchBalance();
       refetchTransactions();
     } catch (error) {
@@ -160,33 +205,33 @@ const Credits = () => {
                  >
                    Buy Credits
                  </button>
-                <button
-                  class="w-full bg-base-100 border-2 border-base-300 text-base-content/80 py-3 px-4 rounded-xl font-semibold hover:bg-base-200 transition-all duration-200"
-                  onClick={() => toastManager.info('Usage report would open here')}
-                >
-                  View Usage Report
-                </button>
-                <button
-                  class="w-full bg-base-100 border-2 border-base-300 text-base-content/80 py-3 px-4 rounded-xl font-semibold hover:bg-base-200 transition-all duration-200"
-                  onClick={setAutoRecharge}
-                >
-                  Set Auto-recharge
-                </button>
+                 <button
+                   class="w-full bg-base-100 border-2 border-base-300 text-base-content/80 py-3 px-4 rounded-xl font-semibold hover:bg-base-200 transition-all duration-200"
+                   onClick={() => setUsageReportModal(true)}
+                 >
+                   View Usage Report
+                 </button>
+                 <button
+                   class="w-full bg-base-100 border-2 border-base-300 text-base-content/80 py-3 px-4 rounded-xl font-semibold hover:bg-base-200 transition-all duration-200"
+                   onClick={() => setAutoRechargeModal(true)}
+                 >
+                   Set Auto-recharge
+                 </button>
               </div>
 
-              {/* Credit Health */}
-              <div class="mt-8 pt-6 border-t border-base-300">
-                <h4 class="font-semibold mb-3">Credit Health</h4>
-                <div class="space-y-2">
-                  <div class="flex justify-between text-sm">
-                    <span>Usage Rate</span>
-                    <span class="text-success">Healthy</span>
-                  </div>
-                  <div class="w-full bg-base-200 rounded-full h-2">
-                    <div class="bg-success h-2 rounded-full" style="width: 75%"></div>
-                  </div>
-                </div>
-              </div>
+               {/* Credit Health */}
+               <div class="mt-8 pt-6 border-t border-base-300">
+                 <h4 class="font-semibold mb-3">Credit Health</h4>
+                 <div class="space-y-2">
+                   <div class="flex justify-between text-sm">
+                     <span>Usage Rate</span>
+                     <span class={getCreditHealth().color}>{getCreditHealth().status}</span>
+                   </div>
+                   <div class="w-full bg-base-200 rounded-full h-2">
+                     <div class={`h-2 rounded-full ${getCreditHealth().color.replace('text-', 'bg-')}`} style={`width: ${getCreditHealth().usageRate}%`}></div>
+                   </div>
+                 </div>
+               </div>
             </div>
           </div>
 
@@ -280,6 +325,124 @@ const Credits = () => {
           </div>
         </div>
       </div>
+
+      {/* Usage Report Modal */}
+      <Show when={usageReportModal()}>
+        <div class="modal modal-open">
+          <div class="modal-box max-w-2xl">
+            <h3 class="font-bold text-lg mb-4">Usage Report</h3>
+            <div class="space-y-4">
+              <div class="grid grid-cols-2 gap-4">
+                <div class="stat">
+                  <div class="stat-title">Total Purchased</div>
+                  <div class="stat-value text-success">
+                    {(transactions() || []).filter(t => t.type === 'purchase').reduce((sum, t) => sum + t.amount, 0)}
+                  </div>
+                </div>
+                <div class="stat">
+                  <div class="stat-title">Total Used</div>
+                  <div class="stat-value text-error">
+                    {(transactions() || []).filter(t => t.type === 'usage').reduce((sum, t) => sum + Math.abs(t.amount), 0)}
+                  </div>
+                </div>
+                <div class="stat">
+                  <div class="stat-title">Net Gain</div>
+                  <div class="stat-value">
+                    {(transactions() || []).filter(t => t.type === 'purchase').reduce((sum, t) => sum + t.amount, 0) -
+                     (transactions() || []).filter(t => t.type === 'usage').reduce((sum, t) => sum + Math.abs(t.amount), 0)}
+                  </div>
+                </div>
+                <div class="stat">
+                  <div class="stat-title">Transactions Count</div>
+                  <div class="stat-value">{(transactions() || []).length}</div>
+                </div>
+              </div>
+              <div class="divider"></div>
+              <div>
+                <h4 class="font-semibold mb-2">Recent Activity (Last 30 Days)</h4>
+                <div class="space-y-2 max-h-40 overflow-y-auto">
+                  <For each={(transactions() || []).filter(t => new Date(t.date) > new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)).slice(0, 10)}>
+                    {(transaction) => (
+                      <div class="flex justify-between text-sm">
+                        <span>{transaction.description}</span>
+                        <span class={transaction.amount > 0 ? 'text-success' : 'text-error'}>
+                          {transaction.amount > 0 ? '+' : ''}{transaction.amount}
+                        </span>
+                      </div>
+                    )}
+                  </For>
+                </div>
+              </div>
+            </div>
+            <div class="modal-action">
+              <button class="btn" onClick={() => setUsageReportModal(false)}>Close</button>
+            </div>
+          </div>
+        </div>
+      </Show>
+
+      {/* Auto-recharge Modal */}
+      <Show when={autoRechargeModal()}>
+        <div class="modal modal-open">
+          <div class="modal-box">
+            <h3 class="font-bold text-lg mb-4">Auto-recharge Settings</h3>
+            <div class="space-y-4">
+              <div class="form-control">
+                <label class="label">
+                  <span class="label-text">Enable Auto-recharge</span>
+                  <input
+                    type="checkbox"
+                    class="checkbox"
+                    checked={autoRechargeSettings().enabled}
+                    onChange={(e) => setAutoRechargeSettings(prev => ({ ...prev, enabled: e.target.checked }))}
+                  />
+                </label>
+              </div>
+              <div class="form-control">
+                <label class="label">
+                  <span class="label-text">Recharge Threshold (min credits)</span>
+                </label>
+                <input
+                  type="number"
+                  class="input input-bordered"
+                  value={autoRechargeSettings().threshold}
+                  onInput={(e) => setAutoRechargeSettings(prev => ({ ...prev, threshold: parseInt(e.target.value) || 0 }))}
+                  min="0"
+                />
+              </div>
+              <div class="form-control">
+                <label class="label">
+                  <span class="label-text">Recharge Amount</span>
+                </label>
+                <input
+                  type="number"
+                  class="input input-bordered"
+                  value={autoRechargeSettings().amount}
+                  onInput={(e) => setAutoRechargeSettings(prev => ({ ...prev, amount: parseInt(e.target.value) || 0 }))}
+                  min="1"
+                />
+              </div>
+            </div>
+            <div class="modal-action">
+              <button class="btn" onClick={() => setAutoRechargeModal(false)}>Cancel</button>
+              <button
+                class="btn btn-primary"
+                onClick={async () => {
+                  try {
+                    await updatePreferences({ autoRecharge: autoRechargeSettings() });
+                    toastManager.success('Auto-recharge settings saved');
+                    setAutoRechargeModal(false);
+                  } catch (error) {
+                    toastManager.error('Failed to save settings');
+                  }
+                }}
+              >
+                Save
+              </button>
+            </div>
+          </div>
+        </div>
+      </Show>
     </div>
   );
 };

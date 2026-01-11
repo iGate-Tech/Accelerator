@@ -106,7 +106,7 @@ const ProgressAccordion = (props) => {
                    value={props.machineStore.context.uiProgress}
                    max="100"
                  ></progress>
-                 <span class="badge badge-primary badge-xs">{props.machineStore.context.completedSteps} / {stepOrder.length - 1} Complete</span>
+                  <span class="badge badge-primary badge-xs">{props.machineStore.context.completedSteps} / 51 Complete</span>
                </div>
 
                <div class="flex justify-between items-center mt-2 gap-2">

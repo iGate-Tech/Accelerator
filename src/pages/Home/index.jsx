@@ -37,6 +37,7 @@ import {
 } from "../../lib/db";
 import { useUser } from "../../context/UserContext";
 import { toastManager } from "../../lib/feedback";
+import { useActivityLogger } from "../../lib/activity";
 import { handleLLMProjectUpdate } from "../../lib/utils";
 import {setMachineStore} from "../../lib/machine";
 import {marked} from 'marked';
@@ -68,6 +69,7 @@ const getStepName = (task) => {
 const Tasks = () => {
     const { lang } = useContext(LangContext);
     const { user } = useUser();
+    const activityLogger = useActivityLogger();
     const [currentLang, setCurrentLang] = createSignal(lang());
 
     const t = () => translations[currentLang()];
@@ -198,6 +200,9 @@ const Tasks = () => {
                 }
                 await consumeCredits(currentUser.id, 10, `AI Request: ${prompt.substring(0, 50)}...`);
                 toastManager.info('Consumed 10 credits for AI request');
+
+                // Log AI usage
+                activityLogger.logAI('used', null, 'Home AI Request', { creditsUsed: 10, promptLength: prompt.length });
             }
 
             setIsLoading(true);

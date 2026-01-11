@@ -156,45 +156,47 @@ const Sidebar = () => {
               </div>
               <span class="font-medium">{t().help}</span>
             </A>
-          </li>
-            <li>
-              <button
-                onclick={async () => {
-                  try {
-                    await performSync();
-                    setSyncStatus(getSyncStatus());
-                    toastManager.success('Sync completed successfully!');
-                  } catch (error) {
-                    toastManager.error('Sync failed: ' + error.message);
-                  }
-                }}
-                disabled={syncInProgress()}
-                class={`flex items-center gap-3 px-4 py-3 transition-all duration-200 ${
-                  syncInProgress()
-                    ? 'bg-base-300 cursor-not-allowed opacity-75'
-                    : 'hover:bg-base-300 cursor-pointer'
-                }`}
-              >
-                <div class={`p-1 rounded transition-all duration-300 ${
-                  syncInProgress() ? 'bg-warning/20 animate-pulse' : 'bg-success/10'
-                }`}>
-                  <i
-                    data-lucide="refresh-ccw"
-                    class={`w-4 h-4 transition-all duration-300 ${
-                      syncInProgress()
-                        ? 'text-warning animate-spin'
-                        : 'text-success'
-                    }`}
-                  ></i>
-                </div>
-                <span class="font-medium">
-                  {syncInProgress() ? 'Syncing...' : 'Sync Data'}
-                </span>
-                <Show when={syncInProgress()}>
-                  <span class="loading loading-spinner loading-xs text-warning"></span>
-                </Show>
-              </button>
-            </li>
+           </li>
+            <Show when={import.meta.env.NODE_ENV !== 'production'}>
+              <li>
+                <button
+                  onclick={async () => {
+                    try {
+                      await performSync();
+                      setSyncStatus(getSyncStatus());
+                      toastManager.success('Sync completed successfully!');
+                    } catch (error) {
+                      toastManager.error('Sync failed: ' + error.message);
+                    }
+                  }}
+                  disabled={syncInProgress()}
+                  class={`flex items-center gap-3 px-4 py-3 transition-all duration-200 ${
+                    syncInProgress()
+                      ? 'bg-base-300 cursor-not-allowed opacity-75'
+                      : 'hover:bg-base-300 cursor-pointer'
+                  }`}
+                >
+                  <div class={`p-1 rounded transition-all duration-300 ${
+                    syncInProgress() ? 'bg-warning/20 animate-pulse' : 'bg-success/10'
+                  }`}>
+                    <i
+                      data-lucide="refresh-ccw"
+                      class={`w-4 h-4 transition-all duration-300 ${
+                        syncInProgress()
+                          ? 'text-warning animate-spin'
+                          : 'text-success'
+                      }`}
+                    ></i>
+                  </div>
+                  <span class="font-medium">
+                    {syncInProgress() ? 'Syncing...' : 'Sync Data'}
+                  </span>
+                  <Show when={syncInProgress()}>
+                    <span class="loading loading-spinner loading-xs text-warning"></span>
+                  </Show>
+                </button>
+              </li>
+            </Show>
         </ul>
         <section class="menu bg-base-200 rounded-box w-full">
           <li>

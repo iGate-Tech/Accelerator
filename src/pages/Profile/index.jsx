@@ -2,7 +2,7 @@ import { createSignal, onMount, createEffect } from "solid-js";
 import { useNavigate } from "@solidjs/router";
 import { useUser } from "../../context/UserContext";
 import { useLanguage } from "../../hooks/useLanguage";
-import { getUserCredits, getUserCreditBalance } from "../../lib/db";
+import { getUserCredits, getUserCreditBalance, getProjects } from "../../lib/db";
 import { formatLocaleDate } from "../../lib/utils";
 import { toastManager } from "../../lib/feedback";
 import avatar from "../../assets/avatar.png";
@@ -14,6 +14,8 @@ const Profile = () => {
   const { currentLang, t } = useLanguage();
   const [credits, setCredits] = createSignal([]);
   const [creditBalance, setCreditBalance] = createSignal(0);
+  const [projectsCount, setProjectsCount] = createSignal(0);
+  const [storageUsed, setStorageUsed] = createSignal(0);
   const [avatarFile, setAvatarFile] = createSignal(null);
   const [avatarPreview, setAvatarPreview] = createSignal(null);
   const [uploadingAvatar, setUploadingAvatar] = createSignal(false);
@@ -49,6 +51,28 @@ const Profile = () => {
       } catch (e) {
         console.error('Error loading credit balance:', e);
         setCreditBalance(0);
+      }
+      try {
+        const userProjects = await getProjects(user().id);
+        setProjectsCount(userProjects.length);
+      } catch (e) {
+        console.error('Error loading projects:', e);
+        setProjectsCount(0);
+      }
+      try {
+        const { data, error } = await supabase.storage.from('avatars').list(user().id + '/');
+        if (!error && data && data.length > 0) {
+          const fileName = data[0].name;
+          const { data: urlData } = supabase.storage.from('avatars').getPublicUrl(user().id + '/' + fileName);
+          const response = await fetch(urlData.publicUrl, { method: 'HEAD' });
+          const size = parseInt(response.headers.get('content-length')) || 0;
+          setStorageUsed((size / (1024 * 1024)).toFixed(2));
+        } else {
+          setStorageUsed(0);
+        }
+      } catch (e) {
+        console.error('Error loading storage used:', e);
+        setStorageUsed(0);
       }
     }
   });
@@ -474,14 +498,14 @@ const Profile = () => {
                     <span>{t().totalCreditsUsed}</span>
                     <span class="font-semibold">{getCreditUsage()}</span>
                   </div>
-                  <div class="flex justify-between">
-                    <span>{t().projects}</span>
-                    <span class="font-semibold">0</span>
-                  </div>
-                  <div class="flex justify-between">
-                    <span>{t().storageUsed}</span>
-                    <span class="font-semibold">0 MB</span>
-                  </div>
+                   <div class="flex justify-between">
+                     <span>{t().projects}</span>
+                     <span class="font-semibold">{projectsCount()}</span>
+                   </div>
+                   <div class="flex justify-between">
+                     <span>{t().storageUsed}</span>
+                     <span class="font-semibold">{storageUsed()} MB</span>
+                   </div>
                   {getLastActivity() && (
                     <div class="flex justify-between">
                       <span>{t().lastActivity}</span>

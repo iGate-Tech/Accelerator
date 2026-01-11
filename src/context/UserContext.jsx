@@ -3,6 +3,7 @@ import { supabase, getCurrentUser, signIn, signUp, signOut, resetPassword } from
 import { dataAPI } from "../lib/data";
 import { updateEntity, getUserProfile, createUserProfile, getUserById, createUser } from "../lib/db";
 import { toastManager } from "../lib/feedback";
+import { activityLogger } from "../lib/activity";
 import avatar from "../assets/avatar.png";
 
 const UserContext = createContext();
@@ -51,6 +52,9 @@ export const UserProvider = (props) => {
       if (Object.keys(dbUpdates).length > 0) {
         dbUpdates.last_modified = new Date();
         await updateEntity('profiles', 'user_id', user().id, dbUpdates);
+
+        // Log profile update
+        activityLogger.logProfile('updated', { fields: Object.keys(dbUpdates) });
       }
     } catch (error) {
       console.error('Error updating profile:', error);
@@ -175,6 +179,11 @@ export const UserProvider = (props) => {
 
   const logout = async () => {
     try {
+      // Log logout before clearing session
+      if (user()) {
+        activityLogger.logAuth('logout');
+      }
+
       await signOut();
       toastManager.success('Logged out successfully');
       // Session will be cleared by onAuthStateChange
@@ -261,6 +270,10 @@ export const UserProvider = (props) => {
 
         setUser(mergedUser);
         setIsAuthenticated(true);
+
+        // Log login activity
+        activityLogger.setUser(mergedUser);
+        activityLogger.logAuth('login');
 
         // For production: Don't create sample data, let users build their own data
         // Users will see empty states until they interact with the app

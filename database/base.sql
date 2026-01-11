@@ -258,6 +258,25 @@ CREATE TABLE IF NOT EXISTS portfolio_invitations (
   UNIQUE(portfolio_id, invitee_email, status)
 );
 
+-- User Activities table
+CREATE TABLE IF NOT EXISTS user_activities (
+  id TEXT PRIMARY KEY,
+  user_id TEXT REFERENCES users(id) ON DELETE CASCADE,
+  action_type TEXT NOT NULL,
+  entity_type TEXT,
+  entity_id TEXT,
+  description TEXT NOT NULL,
+  metadata JSONB,
+  ip_address INET,
+  user_agent TEXT,
+  timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  synced_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  last_modified TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  sync_status TEXT DEFAULT 'local',
+  deleted_at TIMESTAMP,
+  version INTEGER DEFAULT 1
+);
+
 -- Project Votes table
 CREATE TABLE IF NOT EXISTS project_votes (
   id BIGSERIAL PRIMARY KEY,

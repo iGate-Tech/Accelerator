@@ -19,15 +19,8 @@ const DatabaseWorker = {
     console.log('Initializing PGLite database...');
     dbInstance = new PGlite({ dataDir: options.dataDir || 'idb://accelerator-db-v19' });
 
-    try {
-    const result = await dbInstance.query('SELECT COUNT(*) as count FROM users LIMIT 1');
-    if (result.rows[0].count >= 0) {
-      console.log('Database schema already exists, skipping initialization');
-      return { success: true };
-    }
-    } catch (err) {
-      console.log('Database schema not found, initializing...');
-    }
+    // Always ensure schema exists (CREATE IF NOT EXISTS will handle duplicates)
+    console.log('Ensuring database schema exists...');
 
     // Full Schema
     await dbInstance.exec(`
@@ -141,6 +134,23 @@ CREATE TABLE IF NOT EXISTS billing (
   synced_at TEXT,
   last_modified TEXT,
   sync_status TEXT
+);
+
+-- User Activities table
+CREATE TABLE IF NOT EXISTS user_activities (
+  id TEXT PRIMARY KEY,
+  user_id TEXT REFERENCES users(id),
+  action_type TEXT NOT NULL,
+  entity_type TEXT,
+  entity_id TEXT,
+  description TEXT NOT NULL,
+  metadata JSON,
+  ip_address TEXT,
+  user_agent TEXT,
+  timestamp TEXT DEFAULT CURRENT_TIMESTAMP,
+  synced_at TEXT,
+  last_modified TEXT,
+  sync_status TEXT DEFAULT 'pending'
 );
 
 -- Notifications table
@@ -762,11 +772,41 @@ CREATE TABLE IF NOT EXISTS portfolio_invitations (
       console.error('Error consuming credits:', err);
       throw err;
     }
-  },
+   },
 
-  // ---------------------------------------------------------------------------
-  // Billing Operations
-  // ---------------------------------------------------------------------------
+   // ---------------------------------------------------------------------------
+   // Activity Logging Operations (v2)
+   // ---------------------------------------------------------------------------
+   async logActivity({ userId, actionType, entityType, entityId, description, metadata = {} }) {
+     try {
+       const id = Math.random().toString(36).substring(2, 15);
+       const res = await dbInstance.query(
+         'INSERT INTO user_activities (id, user_id, action_type, entity_type, entity_id, description, metadata, synced_at, last_modified, sync_status) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING *',
+         [id, userId, actionType, entityType, entityId, description, JSON.stringify(metadata), new Date().toISOString(), new Date().toISOString(), 'local']
+       );
+       return res.rows[0];
+     } catch (err) {
+       console.error('Error logging activity:', err);
+       throw err;
+     }
+   },
+
+   async getUserActivities({ userId, limit = 50, offset = 0 }) {
+     try {
+       const res = await dbInstance.query(
+         'SELECT * FROM user_activities WHERE user_id = $1 ORDER BY timestamp DESC LIMIT $2 OFFSET $3',
+         [userId, limit, offset]
+       );
+       return res.rows;
+     } catch (err) {
+       console.error('Error getting user activities:', err);
+       return [];
+     }
+   },
+
+   // ---------------------------------------------------------------------------
+   // Billing Operations
+   // ---------------------------------------------------------------------------
   async addBillingRecord({ userId, type, amount, description, dueDate = null }) {
     try {
       const id = Math.random().toString(36).substring(2, 15);
@@ -1185,8 +1225,10 @@ const operationHandlers = {
   getCreditBalance: DatabaseWorker.getCreditBalance.bind(DatabaseWorker),
   getUserCreditBalance: DatabaseWorker.getUserCreditBalance.bind(DatabaseWorker),
   addCreditTransaction: DatabaseWorker.addCreditTransaction.bind(DatabaseWorker),
-  consumeCredits: DatabaseWorker.consumeCredits.bind(DatabaseWorker),
-  addBillingRecord: DatabaseWorker.addBillingRecord.bind(DatabaseWorker),
+    consumeCredits: DatabaseWorker.consumeCredits.bind(DatabaseWorker),
+    logActivity: DatabaseWorker.logActivity.bind(DatabaseWorker),
+    getUserActivities: DatabaseWorker.getUserActivities.bind(DatabaseWorker),
+   addBillingRecord: DatabaseWorker.addBillingRecord.bind(DatabaseWorker),
   getUserBilling: DatabaseWorker.getUserBilling.bind(DatabaseWorker),
   updateBillingStatus: DatabaseWorker.updateBillingStatus.bind(DatabaseWorker),
   createNotification: DatabaseWorker.createNotification.bind(DatabaseWorker),

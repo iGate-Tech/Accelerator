@@ -41,6 +41,9 @@ ALTER TABLE portfolio_collaborators ADD CONSTRAINT portfolio_collaborators_invit
 ALTER TABLE portfolio_invitations ALTER COLUMN inviter_id TYPE UUID USING inviter_id::UUID;
 ALTER TABLE portfolio_invitations ADD CONSTRAINT portfolio_invitations_inviter_id_fkey FOREIGN KEY (inviter_id) REFERENCES auth.users(id) ON DELETE CASCADE;
 
+ALTER TABLE user_activities ALTER COLUMN user_id TYPE UUID USING user_id::UUID;
+ALTER TABLE user_activities ADD CONSTRAINT user_activities_user_id_fkey FOREIGN KEY (user_id) REFERENCES auth.users(id) ON DELETE CASCADE;
+
 ALTER TABLE project_votes ALTER COLUMN user_id TYPE UUID USING user_id::UUID;
 ALTER TABLE project_votes ADD CONSTRAINT project_votes_user_id_fkey FOREIGN KEY (user_id) REFERENCES auth.users(id) ON DELETE CASCADE;
 
@@ -85,6 +88,7 @@ ALTER TABLE notifications ENABLE ROW LEVEL SECURITY;
 ALTER TABLE packages ENABLE ROW LEVEL SECURITY;
 ALTER TABLE profiles ENABLE ROW LEVEL SECURITY;
 ALTER TABLE user_subscriptions ENABLE ROW LEVEL SECURITY;
+ALTER TABLE user_activities ENABLE ROW LEVEL SECURITY;
 ALTER TABLE portfolio_collaborators ENABLE ROW LEVEL SECURITY;
 ALTER TABLE portfolio_invitations ENABLE ROW LEVEL SECURITY;
 ALTER TABLE project_votes ENABLE ROW LEVEL SECURITY;
@@ -158,6 +162,9 @@ ALTER TABLE profiles ADD COLUMN IF NOT EXISTS version INTEGER DEFAULT 1;
 
 ALTER TABLE user_subscriptions ADD COLUMN IF NOT EXISTS deleted_at TIMESTAMP;
 ALTER TABLE user_subscriptions ADD COLUMN IF NOT EXISTS version INTEGER DEFAULT 1;
+
+ALTER TABLE user_activities ADD COLUMN IF NOT EXISTS deleted_at TIMESTAMP;
+ALTER TABLE user_activities ADD COLUMN IF NOT EXISTS version INTEGER DEFAULT 1;
 
 ALTER TABLE portfolio_collaborators ADD COLUMN IF NOT EXISTS deleted_at TIMESTAMP;
 ALTER TABLE portfolio_collaborators ADD COLUMN IF NOT EXISTS version INTEGER DEFAULT 1;

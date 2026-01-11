@@ -1,6 +1,9 @@
 require('dotenv').config();
 const express = require('express');
 const path = require('path');
+const fs = require('fs');
+const https = require('https');
+const http = require('http');
 const OpenAI = require('openai');
 
 const port = process.env.PORT || 3000;
@@ -167,6 +170,25 @@ app.use((req, res, next) => {
     }
 });
 
-app.listen(port, () => {
-    console.log(`Server running at http://localhost:${port}`);
+// HTTPS configuration
+const sslKeyPath = process.env.SSL_KEY_PATH;
+const sslCertPath = process.env.SSL_CERT_PATH;
+
+let server;
+if (sslKeyPath && sslCertPath && fs.existsSync(sslKeyPath) && fs.existsSync(sslCertPath)) {
+    // HTTPS server
+    const sslOptions = {
+        key: fs.readFileSync(sslKeyPath),
+        cert: fs.readFileSync(sslCertPath)
+    };
+    server = https.createServer(sslOptions, app);
+    console.log(`HTTPS Server running at https://localhost:${port}`);
+} else {
+    // HTTP server
+    server = http.createServer(app);
+    console.log(`HTTP Server running at http://localhost:${port}`);
+}
+
+server.listen(port, () => {
+    console.log(`Server listening on port ${port}`);
 });

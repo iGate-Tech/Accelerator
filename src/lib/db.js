@@ -494,14 +494,14 @@ export const clearAllTasks = async () => {
 
 
 
-     export const getProjects = async (userId = null) => {
-        try {
-          if (!userId) {
-            const { getCurrentUser } = await import('./supabase');
-            const user = await getCurrentUser();
-            console.log('user from getCurrentUser:', user);
-            userId = user && typeof user.id === 'string' ? user.id : null;
-          }
+      export const getProjects = async (userId = null) => {
+         try {
+           if (!userId || typeof userId !== 'string') {
+             const { getCurrentUser } = await import('./supabase');
+             const user = await getCurrentUser();
+             console.log('user from getCurrentUser:', user);
+             userId = user && typeof user.id === 'string' ? user.id : null;
+           }
           const pg = await getPg();
           console.log('Getting projects for userId:', userId, 'type:', typeof userId);
           if (typeof userId !== 'string') {

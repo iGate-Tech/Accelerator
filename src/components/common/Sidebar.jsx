@@ -35,7 +35,7 @@ const Sidebar = () => {
   const loadProjects = async () => {
     try {
       const currentUser = user();
-      if (!currentUser || typeof currentUser.id !== 'string') return;
+      if (!currentUser || typeof currentUser !== 'object' || !currentUser.id || typeof currentUser.id !== 'string') return;
       const projs = await getProjects(currentUser.id) || [];
       setProjects(projs);
     } catch (error) {

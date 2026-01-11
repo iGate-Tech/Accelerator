@@ -116,12 +116,12 @@ export const UserProvider = (props) => {
     try {
       const data = await signIn(email, password);
       console.log('signIn result:', { user: !!data?.user, session: !!data?.session });
-      if (data && data.user && data.session) {
+      if (data && data.user && data.session && typeof data.session.user.id === 'string') {
         // Manually set auth state to ensure immediate update
         setSession(data.session);
         setIsAuthenticated(true);
         setUser({
-          id: typeof data.session.user.id === 'string' ? data.session.user.id : String(data.session.user.id),
+          id: data.session.user.id,
           email: data.session.user.email,
           avatar: data.session.user.user_metadata?.avatar_url || avatar,
           profile: {
@@ -193,16 +193,11 @@ export const UserProvider = (props) => {
     try {
       const { data, error } = await supabase.auth.getSession();
       if (error) throw error;
-      if (data.session) {
+      if (data.session && data.session.user && typeof data.session.user.id === 'string') {
         const userData = data.session.user;
         console.log('session user:', userData);
-        // Ensure id is string
-        if (userData.id && typeof userData.id !== 'string') {
-          userData.id = String(userData.id);
-        }
         setUser(userData);
         setIsAuthenticated(true);
-
 
 
         // For production: Don't create sample data, let users build their own data
@@ -228,9 +223,9 @@ export const UserProvider = (props) => {
       try {
         console.log('onAuthStateChange:', event, !!session, session?.user?.email);
         setSession(session);
-        if (session) {
+        if (session && session.user && typeof session.user.id === 'string') {
           setUser({
-            id: typeof session.user.id === 'string' ? session.user.id : String(session.user.id),
+            id: session.user.id,
             email: session.user.email,
             profile: session.user.user_metadata || {},
             preferences: {

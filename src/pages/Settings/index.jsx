@@ -209,15 +209,15 @@ const Settings = () => {
   };
 
    onMount(async () => {
-    if (window.lucide) window.lucide.createIcons();
-     if (user() && typeof user().id === 'string') {
-       try {
-         const userProjects = await getProjects(user().id);
-         setProjects(userProjects || []);
-       } catch (e) {
-         console.error('Error loading projects:', e);
-         setProjects([]);
-       }
+     if (window.lucide) window.lucide.createIcons();
+      if (user() && typeof user() === 'object' && user().id && typeof user().id === 'string') {
+        try {
+          const userProjects = await getProjects(user().id);
+          setProjects(userProjects || []);
+        } catch (e) {
+          console.error('Error loading projects:', e);
+          setProjects([]);
+        }
        try {
          const userCredits = await getUserCredits(user().id);
          setCredits(userCredits || []);

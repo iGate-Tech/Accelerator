@@ -24,7 +24,8 @@ export const getPg = async () => {
 };
 
 export const triggerSync = () => {
-  syncService.debouncedSync();
+  // Temporarily disabled sync due to schema mismatch with Supabase
+  // syncService.debouncedSync();
 };
 
 export const initDb = async () => {
@@ -187,27 +188,27 @@ export const updateTask = async (id, content) => {
       }
       const whereClause = userId ? 'WHERE user_id = $1' : '';
       const params = userId ? [userId] : [];
-      const projects = await getEntities('Projects', '*', whereClause, 'ORDER BY createdAt DESC', params);
+      const projects = await getEntities('projects', '*', whereClause, 'ORDER BY createdAt DESC', params);
       console.log('Projects loaded:', projects);
       return projects;
     };
 
-   export const getPublicProjects = async () => {
-     const projects = await getEntities('Projects', '*', 'WHERE public = true', 'ORDER BY createdAt DESC');
-     console.log('Public projects loaded:', projects);
-     return projects;
-   };
+    export const getPublicProjects = async () => {
+      const projects = await getEntities('projects', '*', 'WHERE public = true', 'ORDER BY createdAt DESC');
+      console.log('Public projects loaded:', projects);
+      return projects;
+    };
 
    export const getPublicProjectsWithVotes = async (currentUserId) => {
      try {
        const pg = await getPg();
-       const res = await pg.query(`
-         SELECT
-           p.*,
-           COALESCE(v.user_vote, null) as user_vote,
-           COALESCE(vs.upvotes, 0) as upvotes,
-           COALESCE(vs.downvotes, 0) as downvotes
-         FROM Projects p
+        const res = await pg.query(`
+          SELECT
+            p.*,
+            COALESCE(v.user_vote, null) as user_vote,
+            COALESCE(vs.upvotes, 0) as upvotes,
+            COALESCE(vs.downvotes, 0) as downvotes
+          FROM projects p
          LEFT JOIN (
            SELECT project_id,
                   vote_type as user_vote
@@ -232,27 +233,27 @@ export const updateTask = async (id, content) => {
      }
    };
 
- export const getProjectByName = async (name) => {
-    try {
-      const pg = await getPg();
-      const res = await pg.query('SELECT * FROM Projects WHERE name = $1', [name]);
-      return res.rows[0];
-    } catch (e) {
-      console.log('DB not ready, returning null');
-      return null;
-    }
-  };
+   export const getProjectByName = async (name) => {
+     try {
+       const pg = await getPg();
+       const res = await pg.query('SELECT * FROM projects WHERE name = $1', [name]);
+       return res.rows[0];
+     } catch (e) {
+       console.log('DB not ready, returning null');
+       return null;
+     }
+   };
 
-  export const getProjectById = async (id) => {
-    try {
-      const pg = await getPg();
-      const res = await pg.query('SELECT * FROM Projects WHERE id = $1', [id]);
-      return res.rows[0];
-    } catch (e) {
-      console.log('DB not ready, returning null');
-      return null;
-    }
-  };
+   export const getProjectById = async (id) => {
+     try {
+       const pg = await getPg();
+       const res = await pg.query('SELECT * FROM projects WHERE id = $1', [id]);
+       return res.rows[0];
+     } catch (e) {
+       console.log('DB not ready, returning null');
+       return null;
+     }
+   };
 
   export const addProject = async (project) => {
     try {
@@ -263,7 +264,7 @@ export const updateTask = async (id, content) => {
        const defaultTotalSteps = 51;
        const totalSteps = project.totalSteps || defaultTotalSteps;
        const completedSteps = project.completedSteps || 0;
-          const res = await pg.query('INSERT INTO Projects (user_id, name, description, currentStep, completedSteps, stepName, currentModel, currentSection, uiProgress, uiMessage, uiStatus, totalCredits, consumedCredits, totalTime, consumedTime, totalSteps, createdAt, public, problem, solution, currentPrompt, llmResponse, synced_at, last_modified, sync_status) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, \'local\') RETURNING *', [
+          const res = await pg.query('INSERT INTO projects (user_id, name, description, currentStep, completedSteps, stepName, currentModel, currentSection, uiProgress, uiMessage, uiStatus, totalCredits, consumedCredits, totalTime, consumedTime, totalSteps, createdAt, public, problem, solution, currentPrompt, llmResponse, synced_at, last_modified, sync_status) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, \'local\') RETURNING *', [
             user.id,
             project.name,
            project.description,
@@ -325,7 +326,7 @@ export const updateTask = async (id, content) => {
  export const deleteProject = async (id) => {
    try {
        const pg = await getPg();
-       await pg.query('DELETE FROM Projects WHERE id = $1', [id]);
+        await pg.query('DELETE FROM projects WHERE id = $1', [id]);
        console.log('Deleted project:', id);
        triggerSync();
       } catch (e) {
@@ -337,7 +338,7 @@ export const updateTask = async (id, content) => {
   export const deleteAllProjects = async () => {
      try {
        const pg = await getPg();
-       await pg.query('DELETE FROM Projects');
+        await pg.query('DELETE FROM projects');
        console.log('Deleted all projects');
      } catch (e) {
        console.log('Error deleting all projects:', e);
@@ -426,7 +427,7 @@ export const updateTask = async (id, content) => {
 export const getGroupById = async (id) => {
   try {
     const pg = await getPg();
-    const res = await pg.query('SELECT * FROM Groups WHERE id = $1', [id]);
+    const res = await pg.query('SELECT * FROM groups WHERE id = $1', [id]);
     return res.rows[0];
   } catch (e) {
     console.log('Error loading group:', e);
@@ -441,7 +442,7 @@ export const addGroup = async (group) => {
     const user = await getCurrentUser();
     if (!user) throw new Error('User not authenticated');
     const res = await pg.query(
-      'INSERT INTO Groups (user_id, name, description, color, createdAt) VALUES ($1, $2, $3, $4, $5) RETURNING id',
+      'INSERT INTO groups (user_id, name, description, color, createdAt) VALUES ($1, $2, $3, $4, $5) RETURNING id',
       [user.id, group.name, group.description || '', group.color || '#6366f1', group.createdAt || new Date()]
     );
      const newGroup = res.rows[0];
@@ -473,7 +474,7 @@ export const deleteGroup = async (id) => {
     // First remove all project-group relationships
     await pg.query('DELETE FROM project_groups WHERE group_id = $1', [id]);
      // Then delete the group
-     await pg.query('DELETE FROM Groups WHERE id = $1', [id]);
+      await pg.query('DELETE FROM groups WHERE id = $1', [id]);
      console.log('Deleted group:', id);
      triggerSync();
    } catch (e) {
@@ -521,7 +522,7 @@ export const getProjectsInGroup = async (groupId) => {
     const pg = await getPg();
     const res = await pg.query(`
       SELECT p.*, pg.addedAt as addedToGroupAt
-      FROM Projects p
+      FROM projects p
       JOIN project_groups pg ON p.id = pg.project_id
       WHERE pg.group_id = $1
       ORDER BY pg.addedAt DESC
@@ -537,7 +538,7 @@ export const getUngroupedProjects = async (userId = null) => {
   try {
     const pg = await getPg();
     let query = `
-      SELECT * FROM Projects
+      SELECT * FROM projects
       WHERE id NOT IN (SELECT project_id FROM project_groups)
     `;
     let params = [];

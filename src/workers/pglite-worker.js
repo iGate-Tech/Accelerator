@@ -197,11 +197,7 @@ CREATE TABLE IF NOT EXISTS credits (
   date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   synced_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   last_modified TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  sync_status TEXT DEFAULT 'local',
-  deleted_at TIMESTAMP,
-  version INTEGER DEFAULT 1,
-  sync_error TEXT,
-  retry_count INTEGER DEFAULT 0
+  sync_status TEXT DEFAULT 'local'
 );
 
 -- Billing table
@@ -547,55 +543,7 @@ CREATE TABLE IF NOT EXISTS sessions (
 );
     `);
 
-    // Add sync columns if missing
-    await db.exec(`
-      ALTER TABLE users ADD COLUMN IF NOT EXISTS deleted_at TIMESTAMP;
-      ALTER TABLE users ADD COLUMN IF NOT EXISTS version INTEGER DEFAULT 1;
-
-      ALTER TABLE sessions ADD COLUMN IF NOT EXISTS deleted_at TIMESTAMP;
-      ALTER TABLE sessions ADD COLUMN IF NOT EXISTS version INTEGER DEFAULT 1;
-
-      ALTER TABLE projects ADD COLUMN IF NOT EXISTS deleted_at TIMESTAMP;
-      ALTER TABLE projects ADD COLUMN IF NOT EXISTS version INTEGER DEFAULT 1;
-
-      ALTER TABLE tasks ADD COLUMN IF NOT EXISTS deleted_at TIMESTAMP;
-      ALTER TABLE tasks ADD COLUMN IF NOT EXISTS version INTEGER DEFAULT 1;
-
-      ALTER TABLE groups ADD COLUMN IF NOT EXISTS deleted_at TIMESTAMP;
-      ALTER TABLE groups ADD COLUMN IF NOT EXISTS version INTEGER DEFAULT 1;
-
-      ALTER TABLE project_groups ADD COLUMN IF NOT EXISTS deleted_at TIMESTAMP;
-      ALTER TABLE project_groups ADD COLUMN IF NOT EXISTS version INTEGER DEFAULT 1;
-
-      ALTER TABLE credits ADD COLUMN IF NOT EXISTS deleted_at TIMESTAMP;
-      ALTER TABLE credits ADD COLUMN IF NOT EXISTS version INTEGER DEFAULT 1;
-
-      ALTER TABLE billing ADD COLUMN IF NOT EXISTS deleted_at TIMESTAMP;
-      ALTER TABLE billing ADD COLUMN IF NOT EXISTS version INTEGER DEFAULT 1;
-
-      ALTER TABLE notifications ADD COLUMN IF NOT EXISTS deleted_at TIMESTAMP;
-      ALTER TABLE notifications ADD COLUMN IF NOT EXISTS version INTEGER DEFAULT 1;
-
-      ALTER TABLE packages ADD COLUMN IF NOT EXISTS deleted_at TIMESTAMP;
-      ALTER TABLE packages ADD COLUMN IF NOT EXISTS version INTEGER DEFAULT 1;
-
-      ALTER TABLE profiles ADD COLUMN IF NOT EXISTS deleted_at TIMESTAMP;
-      ALTER TABLE profiles ADD COLUMN IF NOT EXISTS version INTEGER DEFAULT 1;
-
-      ALTER TABLE user_subscriptions ADD COLUMN IF NOT EXISTS deleted_at TIMESTAMP;
-      ALTER TABLE user_subscriptions ADD COLUMN IF NOT EXISTS version INTEGER DEFAULT 1;
-
-      ALTER TABLE portfolio_collaborators ADD COLUMN IF NOT EXISTS deleted_at TIMESTAMP;
-      ALTER TABLE portfolio_collaborators ADD COLUMN IF NOT EXISTS version INTEGER DEFAULT 1;
-
-      ALTER TABLE portfolio_invitations ADD COLUMN IF NOT EXISTS deleted_at TIMESTAMP;
-      ALTER TABLE portfolio_invitations ADD COLUMN IF NOT EXISTS version INTEGER DEFAULT 1;
-
-      ALTER TABLE project_votes ADD COLUMN IF NOT EXISTS deleted_at TIMESTAMP;
-      ALTER TABLE project_votes ADD COLUMN IF NOT EXISTS version INTEGER DEFAULT 1;
-      ALTER TABLE project_votes ADD COLUMN IF NOT EXISTS sync_error TEXT;
-      ALTER TABLE project_votes ADD COLUMN IF NOT EXISTS retry_count INTEGER DEFAULT 0;
-    `);
+    // Sync columns are now included in the initial CREATE TABLE statements
 
     console.log('Database schema initialized successfully');
     return db;

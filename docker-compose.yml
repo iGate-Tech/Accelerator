@@ -11,30 +11,8 @@ services:
     volumes:
       # Mount .env file for environment variables
       - ./.env:/app/.env:ro
-    depends_on:
-      - supabase
     networks:
       - accelerator-network
-
-  supabase:
-    image: supabase/postgres:15.1.0.147
-    expose:
-      - "5432"
-    environment:
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: postgres
-    volumes:
-      - supabase_data:/var/lib/postgresql/data
-    networks:
-      - accelerator-network
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-
-volumes:
-  supabase_data:
 
 networks:
   accelerator-network:

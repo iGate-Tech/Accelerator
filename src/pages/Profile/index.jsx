@@ -446,7 +446,7 @@ const Profile = () => {
                   </div>
                   <div class="flex justify-between items-center">
                     <span class="font-medium">{t().credits}</span>
-                    <span class="font-semibold">{user().credits?.balance || 0} / {user().subscription?.maxCredits || 100}</span>
+                     <span class="font-semibold">{creditBalance() || 0} / {user().subscription?.maxCredits || 100}</span>
                   </div>
                   <div class="flex justify-between items-center">
                     <span class="font-medium">{t().renewal}</span>
@@ -455,7 +455,7 @@ const Profile = () => {
                   <div class="w-full bg-base-200 rounded-full h-2">
                     <div
                       class="bg-primary h-2 rounded-full"
-                      style={`width: ${Math.min((user().credits?.balance || 0) / (user().subscription?.maxCredits || 100) * 100, 100)}%`}
+                      style={`width: ${Math.min((creditBalance() || 0) / (user().subscription?.maxCredits || 100) * 100, 100)}%`}
                     ></div>
                   </div>
                 </div>

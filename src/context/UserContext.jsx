@@ -121,6 +121,25 @@ export const UserProvider = (props) => {
         const profileData = await getUserProfile(data.session.user.id);
         console.log('profile data in login:', profileData);
 
+        // Fetch subscription data from database
+        let subscriptionData = { plan: 'free', status: 'active', price: 0, renewalDate: null, maxCredits: 100 };
+        try {
+          const { getUserSubscription } = await import('./db');
+          const userSubscription = await getUserSubscription(data.session.user.id);
+          if (userSubscription) {
+            subscriptionData = {
+              plan: userSubscription.name,
+              status: userSubscription.status,
+              price: userSubscription.price,
+              renewalDate: userSubscription.end_date,
+              maxCredits: userSubscription.credits_included
+            };
+          }
+          console.log('subscription data in login:', subscriptionData);
+        } catch (error) {
+          console.error('Error fetching subscription in login:', error);
+        }
+
         // Manually set auth state to ensure immediate update
         setSession(data.session);
         setIsAuthenticated(true);
@@ -139,7 +158,7 @@ export const UserProvider = (props) => {
             notifications: { email: true, browser: false, projectUpdates: true },
             privacy: { profileVisibility: 'private', dataSharing: false }
           },
-          subscription: { plan: 'free', status: 'active', price: 0, renewalDate: null, maxCredits: 100 },
+          subscription: subscriptionData,
           credits: { balance: 0, transactions: [] }
         });
         return true;
@@ -205,7 +224,26 @@ export const UserProvider = (props) => {
         const profileData = await getUserProfile(userData.id);
         console.log('profile data:', profileData);
 
-        // Merge session data with profile data
+        // Fetch subscription data from database
+        let subscriptionData = { plan: 'free', status: 'active', price: 0, renewalDate: null, maxCredits: 100 };
+        try {
+          const { getUserSubscription } = await import('./db');
+          const userSubscription = await getUserSubscription(userData.id);
+          if (userSubscription) {
+            subscriptionData = {
+              plan: userSubscription.name,
+              status: userSubscription.status,
+              price: userSubscription.price,
+              renewalDate: userSubscription.end_date,
+              maxCredits: userSubscription.credits_included
+            };
+          }
+          console.log('subscription data:', subscriptionData);
+        } catch (error) {
+          console.error('Error fetching subscription:', error);
+        }
+
+        // Merge session data with profile and subscription data
         const mergedUser = {
           ...userData,
           avatar: profileData?.avatar || userData.user_metadata?.avatar_url || avatar,
@@ -217,7 +255,7 @@ export const UserProvider = (props) => {
             notifications: { email: true, browser: false, projectUpdates: true },
             privacy: { profileVisibility: 'private', dataSharing: false }
           },
-          subscription: { plan: 'free', status: 'active', price: 0, renewalDate: null, maxCredits: 100 },
+          subscription: subscriptionData,
           credits: { balance: 0, transactions: [] }
         };
 
@@ -252,6 +290,25 @@ export const UserProvider = (props) => {
           const profileData = await getUserProfile(session.user.id);
           console.log('profile data in auth change:', profileData);
 
+          // Fetch subscription data from database
+          let subscriptionData = { plan: 'free', status: 'active', price: 0, renewalDate: null, maxCredits: 100 };
+          try {
+            const { getUserSubscription } = await import('./db');
+            const userSubscription = await getUserSubscription(session.user.id);
+            if (userSubscription) {
+              subscriptionData = {
+                plan: userSubscription.name,
+                status: userSubscription.status,
+                price: userSubscription.price,
+                renewalDate: userSubscription.end_date,
+                maxCredits: userSubscription.credits_included
+              };
+            }
+            console.log('subscription data in auth change:', subscriptionData);
+          } catch (error) {
+            console.error('Error fetching subscription in auth change:', error);
+          }
+
           setUser({
             ...session.user,
             avatar: profileData?.avatar || session.user.user_metadata?.avatar_url || avatar,
@@ -263,7 +320,7 @@ export const UserProvider = (props) => {
               notifications: { email: true, browser: false, projectUpdates: true },
               privacy: { profileVisibility: 'private', dataSharing: false }
             },
-            subscription: { plan: 'free', status: 'active', price: 0, renewalDate: null, maxCredits: 100 },
+            subscription: subscriptionData,
             credits: { balance: 0, transactions: [] }
           });
           setIsAuthenticated(true);

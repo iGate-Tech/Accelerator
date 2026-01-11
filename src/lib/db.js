@@ -2,6 +2,7 @@ import { toastManager } from './feedback';
 import { performSync, syncService } from './sync';
 import { getCurrentUser } from './supabase';
 import { v4 as uuidv4 } from 'uuid';
+import PgliteWorker from '../workers/pglite-worker-v2.js?worker';
 
 let worker = null;
 let nextRequestId = 1;
@@ -18,9 +19,7 @@ class DatabaseWorker {
 
     try {
       console.log('Creating database worker instance');
-      this.worker = new Worker(new URL('../workers/pglite-worker-v2.js', import.meta.url), {
-        type: 'module'
-      });
+      this.worker = new PgliteWorker();
 
       this.worker.onmessage = (e) => {
         const { id, success, result, error, type } = e.data;

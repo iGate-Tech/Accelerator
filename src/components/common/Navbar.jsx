@@ -143,9 +143,7 @@ const Navbar = () => {
           <div class="hidden lg:flex gap-6">
             <NavItem href="/" label={t().home} />
             <NavItem href="/dashboard" label={t().dashboard} />
-            <NavItem href="/explore" label={t().explore} />
             <NavItem href="/portfolio" label={t().portfolio} />
-            <NavItem href="/help" label={t().help} />
           </div>
         </Show>
       </div>
@@ -169,10 +167,8 @@ const Navbar = () => {
             }>
               <li><A href="/" class="flex items-center gap-2"><i data-lucide="home" class="w-4 h-4"></i>Home</A></li>
               <li><A href="/dashboard" class="flex items-center gap-2"><i data-lucide="bar-chart" class="w-4 h-4"></i>Dashboard</A></li>
-              <li><A href="/explore" class="flex items-center gap-2"><i data-lucide="search" class="w-4 h-4"></i>Explore</A></li>
                <li><A href="/portfolio" class="flex items-center gap-2"><i data-lucide="briefcase" class="w-4 h-4"></i>Portfolio</A></li>
                <li><A href="/invitations" class="flex items-center gap-2"><i data-lucide="user-plus" class="w-4 h-4"></i>Invitations</A></li>
-               <li><A href="/help" class="flex items-center gap-2"><i data-lucide="help-circle" class="w-4 h-4"></i>Help</A></li>
             </Show>
           </ul>
         </div>

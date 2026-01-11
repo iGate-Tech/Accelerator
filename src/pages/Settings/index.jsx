@@ -324,41 +324,53 @@ const Settings = () => {
           <h2 class="text-2xl font-bold mb-6 flex items-center"><i data-lucide="shield" class="w-6 h-6 mr-2"></i>Account Security</h2>
 
           <div class="space-y-6">
-             <div class="card bg-base-200">
-               <div class="card-body">
-                 <h3 class="card-title">{t().changePassword}</h3>
-                 <div class="space-y-4">
-                   <input
-                     type="password"
-                     placeholder="Current password"
-                     class="input input-bordered w-full"
-                     value={passwordForm().current}
-                     onInput={(e) => setPasswordForm({ ...passwordForm(), current: e.target.value })}
-                   />
-                   <input
-                     type="password"
-                     placeholder="New password"
-                     class="input input-bordered w-full"
-                     value={passwordForm().new}
-                     onInput={(e) => setPasswordForm({ ...passwordForm(), new: e.target.value })}
-                   />
-                   <input
-                     type="password"
-                     placeholder="Confirm new password"
-                     class="input input-bordered w-full"
-                     value={passwordForm().confirm}
-                     onInput={(e) => setPasswordForm({ ...passwordForm(), confirm: e.target.value })}
-                   />
-                   <button
-                     class="btn btn-primary"
-                     onClick={changePassword}
-                     disabled={changingPassword()}
-                   >
-                     {changingPassword() ? <span class="loading loading-spinner loading-sm"></span> : 'Update Password'}
-                   </button>
-                 </div>
-              </div>
-            </div>
+              <div class="card bg-base-200">
+                <div class="card-body">
+                  <h3 class="card-title">{t().changePassword}</h3>
+                  <form onSubmit={(e) => { e.preventDefault(); changePassword(); }}>
+                    <div class="space-y-4">
+                      <input
+                        type="email"
+                        value={user()?.email || ''}
+                        autocomplete="username"
+                        class="hidden"
+                        readonly
+                      />
+                      <input
+                        type="password"
+                        placeholder="Current password"
+                        class="input input-bordered w-full"
+                        autocomplete="current-password"
+                        value={passwordForm().current}
+                        onInput={(e) => setPasswordForm({ ...passwordForm(), current: e.target.value })}
+                      />
+                      <input
+                        type="password"
+                        placeholder="New password"
+                        class="input input-bordered w-full"
+                        autocomplete="new-password"
+                        value={passwordForm().new}
+                        onInput={(e) => setPasswordForm({ ...passwordForm(), new: e.target.value })}
+                      />
+                      <input
+                        type="password"
+                        placeholder="Confirm new password"
+                        class="input input-bordered w-full"
+                        autocomplete="new-password"
+                        value={passwordForm().confirm}
+                        onInput={(e) => setPasswordForm({ ...passwordForm(), confirm: e.target.value })}
+                      />
+                      <button
+                        type="submit"
+                        class="btn btn-primary"
+                        disabled={changingPassword()}
+                      >
+                        {changingPassword() ? <span class="loading loading-spinner loading-sm"></span> : 'Update Password'}
+                      </button>
+                    </div>
+                  </form>
+               </div>
+             </div>
 
 
 

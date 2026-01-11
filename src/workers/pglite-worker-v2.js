@@ -1104,7 +1104,7 @@ CREATE TABLE IF NOT EXISTS portfolio_invitations (
       console.log('Error creating sample notifications:', err.message);
       throw err;
     }
-  }
+  },
 
   async getLocalChanges({ tableName }) {
     // TODO: Implement proper local changes tracking based on sync_status

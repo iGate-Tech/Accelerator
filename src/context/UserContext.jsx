@@ -117,19 +117,23 @@ export const UserProvider = (props) => {
       const data = await signIn(email, password);
       console.log('signIn result:', { user: !!data?.user, session: !!data?.session });
       if (data && data.user && data.session && typeof data.session.user.id === 'string') {
+        // Fetch profile data from database
+        const profileData = await getUserProfile(data.session.user.id);
+        console.log('profile data in login:', profileData);
+
         // Manually set auth state to ensure immediate update
         setSession(data.session);
         setIsAuthenticated(true);
         setUser({
-          id: data.session.user.id,
-          email: data.session.user.email,
-          avatar: data.session.user.user_metadata?.avatar_url || avatar,
+          ...data.session.user,
+          avatar: profileData?.avatar || data.session.user.user_metadata?.avatar_url || avatar,
           profile: {
             name: data.session.user.user_metadata?.name || data.session.user.email.split('@')[0],
             email: data.session.user.email,
             bio: data.session.user.user_metadata?.bio || '',
             joinDate: data.session.user.created_at,
-            ...data.session.user.user_metadata
+            ...data.session.user.user_metadata,
+            ...profileData
           },
           preferences: {
             notifications: { email: true, browser: false, projectUpdates: true },
@@ -196,9 +200,29 @@ export const UserProvider = (props) => {
       if (data.session && data.session.user && typeof data.session.user.id === 'string') {
         const userData = data.session.user;
         console.log('session user:', userData);
-        setUser(userData);
-        setIsAuthenticated(true);
 
+        // Fetch profile data from database
+        const profileData = await getUserProfile(userData.id);
+        console.log('profile data:', profileData);
+
+        // Merge session data with profile data
+        const mergedUser = {
+          ...userData,
+          avatar: profileData?.avatar || userData.user_metadata?.avatar_url || avatar,
+          profile: {
+            ...userData.user_metadata,
+            ...profileData
+          },
+          preferences: {
+            notifications: { email: true, browser: false, projectUpdates: true },
+            privacy: { profileVisibility: 'private', dataSharing: false }
+          },
+          subscription: { plan: 'free', status: 'active', price: 0, renewalDate: null, maxCredits: 100 },
+          credits: { balance: 0, transactions: [] }
+        };
+
+        setUser(mergedUser);
+        setIsAuthenticated(true);
 
         // For production: Don't create sample data, let users build their own data
         // Users will see empty states until they interact with the app
@@ -219,15 +243,22 @@ export const UserProvider = (props) => {
     await checkAuth();
 
     // Listen for auth state changes
-    supabase.auth.onAuthStateChange((event, session) => {
+    supabase.auth.onAuthStateChange(async (event, session) => {
       try {
         console.log('onAuthStateChange:', event, !!session, session?.user?.email);
         setSession(session);
         if (session && session.user && typeof session.user.id === 'string') {
+          // Fetch profile data from database
+          const profileData = await getUserProfile(session.user.id);
+          console.log('profile data in auth change:', profileData);
+
           setUser({
-            id: session.user.id,
-            email: session.user.email,
-            profile: session.user.user_metadata || {},
+            ...session.user,
+            avatar: profileData?.avatar || session.user.user_metadata?.avatar_url || avatar,
+            profile: {
+              ...session.user.user_metadata,
+              ...profileData
+            },
             preferences: {
               notifications: { email: true, browser: false, projectUpdates: true },
               privacy: { profileVisibility: 'private', dataSharing: false }

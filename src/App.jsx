@@ -32,6 +32,7 @@ const ProtectedRoute = (props) => {
 };
 
 const AppRoutes = () => {
+  console.log('Current location:', window.location.pathname);
   return (
     <Router>
        <Route path="/" component={MainLayout}>
@@ -52,15 +53,13 @@ const AppRoutes = () => {
           <Route path="notifications" component={Notifications} />
           <Route path="invitations" component={() => <ProtectedRoute><Invitations /></ProtectedRoute>} />
         </Route>
-        <Route path="/auth" component={AuthLayout}>
-          <Route path="login" component={Login} />
-          <Route path="signup" component={Signup} />
-          <Route path="forgot-password" component={ForgotPassword} />
-          <Route path="onboarding" component={Onboarding} />
-        </Route>
+        <Route path="/auth/login" component={() => <AuthLayout><Login /></AuthLayout>} />
+        <Route path="/auth/signup" component={() => <AuthLayout><Signup /></AuthLayout>} />
+        <Route path="/auth/forgot-password" component={() => <AuthLayout><ForgotPassword /></AuthLayout>} />
+        <Route path="/auth/onboarding" component={() => <AuthLayout><Onboarding /></AuthLayout>} />
         {/* Fallback route - show login if nothing else matches */}
         <Route path="*" component={() => {
-          console.log('Fallback route: rendering login directly');
+          console.log('Fallback route triggered for path:', window.location.pathname);
           return (
             <AuthLayout>
               <Login />

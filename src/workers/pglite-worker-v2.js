@@ -479,6 +479,7 @@ CREATE TABLE IF NOT EXISTS portfolio_invitations (
   },
 
   async updateProject({ id, project }) {
+    console.log('Worker updateProject called with id:', id, 'project:', project);
     try {
       const result = await this.updateEntity('projects', 'id', id, project);
       if (!result.success) {

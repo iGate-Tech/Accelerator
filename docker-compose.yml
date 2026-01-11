@@ -7,11 +7,7 @@ services:
       - "3000"
     environment:
       - NODE_ENV=production
-      # Add your environment variables here
-      # - VITE_SUPABASE_URL=your_supabase_url
-      # - VITE_SUPABASE_ANON_KEY=your_anon_key
-      # - VITE_SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
-      # - OPENROUTER_API_KEY=your_openrouter_key
+
     volumes:
       # Mount .env file for environment variables
       - ./.env:/app/.env:ro

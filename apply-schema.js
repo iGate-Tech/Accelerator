@@ -26,7 +26,7 @@ async function applySchema() {
     console.log('✅ Connected successfully');
 
     console.log('Reading schema file...');
-    const schema = fs.readFileSync('supabase-schema.sql', 'utf8');
+    const schema = fs.readFileSync('src/supabase-schema-update.sql', 'utf8');
 
     console.log('Applying schema...');
     // Split schema into statements and execute them individually to handle errors

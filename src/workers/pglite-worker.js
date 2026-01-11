@@ -110,17 +110,29 @@ worker({
         businessPlan TEXT,
         valuationReport TEXT,
         currentPrompt TEXT,
-        llmResponse TEXT,
-        createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        synced_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        last_modified TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        sync_status TEXT DEFAULT 'local'
-      );
+   llmResponse TEXT,
+   tasks_list TEXT,
+   createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+   synced_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+   last_modified TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+   sync_status TEXT DEFAULT 'local'
+ );
     `);
 
     // Add public column to existing Projects table if it doesn't exist
     await db.exec(`
       ALTER TABLE Projects ADD COLUMN IF NOT EXISTS public BOOLEAN DEFAULT false;
+ALTER TABLE Projects ADD COLUMN IF NOT EXISTS tasks_list TEXT;
+    `);
+
+    // Rename profiles.id to user_id if it exists as id (for backward compatibility)
+    await db.exec(`
+      DO $$
+      BEGIN
+        IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'profiles' AND column_name = 'id') THEN
+          ALTER TABLE profiles RENAME COLUMN id TO user_id;
+        END IF;
+      END $$;
     `);
 
     await db.exec(`
@@ -243,15 +255,15 @@ worker({
 
     await db.exec(`
       CREATE TABLE IF NOT EXISTS profiles (
-        id TEXT PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
-        avatar TEXT DEFAULT '/src/assets/avatar.png',
-        bio TEXT,
-        preferences JSONB DEFAULT '{"notifications": {"email": true, "browser": false, "projectUpdates": true}, "privacy": {"profileVisibility": "private", "dataSharing": false}}',
-        synced_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        last_modified TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        sync_status TEXT DEFAULT 'local'
-      );
-    `);
+         user_id TEXT PRIMARY KEY REFERENCES users(id),
+         avatar TEXT DEFAULT '/src/assets/avatar.png',
+         bio TEXT,
+         preferences JSONB DEFAULT '{"notifications": {"email": true, "browser": false, "projectUpdates": true}, "privacy": {"profileVisibility": "private", "dataSharing": false}}',
+         synced_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+         last_modified TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+         sync_status TEXT DEFAULT 'local'
+       );
+     `);
 
     await db.exec(`
       CREATE TABLE IF NOT EXISTS user_subscriptions (

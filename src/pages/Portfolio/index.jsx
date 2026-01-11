@@ -19,6 +19,8 @@ import { LangContext } from "../../context/LangContext";
 import { useUser } from "../../context/UserContext";
 import { translations } from "../../assets/translations/translations-index.js";
 import ProjectCard from "../../components/ui/ProjectCard";
+import { toastManager } from "../../lib/feedback";
+import { useLucideIcons } from "../../hooks/useLucideIcons";
 
 const Portfolio = () => {
   const navigate = useNavigate();
@@ -26,6 +28,8 @@ const Portfolio = () => {
   const { user } = useUser();
   const [currentLang, setCurrentLang] = createSignal(lang());
   const [groups, { refetch: refetchGroups }] = createResource(() => user()?.id, getGroupsWithProjects);
+
+  useLucideIcons();
   const [ungroupedProjects, { refetch: refetchUngrouped }] = createResource(() => user()?.id, getUngroupedProjects);
   const [showCreateGroupModal, setShowCreateGroupModal] = createSignal(false);
   const [newGroupName, setNewGroupName] = createSignal("");

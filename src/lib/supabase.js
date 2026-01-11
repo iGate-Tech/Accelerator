@@ -72,14 +72,14 @@ export const insertIntoSupabase = async (table, data) => {
   return result
 }
 
-export const updateInSupabase = async (table, id, data) => {
-  const { data: result, error } = await supabase.from(table).update(data).eq('id', id).select()
+export const updateInSupabase = async (table, id, data, idField = 'id') => {
+  const { data: result, error } = await supabase.from(table).update(data).eq(idField, id).select()
   if (error) throw error
   return result
 }
 
-export const deleteFromSupabase = async (table, id) => {
-  const { error } = await supabase.from(table).delete().eq('id', id)
+export const deleteFromSupabase = async (table, id, idField = 'id') => {
+  const { error } = await supabase.from(table).delete().eq(idField, id)
   if (error) throw error
 }
 

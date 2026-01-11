@@ -15,7 +15,8 @@
     "test": "vitest",
     "test:supabase": "node test-supabase.js",
     "apply-schema": "node apply-schema.js",
-    "validate-translations": "node validate-translations.js"
+    "validate-translations": "node validate-translations.js",
+    "update-supabase-schema": "node src/update-supabase-schema.js"
   },
   "keywords": [],
   "author": "",

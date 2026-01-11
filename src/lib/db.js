@@ -1,6 +1,6 @@
 import { PGliteWorker } from '@electric-sql/pglite/worker';
 import { toastManager } from './feedback';
-import { performSync } from './sync';
+import { performSync, syncService } from './sync';
 import { getCurrentUser } from './supabase';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -23,6 +23,10 @@ export const getPg = async () => {
   return pgInstance;
 };
 
+export const triggerSync = () => {
+  syncService.debouncedSync();
+};
+
 export const initDb = async () => {
   // Worker initializes automatically
   await seedInitialData();
@@ -42,7 +46,7 @@ export const getEntities = async (table, selectFields = '*', whereClause = '', o
 };
 
 // Generic helper for UPDATE operations
-export const updateEntity = async (table, idField, id, updates, options = {}) => {
+export const updateEntity = async (table, idField, id, updates, options = { noTrigger: false }) => {
   const pg = await getPg();
   const fields = [];
   const values = [];
@@ -73,7 +77,9 @@ export const updateEntity = async (table, idField, id, updates, options = {}) =>
   if (!updates.last_modified) {
     fields.push(`last_modified = CURRENT_TIMESTAMP`);
   }
-  fields.push(`sync_status = 'local'`);
+  if (!updates.sync_status) {
+    fields.push(`sync_status = 'local'`);
+  }
 
   if (fields.length === 0) {
     console.log(`No fields to update for ${table} with id ${id}`);
@@ -92,14 +98,21 @@ export const updateEntity = async (table, idField, id, updates, options = {}) =>
   values.push(id);
   const query = `UPDATE ${table} SET ${fields.join(', ')} WHERE ${idField} = $${paramIndex}`;
 
-  try {
+   try {
     const res = await pg.query(query, values);
     console.log(`Updated ${table}:`, id, 'with query:', query, 'values:', values);
+    if (!options.noTrigger) {
+      triggerSync();
+    }
     return { success: true, data: res.rows[0] };
-  } catch (error) {
-    console.log(`DB error in updateEntity for ${table}: ${error.message}`);
-    return { success: false, error: error.message };
-  }
+    } catch (error) {
+      console.log(`DB error in updateEntity for ${table}: ${error.message}`);
+      return { success: false, error: error.message };
+    }
+
+    if (!options.noTrigger) {
+      triggerSync();
+    }
 };
 
   export const getTasks = async (project_id = null, userId = null) => {
@@ -136,31 +149,34 @@ export const updateEntity = async (table, idField, id, updates, options = {}) =>
   };
 
   export const addTask = async (task, project_id) => {
-    try {
-      const pg = await getPg();
-      await pg.query('INSERT INTO tasks (content, model, llm_model, section, stepName, prompt, project_id, synced_at, last_modified, sync_status) VALUES ($1, $2, $3, $4, $5, $6, $7, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, \'local\')', [task.content, task.model, task.llm_model, task.section, task.stepName, task.prompt, project_id]);
-      console.log('Task added:', task, 'for project:', project_id);
-    } catch (e) {
-      console.log('DB error in addTask:', e);
-    }
+   try {
+       const pg = await getPg();
+       await pg.query('INSERT INTO tasks (content, model, llm_model, section, stepName, prompt, project_id, synced_at, last_modified, sync_status) VALUES ($1, $2, $3, $4, $5, $6, $7, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, \'local\')', [task.content, task.model, task.llm_model, task.section, task.stepName, task.prompt, project_id]);
+       console.log('Task added:', task, 'for project:', project_id);
+       triggerSync();
+     } catch (e) {
+       console.log('DB error in addTask:', e);
+     }
   };
 
 export const clearAllTasks = async () => {
-  try {
-    const pg = await getPg();
-    await pg.query('DELETE FROM tasks');
-  } catch (e) {
-    console.log('DB not ready, skipping clearAllTasks');
-  }
+   try {
+     const pg = await getPg();
+     await pg.query('DELETE FROM tasks');
+     triggerSync();
+   } catch (e) {
+     console.log('DB not ready, skipping clearAllTasks');
+   }
 };
 
 export const updateTask = async (id, content) => {
-  try {
-    const pg = await getPg();
-    await pg.query('UPDATE tasks SET content = $1 WHERE id = $2', [content, id]);
-  } catch (e) {
-    console.log('DB not ready, skipping updateTask');
-  }
+   try {
+     const pg = await getPg();
+     await pg.query('UPDATE tasks SET content = $1 WHERE id = $2', [content, id]);
+     triggerSync();
+   } catch (e) {
+     console.log('DB not ready, skipping updateTask');
+   }
 };
 
 
@@ -168,6 +184,11 @@ export const updateTask = async (id, content) => {
 
 
     export const getProjects = async (userId = null) => {
+      if (!userId) {
+        const { getCurrentUser } = await import('./supabase');
+        const user = await getCurrentUser();
+        userId = user ? user.id : null;
+      }
       const whereClause = userId ? 'WHERE user_id = $1' : '';
       const params = userId ? [userId] : [];
       const projects = await getEntities('Projects', '*', whereClause, 'ORDER BY createdAt DESC', params);
@@ -240,11 +261,15 @@ export const updateTask = async (id, content) => {
   export const addProject = async (project) => {
     try {
       const pg = await getPg();
+      const { getCurrentUser } = await import('./supabase');
+      const user = await getCurrentUser();
+      if (!user) throw new Error('User not authenticated');
        const defaultTotalSteps = 51;
        const totalSteps = project.totalSteps || defaultTotalSteps;
        const completedSteps = project.completedSteps || 0;
-         const res = await pg.query('INSERT INTO Projects (name, description, currentStep, completedSteps, stepName, currentModel, currentSection, uiProgress, uiMessage, uiStatus, totalCredits, consumedCredits, totalTime, consumedTime, totalSteps, createdAt, public, problem, solution, currentPrompt, llmResponse, synced_at, last_modified, sync_status) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, \'local\') RETURNING *', [
-           project.name,
+          const res = await pg.query('INSERT INTO Projects (user_id, name, description, currentStep, completedSteps, stepName, currentModel, currentSection, uiProgress, uiMessage, uiStatus, totalCredits, consumedCredits, totalTime, consumedTime, totalSteps, createdAt, public, problem, solution, currentPrompt, llmResponse, synced_at, last_modified, sync_status) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, \'local\') RETURNING *', [
+            user.id,
+            project.name,
            project.description,
            project.currentStep || 'system',
            completedSteps,
@@ -266,9 +291,10 @@ export const updateTask = async (id, content) => {
            project.currentPrompt || '',
            project.llmResponse || ''
          ]);
-      const newProject = res.rows[0];
-      console.log('Added project:', newProject);
-      return newProject.id;
+       const newProject = res.rows[0];
+       console.log('Added project:', newProject);
+       triggerSync();
+       return newProject.id;
      } catch (e) {
        console.log('Error adding project:', e);
        toastManager.error(`Failed to add project "${project.name}" (${project.description?.length || 0} chars description): ${e.message}`);
@@ -301,14 +327,15 @@ export const updateTask = async (id, content) => {
 };
 
  export const deleteProject = async (id) => {
-    try {
-      const pg = await getPg();
-      await pg.query('DELETE FROM Projects WHERE id = $1', [id]);
-      console.log('Deleted project:', id);
-     } catch (e) {
-       console.log('Error deleting project:', e);
-       toastManager.error(`Failed to delete project ${id}: ${e.message}`);
-     }
+   try {
+       const pg = await getPg();
+       await pg.query('DELETE FROM Projects WHERE id = $1', [id]);
+       console.log('Deleted project:', id);
+       triggerSync();
+      } catch (e) {
+        console.log('Error deleting project:', e);
+        toastManager.error(`Failed to delete project ${id}: ${e.message}`);
+      }
   };
 
   export const deleteAllProjects = async () => {
@@ -349,21 +376,24 @@ export const updateTask = async (id, content) => {
        if (existingVote.rows.length > 0) {
          const currentVote = existingVote.rows[0];
          if (currentVote.vote_type === voteType) {
-           // User is removing their vote
-           await pg.query('DELETE FROM project_votes WHERE id = $1', [currentVote.id]);
-           return { action: 'removed', voteType: null };
+            // User is removing their vote
+            await pg.query('DELETE FROM project_votes WHERE id = $1', [currentVote.id]);
+            triggerSync();
+            return { action: 'removed', voteType: null };
          } else {
-           // User is changing their vote
-           await pg.query('UPDATE project_votes SET vote_type = $1 WHERE id = $2', [voteType, currentVote.id]);
-           return { action: 'changed', voteType };
+            // User is changing their vote
+            await pg.query('UPDATE project_votes SET vote_type = $1 WHERE id = $2', [voteType, currentVote.id]);
+            triggerSync();
+            return { action: 'changed', voteType };
          }
        } else {
-         // User is adding a new vote
-         await pg.query(
-           'INSERT INTO project_votes (project_id, user_id, vote_type) VALUES ($1, $2, $3)',
-           [projectId, userId, voteType]
-         );
-         return { action: 'added', voteType };
+          // User is adding a new vote
+          await pg.query(
+            'INSERT INTO project_votes (project_id, user_id, vote_type) VALUES ($1, $2, $3)',
+            [projectId, userId, voteType]
+          );
+          triggerSync();
+          return { action: 'added', voteType };
        }
      } catch (e) {
        console.log('Error voting on project:', e);
@@ -411,13 +441,17 @@ export const getGroupById = async (id) => {
 export const addGroup = async (group) => {
   try {
     const pg = await getPg();
+    const { getCurrentUser } = await import('./supabase');
+    const user = await getCurrentUser();
+    if (!user) throw new Error('User not authenticated');
     const res = await pg.query(
-      'INSERT INTO Groups (name, description, color, createdAt) VALUES ($1, $2, $3, $4) RETURNING id',
-      [group.name, group.description || '', group.color || '#6366f1', group.createdAt || new Date()]
+      'INSERT INTO Groups (user_id, name, description, color, createdAt) VALUES ($1, $2, $3, $4, $5) RETURNING id',
+      [user.id, group.name, group.description || '', group.color || '#6366f1', group.createdAt || new Date()]
     );
-    const newGroup = res.rows[0];
-    console.log('Added group:', newGroup);
-    return newGroup.id;
+     const newGroup = res.rows[0];
+     console.log('Added group:', newGroup);
+     triggerSync();
+     return newGroup.id;
    } catch (e) {
      console.log('Error adding group:', e);
      toastManager.error(`Failed to add group "${group.name}": ${e.message}`);
@@ -442,9 +476,10 @@ export const deleteGroup = async (id) => {
     const pg = await getPg();
     // First remove all project-group relationships
     await pg.query('DELETE FROM project_groups WHERE group_id = $1', [id]);
-    // Then delete the group
-    await pg.query('DELETE FROM Groups WHERE id = $1', [id]);
-    console.log('Deleted group:', id);
+     // Then delete the group
+     await pg.query('DELETE FROM Groups WHERE id = $1', [id]);
+     console.log('Deleted group:', id);
+     triggerSync();
    } catch (e) {
      console.log('Error deleting group:', e);
      toastManager.error(`Failed to delete group ${id}: ${e.message}`);
@@ -463,11 +498,12 @@ export const exportAllProjects = async (userId = null) => {
 export const addProjectToGroup = async (projectId, groupId) => {
   try {
     const pg = await getPg();
-    await pg.query(
-      'INSERT INTO project_groups (project_id, group_id, addedAt) VALUES ($1, $2, $3) ON CONFLICT (project_id, group_id) DO NOTHING',
-      [projectId, groupId, new Date()]
-    );
-    console.log('Added project', projectId, 'to group', groupId);
+     await pg.query(
+       'INSERT INTO project_groups (project_id, group_id, addedAt) VALUES ($1, $2, $3) ON CONFLICT (project_id, group_id) DO NOTHING',
+       [projectId, groupId, new Date()]
+     );
+     console.log('Added project', projectId, 'to group', groupId);
+     triggerSync();
   } catch (e) {
     console.log('Error adding project to group:', e);
   }
@@ -476,8 +512,9 @@ export const addProjectToGroup = async (projectId, groupId) => {
 export const removeProjectFromGroup = async (projectId, groupId) => {
   try {
     const pg = await getPg();
-    await pg.query('DELETE FROM project_groups WHERE project_id = $1 AND group_id = $2', [projectId, groupId]);
-    console.log('Removed project', projectId, 'from group', groupId);
+     await pg.query('DELETE FROM project_groups WHERE project_id = $1 AND group_id = $2', [projectId, groupId]);
+     console.log('Removed project', projectId, 'from group', groupId);
+     triggerSync();
   } catch (e) {
     console.log('Error removing project from group:', e);
   }
@@ -548,13 +585,14 @@ export const createUser = async (email, passwordHash, profile = {}, userId = nul
     const res = await pg.query(
       'INSERT INTO users (id, email, password_hash, profile, synced_at, last_modified, sync_status) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *',
       [id, email, passwordHash, JSON.stringify(profile), new Date(), new Date(), 'local']
-    );
-    console.log('User created:', res.rows[0]);
-    return res.rows[0];
-  } catch (e) {
-    console.log('Error creating user:', e);
-    throw e;
-  }
+     );
+     console.log('User created:', res.rows[0]);
+     triggerSync();
+     return res.rows[0];
+   } catch (e) {
+     console.log('Error creating user:', e);
+     throw e;
+   }
 };
 
 export const getUserByEmail = async (email) => {
@@ -599,14 +637,15 @@ export const updateUser = async (id, updates) => {
 };
 
 export const deleteUser = async (id) => {
-  try {
-    const pg = await getPg();
-    await pg.query('DELETE FROM users WHERE id = $1', [id]);
-    console.log('Deleted user:', id);
-  } catch (e) {
-    console.log('Error deleting user:', e);
-    throw e;
-  }
+   try {
+     const pg = await getPg();
+     await pg.query('DELETE FROM users WHERE id = $1', [id]);
+     console.log('Deleted user:', id);
+     triggerSync();
+   } catch (e) {
+     console.log('Error deleting user:', e);
+     throw e;
+   }
 };
 
 // Session functions
@@ -617,8 +656,9 @@ export const createSession = async (userId, token, expiresAt) => {
       'INSERT INTO sessions (user_id, token, expires_at) VALUES ($1, $2, $3) RETURNING *',
       [userId, token, expiresAt]
     );
-    console.log('Session created:', res.rows[0]);
-    return res.rows[0];
+     console.log('Session created:', res.rows[0]);
+     triggerSync();
+     return res.rows[0];
   } catch (e) {
     console.log('Error creating session:', e);
     throw e;
@@ -640,23 +680,25 @@ export const getSessionByToken = async (token) => {
 };
 
 export const deleteSession = async (token) => {
-  try {
-    const pg = await getPg();
-    await pg.query('DELETE FROM sessions WHERE token = $1', [token]);
-    console.log('Deleted session:', token);
-  } catch (e) {
-    console.log('Error deleting session:', e);
-  }
+   try {
+     const pg = await getPg();
+     await pg.query('DELETE FROM sessions WHERE token = $1', [token]);
+     console.log('Deleted session:', token);
+     triggerSync();
+   } catch (e) {
+     console.log('Error deleting session:', e);
+   }
 };
 
 export const deleteExpiredSessions = async () => {
-  try {
-    const pg = await getPg();
-    await pg.query('DELETE FROM sessions WHERE expires_at <= CURRENT_TIMESTAMP');
-    console.log('Deleted expired sessions');
-  } catch (e) {
-    console.log('Error deleting expired sessions:', e);
-  }
+   try {
+     const pg = await getPg();
+     await pg.query('DELETE FROM sessions WHERE expires_at <= CURRENT_TIMESTAMP');
+     console.log('Deleted expired sessions');
+     triggerSync();
+   } catch (e) {
+     console.log('Error deleting expired sessions:', e);
+   }
 };
 
 // Credits functions
@@ -682,6 +724,7 @@ export const addCreditTransaction = async (userId, type, amount, description) =>
       'INSERT INTO credits (id, user_id, type, amount, description, balance_after, date, synced_at, last_modified, sync_status) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)',
       [id, userId, type, amount, description, transaction.balance_after, transaction.date, new Date(), new Date(), 'local']
     );
+    triggerSync();
     return transaction;
   } catch (error) {
     console.error('Error adding credit transaction:', error);
@@ -718,8 +761,9 @@ export const addBillingRecord = async (userId, type, amount, description, dueDat
       'INSERT INTO billing (id, user_id, type, amount, description, due_date, synced_at, last_modified, sync_status) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING *',
       [id, userId, type, amount, description, dueDate, new Date(), new Date(), 'local']
     );
-    console.log('Billing record added:', res.rows[0]);
-    return res.rows[0];
+     console.log('Billing record added:', res.rows[0]);
+     triggerSync();
+     return res.rows[0];
   } catch (e) {
     console.log('Error adding billing record:', e);
     throw e;
@@ -793,11 +837,12 @@ export const createNotification = async (userId, type, title, message, createdAt
       read: false,
       created_at: timestamp
     };
-    await pg.query(
-      'INSERT INTO notifications (id, user_id, type, title, message, read, created_at, synced_at, last_modified, sync_status) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)',
-      [id, userId, type, title, message, false, timestamp, new Date(), new Date(), 'local']
-    );
-    return notification;
+     await pg.query(
+       'INSERT INTO notifications (id, user_id, type, title, message, read, created_at, synced_at, last_modified, sync_status) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)',
+       [id, userId, type, title, message, false, timestamp, new Date(), new Date(), 'local']
+     );
+     triggerSync();
+     return notification;
   } catch (error) {
     console.error('Error creating notification:', error);
     throw error;
@@ -819,14 +864,15 @@ export const getUserNotifications = async (userId) => {
 };
 
 export const markNotificationRead = async (notificationId, userId) => {
-  try {
-    const pg = await getPg();
-    await pg.query('UPDATE notifications SET read = true WHERE id = $1 AND user_id = $2', [notificationId, userId]);
-    return true;
-  } catch (error) {
-    console.error('Error marking notification read:', error);
-    return false;
-  }
+   try {
+     const pg = await getPg();
+     await pg.query('UPDATE notifications SET read = true WHERE id = $1 AND user_id = $2', [notificationId, userId]);
+     triggerSync();
+     return true;
+   } catch (error) {
+     console.error('Error marking notification read:', error);
+     return false;
+   }
 };
 
 export const getPackages = async () => {
@@ -888,8 +934,9 @@ export const createUserSubscription = async (userId, packageId, subscriptionData
       }
     }
 
-    console.log('User subscription created:', res.rows[0]);
-    return res.rows[0];
+     console.log('User subscription created:', res.rows[0]);
+     triggerSync();
+     return res.rows[0];
   } catch (error) {
     console.error('Error creating user subscription:', error);
     throw error;
@@ -963,7 +1010,7 @@ export const getUserProfile = async (userId) => {
   try {
     const pg = await getPg();
     const res = await pg.query(
-      'SELECT * FROM profiles WHERE id = $1',
+      'SELECT * FROM profiles WHERE user_id = $1',
       [userId]
     );
     return res.rows[0] || null;
@@ -977,7 +1024,7 @@ export const createUserProfile = async (userId, profileData = {}) => {
   try {
     const pg = await getPg();
     const res = await pg.query(
-      'INSERT INTO profiles (id, avatar, bio, preferences, synced_at, last_modified, sync_status) VALUES ($1, $2, $3, $4, $5, $6, $7) ON CONFLICT (id) DO NOTHING RETURNING *',
+      'INSERT INTO profiles (user_id, avatar, bio, preferences, synced_at, last_modified, sync_status) VALUES ($1, $2, $3, $4, $5, $6, $7) ON CONFLICT (user_id) DO NOTHING RETURNING *',
       [
         userId,
         profileData.avatar || avatar,
@@ -991,6 +1038,7 @@ export const createUserProfile = async (userId, profileData = {}) => {
         'local'
       ]
     );
+    if (res.rows[0]) triggerSync();
     return res.rows[0];
   } catch (error) {
     console.error('Error creating user profile:', error);
@@ -999,13 +1047,14 @@ export const createUserProfile = async (userId, profileData = {}) => {
 };
 
 export const updateBillingStatus = async (id, status) => {
-  try {
-    const pg = await getPg();
-    await pg.query('UPDATE billing SET status = $1 WHERE id = $2', [status, id]);
-    console.log('Updated billing status:', id, status);
-  } catch (e) {
-    console.log('Error updating billing status:', e);
-  }
+   try {
+     const pg = await getPg();
+     await pg.query('UPDATE billing SET status = $1 WHERE id = $2', [status, id]);
+     console.log('Updated billing status:', id, status);
+     triggerSync();
+   } catch (e) {
+     console.log('Error updating billing status:', e);
+   }
 };
 
 // Seeding function for initial data
@@ -1080,7 +1129,7 @@ export const seedPackages = async () => {
       const packageId = uuidv4();
       await pg.query(
         'INSERT INTO packages (id, name, description, price, credits_included, features, synced_at, last_modified, sync_status) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)',
-        [packageId, pkg.name, pkg.description, pkg.price, pkg.credits_included, pkg.features, new Date(), new Date(), 'local']
+        [packageId, pkg.name, pkg.description, pkg.price, pkg.credits_included, pkg.features, new Date(), new Date(), 'synced']
       );
     }
 
@@ -1169,11 +1218,12 @@ export const inviteCollaborator = async (portfolioId, inviteeEmail, role = 'edit
       [portfolioId, inviterId, inviteeEmail, role, message, expiresAt]
     );
 
-    return res.rows[0];
-  } catch (error) {
-    console.error('Error inviting collaborator:', error);
-    throw error;
-  }
+     triggerSync();
+     return res.rows[0];
+   } catch (error) {
+     console.error('Error inviting collaborator:', error);
+     throw error;
+   }
 };
 
 export const getPortfolioInvitations = async (portfolioId) => {
@@ -1194,7 +1244,7 @@ export const getUserInvitations = async (userEmail) => {
   try {
     const pg = await getPg();
     const res = await pg.query(
-      'SELECT pi.*, g.name as portfolio_name, u.email as inviter_email FROM portfolio_invitations pi JOIN groups g ON pi.portfolio_id = g.id LEFT JOIN auth.users u ON pi.inviter_id = u.id WHERE pi.invitee_email = $1 AND pi.status = $2 AND pi.expires_at > CURRENT_TIMESTAMP ORDER BY pi.invited_at DESC',
+      'SELECT pi.*, g.name as portfolio_name, u.email as inviter_email FROM portfolio_invitations pi JOIN groups g ON pi.portfolio_id = g.id LEFT JOIN users u ON pi.inviter_id = u.id WHERE pi.invitee_email = $1 AND pi.status = $2 AND pi.expires_at > CURRENT_TIMESTAMP ORDER BY pi.invited_at DESC',
       [userEmail, 'pending']
     );
     return res.rows;
@@ -1233,11 +1283,12 @@ export const respondToInvitation = async (invitationId, status) => {
           'system',
           'Invitation Accepted',
           `Your invitation to collaborate on portfolio "${await getGroupName(inv.portfolio_id)}" has been accepted.`
-        );
-      }
-    }
+         );
+       }
+     }
 
-    return true;
+     triggerSync();
+     return true;
   } catch (error) {
     console.error('Error responding to invitation:', error);
     throw error;
@@ -1248,7 +1299,7 @@ export const getPortfolioCollaborators = async (portfolioId) => {
   try {
     const pg = await getPg();
     const res = await pg.query(
-      'SELECT pc.*, u.email, p.bio, p.avatar FROM portfolio_collaborators pc JOIN auth.users u ON pc.user_id = u.id LEFT JOIN profiles p ON pc.user_id = p.id WHERE pc.portfolio_id = $1 ORDER BY pc.joined_at ASC',
+      'SELECT pc.*, u.email, p.bio, p.avatar FROM portfolio_collaborators pc JOIN users u ON pc.user_id = u.id LEFT JOIN profiles p ON pc.user_id = p.user_id WHERE pc.portfolio_id = $1 ORDER BY pc.joined_at ASC',
       [portfolioId]
     );
     return res.rows;
@@ -1272,9 +1323,10 @@ export const removeCollaborator = async (portfolioId, userId) => {
       'system',
       'Removed from Portfolio',
       `You have been removed from portfolio "${await getGroupName(portfolioId)}".`
-    );
+     );
 
-    return true;
+     triggerSync();
+     return true;
   } catch (error) {
     console.error('Error removing collaborator:', error);
     throw error;
@@ -1288,6 +1340,7 @@ export const updateCollaboratorRole = async (portfolioId, userId, role) => {
       'UPDATE portfolio_collaborators SET role = $1 WHERE portfolio_id = $2 AND user_id = $3',
       [role, portfolioId, userId]
     );
+    triggerSync();
     return true;
   } catch (error) {
     console.error('Error updating collaborator role:', error);

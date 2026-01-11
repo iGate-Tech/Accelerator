@@ -50,7 +50,7 @@ export const UserProvider = (props) => {
 
       if (Object.keys(dbUpdates).length > 0) {
         dbUpdates.last_modified = new Date();
-        await updateEntity('profiles', 'id', user().id, dbUpdates);
+        await updateEntity('profiles', 'user_id', user().id, dbUpdates);
       }
     } catch (error) {
       console.error('Error updating profile:', error);

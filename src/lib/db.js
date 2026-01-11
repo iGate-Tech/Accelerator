@@ -499,7 +499,8 @@ export const clearAllTasks = async () => {
           if (!userId) {
             const { getCurrentUser } = await import('./supabase');
             const user = await getCurrentUser();
-            userId = user ? user.id : null;
+            console.log('user from getCurrentUser:', user);
+            userId = user && typeof user.id === 'string' ? user.id : null;
           }
           const pg = await getPg();
           console.log('Getting projects for userId:', userId, 'type:', typeof userId);

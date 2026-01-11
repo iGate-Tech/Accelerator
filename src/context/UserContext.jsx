@@ -121,7 +121,7 @@ export const UserProvider = (props) => {
         setSession(data.session);
         setIsAuthenticated(true);
         setUser({
-          id: data.session.user.id,
+          id: typeof data.session.user.id === 'string' ? data.session.user.id : String(data.session.user.id),
           email: data.session.user.email,
           avatar: data.session.user.user_metadata?.avatar_url || avatar,
           profile: {
@@ -194,103 +194,16 @@ export const UserProvider = (props) => {
       const { data, error } = await supabase.auth.getSession();
       if (error) throw error;
       if (data.session) {
-        setSession(data.session);
-
-        // Ensure user exists in local database
-        let localUser = await getUserById(data.session.user.id);
-        if (!localUser) {
-          try {
-            localUser = await createUser(
-              data.session.user.email,
-              'supabase_auth', // placeholder password since we're using Supabase auth
-              {
-                name: data.session.user.user_metadata?.name || data.session.user.email.split('@')[0],
-                email: data.session.user.email,
-                avatar: data.session.user.user_metadata?.avatar_url || avatar,
-                joinDate: data.session.user.created_at,
-                bio: data.session.user.user_metadata?.bio || '',
-              },
-              data.session.user.id // Pass the Supabase user ID
-            );
-          } catch (error) {
-            console.error('Error creating local user:', error);
-            // Continue without local user for now
-          }
+        const userData = data.session.user;
+        console.log('session user:', userData);
+        // Ensure id is string
+        if (userData.id && typeof userData.id !== 'string') {
+          userData.id = String(userData.id);
         }
-
-        // Load or create user profile (only if local user exists)
-        let profileData = null;
-        if (localUser) {
-          try {
-            profileData = await getUserProfile(data.session.user.id);
-            if (!profileData) {
-              profileData = await createUserProfile(data.session.user.id, data.session.user.user_metadata);
-            }
-          } catch (error) {
-            console.log('Profile creation skipped:', error.message);
-          }
-        }
-
-        // Get actual credit balance (fallback to 0 if user creation failed)
-        let creditBalance = 0;
-        if (localUser) {
-          try {
-            const { getCreditBalance } = await import('../lib/db');
-            creditBalance = await getCreditBalance(data.session.user.id);
-          } catch (error) {
-            console.log('Could not get credit balance:', error.message);
-          }
-        }
-
-        // Get actual subscription data (fallback to free if none exists)
-        let subscriptionData = { plan: 'free', status: 'active', price: 0, renewalDate: null, maxCredits: 100 };
-        if (localUser) {
-          try {
-            const { getUserSubscription } = await import('../lib/db');
-            const userSubscription = await getUserSubscription(data.session.user.id);
-            if (userSubscription) {
-              subscriptionData = {
-                plan: userSubscription.name,
-                status: userSubscription.status,
-                price: userSubscription.price,
-                renewalDate: userSubscription.end_date,
-                maxCredits: userSubscription.credits_included
-              };
-            }
-          } catch (error) {
-            console.log('Could not get subscription data:', error.message);
-          }
-        }
-
-        setUser({
-          id: data.session.user.id,
-          email: data.session.user.email,
-          avatar: profileData?.avatar || data.session.user.user_metadata?.avatar_url || avatar,
-          profile: {
-            name: data.session.user.user_metadata?.name || data.session.user.email.split('@')[0],
-            email: data.session.user.email,
-            bio: profileData?.bio || '',
-            joinDate: data.session.user.created_at,
-            ...data.session.user.user_metadata
-          },
-           preferences: profileData?.preferences || {
-             notifications: { email: true, browser: false, projectUpdates: true },
-             privacy: { profileVisibility: 'private', dataSharing: false }
-           },
-           subscription: subscriptionData,
-           credits: { balance: creditBalance, transactions: [] }
-        });
+        setUser(userData);
         setIsAuthenticated(true);
 
-        // Create sample notifications for new users
-        if (localUser) {
-          try {
-            const { seedSampleNotifications } = await import('../lib/db');
-            await seedSampleNotifications(data.session.user.id);
-          } catch (error) {
-            console.error('Could not create sample notifications:', error.message);
-          }
-        }
+
 
         // For production: Don't create sample data, let users build their own data
         // Users will see empty states until they interact with the app

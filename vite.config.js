@@ -26,33 +26,51 @@ export default defineConfig({
         dir: 'ltr',
         icons: []
       },
-      workbox: {
-        globPatterns: ['**/*.{js,css,html,ico,png,svg}'],
-        runtimeCaching: [
-          {
-            urlPattern: /^https:\/\/.*\.(png|jpg|jpeg|svg|gif)$/,
-            handler: 'CacheFirst',
-            options: {
-              cacheName: 'images-cache',
-              expiration: {
-                maxEntries: 50,
-                maxAgeSeconds: 30 * 24 * 60 * 60, // 30 days
-              },
-            },
-          },
-          {
-            urlPattern: ({ request }) => request.destination === 'script' || request.destination === 'style',
-            handler: 'StaleWhileRevalidate',
-            options: {
-              cacheName: 'assets-cache',
-              expiration: {
-                maxEntries: 100,
-                maxAgeSeconds: 24 * 60 * 60, // 24 hours
-              },
-            },
-          }
-        ]
-      },
+       workbox: {
+         globPatterns: ['**/*.{js,css,html,ico,png,svg}'],
+         runtimeCaching: [
+           {
+             urlPattern: /^https:\/\/.*\.(png|jpg|jpeg|svg|gif)$/,
+             handler: 'CacheFirst',
+             options: {
+               cacheName: 'images-cache',
+               expiration: {
+                 maxEntries: 50,
+                 maxAgeSeconds: 30 * 24 * 60 * 60, // 30 days
+               },
+             },
+           },
+           {
+             urlPattern: ({ request }) => request.destination === 'script' || request.destination === 'style',
+             handler: 'StaleWhileRevalidate',
+             options: {
+               cacheName: 'assets-cache',
+               expiration: {
+                 maxEntries: 100,
+                 maxAgeSeconds: 24 * 60 * 60, // 24 hours
+               },
+             },
+           },
+           {
+             urlPattern: ({ url }) => url.pathname.startsWith('/api/'),
+             handler: 'NetworkOnly', // Don't cache API calls
+             options: {
+               cacheName: 'api-cache',
+             },
+           },
+           {
+             urlPattern: ({ request, url }) => request.destination === 'document' && !url.pathname.startsWith('/api/'),
+             handler: 'NetworkFirst', // For pages, try network first, fall back to cache
+             options: {
+               cacheName: 'pages-cache',
+               expiration: {
+                 maxEntries: 10,
+                 maxAgeSeconds: 24 * 60 * 60, // 24 hours
+               },
+             },
+           }
+         ]
+       },
       devOptions: {
         enabled: false
       }

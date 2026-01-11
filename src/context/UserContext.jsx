@@ -124,7 +124,7 @@ export const UserProvider = (props) => {
         // Fetch subscription data from database
         let subscriptionData = { plan: 'free', status: 'active', price: 0, renewalDate: null, maxCredits: 100 };
         try {
-          const { getUserSubscription } = await import('./db');
+          const { getUserSubscription } = await import('../lib/db');
           const userSubscription = await getUserSubscription(data.session.user.id);
           if (userSubscription) {
             subscriptionData = {
@@ -227,7 +227,7 @@ export const UserProvider = (props) => {
         // Fetch subscription data from database
         let subscriptionData = { plan: 'free', status: 'active', price: 0, renewalDate: null, maxCredits: 100 };
         try {
-          const { getUserSubscription } = await import('./db');
+          const { getUserSubscription } = await import('../lib/db');
           const userSubscription = await getUserSubscription(userData.id);
           if (userSubscription) {
             subscriptionData = {
@@ -293,7 +293,7 @@ export const UserProvider = (props) => {
           // Fetch subscription data from database
           let subscriptionData = { plan: 'free', status: 'active', price: 0, renewalDate: null, maxCredits: 100 };
           try {
-            const { getUserSubscription } = await import('./db');
+            const { getUserSubscription } = await import('../lib/db');
             const userSubscription = await getUserSubscription(session.user.id);
             if (userSubscription) {
               subscriptionData = {

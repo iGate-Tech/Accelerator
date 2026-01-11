@@ -25,7 +25,7 @@ RUN chown -R solidjs:nodejs /app
 USER solidjs
 
 # Expose port
-EXPOSE 4000
+EXPOSE 3000
 
 # Start the application
 CMD ["npm", "start"]

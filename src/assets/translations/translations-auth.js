@@ -84,6 +84,6 @@ export const authTranslations = {
     statusPage: 'صفحة الحالة',
     changelog: 'سجل التغييرات',
     help: 'المساعدة',
-    copyright: '© {year} iGate. One Gate, Endless Possibilities.'
+    copyright: '© {year} iGate. بوابة واحدة، إمكانيات لا حصر لها.'
   }
 };

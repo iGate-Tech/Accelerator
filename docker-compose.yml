@@ -4,7 +4,7 @@ services:
   app:
     build: .
     expose:
-      - "3000"
+      - "4000"
     environment:
       - NODE_ENV=production
 

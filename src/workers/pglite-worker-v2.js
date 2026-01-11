@@ -258,10 +258,6 @@ CREATE TABLE IF NOT EXISTS portfolio_invitations (
   },
 
   async updateEntity({ table, idField, id, updates, options = {} }) {
-    if (!updates || typeof updates !== 'object') {
-      return { success: false, error: 'Invalid updates parameter' };
-    }
-
     const fields = [];
     const values = [];
     let paramIndex = 1;

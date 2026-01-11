@@ -234,7 +234,7 @@ export const UserProvider = (props) => {
         try {
           profileData = await Promise.race([
             getUserProfile(userData.id),
-            new Promise((_, reject) => setTimeout(() => reject(new Error('Profile fetch timeout')), 3000))
+            new Promise((_, reject) => setTimeout(() => reject(new Error('Profile fetch timeout')), 5000))
           ]);
           console.log('profile data:', profileData);
         } catch (error) {
@@ -329,7 +329,7 @@ export const UserProvider = (props) => {
           try {
             profileData = await Promise.race([
               getUserProfile(session.user.id),
-              new Promise((_, reject) => setTimeout(() => reject(new Error('Profile fetch timeout')), 3000))
+              new Promise((_, reject) => setTimeout(() => reject(new Error('Profile fetch timeout')), 5000))
             ]);
             console.log('profile data in auth change:', profileData);
           } catch (error) {

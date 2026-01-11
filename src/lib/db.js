@@ -74,8 +74,62 @@ class DatabaseWorker {
     return new Promise((resolve, reject) => {
       const id = nextRequestId++;
       pendingRequests.set(id, { resolve, reject });
-      this.worker.postMessage({ id, type, payload: data });
+
+      // Deep clone data to ensure it's cloneable, handling circular references and non-serializable objects
+      const serializableData = this.deepCloneSerializable(data);
+      this.worker.postMessage({ id, type, payload: serializableData });
     });
+  }
+
+  // Helper method to deep clone data while filtering out non-serializable objects
+  deepCloneSerializable(obj, seen = new WeakMap()) {
+    // Handle primitives
+    if (obj === null || typeof obj !== 'object') {
+      return obj;
+    }
+
+    // Handle circular references
+    if (seen.has(obj)) {
+      return '[Circular]';
+    }
+
+    // Handle arrays
+    if (Array.isArray(obj)) {
+      const result = [];
+      seen.set(obj, result);
+      for (let i = 0; i < obj.length; i++) {
+        result[i] = this.deepCloneSerializable(obj[i], seen);
+      }
+      return result;
+    }
+
+    // Handle objects
+    const result = {};
+    seen.set(obj, result);
+
+    for (const key in obj) {
+      if (obj.hasOwnProperty(key)) {
+        const value = obj[key];
+
+        // Skip functions, DOM elements, and other non-serializable objects
+        if (typeof value === 'function' ||
+            (typeof value === 'object' && value !== null && (
+              value instanceof Element ||
+              value instanceof Node ||
+              value instanceof Window ||
+              value instanceof Document ||
+              value instanceof Event ||
+              value instanceof EventTarget ||
+              value.constructor.name === 'Object' && !Object.getPrototypeOf(value)
+            ))) {
+          continue; // Skip this property
+        }
+
+        result[key] = this.deepCloneSerializable(value, seen);
+      }
+    }
+
+    return result;
   }
 
   async isSeeded() {

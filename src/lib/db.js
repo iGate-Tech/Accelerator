@@ -502,6 +502,11 @@ export const clearAllTasks = async () => {
             userId = user ? user.id : null;
           }
           const pg = await getPg();
+          console.log('Getting projects for userId:', userId, 'type:', typeof userId);
+          if (typeof userId !== 'string') {
+            console.error('Invalid userId type:', typeof userId, 'value:', userId);
+            return [];
+          }
           const projects = await pg.getProjects(userId);
           console.log('Projects loaded:', projects);
           return projects;

@@ -441,14 +441,17 @@ CREATE TABLE IF NOT EXISTS portfolio_invitations (
   },
 
   async getProjects({ userId = null }) {
-    if (!userId) {
-      throw new Error('userId required for getProjects');
+    try {
+      console.log('Worker getProjects userId:', userId, 'type:', typeof userId);
+      if (!userId) {
+        throw new Error('userId required for getProjects');
+      }
+      const res = await dbInstance.query('SELECT * FROM projects WHERE user_id = $1 ORDER BY id DESC', [userId]);
+      return res.rows;
+    } catch (err) {
+      console.error('Error in worker getProjects:', err);
+      return [];
     }
-    const whereClause = userId ? 'WHERE user_id = $1' : '';
-    const params = userId ? [userId] : [];
-    const query = `SELECT * FROM projects ${whereClause} ORDER BY last_modified DESC`;
-    const res = await dbInstance.query(query, params);
-    return res.rows;
   },
 
   async getProjectById({ id }) {

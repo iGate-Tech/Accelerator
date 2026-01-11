@@ -8,6 +8,7 @@ import RouteGuard from "../../components/common/RouteGuard";
 import logo from "../../assets/iGate-tech-logo.svg";
 
 const Login = () => {
+  console.log('Login component rendering');
   const navigate = useNavigate();
   const { login, isAuthenticated } = useUser();
   const { currentLang, t } = useLanguage();

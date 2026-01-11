@@ -474,9 +474,9 @@ CREATE TABLE IF NOT EXISTS portfolio_invitations (
     }
   },
 
-  async updateProject({ id, updates }) {
+  async updateProject({ id, project }) {
     try {
-      const result = await this.updateEntity('projects', 'id', id, updates);
+      const result = await this.updateEntity('projects', 'id', id, project);
       if (!result.success) {
         throw new Error(result.error);
       }

@@ -28,10 +28,13 @@ const Invitations = lazy(() => import("./pages/Invitations"));
 
 const ProtectedRoute = (props) => {
   const { isAuthenticated } = useUser();
-  return isAuthenticated() ? props.children : <Navigate href="/auth/login" />;
+  const authenticated = isAuthenticated();
+  console.log('ProtectedRoute check:', authenticated ? 'authenticated - showing content' : 'not authenticated - redirecting to login');
+  return authenticated ? props.children : <Navigate href="/auth/login" />;
 };
 
 const AppRoutes = () => {
+  console.log('AppRoutes component rendering');
   return (
     <Router>
        <Route path="/" component={MainLayout}>
@@ -62,12 +65,15 @@ const AppRoutes = () => {
   );
 };
 
-const App = () => (
-  <LangProvider>
-    <UserProvider>
-      <AppRoutes />
-    </UserProvider>
-  </LangProvider>
-);
+const App = () => {
+  console.log('App component mounting');
+  return (
+    <LangProvider>
+      <UserProvider>
+        <AppRoutes />
+      </UserProvider>
+    </LangProvider>
+  );
+};
 
 export default App;

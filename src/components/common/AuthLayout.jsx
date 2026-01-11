@@ -7,6 +7,7 @@ import { ToastContainer } from "./GlobalUI";
 import favicon from "../../assets/favicon.svg";
 
 const AuthLayout = (props) => {
+    console.log('AuthLayout rendering with children:', !!props.children);
     const context = useContext(LangContext) || { lang: () => 'ar', setLang: () => {}, serverReachable: () => true, setServerReachable: () => {} };
   const {lang, setLang, serverReachable, setServerReachable} = context;
 

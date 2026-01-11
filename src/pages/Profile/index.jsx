@@ -30,9 +30,9 @@ const Profile = () => {
     }
   });
 
-  onMount(async () => {
+   onMount(async () => {
     if (window.lucide) window.lucide.createIcons();
-    if (user()) {
+    if (user() && typeof user().id === 'string') {
       // Refresh profile data
       await checkAuth();
 

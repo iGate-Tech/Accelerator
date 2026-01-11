@@ -230,7 +230,7 @@ export const UserProvider = (props) => {
         setSession(session);
         if (session) {
           setUser({
-            id: session.user.id,
+            id: typeof session.user.id === 'string' ? session.user.id : String(session.user.id),
             email: session.user.email,
             profile: session.user.user_metadata || {},
             preferences: {

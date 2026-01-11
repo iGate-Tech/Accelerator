@@ -35,7 +35,8 @@ const Sidebar = () => {
   const loadProjects = async () => {
     try {
       const currentUser = user();
-      const projs = await getProjects(currentUser?.id) || [];
+      if (!currentUser || typeof currentUser.id !== 'string') return;
+      const projs = await getProjects(currentUser.id) || [];
       setProjects(projs);
     } catch (error) {
       console.error('Failed to load projects:', error);

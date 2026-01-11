@@ -210,7 +210,7 @@ const Settings = () => {
 
    onMount(async () => {
     if (window.lucide) window.lucide.createIcons();
-     if (user()) {
+     if (user() && typeof user().id === 'string') {
        try {
          const userProjects = await getProjects(user().id);
          setProjects(userProjects || []);

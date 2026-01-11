@@ -31,9 +31,18 @@ const AgentInterface = (props) => {
 
   const t = () => translations[currentLang()];
 
-  createEffect(() => {
-    setCurrentLang(lang());
-  });
+   createEffect(() => {
+     setCurrentLang(lang());
+   });
+
+   // Auto-resize textarea when prompt changes
+   createEffect(() => {
+     props.prompt(); // Track prompt changes
+     if (textareaRef && textareaRef.style) {
+       textareaRef.style.height = 'auto';
+       textareaRef.style.height = textareaRef.scrollHeight + 'px';
+     }
+   });
 
   // Initial animations
   onMount(() => {

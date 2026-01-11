@@ -132,9 +132,9 @@ class DatabaseWorker {
      return await this.sendMessage('getProjectById', { id });
    }
 
-   async addProject(project, userId) {
-     return await this.sendMessage('addProject', { project, userId });
-   }
+    async addProject(project, userId) {
+      return await this.sendMessage('createProject', { project, userId });
+    }
 
    async updateProject(id, project) {
      return await this.sendMessage('updateProject', { id, project });
@@ -594,9 +594,8 @@ export const clearAllTasks = async () => {
         const newProject = await pg.addProject(project, user.id);
         console.log('Added project:', newProject);
 
-        // Log activity
-        const { logActivity } = await import('./activity');
-        await logActivity(user.id, 'project_created', 'project', newProject.id, `Created project "${project.name}"`, { projectName: project.name });
+         // Log activity
+         await logActivity(user.id, 'project_created', 'project', newProject.id, `Created project "${project.name}"`, { projectName: project.name });
 
         triggerSync();
         return newProject.id;
@@ -620,9 +619,8 @@ export const clearAllTasks = async () => {
       }
       console.log('Updated project:', id);
 
-      // Log activity
-      const { logActivity } = await import('./activity');
-      await logActivity(user.id, 'project_updated', 'project', id, `Updated project`, { fields: Object.keys(project) });
+       // Log activity
+       await logActivity(user.id, 'project_updated', 'project', id, `Updated project`, { fields: Object.keys(project) });
 
      } catch (e) {
        console.log('Error updating project:', e);
@@ -640,9 +638,8 @@ export const clearAllTasks = async () => {
           await pg.deleteProject(id);
          console.log('Deleted project:', id);
 
-         // Log activity
-         const { logActivity } = await import('./activity');
-         await logActivity(user.id, 'project_deleted', 'project', id, `Deleted project`, {});
+          // Log activity
+          await logActivity(user.id, 'project_deleted', 'project', id, `Deleted project`, {});
 
          triggerSync();
         } catch (e) {

@@ -32,42 +32,46 @@ const ProtectedRoute = (props) => {
 };
 
 const AppRoutes = () => {
+  console.log('AppRoutes component rendering');
   return (
     <Router>
        <Route path="/" component={MainLayout}>
-         <Route path="" component={() => <ProtectedRoute><Home /></ProtectedRoute>} />
-         <Route path="dashboard" component={() => <ProtectedRoute><Dashboard /></ProtectedRoute>} />
-         <Route path="explore" component={() => <ProtectedRoute><Explore /></ProtectedRoute>} />
-         <Route path="portfolio" component={() => <ProtectedRoute><Portfolio /></ProtectedRoute>} />
-         <Route path="help" component={Help} />
-         <Route path="profile" component={() => <ProtectedRoute><Profile /></ProtectedRoute>} />
-         <Route path="settings" component={() => <ProtectedRoute><Settings /></ProtectedRoute>} />
-         <Route path="packages" component={() => <ProtectedRoute><Packages /></ProtectedRoute>} />
-         <Route path="credits" component={() => <ProtectedRoute><Credits /></ProtectedRoute>} />
-         <Route path="billing" component={() => <ProtectedRoute><Billing /></ProtectedRoute>} />
-         <Route path="privacy-policy" component={PrivacyPolicy} />
-         <Route path="terms-of-service" component={TermsOfService} />
-         <Route path="status" component={StatusPage} />
-         <Route path="changelog" component={Changelog} />
-         <Route path="notifications" component={Notifications} />
-         <Route path="invitations" component={() => <ProtectedRoute><Invitations /></ProtectedRoute>} />
-       </Route>
-       <Route path="/auth" component={AuthLayout}>
-         <Route path="/login" component={Login} />
-         <Route path="/signup" component={Signup} />
-         <Route path="/forgot-password" component={ForgotPassword} />
-         <Route path="/onboarding" component={Onboarding} />
-       </Route>
-    </Router>
+          <Route path="" component={() => <ProtectedRoute><Home /></ProtectedRoute>} />
+          <Route path="dashboard" component={() => <ProtectedRoute><Dashboard /></ProtectedRoute>} />
+          <Route path="explore" component={() => <ProtectedRoute><Explore /></ProtectedRoute>} />
+          <Route path="portfolio" component={() => <ProtectedRoute><Portfolio /></ProtectedRoute>} />
+          <Route path="help" component={Help} />
+          <Route path="profile" component={() => <ProtectedRoute><Profile /></ProtectedRoute>} />
+          <Route path="settings" component={() => <ProtectedRoute><Settings /></ProtectedRoute>} />
+          <Route path="packages" component={() => <ProtectedRoute><Packages /></ProtectedRoute>} />
+          <Route path="credits" component={() => <ProtectedRoute><Credits /></ProtectedRoute>} />
+          <Route path="billing" component={() => <ProtectedRoute><Billing /></ProtectedRoute>} />
+          <Route path="privacy-policy" component={PrivacyPolicy} />
+          <Route path="terms-of-service" component={TermsOfService} />
+          <Route path="status" component={StatusPage} />
+          <Route path="changelog" component={Changelog} />
+          <Route path="notifications" component={Notifications} />
+          <Route path="invitations" component={() => <ProtectedRoute><Invitations /></ProtectedRoute>} />
+        </Route>
+        <Route path="/auth" component={AuthLayout}>
+          <Route path="/login" component={Login} />
+          <Route path="/signup" component={Signup} />
+          <Route path="/forgot-password" component={ForgotPassword} />
+          <Route path="/onboarding" component={Onboarding} />
+        </Route>
+     </Router>
   );
 };
 
-const App = () => (
-  <LangProvider>
-    <UserProvider>
-      <AppRoutes />
-    </UserProvider>
-  </LangProvider>
-);
+const App = () => {
+  console.log('App component rendering');
+  return (
+    <LangProvider>
+      <UserProvider>
+        <AppRoutes />
+      </UserProvider>
+    </LangProvider>
+  );
+};
 
 export default App;

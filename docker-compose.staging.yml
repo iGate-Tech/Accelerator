@@ -1,0 +1,19 @@
+version: '3.8'
+
+services:
+  app:
+    build: .
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=staging
+
+    volumes:
+      # Mount .env file for environment variables
+      - ./.env:/app/.env:ro
+    networks:
+      - accelerator-network
+
+networks:
+  accelerator-network:
+    driver: bridge

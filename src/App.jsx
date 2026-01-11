@@ -29,7 +29,10 @@ const Invitations = lazy(() => import("./pages/Invitations"));
 const ProtectedRoute = (props) => {
   const { isAuthenticated } = useUser();
   const authenticated = isAuthenticated();
-  console.log('ProtectedRoute check:', authenticated ? 'authenticated - showing content' : 'not authenticated - redirecting to login');
+  console.log('ProtectedRoute check:', authenticated ? 'authenticated - showing content' : 'not authenticated - redirecting to /auth/login');
+  if (!authenticated) {
+    console.log('Redirecting to /auth/login');
+  }
   return authenticated ? props.children : <Navigate href="/auth/login" />;
 };
 
@@ -56,11 +59,20 @@ const AppRoutes = () => {
           <Route path="invitations" component={() => <ProtectedRoute><Invitations /></ProtectedRoute>} />
         </Route>
         <Route path="/auth" component={AuthLayout}>
-          <Route path="/login" component={Login} />
-          <Route path="/signup" component={Signup} />
-          <Route path="/forgot-password" component={ForgotPassword} />
-          <Route path="/onboarding" component={Onboarding} />
+          <Route path="login" component={Login} />
+          <Route path="signup" component={Signup} />
+          <Route path="forgot-password" component={ForgotPassword} />
+          <Route path="onboarding" component={Onboarding} />
         </Route>
+        {/* Fallback route - show login if nothing else matches */}
+        <Route path="*" component={() => {
+          console.log('Fallback route: rendering login directly');
+          return (
+            <AuthLayout>
+              <Login />
+            </AuthLayout>
+          );
+        }} />
      </Router>
   );
 };

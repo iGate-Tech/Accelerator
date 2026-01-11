@@ -121,7 +121,7 @@ const Tasks = () => {
     // Save progress to current project
     createEffect(() => {
       machineStore.context; // trigger on change
-      if (currentProjectId() && machineStore.context) {
+      if (currentProjectId() && machineStore.context && typeof machineStore.context === 'object') {
         // Filter context to only include database fields
         const dbFields = [
           'problem', 'solution', 'currentStep', 'completedSteps', 'stepName',
@@ -131,8 +131,9 @@ const Tasks = () => {
         ];
         const filteredContext = {};
         for (const field of dbFields) {
-          if (machineStore.context[field] !== undefined) {
-            filteredContext[field] = machineStore.context[field];
+          const value = machineStore.context[field];
+          if (value !== undefined && value !== null) {
+            filteredContext[field] = value;
           }
         }
         // Only update if there are fields to update

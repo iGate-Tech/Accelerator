@@ -95,7 +95,7 @@ const Signup = () => {
       if (result.needsConfirmation) {
         toastManager.success(`Account created successfully for ${sanitizedEmail}! Please check your email and click the confirmation link to activate your account.`);
         setTimeout(() => {
-          navigate('/login');
+          navigate('/auth/login');
         }, 3000);
         return;
       }
@@ -110,7 +110,7 @@ const Signup = () => {
       } else {
         toastManager.error(`Account created for ${sanitizedEmail} but automatic login failed. Please try logging in manually on the login page.`);
         setTimeout(() => {
-          navigate('/login');
+          navigate('/auth/login');
         }, 2000);
       }
     } catch (err) {
@@ -242,7 +242,7 @@ const Signup = () => {
 
           <div class="divider">OR</div>
 
-           <button class="btn btn-outline w-full" onClick={() => navigate('/login')}>
+           <button class="btn btn-outline w-full" onClick={() => navigate('/auth/login')}>
              {t().alreadyHaveAccount}
            </button>
 

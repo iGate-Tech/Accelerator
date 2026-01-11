@@ -110,12 +110,7 @@ class SyncService {
 
   async getLocalChanges(tableName) {
     const pg = await getPg();
-    const query = `
-      SELECT * FROM ${tableName}
-      WHERE last_modified > synced_at OR sync_status = '${SYNC_STATUS.LOCAL}'
-    `;
-    const res = await pg.query(query);
-    return res.rows;
+    return await pg.getLocalChanges(tableName);
   }
 
   async getRemoteChanges(tableName) {
@@ -168,14 +163,8 @@ class SyncService {
         }
 
         // Mark as synced and increment version
-        const updateData = {
-          synced_at: new Date(),
-          sync_status: SYNC_STATUS.SYNCED,
-          version: (localItem.version || 0) + 1,
-          retry_count: 0,
-          sync_error: null
-        };
-        await updateEntity(tableName, idField, this.getItemId(localItem, idField), updateData, { noTrigger: true });
+        const pg = await getPg();
+        await pg.markItemSynced(tableName, idField, this.getItemId(localItem, idField), (localItem.version || 0) + 1);
         return;
 
       } catch (error) {
@@ -188,11 +177,8 @@ class SyncService {
           retryCount++;
         } else {
           // Mark as conflict with error details
-          await updateEntity(tableName, idField, this.getItemId(localItem, idField), {
-            sync_status: SYNC_STATUS.CONFLICT,
-            sync_error: error.message,
-            retry_count: retryCount + 1
-          });
+          const pg = await getPg();
+          await pg.markItemConflict(tableName, idField, this.getItemId(localItem, idField), error.message, retryCount + 1);
         }
       }
     }
@@ -200,28 +186,29 @@ class SyncService {
 
   async downloadToLocal(tableName, idField, remoteItem) {
     try {
+      const pg = await getPg();
       const remoteId = this.getItemId(remoteItem, idField);
-      const localItem = await this.getLocalItem(tableName, remoteId, idField);
+      const localItem = await pg.getLocalItem(tableName, remoteId, idField);
 
       if (remoteItem.deleted_at && localItem) {
         // Remote item is soft deleted, remove locally
-        await this.deleteLocalItem(tableName, idField, remoteId);
+        await pg.deleteLocalItem(tableName, idField, remoteId);
       } else if (!localItem) {
         // Insert new item
         const localData = { ...remoteItem };
         delete localData.synced_at; // Remove remote fields
         delete localData.last_modified; // Remove remote fields
         localData.sync_status = SYNC_STATUS.SYNCED;
-        await this.insertLocalItem(tableName, localData);
+        await pg.insertLocalItem(tableName, localData);
       } else {
         // Update existing item
-        const merged = await this.resolveConflict(localItem, remoteItem);
+        const merged = await pg.resolveConflict(localItem, remoteItem);
         const updateData = { ...merged };
         delete updateData.sync_status; // Remove to avoid conflicts
         delete updateData.synced_at; // Remove remote fields
         delete updateData.last_modified; // Remove remote fields
 
-        await updateEntity(tableName, idField, remoteId, {
+        await pg.updateEntity(tableName, idField, remoteId, {
           ...updateData,
           synced_at: new Date(),
           sync_status: SYNC_STATUS.SYNCED
@@ -234,56 +221,17 @@ class SyncService {
 
   async getLocalItem(tableName, id, idField) {
     const pg = await getPg();
-    let query, params;
-
-    if (Array.isArray(idField)) {
-      // Composite key
-      const conditions = idField.map((field, index) => `${field} = $${index + 1}`).join(' AND ');
-      query = `SELECT * FROM ${tableName} WHERE ${conditions}`;
-      params = id;
-    } else {
-      query = `SELECT * FROM ${tableName} WHERE ${idField} = $1`;
-      params = [id];
-    }
-
-    const res = await pg.query(query, params);
-    return res.rows[0];
+    return await pg.getLocalItem(tableName, id, idField);
   }
 
   async insertLocalItem(tableName, data) {
     const pg = await getPg();
-
-    // Generate UUID for ID if not present
-    const itemData = { ...data };
-    const idField = SYNC_TABLES[tableName];
-    const idKey = Array.isArray(idField) ? idField[0] : idField;
-    if (!itemData[idKey]) {
-      itemData[idKey] = generateUUID();
-    }
-
-    const fields = Object.keys(itemData);
-    const values = Object.values(itemData);
-    const placeholders = fields.map((_, i) => `$${i + 1}`);
-
-    const query = `INSERT INTO ${tableName} (${fields.join(', ')}) VALUES (${placeholders.join(', ')})`;
-    await pg.query(query, values);
+    return await pg.insertLocalItem(tableName, data);
   }
 
   async resolveConflict(localItem, remoteItem) {
-    // Version-based conflict resolution
-    const localVersion = localItem.version || 0;
-    const remoteVersion = remoteItem.version || 0;
-
-    if (localVersion > remoteVersion) {
-      return localItem;
-    } else if (remoteVersion > localVersion) {
-      return remoteItem;
-    } else {
-      // Same version, use timestamp
-      const localTime = new Date(localItem.last_modified);
-      const remoteTime = new Date(remoteItem.last_modified);
-      return localTime > remoteTime ? localItem : remoteItem;
-    }
+    const pg = await getPg();
+    return await pg.resolveConflict(localItem, remoteItem);
   }
 
   // Manual sync trigger
@@ -314,18 +262,7 @@ class SyncService {
   // Delete local item
   async deleteLocalItem(tableName, idField, id) {
     const pg = await getPg();
-    let query, params;
-
-    if (Array.isArray(idField)) {
-      const conditions = idField.map((field, index) => `${field} = $${index + 1}`).join(' AND ');
-      query = `DELETE FROM ${tableName} WHERE ${conditions}`;
-      params = id;
-    } else {
-      query = `DELETE FROM ${tableName} WHERE ${idField} = $1`;
-      params = [id];
-    }
-
-    await pg.query(query, params);
+    await pg.deleteLocalItem(tableName, idField, id);
   }
 }
 

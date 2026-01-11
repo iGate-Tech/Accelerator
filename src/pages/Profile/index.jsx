@@ -26,7 +26,7 @@ const Profile = () => {
   // Redirect if not authenticated
   createEffect(() => {
     if (!isAuthenticated()) {
-      navigate('/login', { replace: true });
+      navigate('/auth/login', { replace: true });
     }
   });
 
@@ -36,10 +36,20 @@ const Profile = () => {
       // Refresh profile data
       await checkAuth();
 
-      const userCredits = await getUserCredits(user().id);
-      setCredits(userCredits);
-      const balance = await getUserCreditBalance(user().id);
-      setCreditBalance(balance);
+      try {
+        const userCredits = await getUserCredits(user().id);
+        setCredits(userCredits || []);
+      } catch (e) {
+        console.error('Error loading credits:', e);
+        setCredits([]);
+      }
+      try {
+        const balance = await getUserCreditBalance(user().id);
+        setCreditBalance(balance);
+      } catch (e) {
+        console.error('Error loading credit balance:', e);
+        setCreditBalance(0);
+      }
     }
   });
 
@@ -380,7 +390,7 @@ const Profile = () => {
                   {t().recentActivity}
                 </h3>
                 <div class="space-y-3">
-                  {credits().slice(0, 5).map((transaction) => (
+                   {(credits() || []).slice(0, 5).map((transaction) => (
                     <div class="flex items-center gap-4 p-3 bg-base-200 rounded-lg">
                       <div class={`p-2 rounded-full ${transaction.amount > 0 ? 'bg-success/20 text-success' : 'bg-error/20 text-error'}`}>
                         <i data-lucide={transaction.amount > 0 ? 'plus' : 'minus'} class="w-4 h-4"></i>
@@ -396,7 +406,7 @@ const Profile = () => {
                       </div>
                     </div>
                   ))}
-                  {credits().length === 0 && (
+                   {(credits() || []).length === 0 && (
                     <div class="text-center py-8 text-base-content/60">
                       <i data-lucide="inbox" class="w-8 h-8 mx-auto mb-2 opacity-50"></i>
                       <p>{t().noRecentActivity}</p>

@@ -17,12 +17,13 @@ const Login = () => {
   let eyeButton;
   const [loading, setLoading] = createSignal(false);
 
-  // Redirect if already authenticated
-  createEffect(() => {
-    if (isAuthenticated()) {
-      navigate('/dashboard', { replace: true });
-    }
-  });
+   // Redirect if already authenticated
+   createEffect(() => {
+     console.log('Login createEffect running, isAuthenticated:', isAuthenticated());
+     if (isAuthenticated()) {
+       navigate('/dashboard', { replace: true });
+     }
+   });
 
   // Update eye icon when showPassword changes
   createEffect(() => {
@@ -51,10 +52,11 @@ const Login = () => {
 
     try {
       const success = await login(sanitizedEmail, sanitizedPassword);
-      if (success) {
-        toastManager.success(`Login successful for ${sanitizedEmail}. Welcome back! Redirecting to dashboard.`);
-        navigate('/');
-      } else {
+       if (success) {
+         console.log('Login successful, isAuthenticated:', isAuthenticated());
+         toastManager.success(`Login successful for ${sanitizedEmail}. Welcome back!`);
+         // Navigation will be handled by the createEffect when auth state updates
+       } else {
         toastManager.error(`Invalid credentials for ${sanitizedEmail}. Please check your email and password.`);
       }
     } catch (err) {
@@ -176,12 +178,12 @@ const Login = () => {
 
           <div class="divider">OR</div>
 
-           <button class="btn btn-outline w-full" onClick={() => navigate('/signup')}>
+           <button class="btn btn-outline w-full" onClick={() => navigate('/auth/signup')}>
              {t().createNewAccount}
            </button>
 
            <div class="text-center text-sm text-base-content/60">
-             <a href="/forgot-password" class="link link-primary">{t().forgotPassword}</a>
+              <a href="/auth/forgot-password" class="link link-primary">{t().forgotPassword}</a>
            </div>
            </div>
          </div>

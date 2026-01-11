@@ -201,7 +201,7 @@ const Settings = () => {
       showMessage('Account deleted successfully. You will be logged out.');
       await signOut();
       // Navigate to login or home
-      navigate('/login');
+       navigate('/auth/login');
     } catch (error) {
       showMessage('Failed to delete account. Please contact support.', 'error');
       console.error('Delete account error:', error);
@@ -209,14 +209,24 @@ const Settings = () => {
   };
 
    onMount(async () => {
-     if (window.lucide) window.lucide.createIcons();
-      if (user()) {
-        const userProjects = await getProjects(user().id);
-        setProjects(userProjects);
-        const userCredits = await getUserCredits(user().id);
-        setCredits(userCredits);
-      }
-   });
+    if (window.lucide) window.lucide.createIcons();
+     if (user()) {
+       try {
+         const userProjects = await getProjects(user().id);
+         setProjects(userProjects || []);
+       } catch (e) {
+         console.error('Error loading projects:', e);
+         setProjects([]);
+       }
+       try {
+         const userCredits = await getUserCredits(user().id);
+         setCredits(userCredits || []);
+       } catch (e) {
+         console.error('Error loading credits:', e);
+         setCredits([]);
+       }
+     }
+  });
 
   createEffect(() => {
     if (window.lucide) window.lucide.createIcons();
@@ -391,12 +401,12 @@ const Settings = () => {
                 <div class="stats stats-vertical lg:stats-horizontal">
                      <div class="stat">
                        <div class="stat-title">Projects</div>
-                       <div class="stat-value">{projects().length}</div>
+                        <div class="stat-value">{(projects() || []).length}</div>
                        <div class="stat-desc">Active projects</div>
                      </div>
                       <div class="stat">
                         <div class="stat-title">Credits Used</div>
-                        <div class="stat-value">{credits().filter(c => c.type === 'usage').reduce((sum, c) => sum + Math.abs(c.amount), 0)}</div>
+                        <div class="stat-value">{(credits() || []).filter(c => c.type === 'usage').reduce((sum, c) => sum + Math.abs(c.amount), 0)}</div>
                         <div class="stat-desc">This month</div>
                       </div>
                      <div class="stat">

@@ -454,7 +454,7 @@ const Navbar = () => {
 
               <li class="border-t border-base-200 my-1"></li>
               <li class="hover:bg-error/10 hover:text-error transition-colors duration-200 rounded-lg mx-2 my-1">
-                <button onClick={async () => { await logout(); navigate('/login'); }} class="flex items-center gap-3 w-full text-left px-4 py-3 font-medium">
+                <button onClick={async () => { await logout(); navigate('/auth/login'); }} class="flex items-center gap-3 w-full text-left px-4 py-3 font-medium">
                   <i data-lucide="log-out" class="w-5 h-5"></i> Logout
                 </button>
               </li>

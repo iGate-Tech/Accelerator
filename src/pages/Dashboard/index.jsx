@@ -16,7 +16,7 @@ const Dashboard = () => {
   // Redirect if not authenticated
   createEffect(() => {
     if (!isAuthenticated()) {
-      navigate('/login', { replace: true });
+      navigate('/auth/login', { replace: true });
     }
   });
 

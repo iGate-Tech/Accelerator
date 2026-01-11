@@ -29,7 +29,7 @@ const ForgotPassword = () => {
       if (result.success) {
         toastManager.success(`Password reset request processed for ${email()}. If an account with this email exists, a reset link has been sent. Check your inbox and spam folder.`);
         setTimeout(() => {
-          navigate('/login');
+          navigate('/auth/login');
         }, 3000);
       } else {
         toastManager.error(`Failed to send reset email to ${email()}. ${result.error}`);
@@ -82,7 +82,7 @@ const ForgotPassword = () => {
             </form>
 
             <div class="text-center">
-              <button class="btn btn-ghost btn-sm" onClick={() => navigate('/login')}>
+              <button class="btn btn-ghost btn-sm" onClick={() => navigate('/auth/login')}>
                 {t().backToLogin}
               </button>
             </div>

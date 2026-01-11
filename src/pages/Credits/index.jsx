@@ -10,7 +10,12 @@ const Credits = () => {
     () => user()?.id,
     async (userId) => {
       if (!userId) return 0;
-      return await getCreditBalance(userId);
+      try {
+        return await getCreditBalance(userId);
+      } catch (e) {
+        console.error('Error fetching balance:', e);
+        return 0;
+      }
     }
   );
 
@@ -18,7 +23,12 @@ const Credits = () => {
     () => user()?.id,
     async (userId) => {
       if (!userId) return [];
-      return await getCreditTransactions(userId);
+      try {
+        return await getCreditTransactions(userId);
+      } catch (e) {
+        console.error('Error fetching transactions:', e);
+        return [];
+      }
     }
   );
 
@@ -56,15 +66,15 @@ const Credits = () => {
   };
 
   const exportCSV = () => {
-    const transactions = credits() || [];
-    if (transactions.length === 0) {
+    const csvTransactions = transactions() || [];
+    if (csvTransactions.length === 0) {
       toastManager.info('No transactions to export');
       return;
     }
 
     const csvContent = [
       ['Date', 'Type', 'Description', 'Amount', 'Balance After'],
-      ...transactions.map(t => [
+      ...csvTransactions.map(t => [
         new Date(t.date).toLocaleDateString(),
         t.type,
         t.description,
@@ -110,13 +120,13 @@ const Credits = () => {
                   <h2 class="text-2xl font-bold text-base-content mb-2">Available Credits</h2>
                   <div class="flex items-baseline">
                     <span class="text-5xl font-bold text-success">
-                      <Show when={!balance.loading} fallback={<span class="loading loading-spinner loading-lg"></span>}>
-                        {balance()}
-                      </Show>
+                       <Show when={!balance.loading} fallback={<span class="loading loading-spinner loading-lg"></span>}>
+                         {balance() || 0}
+                       </Show>
                     </span>
                     <span class="text-xl text-base-content/60 ml-2">credits</span>
                   </div>
-                  <p class="text-base-content/70 mt-2">≈ ${(balance() * 0.1).toFixed(2)} worth of AI processing</p>
+                   <p class="text-base-content/70 mt-2">≈ ${(((balance() || 0) * 0.1).toFixed(2))} worth of AI processing</p>
                 </div>
                 <div class="text-8xl text-base-content/10">⚡</div>
               </div>
@@ -217,7 +227,7 @@ const Credits = () => {
                 <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
               </div>
             }>
-              <Show when={transactions().length > 0} fallback={
+               <Show when={transactions() && transactions().length > 0} fallback={
                 <div class="text-center py-12">
                   <div class="text-6xl mb-4">📊</div>
                   <h3 class="text-xl font-semibold text-base-content mb-2">No transactions yet</h3>

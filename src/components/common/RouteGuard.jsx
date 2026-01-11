@@ -6,21 +6,21 @@ const RouteGuard = (props) => {
   const { isAuthenticated } = useUser();
   const navigate = useNavigate();
 
-  createEffect(() => {
-    if (props.requireAuth && !isAuthenticated()) {
-      navigate('/login');
-    } else if (props.requireGuest && isAuthenticated() && window.location.pathname !== '/login' && window.location.pathname !== '/signup') {
-      navigate('/');
-    }
-  });
+   createEffect(() => {
+     if (props.requireAuth && !isAuthenticated()) {
+       navigate('/auth/login');
+     } else if (props.requireGuest && isAuthenticated() && window.location.pathname !== '/auth/login' && window.location.pathname !== '/auth/signup') {
+       navigate('/');
+     }
+   });
 
-  onMount(() => {
-    if (props.requireAuth && !isAuthenticated()) {
-      navigate('/login');
-    } else if (props.requireGuest && isAuthenticated() && window.location.pathname !== '/login' && window.location.pathname !== '/signup') {
-      navigate('/');
-    }
-  });
+   onMount(() => {
+     if (props.requireAuth && !isAuthenticated()) {
+       navigate('/auth/login');
+     } else if (props.requireGuest && isAuthenticated() && window.location.pathname !== '/auth/login' && window.location.pathname !== '/auth/signup') {
+       navigate('/');
+     }
+   });
 
   return props.children;
 };

@@ -28,36 +28,36 @@ const Invitations = lazy(() => import("./pages/Invitations"));
 
 const ProtectedRoute = (props) => {
   const { isAuthenticated } = useUser();
-  return isAuthenticated() ? props.children : <Navigate href="/login" />;
+  return isAuthenticated() ? props.children : <Navigate href="/auth/login" />;
 };
 
 const AppRoutes = () => {
   return (
     <Router>
-      <Route path="/" component={MainLayout}>
-        <Route path="" component={() => <ProtectedRoute><Home /></ProtectedRoute>} />
-        <Route path="dashboard" component={() => <ProtectedRoute><Dashboard /></ProtectedRoute>} />
-        <Route path="explore" component={() => <ProtectedRoute><Explore /></ProtectedRoute>} />
-        <Route path="portfolio" component={() => <ProtectedRoute><Portfolio /></ProtectedRoute>} />
-        <Route path="help" component={Help} />
-        <Route path="profile" component={() => <ProtectedRoute><Profile /></ProtectedRoute>} />
-        <Route path="settings" component={() => <ProtectedRoute><Settings /></ProtectedRoute>} />
-        <Route path="packages" component={() => <ProtectedRoute><Packages /></ProtectedRoute>} />
-        <Route path="credits" component={() => <ProtectedRoute><Credits /></ProtectedRoute>} />
-        <Route path="billing" component={() => <ProtectedRoute><Billing /></ProtectedRoute>} />
-        <Route path="privacy-policy" component={PrivacyPolicy} />
-        <Route path="terms-of-service" component={TermsOfService} />
-        <Route path="status" component={StatusPage} />
-        <Route path="changelog" component={Changelog} />
-        <Route path="notifications" component={Notifications} />
-        <Route path="invitations" component={() => <ProtectedRoute><Invitations /></ProtectedRoute>} />
-      </Route>
-      <Route path="/" component={AuthLayout}>
-        <Route path="login" component={Login} />
-        <Route path="signup" component={Signup} />
-        <Route path="forgot-password" component={ForgotPassword} />
-        <Route path="onboarding" component={Onboarding} />
-      </Route>
+       <Route path="/" component={MainLayout}>
+         <Route path="" component={() => <ProtectedRoute><Home /></ProtectedRoute>} />
+         <Route path="dashboard" component={() => <ProtectedRoute><Dashboard /></ProtectedRoute>} />
+         <Route path="explore" component={() => <ProtectedRoute><Explore /></ProtectedRoute>} />
+         <Route path="portfolio" component={() => <ProtectedRoute><Portfolio /></ProtectedRoute>} />
+         <Route path="help" component={Help} />
+         <Route path="profile" component={() => <ProtectedRoute><Profile /></ProtectedRoute>} />
+         <Route path="settings" component={() => <ProtectedRoute><Settings /></ProtectedRoute>} />
+         <Route path="packages" component={() => <ProtectedRoute><Packages /></ProtectedRoute>} />
+         <Route path="credits" component={() => <ProtectedRoute><Credits /></ProtectedRoute>} />
+         <Route path="billing" component={() => <ProtectedRoute><Billing /></ProtectedRoute>} />
+         <Route path="privacy-policy" component={PrivacyPolicy} />
+         <Route path="terms-of-service" component={TermsOfService} />
+         <Route path="status" component={StatusPage} />
+         <Route path="changelog" component={Changelog} />
+         <Route path="notifications" component={Notifications} />
+         <Route path="invitations" component={() => <ProtectedRoute><Invitations /></ProtectedRoute>} />
+       </Route>
+       <Route path="/auth" component={AuthLayout}>
+         <Route path="/login" component={Login} />
+         <Route path="/signup" component={Signup} />
+         <Route path="/forgot-password" component={ForgotPassword} />
+         <Route path="/onboarding" component={Onboarding} />
+       </Route>
     </Router>
   );
 };

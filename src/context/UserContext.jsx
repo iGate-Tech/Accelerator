@@ -65,11 +65,11 @@ export const UserProvider = (props) => {
       // Update local state first
       setUser(prev => ({ ...prev, profile: { ...prev.profile, preferences: { ...prev.preferences, ...preferenceUpdates } } }));
 
-      // Update database
-      await updateEntity('profiles', 'id', user().id, {
-        preferences: { ...user().profile.preferences, ...preferenceUpdates },
-        last_modified: new Date()
-      });
+       // Update database
+       await updateEntity('profiles', 'user_id', user().id, {
+         preferences: { ...user().profile.preferences, ...preferenceUpdates },
+         last_modified: new Date()
+       });
     } catch (error) {
       console.error('Error updating preferences:', error);
       // Revert local state on error
@@ -115,8 +115,29 @@ export const UserProvider = (props) => {
   const login = async (email, password) => {
     try {
       const data = await signIn(email, password);
-      if (data && data.user) {
-        // Session will be set by onAuthStateChange
+      console.log('signIn result:', { user: !!data?.user, session: !!data?.session });
+      if (data && data.user && data.session) {
+        // Manually set auth state to ensure immediate update
+        setSession(data.session);
+        setIsAuthenticated(true);
+        setUser({
+          id: data.session.user.id,
+          email: data.session.user.email,
+          avatar: data.session.user.user_metadata?.avatar_url || avatar,
+          profile: {
+            name: data.session.user.user_metadata?.name || data.session.user.email.split('@')[0],
+            email: data.session.user.email,
+            bio: data.session.user.user_metadata?.bio || '',
+            joinDate: data.session.user.created_at,
+            ...data.session.user.user_metadata
+          },
+          preferences: {
+            notifications: { email: true, browser: false, projectUpdates: true },
+            privacy: { profileVisibility: 'private', dataSharing: false }
+          },
+          subscription: { plan: 'free', status: 'active', price: 0, renewalDate: null, maxCredits: 100 },
+          credits: { balance: 0, transactions: [] }
+        });
         return true;
       }
       return false;
@@ -291,23 +312,28 @@ export const UserProvider = (props) => {
 
     // Listen for auth state changes
     supabase.auth.onAuthStateChange((event, session) => {
-      setSession(session);
-      if (session) {
-        setUser({
-          id: session.user.id,
-          email: session.user.email,
-          profile: session.user.user_metadata || {},
-          preferences: {
-            notifications: { email: true, browser: false, projectUpdates: true },
-            privacy: { profileVisibility: 'private', dataSharing: false }
-          },
-          subscription: { plan: 'free', status: 'active', price: 0, renewalDate: null, maxCredits: 100 },
-          credits: { balance: 0, transactions: [] }
-        });
-        setIsAuthenticated(true);
-      } else {
-        setUser(null);
-        setIsAuthenticated(false);
+      try {
+        console.log('onAuthStateChange:', event, !!session, session?.user?.email);
+        setSession(session);
+        if (session) {
+          setUser({
+            id: session.user.id,
+            email: session.user.email,
+            profile: session.user.user_metadata || {},
+            preferences: {
+              notifications: { email: true, browser: false, projectUpdates: true },
+              privacy: { profileVisibility: 'private', dataSharing: false }
+            },
+            subscription: { plan: 'free', status: 'active', price: 0, renewalDate: null, maxCredits: 100 },
+            credits: { balance: 0, transactions: [] }
+          });
+          setIsAuthenticated(true);
+        } else {
+          setUser(null);
+          setIsAuthenticated(false);
+        }
+      } catch (error) {
+        console.error('onAuthStateChange error:', error);
       }
     });
   });

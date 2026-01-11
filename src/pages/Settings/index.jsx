@@ -102,8 +102,10 @@ const Settings = () => {
     setUploadingAvatar(true);
     try {
       const fileExt = avatarFile().name.split('.').pop();
-      const fileName = `${user().id}_${Date.now()}.${fileExt}`;
-      const filePath = `avatars/${fileName}`;
+      const fileName = `${Date.now()}.${fileExt}`;
+      const filePath = `${user().id}/${fileName}`;
+
+      console.log('Attempting to upload file:', filePath, 'to bucket: avatars');
 
       // Upload to Supabase Storage
       const { data, error } = await supabase.storage
@@ -113,13 +115,18 @@ const Settings = () => {
           upsert: false
         });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Supabase storage upload error:', error);
+        throw error;
+      }
 
+      console.log('Upload successful, getting public URL...');
       // Get public URL
       const { data: { publicUrl } } = supabase.storage
         .from('avatars')
         .getPublicUrl(filePath);
 
+      console.log('Public URL obtained:', publicUrl);
       // Update user profile
       await updateProfile({ avatar: publicUrl });
 
@@ -128,7 +135,7 @@ const Settings = () => {
       showMessage('Avatar updated successfully');
     } catch (error) {
       console.error('Avatar upload error:', error);
-      showMessage('Failed to upload avatar', 'error');
+      showMessage(`Failed to upload avatar: ${error.message}`, 'error');
     } finally {
       setUploadingAvatar(false);
     }

@@ -380,6 +380,7 @@ function resetTemplatePlaceholders(templateText, options = {}) {
 
     let inString = false;
     let escaped = false;
+    let braceCount = 0;
     let found = false;
 
     // Scan until }}

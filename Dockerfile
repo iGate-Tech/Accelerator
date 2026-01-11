@@ -24,7 +24,7 @@ RUN adduser -S solidjs -u 1001
 RUN chown -R solidjs:nodejs /app
 USER solidjs
 
-# Expose port
+# Expose port (will be overridden by PORT env var)
 EXPOSE 3000
 
 # Start the application

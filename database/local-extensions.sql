@@ -1,0 +1,84 @@
+-- Local Extensions
+-- This file contains PGLite/local-specific additions to the base schema
+-- Run after base.sql
+
+-- Users table for local authentication
+CREATE TABLE IF NOT EXISTS users (
+  id TEXT PRIMARY KEY,
+  email TEXT UNIQUE NOT NULL,
+  password_hash TEXT,
+  avatar TEXT DEFAULT '/src/assets/avatar.png',
+  profile JSONB,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  synced_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  last_modified TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  sync_status TEXT DEFAULT 'local'
+);
+
+-- Sessions table for local sessions
+CREATE TABLE IF NOT EXISTS sessions (
+  id BIGSERIAL PRIMARY KEY,
+  user_id TEXT REFERENCES users(id) ON DELETE CASCADE,
+  session_data JSONB,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  synced_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  last_modified TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  sync_status TEXT DEFAULT 'local'
+);
+
+-- Add sync columns if missing (for existing databases)
+ALTER TABLE users ADD COLUMN IF NOT EXISTS deleted_at TIMESTAMP;
+ALTER TABLE users ADD COLUMN IF NOT EXISTS version INTEGER DEFAULT 1;
+
+ALTER TABLE sessions ADD COLUMN IF NOT EXISTS deleted_at TIMESTAMP;
+ALTER TABLE sessions ADD COLUMN IF NOT EXISTS version INTEGER DEFAULT 1;
+
+-- Add to all sync tables
+ALTER TABLE projects ADD COLUMN IF NOT EXISTS deleted_at TIMESTAMP;
+ALTER TABLE projects ADD COLUMN IF NOT EXISTS version INTEGER DEFAULT 1;
+
+ALTER TABLE tasks ADD COLUMN IF NOT EXISTS deleted_at TIMESTAMP;
+ALTER TABLE tasks ADD COLUMN IF NOT EXISTS version INTEGER DEFAULT 1;
+
+ALTER TABLE groups ADD COLUMN IF NOT EXISTS deleted_at TIMESTAMP;
+ALTER TABLE groups ADD COLUMN IF NOT EXISTS version INTEGER DEFAULT 1;
+
+ALTER TABLE project_groups ADD COLUMN IF NOT EXISTS deleted_at TIMESTAMP;
+ALTER TABLE project_groups ADD COLUMN IF NOT EXISTS version INTEGER DEFAULT 1;
+
+ALTER TABLE credits ADD COLUMN IF NOT EXISTS deleted_at TIMESTAMP;
+ALTER TABLE credits ADD COLUMN IF NOT EXISTS version INTEGER DEFAULT 1;
+
+ALTER TABLE billing ADD COLUMN IF NOT EXISTS deleted_at TIMESTAMP;
+ALTER TABLE billing ADD COLUMN IF NOT EXISTS version INTEGER DEFAULT 1;
+
+ALTER TABLE notifications ADD COLUMN IF NOT EXISTS deleted_at TIMESTAMP;
+ALTER TABLE notifications ADD COLUMN IF NOT EXISTS version INTEGER DEFAULT 1;
+
+ALTER TABLE packages ADD COLUMN IF NOT EXISTS deleted_at TIMESTAMP;
+ALTER TABLE packages ADD COLUMN IF NOT EXISTS version INTEGER DEFAULT 1;
+
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS deleted_at TIMESTAMP;
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS version INTEGER DEFAULT 1;
+
+ALTER TABLE user_subscriptions ADD COLUMN IF NOT EXISTS deleted_at TIMESTAMP;
+ALTER TABLE user_subscriptions ADD COLUMN IF NOT EXISTS version INTEGER DEFAULT 1;
+
+ALTER TABLE portfolio_collaborators ADD COLUMN IF NOT EXISTS deleted_at TIMESTAMP;
+ALTER TABLE portfolio_collaborators ADD COLUMN IF NOT EXISTS version INTEGER DEFAULT 1;
+
+ALTER TABLE portfolio_invitations ADD COLUMN IF NOT EXISTS deleted_at TIMESTAMP;
+ALTER TABLE portfolio_invitations ADD COLUMN IF NOT EXISTS version INTEGER DEFAULT 1;
+
+ALTER TABLE project_votes ADD COLUMN IF NOT EXISTS deleted_at TIMESTAMP;
+ALTER TABLE project_votes ADD COLUMN IF NOT EXISTS version INTEGER DEFAULT 1;
+ALTER TABLE project_votes ADD COLUMN IF NOT EXISTS sync_error TEXT;
+ALTER TABLE project_votes ADD COLUMN IF NOT EXISTS retry_count INTEGER DEFAULT 0;
+
+-- Change id columns to TEXT where needed for local flexibility
+ALTER TABLE credits ALTER COLUMN id TYPE TEXT;
+ALTER TABLE billing ALTER COLUMN id TYPE TEXT;
+ALTER TABLE notifications ALTER COLUMN id TYPE TEXT;
+ALTER TABLE packages ALTER COLUMN id TYPE TEXT;
+ALTER TABLE user_subscriptions ALTER COLUMN id TYPE TEXT;

@@ -13,7 +13,7 @@ export const getPg = async () => {
       new Worker(new URL('../workers/pglite-worker.js', import.meta.url), {
         type: 'module'
       }),
-      { dataDir: 'idb://accelerator-db-v18' }
+      { dataDir: 'idb://accelerator-db-v19' }
     );
     console.log('PGLiteWorker instance created');
 
@@ -98,21 +98,17 @@ export const updateEntity = async (table, idField, id, updates, options = { noTr
   values.push(id);
   const query = `UPDATE ${table} SET ${fields.join(', ')} WHERE ${idField} = $${paramIndex}`;
 
-   try {
-    const res = await pg.query(query, values);
-    console.log(`Updated ${table}:`, id, 'with query:', query, 'values:', values);
-    if (!options.noTrigger) {
-      triggerSync();
-    }
-    return { success: true, data: res.rows[0] };
-    } catch (error) {
-      console.log(`DB error in updateEntity for ${table}: ${error.message}`);
-      return { success: false, error: error.message };
-    }
-
-    if (!options.noTrigger) {
-      triggerSync();
-    }
+    try {
+     const res = await pg.query(query, values);
+     console.log(`Updated ${table}:`, id, 'with query:', query, 'values:', values);
+     if (!options.noTrigger) {
+       triggerSync();
+     }
+     return { success: true, data: res.rows[0] };
+     } catch (error) {
+       console.log(`DB error in updateEntity for ${table}: ${error.message}`);
+       return { success: false, error: error.message };
+     }
 };
 
   export const getTasks = async (project_id = null, userId = null) => {

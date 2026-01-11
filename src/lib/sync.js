@@ -10,17 +10,26 @@ export const SYNC_STATUS = {
   DELETED: 'deleted'
 };
 
-// Tables to sync with their primary key fields
-const SYNC_TABLES = {
-  projects: 'id',
-  tasks: 'id',
-  groups: 'id',
-  project_groups: 'project_id', // composite, but for update we'll use project_id or handle specially
-  credits: 'id',
-  billing: 'id',
-  notifications: 'id',
-  profiles: 'user_id'
-};
+// Generate UUID for local IDs
+function generateUUID() {
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+    const r = Math.random() * 16 | 0;
+    const v = c === 'x' ? r : (r & 0x3 | 0x8);
+    return v.toString(16);
+  });
+}
+
+// Tables to sync in dependency order (parents before children)
+const SYNC_TABLES = [
+  { name: 'projects', idField: 'id' },
+  { name: 'groups', idField: 'id' },
+  { name: 'tasks', idField: 'id' }, // depends on projects
+  { name: 'project_groups', idField: ['project_id', 'group_id'] }, // depends on projects, groups
+  { name: 'credits', idField: 'id' },
+  { name: 'billing', idField: 'id' },
+  { name: 'notifications', idField: 'id' },
+  { name: 'profiles', idField: 'user_id' }
+];
 
 // Reactive sync status
 export const [syncInProgress, setSyncInProgress] = createSignal(false);
@@ -28,7 +37,7 @@ export const [syncInProgress, setSyncInProgress] = createSignal(false);
 class SyncService {
   constructor() {
     this.isOnline = navigator.onLine;
-    this.lastSyncTime = null;
+    this.lastSyncTime = {}; // Per-table last sync time
     this.syncTimeout = null;
 
     // Listen for online/offline events
@@ -49,19 +58,6 @@ class SyncService {
   async performSync() {
     if (!this.isOnline || syncInProgress()) return;
 
-    // Refresh session to ensure valid token
-    try {
-      console.log('Refreshing session...');
-      const { data, error } = await supabase.auth.refreshSession();
-      if (error) {
-        console.log('Session refresh error:', error);
-      } else {
-        console.log('Session refreshed successfully');
-      }
-    } catch (error) {
-      console.log('Session refresh failed:', error);
-    }
-
     // Check if user is authenticated
     const user = await getCurrentUser();
     console.log('Sync check user:', user);
@@ -74,11 +70,11 @@ class SyncService {
     console.log('Starting sync...');
 
     try {
-      for (const [table, idField] of Object.entries(SYNC_TABLES)) {
+      // Sync tables sequentially to respect foreign key dependencies
+      for (const { name: table, idField } of SYNC_TABLES) {
         await this.syncTable(table, idField);
       }
 
-      this.lastSyncTime = new Date();
       console.log('Sync completed successfully');
     } catch (error) {
       console.error('Sync failed:', error);
@@ -99,18 +95,17 @@ class SyncService {
   async syncTable(tableName, idField) {
     console.log(`Syncing table: ${tableName}`);
 
-    // Get local changes (modified after last sync)
+    // Always get local changes
     const localChanges = await this.getLocalChanges(tableName);
 
-    if (localChanges.length > 0) {
-      // Get remote changes only if there are local changes
-      const remoteChanges = await this.getRemoteChanges(tableName);
+    // Always get remote changes (rely on RLS for filtering)
+    const remoteChanges = await this.getRemoteChanges(tableName);
 
-      // Resolve conflicts and apply changes
-      await this.applyChanges(tableName, idField, localChanges, remoteChanges);
-    } else {
-      console.log(`No local changes for ${tableName}, skipping sync`);
-    }
+    // Resolve conflicts and apply changes
+    await this.applyChanges(tableName, idField, localChanges, remoteChanges);
+
+    // Update last sync time for this table
+    this.lastSyncTime[tableName] = new Date();
   }
 
   async getLocalChanges(tableName) {
@@ -124,17 +119,14 @@ class SyncService {
   }
 
   async getRemoteChanges(tableName) {
-    const user = await getCurrentUser();
-    if (!user) return [];
-
-    // Get changes from Supabase since last sync
-    const lastSync = this.lastSyncTime || new Date(0);
-    const allChanges = await selectFromSupabase(tableName, {
+    // Get changes from Supabase since last sync for this table
+    const lastSync = this.lastSyncTime[tableName] || new Date(0);
+    const changes = await selectFromSupabase(tableName, {
       gt: { last_modified: lastSync.toISOString() }
     });
 
-    // Filter by user_id client-side to avoid query issues
-    return allChanges.filter(item => item.user_id === user.id);
+    // RLS handles user filtering, no client-side filtering needed
+    return changes;
   }
 
   async applyChanges(tableName, idField, localChanges, remoteChanges) {
@@ -150,51 +142,71 @@ class SyncService {
   }
 
   async uploadToRemote(tableName, idField, localItem) {
-    try {
-      const user = await getCurrentUser();
-      if (!user) {
-        throw new Error('User not authenticated');
-      }
+    const maxRetries = 3;
+    let retryCount = localItem.retry_count || 0;
 
-      const itemId = localItem[idField];
-      const remoteData = { ...localItem, user_id: user.id };
-      delete remoteData.sync_status; // Remove local fields
-      delete remoteData.synced_at; // Remove local fields
-      delete remoteData.last_modified; // Remove local fields
+    for (let attempt = 0; attempt <= maxRetries; attempt++) {
+      try {
+        const user = await getCurrentUser();
+        if (!user) {
+          throw new Error('User not authenticated');
+        }
 
-      if (localItem.sync_status === SYNC_STATUS.DELETED) {
-        await deleteFromSupabase(tableName, itemId, idField);
-      } else if (itemId) {
-        await updateInSupabase(tableName, itemId, remoteData, idField);
-      } else {
-        const result = await insertIntoSupabase(tableName, remoteData);
-        // Update local with remote ID if it was generated
-        if (result && result[0] && result[0][idField] !== itemId) {
-          await updateEntity(tableName, idField, itemId, { [idField]: result[0][idField] }, { noTrigger: true });
+        const remoteData = { ...localItem };
+        delete remoteData.sync_status; // Remove local fields
+        delete remoteData.synced_at; // Remove local fields
+        // Keep last_modified for conflict resolution
+
+        if (localItem.deleted_at) {
+          // Soft delete: set deleted_at on remote
+          await updateInSupabase(tableName, this.getItemId(localItem, idField), { deleted_at: localItem.deleted_at, version: remoteData.version }, idField);
+        } else if (this.getItemId(localItem, idField)) {
+          await updateInSupabase(tableName, this.getItemId(localItem, idField), remoteData, idField);
+        } else {
+          const result = await insertIntoSupabase(tableName, remoteData);
+          // Local IDs are already UUIDs, no remapping needed
+        }
+
+        // Mark as synced and increment version
+        const updateData = {
+          synced_at: new Date(),
+          sync_status: SYNC_STATUS.SYNCED,
+          version: (localItem.version || 0) + 1,
+          retry_count: 0,
+          sync_error: null
+        };
+        await updateEntity(tableName, idField, this.getItemId(localItem, idField), updateData, { noTrigger: true });
+        return;
+
+      } catch (error) {
+        console.warn(`Upload attempt ${attempt + 1} failed for ${tableName} item:`, error.message);
+
+        if (attempt < maxRetries) {
+          // Exponential backoff
+          const delay = Math.min(1000 * Math.pow(2, attempt), 30000);
+          await new Promise(resolve => setTimeout(resolve, delay));
+          retryCount++;
+        } else {
+          // Mark as conflict with error details
+          await updateEntity(tableName, idField, this.getItemId(localItem, idField), {
+            sync_status: SYNC_STATUS.CONFLICT,
+            sync_error: error.message,
+            retry_count: retryCount + 1
+          });
         }
       }
-
-      // Mark as synced
-      await updateEntity(tableName, idField, itemId, {
-        synced_at: new Date(),
-        sync_status: SYNC_STATUS.SYNCED
-      }, { noTrigger: true });
-
-    } catch (error) {
-      console.error(`Failed to upload ${tableName} item ${localItem[idField]}:`, error);
-      // Mark as conflict
-      await updateEntity(tableName, idField, localItem[idField], {
-        sync_status: SYNC_STATUS.CONFLICT
-      });
     }
   }
 
   async downloadToLocal(tableName, idField, remoteItem) {
     try {
-      const remoteId = remoteItem[idField] || remoteItem.id;
+      const remoteId = this.getItemId(remoteItem, idField);
       const localItem = await this.getLocalItem(tableName, remoteId, idField);
 
-      if (!localItem) {
+      if (remoteItem.deleted_at && localItem) {
+        // Remote item is soft deleted, remove locally
+        await this.deleteLocalItem(tableName, idField, remoteId);
+      } else if (!localItem) {
         // Insert new item
         const localData = { ...remoteItem };
         delete localData.synced_at; // Remove remote fields
@@ -209,27 +221,48 @@ class SyncService {
         delete updateData.synced_at; // Remove remote fields
         delete updateData.last_modified; // Remove remote fields
 
-        await updateEntity(tableName, idField, localItem[idField], {
+        await updateEntity(tableName, idField, remoteId, {
           ...updateData,
           synced_at: new Date(),
           sync_status: SYNC_STATUS.SYNCED
         }, { noTrigger: true });
       }
     } catch (error) {
-      console.error(`Failed to download ${tableName} item ${remoteItem[idField] || remoteItem.id}:`, error);
+      console.error(`Failed to download ${tableName} item:`, error);
     }
   }
 
-  async getLocalItem(tableName, id, idField = 'id') {
+  async getLocalItem(tableName, id, idField) {
     const pg = await getPg();
-    const res = await pg.query(`SELECT * FROM ${tableName} WHERE ${idField} = $1`, [id]);
+    let query, params;
+
+    if (Array.isArray(idField)) {
+      // Composite key
+      const conditions = idField.map((field, index) => `${field} = $${index + 1}`).join(' AND ');
+      query = `SELECT * FROM ${tableName} WHERE ${conditions}`;
+      params = id;
+    } else {
+      query = `SELECT * FROM ${tableName} WHERE ${idField} = $1`;
+      params = [id];
+    }
+
+    const res = await pg.query(query, params);
     return res.rows[0];
   }
 
   async insertLocalItem(tableName, data) {
     const pg = await getPg();
-    const fields = Object.keys(data);
-    const values = Object.values(data);
+
+    // Generate UUID for ID if not present
+    const itemData = { ...data };
+    const idField = SYNC_TABLES[tableName];
+    const idKey = Array.isArray(idField) ? idField[0] : idField;
+    if (!itemData[idKey]) {
+      itemData[idKey] = generateUUID();
+    }
+
+    const fields = Object.keys(itemData);
+    const values = Object.values(itemData);
     const placeholders = fields.map((_, i) => `$${i + 1}`);
 
     const query = `INSERT INTO ${tableName} (${fields.join(', ')}) VALUES (${placeholders.join(', ')})`;
@@ -237,14 +270,19 @@ class SyncService {
   }
 
   async resolveConflict(localItem, remoteItem) {
-    // Last-write-wins strategy
-    const localTime = new Date(localItem.last_modified);
-    const remoteTime = new Date(remoteItem.last_modified);
+    // Version-based conflict resolution
+    const localVersion = localItem.version || 0;
+    const remoteVersion = remoteItem.version || 0;
 
-    if (localTime > remoteTime) {
+    if (localVersion > remoteVersion) {
       return localItem;
-    } else {
+    } else if (remoteVersion > localVersion) {
       return remoteItem;
+    } else {
+      // Same version, use timestamp
+      const localTime = new Date(localItem.last_modified);
+      const remoteTime = new Date(remoteItem.last_modified);
+      return localTime > remoteTime ? localItem : remoteItem;
     }
   }
 
@@ -263,6 +301,31 @@ class SyncService {
       syncInProgress: syncInProgress(),
       lastSyncTime: this.lastSyncTime
     };
+  }
+
+  // Helper to get item ID (handles composite keys)
+  getItemId(item, idField) {
+    if (Array.isArray(idField)) {
+      return idField.map(field => item[field]);
+    }
+    return item[idField] || item.id;
+  }
+
+  // Delete local item
+  async deleteLocalItem(tableName, idField, id) {
+    const pg = await getPg();
+    let query, params;
+
+    if (Array.isArray(idField)) {
+      const conditions = idField.map((field, index) => `${field} = $${index + 1}`).join(' AND ');
+      query = `DELETE FROM ${tableName} WHERE ${conditions}`;
+      params = id;
+    } else {
+      query = `DELETE FROM ${tableName} WHERE ${idField} = $1`;
+      params = [id];
+    }
+
+    await pg.query(query, params);
   }
 }
 

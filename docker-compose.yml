@@ -3,10 +3,11 @@ version: '3.8'
 services:
   app:
     build: .
-    expose:
-      - "4000"
+    ports:
+      - "4000:4000"
     environment:
       - NODE_ENV=production
+      - PORT=4000
 
     volumes:
       # Mount .env file for environment variables

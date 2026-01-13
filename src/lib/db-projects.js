@@ -43,7 +43,9 @@ export async function _createProject({ project, userId }) {
 
 export async function _getProjectById({ id }) {
   try {
+    console.log('Getting project by id:', id);
     const result = await dbInstance.query('SELECT * FROM projects WHERE id = $1', [id]);
+    console.log('Project query result:', result.rows);
     return result.rows[0] || null;
   } catch (err) {
     console.error('Error getting project by id:', err);

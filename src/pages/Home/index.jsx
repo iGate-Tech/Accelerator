@@ -376,7 +376,7 @@ const TasksContent = () => {
         const project = projectData();
         if (project && typeof project === 'object') {
           // Refetch tasks for the opened project
-          setTimeout(async () => {
+          (async () => {
             await refetch();
             logger.debug('Opened project', project.id, 'with context:', machineStore.context);
             logger.debug('Project tasks_list:', project.tasks_list);
@@ -426,7 +426,7 @@ const TasksContent = () => {
             } else {
               logger.debug('Tasks already exist or no tasks_list, not creating tasks');
             }
-          }, 100);
+          })();
         }
       });
 

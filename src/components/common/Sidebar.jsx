@@ -3,7 +3,7 @@ import { useContext, onMount, createSignal, createEffect, For, Show, createMemo 
 import { LangContext } from "../../context/LangContext";
 import { useUser } from "../../context/UserContext";
 import { translations } from "../../assets/translations/translations-index.js";
-import { getProjects, updateProject, deleteProject, deleteAllProjects, exportAllProjects } from "../../lib/db";
+import { getProjects, updateProject, deleteProject, deleteAllProjects, exportAllProjects, exportProject, exportReports } from "../../lib/db";
 // Removed sync imports
 import { toastManager } from "../../lib/feedback";
 import logger from "../../lib/logger.js";
@@ -18,6 +18,18 @@ const Sidebar = () => {
   const [projects, setProjects] = createSignal([]);
   const [searchQuery, setSearchQuery] = createSignal("");
   const [editingProjectId, setEditingProjectId] = createSignal(null);
+
+  const downloadJSON = (data, filename) => {
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
   // Removed sync status
 
   const [currentLang, setCurrentLang] = createSignal(lang());
@@ -490,8 +502,8 @@ const Sidebar = () => {
                         <li><a onclick={() => { setEditingProjectId(project.id); setTimeout(() => { const span = document.querySelector(`[data-project-id="${project.id}"]`); if (span) { span.focus(); const range = document.createRange(); range.selectNodeContents(span); const sel = window.getSelection(); sel.removeAllRanges(); sel.addRange(range); } }, 0); }}><i data-lucide="edit" class="w-4 h-4"></i>{t().rename}</a></li>
                         <li><a onclick={() => handleProjectAction('delete', project.id)}><i data-lucide="trash" class="w-4 h-4"></i>{t().delete}</a></li>
                         <li><a onclick={() => { window.dispatchEvent(new CustomEvent('openProject', { detail: project.id })); navigate('/'); }}><i data-lucide="folder-open" class="w-4 h-4"></i>{t().open}</a></li>
-                        <li><a onclick={() => toastManager.info(t().exportProject + ': ' + project.name)}><i data-lucide="download" class="w-4 h-4"></i>{t().exportProject}</a></li>
-                        <li><a onclick={() => toastManager.info(t().exportReports + ': ' + project.name)}><i data-lucide="file-text" class="w-4 h-4"></i>{t().exportReports}</a></li>
+                         <li><a onclick={async () => { try { const data = await exportProject(project.id); downloadJSON(data, `${project.name}-project.json`); toastManager.success(t().exportProject + ' ' + t().successful); } catch (error) { toastManager.error(t().exportProject + ' ' + t().failed); } }}><i data-lucide="download" class="w-4 h-4"></i>{t().exportProject}</a></li>
+                         <li><a onclick={async () => { try { const data = await exportReports(project.id); downloadJSON(data, `${project.name}-report.json`); toastManager.success(t().exportReports + ' ' + t().successful); } catch (error) { toastManager.error(t().exportReports + ' ' + t().failed); } }}><i data-lucide="file-text" class="w-4 h-4"></i>{t().exportReports}</a></li>
                       </ul>
                     </li>
                   )}

@@ -277,8 +277,51 @@ export const exportAllProjects = async (userId = null) => {
     const user = await getCurrentUser();
     userId = user?.id;
   }
+  if (!userId) return null;
   const { _exportAllProjects } = await import('./db-groups.js');
   return await _exportAllProjects({ userId });
+};
+
+export const exportProject = async (projectId) => {
+  try {
+    const project = await getProjectById(projectId);
+    if (!project) throw new Error('Project not found');
+    const tasks = await getTasks(projectId);
+    return {
+      project,
+      tasks,
+      exportedAt: new Date().toISOString()
+    };
+  } catch (error) {
+    console.error('Export project failed:', error);
+    throw error;
+  }
+};
+
+export const exportReports = async (projectId) => {
+  try {
+    const project = await getProjectById(projectId);
+    if (!project) throw new Error('Project not found');
+    const tasks = await getTasks(projectId);
+    const completedTasks = tasks.filter(t => t.status === 'completed').length;
+    const totalTasks = tasks.length;
+    const progress = totalTasks > 0 ? (completedTasks / totalTasks) * 100 : 0;
+    return {
+      projectName: project.name,
+      description: project.description,
+      status: project.uiStatus,
+      progress: `${progress.toFixed(1)}%`,
+      totalTasks,
+      completedTasks,
+      creditsUsed: project.consumedCredits || 0,
+      timeSpent: project.consumedTime || 0,
+      createdAt: project.createdAt,
+      exportedAt: new Date().toISOString()
+    };
+  } catch (error) {
+    console.error('Export reports failed:', error);
+    throw error;
+  }
 };
 
 export const addProjectToGroup = async (projectId, groupId) => {

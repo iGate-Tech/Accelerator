@@ -448,10 +448,20 @@ const TasksContent = () => {
              }
          });
 
-         // Listen for reset agent
-         window.addEventListener('resetAgent', () => {
-             handleReset();
-         });
+          // Listen for reset agent
+          window.addEventListener('resetAgent', () => {
+              handleReset();
+          });
+
+          // Listen for open project
+          console.log('Home: adding openProject listener');
+          window.addEventListener('openProject', (e) => {
+              const pid = e.detail;
+              console.log('Home: openProject event received', pid);
+              // Save selected project to user profile
+              updateEntity({ table: 'profiles', idField: 'user_id', id: user().id, updates: { current_project_id: pid } });
+              setCurrentProjectId(pid);
+          });
 
          // Create Lucide icons after a delay to ensure script loaded
           setTimeout(() => {

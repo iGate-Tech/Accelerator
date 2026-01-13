@@ -246,12 +246,7 @@ const AgentInterface = (props) => { // Defensive checks for required props
                                          props.handleResume
                                      }/>
                              </Show>
-                             <Show when={props.machineStore.state === "processing" && props.streamingContent && props.streamingContent().trim()}>
-                                 <div class="mt-4 p-4 bg-base-200 rounded-lg">
-                                     <h3 class="text-sm font-semibold mb-2">AI Processing...</h3>
-                                     <div class="text-sm whitespace-pre-wrap">{props.streamingContent()}</div>
-                                 </div>
-                             </Show>
+
                              {/* Form */}
                             <Show when={
                                 props.tasksList && props.tasksList().length === 0
@@ -299,37 +294,9 @@ const AgentInterface = (props) => { // Defensive checks for required props
                                                 }
                                             }
                                         }
-                                        disabled={
-                                            props.machineStore ? props.machineStore.state !== "idle" : true
-                                    }></textarea>
-                            <Show when={
-                                props.machineStore && props.machineStore.state === "pause"
-                            }>
-                                <div class="text-warning text-sm mt-2">
-                                    {
-                                    t().agentPaused
-                                }</div>
-                            </Show>
-                            <Show when={
-                                props.machineStore && props.machineStore.state === "error"
-                            }>
-                                <div class="text-error text-sm mt-2">
-                                    Processing error: {
-                                    props.machineStore.context ?. uiMessage || 'Unknown error occurred'
-                                } </div>
-                            </Show>
-                            <div ref={buttonsRef}
-                                class="flex justify-between items-center mt-2">
-                                <div class="flex gap-2">
-                                    <Show when={
-                                        props.machineStore && props.machineStore.state === "idle"
-                                    }>
-                                        <button type="button"
-                                            onClick={
-                                                (e) => {
-                                                    handleButtonPress(e.currentTarget);
-                                                    props.handleImprove && props.handleImprove();
-                                                }
+                                         disabled={
+                                             props.machineStore ? props.machineStore.state !== "idle" && props.machineStore.state !== "processing" : true
+                                         }
                                             }
                                             onMouseEnter={
                                                 (e) => handleButtonHover(e.currentTarget)

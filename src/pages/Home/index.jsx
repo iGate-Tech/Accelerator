@@ -272,13 +272,13 @@ const TasksContent = () => {
             }
             const sanitizedPrompt = promptValidation.sanitized;
 
-            // Consume credits
-            const creditsCost = 10;
-            const balance = await getCreditBalance(user().id);
-            if (balance < creditsCost) {
-                throw new Error('Insufficient credits. You need at least ' + creditsCost + ' credits to use AI features.');
-            }
-            await consumeCredits(user().id, creditsCost, `AI Processing: ${sanitizedPrompt.substring(0, 50)}...`);
+            // Consume credits (free for testing)
+            const creditsCost = 0;
+            // const balance = await getCreditBalance(user().id);
+            // if (balance < creditsCost) {
+            //     throw new Error('Insufficient credits. You need at least ' + creditsCost + ' credits to use AI features.');
+            // }
+            // await consumeCredits(user().id, creditsCost, `AI Processing: ${sanitizedPrompt.substring(0, 50)}...`);
 
             // Log activity
             if (activityLogger.user) {
@@ -298,17 +298,17 @@ const TasksContent = () => {
                 throw new Error(`API request failed: ${response.status} ${response.statusText}`);
             }
 
-            const reader = response.body.getReader();
-            const decoder = new TextDecoder();
-            let aiResponse = '';
+             const reader = response.body.getReader();
+             const decoder = new TextDecoder();
+             let aiResponse = '';
 
-            while (true) {
-                const { done, value } = await reader.read();
-                if (done) break;
-                const chunk = decoder.decode(value);
-                aiResponse += chunk;
-                setStreamingContent(aiResponse);
-            }
+             while (true) {
+                 const { done, value } = await reader.read();
+                 if (done) break;
+                 const chunk = decoder.decode(value);
+                 aiResponse += chunk;
+                 setPrompt(aiResponse);
+             }
 
             // After streaming, process the response
             await receiveResponse(aiResponse, setAutoProgress, setTasksList, tasksList, addTask, updateProject, currentProjectId());

@@ -608,6 +608,7 @@ const TasksContent = () => {
                  cardRef={cardRef}
                  isAccordionOpen={isAccordionOpen}
                  setIsAccordionOpen={setIsAccordionOpen}
+                 projectData={projectData}
                  isLoading={isLoading}
                  machineStore={machineStore}
                  textareaRef={textareaRef}

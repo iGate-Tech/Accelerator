@@ -8,7 +8,7 @@ import {
 
 import logger from '../../../lib/logger.js';
 import ProgressAccordion from "../../ui/ProgressAccordion";
-import {getProjectById} from "../../../lib/db";
+
 import {LangContext} from "../../../context/LangContext";
 import {translations} from "../../../assets/translations/translations-index.js";
 import {useUser} from "../../../context/UserContext";
@@ -45,7 +45,6 @@ const AgentInterface = (props) => { // Defensive checks for required props
     };
 
     const [currentLang, setCurrentLang] = createSignal(lang ? lang() : 'en');
-    const [currentProject, setCurrentProject] = createSignal(null);
 
     // Animation refs
     let greetingRef;
@@ -85,19 +84,8 @@ const AgentInterface = (props) => { // Defensive checks for required props
 
     });
 
-    createEffect(() => {
-        if (props.currentProjectId()) {
-            getProjectById(props.currentProjectId()).then((project) => {
-                logger.debug("Fetched project in AgentInterface:", project);
-                setCurrentProject(project);
-            }).catch((error) => {
-                logger.error("Failed to fetch project in AgentInterface:", error);
-                setCurrentProject(null);
-            });
-        } else {
-            setCurrentProject(null);
-        }
-    });
+    // Use project data passed as prop instead of fetching
+    const currentProject = () => props.projectData ? props.projectData() : null;
 
     // Animate state changes
     createEffect(() => {

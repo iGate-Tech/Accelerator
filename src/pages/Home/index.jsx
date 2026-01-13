@@ -382,8 +382,7 @@ const TasksContent = () => {
           (async () => {
             console.log('Home: refetching tasks for project', project.id);
             await refetch();
-            const currentTasks = tasks();
-            console.log('Home: tasks after refetch', currentTasks);
+            console.log('Home: tasks after refetch', tasks());
             logger.debug('Opened project', project.id, 'with context:', machineStore.context);
             logger.debug('Project tasks_list:', project.tasks_list);
 

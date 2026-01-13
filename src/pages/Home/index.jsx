@@ -371,6 +371,10 @@ const TasksContent = () => {
                   const newState = project.uiStatus || (project.current_step ? "processing" : "idle");
                   console.log('Home: setting machine state to', newState);
                   setMachineStore("state", newState);
+
+                  // Set the prompt to project description
+                  console.log('Home: setting prompt to project description', project.description);
+                  setPrompt(project.description || "");
         }
       });
 

@@ -85,6 +85,7 @@ const AgentInterface = (props) => { // Defensive checks for required props
 
     // Auto-resize textarea when prompt changes
     createEffect(() => {
+        console.log('AgentInterface: prompt changed to', props.prompt ? props.prompt() : 'undefined');
         props.prompt(); // Track prompt changes
         if (textareaRef && textareaRef.style) {
             textareaRef.style.height = 'auto';

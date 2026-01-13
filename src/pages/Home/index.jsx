@@ -124,6 +124,12 @@ const TasksContent = () => {
         const improvedPrompt = `Improve this startup idea for better clarity, specificity, and market potential. Start with the improved idea name followed by ': ' and then provide a concise description in simple English, in only 3 lines. Do not generate in markdown: ${prompt()}`;
         try {
             const improvedText = await handleQuickLLMCall(improvedPrompt, true, setPrompt);
+            // Update current project if exists
+            if (currentProjectId()) {
+                await updateProject(currentProjectId(), { description: improvedText });
+                window.dispatchEvent(new CustomEvent('projectUpdated'));
+                logger.info('Project updated with improved description');
+            }
         } catch (error) {
             logger.error('Improve error:', error);
         }

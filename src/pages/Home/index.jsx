@@ -126,12 +126,21 @@ const TasksContent = () => {
             const improvedText = await handleQuickLLMCall(improvedPrompt, true, setPrompt);
             // Update current project if exists
             if (currentProjectId()) {
-                await updateProject(currentProjectId(), { description: improvedText });
+                // Parse name and description from improvedText
+                const colonIndex = improvedText.indexOf(': ');
+                let name = '', description = improvedText;
+                if (colonIndex !== -1) {
+                    name = improvedText.substring(0, colonIndex).trim();
+                    description = improvedText.substring(colonIndex + 2).trim();
+                }
+                await updateProject(currentProjectId(), { name, description });
                 window.dispatchEvent(new CustomEvent('projectUpdated'));
-                logger.info('Project updated with improved description');
+                toastManager.success('Project improved successfully!');
+                logger.info('Project updated with improved name and description');
             }
         } catch (error) {
             logger.error('Improve error:', error);
+            toastManager.error('Failed to improve project');
         }
     };
     const handleSuggest = async () => {

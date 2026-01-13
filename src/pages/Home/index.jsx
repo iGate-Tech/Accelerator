@@ -80,6 +80,7 @@ const TasksContent = () => {
     const { lang } = useContext(LangContext);
     const { user } = useUser();
     const activityLogger = useActivityLogger();
+    const { isOnline } = useOnlineStatus();
     const [currentLang, setCurrentLang] = createSignal(lang());
 
     const t = () => translations[currentLang()];

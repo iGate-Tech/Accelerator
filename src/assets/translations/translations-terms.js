@@ -1,3 +1,5 @@
+import logger from '../../lib/logger.js';
+
 // Terms of Service translations
 export const termsTranslations = {
   en: {

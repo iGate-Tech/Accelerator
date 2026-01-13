@@ -7,6 +7,7 @@ import {
     Show,
     createMemo
 } from "solid-js";
+import logger from "../../lib/logger.js";
 import {
     machineStore,
     startProcess,
@@ -19,9 +20,12 @@ import {
     getNextStep,
     modelMap,
     sectionMap,
+    persistableFields,
+    extractDataFromTasks,
     stepNames,
     stepPrompts,
-    fillPrompt
+    fillPrompt,
+    initialContext
 } from "../../lib/machine";
 import {
     getTasks,
@@ -58,6 +62,7 @@ const promptToStepName = Object.fromEntries(
 );
 
 const getStepName = (task) => {
+  logger.trace('getStepName: Starting');
     for (let key in promptToStepName) {
         if (task.prompt && task.prompt.includes(key)) {
             return promptToStepName[key];
@@ -80,320 +85,322 @@ const Tasks = () => {
 
     const [currentProjectId, setCurrentProjectId] = createSignal(null);
     const [prompt, setPrompt] = createSignal("");
-    const [tasks, {
-            refetch
-        }
-    ] = createResource(() => ({ projectId: currentProjectId(), userId: user()?.id }), async ({ projectId, userId }) => {
-      return await getTasks(projectId, userId);
-    });
-    const [streamingContent, setStreamingContent] = createSignal("");
+
+    // Refs
+    let cardRef;
+
+    // Accordion state
     const [isAccordionOpen, setIsAccordionOpen] = createSignal(false);
-    const [editingTaskId, setEditingTaskId] = createSignal(null);
-    const [editContent, setEditContent] = createSignal("");
-    const [agentBoxClass, setAgentBoxClass] = createSignal("flex items-center h-[calc(100vh-24rem)] max-w-6xl w-full mx-auto");
-    const [agentContentClass, setAgentContentClass] = createSignal("relative w-full");
-    const [greetingClass, setGreetingClass] = createSignal("text-center py-4 h-auto overflow-visible transition-all duration-300 opacity-100");
+
+    // Additional signals
     const [isLoading, setIsLoading] = createSignal(false);
     const [autoProgress, setAutoProgress] = createSignal(false);
+    const [streamingContent, setStreamingContent] = createSignal("");
     const [tasksList, setTasksList] = createSignal([]);
+    const [editingTaskId, setEditingTaskId] = createSignal(null);
+    const [editContent, setEditContent] = createSignal("");
     const [activeCardId, setActiveCardId] = createSignal(null);
 
-    const currentContent = createMemo(() => streamingContent() || machineStore.context.llmResponse);
-
-    // Adjust UI based on project selection and tasks
-    createEffect(() => {
-      const hasProject = currentProjectId() !== null;
-      const hasTasks = tasksList().length > 0;
-      if (hasProject && hasTasks) {
-        setAgentBoxClass("flex items-start max-w-6xl w-full mx-auto"); // Auto height when project has tasks
-      } else {
-        setAgentBoxClass("flex items-center h-[calc(100vh-4rem)] max-w-6xl mx-auto"); // Full height otherwise
-      }
-      if (hasTasks) {
-        setGreetingClass("hidden");
-        setIsAccordionOpen(true);
-      } else {
-        setGreetingClass("text-center py-4 h-auto overflow-visible transition-all duration-300 opacity-100");
-        setIsAccordionOpen(false);
-      }
-    });
-
-    // Save progress to current project
-    createEffect(() => {
-      machineStore.context; // trigger on change
-      if (currentProjectId() && machineStore.context && typeof machineStore.context === 'object') {
-        // Filter context to only include database fields
-        const dbFields = [
-          'problem', 'solution', 'currentStep', 'completedSteps', 'stepName',
-          'currentModel', 'currentSection', 'uiProgress', 'uiMessage', 'uiStatus',
-          'totalCredits', 'consumedCredits', 'totalTime', 'consumedTime', 'totalSteps',
-          'currentPrompt', 'llmResponse'
-        ];
-        const filteredContext = {};
-        for (const field of dbFields) {
-          const value = machineStore.context[field];
-          if (value !== undefined && value !== null) {
-            filteredContext[field] = value;
-          }
-        }
-        // Only update if there are fields to update
-        if (Object.keys(filteredContext).length > 0) {
-          try {
-            updateProject(currentProjectId(), filteredContext);
-          } catch (error) {
-            console.error('Failed to update project in createEffect:', error);
-          }
-        }
-      }
-    });
-
-    // Load initial tasks - removed for now
-
-    let cardRef;
+    // Refs
     let streamingRef;
-    let textareaRef;
     let taskRefs = {};
+    let textareaRef;
 
-    const advanceToNextStep = () => {
-        setMachineStore('context', (prev) => {
-            const nextStep = getNextStep(prev.currentStep);
-            if (nextStep === 'done') {
-                setMachineStore('state', 'completed');
-                return {
-                    ...prev,
-                    currentStep: 'done',
-                    uiProgress: 100,
-                    uiStatus: 'completed',
-                    uiMessage: '🎉 All 48 steps completed successfully!'
-                };
-            } else {
-                const isSystem = prev.currentStep === 'system';
-                const newCompletedSteps = isSystem ? 1 : prev.completedSteps + 1;
-                const progress = (newCompletedSteps / 48) * 100;
-                const message = isSystem ? t().initializationComplete : `Step ${newCompletedSteps} complete. Moving to ${
-                    stepNames[nextStep] || 'next step'
-                }...`;
-                return {
-                    ...prev,
-                    currentStep: nextStep,
-                    stepName: stepNames[nextStep] || 'Next Step',
-                    currentModel: modelMap[nextStep] || 'System',
-                    currentSection: sectionMap[nextStep] || 'Initialization',
-                    completedSteps: newCompletedSteps,
-                    uiProgress: Math.min(progress, 100),
-                    uiMessage: message,
-                    currentPrompt: fillPrompt(getPromptForStep(nextStep), {
-                        ...prev,
-                        currentStep: nextStep
-                    })
-                };
-            }
-        });
-    };
-
-    const handleLLMCall = async (prompt, retryCount = 0, options = {}) => { // Rate limit: 4 requests per minute (15 seconds between calls after the first)
-        if (machineStore.context.completedSteps > 0) {
-            await new Promise(resolve => setTimeout(resolve, 15000));
-        }
+    // Handler functions
+    const handleImprove = async () => {
+        const improvedPrompt = `Improve this startup idea for better clarity, specificity, and market potential. Provide a concise improved description in simple English: ${prompt()}`;
         try {
-            const result = await callLLM(prompt, retryCount, options);
-            receiveResponse(result, setAutoProgress, setTasksList, tasksList, (task) => {
-                console.log('Adding task for project:', currentProjectId());
-                addTask(task, currentProjectId());
+            const improvedText = await handleQuickLLMCall(improvedPrompt, true, setPrompt);
+        } catch (error) {
+            logger.error('Improve error:', error);
+        }
+    };
+    const handleSuggest = async () => {
+        logger.info('Starting AI suggestion process for prompt:', prompt().substring(0, 50) + '...');
+        const suggestPrompt = `Based on this idea, suggest a compelling startup idea. Provide a brief description in simple English: ${prompt()}`;
+        try {
+            const suggestedText = await handleQuickLLMCall(suggestPrompt, true, setPrompt);
+            logger.info('AI suggestion received:', suggestedText.substring(0, 100) + '...');
+            setPrompt(suggestedText);
+            // Create a new project with the suggested idea
+            const projectName = suggestedText.length > 50 ? suggestedText.substring(0, 50) + '...' : suggestedText;
+            const projectId = await addProject({
+                name: projectName,
+                description: suggestedText,
+                createdAt: new Date()
             });
-            setStreamingContent('');
-        } catch (e) {
-            console.log('LLM call failed, advancing to next step:', e.message);
-            advanceToNextStep();
-            setAutoProgress(true);
+            setCurrentProjectId(projectId);
+            logger.info('Project created from AI suggestion, ID:', projectId);
+            toastManager.success('New project created with AI suggestion!');
+        } catch (error) {
+            logger.error('AI suggestion process failed:', error.message);
         }
     };
+    const handleReset = () => {
+        logger.info('Resetting application state to initial');
+        reset();
+        setTasksList([]);
+        setPrompt('');
+        setMachineStore('context', initialContext);
+    };
+    const handleStart = async () => {
+        setAutoProgress(true);
+        await handleLLMProjectUpdate(prompt(), extractProjectName, currentProjectId, setCurrentProjectId, setPrompt, setStreamingContent);
+    };
+    const handlePause = () => {
+        pause();
+    };
+    const handleResume = () => {
+        resume();
+    };
 
-    const callLLM = async (prompt, retryCount = 0, options = {}) => {
+    // Quick LLM Call handler for short responses
+    const handleQuickLLMCall = async (prompt, stream = true, setFunction = setStreamingContent) => {
+        logger.info('Quick LLM call initiated, prompt length:', prompt.length);
+        setIsLoading(true);
+        setStreamingContent('');
+
         try {
-            // Check and consume credits
-            const currentUser = user();
-            if (currentUser && currentUser.id) {
-                const balance = await getCreditBalance(currentUser.id);
-                if (balance < 10) {
-                    toastManager.error('Insufficient credits. You need at least 10 credits to use AI features.');
-                    return;
-                }
-                await consumeCredits(currentUser.id, 10, `AI Request: ${prompt.substring(0, 50)}...`);
-                toastManager.info('Consumed 10 credits for AI request');
-
-                // Log AI usage
-                activityLogger.logAI('used', null, 'Home AI Request', { creditsUsed: 10, promptLength: prompt.length });
+            // Check user authentication
+            if (!user() || !user().id) {
+                logger.error('User not authenticated for LLM call');
+                throw new Error('You must be logged in to use AI features.');
             }
 
-            setIsLoading(true);
-            const response = await fetch('/api/llm/stream', {
+            // Consume credits
+            const creditsCost = 5; // Less credits for quick calls
+            const balance = user().credits?.balance || 0;
+            if (balance < creditsCost) {
+                logger.error('Insufficient credits - balance:', balance, 'required:', creditsCost);
+                throw new Error('Insufficient credits. You need at least ' + creditsCost + ' credits to use AI features.');
+            }
+            await consumeCredits(user().id, creditsCost, `Quick AI: ${prompt.substring(0, 50)}...`);
+
+            // Log activity
+            if (activityLogger.user) {
+                activityLogger.logAI('used', null, 'Quick LLM', { creditsUsed: creditsCost, promptLength: prompt.length });
+            }
+
+            const response = await fetch('/api/llm/quick', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({prompt})
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ prompt })
             });
-            if (! response.ok) {
-                if (response.status === 429) {
-                    const waitTime = 60000 * (2 ** retryCount); // Exponential backoff: 60s, 120s, 240s, etc.
-                    toastManager.warning(`Rate limit exceeded for prompt (${prompt.length} chars). Retrying in ${waitTime / 1000} seconds... (Attempt ${retryCount + 1}/3)`);
-                    await new Promise(resolve => setTimeout(resolve, waitTime));
-                    return callLLM(prompt, retryCount + 1);
-                }
-                throw new Error(`HTTP ${
-                    response.status
-                }`);
+
+            if (!response.ok) {
+                throw new Error(`Quick LLM API error: ${response.status}`);
             }
+
             const reader = response.body.getReader();
             const decoder = new TextDecoder();
-            const chunks = [];
+            let aiResponse = '';
+
             while (true) {
-                const {done, value} = await reader.read();
-                if (done) 
-                    break;
-                
-                const chunkText = decoder.decode(value, {stream: true});
-                chunks.push(chunkText);
-                if (options.streamToTextarea) {
-                    setPrompt(chunks.join(''));
-                } else {
-                    setStreamingContent(chunks.join(''));
-                }
-                // Small delay to ensure UI updates are visible
-                await new Promise(resolve => setTimeout(resolve, 50));
+                const { done, value } = await reader.read();
+                if (done) break;
+                const chunk = decoder.decode(value);
+                aiResponse += chunk;
+                if (stream) setFunction(aiResponse);
             }
-            console.log('LLM response received:', chunks.join('').length, 'chars');
-            return chunks.join('');
-        } catch (e) {
-            toastManager.error(`Failed to get AI response for prompt (${prompt.length} chars): ${e.message}. Process paused.`);
-            // Continue to next step on any error, only pause on button press
-            setAutoProgress(true);
-            throw e;
+
+            logger.debug('Home: quick LLM call completed successfully');
+            return aiResponse;
+        } catch (error) {
+            logger.error('Home: Quick LLM call error:', error);
+            toastManager.error(`Failed to get quick LLM response: ${error.message}`);
+            throw error;
         } finally {
+            logger.debug('Home: finally block - setting isLoading to false, clearing streamingContent');
+            setIsLoading(false);
+            setStreamingContent('');
+        }
+    };
+
+    // LLM Call handler
+    const handleLLMCall = async (prompt) => {
+        setIsLoading(true);
+        setStreamingContent('');
+        try {
+            // Check user authentication
+            if (!user() || !user().id) {
+                logger.error('Home: User not authenticated');
+                throw new Error('You must be logged in to use AI features.');
+            }
+
+            // Consume credits
+            const creditsCost = 10;
+            const balance = await getCreditBalance(user().id);
+            if (balance < creditsCost) {
+                throw new Error('Insufficient credits. You need at least ' + creditsCost + ' credits to use AI features.');
+            }
+            await consumeCredits(user().id, creditsCost, `AI Processing: ${prompt.substring(0, 50)}...`);
+
+            // Log activity
+            if (activityLogger.user) {
+                activityLogger.logAI('used', null, 'LLM Stream', { creditsUsed: creditsCost, promptLength: prompt.length });
+            }
+
+            const response = await fetch('/api/llm/stream', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ prompt })
+            });
+
+            if (!response.ok) {
+                throw new Error(`LLM API error: ${response.status}`);
+            }
+
+            const reader = response.body.getReader();
+            const decoder = new TextDecoder();
+            let aiResponse = '';
+
+            while (true) {
+                const { done, value } = await reader.read();
+                if (done) break;
+                const chunk = decoder.decode(value);
+                aiResponse += chunk;
+                setStreamingContent(aiResponse);
+            }
+
+            // After streaming, process the response
+            await receiveResponse(aiResponse, setAutoProgress, setTasksList, tasksList, addTask, updateProject, currentProjectId());
+            // Refetch tasks to update the UI
+            await refetch();
+        } catch (error) {
+            logger.error('LLM call error:', error);
+            toastManager.error(`Failed to get LLM response: ${error.message}`);
             setIsLoading(false);
         }
     };
 
-    const handleStart = async () => {
-        setAgentBoxClass("flex items-center max-w-6xl w-full mx-auto");
-        setStreamingContent("");
-        setIsAccordionOpen(true);
-        // Reset textarea height to prevent it from being tall during processing
-        if (textareaRef) {
-            textareaRef.style.height = '3rem';
+    // CSS class signals for AgentInterface
+    const agentBoxClass = () => "flex flex-col rounded-lg mx-auto max-w-6xl";
+    const agentContentClass = () => "flex-1 overflow-hidden";
+    const [greetingClass, setGreetingClass] = createSignal("text-lg font-semibold text-gray-900 dark:text-white mb-4");
+    const [tasks, {
+            refetch
         }
-        startProcess("Please help me start a new project");
-        if (!currentProjectId()) {
-            const projectName = "New Project";
-            const description = "AI-powered startup accelerator project";
-            const projectId = await addProject({name: projectName, description, createdAt: new Date()});
-            setCurrentProjectId(projectId);
-            toastManager.success(`New project "${projectName}" created (ID: ${projectId}) with ${description.length} chars description. Accelerator process started.`);
-            window.dispatchEvent(new CustomEvent('projectAdded'));
-        }
-        await handleLLMCall(machineStore.context.currentPrompt, 0);
-    };
-
-    const handlePause = () => {
-        pause();
-    };
-
-    const handleResume = () => {
-        resume();
-        setAutoProgress(true);
-        setIsAccordionOpen(true);
-    };
-
-    const handleImprove = async () => {
-        const improvedPrompt = `${t().improvePrompt} Please improve my startup idea`;
-        const extractProjectName = (result) => result.split('\n')[0].trim();
-        await handleLLMProjectUpdate(callLLM, improvedPrompt, extractProjectName, currentProjectId, setCurrentProjectId, setPrompt);
-    };
-
-    const handleSuggest = async () => {
-        const suggestPrompt = t().suggestPrompt;
-        const extractProjectName = (result) => {
-            const lines = result.split('\n').map(l => l.trim()).filter(l => l);
-            const firstLine = lines[0] || '';
-            let projectName = firstLine.replace(/^#+\s*/, '').split(':')[0].trim();
-            return projectName || 'Unnamed Idea';
-        };
-        await handleLLMProjectUpdate(callLLM, suggestPrompt, extractProjectName, currentProjectId, setCurrentProjectId, setPrompt);
-    };
-
-    const handleReset = async () => {
-        reset();
-        setStreamingContent('');
-        setAutoProgress(false);
-        setTasksList([]);
-        setIsAccordionOpen(false);
-        setPrompt(''); // Clear the prompt
-        setCurrentProjectId(null); // Unselect current project
-        if (textareaRef) {
-            textareaRef.style.height = '3rem'; // Reset textarea height
-        }
-        await clearAllTasks();
-    };
-
-    onMount(async () => { // Load progress
-
-        // Set initial textarea height
-        if (textareaRef) {
-            textareaRef.style.height = 'auto';
-            textareaRef.style.height = textareaRef.scrollHeight + 'px';
-        }
-
-        // Listen for open project
-        window.addEventListener('openProject', async (e) => {
-            const project = await getProjectById(e.detail);
-            console.log('Selected project data:', project);
-            if (project) {
-                setCurrentProjectId(project.id);
-                setPrompt(project.description || '');
-                setMachineStore('context', {
-                  problem: '',
-                  solution: '',
-                  currentStep: project.currentStep || 'system',
-                  completedSteps: project.completedSteps || 0,
-                  stepName: project.stepName || 'System Initialization',
-                  currentModel: project.currentModel || 'System',
-                  currentSection: project.currentSection || 'Initialization',
-                  uiProgress: project.uiProgress || 0,
-                  uiMessage: project.uiMessage || t().uiMessage,
-                  uiStatus: project.uiStatus || 'idle',
-                  currentPrompt: '',
-                  llmResponse: '',
-                  strugglers: '',
-                  alternatives: '',
-                  gaps: '',
-                  persona: '',
-                  urgency: '',
-                  evidence: '',
-                  valueProp: '',
-                  features: '',
-                  modelType: '',
-                  revenue: '',
-                  pricing: '',
-                  moat: '',
-                  risks: '',
-                  tasks_list: ''
-                });
-            }
-        });
-
-        // Listen for reset agent
-        window.addEventListener('resetAgent', () => {
-            handleReset();
-        });
-
-        // Create Lucide icons after a delay to ensure script loaded
-        setTimeout(() => {
-            if (window.lucide) 
-                window.lucide.createIcons();
-            
-        }, 100);
+    ] = createResource(() => ({ projectId: currentProjectId(), userId: user()?.id }), async ({ projectId, userId }) => {
+      if (!userId) return [];
+      return await getTasks(projectId, userId);
     });
+    const [projectData, { mutate }] = createResource(currentProjectId, async (projectId) => {
+      if (!projectId) return null;
+      return await getProjectById(projectId);
+    });
+
+     // Load project context when project data changes
+     createEffect(() => {
+       const project = projectData();
+       if (project && typeof project === 'object') {
+                 // Load context from flattened project fields
+                 const contextFromDB = {
+                   problem: project.description || "", // Use project description as problem
+                   solution: "", // Will be filled by AI during processing
+                   currentStep: project.currentStep,
+                   completedSteps: project.completedSteps,
+                   stepName: project.stepName,
+                   currentModel: project.currentModel,
+                   currentSection: project.currentSection,
+                   uiProgress: project.uiProgress,
+                   uiMessage: project.uiMessage,
+                   uiStatus: project.uiStatus,
+                   currentPrompt: project.currentPrompt,
+                   llmResponse: project.llmResponse,
+                   totalCredits: project.totalCredits,
+                   consumedCredits: project.consumedCredits,
+                   totalTime: project.totalTime,
+                   consumedTime: project.consumedTime
+                 };
+                 setMachineStore('context', { ...initialContext, ...contextFromDB });
+                  // Set machine state: show resume for any unfinished project
+                   setMachineStore("state", project.uiStatus === "completed" ? "completed" : "pause");
+        }
+      });
+
+      // Handle async operations when project changes
+      createEffect(() => {
+        const project = projectData();
+        if (project && typeof project === 'object') {
+          // Refetch tasks for the opened project
+          setTimeout(async () => {
+            await refetch();
+            logger.debug('Opened project', project.id, 'with context:', machineStore.context);
+            logger.debug('Project tasks_list:', project.tasks_list);
+
+            // Extract business data from loaded tasks
+            const currentTasks = tasks();
+            if (currentTasks && currentTasks.length > 0) {
+              const extractedData = extractDataFromTasks(currentTasks);
+              setMachineStore('context', (prev) => ({ ...prev, ...extractedData }));
+              logger.debug('Extracted business data from tasks:', extractedData);
+            }
+
+            // If no tasks loaded and project has tasks_list, create tasks from it
+            logger.debug('Current tasks:', currentTasks);
+
+            if ((!currentTasks || currentTasks.length === 0) && project.tasks_list) {
+              logger.debug('Attempting to create tasks from tasks_list...');
+              try {
+                const tasksData = JSON.parse(project.tasks_list);
+                logger.debug('Parsed tasks_data:', tasksData);
+                if (Array.isArray(tasksData) && tasksData.length > 0) {
+                  logger.debug('Creating tasks from project tasks_list:', tasksData);
+                  for (const taskData of tasksData) {
+                    logger.debug('Adding task:', taskData);
+                    await addTask({
+                      content: taskData.content || taskData,
+                      llmResponse: taskData.llmResponse || null,
+                      timestamp: taskData.timestamp || new Date().toISOString(),
+                      completed: taskData.completed || false
+                    }, project.id, user()?.id);
+                  }
+                  // Refetch again to load the newly created tasks
+                  await refetch();
+                  // Extract data from newly created tasks
+                  const newTasks = tasks();
+                  if (newTasks && newTasks.length > 0) {
+                    logger.debug('Extracted data from newly created tasks');
+                    const extractedData = extractDataFromTasks(newTasks);
+                    setMachineStore('context', (prev) => ({ ...prev, ...extractedData }));
+                  }
+                } else {
+                  logger.debug('tasksData is not a valid array or is empty');
+                }
+              } catch (e) {
+                logger.error('Error parsing or creating tasks from tasks_list:', e);
+              }
+            } else {
+              logger.debug('Tasks already exist or no tasks_list, not creating tasks');
+            }
+          }, 100);
+        }
+      });
+
+     // Event listeners and initialization
+     onMount(() => {
+         // Listen for project deletion
+         window.addEventListener('projectDeleted', (e) => {
+             if (currentProjectId() === e.detail.projectId) {
+                 logger.debug('Current project was deleted, resetting selection');
+                 setCurrentProjectId(null);
+                 setPrompt('');
+                 setTasksList([]);
+                 setMachineStore('context', initialContext);
+             }
+         });
+
+         // Listen for reset agent
+         window.addEventListener('resetAgent', () => {
+             handleReset();
+         });
+
+         // Create Lucide icons after a delay to ensure script loaded
+         setTimeout(() => {
+             if (window.lucide)
+                 window.lucide.createIcons();
+         }, 100);
+     });
 
     createEffect(() => {
         machineStore.state;
@@ -411,12 +418,14 @@ const Tasks = () => {
         
     });
 
-    createEffect(() => {
-        console.log('Setting tasksList from resource:', tasks());
-        if (Array.isArray(tasks())) {
-            setTasksList(tasks());
-        }
-    });
+     // Set tasksList when project changes
+     createEffect(() => {
+         currentProjectId();
+         logger.debug('Setting tasksList from resource:', tasks());
+         if (Array.isArray(tasks())) {
+             setTasksList(tasks());
+         }
+     });
 
     createEffect(() => {
         if (machineStore.state === 'idle') {
@@ -466,6 +475,37 @@ const Tasks = () => {
         }
     });
 
+    // Save progress to current project when context changes
+    createEffect(() => {
+      machineStore.context; // trigger on change
+      if (currentProjectId() && machineStore.context && typeof machineStore.context === 'object') {
+        try {
+          const updates = {
+            currentPrompt: machineStore.context.currentPrompt,
+            llmResponse: machineStore.context.llmResponse,
+            currentStep: machineStore.context.currentStep,
+            completedSteps: machineStore.context.completedSteps,
+            stepName: machineStore.context.stepName,
+            currentModel: machineStore.context.currentModel,
+            currentSection: machineStore.context.currentSection,
+            uiProgress: machineStore.context.uiProgress,
+            uiMessage: machineStore.context.uiMessage,
+            uiStatus: machineStore.context.uiStatus,
+            totalCredits: machineStore.context.totalCredits,
+            consumedCredits: machineStore.context.consumedCredits,
+            totalTime: machineStore.context.totalTime,
+            consumedTime: machineStore.context.consumedTime
+          };
+          logger.debug('Updating project', currentProjectId(), 'with flattened context');
+          updateProject(currentProjectId(), updates);
+          // Update local project data to update UI
+          mutate((prev) => prev ? { ...prev, ...updates } : prev);
+        } catch (error) {
+          logger.error('Failed to update project in createEffect:', error);
+        }
+      }
+    });
+
     // createEffect(() => {
     // streamingContent();
     // setTimeout(() => {
@@ -499,39 +539,44 @@ const Tasks = () => {
 
     return (
         <RouteGuard requireAuth={true}>
-            <div class={`relative flex flex-col ${currentLang() === 'ar' ? 'rtl' : 'ltr'}`}>
-            <ResponseSection tasksList={tasksList}
-                editingTaskId={editingTaskId}
-                setEditingTaskId={setEditingTaskId}
-                editContent={editContent}
-                setEditContent={setEditContent}
-                updateTask={updateTask}
-                setTasksList={setTasksList}
-                isLoading={isLoading}
-                streamingContent={streamingContent}
-                machineStore={machineStore}
-                streamingRef={streamingRef}
-                activeCardId={activeCardId}
-                setActiveCardId={setActiveCardId}
-                taskRefs={taskRefs}/>
-            <AgentInterface agentBoxClass={agentBoxClass} currentProjectId={currentProjectId}
-                agentContentClass={agentContentClass}
-                greetingClass={greetingClass}
-                cardRef={cardRef}
-                isAccordionOpen={isAccordionOpen}
-                setIsAccordionOpen={setIsAccordionOpen}
-                isLoading={isLoading}
-                machineStore={machineStore}
-                textareaRef={textareaRef}
-                prompt={prompt}
-                setPrompt={setPrompt}
-                tasksList={tasksList}
-                handleImprove={handleImprove}
-                handleSuggest={handleSuggest}
-                handleReset={handleReset}
-                handleStart={handleStart}
-                handlePause={handlePause}
-                handleResume={handleResume}/>
+            <div class={`relative flex flex-col justify-center h-[calc(100vh-4rem)] items-center ${currentLang() === 'ar' ? 'rtl' : 'ltr'}`}>
+              <AgentInterface agentBoxClass={agentBoxClass} currentProjectId={currentProjectId}
+                 agentContentClass={agentContentClass}
+                 greetingClass={greetingClass}
+                 cardRef={cardRef}
+                 isAccordionOpen={isAccordionOpen}
+                 setIsAccordionOpen={setIsAccordionOpen}
+                 isLoading={isLoading}
+                 machineStore={machineStore}
+                 textareaRef={textareaRef}
+                 prompt={prompt}
+                 setPrompt={setPrompt}
+                 tasksList={tasksList}
+                 handleImprove={handleImprove}
+                 handleSuggest={handleSuggest}
+                 handleReset={handleReset}
+                 handleStart={handleStart}
+                 handlePause={handlePause}
+                 handleResume={handleResume}/>
+            <Show when={currentProjectId() && tasksList().length > 0}>
+                 <ResponseSection tasksList={tasksList}
+                 project={projectData()}
+                 editingTaskId={editingTaskId}
+                 setEditingTaskId={setEditingTaskId}
+                 editContent={editContent}
+                 setEditContent={setEditContent}
+                 updateTask={updateTask}
+                 setTasksList={setTasksList}
+                 isLoading={isLoading}
+                 streamingContent={streamingContent}
+                 machineStore={machineStore}
+                 streamingRef={streamingRef}
+                 activeCardId={activeCardId}
+                 setActiveCardId={setActiveCardId}
+                  taskRefs={taskRefs}
+                  handleImprove={handleImprove}
+                  handleSuggest={handleSuggest}/>
+              </Show>
         </div>
         </RouteGuard>
     );

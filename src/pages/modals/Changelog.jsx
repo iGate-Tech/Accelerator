@@ -2,8 +2,11 @@ import { createSignal, createEffect, onMount, useContext } from "solid-js";
 import { useNavigate } from "@solidjs/router";
 import { LangContext } from "../../context/LangContext";
 import { translations } from "../../assets/translations/translations-index.js";
+import logger from '../../lib/logger.js';
+
 
 const Changelog = () => {
+  logger.trace('Changelog: Starting');
   const { lang } = useContext(LangContext);
   const [currentLang, setCurrentLang] = createSignal(lang());
   const t = () => translations[currentLang()];
@@ -65,7 +68,8 @@ const Changelog = () => {
     switch (type) {
       case 'feature': return 'plus';
       case 'improvement': return 'arrow-up';
-      case 'fix': return 'bug';
+      case 'fix': return 'bug'
+  logger.trace('getChangeColor: Starting');;
       default: return 'circle';
     }
   };

@@ -4,6 +4,10 @@ import {
   validationPromptTemplate,
   generationPromptTemplate,
 } from "./promptTemplates.js";
+import logger from '../logger.js';
+
+// Log stepsConfig loading
+logger.trace('stepsConfig: Loading steps configuration');
 
 export const stepsConfig = [
   {

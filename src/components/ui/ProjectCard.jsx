@@ -2,8 +2,12 @@ import { createSignal, onMount } from "solid-js";
 import { voteOnProject, toggleProjectPublic } from "../../lib/db";
 import { getCurrentUser } from "../../lib/supabase";
 import { toastManager } from "../../lib/feedback";
+import logger from '../../lib/logger.js';
+
+
 
 const ProjectCard = (props) => {
+  logger.trace('ProjectCard: Starting');
   const {
     project,
     onClick,
@@ -69,7 +73,7 @@ const ProjectCard = (props) => {
         onVote(project.id, result);
       }
     } catch (error) {
-      console.error('Error voting:', error);
+      logger.error('Error voting:', error);
     }
   };
 
@@ -85,10 +89,12 @@ const ProjectCard = (props) => {
         }
       }
     } catch (error) {
-      console.error('Error toggling visibility:', error);
+      logger.error('Error toggling visibility:', error);
       toastManager.error('Failed to update project visibility');
     }
-  };
+  }
+  logger.trace('getStatusColor: Starting');
+  logger.trace('getStatusColor: Starting');;
 
   const getStatusColor = (status) => {
     switch (status) {
@@ -96,7 +102,9 @@ const ProjectCard = (props) => {
       case 'processing': return 'badge-warning';
       case 'idle': return 'badge-neutral';
       case 'paused': return 'badge-error';
-      default: return 'badge-neutral';
+   
+  logger.trace('getStatusIcon: Starting');
+  logger.trace('getStatusIcon: Starting');   default: return 'badge-neutral';
     }
   };
 
@@ -104,7 +112,9 @@ const ProjectCard = (props) => {
     switch (status) {
       case 'completed': return 'check-circle';
       case 'processing': return 'loader';
-      case 'idle': return 'circle';
+      case 'idle': return 'circle'
+  logger.trace('formatDate: Starting');
+  logger.trace('formatDate: Starting');;
       case 'paused': return 'pause-circle';
       default: return 'circle';
     }

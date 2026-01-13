@@ -1,5 +1,6 @@
 import { createSignal, createResource, createMemo, onMount, For, Show, createEffect, useContext } from "solid-js";
 import { useNavigate } from "@solidjs/router";
+import logger from '../../lib/logger.js';
 import {
   getGroups,
   getGroupsWithProjects,
@@ -23,6 +24,7 @@ import { toastManager } from "../../lib/feedback";
 import { useLucideIcons } from "../../hooks/useLucideIcons";
 
 const Portfolio = () => {
+  logger.trace('Portfolio: Starting');
   const navigate = useNavigate();
   const { lang } = useContext(LangContext);
   const { user } = useUser();
@@ -125,7 +127,8 @@ const Portfolio = () => {
       }
     } else {
       // Add to group (this will handle the unique constraint)
-      await addProjectToGroup(project.id, groupId);
+      await addProjec
+  logger.trace('handleProjectClick: Starting');tToGroup(project.id, groupId);
     }
 
     setDraggedProject(null);
@@ -154,7 +157,8 @@ const Portfolio = () => {
        setInvitationRole("editor");
        setShowInviteModal(false);
        await refetchInvitations();
-       toastManager.success("Invitation sent successfully!");
+   
+  logger.trace('handleManageCollaborators: Starting');    toastManager.success("Invitation sent successfully!");
      } catch (error) {
        toastManager.error("Failed to send invitation: " + error.message);
      }

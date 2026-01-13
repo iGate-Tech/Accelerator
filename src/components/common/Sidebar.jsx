@@ -6,8 +6,11 @@ import { translations } from "../../assets/translations/translations-index.js";
 import { getProjects, updateProject, deleteProject, deleteAllProjects, exportAllProjects } from "../../lib/db";
 import { getSyncStatus, performSync, syncInProgress } from "../../lib/sync";
 import { toastManager } from "../../lib/feedback";
+import logger from "../../lib/logger.js";
+
 
 const Sidebar = () => {
+  logger.trace('Sidebar: Starting');
   const { lang } = useContext(LangContext);
   const { user } = useUser();
   const location = useLocation();
@@ -39,7 +42,7 @@ const Sidebar = () => {
       const projs = await getProjects(currentUser.id) || [];
       setProjects(projs);
     } catch (error) {
-      console.error('Failed to load projects:', error);
+      logger.error('Failed to load projects:', error);
       setProjects([]);
     }
   };
@@ -67,7 +70,7 @@ const Sidebar = () => {
         break;
 
       default:
-        console.log('Unknown action:', action);
+        logger.debug('Unknown action:', action);
     }
   };
 
@@ -113,7 +116,7 @@ const Sidebar = () => {
   createEffect(() => {
     const newLang = lang();
     setCurrentLang(newLang);
-    console.log('Sidebar language changed to:', newLang);
+    logger.debug('Sidebar language changed to:', newLang);
   });
 
   createEffect(() => {
@@ -512,7 +515,7 @@ const Sidebar = () => {
                        <ul class="dropdown menu w-52 rounded-box bg-base-100 shadow-sm" popover id={`popover-project-${project.id}`} style={`position-anchor:--anchor-project-${project.id}`}>
                         <li><a onclick={() => { setEditingProjectId(project.id); setTimeout(() => { const span = document.querySelector(`[data-project-id="${project.id}"]`); if (span) { span.focus(); const range = document.createRange(); range.selectNodeContents(span); const sel = window.getSelection(); sel.removeAllRanges(); sel.addRange(range); } }, 0); }}><i data-lucide="edit" class="w-4 h-4"></i>{t().rename}</a></li>
                         <li><a onclick={() => handleProjectAction('delete', project.id)}><i data-lucide="trash" class="w-4 h-4"></i>{t().delete}</a></li>
-                        <li><a onclick={() => window.dispatchEvent(new CustomEvent('openProject', { detail: project.id }))}><i data-lucide="folder-open" class="w-4 h-4"></i>{t().open}</a></li>
+                        <li><a onclick={() => { window.dispatchEvent(new CustomEvent('openProject', { detail: project.id })); navigate('/'); }}><i data-lucide="folder-open" class="w-4 h-4"></i>{t().open}</a></li>
                         <li><a onclick={() => toastManager.info(t().exportProject + ': ' + project.name)}><i data-lucide="download" class="w-4 h-4"></i>{t().exportProject}</a></li>
                         <li><a onclick={() => toastManager.info(t().exportReports + ': ' + project.name)}><i data-lucide="file-text" class="w-4 h-4"></i>{t().exportReports}</a></li>
                       </ul>

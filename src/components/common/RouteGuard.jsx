@@ -1,8 +1,11 @@
 import { useUser } from "../../context/UserContext";
 import { useNavigate } from "@solidjs/router";
 import { onMount, createEffect } from "solid-js";
+import logger from '../../lib/logger.js';
+
 
 const RouteGuard = (props) => {
+  logger.trace('RouteGuard: Starting');
   const { isAuthenticated } = useUser();
   const navigate = useNavigate();
 

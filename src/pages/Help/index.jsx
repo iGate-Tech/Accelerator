@@ -2,8 +2,11 @@ import { createSignal, createEffect, onMount, For, Show, createResource, useCont
 import { useNavigate, A } from "@solidjs/router";
 import { LangContext } from "../../context/LangContext";
 import { translations } from "../../assets/translations/translations-index.js";
+import logger from '../../lib/logger.js';
+
 
 const Help = () => {
+  logger.trace('Help: Starting');
   const navigate = useNavigate();
   const { lang } = useContext(LangContext);
   const [currentLang, setCurrentLang] = createSignal(lang());
@@ -50,7 +53,8 @@ const Help = () => {
      }
    });
 
-   const handleKeyPress = (e) => {
+
+  logger.trace('handleKeyPress: Starting');   const handleKeyPress = (e) => {
     // Ctrl+K for search
     if (e.ctrlKey && e.key === 'k') {
       e.preventDefault();
@@ -346,7 +350,7 @@ Use consistent naming conventions and color coding for easy navigation.`
      },
      {
        title: t().exportCapabilities,
-       description: t().exportDesc,
+        description: t().exportDesc,
        icon: "download"
      }
    ];
@@ -367,7 +371,8 @@ Use consistent naming conventions and color coding for easy navigation.`
      newCompleted.add(stepId);
      setCompletedSteps(newCompleted);
      setTutorialProgress(newCompleted.size);
-     localStorage.setItem('tutorial-progress', JSON.stringify([...newCompleted]));
+     loc
+  logger.trace('resetTutorial: Starting');alStorage.setItem('tutorial-progress', JSON.stringify([...newCompleted]));
      if (window.lucide) window.lucide.createIcons();
    };
 
@@ -380,7 +385,7 @@ Use consistent naming conventions and color coding for easy navigation.`
 
   const submitContactForm = async () => {
     // Simulate form submission
-    console.log('Submitting contact form:', contactForm());
+    logger.debug('Submitting contact form:', contactForm());
     // In a real app, this would send to an API
      setShowContactForm(false);
      setContactForm({ name: '', email: '', subject: '', message: '' });

@@ -1,8 +1,10 @@
 import { createStore } from "solid-js/store";
+import logger from './logger.js';
 
 const [toasts, setToasts] = createStore([]);
 
 export const addToast = (type, message, duration = 3000) => {
+  logger.trace('addToast: Starting');
   const id = Date.now() + Math.random();
   const toast = { id, type, message, duration };
   setToasts(toasts => [...toasts, toast]);
@@ -13,6 +15,7 @@ export const addToast = (type, message, duration = 3000) => {
     }, duration);
   }
 };
+  logger.trace('removeToast: Starting');
 
 export const removeToast = (id) => {
   setToasts(toasts => toasts.filter(t => t.id !== id));

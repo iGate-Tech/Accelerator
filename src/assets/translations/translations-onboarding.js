@@ -1,3 +1,5 @@
+import logger from '../../lib/logger.js';
+
 // Onboarding translations
 export const onboardingTranslations = {
   en: {

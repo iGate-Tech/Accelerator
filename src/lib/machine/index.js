@@ -1,3 +1,5 @@
+import logger from '../logger.js';
+
 // Re-exports from modules for backward compatibility
 export { stepOrder, initialContext, getNextStep } from "./constants.js";
 export { stepPrompts } from "./prompts.js";
@@ -12,6 +14,7 @@ export {
   reset,
   fillPrompt,
   getPromptForStep,
+  extractDataFromTasks,
 } from "./state.js";
 
 // Utility functions

@@ -2,8 +2,11 @@ import { createSignal, createEffect, onMount, useContext } from "solid-js";
 import { useNavigate } from "@solidjs/router";
 import { LangContext } from "../../context/LangContext";
 import { translations } from "../../assets/translations/translations-index.js";
+import logger from '../../lib/logger.js';
+
 
 const PrivacyPolicy = () => {
+  logger.trace('PrivacyPolicy: Starting');
   const navigate = useNavigate();
   const { lang } = useContext(LangContext);
   const [currentLang, setCurrentLang] = createSignal(lang());

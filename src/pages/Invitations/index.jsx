@@ -5,8 +5,11 @@ import { getUserInvitations, respondToInvitation } from "../../lib/db";
 import { toastManager } from "../../lib/feedback";
 import { LangContext } from "../../context/LangContext";
 import { translations } from "../../assets/translations/translations-index.js";
+import logger from '../../lib/logger.js';
+
 
 const Invitations = () => {
+  logger.trace('Invitations: Starting');
   const navigate = useNavigate();
   const { user } = useUser();
   const { lang } = useContext(LangContext);

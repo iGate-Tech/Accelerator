@@ -1,15 +1,30 @@
 import {onMount, createEffect, createSignal, useContext, Show} from "solid-js";
+import { useLocation } from "@solidjs/router";
 import {LangContext} from "../../context/LangContext";
 import {useUser} from "../../context/UserContext";
 import Navbar from "./Navbar";
 import Sidebar from "./Sidebar";
 import { GlobalLoading, GlobalError, ToastContainer } from "./GlobalUI";
 import favicon from "../../assets/favicon.svg";
+import logger from '../../lib/logger.js';
+
 
 const MainLayout = (props) => {
+  logger.trace('MainLayout: Starting');
     const context = useContext(LangContext) || { lang: () => 'ar', setLang: () => {}, serverReachable: () => true, setServerReachable: () => {} };
   const {lang, setLang, serverReachable, setServerReachable} = context;
   const { isAuthenticated } = useUser();
+  const location = useLocation();
+
+  // Log route changes
+  createEffect(() => {
+    const currentPath = location.pathname;
+    const search = location.search;
+    const hash = location.hash;
+    logger.info('Router: Route changed to:', currentPath + search + hash);
+    logger.debug('Router: Query params:', Object.fromEntries(new URLSearchParams(search)));
+    if (hash) logger.debug('Router: Hash:', hash);
+  });
 
     // Make component reactive to language changes
     const [currentLang, setCurrentLang] = createSignal(lang());
@@ -18,7 +33,7 @@ const MainLayout = (props) => {
         const newLang = lang();
         setCurrentLang(newLang);
         document.documentElement.setAttribute('dir', newLang === 'ar' ? 'rtl' : 'ltr');
-        console.log('Language changed to:', newLang);
+        logger.debug('Language changed to:', newLang);
     });
 
     const checkServerConnectivity = async () => {
@@ -34,7 +49,7 @@ const MainLayout = (props) => {
     };
 
     onMount(async () => {
-        console.log('MainLayout onMount');
+        logger.debug('MainLayout onMount');
 
         // Create Lucide icons
         if (window.lucide)

@@ -1,6 +1,9 @@
+
+
 // Activity logging utility
 import { logActivity } from './db';
 import { useUser } from '../context/UserContext';
+import logger from './logger.js';
 
 class ActivityLogger {
   constructor() {
@@ -16,7 +19,7 @@ class ActivityLogger {
   // Log an activity
   async log(actionType, entityType = null, entityId = null, description, metadata = {}) {
     if (!this.user || !this.user.id) {
-      console.warn('Cannot log activity: User not set');
+      logger.warn('Cannot log activity: User not set');
       return;
     }
 
@@ -41,6 +44,7 @@ class ActivityLogger {
     if (this.isProcessing || this.queue.length === 0) return;
 
     this.isProcessing = true;
+    logger.info('Processing activity queue, items:', this.queue.length);
 
     while (this.queue.length > 0) {
       const activity = this.queue.shift();
@@ -53,8 +57,9 @@ class ActivityLogger {
           activity.description,
           activity.metadata
         );
+        logger.debug('Activity logged:', activity.actionType, activity.description);
       } catch (error) {
-        console.error('Failed to log activity:', error);
+        logger.error('Failed to log activity:', error);
         // Re-queue failed activities (simple retry)
         if (this.queue.length < 10) { // Prevent infinite loops
           this.queue.unshift(activity);
@@ -64,6 +69,7 @@ class ActivityLogger {
     }
 
     this.isProcessing = false;
+    logger.info('Activity queue processing completed');
   }
 
   // Convenience methods for common activities

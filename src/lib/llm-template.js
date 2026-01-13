@@ -1,3 +1,5 @@
+
+
 /**
   * LLMTemplate
   * "Typed bidirectional template engine for LLM prompts and responses"
@@ -72,6 +74,7 @@
 // ws ::= [ \t\n\r]*
 
 function extractTemplateData(templateText, options = {}) {
+  logger.trace('extractTemplateData: Starting with template length:', templateText?.length, 'options:', options);
   const { expandNestedKeys = false, duplicateHandling = 'lastWins' } = options;
   const text = templateText;
   const len = text.length;
@@ -80,6 +83,7 @@ function extractTemplateData(templateText, options = {}) {
 
   // Helper to set nested value
   function _assignNestedKey(obj, keyPath, value, duplicateHandling) {
+    logger.trace('_assignNestedKey: Starting with keyPath:', keyPath, 'value type:', typeof value);
     const keys = keyPath.split('.');
     let current = obj;
 
@@ -112,7 +116,10 @@ function extractTemplateData(templateText, options = {}) {
     }
   }
 
+  let placeholderCount = 0;
   while ((pos = text.indexOf("{{", pos)) !== -1) {
+    placeholderCount++;
+    logger.trace('extractTemplateData: Found placeholder', placeholderCount, 'at position:', pos);
     const start = pos;
     pos += 2;
 
@@ -230,7 +237,7 @@ function extractTemplateData(templateText, options = {}) {
                 }
               }
              } catch (subE) {
-               console.log('JSON parse error for sub-value:', subValueStr, subE.message);
+               logger.debug('JSON parse error for sub-value:', subValueStr, subE.message);
                // Treat as string if not valid JSON
                if (expandNestedKeys && subKey.includes('.')) {
                  _assignNestedKey(obj, subKey, subValueStr, duplicateHandling);
@@ -259,6 +266,8 @@ function extractTemplateData(templateText, options = {}) {
     }
   }
 
+  logger.debug('extractTemplateData: Completed, extracted', Object.keys(obj).length, 'keys from', placeholderCount, 'placeholders');
+  logger.trace('extractTemplateData: Final extracted object:', obj);
   return obj;
 }
 
@@ -266,18 +275,24 @@ function extractTemplateData(templateText, options = {}) {
  * Gets a value from nested object using dot notation key
  */
 function resolveNestedKey(obj, key) {
+  logger.trace('resolveNestedKey: Starting with key:', key);
   if (!key.includes('.')) {
-    return obj[key];
+    const value = obj[key];
+    logger.trace('resolveNestedKey: Simple key resolved to:', typeof value);
+    return value;
   }
   const keys = key.split('.');
   let current = obj;
   for (const k of keys) {
     if (current && typeof current === 'object' && k in current) {
       current = current[k];
+      logger.trace('resolveNestedKey: Resolved key segment:', k, 'current type:', typeof current);
     } else {
+      logger.trace('resolveNestedKey: Key segment not found:', k, 'in current object');
       return undefined;
     }
   }
+  logger.trace('resolveNestedKey: Nested key resolved successfully');
   return current;
 }
 
@@ -286,6 +301,7 @@ function resolveNestedKey(obj, key) {
  * Converts {{key}} → {{key: JSON}}
  */
 function injectTemplateData(templateStr, data, options = {}) {
+  logger.trace('injectTemplateData: Starting with template length:', templateStr?.length, 'data keys:', Object.keys(data || {}), 'options:', options);
   const { preserveWhitespace = false } = options;
 
   if (preserveWhitespace) {
@@ -303,15 +319,19 @@ function injectTemplateData(templateStr, data, options = {}) {
     });
   } else {
     return templateStr.replace(/\{\{\s*([\w.\-]+)\s*\}\}/g, (match, key) => {
+      logger.trace('injectTemplateData: Processing placeholder:', match, 'key:', key);
       const value = resolveNestedKey(data, key);
       if (value !== undefined) {
         try {
           const replacement = typeof value === 'string' ? value : JSON.stringify(value);
-          return replacement;
-        } catch {
+          logger.trace('injectTemplateData: Replaced with value type:', typeof value);
+          return `{{${key}: ${replacement}}}`;
+        } catch (error) {
+          logger.warn('injectTemplateData: Failed to stringify value for key:', key, error.message);
           return match;
         }
       }
+      logger.trace('injectTemplateData: No value found for key:', key, 'leaving placeholder unchanged');
       return match;
     });
   }
@@ -321,6 +341,7 @@ function injectTemplateData(templateStr, data, options = {}) {
  * Normalizes a template by converting filled placeholders {{key: value}} back to {{key}}
  */
 function resetTemplatePlaceholders(templateText, options = {}) {
+  logger.trace('resetTemplatePlaceholders: Starting with template length:', templateText?.length, 'options:', options);
   const { preserveWhitespace = false } = options;
   const text = templateText;
   const len = text.length;
@@ -426,14 +447,18 @@ function resetTemplatePlaceholders(templateText, options = {}) {
  * Deep merges two objects
  */
 function mergeTemplateData(target, source) {
+  logger.trace('mergeTemplateData: Starting with target keys:', Object.keys(target || {}), 'source keys:', Object.keys(source || {}));
   const result = { ...target };
   for (const key in source) {
     if (source[key] && typeof source[key] === 'object' && !Array.isArray(source[key])) {
+      logger.trace('mergeTemplateData: Merging nested object for key:', key);
       result[key] = mergeTemplateData(result[key] || {}, source[key]);
     } else {
+      logger.trace('mergeTemplateData: Setting primitive value for key:', key, 'type:', typeof source[key]);
       result[key] = source[key];
     }
   }
+  logger.trace('mergeTemplateData: Completed, result keys:', Object.keys(result));
   return result;
 }
 
@@ -441,18 +466,25 @@ function mergeTemplateData(target, source) {
  * Renders filled templates as plain text by replacing {{key: value}} with value
  */
 function renderFilledTemplate(templateText) {
-  return templateText.replace(/\{\{(\s*)([\w.\-]+)\s*:\s*([^}]+)\}\}/g, (match, ws1, key, valueStr) => {
+  logger.trace('renderFilledTemplate: Starting with template length:', templateText?.length);
+  const result = templateText.replace(/\{\{(\s*)([\w.\-]+)\s*:\s*([^}]+)\}\}/g, (match, ws1, key, valueStr) => {
+    logger.trace('renderFilledTemplate: Processing filled placeholder for key:', key);
     try {
       const value = JSON.parse(valueStr.trim());
       if (typeof value === 'string') {
+        logger.trace('renderFilledTemplate: Returning string value for key:', key);
         return value;
       } else {
+        logger.trace('renderFilledTemplate: Returning JSON stringified value for key:', key);
         return JSON.stringify(value, null, 2);
       }
-    } catch {
+    } catch (error) {
+      logger.warn('renderFilledTemplate: Failed to parse value for key:', key, error.message);
       return match;
     }
   });
+  logger.trace('renderFilledTemplate: Completed');
+  return result;
 }
 
 /**
@@ -464,17 +496,29 @@ function renderFilledTemplate(templateText) {
  * - Re-extracts data
  */
 function processLLMTemplate(template, data = {}, options = {}) {
+  logger.info('processLLMTemplate: Starting with template length:', template?.length, 'data keys:', Object.keys(data), 'options:', options);
   const extractedInitial = extractTemplateData(template, options);
-  const mergedData = mergeTemplateData(extractedInitial, data);
-  const normalizedTemplate = resetTemplatePlaceholders(template, options);
-  const processedTemplate = injectTemplateData(normalizedTemplate, mergedData, options);
-  const extractedData = extractTemplateData(processedTemplate, options);
+  logger.debug('processLLMTemplate: Initial extraction completed, keys:', Object.keys(extractedInitial));
 
-  return {
+  const mergedData = mergeTemplateData(extractedInitial, data);
+  logger.debug('processLLMTemplate: Data merged, total keys:', Object.keys(mergedData));
+
+  const normalizedTemplate = resetTemplatePlaceholders(template, options);
+  logger.debug('processLLMTemplate: Template normalized, length:', normalizedTemplate.length);
+
+  const processedTemplate = injectTemplateData(normalizedTemplate, mergedData, options);
+  logger.debug('processLLMTemplate: Template processed with data injection');
+
+  const extractedData = extractTemplateData(processedTemplate, options);
+  logger.debug('processLLMTemplate: Final extraction completed, extracted keys:', Object.keys(extractedData));
+
+  const result = {
     inputData: data,
     template: processedTemplate,
     extractedData
   };
+  logger.info('processLLMTemplate: Completed successfully');
+  return result;
 }
 
 export {

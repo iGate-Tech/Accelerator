@@ -1,3 +1,5 @@
+import logger from '../../lib/logger.js';
+
 // Dashboard page translations
 export const dashboardTranslations = {
   en: {

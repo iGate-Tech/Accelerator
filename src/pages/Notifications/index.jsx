@@ -2,8 +2,11 @@ import { createSignal, createResource, For, Show, onMount } from "solid-js";
 import { useUser } from "../../context/UserContext";
 import { getUserNotifications, markNotificationRead, createNotification } from "../../lib/db";
 import { toastManager } from "../../lib/feedback";
+import logger from '../../lib/logger.js';
+
 
 const Notifications = () => {
+  logger.trace('Notifications: Starting');
   const { user } = useUser();
   const [filter, setFilter] = createSignal('all'); // all, unread
 
@@ -45,11 +48,13 @@ const Notifications = () => {
     } catch (error) {
       toastManager.error('Failed to mark all notifications as read');
     }
-  };
+  
+  logger.trace('filteredNotifications: Starting');};
 
   const filteredNotifications = () => {
     const notifs = notifications() || [];
-    if (filter() === 'unread') return notifs.filter(n => !n.read);
+    if (filter() === 'unread') return n
+  logger.trace('getNotificationIcon: Starting');otifs.filter(n => !n.read);
     return notifs;
   };
 
@@ -57,7 +62,8 @@ const Notifications = () => {
     switch (type) {
       case 'system': return '🔔';
       case 'billing': return '💳';
-      case 'credits': return '💰';
+      ca
+  logger.trace('getNotificationColor: Starting');se 'credits': return '💰';
       case 'update': return '📢';
       default: return '📧';
     }

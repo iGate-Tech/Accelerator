@@ -1,3 +1,5 @@
+import logger from '../../lib/logger.js';
+
 // Profile translations
 export const profileTranslations = {
   en: {

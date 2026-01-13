@@ -7,8 +7,11 @@ import { formatLocaleDate } from "../../lib/utils";
 import { toastManager } from "../../lib/feedback";
 import avatar from "../../assets/avatar.png";
 import { supabase } from "../../lib/supabase";
+import logger from "../../lib/logger.js";
+
 
 const Profile = () => {
+  logger.trace('Profile: Starting');
   const navigate = useNavigate();
   const { user, isAuthenticated, updateProfile, checkAuth } = useUser();
   const { currentLang, t } = useLanguage();
@@ -42,21 +45,21 @@ const Profile = () => {
         const userCredits = await getUserCredits(user().id);
         setCredits(userCredits || []);
       } catch (e) {
-        console.error('Error loading credits:', e);
+        logger.error('Error loading credits:', e);
         setCredits([]);
       }
       try {
         const balance = await getUserCreditBalance(user().id);
         setCreditBalance(balance);
       } catch (e) {
-        console.error('Error loading credit balance:', e);
+        logger.error('Error loading credit balance:', e);
         setCreditBalance(0);
       }
       try {
         const userProjects = await getProjects(user().id);
         setProjectsCount(userProjects.length);
       } catch (e) {
-        console.error('Error loading projects:', e);
+        logger.error('Error loading projects:', e);
         setProjectsCount(0);
       }
       try {
@@ -71,7 +74,7 @@ const Profile = () => {
           setStorageUsed(0);
         }
       } catch (e) {
-        console.error('Error loading storage used:', e);
+        logger.error('Error loading storage used:', e);
         setStorageUsed(0);
       }
     }
@@ -122,7 +125,7 @@ const Profile = () => {
     setUploadingAvatar(true);
     try {
       const fileName = `${user().id}/${Date.now()}.${avatarFile().name.split('.').pop()}`;
-      console.log('Attempting to upload file:', fileName, 'to bucket: avatars');
+      logger.debug('Attempting to upload file:', fileName, 'to bucket: avatars');
 
       const { data, error } = await supabase.storage
         .from('avatars')
@@ -132,22 +135,22 @@ const Profile = () => {
         });
 
       if (error) {
-        console.error('Supabase storage upload error:', error);
+        logger.error('Supabase storage upload error:', error);
         throw error;
       }
 
-      console.log('Upload successful, getting public URL...');
+      logger.debug('Upload successful, getting public URL...');
       const { data: { publicUrl } } = supabase.storage
         .from('avatars')
         .getPublicUrl(fileName);
 
-      console.log('Public URL obtained:', publicUrl);
+      logger.debug('Public URL obtained:', publicUrl);
       await updateProfile({ avatar: publicUrl });
       setAvatarFile(null);
       setAvatarPreview(null);
       toastManager.success('Avatar updated successfully');
     } catch (error) {
-      console.error('Avatar upload error:', error);
+      logger.error('Avatar upload error:', error);
       toastManager.error(`Failed to upload avatar: ${error.message}`);
     } finally {
       setUploadingAvatar(false);
@@ -174,7 +177,7 @@ const Profile = () => {
       setEditingProfile(false);
       toastManager.success('Profile updated successfully');
     } catch (error) {
-      console.error('Profile update error:', error);
+      logger.error('Profile update error:', error);
       toastManager.error('Failed to update profile');
     }
   };

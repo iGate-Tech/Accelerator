@@ -7,8 +7,12 @@ import { toastManager } from "../../lib/feedback";
 import RouteGuard from "../../components/common/RouteGuard";
 import logo from "../../assets/iGate-tech-logo.svg";
 import avatar from "../../assets/avatar.png";
+import logger from '../../lib/logger.js';
+
+
 
 const Signup = () => {
+  logger.trace('Signup: Starting');
   const navigate = useNavigate();
   const { login, signup, isAuthenticated } = useUser();
   const { t } = useLanguage();
@@ -27,7 +31,7 @@ const Signup = () => {
   // Redirect if already authenticated
   createEffect(() => {
     if (isAuthenticated()) {
-      navigate('/dashboard', { replace: true });
+      navigate('/', { replace: true });
     }
   });
 
@@ -82,7 +86,7 @@ const Signup = () => {
         bio: ""
       };
 
-      console.log('Creating user with email:', sanitizedEmail);
+      logger.debug('Creating user with email:', sanitizedEmail);
       // Create user with Supabase
       const result = await signup(sanitizedEmail, password, profile);
       if (!result.success) {
@@ -114,7 +118,7 @@ const Signup = () => {
         }, 2000);
       }
     } catch (err) {
-      console.error('Signup error:', err);
+      logger.error('Signup error:', err);
       if (err.message?.includes('User already registered')) {
         toastManager.error(`Registration failed for ${sanitizedEmail}. An account with this email already exists. Please try logging in or use a different email.`);
       } else {
@@ -258,8 +262,6 @@ const Signup = () => {
                <a href="/help" class="link link-hover">{t().help}</a>
                <a href="/privacy-policy" class="link link-hover">{t().privacyPolicy}</a>
                <a href="/terms-of-service" class="link link-hover">{t().termsOfService}</a>
-               <a href="/status" class="link link-hover">{t().statusPage}</a>
-               <a href="/changelog" class="link link-hover">{t().changelog}</a>
              </div>
               <p>© {new Date().getFullYear()} iGate. <em>"One Gate, Endless Possibilities."</em></p>
            </footer>

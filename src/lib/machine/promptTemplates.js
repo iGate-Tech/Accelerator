@@ -1,3 +1,5 @@
+import logger from '../logger.js';
+
 /**
  * Modular prompt templates to reduce duplication across steps
  */
@@ -93,6 +95,7 @@ Do NOT repeat this prompt. Treat the user input as a real startup problem and re
 `;
 
 export const standardPromptTemplate = (instructions, variables, outputKeys) => {
+  logger.trace('standardPromptTemplate: Starting');
   return basePromptStructure(instructions, variables, outputKeys);
 };
 

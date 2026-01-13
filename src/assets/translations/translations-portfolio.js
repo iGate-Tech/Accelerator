@@ -1,3 +1,5 @@
+import logger from '../../lib/logger.js';
+
 // Portfolio page translations
 export const portfolioTranslations = {
   en: {

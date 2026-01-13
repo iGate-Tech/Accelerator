@@ -3,13 +3,19 @@ import { useUser } from "../../context/UserContext";
 import { useNavigate } from "@solidjs/router";
 import { getPackages, getUserSubscription, createUserSubscription, changeUserSubscription } from "../../lib/db";
 import { toastManager } from "../../lib/feedback";
+import logger from '../../lib/logger.js';
+
+
 
 const Packages = () => {
+  logger.trace('Packages: Starting');
   const navigate = useNavigate();
   const { user, refreshUserData } = useUser();
 
   const [packages, { refetch: refetchPackages }] = createResource(async () => {
-    return await getPackages();
+    const result = await getPackages();
+    logger.debug('Loaded packages:', result);
+    return result;
   });
 
   const [subscription, { refetch: refetchSubscription }] = createResource(
@@ -22,6 +28,19 @@ const Packages = () => {
 
   const handleSubscribe = async (packageData) => {
     try {
+      // Validate inputs
+      if (!user() || !user().id) {
+        logger.error('User not available', user());
+        toastManager.error('User session expired. Please log in again.');
+        return;
+      }
+
+      if (!packageData || !packageData.id) {
+        logger.error('Invalid package data', packageData);
+        toastManager.error('Package data is invalid. Please try again.');
+        return;
+      }
+
       const currentSubscription = subscription();
 
       // Check if user already has this active subscription
@@ -57,7 +76,7 @@ const Packages = () => {
       await refreshUserData();
 
     } catch (error) {
-      console.error('Subscription error:', error);
+      logger.error('Subscription error:', error);
       toastManager.error('Failed to process subscription. Please try again.');
     }
   };

@@ -3,6 +3,8 @@ import { performSync, syncService } from './sync';
 import { getCurrentUser } from './supabase';
 import { v4 as uuidv4 } from 'uuid';
 import PgliteWorker from '../workers/pglite-worker-v2.js?worker';
+import logger from './logger.js';
+
 
 let worker = null;
 let nextRequestId = 1;
@@ -18,7 +20,7 @@ class DatabaseWorker {
     if (this.initialized) return;
 
     try {
-      console.log('Creating database worker instance');
+      logger.debug('Creating database worker instance');
       this.worker = new PgliteWorker();
 
       this.worker.onmessage = (e) => {
@@ -35,7 +37,7 @@ class DatabaseWorker {
       };
 
       this.worker.onerror = (error) => {
-        console.error('Worker error:', error);
+        logger.error('Worker error:', error);
         // Reject all pending requests on worker error
         for (const [id, resolver] of pendingRequests) {
           resolver.reject(new Error('Database worker error'));
@@ -44,40 +46,44 @@ class DatabaseWorker {
       };
 
       // Initialize the database with timeout
-      console.log('Initializing database...');
-      await Promise.race([
-        this.sendMessage('init', { dataDir: 'idb://accelerator-db-v19' }),
-        new Promise((_, reject) => setTimeout(() => reject(new Error('Database init timeout')), 10000))
-      ]);
+      logger.debug('Initializing database...');
+       await Promise.race([
+          this.sendMessage('init', { dataDir: 'idb://accelerator-db-v22' }),
+         new Promise((_, reject) => setTimeout(() => reject(new Error('Database init timeout')), 30000))
+       ]);
       this.initialized = true;
 
-      console.log('Database worker initialized successfully');
+      logger.debug('Database worker initialized successfully');
     } catch (error) {
-      console.error('Failed to initialize database worker:', error);
+      logger.error('Failed to initialize database worker:', error);
       // Set a flag to indicate database is unavailable
       this.dbUnavailable = true;
-      console.warn('Database unavailable, app will work in limited mode');
+      logger.warn('Database unavailable, app will work in limited mode');
       // Don't throw error - let app continue with limited functionality
     }
 
     // Check if database is already seeded
     const alreadySeeded = await isSeeded();
     if (!alreadySeeded) {
-      // Seed initial data after database is ready
-      await seedInitialData();
+  // Seed initial data after database is ready
+  await seedInitialData();
     } else {
-      console.log('Database already seeded, skipping seeding');
+      logger.debug('Database already seeded, skipping seeding');
     }
   }
 
   async sendMessage(type, data) {
+    logger.trace('DatabaseWorker: sendMessage called - type:', type, 'data keys:', Object.keys(data || {}));
     return new Promise((resolve, reject) => {
       const id = nextRequestId++;
+      logger.debug('DatabaseWorker: sending message id:', id, 'type:', type);
       pendingRequests.set(id, { resolve, reject });
 
       // Deep clone data to ensure it's cloneable, handling circular references and non-serializable objects
       const serializableData = this.deepCloneSerializable(data);
+      logger.trace('DatabaseWorker: data serialized, posting message');
       this.worker.postMessage({ id, type, payload: serializableData });
+      logger.trace('DatabaseWorker: message posted to worker');
     });
   }
 
@@ -162,9 +168,9 @@ class DatabaseWorker {
      return await this.sendMessage('getTasks', { project_id, userId });
    }
 
-   async addTask(task, project_id) {
-     return await this.sendMessage('addTask', { task, project_id });
-   }
+    async addTask(task, project_id, userId = null) {
+      return await this.sendMessage('addTask', { task, project_id, userId });
+    }
 
    async clearAllTasks() {
      return await this.sendMessage('clearAllTasks', {});
@@ -494,7 +500,8 @@ export const getPg = async () => {
 };
 
 export const triggerSync = () => {
-  syncService.debouncedSync();
+  logger.trace('triggerSync: Starting');
+  syncService.performSync();
 };
 
 export const initDb = async () => {
@@ -508,49 +515,64 @@ export const initDb = async () => {
      const pg = await getPg();
      return await pg.getEntities(table, selectFields, whereClause, orderBy, params);
    } catch (error) {
-     console.log(`DB error in getEntities for ${table}: ${error.message}`);
+     logger.debug(`DB error in getEntities for ${table}: ${error.message}`);
      return [];
    }
  };
 
 // Generic helper for UPDATE operations
- export const updateEntity = async (table, idField, id, updates, options = { noTrigger: false }) => {
-   try {
-     const pg = await getPg();
-     const result = await pg.updateEntity(table, idField, id, updates, options);
-     if (!options.noTrigger) {
-       triggerSync();
-     }
-     return result;
-   } catch (error) {
-     console.log(`DB error in updateEntity for ${table}: ${error.message}`);
-     return { success: false, error: error.message };
-   }
- };
+  export const updateEntity = async (table, idField, id, updates, options = { noTrigger: false }) => {
+    logger.trace('updateEntity: Starting - table:', table, 'idField:', idField, 'id:', id, 'updates keys:', Object.keys(updates || {}), 'noTrigger:', options.noTrigger);
+    try {
+      const pg = await getPg();
+      logger.debug('updateEntity: PG connection obtained, executing update');
+      const result = await pg.updateEntity(table, idField, id, updates, options);
+      logger.debug('updateEntity: Update executed successfully, result:', result);
+      if (!options.noTrigger) {
+        logger.debug('updateEntity: Triggering sync');
+        triggerSync();
+      } else {
+        logger.debug('updateEntity: Skipping sync trigger');
+      }
+      logger.trace('updateEntity: Completed successfully');
+      return result;
+    } catch (error) {
+      logger.error('updateEntity: Error - table:', table, 'error:', error.message, error.stack);
+      return { success: false, error: error.message };
+    }
+  };
 
    export const getTasks = async (project_id = null, userId = null) => {
-     console.log('getTasks called with project_id:', project_id, 'userId:', userId);
+     logger.debug('getTasks called with project_id:', project_id, 'userId:', userId);
      try {
        const pg = await getPg();
        const tasks = await pg.getTasks(project_id, userId);
-       console.log('Tasks loaded:', tasks);
+       logger.debug('Tasks loaded:', tasks);
        return tasks;
      } catch (e) {
-       console.log('DB error in getTasks:', e);
+       logger.debug('DB error in getTasks:', e);
        return [];
      }
    };
 
-   export const addTask = async (task, project_id) => {
-    try {
-        const pg = await getPg();
-        await pg.addTask(task, project_id);
-        console.log('Task added:', task, 'for project:', project_id);
-        triggerSync();
-      } catch (e) {
-        console.log('DB error in addTask:', e);
-      }
-   };
+    export const addTask = async (task, project_id) => {
+      logger.debug('DB: addTask called with task content length:', task?.content?.length, 'project_id:', project_id);
+      try {
+          logger.debug('DB: getting current user');
+          const { getCurrentUser } = await import('./supabase');
+          const user = await getCurrentUser();
+          logger.debug('DB: current user:', user?.id);
+          logger.debug('DB: getting pg worker');
+          const pg = await getPg();
+          logger.debug('DB: calling pg.addTask');
+          await pg.addTask(task, project_id, user?.id);
+          logger.debug('DB: Task added successfully');
+          logger.debug('DB: triggering sync');
+          triggerSync();
+        } catch (e) {
+          logger.debug('DB: error in addTask:', e);
+        }
+     };
 
 export const clearAllTasks = async () => {
     try {
@@ -558,7 +580,7 @@ export const clearAllTasks = async () => {
       await pg.clearAllTasks();
       triggerSync();
     } catch (e) {
-      console.log('DB not ready, skipping clearAllTasks');
+      logger.debug('DB not ready, skipping clearAllTasks');
     }
  };
 
@@ -568,7 +590,7 @@ export const clearAllTasks = async () => {
       await pg.updateTask(id, content);
       triggerSync();
     } catch (e) {
-      console.log('DB not ready, skipping updateTask');
+      logger.debug('DB not ready, skipping updateTask');
     }
  };
 
@@ -581,20 +603,20 @@ export const clearAllTasks = async () => {
            if (!userId || typeof userId !== 'string') {
              const { getCurrentUser } = await import('./supabase');
              const user = await getCurrentUser();
-             console.log('user from getCurrentUser:', user);
+             logger.debug('user from getCurrentUser:', user);
              userId = user && typeof user.id === 'string' ? user.id : null;
            }
           const pg = await getPg();
-          console.log('Getting projects for userId:', userId, 'type:', typeof userId);
+          logger.debug('Getting projects for userId:', userId, 'type:', typeof userId);
           if (typeof userId !== 'string') {
-            console.error('Invalid userId type:', typeof userId, 'value:', userId);
+            logger.error('Invalid userId type:', typeof userId, 'value:', userId);
             return [];
           }
           const projects = await pg.getProjects(userId);
-          console.log('Projects loaded:', projects);
+          logger.debug('Projects loaded:', projects);
           return projects;
         } catch (e) {
-          console.log('Error getting projects:', e);
+          logger.debug('Error getting projects:', e);
           return [];
         }
       };
@@ -602,7 +624,7 @@ export const clearAllTasks = async () => {
     export const getPublicProjects = async () => {
        const pg = await getPg();
        const projects = await pg.getPublicProjects();
-       console.log('Public projects loaded:', projects);
+       logger.debug('Public projects loaded:', projects);
        return projects;
      };
 
@@ -610,10 +632,10 @@ export const clearAllTasks = async () => {
       try {
         const pg = await getPg();
         const projects = await pg.getPublicProjectsWithVotes(currentUserId);
-        console.log('Public projects with votes loaded:', projects);
+        logger.debug('Public projects with votes loaded:', projects);
         return projects;
       } catch (e) {
-        console.log('Error getting public projects with votes:', e);
+        logger.debug('Error getting public projects with votes:', e);
         return [];
       }
     };
@@ -623,7 +645,7 @@ export const clearAllTasks = async () => {
         const pg = await getPg();
         return await pg.getProjectByName(name);
       } catch (e) {
-        console.log('DB not ready, returning null');
+        logger.debug('DB not ready, returning null');
         return null;
       }
     };
@@ -633,7 +655,7 @@ export const clearAllTasks = async () => {
         const pg = await getPg();
         return await pg.getProjectById(id);
       } catch (e) {
-        console.log('DB not ready, returning null');
+        logger.debug('DB not ready, returning null');
         return null;
       }
     };
@@ -646,7 +668,7 @@ export const clearAllTasks = async () => {
 
         const pg = await getPg();
         const newProject = await pg.addProject(project, user.id);
-        console.log('Added project:', newProject);
+        logger.debug('Added project:', newProject);
 
          // Log activity
          await logActivity(user.id, 'project_created', 'project', newProject.id, `Created project "${project.name}"`, { projectName: project.name });
@@ -654,35 +676,32 @@ export const clearAllTasks = async () => {
         triggerSync();
         return newProject.id;
      } catch (e) {
-       console.log('Error adding project:', e);
+       logger.debug('Error adding project:', e);
        toastManager.error(`Failed to add project "${project.name}" (${project.description?.length || 0} chars description): ${e.message}`);
      }
    };
 
     export const updateProject = async (id, project) => {
-    if (!project || typeof project !== 'object') {
-      const errorMsg = `Invalid project data: ${JSON.stringify(project)}`;
-      console.error('updateProject called with invalid project data:', project);
-      throw new Error(errorMsg);
-    }
-    console.log('Updating project', id, 'with fields:', Object.keys(project));
-    try {
-      const { getCurrentUser } = await import('./supabase');
-      const user = await getCurrentUser();
-      if (!user) throw new Error('User not authenticated');
+      try {
+        // Validate parameters
+        if (!id) throw new Error('Project ID is required');
+        if (!project || typeof project !== 'object') throw new Error('Project data must be an object');
 
-      const pg = await getPg();
-      const result = await pg.updateProject(id, project);
-      if (!result.success) {
-        throw new Error(result.error);
-      }
-      console.log('Updated project:', id);
+        const user = await getCurrentUser();
+        if (!user) throw new Error('User not authenticated');
 
-       // Log activity
-       await logActivity(user.id, 'project_updated', 'project', id, `Updated project`, { fields: Object.keys(project) });
+        logger.debug('DB: updateProject called with id:', id, 'updates:', Object.keys(project));
+        const pg = await getPg();
+        logger.debug('DB: calling pg.updateProject');
+        await pg.updateProject(id, project);
+        logger.debug('DB: Updated project:', id);
 
-     } catch (e) {
-       console.log('Error updating project:', e);
+         // Log activity
+        await logActivity(user.id, 'project_updated', 'project', id, `Updated project`, { fields: Object.keys(project) });
+
+        triggerSync();
+      } catch (e) {
+       logger.debug('Error updating project:', e);
        toastManager.error(`Failed to update project ${id} (${Object.keys(project).length} fields): ${e.message}`);
      }
   };
@@ -693,16 +712,19 @@ export const clearAllTasks = async () => {
          const user = await getCurrentUser();
          if (!user) throw new Error('User not authenticated');
 
-         const pg = await getPg();
-          await pg.deleteProject(id);
-         console.log('Deleted project:', id);
+          const pg = await getPg();
+           await pg.deleteProject(id);
+          logger.debug('Deleted project:', id);
 
-          // Log activity
-          await logActivity(user.id, 'project_deleted', 'project', id, `Deleted project`, {});
+           // Dispatch event to reset current project if it was deleted
+           window.dispatchEvent(new CustomEvent('projectDeleted', { detail: { projectId: id } }));
 
-         triggerSync();
+           // Log activity
+           await logActivity(user.id, 'project_deleted', 'project', id, `Deleted project`, {});
+
+          triggerSync();
         } catch (e) {
-         console.log('Error deleting project:', e);
+         logger.debug('Error deleting project:', e);
          toastManager.error(`Failed to delete project ${id}: ${e.message}`);
        }
    };
@@ -711,20 +733,20 @@ export const clearAllTasks = async () => {
       try {
         const pg = await getPg();
         await pg.deleteAllProjects();
-        console.log('Deleted all projects');
+        logger.debug('Deleted all projects');
       } catch (e) {
-        console.log('Error deleting all projects:', e);
+        logger.debug('Error deleting all projects:', e);
       }
     };
 
     export const toggleProjectPublic = async (projectId, isPublic) => {
       try {
         const pg = await getPg();
-        const result = await pg.toggleProjectPublic(projectId, isPublic);
-        console.log(`Project ${projectId} set to ${isPublic ? 'public' : 'private'}`);
+        const result = await pg.toggleProjectPublic({ projectId, isPublic });
+        logger.debug(`Project ${projectId} set to ${isPublic ? 'public' : 'private'}`);
         return result;
       } catch (e) {
-        console.log('Error toggling project public status:', e);
+        logger.debug('Error toggling project public status:', e);
         toastManager.error(`Failed to update project visibility: ${e.message}`);
         return { success: false, error: e.message };
       }
@@ -733,11 +755,11 @@ export const clearAllTasks = async () => {
     export const voteOnProject = async (projectId, userId, voteType) => {
       try {
         const pg = await getPg();
-        const result = await pg.voteOnProject(projectId, userId, voteType);
+        const result = await pg.voteOnProject({ projectId, userId, voteType });
         triggerSync();
         return result;
       } catch (e) {
-        console.log('Error voting on project:', e);
+        logger.debug('Error voting on project:', e);
         toastManager.error(`Failed to vote on project: ${e.message}`);
         return { success: false, error: e.message };
       }
@@ -748,7 +770,7 @@ export const clearAllTasks = async () => {
         const pg = await getPg();
         return await pg.getProjectVotes(projectId);
       } catch (e) {
-        console.log('Error getting project votes:', e);
+        logger.debug('Error getting project votes:', e);
         return [];
       }
     };
@@ -757,7 +779,7 @@ export const clearAllTasks = async () => {
   export const getGroups = async (userId = null) => {
     const pg = await getPg();
     const groups = await pg.getGroups(userId);
-    console.log('Groups loaded:', groups);
+    logger.debug('Groups loaded:', groups);
     return groups;
   };
 
@@ -766,7 +788,7 @@ export const clearAllTasks = async () => {
      const pg = await getPg();
      return await pg.getGroupById(id);
    } catch (e) {
-     console.log('Error loading group:', e);
+     logger.debug('Error loading group:', e);
      return null;
    }
  };
@@ -779,11 +801,11 @@ export const clearAllTasks = async () => {
 
      const pg = await getPg();
      const newGroup = await pg.addGroup(group, user.id);
-     console.log('Added group:', newGroup);
+     logger.debug('Added group:', newGroup);
      triggerSync();
      return newGroup.id;
    } catch (e) {
-     console.log('Error adding group:', e);
+     logger.debug('Error adding group:', e);
      toastManager.error(`Failed to add group "${group.name}": ${e.message}`);
    }
  };
@@ -791,13 +813,13 @@ export const clearAllTasks = async () => {
  export const updateGroup = async (id, group) => {
    try {
      const pg = await getPg();
-     const result = await pg.updateGroup(id, group);
+      const result = await pg.updateGroup({ id, group });
      if (!result.success) {
        throw new Error(result.error);
      }
-     console.log('Updated group:', id);
+     logger.debug('Updated group:', id);
    } catch (e) {
-     console.log('Error updating group:', e);
+     logger.debug('Error updating group:', e);
      toastManager.error(`Failed to update group ${id} (${Object.keys(group).length} fields): ${e.message}`);
    }
  };
@@ -806,10 +828,10 @@ export const clearAllTasks = async () => {
    try {
      const pg = await getPg();
      await pg.deleteGroup(id);
-     console.log('Deleted group:', id);
+     logger.debug('Deleted group:', id);
      triggerSync();
    } catch (e) {
-     console.log('Error deleting group:', e);
+     logger.debug('Error deleting group:', e);
      toastManager.error(`Failed to delete group ${id}: ${e.message}`);
    }
  };
@@ -826,22 +848,22 @@ export const exportAllProjects = async (userId = null) => {
  export const addProjectToGroup = async (projectId, groupId) => {
    try {
      const pg = await getPg();
-     await pg.addProjectToGroup(projectId, groupId);
-     console.log('Added project', projectId, 'to group', groupId);
+      await pg.addProjectToGroup({ projectId, groupId });
+     logger.debug('Added project', projectId, 'to group', groupId);
      triggerSync();
    } catch (e) {
-     console.log('Error adding project to group:', e);
+     logger.debug('Error adding project to group:', e);
    }
  };
 
  export const removeProjectFromGroup = async (projectId, groupId) => {
    try {
      const pg = await getPg();
-     await pg.removeProjectFromGroup(projectId, groupId);
-     console.log('Removed project', projectId, 'from group', groupId);
+      await pg.removeProjectFromGroup({ projectId, groupId });
+     logger.debug('Removed project', projectId, 'from group', groupId);
      triggerSync();
    } catch (e) {
-     console.log('Error removing project from group:', e);
+     logger.debug('Error removing project from group:', e);
    }
  };
 
@@ -850,7 +872,7 @@ export const exportAllProjects = async (userId = null) => {
      const pg = await getPg();
      return await pg.getProjectsInGroup(groupId);
    } catch (e) {
-     console.log('Error getting projects in group:', e);
+     logger.debug('Error getting projects in group:', e);
      return [];
    }
  };
@@ -860,7 +882,7 @@ export const exportAllProjects = async (userId = null) => {
      const pg = await getPg();
      return await pg.getUngroupedProjects(userId);
    } catch (e) {
-     console.log('Error getting ungrouped projects:', e);
+     logger.debug('Error getting ungrouped projects:', e);
      return [];
    }
  };
@@ -870,7 +892,7 @@ export const exportAllProjects = async (userId = null) => {
      const pg = await getPg();
      return await pg.getGroupsWithProjects(userId);
    } catch (e) {
-     console.log('Error getting groups with projects:', e);
+     logger.debug('Error getting groups with projects:', e);
      return [];
    }
  };
@@ -879,12 +901,11 @@ export const exportAllProjects = async (userId = null) => {
  export const createUser = async (email, passwordHash, profile = {}, userId = null) => {
    try {
      const pg = await getPg();
-     const user = await pg.createUser(email, passwordHash, profile, userId);
-     console.log('User created:', user);
+      const user = await pg.createUser({ email, passwordHash, profile, userId });
      triggerSync();
      return user;
    } catch (e) {
-     console.log('Error creating user:', e);
+     logger.debug('Error creating user:', e);
      throw e;
    }
  };
@@ -894,7 +915,7 @@ export const exportAllProjects = async (userId = null) => {
      const pg = await getPg();
      return await pg.getUserByEmail(email);
    } catch (e) {
-     console.log('Error getting user by email:', e);
+     logger.debug('Error getting user by email:', e);
      return null;
    }
  };
@@ -904,7 +925,7 @@ export const exportAllProjects = async (userId = null) => {
      const pg = await getPg();
      return await pg.getUserById(id);
    } catch (e) {
-     console.log('Error getting user by id:', e);
+     logger.debug('Error getting user by id:', e);
      return null;
    }
  };
@@ -912,11 +933,11 @@ export const exportAllProjects = async (userId = null) => {
  export const updateUser = async (id, updates) => {
    try {
      const pg = await getPg();
-     const result = await pg.updateUser(id, updates);
-     console.log('Updated user:', id);
+      const result = await pg.updateUser({ id, updates });
+     logger.debug('Updated user:', id);
      return result;
    } catch (e) {
-     console.log('Error updating user:', e);
+     logger.debug('Error updating user:', e);
      throw e;
    }
  };
@@ -925,10 +946,10 @@ export const exportAllProjects = async (userId = null) => {
    try {
      const pg = await getPg();
      await pg.deleteUser(id);
-     console.log('Deleted user:', id);
+     logger.debug('Deleted user:', id);
      triggerSync();
    } catch (e) {
-     console.log('Error deleting user:', e);
+     logger.debug('Error deleting user:', e);
      throw e;
    }
  };
@@ -937,12 +958,12 @@ export const exportAllProjects = async (userId = null) => {
  export const createSession = async (userId, token, expiresAt) => {
    try {
      const pg = await getPg();
-     const session = await pg.createSession(userId, token, expiresAt);
-     console.log('Session created:', session);
+      const session = await pg.createSession({ userId, token, expiresAt });
+     logger.debug('Session created:', session);
      triggerSync();
      return session;
    } catch (e) {
-     console.log('Error creating session:', e);
+     logger.debug('Error creating session:', e);
      throw e;
    }
  };
@@ -952,7 +973,7 @@ export const exportAllProjects = async (userId = null) => {
      const pg = await getPg();
      return await pg.getSessionByToken(token);
    } catch (e) {
-     console.log('Error getting session by token:', e);
+     logger.debug('Error getting session by token:', e);
      return null;
    }
  };
@@ -961,10 +982,10 @@ export const exportAllProjects = async (userId = null) => {
    try {
      const pg = await getPg();
      await pg.deleteSession(token);
-     console.log('Deleted session:', token);
+     logger.debug('Deleted session:', token);
      triggerSync();
    } catch (e) {
-     console.log('Error deleting session:', e);
+     logger.debug('Error deleting session:', e);
    }
  };
 
@@ -972,10 +993,10 @@ export const exportAllProjects = async (userId = null) => {
    try {
      const pg = await getPg();
      await pg.deleteExpiredSessions();
-     console.log('Deleted expired sessions');
+     logger.debug('Deleted expired sessions');
      triggerSync();
    } catch (e) {
-     console.log('Error deleting expired sessions:', e);
+     logger.debug('Error deleting expired sessions:', e);
    }
  };
 
@@ -983,11 +1004,11 @@ export const exportAllProjects = async (userId = null) => {
  export const addCreditTransaction = async (userId, type, amount, description) => {
    try {
      const pg = await getPg();
-     const transaction = await pg.addCreditTransaction(userId, type, amount, description);
+      const transaction = await pg.addCreditTransaction({ userId, type, amount, description });
      triggerSync();
      return transaction;
    } catch (error) {
-     console.error('Error adding credit transaction:', error);
+     logger.error('Error adding credit transaction:', error);
      throw error;
    }
  };
@@ -999,7 +1020,7 @@ export const exportAllProjects = async (userId = null) => {
         const pg = await getPg();
         return await pg.getUserCredits(userId);
       } catch (e) {
-        console.log('Error getting user credits:', e);
+        logger.debug('Error getting user credits:', e);
         return [];
       }
     };
@@ -1009,7 +1030,7 @@ export const exportAllProjects = async (userId = null) => {
      const pg = await getPg();
      return await pg.getUserCreditBalance(userId);
    } catch (e) {
-     console.log('Error getting user credit balance:', e);
+     logger.debug('Error getting user credit balance:', e);
      return 0;
    }
  };
@@ -1018,12 +1039,12 @@ export const exportAllProjects = async (userId = null) => {
  export const addBillingRecord = async (userId, type, amount, description, dueDate = null) => {
    try {
      const pg = await getPg();
-     const billingRecord = await pg.addBillingRecord(userId, type, amount, description, dueDate);
-     console.log('Billing record added:', billingRecord);
+      const billingRecord = await pg.addBillingRecord({ userId, type, amount, description, dueDate });
+     logger.debug('Billing record added:', billingRecord);
      triggerSync();
      return billingRecord;
    } catch (e) {
-     console.log('Error adding billing record:', e);
+     logger.debug('Error adding billing record:', e);
      throw e;
    }
  };
@@ -1033,7 +1054,7 @@ export const exportAllProjects = async (userId = null) => {
      const pg = await getPg();
      return await pg.getUserBilling(userId);
    } catch (e) {
-     console.log('Error getting user billing:', e);
+     logger.debug('Error getting user billing:', e);
      return [];
    }
  };
@@ -1043,7 +1064,7 @@ export const exportAllProjects = async (userId = null) => {
      const pg = await getPg();
      return await pg.consumeCredits(userId, amount, description);
    } catch (error) {
-     console.error('Error consuming credits:', error);
+     logger.error('Error consuming credits:', error);
      throw error;
    }
  };
@@ -1053,7 +1074,7 @@ export const exportAllProjects = async (userId = null) => {
      const pg = await getPg();
      return await pg.getCreditBalance(userId);
    } catch (error) {
-     console.error('Error getting credit balance:', error);
+     logger.error('Error getting credit balance:', error);
      return 0;
    }
  };
@@ -1063,7 +1084,7 @@ export const exportAllProjects = async (userId = null) => {
       const pg = await getPg();
       return await pg.getCreditTransactions(userId);
     } catch (error) {
-      console.error('Error getting credit transactions:', error);
+      logger.error('Error getting credit transactions:', error);
       return [];
     }
   };
@@ -1076,7 +1097,7 @@ export const logActivity = async (userId, actionType, entityType, entityId, desc
     triggerSync();
     return activity;
   } catch (error) {
-    console.error('Error logging activity:', error);
+    logger.error('Error logging activity:', error);
     throw error;
   }
 };
@@ -1086,7 +1107,7 @@ export const getUserActivities = async (userId, limit = 50, offset = 0) => {
     const pg = await getPg();
     return await pg.getUserActivities({ userId, limit, offset });
   } catch (error) {
-    console.error('Error getting user activities:', error);
+    logger.error('Error getting user activities:', error);
     return [];
   }
 };
@@ -1094,11 +1115,11 @@ export const getUserActivities = async (userId, limit = 50, offset = 0) => {
   export const createNotification = async (userId, type, title, message, createdAt = null) => {
    try {
      const pg = await getPg();
-     const notification = await pg.createNotification(userId, type, title, message, createdAt);
+      const notification = await pg.createNotification({ userId, type, title, message });
      triggerSync();
      return notification;
    } catch (error) {
-     console.error('Error creating notification:', error);
+     logger.error('Error creating notification:', error);
      throw error;
    }
  };
@@ -1108,7 +1129,7 @@ export const getUserActivities = async (userId, limit = 50, offset = 0) => {
      const pg = await getPg();
      return await pg.getUserNotifications(userId);
    } catch (error) {
-     console.error('Error getting user notifications:', error);
+     logger.error('Error getting user notifications:', error);
      return [];
    }
  };
@@ -1116,11 +1137,11 @@ export const getUserActivities = async (userId, limit = 50, offset = 0) => {
  export const markNotificationRead = async (notificationId, userId) => {
    try {
      const pg = await getPg();
-     const result = await pg.markNotificationRead(notificationId, userId);
+      const result = await pg.markNotificationRead({ notificationId, userId });
      triggerSync();
      return result;
    } catch (error) {
-     console.error('Error marking notification read:', error);
+     logger.error('Error marking notification read:', error);
      return false;
    }
  };
@@ -1130,7 +1151,7 @@ export const getUserActivities = async (userId, limit = 50, offset = 0) => {
      const pg = await getPg();
      return await pg.getPackages();
    } catch (error) {
-     console.error('Error getting packages:', error);
+     logger.error('Error getting packages:', error);
      return [];
    }
  };
@@ -1140,43 +1161,43 @@ export const getUserActivities = async (userId, limit = 50, offset = 0) => {
      const pg = await getPg();
      return await pg.getUserSubscription(userId);
    } catch (error) {
-     console.error('Error getting user subscription:', error);
+     logger.error('Error getting user subscription:', error);
      return null;
    }
  };
 
- export const createUserSubscription = async (userId, packageId, subscriptionData = {}) => {
-   try {
-     const pg = await getPg();
-     const subscription = await pg.createUserSubscription(userId, packageId, subscriptionData);
-     console.log('User subscription created:', subscription);
-     triggerSync();
-     return subscription;
-   } catch (error) {
-     console.error('Error creating user subscription:', error);
-     throw error;
-   }
- };
+  export const createUserSubscription = async (userId, packageId, subscriptionData = {}) => {
+    try {
+      const pg = await getPg();
+       const subscription = await pg.createUserSubscription(userId, packageId, subscriptionData);
+      logger.debug('User subscription created:', subscription);
+      triggerSync();
+      return subscription;
+    } catch (error) {
+      logger.error('Error creating user subscription:', error);
+      throw error;
+    }
+  };
 
- export const changeUserSubscription = async (userId, newPackageId, currentSubscription = null) => {
-   try {
-     const pg = await getPg();
-     const newSubscription = await pg.changeUserSubscription(userId, newPackageId, currentSubscription);
-     return newSubscription;
-   } catch (error) {
-     console.error('Error changing user subscription:', error);
-     throw error;
-   }
- };
+  export const changeUserSubscription = async (userId, newPackageId, currentSubscription = null) => {
+    try {
+      const pg = await getPg();
+       const newSubscription = await pg.changeUserSubscription(userId, newPackageId, currentSubscription);
+      return newSubscription;
+    } catch (error) {
+      logger.error('Error changing user subscription:', error);
+      throw error;
+    }
+  };
 
  export const updateUserSubscription = async (userId, subscriptionId, updates) => {
    try {
      const pg = await getPg();
-     const result = await pg.updateUserSubscription(userId, subscriptionId, updates);
-     console.log('Updated user subscription:', subscriptionId);
+      const result = await pg.updateUserSubscription({ userId, subscriptionId, updates });
+     logger.debug('Updated user subscription:', subscriptionId);
      return result;
    } catch (error) {
-     console.error('Error updating user subscription:', error);
+     logger.error('Error updating user subscription:', error);
      throw error;
    }
  };
@@ -1186,7 +1207,7 @@ export const getUserActivities = async (userId, limit = 50, offset = 0) => {
      const pg = await getPg();
      return await pg.getUserProfile(userId);
    } catch (error) {
-     console.error('Error getting user profile:', error);
+     logger.error('Error getting user profile:', error);
      return null;
    }
  };
@@ -1194,11 +1215,11 @@ export const getUserActivities = async (userId, limit = 50, offset = 0) => {
  export const createUserProfile = async (userId, profileData = {}) => {
    try {
      const pg = await getPg();
-     const profile = await pg.createUserProfile(userId, profileData);
+      const profile = await pg.createUserProfile({ userId, profileData });
      if (profile) triggerSync();
      return profile;
    } catch (error) {
-     console.error('Error creating user profile:', error);
+     logger.error('Error creating user profile:', error);
      throw error;
    }
  };
@@ -1207,10 +1228,10 @@ export const getUserActivities = async (userId, limit = 50, offset = 0) => {
    try {
      const pg = await getPg();
      await pg.updateBillingStatus(id, status);
-     console.log('Updated billing status:', id, status);
+     logger.debug('Updated billing status:', id, status);
      triggerSync();
    } catch (e) {
-     console.log('Error updating billing status:', e);
+     logger.debug('Error updating billing status:', e);
    }
  };
 
@@ -1220,7 +1241,7 @@ export const getUserActivities = async (userId, limit = 50, offset = 0) => {
       const pg = await getPg();
       return await pg.isSeeded();
     } catch (e) {
-      console.log('Error checking if seeded:', e);
+      logger.debug('Error checking if seeded:', e);
       return false;
     }
   };
@@ -1229,23 +1250,23 @@ export const getUserActivities = async (userId, limit = 50, offset = 0) => {
     try {
       const pg = await getPg();
       const result = await pg.seedPackages();
-      console.log('Packages seeded successfully');
+      logger.debug('Packages seeded successfully');
       return result;
     } catch (e) {
-      console.log('Error seeding packages:', e);
+      logger.debug('Error seeding packages:', e);
     }
   };
 
  export const seedInitialData = async () => {
    try {
-     console.log('Seeding initial data...');
+     logger.debug('Seeding initial data...');
 
      // Seed packages (these are system-wide, not user-specific)
      await seedPackages();
 
-     console.log('Initial data seeded successfully');
+     logger.debug('Initial data seeded successfully');
    } catch (e) {
-     console.log('Error seeding data:', e);
+     logger.debug('Error seeding data:', e);
    }
  };
 
@@ -1254,7 +1275,7 @@ export const getUserActivities = async (userId, limit = 50, offset = 0) => {
      const pg = await getPg();
      await pg.seedSampleNotifications(userId);
    } catch (e) {
-     console.log('Error creating sample notifications:', e);
+     logger.debug('Error creating sample notifications:', e);
    }
  };
 
@@ -1268,7 +1289,7 @@ export const getUserActivities = async (userId, limit = 50, offset = 0) => {
      triggerSync();
      return invitation;
    } catch (error) {
-     console.error('Error inviting collaborator:', error);
+     logger.error('Error inviting collaborator:', error);
      throw error;
    }
  };
@@ -1278,7 +1299,7 @@ export const getUserActivities = async (userId, limit = 50, offset = 0) => {
      const pg = await getPg();
      return await pg.getPortfolioInvitations(portfolioId);
    } catch (error) {
-     console.error('Error getting portfolio invitations:', error);
+     logger.error('Error getting portfolio invitations:', error);
      return [];
    }
  };
@@ -1288,7 +1309,7 @@ export const getUserActivities = async (userId, limit = 50, offset = 0) => {
      const pg = await getPg();
      return await pg.getUserInvitations(userEmail);
    } catch (error) {
-     console.error('Error getting user invitations:', error);
+     logger.error('Error getting user invitations:', error);
      return [];
    }
  };
@@ -1303,7 +1324,7 @@ export const getUserActivities = async (userId, limit = 50, offset = 0) => {
     return result;
      return result;
    } catch (error) {
-     console.error('Error responding to invitation:', error);
+     logger.error('Error responding to invitation:', error);
      throw error;
    }
  };
@@ -1313,7 +1334,7 @@ export const getUserActivities = async (userId, limit = 50, offset = 0) => {
      const pg = await getPg();
      return await pg.getPortfolioCollaborators(portfolioId);
    } catch (error) {
-     console.error('Error getting portfolio collaborators:', error);
+     logger.error('Error getting portfolio collaborators:', error);
      return [];
    }
  };
@@ -1330,7 +1351,7 @@ export const getUserActivities = async (userId, limit = 50, offset = 0) => {
      triggerSync();
      return result;
    } catch (error) {
-     console.error('Error removing collaborator:', error);
+     logger.error('Error removing collaborator:', error);
      throw error;
    }
  };
@@ -1342,7 +1363,7 @@ export const getUserActivities = async (userId, limit = 50, offset = 0) => {
      triggerSync();
      return result;
    } catch (error) {
-     console.error('Error updating collaborator role:', error);
+     logger.error('Error updating collaborator role:', error);
      throw error;
    }
  };
@@ -1368,8 +1389,8 @@ export const getUserActivities = async (userId, limit = 50, offset = 0) => {
 export const syncData = async () => {
   try {
     await performSync();
-    console.log('Data sync completed');
+    logger.debug('Data sync completed');
   } catch (error) {
-    console.error('Sync failed:', error);
+    logger.error('Sync failed:', error);
   }
 };

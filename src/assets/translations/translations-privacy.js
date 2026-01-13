@@ -1,3 +1,5 @@
+import logger from '../../lib/logger.js';
+
 // Privacy Policy translations
 export const privacyTranslations = {
   en: {

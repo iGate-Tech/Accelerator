@@ -5,8 +5,11 @@ import { useLanguage } from "../../hooks/useLanguage";
 import { toastManager } from "../../lib/feedback";
 import RouteGuard from "../../components/common/RouteGuard";
 import logo from "../../assets/iGate-tech-logo.svg";
+import logger from '../../lib/logger.js';
+
 
 const ForgotPassword = () => {
+  logger.trace('ForgotPassword: Starting');
   const navigate = useNavigate();
   const { isAuthenticated, forgotPassword } = useUser();
   const { t } = useLanguage();
@@ -16,7 +19,7 @@ const ForgotPassword = () => {
   // Redirect if already authenticated
   createEffect(() => {
     if (isAuthenticated()) {
-      navigate('/dashboard', { replace: true });
+      navigate('/', { replace: true });
     }
   });
 

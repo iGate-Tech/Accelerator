@@ -1,3 +1,5 @@
+import logger from '../../lib/logger.js';
+
 // Auth translations
 export const authTranslations = {
   en: {

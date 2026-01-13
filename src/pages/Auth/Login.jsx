@@ -6,8 +6,13 @@ import { sanitizeInput, isValidEmail } from "../../lib/security";
 import { toastManager } from "../../lib/feedback";
 import RouteGuard from "../../components/common/RouteGuard";
 import logo from "../../assets/iGate-tech-logo.svg";
+import logger from '../../lib/logger.js';
+
+
 
 const Login = () => {
+  logger.trace('Login: Starting');
+  logger.trace('Login: Starting');
   const navigate = useNavigate();
   const { login, isAuthenticated } = useUser();
   const { currentLang, t } = useLanguage();
@@ -17,13 +22,14 @@ const Login = () => {
   let eyeButton;
   const [loading, setLoading] = createSignal(false);
 
-   // Redirect if already authenticated
-   createEffect(() => {
-     console.log('Login createEffect running, isAuthenticated:', isAuthenticated());
-     if (isAuthenticated()) {
-       navigate('/dashboard', { replace: true });
-     }
-   });
+    // Redirect if already authenticated
+    createEffect(() => {
+      logger.debug('Login createEffect running, isAuthenticated:', isAuthenticated());
+      if (isAuthenticated()) {
+        logger.debug('Login: Redirecting authenticated user to /');
+        navigate('/', { replace: true });
+      }
+    });
 
   // Update eye icon when showPassword changes
   createEffect(() => {
@@ -53,9 +59,9 @@ const Login = () => {
     try {
       const success = await login(sanitizedEmail, sanitizedPassword);
        if (success) {
-         console.log('Login successful, isAuthenticated:', isAuthenticated());
+         logger.info('Login successful for:', sanitizedEmail);
          toastManager.success(`Login successful for ${sanitizedEmail}. Welcome back!`);
-         // Navigation will be handled by the createEffect when auth state updates
+         navigate('/', { replace: true });
        } else {
         toastManager.error(`Invalid credentials for ${sanitizedEmail}. Please check your email and password.`);
       }
@@ -71,43 +77,46 @@ const Login = () => {
   });
 
   return (
-  <RouteGuard>
+  <RouteGuard requireGuest={true}>
 <style>{`
-.btnshadow{
-   	position: relative;
-   	margin: 10px auto;
+.btnshadow {
+  position: relative;
+  background: #010002;
+  border-radius: 8px;
+  z-index: 0;
+  overflow: hidden;
+}
 
-    background: #010002;
-    
-   }
-  
-   .btnshadow:before,
-   .btnshadow:after{
-   	content: '';
-   	position: absolute;
-   	
-   	background: linear-gradient(45deg,#fb0094,#0000ff,#00ff00,#ffff00,#ff0000,#fb0094,#0000ff,#00ff00,#ffff00,#ff0000);
-   	background-size: 200% 200%;
-   	width: calc(100% + 3px);
-   	height: calc(100% + 3px);
-   	border-radius: 8px;
-   	z-index: -1;
-    animation: animate 4s ease alternate infinite;
-   }
-   .btnshadow:after{
-   	filter: blur(5px);
-   }
-   @keyframes animate{
-   	0%{
-   		background-position: 0 50%;
-   	}
-   	50%{
-   		background-position: 100% 50%;
-   	}
-   	100%{
-   		background-position: 0% 50%;
-   	}
-   }
+/* rotating border */
+.btnshadow::before {
+  content: "";
+  position: absolute;
+  inset: 5px;
+  background: conic-gradient(
+    from 0deg,
+    #fb0094,
+    #0000ff,
+    #00ff00,
+    #ffff00,
+    #ff0000,
+    transparent 50%,
+    transparent
+  );
+  border-radius: inherit;
+  animation: spin 3s linear infinite;
+  z-index: -2;
+}
+
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 `}</style>
 
     <div class="w-full max-w-md">
@@ -165,13 +174,13 @@ const Login = () => {
 
             <button
               type="submit"
-              class="w-full btn btnshadow"
+              class="w-full btnshadow rounded-md border border-base-300 p-[2px]"
               disabled={loading()}
             >
-              <div class="bg-base-100">
+              <div class="bg-base-100 rounded-md w-full h-8 flex items-center justify-center">
 
               {loading() && <span class="loading loading-spinner loading-sm"></span>}
-               {t().signIn}
+                {t().signIn}
               </div>
             </button>
           </form>
@@ -194,8 +203,6 @@ const Login = () => {
              <a href="/help" class="link link-hover">{t().help}</a>
              <a href="/privacy-policy" class="link link-hover">{t().privacyPolicy}</a>
              <a href="/terms-of-service" class="link link-hover">{t().termsOfService}</a>
-             <a href="/status" class="link link-hover">{t().statusPage}</a>
-             <a href="/changelog" class="link link-hover">{t().changelog}</a>
            </div>
             <p>© {new Date().getFullYear()} iGate. <em>"One Gate, Endless Possibilities."</em></p>
          </footer>

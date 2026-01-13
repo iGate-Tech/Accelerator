@@ -1,3 +1,5 @@
+import logger from '../../lib/logger.js';
+
 // Credits page translations
 export const creditsTranslations = {
   en: {

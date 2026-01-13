@@ -5,8 +5,11 @@ import { getCurrentUser } from "../../lib/supabase";
 import { LangContext } from "../../context/LangContext";
 import { translations } from "../../assets/translations/translations-index.js";
 import ProjectCard from "../../components/ui/ProjectCard";
+import logger from '../../lib/logger.js';
+
 
 const Explore = () => {
+  logger.trace('Explore: Starting');
   const { lang } = useContext(LangContext);
   const [currentLang, setCurrentLang] = createSignal(lang());
   const [search, setSearch] = createSignal("");

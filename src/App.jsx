@@ -1,9 +1,12 @@
-import { Router, Route, Navigate } from "@solidjs/router";
+import { Router, Route, Navigate, useLocation } from "@solidjs/router";
 import { lazy, createEffect, useContext } from "solid-js";
 import { LangProvider } from "./context/LangContext";
 import { UserProvider, useUser } from "./context/UserContext";
+import { useLogger } from "./context/LoggerContext";
 import MainLayout from "./components/common/MainLayout";
 import AuthLayout from "./components/common/AuthLayout";
+import logger from './lib/logger.js';
+
 
 const Home = lazy(() => import("./pages/Home"));
 const Dashboard = lazy(() => import("./pages/Dashboard"));
@@ -28,11 +31,17 @@ const Invitations = lazy(() => import("./pages/Invitations"));
 
 const ProtectedRoute = (props) => {
   const { isAuthenticated } = useUser();
-  return isAuthenticated() ? props.children : <Navigate href="/auth/login" />;
+  const authStatus = isAuthenticated();
+  logger.debug('ProtectedRoute: Authentication check - isAuthenticated:', authStatus, 'current path:', window.location.pathname);
+  return authStatus ? props.children : <Navigate href="/auth/login" />;
 };
 
+
 const AppRoutes = () => {
-  console.log('Current location:', window.location.pathname);
+   const logger = useLogger();
+
+   logger.info('App routing initialized for location:', window.location.pathname);
+
   return (
     <Router>
        <Route path="/" component={MainLayout}>
@@ -57,25 +66,30 @@ const AppRoutes = () => {
         <Route path="/auth/signup" component={() => <AuthLayout><Signup /></AuthLayout>} />
         <Route path="/auth/forgot-password" component={() => <AuthLayout><ForgotPassword /></AuthLayout>} />
         <Route path="/auth/onboarding" component={() => <AuthLayout><Onboarding /></AuthLayout>} />
-        {/* Fallback route - show login if nothing else matches */}
-        <Route path="*" component={() => {
-          console.log('Fallback route triggered for path:', window.location.pathname);
-          return (
-            <AuthLayout>
-              <Login />
-            </AuthLayout>
-          );
-        }} />
+         {/* Fallback route - show login if nothing else matches */}
+         <Route path="*" component={() => {
+           logger.warn('Fallback route triggered for unknown path:', window.location.pathname);
+           return (
+             <AuthLayout>
+               <Login />
+             </AuthLayout>
+           );
+         }} />
      </Router>
   );
 };
 
-const App = () => (
-  <LangProvider>
-    <UserProvider>
-      <AppRoutes />
-    </UserProvider>
-  </LangProvider>
-);
+const App = () => {
+   logger.info('App: Application bootstrap starting');
+   const result = (
+     <LangProvider>
+       <UserProvider>
+         <AppRoutes />
+       </UserProvider>
+     </LangProvider>
+   );
+   logger.info('App: Application bootstrap completed');
+   return result;
+ };
 
 export default App;

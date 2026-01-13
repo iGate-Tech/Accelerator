@@ -1,3 +1,5 @@
+import logger from '../../lib/logger.js';
+
 // Settings page translations
 export const settingsTranslations = {
   en: {

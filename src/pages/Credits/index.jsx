@@ -3,8 +3,12 @@ import { useUser } from "../../context/UserContext";
 import { getCreditBalance, getCreditTransactions, addCreditTransaction } from "../../lib/db";
 import { toastManager } from "../../lib/feedback";
 import { useActivityLogger } from "../../lib/activity";
+import logger from '../../lib/logger.js';
+
+
 
 const Credits = () => {
+  logger.trace('Credits: Starting');
   const { user, refreshUserData, updatePreferences } = useUser();
   const activityLogger = useActivityLogger();
 
@@ -15,7 +19,7 @@ const Credits = () => {
       try {
         return await getCreditBalance(userId);
       } catch (e) {
-        console.error('Error fetching balance:', e);
+        logger.error('Error fetching balance:', e);
         return 0;
       }
     }
@@ -28,7 +32,7 @@ const Credits = () => {
       try {
         return await getCreditTransactions(userId);
       } catch (e) {
-        console.error('Error fetching transactions:', e);
+        logger.error('Error fetching transactions:', e);
         return [];
       }
     }
@@ -67,7 +71,8 @@ const Credits = () => {
 
   const getTransactionColor = (amount) => {
     return amount > 0 ? 'text-success' : 'text-error';
-  };
+  
+  logger.trace('getCreditHealth: Starting');};
 
   const getCreditHealth = () => {
     const txns = transactions() || [];
@@ -96,6 +101,13 @@ const Credits = () => {
 
   const handleBuyCredits = async (amount = 100) => {
     try {
+      if (!user() || !user().id) {
+        logger.error('Credit purchase error: User not authenticated');
+        toastManager.error('You must be logged in to purchase credits.');
+        return;
+      }
+
+      logger.debug('Purchasing credits for user:', user().id, 'amount:', amount);
       await addCreditTransaction(user().id, 'purchase', amount, `Purchased ${amount} credits`);
       toastManager.success(`Successfully purchased ${amount} credits!`);
 
@@ -103,9 +115,9 @@ const Credits = () => {
       activityLogger.logCredit('purchased', amount);
 
       refetchBalance();
-      refetchTransactions();
-    } catch (error) {
-      console.error('Credit purchase error:', error);
+       refetchTransactions();
+     } catch (error) {
+      logger.error('Credit purchase error:', error);
       toastManager.error('Failed to purchase credits. Please try again.');
     }
   };
@@ -132,9 +144,11 @@ const Credits = () => {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `credits-transactions-${new Date().toISOString().split('T')[0]}.csv`;
+    a.do
+  logger.trace('setAutoRecharge: Starting');wnload = `credits-transactions-${new Date().toISOString().split('T')[0]}.csv`;
     a.click();
-    URL.revokeObjectURL(url);
+   
+  logger.trace('setAutoRecharge: Starting'); URL.revokeObjectURL(url);
     toastManager.success('CSV exported successfully');
   };
 

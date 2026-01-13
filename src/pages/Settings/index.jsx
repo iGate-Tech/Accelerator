@@ -4,8 +4,11 @@ import { useUser } from "../../context/UserContext";
 import { useLanguage } from "../../hooks/useLanguage";
 import { supabase, supabaseAdmin, signOut, deleteFromSupabase } from "../../lib/supabase.js";
 import { getProjects, getUserCredits } from "../../lib/db";
+import logger from "../../lib/logger.js";
+
 
 const Settings = () => {
+  logger.trace('Settings: Starting');
   const navigate = useNavigate();
   const { user, updateProfile, updatePreferences } = useUser();
   const { currentLang, t, setLang } = useLanguage();
@@ -51,7 +54,8 @@ const Settings = () => {
       await updateProfile({ avatar: avatar });
       showMessage('Avatar removed successfully');
     } catch (error) {
-      showMessage('Failed to remove avatar', 'error');
+      showMessag
+  logger.trace('exportData: Starting');e('Failed to remove avatar', 'error');
     }
   };
 
@@ -63,7 +67,8 @@ const Settings = () => {
     a.href = url;
     a.download = 'user-data.json';
     a.click();
-    URL.revokeObjectURL(url);
+    UR
+  logger.trace('handleAvatarChange: Starting');L.revokeObjectURL(url);
     showMessage('Data exported successfully!');
   };
 
@@ -105,7 +110,7 @@ const Settings = () => {
       const fileName = `${Date.now()}.${fileExt}`;
       const filePath = `${user().id}/${fileName}`;
 
-      console.log('Attempting to upload file:', filePath, 'to bucket: avatars');
+      logger.debug('Attempting to upload file:', filePath, 'to bucket: avatars');
 
       // Upload to Supabase Storage
       const { data, error } = await supabase.storage
@@ -116,17 +121,17 @@ const Settings = () => {
         });
 
       if (error) {
-        console.error('Supabase storage upload error:', error);
+        logger.error('Supabase storage upload error:', error);
         throw error;
       }
 
-      console.log('Upload successful, getting public URL...');
+      logger.debug('Upload successful, getting public URL...');
       // Get public URL
       const { data: { publicUrl } } = supabase.storage
         .from('avatars')
         .getPublicUrl(filePath);
 
-      console.log('Public URL obtained:', publicUrl);
+      logger.debug('Public URL obtained:', publicUrl);
       // Update user profile
       await updateProfile({ avatar: publicUrl });
 
@@ -134,7 +139,7 @@ const Settings = () => {
       setAvatarPreview(null);
       showMessage('Avatar updated successfully');
     } catch (error) {
-      console.error('Avatar upload error:', error);
+      logger.error('Avatar upload error:', error);
       showMessage(`Failed to upload avatar: ${error.message}`, 'error');
     } finally {
       setUploadingAvatar(false);
@@ -178,7 +183,7 @@ const Settings = () => {
       showMessage('Password updated successfully');
     } catch (error) {
       showMessage('Failed to update password', 'error');
-      console.error('Password change error:', error);
+      logger.error('Password change error:', error);
     } finally {
       setChangingPassword(false);
     }
@@ -194,10 +199,10 @@ const Settings = () => {
       if (supabaseAdmin) {
         const { error: supabaseError } = await supabaseAdmin.auth.admin.deleteUser(user().id);
         if (supabaseError) {
-          console.warn('Supabase delete failed, proceeding with local cleanup:', supabaseError);
+          logger.warn('Supabase delete failed, proceeding with local cleanup:', supabaseError);
         }
       } else {
-        console.warn('Supabase admin not available, skipping remote delete');
+        logger.warn('Supabase admin not available, skipping remote delete');
       }
 
       // Clean up local data
@@ -211,7 +216,7 @@ const Settings = () => {
        navigate('/auth/login');
     } catch (error) {
       showMessage('Failed to delete account. Please contact support.', 'error');
-      console.error('Delete account error:', error);
+      logger.error('Delete account error:', error);
     }
   };
 
@@ -222,14 +227,14 @@ const Settings = () => {
           const userProjects = await getProjects(user().id);
           setProjects(userProjects || []);
         } catch (e) {
-          console.error('Error loading projects:', e);
+          logger.error('Error loading projects:', e);
           setProjects([]);
         }
        try {
          const userCredits = await getUserCredits(user().id);
          setCredits(userCredits || []);
        } catch (e) {
-         console.error('Error loading credits:', e);
+         logger.error('Error loading credits:', e);
          setCredits([]);
        }
      }

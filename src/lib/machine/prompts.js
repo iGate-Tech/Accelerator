@@ -1,4 +1,6 @@
 import { stepsConfig } from "./stepsConfig.js";
+import logger from '../logger.js';
+
 
 // Auto-generated prompts from stepsConfig using template functions
 export const stepPrompts = Object.fromEntries(

@@ -1,26 +1,54 @@
 import { createStore } from "solid-js/store";
+import logger from '../logger.js';
 import {
   extractTemplateData,
   injectTemplateData,
   mergeTemplateData,
 } from "../llm-template.js";
-import { stepOrder, initialContext } from "./constants.js";
+import { stepOrder, initialContext, getNextStep } from "./constants.js";
 import { stepPrompts } from "./prompts.js";
 import { stepNames, modelMap, sectionMap } from "./mappings.js";
 import { stepsConfig } from "./stepsConfig.js";
 
+// Extract all business data from tasks
+export const extractDataFromTasks = (tasks) => {
+  logger.trace('extractDataFromTasks: Starting with tasks count:', tasks?.length || 0);
+  let context = {};
+  for (const task of tasks || []) {
+    logger.trace('extractDataFromTasks: Processing task:', task.stepName, 'content length:', task.content?.length);
+    const extracted = extractTemplateData(task.content || "");
+    let dataToMerge = extracted;
+    if (extracted.response && typeof extracted.response === "object") {
+      dataToMerge = extracted.response;
+    }
+    context = mergeTemplateData(context, dataToMerge);
+    logger.trace('extractDataFromTasks: Merged data, current context keys:', Object.keys(context));
+  }
+  logger.trace('extractDataFromTasks: Completed, final context keys:', Object.keys(context));
+  return context;
+};
+
 // Config-driven next step helper
-const getNextStep = (currentStep) => {
+const getNextStepFromConfig = (currentStep) => {
+  logger.trace('getNextStepFromConfig: Starting for step:', currentStep);
   const currentStepConfig = stepsConfig.find((step) => step.id === currentStep);
-  return currentStepConfig?.transitions?.next || "done";
+  const nextStep = currentStepConfig?.transitions?.next || "done";
+  logger.trace('getNextStepFromConfig: Next step determined as:', nextStep);
+  return nextStep;
 };
 
 export const fillPrompt = (template, ctx) => {
-  return injectTemplateData(template, ctx);
+  logger.trace('fillPrompt: Starting with template length:', template?.length, 'context keys:', Object.keys(ctx || {}));
+  const result = injectTemplateData(template, ctx);
+  logger.trace('fillPrompt: Completed, result length:', result?.length);
+  return result;
 };
 
 export const getPromptForStep = (step) => {
-  return stepPrompts[step] || `Please provide input for ${step}`;
+  logger.trace('getPromptForStep: Starting for step:', step);
+  const prompt = stepPrompts[step] || `Please provide input for ${step}`;
+  logger.trace('getPromptForStep: Retrieved prompt length:', prompt?.length);
+  return prompt;
 };
 
 export const [machineStore, setMachineStore] = createStore({
@@ -29,22 +57,28 @@ export const [machineStore, setMachineStore] = createStore({
 });
 
 export const startProcess = (problem) => {
+  logger.trace('startProcess: Starting with problem length:', problem?.length);
   setMachineStore("state", "processing");
-  setMachineStore("context", (prev) => ({
-    ...prev,
-    problem: problem || prev.problem,
-    currentStep: "system",
-    stepName: "Initialization",
-    currentModel: "System",
-    currentSection: "Initialization",
-    uiStatus: "processing",
-    uiMessage: "Starting initialization...",
-    completedSteps: 0,
-    currentPrompt: fillPrompt(getPromptForStep("system"), {
+  setMachineStore("context", (prev) => {
+    const newContext = {
       ...prev,
       problem: problem || prev.problem,
-    }),
-  }));
+      currentStep: "system",
+      stepName: "Initialization",
+      currentModel: "System",
+      currentSection: "Initialization",
+      uiStatus: "processing",
+      uiMessage: "Starting initialization...",
+      completedSteps: 0,
+      currentPrompt: fillPrompt(getPromptForStep("system"), {
+        ...prev,
+        problem: problem || prev.problem,
+      }),
+    };
+    logger.debug('startProcess: Context updated:', { currentStep: newContext.currentStep, uiStatus: newContext.uiStatus });
+    return newContext;
+  });
+  logger.trace('startProcess: Completed');
 };
 
 export const receiveResponse = async (
@@ -53,14 +87,19 @@ export const receiveResponse = async (
   setTasksList,
   tasksList,
   addTask,
+  updateProject,
+  projectId,
+  duration = 0,
 ) => {
+  logger.debug('Machine: receiveResponse called with response length:', response?.length, 'projectId:', projectId, 'duration:', duration);
   if (typeof response === "undefined") {
-    console.error("receiveResponse called with undefined response");
+    logger.error("Machine: receiveResponse called with undefined response");
     throw new Error("Received undefined response from LLM");
   }
 
   // Add the response as a task
   const currentStep = machineStore.context.currentStep;
+  logger.debug('Machine: creating new task for step:', currentStep, 'response length:', response.length);
   const newTask = {
     content: response,
     model: modelMap[currentStep] || "Unknown",
@@ -71,50 +110,65 @@ export const receiveResponse = async (
     prompt: machineStore.context.currentPrompt || "",
     timestamp: new Date().toISOString(),
   };
-  setTasksList([...(tasksList() || []), newTask]);
-  if (addTask) await addTask(newTask);
+  logger.debug('Machine: newTask created:', { stepName: newTask.stepName, contentLength: newTask.content.length });
+  const updatedTasks = [...(tasksList() || []), newTask];
+  logger.debug('Machine: updatedTasks length:', updatedTasks.length);
+  setTasksList(updatedTasks);
+  logger.debug('Machine: setTasksList called');
 
-  const nextStep = getNextStep(machineStore.context.currentStep);
-  if (nextStep === "done") {
-    setMachineStore("context", (prev) => {
-      const extracted = extractTemplateData(response || "");
-      let dataToMerge = extracted;
-      if (extracted.response && typeof extracted.response === "object") {
-        dataToMerge = extracted.response;
-      }
-      const updatedCtx = mergeTemplateData(prev, dataToMerge);
-      return {
-        ...updatedCtx,
-        llmResponse: response || "",
-        currentStep: "done",
-        completedSteps: prev.completedSteps + 1,
-        uiProgress: 100,
-        uiStatus: "completed",
-        uiMessage: "🎉 All 51 steps completed successfully!",
-      };
-    });
+  if (addTask) {
+    logger.debug('Machine: calling addTask');
+    await addTask(newTask);
+    logger.debug('Machine: addTask completed');
   } else {
+    logger.debug('Machine: addTask not provided, skipping');
+  }
+
+  // Extract and merge data from all tasks into context
+  logger.debug('Machine: extracting data from updated tasks');
+  const extractedData = extractDataFromTasks(updatedTasks);
+  logger.debug('Machine: extracted data keys:', Object.keys(extractedData));
+  setMachineStore("context", (prev) => {
+    const merged = mergeTemplateData(prev, extractedData);
+    logger.debug('Machine: context merged, new keys:', Object.keys(merged));
+    return merged;
+  });
+
+  // Accumulate stats
+  const currentConsumedCredits = machineStore.context.consumedCredits || 0;
+  const currentConsumedTime = machineStore.context.consumedTime || 0;
+  const newConsumedCredits = currentConsumedCredits + 10; // 10 credits per call
+  const newConsumedTime = currentConsumedTime + duration;
+  logger.debug('Machine: updated stats - credits:', newConsumedCredits, 'time:', newConsumedTime);
+
+  const nextStep = getNextStepFromConfig(machineStore.context.currentStep);
+  logger.debug('Machine: determined next step:', nextStep);
+
+  if (nextStep === "done") {
+    logger.info('Machine: Process completed!');
+    setMachineStore("context", (prev) => ({
+      ...prev,
+      llmResponse: response || "",
+      currentStep: "done",
+      completedSteps: prev.completedSteps + 1,
+      uiProgress: 100,
+      uiStatus: "completed",
+      uiMessage: "🎉 All 51 steps completed successfully!",
+      consumedCredits: newConsumedCredits,
+      consumedTime: newConsumedTime,
+    }));
+  } else {
+    logger.debug('Machine: transitioning to next step');
     setMachineStore("context", (prev) => {
-      const extracted = extractTemplateData(response || "");
-      let dataToMerge = extracted;
-      if (extracted.response && typeof extracted.response === "object") {
-        dataToMerge = extracted.response;
-      }
-      const updatedContextElse = mergeTemplateData(prev, dataToMerge);
-      console.log("Extracted data:", dataToMerge);
       const isSys = prev.currentStep === "system";
-      if (isSys) {
-        updatedContextElse.greeting = response;
-        updatedContextElse.acknowledgment =
-          "Problem acknowledged and ready to proceed.";
-      }
       const newCompletedSteps = isSys ? 1 : prev.completedSteps + 1;
       const progress = Math.min((newCompletedSteps / 51) * 100, 100);
       const message = isSys
         ? "Initialization complete. Starting step 1..."
         : `Step ${newCompletedSteps} complete. Moving to ${stepNames[nextStep] || "next step"}...`;
-      return {
-        ...updatedContextElse,
+
+      const newContext = {
+        ...prev,
         llmResponse: response || "",
         currentStep: nextStep,
         stepName: stepNames[nextStep] || "Next Step",
@@ -125,23 +179,84 @@ export const receiveResponse = async (
         uiMessage: message,
         currentPrompt: fillPrompt(
           getPromptForStep(nextStep),
-          updatedContextElse,
+          mergeTemplateData(prev, extractedData),
         ),
+        consumedCredits: newConsumedCredits,
+        consumedTime: newConsumedTime,
       };
+      logger.debug('Machine: context updated for next step:', {
+        currentStep: newContext.currentStep,
+        completedSteps: newContext.completedSteps,
+        uiProgress: newContext.uiProgress
+      });
+      return newContext;
     });
-    if (setAutoProgress) setAutoProgress(true);
+    if (setAutoProgress) {
+      logger.trace('Machine: setting auto progress');
+      setAutoProgress(true);
+    }
   }
+
+  // Update project in database after each task completion
+  if (updateProject && projectId) {
+    logger.debug('Machine: updating project in database for projectId:', projectId);
+    try {
+      const updates = {
+        currentStep: machineStore.context.currentStep,
+        completedSteps: machineStore.context.completedSteps,
+        stepName: machineStore.context.stepName,
+        currentModel: machineStore.context.currentModel,
+        currentSection: machineStore.context.currentSection,
+        uiProgress: machineStore.context.uiProgress,
+        uiMessage: machineStore.context.uiMessage,
+        uiStatus: machineStore.context.uiStatus,
+        currentPrompt: machineStore.context.currentPrompt,
+        llmResponse: machineStore.context.llmResponse,
+        totalCredits: machineStore.context.totalCredits,
+        consumedCredits: machineStore.context.consumedCredits,
+        totalTime: machineStore.context.totalTime,
+        consumedTime: machineStore.context.consumedTime,
+      };
+      logger.debug('Machine: project update data prepared');
+      await updateProject(projectId, updates);
+      logger.debug('Machine: project updated successfully');
+    } catch (error) {
+      logger.error('Machine: Failed to update project after task:', error.message, error.stack);
+    }
+  }
+  logger.trace('receiveResponse: Completed');
 };
 
 export const pause = () => {
+  logger.trace('pause: Starting');
   setMachineStore("state", "pause");
+  setMachineStore("context", "uiStatus", "paused");
+  logger.debug('pause: Machine state set to paused');
+  logger.trace('pause: Completed');
 };
 
 export const resume = () => {
+  logger.trace('resume: Starting');
   setMachineStore("state", "processing");
+  setMachineStore("context", "uiStatus", "processing");
+  logger.debug('resume: Machine state set to processing');
+
+  // Refill currentPrompt with updated context after resume
+  const currentStep = machineStore.context.currentStep;
+  logger.debug('resume: Refilling prompt for current step:', currentStep);
+  if (currentStep && currentStep !== "done") {
+    setMachineStore("context", "currentPrompt", fillPrompt(getPromptForStep(currentStep), machineStore.context));
+    logger.debug('resume: Prompt refilled');
+  } else {
+    logger.debug('resume: Skipping prompt refill - step is done or invalid');
+  }
+  logger.trace('resume: Completed');
 };
 
 export const reset = () => {
+  logger.trace('reset: Starting');
   setMachineStore("state", "idle");
   setMachineStore("context", initialContext);
+  logger.debug('reset: Machine state and context reset to initial');
+  logger.trace('reset: Completed');
 };

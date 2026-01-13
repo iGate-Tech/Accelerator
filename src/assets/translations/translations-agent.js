@@ -1,3 +1,5 @@
+import logger from '../../lib/logger.js';
+
 // Agent interface translations
 export const agentTranslations = {
    en: {

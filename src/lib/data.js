@@ -1,3 +1,5 @@
+
+
 // Data interfaces for easy Supabase migration
 // These functions can be easily replaced with Supabase calls
 
@@ -23,7 +25,7 @@ const apiWrapper = async (fn) => {
     const result = await fn();
     return { success: true, ...result };
   } catch (error) {
-    console.error('API error:', error);
+    logger.error('API error:', error);
     return { success: false, error: error.message };
   }
 };

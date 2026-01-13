@@ -1,177 +1,40 @@
--- Base Database Schema (Common Core)
--- This file contains the core table definitions without environment-specific auth or extensions
--- Tables: projects, tasks, groups, project_groups, credits, billing, notifications, packages, profiles, user_subscriptions, portfolio_collaborators, portfolio_invitations, project_votes
--- Sync columns are included for all tables
+-- =========================================================
+-- CORE DATABASE SCHEMA (ENVIRONMENT-AGNOSTIC)
+-- =========================================================
+-- No auth, no RLS, no storage, no extensions
+-- Sync-first, offline-first
+-- =========================================================
 
--- Projects table with extensive business fields
-CREATE TABLE IF NOT EXISTS projects (
+-- =========================================================
+-- PROJECTS
+-- =========================================================
+CREATE TABLE projects (
   id BIGSERIAL PRIMARY KEY,
-  user_id TEXT REFERENCES users(id) ON DELETE CASCADE,
-  name TEXT,
+  user_id UUID NOT NULL,
+
+  name TEXT NOT NULL,
   description TEXT,
-  currentStep TEXT,
-  completedSteps INTEGER,
-  stepName TEXT,
-  currentModel TEXT,
-  currentSection TEXT,
-  uiProgress REAL,
-  uiMessage TEXT,
-  uiStatus TEXT,
-  totalCredits REAL,
-  consumedCredits REAL,
-  totalTime REAL,
-  consumedTime REAL,
-  totalSteps INTEGER,
+
+  current_step TEXT,
+  step_name TEXT,
+  current_model TEXT,
+  current_section TEXT,
+
+  ui_progress REAL,
+  ui_message TEXT,
+  ui_status TEXT,
+
+  total_credits REAL DEFAULT 0,
+  consumed_credits REAL DEFAULT 0,
+  total_time REAL DEFAULT 0,
+  consumed_time REAL DEFAULT 0,
+  total_steps INTEGER,
+
   public BOOLEAN DEFAULT false,
-  problem TEXT,
-  solution TEXT,
-  strugglers TEXT,
-  alternatives TEXT,
-  gaps TEXT,
-  persona TEXT,
-  urgency TEXT,
-  evidence TEXT,
-  valueProp TEXT,
-  features TEXT,
-  modelType TEXT,
-  revenue TEXT,
-  pricing TEXT,
-  moat TEXT,
-  risks TEXT,
-  assumptions TEXT,
-  market TEXT,
-  tam TEXT,
-  sam TEXT,
-  som TEXT,
-  competitors TEXT,
-  differentiation TEXT,
-  marketTrends TEXT,
-  fixedCosts TEXT,
-  variableCosts TEXT,
-  year1 TEXT,
-  year2 TEXT,
-  year3 TEXT,
-  burnRate TEXT,
-  runway TEXT,
-  breakeven TEXT,
-  traction TEXT,
-  team TEXT,
-  risk TEXT,
-  valuation TEXT,
-  stage TEXT,
-  ask TEXT,
-  allocation TEXT,
-  preMoney TEXT,
-  investors TEXT,
-  milestones TEXT,
-  teamGaps TEXT,
-  hiring TEXT,
-  advisors TEXT,
-  entity TEXT,
-  ip TEXT,
-  contracts TEXT,
-  compliance TEXT,
-  pitchDeck TEXT,
-  businessPlan TEXT,
-  valuationReport TEXT,
-  currentPrompt TEXT,
-  llmResponse TEXT,
-  tasks_list TEXT,
-  createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  synced_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  last_modified TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  sync_status TEXT DEFAULT 'local',
-  deleted_at TIMESTAMP,
-  version INTEGER DEFAULT 1
-);
 
--- Tasks table
-CREATE TABLE IF NOT EXISTS tasks (
-  id SERIAL PRIMARY KEY,
-  user_id TEXT REFERENCES users(id) ON DELETE CASCADE,
-  project_id BIGINT REFERENCES projects(id),
-  content TEXT,
-  timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  model TEXT,
-  llm_model TEXT,
-  section TEXT,
-  stepName TEXT,
-  prompt TEXT,
-  synced_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  last_modified TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  sync_status TEXT DEFAULT 'local',
-  deleted_at TIMESTAMP,
-  version INTEGER DEFAULT 1
-);
+  current_prompt TEXT,
+  llm_response TEXT,
 
--- Groups table
-CREATE TABLE IF NOT EXISTS groups (
-  id BIGSERIAL PRIMARY KEY,
-  user_id TEXT REFERENCES users(id) ON DELETE CASCADE,
-  name TEXT,
-  description TEXT,
-  color TEXT,
-  createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  synced_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  last_modified TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  sync_status TEXT DEFAULT 'local'
-);
-
--- Project Groups junction table
-CREATE TABLE IF NOT EXISTS project_groups (
-  project_id BIGINT REFERENCES projects(id) ON DELETE CASCADE,
-  group_id BIGINT REFERENCES groups(id) ON DELETE CASCADE,
-  user_id TEXT REFERENCES users(id) ON DELETE CASCADE,
-  addedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  synced_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  last_modified TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  sync_status TEXT DEFAULT 'local',
-  deleted_at TIMESTAMP,
-  version INTEGER DEFAULT 1,
-  PRIMARY KEY (project_id, group_id)
-);
-
--- Credits table
-CREATE TABLE IF NOT EXISTS credits (
-  id TEXT PRIMARY KEY,
-  user_id TEXT REFERENCES users(id) ON DELETE CASCADE,
-  type TEXT NOT NULL,
-  amount REAL NOT NULL,
-  description TEXT,
-  balance_after REAL,
-  date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  synced_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  last_modified TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  sync_status TEXT DEFAULT 'local',
-  deleted_at TIMESTAMP,
-  version INTEGER DEFAULT 1
-);
-
--- Billing table
-CREATE TABLE IF NOT EXISTS billing (
-  id TEXT PRIMARY KEY,
-  user_id TEXT REFERENCES users(id) ON DELETE CASCADE,
-  type TEXT NOT NULL,
-  amount REAL NOT NULL,
-  status TEXT DEFAULT 'pending',
-  description TEXT,
-  date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  due_date TIMESTAMP,
-  synced_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  last_modified TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  sync_status TEXT DEFAULT 'local',
-  deleted_at TIMESTAMP,
-  version INTEGER DEFAULT 1
-);
-
--- Notifications table
-CREATE TABLE IF NOT EXISTS notifications (
-  id TEXT PRIMARY KEY,
-  user_id TEXT REFERENCES users(id) ON DELETE CASCADE,
-  type TEXT NOT NULL,
-  title TEXT NOT NULL,
-  message TEXT NOT NULL,
-  read BOOLEAN DEFAULT false,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   synced_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   last_modified TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -180,8 +43,138 @@ CREATE TABLE IF NOT EXISTS notifications (
   version INTEGER DEFAULT 1
 );
 
--- Packages table
-CREATE TABLE IF NOT EXISTS packages (
+-- =========================================================
+-- TASKS
+-- =========================================================
+CREATE TABLE tasks (
+  id BIGSERIAL PRIMARY KEY,
+  user_id UUID NOT NULL,
+  project_id BIGINT NOT NULL,
+
+  content TEXT,
+  prompt TEXT,
+  llm_response TEXT,
+
+  model TEXT,
+  section TEXT,
+  step_name TEXT,
+
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  synced_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  last_modified TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  sync_status TEXT DEFAULT 'local',
+  deleted_at TIMESTAMP,
+  version INTEGER DEFAULT 1
+);
+
+-- =========================================================
+-- GROUPS / PORTFOLIOS
+-- =========================================================
+CREATE TABLE groups (
+  id BIGSERIAL PRIMARY KEY,
+  user_id UUID NOT NULL,
+
+  name TEXT NOT NULL,
+  description TEXT,
+  color TEXT,
+
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  synced_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  last_modified TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  sync_status TEXT DEFAULT 'local',
+  deleted_at TIMESTAMP,
+  version INTEGER DEFAULT 1
+);
+
+-- =========================================================
+-- PROJECT ↔ GROUPS
+-- =========================================================
+CREATE TABLE project_groups (
+  project_id BIGINT NOT NULL,
+  group_id BIGINT NOT NULL,
+  user_id UUID NOT NULL,
+
+  added_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+  synced_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  last_modified TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  sync_status TEXT DEFAULT 'local',
+  deleted_at TIMESTAMP,
+  version INTEGER DEFAULT 1,
+
+  PRIMARY KEY (project_id, group_id),
+  FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE,
+  FOREIGN KEY (group_id) REFERENCES groups(id) ON DELETE CASCADE
+);
+
+-- =========================================================
+-- CREDITS (LEDGER)
+-- =========================================================
+CREATE TABLE credits (
+  id UUID PRIMARY KEY,
+  user_id UUID NOT NULL,
+
+  type TEXT NOT NULL,
+  amount REAL NOT NULL,
+  description TEXT,
+  balance_after REAL,
+
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+  synced_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  last_modified TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  sync_status TEXT DEFAULT 'local',
+  deleted_at TIMESTAMP,
+  version INTEGER DEFAULT 1
+);
+
+-- =========================================================
+-- BILLING
+-- =========================================================
+CREATE TABLE billing (
+  id UUID PRIMARY KEY,
+  user_id UUID NOT NULL,
+
+  type TEXT NOT NULL,
+  amount REAL NOT NULL,
+  status TEXT DEFAULT 'pending',
+  description TEXT,
+
+  due_date TIMESTAMP,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+  synced_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  last_modified TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  sync_status TEXT DEFAULT 'local',
+  deleted_at TIMESTAMP,
+  version INTEGER DEFAULT 1
+);
+
+-- =========================================================
+-- NOTIFICATIONS
+-- =========================================================
+CREATE TABLE notifications (
+  id UUID PRIMARY KEY,
+  user_id UUID NOT NULL,
+
+  type TEXT NOT NULL,
+  title TEXT NOT NULL,
+  message TEXT NOT NULL,
+  read BOOLEAN DEFAULT false,
+
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+  synced_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  last_modified TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  sync_status TEXT DEFAULT 'local',
+  deleted_at TIMESTAMP,
+  version INTEGER DEFAULT 1
+);
+
+-- =========================================================
+-- PACKAGES (GLOBAL LOOKUP)
+-- =========================================================
+CREATE TABLE packages (
   id TEXT PRIMARY KEY,
   name TEXT NOT NULL,
   description TEXT,
@@ -189,18 +182,22 @@ CREATE TABLE IF NOT EXISTS packages (
   credits_included INTEGER NOT NULL,
   features JSONB,
   active BOOLEAN DEFAULT true,
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  synced_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  last_modified TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  sync_status TEXT DEFAULT 'local'
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- Profiles table
-CREATE TABLE IF NOT EXISTS profiles (
-  user_id TEXT PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
-  avatar TEXT DEFAULT '/src/assets/avatar.png',
-  bio TEXT,
-  preferences JSONB DEFAULT '{"notifications": {"email": true, "browser": false, "projectUpdates": true}, "privacy": {"profileVisibility": "private", "dataSharing": false}}',
+-- =========================================================
+-- USER SUBSCRIPTIONS
+-- =========================================================
+CREATE TABLE user_subscriptions (
+  id UUID PRIMARY KEY,
+  user_id UUID NOT NULL,
+  package_id TEXT NOT NULL,
+
+  status TEXT DEFAULT 'active',
+  start_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  end_date TIMESTAMP,
+  auto_renew BOOLEAN DEFAULT true,
+
   synced_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   last_modified TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   sync_status TEXT DEFAULT 'local',
@@ -208,68 +205,89 @@ CREATE TABLE IF NOT EXISTS profiles (
   version INTEGER DEFAULT 1
 );
 
--- User Subscriptions table
-CREATE TABLE IF NOT EXISTS user_subscriptions (
-  id TEXT PRIMARY KEY,
-  user_id TEXT REFERENCES users(id) ON DELETE CASCADE,
-  package_id TEXT REFERENCES packages(id),
-  status TEXT DEFAULT 'active',
-  start_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  end_date TIMESTAMP,
-  auto_renew BOOLEAN DEFAULT true,
+-- =========================================================
+-- PROFILES
+-- =========================================================
+CREATE TABLE profiles (
+  user_id UUID PRIMARY KEY,
+
+  avatar TEXT,
+  bio TEXT,
+  preferences JSONB,
+
   synced_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   last_modified TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  sync_status TEXT DEFAULT 'local'
+  sync_status TEXT DEFAULT 'local',
+  deleted_at TIMESTAMP,
+  version INTEGER DEFAULT 1
 );
 
--- Portfolio Collaborators table
-CREATE TABLE IF NOT EXISTS portfolio_collaborators (
+-- =========================================================
+-- PORTFOLIO COLLABORATORS
+-- =========================================================
+CREATE TABLE portfolio_collaborators (
   id BIGSERIAL PRIMARY KEY,
-  portfolio_id BIGINT REFERENCES groups(id) ON DELETE CASCADE,
-  user_id TEXT REFERENCES users(id) ON DELETE CASCADE,
-  inviter_id TEXT REFERENCES users(id) ON DELETE CASCADE,
+  portfolio_id BIGINT NOT NULL,
+  user_id UUID NOT NULL,
+  inviter_id UUID NOT NULL,
+
   role TEXT DEFAULT 'editor',
   joined_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
   synced_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   last_modified TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   sync_status TEXT DEFAULT 'local',
   deleted_at TIMESTAMP,
   version INTEGER DEFAULT 1,
-  UNIQUE(portfolio_id, user_id)
+
+  UNIQUE (portfolio_id, user_id)
 );
 
--- Portfolio Invitations table
-CREATE TABLE IF NOT EXISTS portfolio_invitations (
+-- =========================================================
+-- PORTFOLIO INVITATIONS
+-- =========================================================
+CREATE TABLE portfolio_invitations (
   id BIGSERIAL PRIMARY KEY,
-  portfolio_id BIGINT REFERENCES groups(id) ON DELETE CASCADE,
-  inviter_id TEXT REFERENCES users(id) ON DELETE CASCADE,
+  portfolio_id BIGINT NOT NULL,
+  inviter_id UUID NOT NULL,
+
   invitee_email TEXT NOT NULL,
   role TEXT DEFAULT 'editor',
   status TEXT DEFAULT 'pending',
   message TEXT,
+
   invited_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  expires_at TIMESTAMP DEFAULT (CURRENT_TIMESTAMP + INTERVAL '7 days'),
+  expires_at TIMESTAMP,
   responded_at TIMESTAMP,
+
   synced_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   last_modified TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   sync_status TEXT DEFAULT 'local',
   deleted_at TIMESTAMP,
   version INTEGER DEFAULT 1,
-  UNIQUE(portfolio_id, invitee_email, status)
+
+  UNIQUE (portfolio_id, invitee_email),
+  FOREIGN KEY (portfolio_id) REFERENCES groups(id) ON DELETE CASCADE
 );
 
--- User Activities table
-CREATE TABLE IF NOT EXISTS user_activities (
-  id TEXT PRIMARY KEY,
-  user_id TEXT REFERENCES users(id) ON DELETE CASCADE,
+-- =========================================================
+-- USER ACTIVITIES
+-- =========================================================
+CREATE TABLE user_activities (
+  id UUID PRIMARY KEY,
+  user_id UUID NOT NULL,
+
   action_type TEXT NOT NULL,
   entity_type TEXT,
   entity_id TEXT,
   description TEXT NOT NULL,
   metadata JSONB,
-  ip_address INET,
+
+  ip_address TEXT,
   user_agent TEXT,
-  timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
   synced_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   last_modified TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   sync_status TEXT DEFAULT 'local',
@@ -277,12 +295,17 @@ CREATE TABLE IF NOT EXISTS user_activities (
   version INTEGER DEFAULT 1
 );
 
--- Project Votes table
-CREATE TABLE IF NOT EXISTS project_votes (
+-- =========================================================
+-- PROJECT VOTES
+-- =========================================================
+CREATE TABLE project_votes (
   id BIGSERIAL PRIMARY KEY,
-  project_id BIGINT REFERENCES projects(id) ON DELETE CASCADE,
-  user_id TEXT REFERENCES users(id) ON DELETE CASCADE,
+  project_id BIGINT NOT NULL,
+  user_id UUID NOT NULL,
+
   vote_type TEXT NOT NULL CHECK (vote_type IN ('upvote', 'downvote')),
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  UNIQUE(project_id, user_id)
+
+  UNIQUE (project_id, user_id),
+  FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE
 );

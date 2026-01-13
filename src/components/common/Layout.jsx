@@ -6,8 +6,11 @@ import {getPg} from "../../lib/db";
 import Navbar from "./Navbar";
 import Sidebar from "./Sidebar";
 import favicon from "../../assets/favicon.svg";
+import logger from '../../lib/logger.js';
+
 
 const Layout = (props) => {
+  logger.trace('Layout: Starting');
     const navigate = useNavigate();
     const context = useContext(LangContext) || {
         lang: () => 'ar',
@@ -24,7 +27,7 @@ const Layout = (props) => {
         const newLang = lang();
         setCurrentLang(newLang);
         document.documentElement.setAttribute('dir', newLang === 'ar' ? 'rtl' : 'ltr');
-        console.log('Language changed to:', newLang);
+        logger.debug('Language changed to:', newLang);
     });
 
     const checkServerConnectivity = async () => {
@@ -40,7 +43,7 @@ const Layout = (props) => {
     };
 
     onMount(async () => {
-        console.log('Layout onMount');
+        logger.debug('Layout onMount');
 
         // Create Lucide icons
         if (window.lucide)

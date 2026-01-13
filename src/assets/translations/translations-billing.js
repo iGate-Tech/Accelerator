@@ -1,3 +1,5 @@
+import logger from '../../lib/logger.js';
+
 // Billing page translations
 export const billingTranslations = {
   en: {

@@ -3,8 +3,12 @@ import { LangContext } from "../../context/LangContext";
 import { translations } from "../../assets/translations/translations-index.js";
 import { useUser } from "../../context/UserContext";
 import { getUserNotifications, markNotificationRead } from "../../lib/db";
+import logger from '../../lib/logger.js';
+
+
 
 const Notifications = () => {
+  logger.trace('Notifications: Starting');
   const { lang } = useContext(LangContext);
   const { user } = useUser();
   const [currentLang, setCurrentLang] = createSignal(lang());
@@ -29,7 +33,7 @@ const Notifications = () => {
           time: new Date(notification.created_at)
         }));
       } catch (error) {
-        console.error('Error fetching notifications:', error);
+        logger.error('Error fetching notifications:', error);
         return [];
       }
     }
@@ -54,7 +58,7 @@ const Notifications = () => {
       await markNotificationRead(id, user()?.id);
       refetch();
     } catch (error) {
-      console.error('Error marking notification as read:', error);
+      logger.error('Error marking notification as read:', error);
     }
   };
 
@@ -70,7 +74,7 @@ const Notifications = () => {
         refetch();
       }
     } catch (error) {
-      console.error('Error marking all notifications as read:', error);
+      logger.error('Error marking all notifications as read:', error);
     }
   };
 

@@ -1,5 +1,7 @@
 import { createSignal, Show, For, createEffect } from "solid-js";
 import { toastManager, removeToast } from "../../lib/feedback";
+import logger from '../../lib/logger.js';
+
 
 const [globalLoading, setGlobalLoading] = createSignal(false);
 const [globalError, setGlobalError] = createSignal(null);
@@ -20,6 +22,7 @@ export const errorManager = {
 
 // Global loading component
 const GlobalLoading = () => {
+  logger.trace('GlobalLoading: Starting');
   return (
     <Show when={globalLoading()}>
       <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">

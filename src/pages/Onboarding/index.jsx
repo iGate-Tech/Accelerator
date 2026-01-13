@@ -3,8 +3,12 @@ import { useNavigate } from "@solidjs/router";
 import { LangContext } from "../../context/LangContext";
 import { useUser } from "../../context/UserContext";
 import { translations } from "../../assets/translations/translations-index.js";
+import logger from '../../lib/logger.js';
+
+
 
 const Onboarding = () => {
+  logger.trace('Onboarding: Starting');
   const navigate = useNavigate();
   const { lang } = useContext(LangContext);
   const { updateProfile, updateSubscription } = useUser();
@@ -29,13 +33,17 @@ const Onboarding = () => {
    // Ensure Lucide icons render on step changes
    createEffect(() => {
      step();
-     if (window.lucide) window.lucide.createIcons();
+     if (window.lucide) window.lucide.createIco
+  logger.trace('nextStep: Starting');
+  logger.trace('nextStep: Starting');ns();
    });
 
   const nextStep = () => {
     if (step() < 4) {
       setStep(step() + 1);
-    } else {
+ 
+  logger.trace('prevStep: Starting');
+  logger.trace('prevStep: Starting');   } else {
       completeOnboarding();
     }
   };
@@ -60,9 +68,9 @@ const Onboarding = () => {
         const pkg = onboardingData().selectedPackage === 'pro' ? 'Pro' : 'Enterprise';
         await updateSubscription({ plan: pkg });
       }
-      navigate('/dashboard');
+      navigate('/');
     } catch (error) {
-      console.error('Error completing onboarding:', error);
+      logger.error('Error completing onboarding:', error);
     } finally {
       setLoading(false);
     }

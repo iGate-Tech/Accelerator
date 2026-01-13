@@ -1,3 +1,5 @@
+
+
 // API layer for backend operations
 // Easily replaceable with Supabase or other backends
 
@@ -42,7 +44,7 @@ export const apiClient = {
 
         return await response.text();
        } catch (error) {
-         console.error('LLM API error:', error);
+         logger.error('LLM API error:', error);
          toastManager.error(`Failed to get LLM response for prompt (${prompt.length} chars) from /api/llm/stream: ${error.message}`);
          throw error;
        }
@@ -71,7 +73,7 @@ export const apiClient = {
         return await response.text();
       }
      } catch (error) {
-       console.error('API call error:', error);
+       logger.error('API call error:', error);
        toastManager.error(`API call failed to ${options.method || 'GET'} ${endpoint}: ${error.message}`);
        throw error;
      }

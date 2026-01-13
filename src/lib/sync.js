@@ -1,6 +1,8 @@
 import { supabase, fromSupabase, insertIntoSupabase, updateInSupabase, deleteFromSupabase, selectFromSupabase, getCurrentUser } from './supabase';
 import { createSignal } from "solid-js";
 import { getPg, updateEntity } from './db';
+import logger from './logger.js';
+
 
 // Sync status constants
 export const SYNC_STATUS = {
@@ -12,6 +14,7 @@ export const SYNC_STATUS = {
 
 // Generate UUID for local IDs
 function generateUUID() {
+  logger.trace('generateUUID: Starting');
   return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
     const r = Math.random() * 16 | 0;
     const v = c === 'x' ? r : (r & 0x3 | 0x8);
@@ -57,29 +60,36 @@ class SyncService {
   }
 
   async performSync() {
-    if (!this.isOnline || syncInProgress()) return;
+    logger.debug('Sync: performSync called, isOnline:', this.isOnline, 'syncInProgress:', syncInProgress());
+    if (!this.isOnline || syncInProgress()) {
+      logger.debug('Sync: skipping sync - offline or already in progress');
+      return;
+    }
 
     // Check if user is authenticated
+    logger.debug('Sync: checking user authentication');
     const user = await getCurrentUser();
-    console.log('Sync check user:', user);
+    logger.debug('Sync: current user:', user);
     if (!user) {
-      console.log('Sync skipped: User not authenticated');
+      logger.debug('Sync: skipped - user not authenticated');
       return;
     }
 
     setSyncInProgress(true);
-    console.log('Starting sync...');
+    logger.debug('Sync: starting sync process');
 
     try {
       // Sync tables sequentially to respect foreign key dependencies
       for (const { name: table, idField } of SYNC_TABLES) {
+        logger.debug('Sync: syncing table:', table);
         await this.syncTable(table, idField);
       }
 
-      console.log('Sync completed successfully');
+      logger.debug('Sync: sync completed successfully');
     } catch (error) {
-      console.error('Sync failed:', error);
+      logger.error('Sync: sync failed:', error);
     } finally {
+      logger.debug('Sync: setting syncInProgress to false');
       setSyncInProgress(false);
     }
   }
@@ -88,53 +98,74 @@ class SyncService {
     if (this.syncTimeout) {
       clearTimeout(this.syncTimeout);
     }
+
+    this.syncTimeout = setTimeout(() => {
+      this.performSync();
+    }, 1000); // Debounce sync by 1 second
     this.syncTimeout = setTimeout(() => {
       this.performSync();
     }, 5000); // Debounce sync by 5 seconds
   }
 
   async syncTable(tableName, idField) {
-    console.log(`Syncing table: ${tableName}`);
+    logger.info(`Sync: Starting sync for table: ${tableName}, idField:`, idField);
 
     // Always get local changes
+    logger.debug(`Sync: Getting local changes for ${tableName}`);
     const localChanges = await this.getLocalChanges(tableName);
+    logger.debug(`Sync: Found ${localChanges.length} local changes for ${tableName}`);
 
     // Always get remote changes (rely on RLS for filtering)
+    logger.debug(`Sync: Getting remote changes for ${tableName}`);
     const remoteChanges = await this.getRemoteChanges(tableName);
+    logger.debug(`Sync: Found ${remoteChanges.length} remote changes for ${tableName}`);
 
     // Resolve conflicts and apply changes
+    logger.debug(`Sync: Applying changes for ${tableName}`);
     await this.applyChanges(tableName, idField, localChanges, remoteChanges);
 
     // Update last sync time for this table
     this.lastSyncTime[tableName] = new Date();
+    logger.info(`Sync: Completed sync for table ${tableName}`);
   }
 
   async getLocalChanges(tableName) {
+    logger.trace(`Sync: getLocalChanges starting for ${tableName}`);
     const pg = await getPg();
-    return await pg.getLocalChanges(tableName);
+    const changes = await pg.getLocalChanges(tableName);
+    logger.info(`Sync: Found ${changes.length} local changes for ${tableName}`);
+    return changes;
   }
 
   async getRemoteChanges(tableName) {
+    logger.trace(`Sync: getRemoteChanges starting for ${tableName}`);
     // Get changes from Supabase since last sync for this table
     const lastSync = this.lastSyncTime[tableName] || new Date(0);
+    logger.debug(`Sync: Fetching remote changes for ${tableName} since ${lastSync.toISOString()}`);
     const changes = await selectFromSupabase(tableName, {
       gt: { last_modified: lastSync.toISOString() }
     });
-
+    logger.debug(`Sync: getRemoteChanges completed for ${tableName}, returned ${changes.length} changes`);
     // RLS handles user filtering, no client-side filtering needed
     return changes;
   }
 
   async applyChanges(tableName, idField, localChanges, remoteChanges) {
+    logger.debug(`Sync: applyChanges starting for ${tableName}, local: ${localChanges.length}, remote: ${remoteChanges.length}`);
+
     // Upload local changes to remote
+    logger.debug(`Sync: Uploading ${localChanges.length} local changes to remote for ${tableName}`);
     for (const localItem of localChanges) {
       await this.uploadToRemote(tableName, idField, localItem);
     }
 
     // Download remote changes to local
+    logger.debug(`Sync: Downloading ${remoteChanges.length} remote changes to local for ${tableName}`);
     for (const remoteItem of remoteChanges) {
       await this.downloadToLocal(tableName, idField, remoteItem);
     }
+
+    logger.debug(`Sync: applyChanges completed for ${tableName}`);
   }
 
   async uploadToRemote(tableName, idField, localItem) {
@@ -155,21 +186,21 @@ class SyncService {
 
         if (localItem.deleted_at) {
           // Soft delete: set deleted_at on remote
-          await updateInSupabase(tableName, this.getItemId(localItem, idField), { deleted_at: localItem.deleted_at, version: remoteData.version }, idField);
+          await updateInSupabase(tableName, String(this.getItemId(localItem, idField) || ''), { deleted_at: localItem.deleted_at, version: remoteData.version }, idField);
         } else if (this.getItemId(localItem, idField)) {
-          await updateInSupabase(tableName, this.getItemId(localItem, idField), remoteData, idField);
+          await updateInSupabase(tableName, String(this.getItemId(localItem, idField) || ''), remoteData, idField);
         } else {
-          const result = await insertIntoSupabase(tableName, remoteData);
+          await insertIntoSupabase(tableName, remoteData);
           // Local IDs are already UUIDs, no remapping needed
         }
 
         // Mark as synced and increment version
         const pg = await getPg();
-        await pg.markItemSynced(tableName, idField, this.getItemId(localItem, idField), (localItem.version || 0) + 1);
+        await pg.markItemSynced(tableName, idField, String(this.getItemId(localItem, idField) || ''), (localItem.version || 0) + 1);
         return;
 
       } catch (error) {
-        console.warn(`Upload attempt ${attempt + 1} failed for ${tableName} item:`, error.message);
+        logger.warn(`Upload attempt ${attempt + 1} failed for ${tableName} item:`, error.message);
 
         if (attempt < maxRetries) {
           // Exponential backoff
@@ -179,7 +210,7 @@ class SyncService {
         } else {
           // Mark as conflict with error details
           const pg = await getPg();
-          await pg.markItemConflict(tableName, idField, this.getItemId(localItem, idField), error.message, retryCount + 1);
+          await pg.markItemConflict(tableName, idField, String(this.getItemId(localItem, idField) || ''), error.message, retryCount + 1);
         }
       }
     }
@@ -188,7 +219,7 @@ class SyncService {
   async downloadToLocal(tableName, idField, remoteItem) {
     try {
       const pg = await getPg();
-      const remoteId = this.getItemId(remoteItem, idField);
+      const remoteId = String(this.getItemId(remoteItem, idField) || '');
       const localItem = await pg.getLocalItem(tableName, remoteId, idField);
 
       if (remoteItem.deleted_at && localItem) {
@@ -216,7 +247,7 @@ class SyncService {
         }, { noTrigger: true });
       }
     } catch (error) {
-      console.error(`Failed to download ${tableName} item:`, error);
+      logger.error(`Failed to download ${tableName} item:`, error);
     }
   }
 
@@ -255,7 +286,7 @@ class SyncService {
   // Helper to get item ID (handles composite keys)
   getItemId(item, idField) {
     if (Array.isArray(idField)) {
-      return idField.map(field => item[field]);
+      return idField.map(field => item[field]).join(':');
     }
     return item[idField] || item.id;
   }

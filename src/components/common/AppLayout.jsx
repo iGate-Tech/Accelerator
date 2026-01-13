@@ -5,8 +5,14 @@ import {getPg} from "../../lib/db";
 import Navbar from "./Navbar";
 import Sidebar from "./Sidebar";
 import favicon from "../../assets/favicon.svg";
+import logger from '../../lib/logger.js';
+import logger from '../../lib/logger.js';
+
+
 
 const AppLayout = (props) => {
+  logger.trace('AppLayout: Starting');
+  logger.trace('AppLayout: Starting');
     const context = useContext(LangContext) || { lang: () => 'ar', setLang: () => {}, serverReachable: () => true, setServerReachable: () => {} };
   const {lang, setLang, serverReachable, setServerReachable} = context;
 
@@ -17,7 +23,7 @@ const AppLayout = (props) => {
         const newLang = lang();
         setCurrentLang(newLang);
         document.documentElement.setAttribute('dir', newLang === 'ar' ? 'rtl' : 'ltr');
-        console.log('Language changed to:', newLang);
+        logger.debug('Language changed to:', newLang);
     });
 
     const checkServerConnectivity = async () => {
@@ -33,7 +39,7 @@ const AppLayout = (props) => {
     };
 
     onMount(async () => {
-        console.log('AppLayout onMount: initializing worker');
+        logger.debug('AppLayout onMount: initializing worker');
 
         // Create Lucide icons
         if (window.lucide)
@@ -53,9 +59,9 @@ const AppLayout = (props) => {
         // Initialize database
         try {
             await getPg();
-            console.log('Worker initialized');
+            logger.debug('Worker initialized');
         } catch (error) {
-            console.error('Failed to initialize worker:', error);
+            logger.error('Failed to initialize worker:', error);
         }
 
         return () => clearInterval(interval);

@@ -1,4 +1,7 @@
 import { PGlite } from '@electric-sql/pglite';
+import logger from '../lib/logger.js';
+
+
 
 // -----------------------------------------------------------------------------
 // Global DB Instance and Pending Requests Map
@@ -14,232 +17,284 @@ const DatabaseWorker = {
   // Initialization
   // ---------------------------------------------------------------------------
   async initDatabase(options = {}) {
-    if (dbInstance) return dbInstance;
+    console.log('initDatabase called with options:', options);
+    if (dbInstance) {
+      console.log('dbInstance already exists');
+      return dbInstance;
+    }
 
     console.log('Initializing PGLite database...');
-    dbInstance = new PGlite({ dataDir: options.dataDir || 'idb://accelerator-db-v19' });
+    dbInstance = new PGlite({ dataDir: options.dataDir || 'idb://accelerator-db-v22' });
+    console.log('PGLite instance created');
 
     // Always ensure schema exists (CREATE IF NOT EXISTS will handle duplicates)
-    console.log('Ensuring database schema exists...');
+    logger.debug('Ensuring database schema exists...');
 
-    // Full Schema
-    await dbInstance.exec(`
--- Users table
-CREATE TABLE IF NOT EXISTS users (
-  id TEXT PRIMARY KEY,
-  email TEXT UNIQUE,
-  password_hash TEXT,
-  profile JSON,
-  synced_at TEXT,
-  last_modified TEXT,
-  sync_status TEXT
-);
-
--- Profiles table
-CREATE TABLE IF NOT EXISTS profiles (
-  user_id TEXT PRIMARY KEY REFERENCES users(id),
-  avatar TEXT,
-  bio TEXT,
-  preferences JSON,
-  synced_at TEXT,
-  last_modified TEXT,
-  sync_status TEXT
-);
+    // Full Schema - Create if not exists for faster init
+    try {
+      console.log('Creating database schema...');
+      // Create tables one by one
+      console.log('Creating users table...');
+      await dbInstance.exec("CREATE TABLE IF NOT EXISTS users (id TEXT PRIMARY KEY, email TEXT UNIQUE NOT NULL, password_hash TEXT, avatar TEXT DEFAULT '/src/assets/avatar.png', bio TEXT, preferences TEXT, synced_at TEXT, last_modified TEXT, sync_status TEXT DEFAULT 'local', deleted_at TEXT, version INTEGER DEFAULT 1)");
+      console.log('Users table created');
+      await dbInstance.exec(`
 
 -- Projects table
 CREATE TABLE IF NOT EXISTS projects (
   id TEXT PRIMARY KEY,
-  user_id TEXT REFERENCES users(id),
-  name TEXT,
+  user_id TEXT NOT NULL,
+  name TEXT NOT NULL,
   description TEXT,
-  currentStep TEXT,
-  completedSteps INTEGER,
-  stepName TEXT,
-  currentModel TEXT,
-  currentSection TEXT,
-  uiProgress REAL,
-  uiMessage TEXT,
-  uiStatus TEXT,
-  totalCredits REAL,
-  consumedCredits REAL,
-  totalTime REAL,
-  consumedTime REAL,
-  totalSteps INTEGER,
-  public BOOLEAN DEFAULT false,
-  problem TEXT,
-  solution TEXT,
-  currentPrompt TEXT,
-  llmResponse TEXT,
+  current_step TEXT,
+  completed_steps INTEGER,
+  step_name TEXT,
+  current_model TEXT,
+  current_section TEXT,
+  ui_progress REAL,
+  ui_message TEXT,
+  ui_status TEXT,
+  total_credits REAL DEFAULT 0,
+  consumed_credits REAL DEFAULT 0,
+  total_time REAL DEFAULT 0,
+  consumed_time REAL DEFAULT 0,
+  total_steps INTEGER,
+  public INTEGER DEFAULT 0,
+  current_prompt TEXT,
+  llm_response TEXT,
+  created_at TEXT,
   synced_at TEXT,
   last_modified TEXT,
-  sync_status TEXT
+  sync_status TEXT DEFAULT 'local',
+  deleted_at TEXT,
+  version INTEGER DEFAULT 1
 );
 
 -- Tasks table
 CREATE TABLE IF NOT EXISTS tasks (
-  id TEXT PRIMARY KEY,
-  user_id TEXT REFERENCES users(id),
-  project_id TEXT REFERENCES projects(id),
+  id INTEGER PRIMARY KEY,
+  user_id TEXT NOT NULL,
+  project_id INTEGER NOT NULL,
   content TEXT,
-  timestamp TEXT,
+  prompt TEXT,
+  llm_response TEXT,
+  model TEXT,
+  section TEXT,
+  step_name TEXT,
+  created_at TEXT,
   synced_at TEXT,
   last_modified TEXT,
-  sync_status TEXT
+  sync_status TEXT DEFAULT 'local',
+  deleted_at TEXT,
+  version INTEGER DEFAULT 1
 );
 
 -- Groups table
 CREATE TABLE IF NOT EXISTS groups (
-  id TEXT PRIMARY KEY,
-  user_id TEXT REFERENCES users(id),
-  name TEXT,
+  id INTEGER PRIMARY KEY,
+  user_id TEXT NOT NULL,
+  name TEXT NOT NULL,
   description TEXT,
   color TEXT,
-  createdAt TEXT,
+  created_at TEXT,
   synced_at TEXT,
   last_modified TEXT,
-  sync_status TEXT
+  sync_status TEXT DEFAULT 'local',
+  deleted_at TEXT,
+  version INTEGER DEFAULT 1
 );
 
 -- Project Groups table
 CREATE TABLE IF NOT EXISTS project_groups (
-  project_id TEXT REFERENCES projects(id),
-  group_id TEXT REFERENCES groups(id),
-  addedAt TEXT,
+  project_id INTEGER NOT NULL,
+  group_id INTEGER NOT NULL,
+  user_id TEXT NOT NULL,
+  added_at TEXT DEFAULT CURRENT_TIMESTAMP,
+  synced_at TEXT,
+  last_modified TEXT,
+  sync_status TEXT DEFAULT 'local',
+  deleted_at TEXT,
+  version INTEGER DEFAULT 1,
   PRIMARY KEY (project_id, group_id)
 );
 
 -- Credits table
 CREATE TABLE IF NOT EXISTS credits (
   id TEXT PRIMARY KEY,
-  user_id TEXT REFERENCES users(id),
-  type TEXT,
-  amount REAL,
+  user_id TEXT NOT NULL,
+  type TEXT NOT NULL,
+  amount REAL NOT NULL,
   description TEXT,
   balance_after REAL,
-  date TEXT,
+  created_at TEXT,
   synced_at TEXT,
   last_modified TEXT,
-  sync_status TEXT
+  sync_status TEXT DEFAULT 'local',
+  deleted_at TEXT,
+  version INTEGER DEFAULT 1
 );
 
 -- Billing table
 CREATE TABLE IF NOT EXISTS billing (
   id TEXT PRIMARY KEY,
-  user_id TEXT REFERENCES users(id),
-  type TEXT,
-  amount REAL,
+  user_id TEXT NOT NULL,
+  type TEXT NOT NULL,
+  amount REAL NOT NULL,
+  status TEXT DEFAULT 'pending',
   description TEXT,
   due_date TEXT,
-  status TEXT DEFAULT 'pending',
+  created_at TEXT,
   synced_at TEXT,
   last_modified TEXT,
-  sync_status TEXT
-);
-
--- User Activities table
-CREATE TABLE IF NOT EXISTS user_activities (
-  id TEXT PRIMARY KEY,
-  user_id TEXT REFERENCES users(id),
-  action_type TEXT NOT NULL,
-  entity_type TEXT,
-  entity_id TEXT,
-  description TEXT NOT NULL,
-  metadata JSON,
-  ip_address TEXT,
-  user_agent TEXT,
-  timestamp TEXT DEFAULT CURRENT_TIMESTAMP,
-  synced_at TEXT,
-  last_modified TEXT,
-  sync_status TEXT DEFAULT 'pending'
+  sync_status TEXT DEFAULT 'local',
+  deleted_at TEXT,
+  version INTEGER DEFAULT 1
 );
 
 -- Notifications table
 CREATE TABLE IF NOT EXISTS notifications (
   id TEXT PRIMARY KEY,
-  user_id TEXT REFERENCES users(id),
-  type TEXT,
-  title TEXT,
-  message TEXT,
-  read BOOLEAN DEFAULT false,
+  user_id TEXT NOT NULL,
+  type TEXT NOT NULL,
+  title TEXT NOT NULL,
+  message TEXT NOT NULL,
+  read INTEGER DEFAULT 0,
   created_at TEXT,
   synced_at TEXT,
   last_modified TEXT,
-  sync_status TEXT
+  sync_status TEXT DEFAULT 'local',
+  deleted_at TEXT,
+  version INTEGER DEFAULT 1
 );
 
 -- Sessions table
 CREATE TABLE IF NOT EXISTS sessions (
   id TEXT PRIMARY KEY,
-  user_id TEXT REFERENCES users(id),
-  token TEXT UNIQUE,
-  expires_at TEXT
+  user_id TEXT NOT NULL,
+  token TEXT NOT NULL,
+  expires_at TEXT NOT NULL,
+  created_at TEXT DEFAULT CURRENT_TIMESTAMP::text,
+  synced_at TEXT,
+  last_modified TEXT,
+  sync_status TEXT DEFAULT 'local',
+  deleted_at TEXT,
+  version INTEGER DEFAULT 1
 );
 
 -- Packages table
 CREATE TABLE IF NOT EXISTS packages (
   id TEXT PRIMARY KEY,
-  name TEXT,
+  name TEXT NOT NULL,
   description TEXT,
-  price REAL,
-  credits_included INTEGER,
-  features JSON,
-  active BOOLEAN DEFAULT true,
+  price REAL NOT NULL,
+  credits_included INTEGER NOT NULL,
+  features TEXT,
+  active INTEGER DEFAULT 1,
+  created_at TEXT DEFAULT CURRENT_TIMESTAMP::text,
   synced_at TEXT,
   last_modified TEXT,
-  sync_status TEXT
+  sync_status TEXT DEFAULT 'local',
+  deleted_at TEXT,
+  version INTEGER DEFAULT 1
 );
 
 -- User Subscriptions table
 CREATE TABLE IF NOT EXISTS user_subscriptions (
   id TEXT PRIMARY KEY,
-  user_id TEXT REFERENCES users(id),
-  package_id TEXT REFERENCES packages(id),
-  status TEXT,
-  start_date TEXT,
+  user_id TEXT NOT NULL,
+  package_id TEXT NOT NULL,
+  status TEXT DEFAULT 'active',
+  start_date TEXT DEFAULT CURRENT_TIMESTAMP,
   end_date TEXT,
-  auto_renew BOOLEAN DEFAULT true,
+  auto_renew INTEGER DEFAULT 1,
   synced_at TEXT,
   last_modified TEXT,
-  sync_status TEXT
+  sync_status TEXT DEFAULT 'local',
+  deleted_at TEXT,
+  version INTEGER DEFAULT 1
 );
 
--- Project Votes table
-CREATE TABLE IF NOT EXISTS project_votes (
-  id TEXT PRIMARY KEY,
-  project_id TEXT REFERENCES projects(id),
-  user_id TEXT REFERENCES users(id),
-  vote_type TEXT,
-  voted_at TEXT
+-- Profiles table
+CREATE TABLE IF NOT EXISTS profiles (
+  user_id TEXT PRIMARY KEY,
+  avatar TEXT,
+  bio TEXT,
+  preferences TEXT,
+  synced_at TEXT,
+  last_modified TEXT,
+  sync_status TEXT DEFAULT 'local',
+  deleted_at TEXT,
+  version INTEGER DEFAULT 1
 );
 
 -- Portfolio Collaborators table
 CREATE TABLE IF NOT EXISTS portfolio_collaborators (
-  id TEXT PRIMARY KEY,
-  portfolio_id TEXT,
-  user_id TEXT REFERENCES users(id),
-  role TEXT,
-  invited_at TEXT,
+  id INTEGER PRIMARY KEY,
+  portfolio_id INTEGER NOT NULL,
+  user_id TEXT NOT NULL,
+  inviter_id TEXT NOT NULL,
+  role TEXT DEFAULT 'editor',
+  joined_at TEXT DEFAULT CURRENT_TIMESTAMP,
   synced_at TEXT,
   last_modified TEXT,
-  sync_status TEXT
+  sync_status TEXT DEFAULT 'local',
+  deleted_at TEXT,
+  version INTEGER DEFAULT 1
 );
 
 -- Portfolio Invitations table
 CREATE TABLE IF NOT EXISTS portfolio_invitations (
-  id TEXT PRIMARY KEY,
-  portfolio_id TEXT,
-  inviter_id TEXT REFERENCES users(id),
-  invitee_email TEXT,
-  role TEXT,
-  status TEXT,
-  invited_at TEXT,
+  id INTEGER PRIMARY KEY,
+  portfolio_id INTEGER NOT NULL,
+  inviter_id TEXT NOT NULL,
+  invitee_email TEXT NOT NULL,
+  role TEXT DEFAULT 'editor',
+  status TEXT DEFAULT 'pending',
+  message TEXT,
+  invited_at TEXT DEFAULT CURRENT_TIMESTAMP,
+  expires_at TEXT,
+  responded_at TEXT,
   synced_at TEXT,
   last_modified TEXT,
-  sync_status TEXT
+  sync_status TEXT DEFAULT 'local',
+  deleted_at TEXT,
+  version INTEGER DEFAULT 1
 );
-    `);
 
-    console.log('Database schema initialized successfully');
+-- User Activities table
+CREATE TABLE IF NOT EXISTS user_activities (
+  id TEXT PRIMARY KEY,
+  user_id TEXT NOT NULL,
+  action_type TEXT NOT NULL,
+  entity_type TEXT,
+  entity_id TEXT,
+  description TEXT NOT NULL,
+  metadata TEXT,
+  ip_address TEXT,
+  user_agent TEXT,
+  created_at TEXT,
+  synced_at TEXT,
+  last_modified TEXT,
+  sync_status TEXT DEFAULT 'local',
+  deleted_at TEXT,
+  version INTEGER DEFAULT 1
+);
+
+-- Project Votes table
+CREATE TABLE IF NOT EXISTS project_votes (
+  id INTEGER PRIMARY KEY,
+  project_id INTEGER NOT NULL,
+  user_id TEXT NOT NULL,
+  vote_type TEXT NOT NULL,
+  created_at TEXT DEFAULT CURRENT_TIMESTAMP
+);
+      `);
+      console.log('Database schema created successfully');
+      logger.debug('Database schema initialized successfully');
+    } catch (schemaError) {
+      console.error('Failed to initialize database schema:', schemaError);
+      logger.error('Failed to initialize database schema:', schemaError);
+      throw schemaError;
+    }
     return { success: true };
   },
 
@@ -250,9 +305,9 @@ CREATE TABLE IF NOT EXISTS portfolio_invitations (
     try {
       const query = `SELECT ${selectFields} FROM ${table} ${whereClause} ${orderBy}`;
       const res = await dbInstance.query(query, params);
-      return res.rows;
+      return res;
     } catch (err) {
-      console.error(`DB error in getEntities for ${table}:`, err);
+      logger.error(`DB error in getEntities for ${table}:`, err);
       return [];
     }
   },
@@ -292,7 +347,7 @@ CREATE TABLE IF NOT EXISTS portfolio_invitations (
       const res = await dbInstance.query(query, values);
       return { success: true, data: res.rows[0] };
     } catch (err) {
-      console.error(`DB error in updateEntity for ${table}:`, err);
+      logger.error(`DB error in updateEntity for ${table}:`, err);
       return { success: false, error: err.message };
     }
   },
@@ -301,40 +356,91 @@ CREATE TABLE IF NOT EXISTS portfolio_invitations (
   // User Operations
   // ---------------------------------------------------------------------------
   async createUser({ email, passwordHash, profile = {}, userId = null }) {
+    console.log('createUser called with:', { email, passwordHash, profile, userId });
     try {
+      // Handle case where email is passed as an object containing user data
+      if (typeof email === 'object' && email.email) {
+        const userData = email;
+        email = userData.email;
+        passwordHash = userData.passwordHash || passwordHash;
+        profile = userData.profile || profile;
+        userId = userData.userId || userId;
+      }
+
       const id = userId || Math.random().toString(36).substring(2, 15);
-      const res = await dbInstance.query(
-        `INSERT INTO users 
-        (id,email,password_hash,profile,synced_at,last_modified,sync_status)
-        VALUES($1,$2,$3,$4,$5,$6,$7) RETURNING *`,
-        [id, email, passwordHash, JSON.stringify(profile), new Date().toISOString(), new Date().toISOString(), 'local']
-      );
-      return res.rows[0];
+
+      // Check if users table exists
+      try {
+        await dbInstance.query('SELECT 1 FROM users LIMIT 1');
+      } catch (tableError) {
+        logger.error('Users table does not exist, schema may not be initialized:', tableError);
+        throw new Error('Database schema not initialized');
+      }
+
+      // Check if user already exists
+      const existing = await dbInstance.query('SELECT id FROM users WHERE id = ?', [id]);
+      if (existing.rows.length > 0) {
+        logger.debug('User already exists:', id);
+        return existing.rows[0];
+      }
+
+       const avatar = String(profile.avatar || '/src/assets/avatar.png');
+       const bio = String(profile.bio || '');
+       const preferences = JSON.stringify(profile.preferences || {});
+
+       // Validate parameters
+       if (!id || typeof id !== 'string') throw new Error('Invalid user id');
+       if (!email || typeof email !== 'string') throw new Error('Invalid email');
+       if (typeof avatar !== 'string') throw new Error('Invalid avatar');
+       if (typeof bio !== 'string') throw new Error('Invalid bio');
+       if (typeof preferences !== 'string') throw new Error('Invalid preferences JSON');
+
+       // Log parameters for debugging
+       logger.debug('Creating user with params:', { id, email, passwordHash, avatar, bio, preferences });
+
+         // Check table exists
+         try {
+           await dbInstance.query("SELECT 1 FROM users LIMIT 1");
+           console.log('Users table confirmed to exist');
+         } catch (tableCheckError) {
+           console.error('Users table does not exist:', tableCheckError);
+           throw new Error('Users table not found');
+         }
+
+         // Try simple INSERT with parameters
+         console.log('About to execute INSERT with params');
+         console.log('dbInstance exists:', !!dbInstance);
+         console.log('Parameters:', [id, email, passwordHash || '', avatar, bio, preferences, new Date().toISOString(), new Date().toISOString(), 'local', '', '1']);
+         await dbInstance.query("INSERT INTO users (id,email,password_hash,avatar,bio,preferences,synced_at,last_modified,sync_status,deleted_at,version) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)", [id, email, passwordHash || '', avatar, bio, preferences, new Date().toISOString(), new Date().toISOString(), 'local', '', '1']);
+         console.log('INSERT executed successfully');
+         // Get the inserted user
+         const res = await dbInstance.query('SELECT * FROM users WHERE id = $1', [id]);
+        return res.rows[0];
     } catch (err) {
-      console.error('Error creating user:', err);
+      logger.error('Error creating user:', err);
       throw err;
     }
   },
 
-  async getUserById({ id }) {
-    try {
-      const res = await dbInstance.query('SELECT * FROM users WHERE id = $1', [id]);
-      return res.rows[0];
-    } catch (err) {
-      console.error('Error getting user by id:', err);
-      return null;
-    }
-  },
+   async getUserById({ id }) {
+     try {
+       const res = await dbInstance.query('SELECT * FROM users WHERE id = $1', [id]);
+       return res.rows[0];
+     } catch (err) {
+       logger.error('Error getting user by id:', err);
+       return null;
+     }
+   },
 
-  async getUserByEmail({ email }) {
-    try {
-      const res = await dbInstance.query('SELECT * FROM users WHERE email = $1', [email]);
-      return res.rows[0];
-    } catch (err) {
-      console.error('Error getting user by email:', err);
-      return null;
-    }
-  },
+   async getUserByEmail({ email }) {
+     try {
+       const res = await dbInstance.query('SELECT * FROM users WHERE email = $1', [email]);
+       return res.rows[0];
+     } catch (err) {
+       logger.error('Error getting user by email:', err);
+       return null;
+     }
+   },
 
   async updateUser({ id, updates }) {
     try {
@@ -342,68 +448,70 @@ CREATE TABLE IF NOT EXISTS portfolio_invitations (
       if (updates.profile !== undefined) {
         processedUpdates.profile = JSON.stringify(updates.profile);
       }
-      const result = await this.updateEntity('users', 'id', id, processedUpdates, {
+      const result = await this.updateEntity({ table: 'users', idField: 'id', id, updates: processedUpdates, options: {
         alwaysUpdate: { 'updated_at': 'CURRENT_TIMESTAMP' }
-      });
+      }});
       if (!result.success) {
         throw new Error(result.error);
       }
       return result.data;
     } catch (err) {
-      console.error('Error updating user:', err);
+      logger.error('Error updating user:', err);
       throw err;
     }
   },
 
-  async deleteUser({ id }) {
-    try {
-      await dbInstance.query('DELETE FROM users WHERE id = $1', [id]);
-      return { success: true };
-    } catch (err) {
-      console.error('Error deleting user:', err);
-      throw err;
-    }
-  },
+   async deleteUser({ id }) {
+     try {
+       await dbInstance.query('DELETE FROM users WHERE id = $1', [id]);
+       return { success: true };
+     } catch (err) {
+       logger.error('Error deleting user:', err);
+       throw err;
+     }
+   },
 
   // ---------------------------------------------------------------------------
   // Profile Operations
   // ---------------------------------------------------------------------------
   async createUserProfile({ userId, profileData = {} }) {
     try {
-      const res = await dbInstance.query(
-        `INSERT INTO profiles 
-        (user_id, avatar, bio, preferences, synced_at, last_modified, sync_status)
-        VALUES($1,$2,$3,$4,$5,$6,$7)
-        ON CONFLICT (user_id) DO NOTHING RETURNING *`,
-         [
-           userId,
-           String(profileData.avatar || '/src/assets/avatar.png'),
-           String(profileData.bio || ''),
-           JSON.stringify(profileData.preferences || {
-             notifications: { email: true, browser: false, projectUpdates: true },
-             privacy: { profileVisibility: 'private', dataSharing: false }
-           }),
-           new Date().toISOString(),
-           new Date().toISOString(),
-           'local'
-         ]
-      );
+        const res = await dbInstance.query(
+          `INSERT INTO profiles
+          (user_id, avatar, bio, preferences, synced_at, last_modified, sync_status, deleted_at, version)
+          VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9)
+          ON CONFLICT (user_id) DO NOTHING RETURNING *`,
+           [
+             userId,
+             String(profileData.avatar || '/src/assets/avatar.png'),
+             String(profileData.bio || ''),
+             JSON.stringify(profileData.preferences || {
+               notifications: { email: true, browser: false, projectUpdates: true },
+               privacy: { profileVisibility: 'private', dataSharing: false }
+             }),
+             new Date().toISOString(),
+             new Date().toISOString(),
+             'local',
+             null,
+             1
+           ]
+        );
       return res.rows[0];
     } catch (err) {
-      console.error('Error creating user profile:', err);
+      logger.error('Error creating user profile:', err);
       throw err;
     }
   },
 
-  async getUserProfile({ userId }) {
-    try {
-      const res = await dbInstance.query('SELECT * FROM profiles WHERE user_id = $1', [userId]);
-      return res.rows[0] || null;
-    } catch (err) {
-      console.error('Error getting user profile:', err);
-      return null;
-    }
-  },
+   async getUserProfile({ userId }) {
+     try {
+       const res = await dbInstance.query('SELECT * FROM profiles WHERE user_id = $1', [userId]);
+       return res.rows[0] || null;
+     } catch (err) {
+       logger.error('Error getting user profile:', err);
+       return null;
+     }
+   },
 
   // ---------------------------------------------------------------------------
   // Project Operations
@@ -411,112 +519,125 @@ CREATE TABLE IF NOT EXISTS portfolio_invitations (
   async createProject({ project, userId }) {
     try {
       const id = Math.random().toString(36).substring(2, 15);
-      const res = await dbInstance.query(
-        `INSERT INTO projects 
-        (id, user_id, name, description, currentStep, completedSteps, stepName, currentModel, currentSection, uiProgress, uiMessage, uiStatus, totalCredits, consumedCredits, totalTime, consumedTime, totalSteps, public, problem, solution, currentPrompt, llmResponse, synced_at, last_modified, sync_status)
-        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25) RETURNING *`,
-        [
-          id,
-          userId,
-          project.name || '',
-          project.description || '',
-          project.currentStep || '',
-          project.completedSteps || 0,
-          project.stepName || '',
-          project.currentModel || '',
-          project.currentSection || '',
-          project.uiProgress || 0,
-          project.uiMessage || '',
-          project.uiStatus || 'idle',
-          project.totalCredits || 0,
-          project.consumedCredits || 0,
-          project.totalTime || 0,
-          project.consumedTime || 0,
-          project.totalSteps || 0,
-          project.public || false,
-          project.problem || '',
-          project.solution || '',
-          project.currentPrompt || '',
-          project.llmResponse || '',
-          new Date().toISOString(),
-          new Date().toISOString(),
-          'local'
-        ]
-      );
+      const context = project.project_context || {};
+        const res = await dbInstance.query(
+          `INSERT INTO projects
+          (id, user_id, name, description, current_step, completed_steps, step_name, current_model, current_section, ui_progress, ui_message, ui_status, total_credits, consumed_credits, total_time, consumed_time, total_steps, public, current_prompt, llm_response, created_at, synced_at, last_modified, sync_status, deleted_at, version)
+          VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26) RETURNING *`,
+          [
+            id,
+            userId,
+            project.name || '',
+            project.description || '',
+            project.currentStep || context.currentStep || '',
+            project.completedSteps || context.completedSteps || 0,
+            project.stepName || context.stepName || '',
+            project.currentModel || context.currentModel || '',
+            project.currentSection || context.currentSection || '',
+            project.uiProgress || context.uiProgress || 0,
+            project.uiMessage || context.uiMessage || '',
+            project.uiStatus || context.uiStatus || 'idle',
+            project.totalCredits || context.totalCredits || 0,
+            project.consumedCredits || context.consumedCredits || 0,
+            project.totalTime || context.totalTime || 0,
+            project.consumedTime || context.consumedTime || 0,
+            project.totalSteps || context.totalSteps || 0,
+            project.public || false,
+            context.currentPrompt || '',
+            context.llmResponse || '',
+            new Date().toISOString(),
+            new Date().toISOString(),
+            new Date().toISOString(),
+            'local',
+            null,
+            1
+          ]
+       );
       return res.rows[0];
     } catch (err) {
-      console.error('Error creating project:', err);
+      logger.error('Error creating project:', err);
       throw err;
     }
   },
 
   async getProjects({ userId = null }) {
     try {
-      console.log('Worker getProjects userId:', userId, 'type:', typeof userId);
+      logger.debug('Worker getProjects userId:', userId, 'type:', typeof userId);
       if (!userId) {
         throw new Error('userId required for getProjects');
       }
-      const res = await dbInstance.query('SELECT * FROM projects WHERE user_id = $1 ORDER BY id DESC', [userId]);
+       const res = await dbInstance.query('SELECT * FROM projects WHERE user_id = $1 ORDER BY id DESC', [userId]);
       return res.rows;
     } catch (err) {
-      console.error('Error in worker getProjects:', err);
+      logger.error('Error in worker getProjects:', err);
       return [];
     }
   },
 
-  async getProjectById({ id }) {
-    try {
-      const res = await dbInstance.query('SELECT * FROM projects WHERE id = $1', [id]);
-      return res.rows[0];
-    } catch (err) {
-      console.error('Error loading project:', err);
-      return null;
-    }
-  },
+   async getProjectById({ id }) {
+     try {
+       const res = await dbInstance.query('SELECT * FROM projects WHERE id = $1', [id]);
+       return res.rows[0];
+     } catch (err) {
+       logger.error('Error loading project:', err);
+       return null;
+     }
+   },
 
   async updateProject({ id, project }) {
-    console.log('Worker updateProject called with id:', id, 'project:', project);
+    logger.debug('Worker updateProject called with id:', id, 'project:', project);
+
+    // Validate parameters
+    if (!id) throw new Error('Project ID is required in worker');
+    if (!project || typeof project !== 'object') throw new Error('Project data must be an object in worker');
+
     try {
-      const result = await this.updateEntity('projects', 'id', id, project);
+      const result = await this.updateEntity({ table: 'projects', idField: 'id', id, updates: project });
       if (!result.success) {
         throw new Error(result.error);
       }
       return result.data;
     } catch (err) {
-      console.error('Error updating project:', err);
+      logger.error('Error updating project:', err);
       throw err;
     }
   },
 
   async deleteProject({ id }) {
     try {
-      await dbInstance.query('DELETE FROM projects WHERE id = $1', [id]);
+       // First delete all associated tasks
+       await dbInstance.query('DELETE FROM tasks WHERE project_id = $1', [id]);
+       // Then delete the project
+       await dbInstance.query('DELETE FROM projects WHERE id = $1', [id]);
       return { success: true };
     } catch (err) {
-      console.error('Error deleting project:', err);
+      logger.error('Error deleting project:', err);
       throw err;
     }
   },
 
   async deleteAllProjects() {
     try {
+      // First delete all tasks
+      await dbInstance.query('DELETE FROM tasks');
+      // Then delete all projects
       await dbInstance.query('DELETE FROM projects');
       return { success: true };
     } catch (err) {
-      console.error('Error deleting all projects:', err);
+      logger.error('Error deleting all projects:', err);
       throw err;
     }
   },
 
   async toggleProjectPublic({ projectId, isPublic }) {
     try {
-      const result = await this.updateEntity('projects', 'id', projectId, { public: isPublic });
+      const result = await this.updateEntity({ table: 'projects', idField: 'id', id: projectId, updates: { public: isPublic } });
       if (!result.success) {
         throw new Error(result.error);
       }
       return result;
     } catch (err) {
-      console.error('Error toggling project public status:', err);
+      logger.error('Error toggling project public status:', err);
       throw err;
     }
   },
@@ -526,39 +647,42 @@ CREATE TABLE IF NOT EXISTS portfolio_invitations (
   // ---------------------------------------------------------------------------
   async getTasks({ project_id = null, userId = null }) {
     try {
+      // Only return tasks if a project is selected
+      if (!project_id) {
+        return [];
+      }
+
       let query = 'SELECT * FROM tasks';
       let params = [];
       const conditions = [];
-      if (project_id) {
-        conditions.push(`project_id = $${params.length + 1}`);
-        params.push(project_id);
-      }
+      conditions.push(`project_id = $${params.length + 1}`);
+      params.push(project_id);
       if (userId) {
         conditions.push(`user_id = $${params.length + 1}`);
         params.push(userId);
       }
-      if (conditions.length) query += ' WHERE ' + conditions.join(' AND ');
-      query += ' ORDER BY timestamp DESC';
+      query += ' WHERE ' + conditions.join(' AND ');
+       query += ' ORDER BY created_at DESC';
       const res = await dbInstance.query(query, params);
       return res.rows;
     } catch (err) {
-      console.error('DB error in getTasks:', err);
+      logger.error('DB error in getTasks:', err);
       return [];
     }
   },
 
-  async addTask({ task, project_id }) {
+  async addTask({ task, project_id, userId }) {
     try {
       const id = Math.random().toString(36).substring(2, 15);
-      await dbInstance.query(
-        `INSERT INTO tasks 
-        (id, content, project_id, user_id, timestamp, synced_at, last_modified, sync_status) 
-        VALUES ($1,$2,$3,$4,$5,$6,$7,$8)`,
-        [id, task.content, project_id, task.user_id || null, new Date().toISOString(), new Date().toISOString(), new Date().toISOString(), 'local']
-      );
+        await dbInstance.query(
+          `INSERT INTO tasks
+          (id, user_id, project_id, content, prompt, llm_response, model, section, step_name, created_at, synced_at, last_modified, sync_status, deleted_at, version)
+          VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15)`,
+          [id, userId, project_id, task.content, task.prompt || null, null, task.model || null, task.section || null, task.stepName || null, task.timestamp || new Date().toISOString(), new Date().toISOString(), new Date().toISOString(), 'local', null, 1]
+        );
       return { success: true };
     } catch (err) {
-      console.error('DB error in addTask:', err);
+      logger.error('DB error in addTask:', err);
       throw err;
     }
   },
@@ -566,57 +690,57 @@ CREATE TABLE IF NOT EXISTS portfolio_invitations (
   // ---------------------------------------------------------------------------
   // Group Operations
   // ---------------------------------------------------------------------------
-  async getGroups({ userId = null }) {
-    const whereClause = userId ? 'WHERE user_id = $1' : '';
-    const params = userId ? [userId] : [];
-    const query = `SELECT * FROM groups ${whereClause} ORDER BY createdAt DESC`;
-    const res = await dbInstance.query(query, params);
-    return res.rows;
-  },
+   async getGroups({ userId = null }) {
+     const whereClause = userId ? 'WHERE user_id = $1' : '';
+     const params = userId ? [userId] : [];
+     const query = `SELECT * FROM groups ${whereClause} ORDER BY created_at DESC`;
+     const res = await dbInstance.query(query, params);
+     return res.rows;
+   },
 
-  async getGroupById({ id }) {
-    try {
-      const res = await dbInstance.query('SELECT * FROM groups WHERE id = $1', [id]);
-      return res.rows[0];
-    } catch (err) {
-      console.log('Error loading group:', err);
-      return null;
-    }
-  },
+   async getGroupById({ id }) {
+     try {
+       const res = await dbInstance.query('SELECT * FROM groups WHERE id = $1', [id]);
+       return res.rows[0];
+     } catch (err) {
+       logger.debug('Error loading group:', err);
+       return null;
+     }
+   },
 
   async addGroup({ group, userId }) {
     try {
-      const res = await dbInstance.query(
-        'INSERT INTO groups (user_id, name, description, color, createdAt, synced_at, last_modified, sync_status) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING id',
-        [userId, group.name, group.description || '', group.color || '#6366f1', group.createdAt || new Date().toISOString(), new Date().toISOString(), new Date().toISOString(), 'local']
-      );
+        const res = await dbInstance.query(
+          'INSERT INTO groups (user_id, name, description, color, created_at, synced_at, last_modified, sync_status, deleted_at, version) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING id',
+          [userId, group.name, group.description || '', group.color || '#6366f1', group.createdAt || new Date().toISOString(), new Date().toISOString(), new Date().toISOString(), 'local', null, 1]
+        );
       return res.rows[0];
     } catch (err) {
-      console.log('Error adding group:', err);
+      logger.debug('Error adding group:', err);
       throw err;
     }
   },
 
   async updateGroup({ id, group }) {
     try {
-      const result = await this.updateEntity('groups', 'id', id, group);
+      const result = await this.updateEntity({ table: 'groups', idField: 'id', id, updates: group });
       if (!result.success) {
         throw new Error(result.error);
       }
       return result.data;
     } catch (err) {
-      console.log('Error updating group:', err);
+      logger.debug('Error updating group:', err);
       throw err;
     }
   },
 
   async deleteGroup({ id }) {
     try {
-      await dbInstance.query('DELETE FROM project_groups WHERE group_id = $1', [id]);
-      await dbInstance.query('DELETE FROM groups WHERE id = $1', [id]);
+       await dbInstance.query('DELETE FROM project_groups WHERE group_id = $1', [id]);
+       await dbInstance.query('DELETE FROM groups WHERE id = $1', [id]);
       return { success: true };
     } catch (err) {
-      console.log('Error deleting group:', err);
+      logger.debug('Error deleting group:', err);
       throw err;
     }
   },
@@ -626,59 +750,59 @@ CREATE TABLE IF NOT EXISTS portfolio_invitations (
   // ---------------------------------------------------------------------------
   async addProjectToGroup({ projectId, groupId }) {
     try {
-      await dbInstance.query(
-        'INSERT INTO project_groups (project_id, group_id, addedAt) VALUES ($1, $2, $3) ON CONFLICT (project_id, group_id) DO NOTHING',
-        [projectId, groupId, new Date().toISOString()]
-      );
+       await dbInstance.query(
+         'INSERT INTO project_groups (project_id, group_id, added_at) VALUES ($1, $2, $3) ON CONFLICT (project_id, group_id) DO NOTHING',
+         [projectId, groupId, new Date().toISOString()]
+       );
       return { success: true };
     } catch (err) {
-      console.log('Error adding project to group:', err);
+      logger.debug('Error adding project to group:', err);
       throw err;
     }
   },
 
   async removeProjectFromGroup({ projectId, groupId }) {
     try {
-      await dbInstance.query('DELETE FROM project_groups WHERE project_id = $1 AND group_id = $2', [projectId, groupId]);
+       await dbInstance.query('DELETE FROM project_groups WHERE project_id = $1 AND group_id = $2', [projectId, groupId]);
       return { success: true };
     } catch (err) {
-      console.log('Error removing project from group:', err);
+      logger.debug('Error removing project from group:', err);
       throw err;
     }
   },
 
   async getProjectsInGroup({ groupId }) {
     try {
-      const res = await dbInstance.query(`
-        SELECT p.*, pg.addedAt as addedToGroupAt
-        FROM projects p
-        JOIN project_groups pg ON p.id = pg.project_id
-        WHERE pg.group_id = $1
-        ORDER BY pg.addedAt DESC
-      `, [groupId]);
+       const res = await dbInstance.query(`
+         SELECT p.*, pg.added_at as addedToGroupAt
+         FROM projects p
+         JOIN project_groups pg ON p.id = pg.project_id
+         WHERE pg.group_id = $1
+         ORDER BY pg.added_at DESC
+       `, [groupId]);
       return res.rows;
     } catch (err) {
-      console.log('Error getting projects in group:', err);
+      logger.debug('Error getting projects in group:', err);
       return [];
     }
   },
 
   async getUngroupedProjects({ userId = null }) {
     try {
-      let query = `
-        SELECT * FROM projects
-        WHERE id NOT IN (SELECT project_id FROM project_groups)
-      `;
-      let params = [];
-      if (userId) {
-        query += ' AND user_id = $1';
-        params.push(userId);
-      }
-      query += ' ORDER BY last_modified DESC';
-      const res = await dbInstance.query(query, params);
+       let query = `
+         SELECT * FROM projects
+         WHERE id NOT IN (SELECT project_id FROM project_groups)
+       `;
+       let params = [];
+       if (userId) {
+         query += ' AND user_id = $1';
+         params.push(userId);
+       }
+       query += ' ORDER BY last_modified DESC';
+       const res = await dbInstance.query(query, params);
       return res.rows;
     } catch (err) {
-      console.log('Error getting ungrouped projects:', err);
+      logger.debug('Error getting ungrouped projects:', err);
       return [];
     }
   },
@@ -694,7 +818,7 @@ CREATE TABLE IF NOT EXISTS portfolio_invitations (
       );
       return groupsWithProjects;
     } catch (err) {
-      console.log('Error getting groups with projects:', err);
+      logger.debug('Error getting groups with projects:', err);
       return [];
     }
   },
@@ -702,65 +826,66 @@ CREATE TABLE IF NOT EXISTS portfolio_invitations (
   // ---------------------------------------------------------------------------
   // Credit Operations
   // ---------------------------------------------------------------------------
-  async getUserCredits({ userId }) {
-    try {
-      const result = await this.getEntities({ table: 'credits', selectFields: '*', whereClause: 'WHERE user_id = $1', orderBy: 'ORDER BY date DESC', params: [userId] });
-      return result.rows;
-    } catch (err) {
-      console.error('Error getting user credits:', err);
-      return [];
-    }
-  },
+   async getUserCredits({ userId }) {
+     try {
+       const result = await this.getEntities({ table: 'credits', selectFields: '*', whereClause: 'WHERE user_id = $1', orderBy: 'ORDER BY created_at DESC', params: [userId] });
+       return result.rows;
+     } catch (err) {
+       logger.error('Error getting user credits:', err);
+       return [];
+     }
+   },
 
-  async getCreditTransactions({ userId }) {
-    try {
-      const result = await this.getEntities({ table: 'credits', selectFields: '*', whereClause: 'WHERE user_id = $1', orderBy: 'ORDER BY date DESC', params: [userId] });
-      return result.rows;
-    } catch (err) {
-      console.error('Error getting credit transactions:', err);
-      return [];
-    }
-  },
+   async getCreditTransactions({ userId }) {
+     try {
+       const result = await this.getEntities({ table: 'credits', selectFields: '*', whereClause: 'WHERE user_id = $1', orderBy: 'ORDER BY created_at DESC', params: [userId] });
+       return result.rows;
+     } catch (err) {
+       logger.error('Error getting credit transactions:', err);
+       return [];
+     }
+   },
 
-  async getCreditBalance({ userId }) {
-    try {
-      const result = await dbInstance.query(
-        'SELECT COALESCE(SUM(amount), 0) as balance FROM credits WHERE user_id = $1',
-        [userId]
-      );
-      return result.rows[0].balance || 0;
-    } catch (err) {
-      console.error('Error getting credit balance:', err);
-      return 0;
-    }
-  },
+   async getCreditBalance({ userId }) {
+     try {
+       const result = await dbInstance.query(
+         'SELECT COALESCE(SUM(amount), 0) as balance FROM credits WHERE user_id = $1',
+         [userId]
+       );
+       return result.rows[0].balance || 0;
+     } catch (err) {
+       logger.error('Error getting credit balance:', err);
+       return 0;
+     }
+   },
 
-  async getUserCreditBalance({ userId }) {
-    try {
-      const result = await dbInstance.query(
-        'SELECT COALESCE(SUM(amount), 0) as balance FROM credits WHERE user_id = $1',
-        [userId]
-      );
-      return result.rows[0].balance || 0;
-    } catch (err) {
-      console.error('Error getting user credit balance:', err);
-      return 0;
-    }
-  },
+   async getUserCreditBalance({ userId }) {
+     try {
+       const result = await dbInstance.query(
+         'SELECT COALESCE(SUM(amount), 0) as balance FROM credits WHERE user_id = $1',
+         [userId]
+       );
+       return result.rows[0].balance || 0;
+     } catch (err) {
+       logger.error('Error getting user credit balance:', err);
+       return 0;
+     }
+   },
 
   async addCreditTransaction({ userId, type, amount, description }) {
     try {
-      const balanceResult = await dbInstance.query('SELECT SUM(amount) as balance FROM credits WHERE user_id = $1', [userId]);
-      const currentBalance = balanceResult.rows[0]?.balance || 0;
-      const balance_after = currentBalance + amount;
-      const id = Math.random().toString(36).substring(2, 15);
-      await dbInstance.query(
-        'INSERT INTO credits (id, user_id, type, amount, description, balance_after, date, synced_at, last_modified, sync_status) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)',
-        [id, userId, type, amount, description, balance_after, new Date().toISOString(), new Date().toISOString(), new Date().toISOString(), 'local']
-      );
+       amount = parseFloat(amount);
+       const balanceResult = await dbInstance.query('SELECT SUM(amount) as balance FROM credits WHERE user_id = $1', [userId]);
+       const currentBalance = parseFloat(balanceResult.rows[0]?.balance || 0);
+       const balance_after = currentBalance + amount;
+       const id = 'cred_' + Date.now() + '_' + Math.random().toString(36).substring(2, 5);
+        await dbInstance.query(
+          'INSERT INTO credits (id, user_id, type, amount, description, balance_after, created_at, synced_at, last_modified, sync_status, deleted_at, version) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)',
+          [id, userId, type, amount, description, balance_after, new Date().toISOString(), new Date().toISOString(), new Date().toISOString(), 'local', null, 1]
+        );
       return { id, user_id: userId, type, amount, description, balance_after, date: new Date().toISOString() };
     } catch (err) {
-      console.error('Error adding credit transaction:', err);
+      logger.error('Error adding credit transaction:', err);
       throw err;
     }
   },
@@ -770,7 +895,7 @@ CREATE TABLE IF NOT EXISTS portfolio_invitations (
       await this.addCreditTransaction({ userId, type: 'usage', amount: -amount, description });
       return true;
     } catch (err) {
-      console.error('Error consuming credits:', err);
+      logger.error('Error consuming credits:', err);
       throw err;
     }
    },
@@ -779,28 +904,28 @@ CREATE TABLE IF NOT EXISTS portfolio_invitations (
    // Activity Logging Operations (v2)
    // ---------------------------------------------------------------------------
    async logActivity({ userId, actionType, entityType, entityId, description, metadata = {} }) {
-     try {
-       const id = Math.random().toString(36).substring(2, 15);
-       const res = await dbInstance.query(
-         'INSERT INTO user_activities (id, user_id, action_type, entity_type, entity_id, description, metadata, synced_at, last_modified, sync_status) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING *',
-         [id, userId, actionType, entityType, entityId, description, JSON.stringify(metadata), new Date().toISOString(), new Date().toISOString(), 'local']
-       );
+    try {
+      const id = 'sub_' + Date.now() + '_' + Math.random().toString(36).substring(2, 5);
+        const res = await dbInstance.query(
+          'INSERT INTO user_activities (id, user_id, action_type, entity_type, entity_id, description, metadata, ip_address, user_agent, created_at, synced_at, last_modified, sync_status, deleted_at, version) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15) RETURNING *',
+          [id, userId, actionType, entityType, entityId, description, JSON.stringify(metadata), null, null, new Date().toISOString(), new Date().toISOString(), new Date().toISOString(), 'local', null, 1]
+        );
        return res.rows[0];
      } catch (err) {
-       console.error('Error logging activity:', err);
+       logger.error('Error logging activity:', err);
        throw err;
      }
    },
 
    async getUserActivities({ userId, limit = 50, offset = 0 }) {
      try {
-       const res = await dbInstance.query(
-         'SELECT * FROM user_activities WHERE user_id = $1 ORDER BY timestamp DESC LIMIT $2 OFFSET $3',
-         [userId, limit, offset]
-       );
+         const res = await dbInstance.query(
+           'SELECT * FROM user_activities WHERE user_id = $1 ORDER BY created_at DESC LIMIT $2 OFFSET $3',
+           [userId, limit, offset]
+         );
        return res.rows;
      } catch (err) {
-       console.error('Error getting user activities:', err);
+       logger.error('Error getting user activities:', err);
        return [];
      }
    },
@@ -810,37 +935,37 @@ CREATE TABLE IF NOT EXISTS portfolio_invitations (
    // ---------------------------------------------------------------------------
   async addBillingRecord({ userId, type, amount, description, dueDate = null }) {
     try {
-      const id = Math.random().toString(36).substring(2, 15);
-      const res = await dbInstance.query(
-        'INSERT INTO billing (id, user_id, type, amount, description, due_date, synced_at, last_modified, sync_status) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING *',
-        [id, userId, type, amount, description, dueDate, new Date().toISOString(), new Date().toISOString(), 'local']
-      );
+      const id = 'bill_' + Date.now() + '_' + Math.random().toString(36).substring(2, 5);
+        const res = await dbInstance.query(
+          'INSERT INTO billing (id, user_id, type, amount, status, description, due_date, created_at, synced_at, last_modified, sync_status, deleted_at, version) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13) RETURNING id',
+          [id, userId, type, amount, 'pending', description, dueDate, new Date().toISOString(), new Date().toISOString(), new Date().toISOString(), 'local', null, 1]
+        );
       return res.rows[0];
     } catch (err) {
-      console.log('Error adding billing record:', err);
+      logger.debug('Error adding billing record:', err);
       throw err;
     }
   },
 
   async getUserBilling({ userId }) {
     try {
-      const res = await dbInstance.query(
-        'SELECT * FROM billing WHERE user_id = $1 ORDER BY last_modified DESC',
-        [userId]
-      );
+       const res = await dbInstance.query(
+         'SELECT * FROM billing WHERE user_id = $1 ORDER BY last_modified DESC',
+         [userId]
+       );
       return res.rows;
     } catch (err) {
-      console.log('Error getting user billing:', err);
+      logger.debug('Error getting user billing:', err);
       return [];
     }
   },
 
   async updateBillingStatus({ id, status }) {
     try {
-      await dbInstance.query('UPDATE billing SET status = $1, last_modified = $2 WHERE id = $3', [status, new Date().toISOString(), id]);
+       await dbInstance.query('UPDATE billing SET status = $1, last_modified = $2 WHERE id = $3', [status, new Date().toISOString(), id]);
       return { success: true };
     } catch (err) {
-      console.log('Error updating billing status:', err);
+      logger.debug('Error updating billing status:', err);
       throw err;
     }
   },
@@ -850,25 +975,31 @@ CREATE TABLE IF NOT EXISTS portfolio_invitations (
   // ---------------------------------------------------------------------------
   async createNotification({ userId, type, title, message }) {
     const id = Math.random().toString(36).substring(2, 15);
-    await dbInstance.query(
-      `INSERT INTO notifications (id,user_id,type,title,message,created_at,synced_at,last_modified,sync_status)
-      VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9)`,
-      [id, userId, type, title, message, new Date().toISOString(), new Date().toISOString(), new Date().toISOString(), 'local']
-    );
+      await dbInstance.query(
+        `INSERT INTO notifications (id,user_id,type,title,message,read,created_at,synced_at,last_modified,sync_status,deleted_at,version)
+        VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)`,
+        [id, userId, type, title, message, 0, new Date().toISOString(), new Date().toISOString(), new Date().toISOString(), 'local', null, 1]
+      );
     return { id };
   },
 
-  async getUserNotifications({ userId }) {
-    const res = await dbInstance.query('SELECT * FROM notifications WHERE user_id=$1 ORDER BY created_at DESC', [userId]);
-    return res.rows;
-  },
+   async getUserNotifications({ userId }) {
+     const res = await dbInstance.query('SELECT * FROM notifications WHERE user_id = $1 ORDER BY created_at DESC', [userId]);
+     return res.rows;
+   },
 
   async markNotificationRead({ notificationId, userId }) {
     try {
-      await dbInstance.query('UPDATE notifications SET read = true WHERE id = $1 AND user_id = $2', [notificationId, userId]);
+      // Ensure parameters are strings to avoid PGLite serialization errors
+      const safeNotificationId = String(notificationId || '');
+      const safeUserId = String(userId || '');
+
+      logger.debug('Marking notification read:', { notificationId: safeNotificationId, userId: safeUserId, originalTypes: { notificationId: typeof notificationId, userId: typeof userId } });
+
+       await dbInstance.query('UPDATE notifications SET read = true WHERE id = $1 AND user_id = $2', [safeNotificationId, safeUserId]);
       return true;
     } catch (err) {
-      console.error('Error marking notification read:', err);
+      logger.error('Error marking notification read:', err, { notificationId, userId });
       return false;
     }
   },
@@ -878,36 +1009,36 @@ CREATE TABLE IF NOT EXISTS portfolio_invitations (
   // ---------------------------------------------------------------------------
   async createSession({ userId, token, expiresAt }) {
     try {
-      const res = await dbInstance.query(
-        'INSERT INTO sessions (user_id, token, expires_at) VALUES ($1, $2, $3) RETURNING *',
-        [userId, token, expiresAt]
-      );
+       const res = await dbInstance.query(
+         'INSERT INTO sessions (user_id, token, expires_at) VALUES ($1, $2, $3) RETURNING *',
+         [userId, token, expiresAt]
+       );
       return res.rows[0];
     } catch (err) {
-      console.log('Error creating session:', err);
+      logger.debug('Error creating session:', err);
       throw err;
     }
   },
 
   async getSessionByToken({ token }) {
     try {
-      const res = await dbInstance.query(
-        'SELECT s.*, u.* FROM sessions s JOIN users u ON s.user_id = u.id WHERE s.token = $1 AND s.expires_at > CURRENT_TIMESTAMP',
-        [token]
-      );
+       const res = await dbInstance.query(
+         'SELECT s.*, u.* FROM sessions s JOIN users u ON s.user_id = u.id WHERE s.token = $1 AND s.expires_at > CURRENT_TIMESTAMP',
+         [token]
+       );
       return res.rows[0];
     } catch (err) {
-      console.log('Error getting session by token:', err);
+      logger.debug('Error getting session by token:', err);
       return null;
     }
   },
 
   async deleteSession({ token }) {
     try {
-      await dbInstance.query('DELETE FROM sessions WHERE token = $1', [token]);
+       await dbInstance.query('DELETE FROM sessions WHERE token = $1', [token]);
       return { success: true };
     } catch (err) {
-      console.log('Error deleting session:', err);
+      logger.debug('Error deleting session:', err);
       throw err;
     }
   },
@@ -917,7 +1048,7 @@ CREATE TABLE IF NOT EXISTS portfolio_invitations (
       await dbInstance.query('DELETE FROM sessions WHERE expires_at <= CURRENT_TIMESTAMP');
       return { success: true };
     } catch (err) {
-      console.log('Error deleting expired sessions:', err);
+      logger.debug('Error deleting expired sessions:', err);
       throw err;
     }
   },
@@ -936,42 +1067,44 @@ CREATE TABLE IF NOT EXISTS portfolio_invitations (
         { name: 'Enterprise', description: 'Full solution', price: 199.99, credits_included: 5000, features: JSON.stringify(['Team collaboration', 'Advanced analytics']) }
       ];
 
-      for (const pkg of packages) {
-        const packageId = Math.random().toString(36).substring(2, 15);
-        await dbInstance.query(
-          `INSERT INTO packages 
-          (id, name, description, price, credits_included, features, synced_at, last_modified, sync_status)
-          VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9)`,
-          [packageId, pkg.name, pkg.description, pkg.price, pkg.credits_included, pkg.features, new Date().toISOString(), new Date().toISOString(), 'synced']
-        );
-      }
+      const packageIds = ['free-package', 'pro-package', 'enterprise-package'];
+       for (let i = 0; i < packages.length; i++) {
+         const pkg = packages[i];
+         const packageId = packageIds[i];
+         await dbInstance.query(
+           `INSERT INTO packages
+           (id, name, description, price, credits_included, features, active, created_at, synced_at, last_modified, sync_status, deleted_at, version)
+           VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13)`,
+           [packageId, pkg.name, pkg.description, pkg.price, pkg.credits_included, pkg.features, 1, new Date().toISOString(), new Date().toISOString(), new Date().toISOString(), 'synced', null, 1]
+         );
+       }
 
       return { message: 'Packages seeded successfully' };
     } catch (err) {
-      console.error('Error seeding packages:', err);
+      logger.error('Error seeding packages:', err);
       throw err;
     }
   },
 
   async getPackages() {
     try {
-      const res = await dbInstance.query('SELECT * FROM packages WHERE active = true ORDER BY price ASC');
+      const res = await dbInstance.query('SELECT id, name, description, price, credits_included, features, active, synced_at, last_modified, sync_status FROM packages WHERE active = true ORDER BY price ASC');
       return res.rows;
     } catch (err) {
-      console.error('Error getting packages:', err);
+      logger.error('Error getting packages:', err);
       return [];
     }
   },
 
   async getUserSubscription({ userId }) {
     try {
-      const res = await dbInstance.query(
-        'SELECT us.*, p.name, p.description, p.price, p.credits_included FROM user_subscriptions us JOIN packages p ON us.package_id = p.id WHERE us.user_id = $1 AND us.status = $2 ORDER BY us.start_date DESC LIMIT 1',
-        [userId, 'active']
-      );
+       const res = await dbInstance.query(
+         'SELECT us.*, p.name, p.description, p.price, p.credits_included FROM user_subscriptions us JOIN packages p ON us.package_id = p.id WHERE us.user_id = $1 AND us.status = $2 ORDER BY us.start_date DESC LIMIT 1',
+         [userId, 'active']
+       );
       return res.rows[0] || null;
     } catch (err) {
-      console.error('Error getting user subscription:', err);
+      logger.error('Error getting user subscription:', err);
       return null;
     }
   },
@@ -981,82 +1114,133 @@ CREATE TABLE IF NOT EXISTS portfolio_invitations (
       const id = Math.random().toString(36).substring(2, 15);
       const startDate = subscriptionData.startDate || new Date().toISOString();
       const endDate = subscriptionData.endDate || new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString();
-      const res = await dbInstance.query(
-        'INSERT INTO user_subscriptions (id, user_id, package_id, status, start_date, end_date, auto_renew, synced_at, last_modified, sync_status) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING *',
-        [id, userId, packageId, subscriptionData.status || 'active', startDate, endDate, subscriptionData.autoRenew !== false, new Date().toISOString(), new Date().toISOString(), 'local']
-      );
-      const pkg = await dbInstance.query('SELECT * FROM packages WHERE id = $1', [packageId]);
-      if (pkg.rows[0] && pkg.rows[0].price > 0) {
-        await this.addBillingRecord({
-          userId,
-          type: 'subscription',
-          amount: pkg.rows[0].price,
-          description: `${pkg.rows[0].name} subscription`,
-          dueDate: endDate
-        });
+      // Validate input types
+      if (!packageId) {
+        throw new Error('packageId is undefined or null');
       }
-      return res.rows[0];
+      if (typeof userId === 'object' && userId.id) {
+        userId = userId.id;
+      }
+      if (typeof userId !== 'string' || typeof packageId !== 'string') {
+        throw new Error(`Invalid types: userId=${typeof userId}, packageId=${typeof packageId}`);
+      }
+
+        const res = await dbInstance.query(
+          'INSERT INTO user_subscriptions (id, user_id, package_id, status, start_date, end_date, auto_renew, synced_at, last_modified, sync_status, deleted_at, version) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12) RETURNING id',
+          [id, userId, packageId, subscriptionData.status || 'active', startDate, endDate, subscriptionData.autoRenew !== false ? true : false, new Date().toISOString(), new Date().toISOString(), 'local', null, 1]
+        );
+        const pkg = await dbInstance.query('SELECT * FROM packages WHERE id = $1', [packageId]);
+       if (pkg.rows[0]) {
+         // Add credits included in the package
+         if (pkg.rows[0].credits_included > 0) {
+           await this.addCreditTransaction({
+             userId,
+             type: 'subscription',
+             amount: pkg.rows[0].credits_included,
+             description: `${pkg.rows[0].name} subscription credits`
+           });
+         }
+         if (pkg.rows[0].price > 0) {
+           await this.addBillingRecord({
+             userId,
+             type: 'subscription',
+             amount: pkg.rows[0].price,
+             description: `${pkg.rows[0].name} subscription`,
+             dueDate: endDate
+           });
+         }
+       }
+       return res.rows[0];
     } catch (err) {
-      console.error('Error creating user subscription:', err);
+      logger.error('Error creating user subscription:', err);
       throw err;
     }
   },
 
-  async updateUserSubscription({ userId, subscriptionId, updates }) {
-    try {
-      const result = await this.updateEntity('user_subscriptions', 'id', subscriptionId, updates);
-      if (!result.success) {
-        throw new Error(result.error);
-      }
-      return result.data;
-    } catch (err) {
-      console.error('Error updating user subscription:', err);
-      throw err;
-    }
-  },
+   async updateUserSubscription({ userId, subscriptionId, updates }) {
+     try {
+        const result = await this.updateEntity({ table: 'user_subscriptions', idField: 'id', id: subscriptionId, updates });
+       if (!result.success) {
+         throw new Error(result.error);
+       }
+       return result.data;
+     } catch (err) {
+       logger.error('Error updating user subscription:', err);
+       throw err;
+     }
+   },
+
+   async changeUserSubscription({ userId, newPackageId, currentSubscription }) {
+     try {
+       // If there's a current subscription, update it or cancel it
+       if (currentSubscription) {
+          await this.updateEntity({ table: 'user_subscriptions', idField: 'id', id: currentSubscription.id, updates: {
+            status: 'cancelled',
+            cancelled_at: new Date().toISOString()
+          } });
+       }
+
+       // Create new subscription
+       const subscriptionData = {
+         user_id: userId,
+         package_id: newPackageId,
+         status: 'active',
+         subscribed_at: new Date().toISOString(),
+         synced_at: new Date().toISOString(),
+         last_modified: new Date().toISOString(),
+         sync_status: 'local'
+       };
+
+       const result = await this.createUserSubscription({ userId, packageId: newPackageId, subscriptionData });
+       return result;
+     } catch (err) {
+       logger.error('Error changing user subscription:', err);
+       throw err;
+     }
+   },
 
   // ---------------------------------------------------------------------------
   // Vote Operations
   // ---------------------------------------------------------------------------
   async voteOnProject({ projectId, userId, voteType }) {
     try {
-      const existingVote = await dbInstance.query(
-        'SELECT id, vote_type FROM project_votes WHERE project_id = $1 AND user_id = $2',
-        [projectId, userId]
-      );
-      if (existingVote.rows.length > 0) {
-        const currentVote = existingVote.rows[0];
-        if (currentVote.vote_type === voteType) {
-          await dbInstance.query('DELETE FROM project_votes WHERE id = $1', [currentVote.id]);
-          return { action: 'removed', voteType: null };
-        } else {
-          await dbInstance.query('UPDATE project_votes SET vote_type = $1 WHERE id = $2', [voteType, currentVote.id]);
-          return { action: 'changed', voteType };
-        }
-      } else {
-        await dbInstance.query(
-          'INSERT INTO project_votes (project_id, user_id, vote_type, voted_at) VALUES ($1, $2, $3, $4)',
-          [projectId, userId, voteType, new Date().toISOString()]
-        );
-        return { action: 'added', voteType };
-      }
+       const existingVote = await dbInstance.query(
+         'SELECT id, vote_type FROM project_votes WHERE project_id = $1 AND user_id = $2',
+         [projectId, userId]
+       );
+       if (existingVote.rows.length > 0) {
+         const currentVote = existingVote.rows[0];
+         if (currentVote.vote_type === voteType) {
+           await dbInstance.query('DELETE FROM project_votes WHERE id = $1', [currentVote.id]);
+           return { action: 'removed', voteType: null };
+         } else {
+           await dbInstance.query('UPDATE project_votes SET vote_type = $1 WHERE id = $2', [voteType, currentVote.id]);
+           return { action: 'changed', voteType };
+         }
+       } else {
+          await dbInstance.query(
+            'INSERT INTO project_votes (project_id, user_id, vote_type, created_at) VALUES ($1, $2, $3, $4)',
+            [projectId, userId, voteType, new Date().toISOString()]
+          );
+         return { action: 'added', voteType };
+       }
     } catch (err) {
-      console.log('Error voting on project:', err);
+      logger.debug('Error voting on project:', err);
       throw err;
     }
   },
 
   async getProjectVotes({ projectId }) {
     try {
-      const res = await dbInstance.query(`
-        SELECT vote_type, COUNT(*) as count
-        FROM project_votes
-        WHERE project_id = $1
-        GROUP BY vote_type
-      `, [projectId]);
+       const res = await dbInstance.query(`
+         SELECT vote_type, COUNT(*) as count
+         FROM project_votes
+         WHERE project_id = $1
+         GROUP BY vote_type
+       `, [projectId]);
       return res.rows;
     } catch (err) {
-      console.log('Error getting project votes:', err);
+      logger.debug('Error getting project votes:', err);
       return [];
     }
   },
@@ -1074,7 +1258,7 @@ CREATE TABLE IF NOT EXISTS portfolio_invitations (
           SELECT project_id,
                  vote_type as user_vote
           FROM project_votes
-          WHERE user_id = $1
+          WHERE user_id = ?
         ) v ON p.id = v.project_id
         LEFT JOIN (
           SELECT project_id,
@@ -1088,7 +1272,7 @@ CREATE TABLE IF NOT EXISTS portfolio_invitations (
       `, [currentUserId]);
       return res.rows;
     } catch (err) {
-      console.log('Error getting public projects with votes:', err);
+      logger.debug('Error getting public projects with votes:', err);
       return [];
     }
   },
@@ -1098,7 +1282,7 @@ CREATE TABLE IF NOT EXISTS portfolio_invitations (
   // ---------------------------------------------------------------------------
   async seedSampleNotifications({ userId }) {
     try {
-      const existingNotifications = await dbInstance.query('SELECT COUNT(*) as count FROM notifications WHERE user_id = $1', [userId]);
+      const existingNotifications = await dbInstance.query('SELECT COUNT(*) as count FROM notifications WHERE user_id = ?', [userId]);
       if (existingNotifications.rows[0].count > 0) {
         return { message: 'User already has notifications' };
       }
@@ -1142,7 +1326,7 @@ CREATE TABLE IF NOT EXISTS portfolio_invitations (
 
       return { message: 'Sample notifications seeded successfully' };
     } catch (err) {
-      console.log('Error creating sample notifications:', err.message);
+      logger.debug('Error creating sample notifications:', err.message);
       throw err;
     }
   },
@@ -1244,6 +1428,7 @@ const operationHandlers = {
   getPackages: DatabaseWorker.getPackages.bind(DatabaseWorker),
   getUserSubscription: DatabaseWorker.getUserSubscription.bind(DatabaseWorker),
   createUserSubscription: DatabaseWorker.createUserSubscription.bind(DatabaseWorker),
+  changeUserSubscription: DatabaseWorker.changeUserSubscription.bind(DatabaseWorker),
   updateUserSubscription: DatabaseWorker.updateUserSubscription.bind(DatabaseWorker),
   voteOnProject: DatabaseWorker.voteOnProject.bind(DatabaseWorker),
   getProjectVotes: DatabaseWorker.getProjectVotes.bind(DatabaseWorker),
@@ -1255,12 +1440,18 @@ const operationHandlers = {
   },
   seedSampleNotifications: DatabaseWorker.seedSampleNotifications.bind(DatabaseWorker),
    isSeeded: async () => {
-     try {
-       const result = await dbInstance.query('SELECT COUNT(*) as count FROM users LIMIT 1');
-       return result.rows[0].count > 0;
-     } catch {
-       return false;
-     }
+    try {
+      console.log('Checking if users table exists...');
+      const result = await dbInstance.query('SELECT COUNT(*) as count FROM users LIMIT 1');
+      console.log('Users table exists, count:', result.rows[0].count);
+      if (result.rows[0].count >= 0) {
+        logger.debug('Database schema already exists, skipping initialization');
+        return { success: true };
+      }
+    } catch (err) {
+      console.log('Users table does not exist or query failed:', err.message);
+      logger.debug('Database schema not found, initializing...');
+    }
    }
 };
 

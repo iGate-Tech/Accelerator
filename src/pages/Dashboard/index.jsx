@@ -6,20 +6,40 @@ import { useLanguage } from "../../hooks/useLanguage";
 import { dashboardTranslations } from "../../assets/translations/translations-index.js";
 import { formatRelativeTime } from "../../lib/utils";
 import ProjectCard from "../../components/ui/ProjectCard";
+import logger from '../../lib/logger.js';
+
+
 
 const Dashboard = () => {
+  logger.info('Dashboard: Component mounting');
+  logger.debug('Dashboard: Initializing signals and resources');
   const navigate = useNavigate();
   const { t } = useLanguage();
   const { isAuthenticated, user } = useUser();
-  const [projects, { refetch }] = createResource(getProjects);
+  logger.debug('Dashboard: Hooks initialized, user authenticated:', !!user());
+  const [projects, { refetch }] = createResource(() => {
+    logger.debug('Dashboard: Fetching projects');
+    return getProjects();
+  });
+
   const [activities, { refetch: refetchActivities }] = createResource(
-    () => user()?.id,
+    () => {
+      const userId = user()?.id;
+      logger.debug('Dashboard: Activities resource triggered, userId:', userId);
+      return userId;
+    },
     async (userId) => {
-      if (!userId) return [];
+      logger.debug('Dashboard: Fetching activities for user:', userId);
+      if (!userId) {
+        logger.debug('Dashboard: No userId, returning empty activities');
+        return [];
+      }
       try {
-        return await getUserActivities(userId, 20, 0);
+        const result = await getUserActivities(userId, 20, 0);
+        logger.debug('Dashboard: Activities fetched, count:', result?.length || 0);
+        return result;
       } catch (e) {
-        console.error('Error fetching activities:', e);
+        logger.error('Dashboard: Error fetching activities:', e.message, e.stack);
         return [];
       }
     }
@@ -27,22 +47,44 @@ const Dashboard = () => {
 
   // Redirect if not authenticated
   createEffect(() => {
-    if (!isAuthenticated()) {
+    const auth = isAuthenticated();
+    logger.trace('Dashboard: Auth check effect triggered, isAuthenticated:', auth);
+    if (!auth) {
+      logger.info('Dashboard: User not authenticated, redirecting to login');
       navigate('/auth/login', { replace: true });
+    } else {
+      logger.debug('Dashboard: User authenticated, staying on dashboard');
     }
   });
 
   const stats = createMemo(() => {
-    if (!projects()) return {};
+    logger.trace('Dashboard: Stats memo triggered');
+    if (!projects()) {
+      logger.debug('Dashboard: No projects data yet');
+      return {};
+    }
 
-    const totalProjects = projects().length;
-    const completedProjects = projects().filter(p => p.uiStatus === 'completed').length;
-    const inProgressProjects = projects().filter(p => p.uiStatus === 'processing').length;
-    const idleProjects = projects().filter(p => p.uiStatus === 'idle').length;
-    const pausedProjects = projects().filter(p => p.uiStatus === 'paused').length;
+    const projectsData = projects();
+    const totalProjects = projectsData.length;
+    const completedProjects = projectsData.filter(p => p.uiStatus === 'completed').length;
+    const inProgressProjects = projectsData.filter(p => p.uiStatus === 'processing').length;
+    const idleProjects = projectsData.filter(p => p.uiStatus === 'idle').length;
+    const pausedProjects = projectsData.filter(p => p.uiStatus === 'paused').length;
 
-    const totalCompletedSteps = projects().reduce((sum, p) => sum + (p.completedSteps || 0), 0);
-    const totalSteps = projects().reduce((sum, p) => sum + (p.totalSteps || 51), 0);
+    const totalCompletedSteps = projectsData.reduce((sum, p) => sum + (p.completedSteps || 0), 0);
+    const totalSteps = projectsData.reduce((sum, p) => sum + (p.totalSteps || 51), 0);
+
+    const statsResult = {
+      totalProjects,
+      completedProjects,
+      inProgressProjects,
+      idleProjects,
+      pausedProjects,
+      totalCompletedSteps,
+      totalSteps
+    };
+    logger.debug('Dashboard: Stats calculated:', statsResult);
+    return statsResult;
     const overallProgress = totalSteps > 0 ? (totalCompletedSteps / totalSteps) * 100 : 0;
 
     const totalCreditsConsumed = projects().reduce((sum, p) => sum + (p.consumedCredits || 0), 0);
@@ -96,11 +138,21 @@ const Dashboard = () => {
   const formatDate = (dateString) => formatRelativeTime(dateString, t());
 
   onMount(async () => {
+    logger.info('Dashboard: Component mounted');
+    logger.debug('Dashboard: Setting up Lucide icons');
     if (window.lucide) window.lucide.createIcons();
 
+    logger.debug('Dashboard: Adding event listeners for project updates');
     // Listen for project updates
-    window.addEventListener('projectAdded', () => refetch());
-    window.addEventListener('projectUpdated', () => refetch());
+    window.addEventListener('projectAdded', () => {
+      logger.debug('Dashboard: projectAdded event received, refetching projects');
+      refetch();
+    });
+    window.addEventListener('projectUpdated', () => {
+      logger.debug('Dashboard: projectUpdated event received, refetching projects');
+      refetch();
+    });
+    logger.trace('Dashboard: Mount setup completed');
   });
 
   return (
@@ -230,9 +282,9 @@ const Dashboard = () => {
                     <p>{t().noRecentActivity}</p>
                   </div>
                 }
-              >
-                 <div class="space-y-4">
-                   <For each={recentActivity()}>
+               >
+                  <div class="space-y-4 max-h-96 overflow-y-auto">
+                    <For each={recentActivity()}>
                      {(activity) => (
                        <div class="flex items-start gap-3">
                          <div class={`p-2 rounded-full ${

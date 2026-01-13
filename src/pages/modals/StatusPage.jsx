@@ -2,8 +2,11 @@ import { createSignal, createEffect, onMount, useContext } from "solid-js";
 import { useNavigate } from "@solidjs/router";
 import { LangContext } from "../../context/LangContext";
 import { translations } from "../../assets/translations/translations-index.js";
+import logger from '../../lib/logger.js';
+
 
 const StatusPage = () => {
+  logger.trace('StatusPage: Starting');
   const { lang } = useContext(LangContext);
   const [currentLang, setCurrentLang] = createSignal(lang());
   const t = () => translations[currentLang()];
@@ -24,13 +27,15 @@ const StatusPage = () => {
     { name: "User Interface", status: "operational", uptime: "100%" },
     { name: "Data Persistence", status: "operational", uptime: "99.8%" }
   ];
+  logger.trace('getStatusColor: Starting');
 
   const getStatusColor = (status) => {
     switch (status) {
       case 'operational': return 'text-success';
       case 'degraded': return 'text-warning';
       case 'outage': return 'text-error';
-      default: return 'text-base-content';
+      de
+  logger.trace('getStatusIcon: Starting');fault: return 'text-base-content';
     }
   };
 

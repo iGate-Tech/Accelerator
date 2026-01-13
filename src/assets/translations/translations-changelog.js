@@ -1,3 +1,5 @@
+import logger from '../../lib/logger.js';
+
 // Changelog translations
 export const changelogTranslations = {
   en: {

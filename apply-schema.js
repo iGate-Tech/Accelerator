@@ -1,9 +1,10 @@
 #!/usr/bin/env node
 
 // Apply Supabase schema using service role
-require('dotenv').config();
-const fs = require('fs');
-const { Client } = require('pg');
+import 'dotenv/config';
+import fs from 'fs';
+import pg from 'pg';
+const { Client } = pg;
 
 const databaseUrl = process.env.DATABASE_URL;
 

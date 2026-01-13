@@ -3,8 +3,11 @@ import { useNavigate } from "@solidjs/router";
 import { useUser } from "../../context/UserContext";
 import { getUserBilling, getUserSubscription, getCreditBalance } from "../../lib/db";
 import { toastManager } from "../../lib/feedback";
+import logger from '../../lib/logger.js';
+
 
 const Billing = () => {
+  logger.trace('Billing: Starting');
   const navigate = useNavigate();
   const { user, checkAuth, refreshUserData } = useUser();
 
@@ -75,7 +78,8 @@ const Billing = () => {
         average: average.toFixed(2),
         nextPayment
       };
-    }
+    
+  logger.trace('upgradePlan: Starting');}
   );
 
   const upgradePlan = () => {

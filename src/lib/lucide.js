@@ -1,3 +1,4 @@
+
 /**
  * @license lucide v0.562.0 - ISC
  *
@@ -36,6 +37,7 @@
     }
     return element;
   };
+
   const createElement = (iconNode, customAttrs = {}) => {
     const tag = "svg";
     const attrs = {
@@ -45,36 +47,37 @@
     return createSVGElement([tag, attrs, iconNode]);
   };
 
-  const getAttrs = (element) => Array.from(element.attributes).reduce((attrs, attr) => {
-    attrs[attr.name] = attr.value;
-    return attrs;
-  }, {});
-  const getClassNames = (attrs) => {
-    if (typeof attrs === "string") return attrs;
-    if (!attrs || !attrs.class) return "";
-    if (attrs.class && typeof attrs.class === "string") {
-      return attrs.class.split(" ");
-    }
-    if (attrs.class && Array.isArray(attrs.class)) {
-      return attrs.class;
-    }
-    return "";
-  };
-  const combineClassNames = (arrayOfClassnames) => {
-    const classNameArray = arrayOfClassnames.flatMap(getClassNames);
-    return classNameArray.map((classItem) => classItem.trim()).filter(Boolean).filter((value, index, self) => self.indexOf(value) === index).join(" ");
-  };
+   const getAttrs = (element) => Array.from(element.attributes).reduce((attrs, attr) => {
+     attrs[attr.name] = attr.value;
+     return attrs;
+   }, {});
+   const getClassNames = (attrs) => {
+     if (typeof attrs === "string") return attrs;
+     if (!attrs || !attrs.class) return "";
+     if (attrs.class && typeof attrs.class === "string") {
+       return attrs.class.split(" ");
+     }
+     if (attrs.class && Array.isArray(attrs.class)) {
+       return attrs.class;
+     }
+     return "";
+   };
+   const combineClassNames = (arrayOfClassnames) => {
+     const classNameArray = arrayOfClassnames.flatMap(getClassNames);
+     return classNameArray.map((classItem) => classItem.trim()).filter(Boolean).filter((value, index, self) => self.indexOf(value) === index).join(" ");
+   };
   const toPascalCase = (string) => string.replace(/(\w)(\w*)(_|-|\s*)/g, (g0, g1, g2) => g1.toUpperCase() + g2.toLowerCase());
   const replaceElement = (element, { nameAttr, icons, attrs }) => {
     const iconName = element.getAttribute(nameAttr);
     if (iconName == null) return;
     const ComponentName = toPascalCase(iconName);
     const iconNode = icons[ComponentName];
-    if (!iconNode) {
-      return console.warn(
-        `${element.outerHTML} icon name was not found in the provided icons object.`
-      );
-    }
+     if (!iconNode) {
+       console.warn(
+         `${element.outerHTML} icon name was not found in the provided icons object.`
+       );
+       return;
+     }
     const elementAttrs = getAttrs(element);
     const iconAttrs = {
       ...defaultAttributes,
@@ -16917,7 +16920,7 @@
     if (nameAttr === "data-lucide") {
       const deprecatedElements = root.querySelectorAll("[icon-name]");
       if (deprecatedElements.length > 0) {
-        console.warn(
+        logger.warn(
           "[Lucide] Some icons were found with the now deprecated icon-name attribute. These will still be replaced for backwards compatibility, but will no longer be supported in v1.0 and you should switch to data-lucide"
         );
         Array.from(deprecatedElements).forEach(

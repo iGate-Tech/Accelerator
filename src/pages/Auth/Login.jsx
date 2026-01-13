@@ -78,46 +78,7 @@ const Login = () => {
 
   return (
   <RouteGuard requireGuest={true}>
-<style>{`
-.btnshadow {
-  position: relative;
-  background: #010002;
-  border-radius: 8px;
-  z-index: 0;
-  overflow: hidden;
-}
 
-/* rotating border */
-.btnshadow::before {
-  content: "";
-  position: absolute;
-  inset: 5px;
-  background: conic-gradient(
-    from 0deg,
-    #fb0094,
-    #0000ff,
-    #00ff00,
-    #ffff00,
-    #ff0000,
-    transparent 50%,
-    transparent
-  );
-  border-radius: inherit;
-  animation: spin 3s linear infinite;
-  z-index: -2;
-}
-
-
-@keyframes spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-`}</style>
 
     <div class="w-full max-w-md">
         {/* Logo */}

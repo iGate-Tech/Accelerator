@@ -843,3 +843,51 @@ html {
 }
 
 
+.btnshadow {
+  position: relative;
+  background: #01000200;
+  border-radius: 8px;
+  z-index: 0;
+  overflow: hidden;
+}
+
+/* rotating border */
+.btnshadow::before {
+height: 150%;
+  content: "";
+  position: absolute;
+  inset: -150%;
+  background: conic-gradient(
+    from 0deg,
+    #fb0094,
+    #0000ff,
+    #00ff00,
+    #ffff00,
+    #ff0000,
+    transparent 50%,
+    transparent
+  );
+  border-radius: inherit;
+
+  animation: spin 3s linear infinite;
+  z-index: -2;
+}
+/* inner mask = border thickness */
+.btnshadow::after {
+  content: "";
+  position: absolute;
+  inset: 10px; /* 🔥 THIS controls colored width */
+  background: #01000200;
+  border-radius: calc(8px - 4px);
+  z-index: -1;
+
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}

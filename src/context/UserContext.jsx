@@ -1,6 +1,6 @@
 import { createContext, createSignal, useContext, onMount } from "solid-js";
 import { dataAPI } from "../lib/data";
-import { updateEntity, getUserProfile, createUserProfile, getUserById, createUser, getUserSubscription } from "../lib/db";
+import { updateEntity, getUserProfile, createUserProfile, getUserById, createUser, getUserSubscription, initDb, setCurrentUser } from "../lib/db";
 import { toastManager } from "../lib/feedback";
 import { activityLogger } from "../lib/activity";
 import avatar from "../assets/avatar.png";
@@ -242,7 +242,6 @@ export const UserProvider = (props) => {
 
     // Initialize database only
     try {
-      const { initDb } = await import('../lib/db');
       await initDb();
       logger.info('Database initialized successfully');
     } catch (error) {
@@ -257,6 +256,7 @@ export const UserProvider = (props) => {
           const parsedUser = JSON.parse(savedUserData);
           if (parsedUser && parsedUser.id) {
             setUser(parsedUser);
+            setCurrentUser(parsedUser);
             setIsAuthenticated(true);
             logger.debug('User loaded from localStorage');
           } else {

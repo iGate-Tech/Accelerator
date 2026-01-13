@@ -95,7 +95,7 @@ const TasksContent = () => {
     createEffect(() => {
       const pid = currentProjectId();
       if (pid && user()?.id) {
-        updateEntity('user_profile', 'user_id', user().id, { current_project_id: pid });
+        updateEntity({ table: 'profiles', idField: 'user_id', id: user().id, updates: { current_project_id: pid } });
       }
     });
 

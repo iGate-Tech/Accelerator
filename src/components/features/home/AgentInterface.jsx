@@ -221,31 +221,37 @@ const AgentInterface = (props) => { // Defensive checks for required props
                         onMouseEnter={handleCardHover}
                         onMouseLeave={handleCardLeave}>
                         <div class="card-body relative p-4 !gap-0">
-                            <Show when={
-                                props.currentProjectId && props.currentProjectId() !== null && props.tasksList && (props.tasksList().length > 0 || (props.machineStore && props.machineStore.state === "processing"))
-                            }>
-                                <ProgressAccordion machineStore={
-                                        props.machineStore
-                                    }
-                                    project={
-                                        currentProject()
-                                    }
-                                    isAccordionOpen={
-                                        props.isAccordionOpen
-                                    }
-                                    setIsAccordionOpen={
-                                        props.setIsAccordionOpen
-                                    }
-                                    isLoading={
-                                        props.isLoading
-                                    }
-                                    handlePause={
-                                        props.handlePause
-                                    }
-                                    handleResume={
-                                        props.handleResume
-                                    }/>
-                            </Show>
+                             <Show when={
+                                 props.currentProjectId && props.currentProjectId() !== null && props.tasksList && (props.tasksList().length > 0 || (props.machineStore && props.machineStore.state === "processing"))
+                             }>
+                                 <ProgressAccordion machineStore={
+                                         props.machineStore
+                                     }
+                                     project={
+                                         currentProject()
+                                     }
+                                     isAccordionOpen={
+                                         props.isAccordionOpen
+                                     }
+                                     setIsAccordionOpen={
+                                         props.setIsAccordionOpen
+                                     }
+                                     isLoading={
+                                         props.isLoading
+                                     }
+                                     handlePause={
+                                         props.handlePause
+                                     }
+                                     handleResume={
+                                         props.handleResume
+                                     }/>
+                             </Show>
+                             <Show when={props.machineStore.state === "processing" && props.streamingContent && props.streamingContent().trim()}>
+                                 <div class="mt-4 p-4 bg-base-200 rounded-lg">
+                                     <h3 class="text-sm font-semibold mb-2">AI Processing...</h3>
+                                     <div class="text-sm whitespace-pre-wrap">{props.streamingContent()}</div>
+                                 </div>
+                             </Show>
                             {/* Form */}
                             <Show when={
                                 props.tasksList && props.tasksList().length === 0

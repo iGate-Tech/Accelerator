@@ -259,10 +259,6 @@ const TasksContent = () => {
         setIsLoading(true);
         setStreamingContent('');
         try {
-            // Check online status for AI features
-            if (!isOnline()) {
-                throw new Error('AI features require an internet connection. Please check your connection and try again.');
-            }
 
             // Check user authentication
             if (!user() || !user().id) {
@@ -523,9 +519,9 @@ const TasksContent = () => {
     createEffect(() => {
         console.log('CreateEffect: autoProgress:', autoProgress(), 'isLoading:', isLoading(), 'state:', machineStore.state);
         if (autoProgress() && !isLoading() && machineStore.state === 'processing') {
-            console.log('CreateEffect: calling handleLLMCall with prompt:', machineStore.context.currentPrompt);
+            console.log('CreateEffect: calling handleLLMCall with prompt:', prompt());
             setAutoProgress(false);
-            handleLLMCall(machineStore.context.currentPrompt);
+            handleLLMCall(prompt());
         }
     });
 

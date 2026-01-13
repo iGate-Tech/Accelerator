@@ -121,7 +121,7 @@ const TasksContent = () => {
 
     // Handler functions
     const handleImprove = async () => {
-        const improvedPrompt = `Improve this startup idea for better clarity, specificity, and market potential. Provide a concise improved description in simple English: ${prompt()}`;
+        const improvedPrompt = `Improve this startup idea for better clarity, specificity, and market potential. Start with the improved idea name followed by ': ' and then provide a concise description in simple English, in only 3 lines. Do not generate in markdown: ${prompt()}`;
         try {
             const improvedText = await handleQuickLLMCall(improvedPrompt, true, setPrompt);
         } catch (error) {
@@ -130,7 +130,7 @@ const TasksContent = () => {
     };
     const handleSuggest = async () => {
         logger.info('Starting AI suggestion process for prompt:', prompt().substring(0, 50) + '...');
-        const suggestPrompt = `Based on this idea, suggest a compelling startup idea. Provide a brief description in simple English: ${prompt()}`;
+        const suggestPrompt = `Suggest a compelling startup idea in the legal tech space. Start with the idea name followed by ': ' and then provide a brief description, target market, and unique value proposition in simple English, in only 3 lines. Do not generate in markdown.`;
         try {
             const suggestedText = await handleQuickLLMCall(suggestPrompt, true, setPrompt);
             logger.info('AI suggestion received:', suggestedText.substring(0, 100) + '...');

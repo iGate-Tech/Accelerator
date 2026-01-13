@@ -366,8 +366,8 @@ const TasksContent = () => {
                    consumedTime: project.consumedTime
                  };
                  setMachineStore('context', { ...initialContext, ...contextFromDB });
-                  // Set machine state: show resume for any unfinished project
-                   setMachineStore("state", project.uiStatus === "completed" ? "completed" : "pause");
+                  // Set machine state: use saved state or default to idle for new projects
+                  setMachineStore("state", project.uiStatus || "idle");
         }
       });
 

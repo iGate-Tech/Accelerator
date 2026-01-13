@@ -367,8 +367,8 @@ const TasksContent = () => {
                  };
                   console.log('Home: setting machine context', { ...initialContext, ...contextFromDB });
                   setMachineStore('context', { ...initialContext, ...contextFromDB });
-                  // Set machine state: use saved state, or processing if has progress, or idle
-                  const newState = project.uiStatus || (project.current_step ? "processing" : "idle");
+                  // Set machine state: use saved state or default to idle
+                  const newState = project.uiStatus || "idle";
                   console.log('Home: setting machine state to', newState);
                   setMachineStore("state", newState);
 

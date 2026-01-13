@@ -74,6 +74,7 @@ const Sidebar = () => {
         if (newName && newName.trim()) {
           await updateProject(projectId, { name: newName.trim() });
           window.dispatchEvent(new CustomEvent('projectUpdated'));
+          toastManager.success(t().rename + ' ' + t().successful);
           await loadProjects();
         }
         break;

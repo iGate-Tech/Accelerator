@@ -272,7 +272,7 @@ const AgentInterface = (props) => { // Defensive checks for required props
                                                 props.machineStore.state !== "idle" ? "opacity-50 cursor-not-allowed" : ""
                                             }`
                                         }
-                                        style="resize: none; overflow: hidden; min-height: 3rem; box-sizing: border-box;"
+                                         style="resize: none; overflow-y: auto; min-height: 3rem; max-height: 400px; box-sizing: border-box;"
                                         placeholder={
                                             t().placeholder
                                         }

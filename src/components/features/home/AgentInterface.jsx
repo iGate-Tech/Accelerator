@@ -252,7 +252,7 @@ const AgentInterface = (props) => { // Defensive checks for required props
                                      <div class="text-sm whitespace-pre-wrap">{props.streamingContent()}</div>
                                  </div>
                              </Show>
-                            {/* Form */}
+                             {/* Form */}
                             <Show when={
                                 props.tasksList && props.tasksList().length === 0
                             }>

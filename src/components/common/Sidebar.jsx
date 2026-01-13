@@ -73,6 +73,7 @@ const Sidebar = () => {
       case 'rename':
         if (newName && newName.trim()) {
           await updateProject(projectId, { name: newName.trim() });
+          window.dispatchEvent(new CustomEvent('projectUpdated'));
           await loadProjects();
         }
         break;
@@ -80,6 +81,7 @@ const Sidebar = () => {
       case 'delete':
         toastManager.warning(t().delete + ' "' + project.name + '"');
         await deleteProject(projectId);
+        window.dispatchEvent(new CustomEvent('projectDeleted', { detail: { projectId } }));
         await loadProjects();
         break;
 
@@ -275,9 +277,9 @@ const Sidebar = () => {
                                 onBlur={(e) => {
                                   if (editingProjectId() === project.id) {
                                     const newName = e.target.textContent.trim();
-                                    if (newName && newName !== project.name) {
-                                      handleProjectAction('rename', project.id);
-                                    }
+                                   if (newName && newName !== project.name) {
+                                     handleProjectAction('rename', project.id, newName.trim());
+                                   }
                                     setEditingProjectId(null);
                                   }
                                 }}

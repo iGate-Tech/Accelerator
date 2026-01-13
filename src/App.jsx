@@ -8,7 +8,7 @@ import AuthLayout from "./components/common/AuthLayout";
 import logger from './lib/logger.js';
 
 
-const Home = lazy(() => import("./pages/Home"));
+import Home from "./pages/Home";
 const Dashboard = lazy(() => import("./pages/Dashboard"));
 const Explore = lazy(() => import("./pages/Explore"));
 const Portfolio = lazy(() => import("./pages/Portfolio"));

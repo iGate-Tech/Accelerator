@@ -1,294 +1,249 @@
-import { createSignal, createResource, For, Show } from "solid-js";
-import { useUser } from "../../context/UserContext";
+import { createSignal, onMount, createEffect, For } from "solid-js";
 import { useNavigate } from "@solidjs/router";
-import { getPackages, getUserSubscription, createUserSubscription, changeUserSubscription } from "../../lib/db";
+import { useUser } from "../../context/UserContext";
+import { useLanguage } from "../../hooks/useLanguage";
 import { toastManager } from "../../lib/feedback";
-import logger from '../../lib/logger.js';
-
-
+import logger from "../../lib/logger.js";
 
 const Packages = () => {
   logger.trace('Packages: Starting');
   const navigate = useNavigate();
-  const { user, refreshUserData } = useUser();
+  const { user, isAuthenticated, updateSubscription } = useUser();
+  const { currentLang, t } = useLanguage();
 
-  const [packages, { refetch: refetchPackages }] = createResource(async () => {
-    const result = await getPackages();
-    logger.debug('Loaded packages:', result);
-    return result;
-  });
-
-  const [subscription, { refetch: refetchSubscription }] = createResource(
-    () => user()?.id,
-    async (userId) => {
-      if (!userId) return null;
-      return await getUserSubscription(userId);
+  const [packages] = createSignal([
+    {
+      id: 'free',
+      name: 'Free',
+      price: 0,
+      credits_included: 50,
+      features: [
+        'AI-powered business plan generation',
+        'Basic market analysis',
+        'Financial projections',
+        '3 projects maximum',
+        'Community support',
+        'Basic export options'
+      ]
+    },
+    {
+      id: 'pro',
+      name: 'Pro',
+      price: 29,
+      credits_included: 500,
+      features: [
+        'Everything in Free plan',
+        'Unlimited projects',
+        'Advanced market research',
+        'Competitive analysis',
+        'Pitch deck generation',
+        'Financial modeling',
+        'Priority customer support',
+        'Advanced export formats',
+        'API access',
+        'Custom templates'
+      ]
+    },
+    {
+      id: 'enterprise',
+      name: 'Enterprise',
+      price: 99,
+      credits_included: 2000,
+      features: [
+        'Everything in Pro plan',
+        'Team collaboration tools',
+        'Advanced analytics dashboard',
+        'Custom integrations',
+        'White-label options',
+        'Dedicated success manager',
+        'Priority feature requests',
+        'Advanced security features',
+        'Custom AI model training',
+        '24/7 premium support'
+      ]
     }
-  );
+  ]);
+
+  // Redirect if not authenticated
+  createEffect(() => {
+    if (!isAuthenticated()) {
+      navigate('/auth/login', { replace: true });
+    }
+  });
 
   const handleSubscribe = async (packageData) => {
     try {
-      // Validate inputs
-      if (!user() || !user().id) {
-        logger.error('User not available', user());
-        toastManager.error('User session expired. Please log in again.');
-        return;
-      }
-
-      if (!packageData || !packageData.id) {
-        logger.error('Invalid package data', packageData);
-        toastManager.error('Package data is invalid. Please try again.');
-        return;
-      }
-
-      const currentSubscription = subscription();
-
       // Check if user already has this active subscription
-      if (currentSubscription && currentSubscription.name === packageData.name) {
+      if (user()?.subscription?.plan === packageData.id) {
         toastManager.info(`You already have the ${packageData.name} plan!`);
         return;
       }
 
-      // Handle subscription changes
-      if (currentSubscription) {
-        // Changing plans - use changeUserSubscription
-        await changeUserSubscription(user().id, packageData.id, currentSubscription);
-        toastManager.success(`Successfully changed to ${packageData.name} plan!`);
-      } else {
-        // New subscription - use createUserSubscription
-        if (packageData.price === 0) {
-          await createUserSubscription(user().id, packageData.id);
-          toastManager.success(`Successfully subscribed to ${packageData.name} plan!`);
-        } else {
-          // For paid plans, show payment required message (in real app, integrate payment processor)
-          toastManager.info(`Payment processing for ${packageData.name} plan would happen here. Subscription created for demo purposes.`);
+      // Update subscription locally
+      await updateSubscription({
+        plan: packageData.id,
+        status: 'active',
+        maxCredits: packageData.credits_included
+      });
 
-          // For demo purposes, create the subscription anyway
-          await createUserSubscription(user().id, packageData.id);
-          toastManager.success(`Demo: Subscribed to ${packageData.name} plan!`);
-        }
-      }
-
-      // Refresh data across all resources
-      refetchSubscription();
-
-      // Also refresh user context to update credits and subscription data
-      await refreshUserData();
-
+      toastManager.success(`Successfully upgraded to ${packageData.name} plan!`);
     } catch (error) {
       logger.error('Subscription error:', error);
       toastManager.error('Failed to process subscription. Please try again.');
     }
   };
 
-  const getPackageFeatures = (features, packageName) => {
-    // Features are already parsed as arrays from the database
-    if (Array.isArray(features) && features.length > 0) {
-      return features;
-    }
+  const currentPlan = () => user()?.subscription?.plan || 'free';
 
-    // If no features, provide defaults based on package name
-    switch (packageName) {
-      case 'Free':
-        return ['AI-powered business plan generation', 'Basic market analysis', 'Financial projections', '3 projects maximum', 'Community support', 'Basic export options'];
-      case 'Pro':
-        return ['Everything in Free plan', 'Unlimited projects', 'Advanced market research', 'Competitive analysis', 'Pitch deck generation', 'Financial modeling', 'Priority customer support', 'Advanced export formats', 'API access', 'Custom templates'];
-      case 'Enterprise':
-        return ['Everything in Pro plan', 'Team collaboration tools', 'Advanced analytics dashboard', 'Custom integrations', 'White-label options', 'Dedicated success manager', 'Priority feature requests', 'Advanced security features', 'Custom AI model training', '24/7 premium support'];
-      default:
-        return ['AI-powered tools', 'Project management', 'Community support'];
-    }
-  };
+  onMount(() => {
+    if (window.lucide) window.lucide.createIcons();
+  });
+
+  createEffect(() => {
+    if (window.lucide) window.lucide.createIcons();
+  });
 
   return (
-    <div class="min-h-screen bg-gradient-to-br from-primary/5 via-base-100 to-secondary/5">
-      {/* Hero Section */}
-      <div class="bg-gradient-to-r from-primary to-secondary text-base-100 py-20">
-        <div class="container mx-auto px-4 text-center">
-          <h1 class="text-5xl font-bold mb-6">Choose Your Growth Plan</h1>
-          <p class="text-xl opacity-90 mb-8 max-w-2xl mx-auto">
-            Accelerate your startup journey with our tailored plans. Get the right tools and credits to turn your vision into reality.
-          </p>
-          <div class="flex justify-center space-x-8 text-sm">
-            <div class="flex items-center">
-              <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
-              </svg>
-              30-day money back guarantee
-            </div>
-            <div class="flex items-center">
-              <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
-              </svg>
-              Cancel anytime
-            </div>
-            <div class="flex items-center">
-              <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
-              </svg>
-              24/7 support
-            </div>
-          </div>
+    <div class={`max-w-6xl mx-auto space-y-8 ${currentLang() === 'ar' ? 'rtl' : 'ltr'}`}>
+      {/* Header */}
+      <div class="text-center">
+        <h1 class="text-4xl font-bold text-base-content mb-4">Subscription Packages</h1>
+        <p class="text-lg text-base-content/70">
+          Choose the perfect plan for your needs
+        </p>
+      </div>
+
+      {/* Current Plan Banner */}
+      <div class="alert alert-info">
+        <i data-lucide="info" class="w-5 h-5"></i>
+        <div>
+          <h3 class="font-bold">Current Plan: {packages().find(p => p.id === currentPlan())?.name || 'Free'}</h3>
+          <div class="text-xs">Credits remaining: {user()?.credits?.balance || 0} / {user()?.subscription?.maxCredits || 50}</div>
         </div>
       </div>
 
-      <div class="container mx-auto px-4 py-24">
-        <Show when={!packages.loading} fallback={
-          <div class="flex justify-center items-center py-20">
-            <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
-          </div>
-        }>
-          <div class="max-w-7xl mx-auto">
-            {/* Pricing Cards */}
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 lg:gap-6 -mt-16 relative z-10">
-              <For each={packages()}>
-                {(pkg, index) => (
-                  <div class={`relative bg-base-100 rounded-3xl shadow-xl border-2 transition-all duration-300 hover:shadow-2xl ${
-                    pkg.name === 'Pro'
-                      ? 'border-primary lg:transform lg:scale-105 lg:z-10'
-                      : pkg.name === 'Enterprise'
-                        ? 'border-secondary'
-                        : 'border-base-300'
-                  }`}>
-
-                     {/* Popular Badge */}
-                     <Show when={pkg.name === 'Pro'}>
-                       <div class="absolute -top-3 left-1/2 transform -translate-x-1/2 z-30">
-                         <span class="bg-gradient-to-r from-primary to-primary-focus text-base-100 px-4 py-1.5 rounded-full text-xs font-bold shadow-lg whitespace-nowrap">
-                           🔥 Most Popular
-                         </span>
-                       </div>
-                     </Show>
-
-                    {/* Header */}
-                    <div class={`p-8 text-center ${pkg.name === 'Pro' ? 'bg-gradient-to-br from-primary/10 to-primary/20' : 'bg-base-200'}`}>
-                      <div class="w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-primary to-secondary rounded-2xl flex items-center justify-center">
-                        <span class="text-2xl text-primary-content font-bold">{pkg.name[0]}</span>
-                      </div>
-                      <h3 class="text-2xl font-bold mb-2">{pkg.name}</h3>
-                      <div class="text-center">
-                         <span class="text-5xl font-bold text-base-content">
-                          {pkg.price === 0 ? 'Free' : `$${pkg.price}`}
-                        </span>
-                        {pkg.price > 0 && <span class="text-base-content/60">/month</span>}
-                      </div>
-                      <p class="text-base-content/70 mt-2">{pkg.credits_included} AI credits included</p>
-                    </div>
-
-                    {/* Features */}
-                    <div class="p-8">
-                      <div class="mb-6">
-                         <h4 class="font-semibold mb-4 text-base-content">What's included:</h4>
-                        <ul class="space-y-3">
-                           <For each={getPackageFeatures(pkg.features, pkg.name)}>
-                            {(feature) => (
-                              <li class="flex items-start">
-                                <svg class="w-5 h-5 text-success mr-3 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                                  <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
-                                </svg>
-                                <span class="text-base-content/80">{feature}</span>
-                              </li>
-                            )}
-                          </For>
-                        </ul>
-                      </div>
-
-                      {/* CTA Button */}
-                      <button
-                        onClick={() => handleSubscribe(pkg)}
-                        disabled={subscription() && subscription().name === pkg.name}
-                        class={`w-full py-4 px-6 rounded-xl font-semibold transition-all duration-200 ${
-                          subscription() && subscription().name === pkg.name
-                            ? 'bg-success/20 text-success border border-success/30 cursor-not-allowed'
-                            : pkg.name === 'Starter'
-                            ? 'bg-base-200 text-base-content/80 hover:bg-base-300 border border-base-300'
-                            : 'bg-gradient-to-r from-primary to-primary-focus text-base-100 hover:from-primary-focus hover:to-primary-focus shadow-lg hover:shadow-xl transform hover:-translate-y-0.5'
-                        }`}
-                      >
-                        {subscription() && subscription().name === pkg.name
-                          ? 'Current Plan'
-                          : pkg.price === 0
-                            ? 'Get Started Free'
-                            : 'Start Free Trial'
-                        }
-                      </button>
-
-
-                    </div>
+      {/* Packages Grid */}
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <For each={packages()}>
+          {(pkg) => (
+            <div class={`card bg-base-100 shadow-lg border-2 ${
+              pkg.id === currentPlan() ? 'border-primary' : 'border-base-200'
+            } ${pkg.name === 'Pro' ? 'relative' : ''}`}>
+              {pkg.name === 'Pro' && (
+                <div class="absolute -top-3 left-1/2 transform -translate-x-1/2">
+                  <div class="badge badge-primary">Most Popular</div>
+                </div>
+              )}
+              <div class="card-body">
+                <div class="text-center">
+                  <h2 class="card-title justify-center text-2xl">{pkg.name}</h2>
+                  <div class="text-4xl font-bold text-primary my-4">
+                    ${pkg.price}
+                    <span class="text-lg font-normal text-base-content/60">/month</span>
                   </div>
-                )}
-              </For>
-            </div>
-
-            {/* Testimonials Section */}
-            <div class="mt-32 text-center">
-              <h2 class="text-3xl font-bold mb-16">Trusted by Startup Founders</h2>
-              <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
-                <div class="bg-base-100 p-6 rounded-xl shadow-sm border border-base-300">
-                  <div class="flex items-center mb-4">
-                    <div class="w-12 h-12 bg-info/20 rounded-full flex items-center justify-center mr-4">
-                      <span class="text-info font-bold">SJ</span>
-                    </div>
-                    <div>
-                      <h4 class="font-semibold">Sarah Johnson</h4>
-                      <p class="text-sm text-base-content/70">CEO, TechStart</p>
-                    </div>
-                  </div>
-                  <p class="text-base-content/80 italic">"The Pro plan helped us validate our MVP in just 2 weeks. The AI insights were game-changing."</p>
+                  <p class="text-base-content/60">{pkg.credits_included} credits included</p>
                 </div>
 
-                <div class="bg-base-100 p-6 rounded-xl shadow-sm border border-base-300">
-                  <div class="flex items-center mb-4">
-                    <div class="w-12 h-12 bg-success/20 rounded-full flex items-center justify-center mr-4">
-                      <span class="text-success font-bold">MR</span>
-                    </div>
-                    <div>
-                      <h4 class="font-semibold">Mike Rodriguez</h4>
-                      <p class="text-sm text-base-content/70">Founder, GreenTech</p>
-                    </div>
-                  </div>
-                  <p class="text-base-content/80 italic">"Enterprise plan gave us the tools to scale from idea to Series A. Worth every penny."</p>
-                </div>
+                <div class="divider"></div>
 
-                <div class="bg-base-100 p-6 rounded-xl shadow-sm border border-base-300">
-                  <div class="flex items-center mb-4">
-                    <div class="w-12 h-12 bg-secondary/20 rounded-full flex items-center justify-center mr-4">
-                      <span class="text-secondary font-bold">AL</span>
-                    </div>
-                    <div>
-                      <h4 class="font-semibold">Anna Liu</h4>
-                      <p class="text-sm text-base-content/70">CTO, InnovateLab</p>
-                    </div>
-                  </div>
-                  <p class="text-base-content/80 italic">"Started with free plan, upgraded to Pro. The credit system made budgeting AI costs effortless."</p>
+                <ul class="space-y-3">
+                  <For each={pkg.features}>
+                    {(feature) => (
+                      <li class="flex items-center gap-3">
+                        <i data-lucide="check" class="w-5 h-5 text-success"></i>
+                        <span>{feature}</span>
+                      </li>
+                    )}
+                  </For>
+                </ul>
+
+                <div class="card-actions justify-center mt-6">
+                  {pkg.id === currentPlan() ? (
+                    <button class="btn btn-primary btn-block" disabled>
+                      Current Plan
+                    </button>
+                  ) : (
+                    <button
+                      class="btn btn-primary btn-block"
+                      onClick={() => handleSubscribe(pkg)}
+                    >
+                      {pkg.price === 0 ? 'Get Started' : 'Upgrade'}
+                    </button>
+                  )}
                 </div>
               </div>
             </div>
+          )}
+        </For>
+      </div>
 
-            {/* FAQ Section */}
-            <div class="mt-32 bg-base-100 rounded-2xl p-12 shadow-sm border border-base-300">
-              <h2 class="text-3xl font-bold text-center mb-12">Frequently Asked Questions</h2>
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-12">
-                <div class="mb-6">
-                  <h3 class="font-semibold mb-3">Can I change plans anytime?</h3>
-                  <p class="text-base-content/70">Yes, you can upgrade or downgrade your plan at any time. Changes take effect immediately.</p>
-                </div>
-                <div class="mb-6">
-                  <h3 class="font-semibold mb-3">What happens to unused credits?</h3>
-                  <p class="text-base-content/70">Credits roll over to the next month. Enterprise plans have unlimited carryover.</p>
-                </div>
-                <div class="mb-6">
-                  <h3 class="font-semibold mb-3">Is there a free trial?</h3>
-                  <p class="text-base-content/70">All paid plans come with a 30-day free trial. No credit card required to start.</p>
-                </div>
-                <div class="mb-6">
-                  <h3 class="font-semibold mb-3">Do you offer refunds?</h3>
-                  <p class="text-base-content/70">Yes, we offer a 30-day money-back guarantee if you're not satisfied.</p>
-                </div>
-              </div>
-            </div>
+      {/* Feature Comparison */}
+      <div class="card bg-base-100 shadow-sm border border-base-200">
+        <div class="card-body">
+          <h3 class="card-title">Feature Comparison</h3>
+          <div class="overflow-x-auto">
+            <table class="table table-zebra">
+              <thead>
+                <tr>
+                  <th>Feature</th>
+                  <th>Free</th>
+                  <th>Pro</th>
+                  <th>Enterprise</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>AI Assistance</td>
+                  <td>Basic</td>
+                  <td>Advanced</td>
+                  <td>Advanced</td>
+                </tr>
+                <tr>
+                  <td>Projects per Month</td>
+                  <td>3</td>
+                  <td>Unlimited</td>
+                  <td>Unlimited</td>
+                </tr>
+                <tr>
+                  <td>Credits</td>
+                  <td>50</td>
+                  <td>500</td>
+                  <td>2000</td>
+                </tr>
+                <tr>
+                  <td>Support</td>
+                  <td>Community</td>
+                  <td>Priority</td>
+                  <td>Dedicated</td>
+                </tr>
+                <tr>
+                  <td>Templates</td>
+                  <td>Basic</td>
+                  <td>Premium</td>
+                  <td>Premium</td>
+                </tr>
+                <tr>
+                  <td>Collaboration</td>
+                  <td>-</td>
+                  <td>✓</td>
+                  <td>✓</td>
+                </tr>
+                <tr>
+                  <td>API Access</td>
+                  <td>-</td>
+                  <td>✓</td>
+                  <td>✓</td>
+                </tr>
+                <tr>
+                  <td>Custom Integrations</td>
+                  <td>-</td>
+                  <td>-</td>
+                  <td>✓</td>
+                </tr>
+              </tbody>
+            </table>
           </div>
-        </Show>
+        </div>
       </div>
     </div>
   );

@@ -21,17 +21,18 @@ const Settings = () => {
   const [changingPassword, setChangingPassword] = createSignal(false);
 
   const [saving, setSaving] = createSignal(false);
-  const [preferencesForm, setPreferencesForm] = createSignal({
-    notifications: {
-      email: true,
-      browser: true,
-      projectUpdates: true
-    },
-    privacy: {
-      profileVisibility: 'public',
-      dataSharing: true
-    }
-  });
+   const [preferencesForm, setPreferencesForm] = createSignal({
+     notifications: {
+       email: true,
+       browser: true,
+       projectUpdates: true
+     },
+     privacy: {
+       profileVisibility: 'public',
+       dataSharing: true
+     },
+     theme: 'light'
+   });
   const [avatarFile, setAvatarFile] = createSignal(null);
   const [avatarPreview, setAvatarPreview] = createSignal(null);
   const [uploadingAvatar, setUploadingAvatar] = createSignal(false);
@@ -45,16 +46,18 @@ const Settings = () => {
 
 
 
-  const savePreferences = async () => {
-    setSaving(true);
-    try {
-      await updateProfile({ avatar: avatar });
-      showMessage('Avatar removed successfully');
-    } catch (error) {
-      showMessag
-  logger.trace('exportData: Starting');e('Failed to remove avatar', 'error');
-    }
-  };
+   const savePreferences = async () => {
+     setSaving(true);
+     try {
+       await updatePreferences(preferencesForm());
+       showMessage('Preferences saved successfully');
+     } catch (error) {
+       logger.error('Error saving preferences:', error);
+       showMessage('Failed to save preferences', 'error');
+     } finally {
+       setSaving(false);
+     }
+   };
 
   const exportData = () => {
     const data = JSON.stringify(user(), null, 2);
@@ -119,24 +122,39 @@ const Settings = () => {
   };
 
    onMount(async () => {
-     if (window.lucide) window.lucide.createIcons();
-      if (user() && typeof user() === 'object' && user().id && typeof user().id === 'string') {
+      if (window.lucide) window.lucide.createIcons();
+       if (user() && typeof user() === 'object' && user().id && typeof user().id === 'string') {
+         try {
+           const userProjects = await getProjects(user().id);
+           setProjects(userProjects || []);
+         } catch (e) {
+           logger.error('Error loading projects:', e);
+           setProjects([]);
+         }
         try {
-          const userProjects = await getProjects(user().id);
-          setProjects(userProjects || []);
+          const userCredits = await getUserCredits(user().id);
+          setCredits(userCredits || []);
         } catch (e) {
-          logger.error('Error loading projects:', e);
-          setProjects([]);
+          logger.error('Error loading credits:', e);
+          setCredits([]);
         }
-       try {
-         const userCredits = await getUserCredits(user().id);
-         setCredits(userCredits || []);
-       } catch (e) {
-         logger.error('Error loading credits:', e);
-         setCredits([]);
-       }
-     }
-  });
+        // Initialize preferences form
+        if (user().preferences) {
+          setPreferencesForm({
+            notifications: {
+              email: user().preferences.notifications?.email ?? true,
+              browser: user().preferences.notifications?.browser ?? true,
+              projectUpdates: user().preferences.notifications?.projectUpdates ?? true
+            },
+            privacy: {
+              profileVisibility: user().preferences.privacy?.profileVisibility ?? 'public',
+              dataSharing: user().preferences.privacy?.dataSharing ?? true
+            },
+            theme: user().preferences.theme ?? 'light'
+          });
+        }
+      }
+   });
 
   createEffect(() => {
     if (window.lucide) window.lucide.createIcons();
@@ -168,26 +186,92 @@ const Settings = () => {
           <h2 class="text-2xl font-bold mb-6 flex items-center"><i data-lucide="settings" class="w-6 h-6 mr-2"></i>{t().preferences}</h2>
 
           <div class="space-y-6">
-            <div>
-              <h3 class="text-lg font-semibold mb-4">{t().notifications}</h3>
-              <div class="space-y-3">
-                <label class="flex items-center justify-between">
-                  <div>
-                    <span class="font-medium">Browser Notifications</span>
-                    <p class="text-sm text-base-content/60">Show desktop notifications</p>
-                  </div>
-                  <input
-                    type="checkbox"
-                    class="toggle toggle-primary"
-                    checked={preferencesForm().notifications.browser}
-                    onChange={(e) => setPreferencesForm({
-                      ...preferencesForm(),
-                      notifications: { ...preferencesForm().notifications, browser: e.target.checked }
-                    })}
-                  />
-                </label>
-              </div>
-            </div>
+             <div>
+               <h3 class="text-lg font-semibold mb-4">{t().notifications}</h3>
+               <div class="space-y-3">
+                 <label class="flex items-center justify-between">
+                   <div>
+                     <span class="font-medium">Email Notifications</span>
+                     <p class="text-sm text-base-content/60">Receive email updates</p>
+                   </div>
+                   <input
+                     type="checkbox"
+                     class="toggle toggle-primary"
+                     checked={preferencesForm().notifications.email}
+                     onChange={(e) => setPreferencesForm({
+                       ...preferencesForm(),
+                       notifications: { ...preferencesForm().notifications, email: e.target.checked }
+                     })}
+                   />
+                 </label>
+                 <label class="flex items-center justify-between">
+                   <div>
+                     <span class="font-medium">Browser Notifications</span>
+                     <p class="text-sm text-base-content/60">Show desktop notifications</p>
+                   </div>
+                   <input
+                     type="checkbox"
+                     class="toggle toggle-primary"
+                     checked={preferencesForm().notifications.browser}
+                     onChange={(e) => setPreferencesForm({
+                       ...preferencesForm(),
+                       notifications: { ...preferencesForm().notifications, browser: e.target.checked }
+                     })}
+                   />
+                 </label>
+                 <label class="flex items-center justify-between">
+                   <div>
+                     <span class="font-medium">Project Updates</span>
+                     <p class="text-sm text-base-content/60">Get notified about project changes</p>
+                   </div>
+                   <input
+                     type="checkbox"
+                     class="toggle toggle-primary"
+                     checked={preferencesForm().notifications.projectUpdates}
+                     onChange={(e) => setPreferencesForm({
+                       ...preferencesForm(),
+                       notifications: { ...preferencesForm().notifications, projectUpdates: e.target.checked }
+                     })}
+                   />
+                 </label>
+               </div>
+             </div>
+
+             <div>
+               <h3 class="text-lg font-semibold mb-4">Appearance</h3>
+               <div class="space-y-3">
+                 <div>
+                   <label class="label">
+                     <span class="label-text">Theme</span>
+                   </label>
+                   <select
+                     class="select select-bordered w-full"
+                     value={preferencesForm().theme}
+                     onChange={(e) => setPreferencesForm({
+                       ...preferencesForm(),
+                       theme: e.target.value
+                     })}
+                   >
+                     <option value="light">Light</option>
+                     <option value="dark">Dark</option>
+                     <option value="auto">Auto</option>
+                   </select>
+                 </div>
+                 <div>
+                   <label class="label">
+                     <span class="label-text">Language</span>
+                   </label>
+                   <select
+                     class="select select-bordered w-full"
+                     value={currentLang()}
+                     onChange={(e) => setLang(e.target.value)}
+                   >
+                     <option value="en">English</option>
+                     <option value="ar">العربية</option>
+                   </select>
+                 </div>
+               </div>
+             </div>
 
             <div>
               <h3 class="text-lg font-semibold mb-4">Privacy</h3>
@@ -213,18 +297,18 @@ const Settings = () => {
             </div>
           </div>
 
-           <div class="flex justify-end mt-4">
-             <button
-               class="btn btn-primary"
-               onClick={savePreferences}
-               disabled={saving()}
-             >
-               <Show when={saving()}>
-                 <span class="loading loading-spinner loading-sm"></span>
-               </Show>
-               Save Preferences (Local Only)
-             </button>
-           </div>
+            <div class="flex justify-end mt-4">
+              <button
+                class="btn btn-primary"
+                onClick={savePreferences}
+                disabled={saving()}
+              >
+                <Show when={saving()}>
+                  <span class="loading loading-spinner loading-sm"></span>
+                </Show>
+                Save Preferences
+              </button>
+            </div>
         </div>
 
 
@@ -331,11 +415,11 @@ const Settings = () => {
                         <div class="stat-value">{(credits() || []).filter(c => c.type === 'usage').reduce((sum, c) => sum + Math.abs(c.amount), 0)}</div>
                         <div class="stat-desc">This month</div>
                       </div>
-                     <div class="stat">
-                       <div class="stat-title">Storage</div>
-                       <div class="stat-value">0 MB</div>
-                       <div class="stat-desc">Used space</div>
-                     </div>
+                      <div class="stat">
+                        <div class="stat-title">Storage</div>
+                        <div class="stat-value">{projects().length * 10 + 5} MB</div>
+                        <div class="stat-desc">Used space</div>
+                      </div>
                 </div>
               </div>
             </div>

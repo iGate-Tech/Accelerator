@@ -7,6 +7,7 @@ import {
   pause,
   resume,
   reset,
+  resetToPreviousStep,
   fillPrompt,
   getPromptForStep,
   extractDataFromTasks,
@@ -99,6 +100,17 @@ describe('State Machine', () => {
       expect(result).toHaveProperty('employees', 10);
     });
 
+    it('should handle conflicting data gracefully', () => {
+      const tasks = [
+        { content: '{{businessName: "TestCo"}}', stepName: 'test1' },
+        { content: '{{businessName: "OtherCo"}}', stepName: 'test2' }
+      ];
+
+      // Should log warning but merge (last write wins)
+      const result = extractDataFromTasks(tasks);
+      expect(result).toHaveProperty('businessName', 'OtherCo');
+    });
+
     it('should handle empty tasks array', () => {
       const result = extractDataFromTasks([]);
       expect(result).toEqual({});
@@ -133,6 +145,29 @@ describe('State Machine', () => {
         mockUpdateProject,
         'test-project'
       )).rejects.toThrow('Received undefined response from LLM');
+    });
+
+    it('should handle invalid context gracefully', async () => {
+      // Set invalid context
+      setMachineStore("context", { currentStep: 'invalid', completedSteps: 'not-a-number' });
+
+      const response = 'Test response';
+      const tasksList = [];
+
+      mockAddTask.mockResolvedValue({ id: 'task-123' });
+
+      await receiveResponse(
+        response,
+        mockSetAutoProgress,
+        mockSetTasksList,
+        () => tasksList,
+        mockAddTask,
+        mockUpdateProject,
+        'test-project'
+      );
+
+      // Should continue but log errors
+      expect(mockAddTask).toHaveBeenCalled();
     });
 
     it('should add response as task and update project', async () => {
@@ -203,6 +238,29 @@ describe('State Machine', () => {
       reset();
       expect(machineStore.state).toBe('idle');
       expect(machineStore.context).toEqual(initialContext);
+    });
+  });
+
+  describe('resetToPreviousStep', () => {
+    it('should reset to previous step when available', () => {
+      startProcess('test problem');
+      const initialStep = machineStore.context.currentStep;
+
+      // Simulate moving to next step
+      setMachineStore("context", "currentStep", "step2");
+      setMachineStore("context", "completedSteps", 1);
+
+      resetToPreviousStep();
+      expect(machineStore.context.currentStep).toBe(initialStep);
+      expect(machineStore.context.completedSteps).toBe(0);
+    });
+
+    it('should do nothing when no previous step available', () => {
+      startProcess('test problem');
+      const initialStep = machineStore.context.currentStep;
+
+      resetToPreviousStep();
+      expect(machineStore.context.currentStep).toBe(initialStep);
     });
   });
 

@@ -38,8 +38,14 @@ const Sidebar = () => {
   const loadProjects = async () => {
     try {
       const currentUser = user();
-      if (!currentUser || typeof currentUser !== 'object' || !currentUser.id || typeof currentUser.id !== 'string') return;
+      logger.debug('Sidebar loadProjects: currentUser:', currentUser);
+      if (!currentUser || typeof currentUser !== 'object' || !currentUser.id || typeof currentUser.id !== 'string') {
+        logger.debug('Sidebar loadProjects: no valid user, skipping');
+        return;
+      }
+      logger.debug('Sidebar loadProjects: loading projects for user:', currentUser.id);
       const projs = await getProjects(currentUser.id) || [];
+      logger.debug('Sidebar loadProjects: loaded projects:', projs.length);
       setProjects(projs);
     } catch (error) {
       logger.error('Failed to load projects:', error);
@@ -117,6 +123,13 @@ const Sidebar = () => {
     const newLang = lang();
     setCurrentLang(newLang);
     logger.debug('Sidebar language changed to:', newLang);
+  });
+
+  createEffect(() => {
+    const currentUser = user();
+    if (currentUser && currentUser.id) {
+      loadProjects();
+    }
   });
 
   createEffect(() => {

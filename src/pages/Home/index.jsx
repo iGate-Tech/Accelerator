@@ -37,12 +37,14 @@ import {
     getProjectByName,
     getProjectById,
     consumeCredits,
-    getCreditBalance
+    getCreditBalance,
+    updateEntity,
+    getUserProfile
 } from "../../lib/db";
 import { useUser } from "../../context/UserContext";
 import { toastManager } from "../../lib/feedback";
 import { useActivityLogger } from "../../lib/activity";
-import { handleLLMProjectUpdate } from "../../lib/utils";
+import { handleLLMProjectUpdate, extractProjectName } from "../../lib/utils";
 import {setMachineStore} from "../../lib/machine";
 import {marked} from 'marked';
 import {renderFilledTemplate} from '../../lib/llm-template';
@@ -88,6 +90,14 @@ const TasksContent = () => {
 
     const [currentProjectId, setCurrentProjectId] = createSignal(null);
     const [prompt, setPrompt] = createSignal("");
+
+    // Save selected project to user profile
+    createEffect(() => {
+      const pid = currentProjectId();
+      if (pid && user()?.id) {
+        updateEntity('user_profile', 'user_id', user().id, { current_project_id: pid });
+      }
+    });
 
     // Refs
     let cardRef;
@@ -149,6 +159,7 @@ const TasksContent = () => {
     const handleStart = async () => {
         setAutoProgress(true);
         await handleLLMProjectUpdate(prompt(), extractProjectName, currentProjectId, setCurrentProjectId, setPrompt, setStreamingContent);
+        startProcess();
     };
     const handlePause = () => {
         pause();
@@ -159,6 +170,7 @@ const TasksContent = () => {
 
     // Quick LLM Call handler for short responses
     const handleQuickLLMCall = async (prompt, stream = true, setFunction = setStreamingContent) => {
+        const creditsCost = 0; // Free for quick LLM calls
         logger.info('Quick LLM call initiated, prompt length:', prompt.length);
         setIsLoading(true);
         setStreamingContent('');
@@ -302,9 +314,13 @@ const TasksContent = () => {
     const [tasks, {
             refetch
         }
-    ] = createResource(() => ({ projectId: currentProjectId(), userId: user()?.id }), async ({ projectId, userId }) => {
-      if (!userId) return [];
-      return await getTasks(projectId, userId);
+    ] = createResource(() => {
+      const pid = currentProjectId();
+      if (!pid) return null;
+      return { projectId: pid, userId: user()?.id };
+    }, async (params) => {
+      if (!params || !params.userId) return [];
+      return await getTasks(params.projectId, params.userId);
     });
     const [projectData, { mutate }] = createResource(currentProjectId, async (projectId) => {
       if (!projectId) return null;
@@ -418,11 +434,20 @@ const TasksContent = () => {
          });
 
          // Create Lucide icons after a delay to ensure script loaded
-         setTimeout(() => {
-             if (window.lucide)
-                 window.lucide.createIcons();
-         }, 100);
-     });
+          setTimeout(() => {
+              if (window.lucide)
+                  window.lucide.createIcons();
+          }, 100);
+
+          // Load selected project from user profile
+          if (user()?.id) {
+            getUserProfile(user().id).then(profile => {
+              if (profile?.current_project_id) {
+                setCurrentProjectId(profile.current_project_id);
+              }
+            }).catch(e => logger.error('Error loading user profile:', e));
+          }
+      });
 
     createEffect(() => {
         machineStore.state;

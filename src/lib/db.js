@@ -1,11 +1,13 @@
 import { toastManager } from './feedback';
+
+let dbWorker = null;
 import { v4 as uuidv4 } from 'uuid';
 import PgliteWorker from '../workers/pglite-worker-v2.js?worker';
 import logger from './logger.js';
 
 // Local user management for PGLite only
 const getCurrentUser = async () => {
-  return { id: 'local-user' };
+  return { id: 1 };
 };
 
 
@@ -26,18 +28,18 @@ class DatabaseWorker {
       logger.debug('Creating database worker instance');
       this.worker = new PgliteWorker();
 
-      this.worker.onmessage = (e) => {
-        const { id, success, result, error, type } = e.data;
-        const resolver = pendingRequests.get(id);
-        if (resolver) {
-          pendingRequests.delete(id);
-          if (success) {
-            resolver.resolve(result);
-          } else {
-            resolver.reject(new Error(error));
-          }
-        }
-      };
+  this.worker.onmessage = (e) => {
+    const { id, success, result, error, type } = e.data;
+    const resolver = pendingRequests.get(id);
+    if (resolver) {
+      pendingRequests.delete(id);
+      if (success) {
+        resolver.resolve(result);
+      } else {
+        resolver.reject(new Error(error));
+      }
+    }
+  };
 
       this.worker.onerror = (error) => {
         logger.error('Worker error:', error);
@@ -671,22 +673,26 @@ export const clearAllTasks = async () => {
     };
 
      export const addProject = async (project) => {
-       try {
-         const user = await getCurrentUser();
-         if (!user) throw new Error('User not authenticated');
+        try {
+          const user = await getCurrentUser();
+          if (!user) throw new Error('User not authenticated');
 
-          const pg = await getPg();
-          const newProject = await pg.addProject(project, user.id);
+          // Ensure is_public is integer (0 for private)
+          project.is_public = 0;
+
+           const pg = await getPg();
+           const newProject = await pg.addProject(project, user.id);
           logger.debug('Added project:', newProject);
 
            // Log activity
            await logActivity(user.id, 'project_created', 'project', newProject.id, `Created project "${project.name}"`, { projectName: project.name });
 
-          return newProject.id;
-       } catch (e) {
-         logger.debug('Error adding project:', e);
-         toastManager.error(`Failed to add project "${project.name}" (${project.description?.length || 0} chars description): ${e.message}`);
-       }
+           toastManager.success(`Project "${project.name}" created successfully`);
+           return newProject.id;
+        } catch (e) {
+          logger.debug('Error adding project:', e);
+          toastManager.error(`Failed to add project "${project.name}" (${project.description?.length || 0} chars description): ${e.message}`);
+        }
      };
 
      export const updateProject = async (id, project) => {
@@ -702,15 +708,17 @@ export const clearAllTasks = async () => {
          const pg = await getPg();
          logger.debug('DB: calling pg.updateProject');
          await pg.updateProject(id, project);
-         logger.debug('DB: Updated project:', id);
+          logger.debug('DB: Updated project:', id);
+
+          toastManager.success('Project updated successfully');
 
           // Log activity
-         await logActivity(user.id, 'project_updated', 'project', id, `Updated project`, { fields: Object.keys(project) });
+          await logActivity(user.id, 'project_updated', 'project', id, `Updated project`, { fields: Object.keys(project) });
 
-       } catch (e) {
-        logger.debug('Error updating project:', e);
-        toastManager.error(`Failed to update project ${id} (${Object.keys(project).length} fields): ${e.message}`);
-      }
+        } catch (e) {
+         logger.debug('Error updating project:', e);
+         toastManager.error(`Failed to update project ${id} (${Object.keys(project).length} fields): ${e.message}`);
+       }
    };
 
     export const deleteProject = async (id) => {
@@ -719,19 +727,21 @@ export const clearAllTasks = async () => {
           if (!user) throw new Error('User not authenticated');
 
            const pg = await getPg();
-            await pg.deleteProject(id);
-           logger.debug('Deleted project:', id);
+             await pg.deleteProject(id);
+            logger.debug('Deleted project:', id);
 
-            // Dispatch event to reset current project if it was deleted
-            window.dispatchEvent(new CustomEvent('projectDeleted', { detail: { projectId: id } }));
+            toastManager.success(`Project deleted successfully`);
 
-            // Log activity
-            await logActivity(user.id, 'project_deleted', 'project', id, `Deleted project`, {});
+             // Dispatch event to reset current project if it was deleted
+             window.dispatchEvent(new CustomEvent('projectDeleted', { detail: { projectId: id } }));
 
-         } catch (e) {
-          logger.debug('Error deleting project:', e);
-          toastManager.error(`Failed to delete project ${id}: ${e.message}`);
-        }
+             // Log activity
+             await logActivity(user.id, 'project_deleted', 'project', id, `Deleted project`, {});
+
+          } catch (e) {
+           logger.debug('Error deleting project:', e);
+           toastManager.error(`Failed to delete project ${id}: ${e.message}`);
+         }
     };
 
    export const deleteAllProjects = async () => {
@@ -1220,7 +1230,8 @@ export const getUserSubscription = async (userId) => {
   export const isSeeded = async () => {
     try {
       const pg = await getPg();
-      return await pg.isSeeded();
+      const result = await pg.query(`SELECT version FROM db_version WHERE version >= 2`);
+      return result.length > 0;
     } catch (e) {
       logger.debug('Error checking if seeded:', e);
       return false;
@@ -1246,8 +1257,30 @@ export const getUserSubscription = async (userId) => {
     try {
       logger.debug('Seeding initial data...');
 
-      // Seed packages (these are system-wide, not user-specific)
-      await seedPackages();
+      const currentVersion = 2;
+      const pg = await getPg();
+      // Initialize the database schema
+      await pg.initDatabase();
+      let version = 0;
+      try {
+        const res = await pg.query(`SELECT version FROM db_version`);
+        if (res.length > 0) version = res[0].version;
+      } catch (e) {}
+      if (version < currentVersion) {
+        logger.debug('Migrating database to version', currentVersion);
+        // Drop all tables in reverse order
+        const tables = ['db_version', 'projects', 'tasks', 'users', 'sessions', 'credits', 'billing', 'notifications', 'packages', 'user_subscriptions', 'profiles', 'groups', 'project_groups', 'user_activities', 'portfolio_invitations', 'portfolio_collaborators'];
+        for (const table of tables.reverse()) {
+          await pg.exec(`DROP TABLE IF EXISTS ${table}`);
+        }
+        version = 0;
+      }
+      if (version === 0) {
+        // Seed packages (these are system-wide, not user-specific)
+        await seedPackages();
+        // Insert version
+        await pg.exec(`INSERT INTO db_version (version) VALUES (${currentVersion})`);
+      }
 
       logger.debug('Initial data seeded successfully');
     } catch (e) {

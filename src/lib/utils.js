@@ -2,6 +2,12 @@ import { updateProject, addProject } from './db';
 
 import logger from './logger';
 
+export const extractProjectName = (text) => {
+  // Extract project name from LLM response text
+  const lines = text.split('\n').filter(line => line.trim());
+  return lines[0]?.trim() || 'New Project';
+};
+
 export const handleLLMProjectUpdate = async (
   prompt,
   extractProjectName,

@@ -2,7 +2,7 @@ import { createSignal, onMount, createEffect } from "solid-js";
 import { useNavigate } from "@solidjs/router";
 import { useUser } from "../../context/UserContext";
 import { useLanguage } from "../../hooks/useLanguage";
-import { getUserCredits, getUserCreditBalance, getProjects } from "../../lib/db";
+import { getUserCredits, getUserCreditBalance, getProjects, getUserById } from "../../lib/db";
 import { formatLocaleDate } from "../../lib/utils";
 import { toastManager } from "../../lib/feedback";
 import avatar from "../../assets/avatar.png";
@@ -13,7 +13,7 @@ import logger from "../../lib/logger.js";
 const Profile = () => {
   logger.trace('Profile: Starting');
   const navigate = useNavigate();
-  const { user, isAuthenticated, updateProfile, checkAuth } = useUser();
+   const { user, isAuthenticated, updateProfile, updatePreferences, checkAuth } = useUser();
   const { currentLang, t } = useLanguage();
   const [credits, setCredits] = createSignal([]);
   const [creditBalance, setCreditBalance] = createSignal(0);
@@ -23,10 +23,12 @@ const Profile = () => {
   const [avatarPreview, setAvatarPreview] = createSignal(null);
   const [uploadingAvatar, setUploadingAvatar] = createSignal(false);
   const [editingProfile, setEditingProfile] = createSignal(false);
-  const [profileForm, setProfileForm] = createSignal({
-    name: '',
-    bio: ''
-  });
+   const [profileForm, setProfileForm] = createSignal({
+     name: '',
+     bio: '',
+     location: '',
+     website: ''
+   });
 
   // Redirect if not authenticated
   createEffect(() => {
@@ -55,15 +57,29 @@ const Profile = () => {
         logger.error('Error loading credit balance:', e);
         setCreditBalance(0);
       }
-      try {
-        const userProjects = await getProjects(user().id);
-        setProjectsCount(userProjects.length);
-      } catch (e) {
-        logger.error('Error loading projects:', e);
-        setProjectsCount(0);
-      }
-      // Storage calculation disabled for PGLite only
-      setStorageUsed(0);
+        try {
+          const userProjects = await getProjects(user().id);
+          setProjectsCount(userProjects.length);
+          // Rough storage calculation: 10MB per project + base 5MB
+          setStorageUsed(userProjects.length * 10 + 5);
+        } catch (e) {
+          logger.error('Error loading projects:', e);
+          setProjectsCount(0);
+          setStorageUsed(5);
+        }
+        try {
+          const userData = await getUserById(user().id);
+          if (userData) {
+            setProfileForm({
+              name: userData.name || '',
+              bio: userData.bio || '',
+              location: userData.location || '',
+              website: userData.website || ''
+            });
+          }
+        } catch (e) {
+          logger.error('Error loading user data:', e);
+        }
     }
   });
 
@@ -108,42 +124,60 @@ const Profile = () => {
   };
 
   const uploadAvatar = async () => {
-    // Avatar upload disabled for PGLite only
-    toastManager.error('Avatar upload not available in local mode');
-  };
+     if (avatarPreview()) {
+       try {
+         await updateProfile({ avatar: avatarPreview() });
+         setAvatarFile(null);
+         setAvatarPreview(null);
+         toastManager.success('Avatar updated successfully');
+       } catch (error) {
+         logger.error('Avatar update error:', error);
+         toastManager.error('Failed to update avatar');
+       }
+     }
+   };
 
   const removeAvatar = async () => {
-    // Avatar removal disabled for PGLite only
-    toastManager.error('Avatar removal not available in local mode');
-  };
+     try {
+       await updateProfile({ avatar: avatar });
+       toastManager.success('Avatar removed successfully');
+     } catch (error) {
+       logger.error('Avatar remove error:', error);
+       toastManager.error('Failed to remove avatar');
+     }
+   };
 
   const saveProfile = async () => {
-    try {
-      const form = profileForm();
-      await updateProfile({
-        name: form.name.trim() || user().profile?.name,
-        bio: form.bio.trim()
-      });
-      setEditingProfile(false);
-      toastManager.success('Profile updated successfully');
-    } catch (error) {
-      logger.error('Profile update error:', error);
-      toastManager.error('Failed to update profile');
-    }
-  };
+     try {
+       const form = profileForm();
+       await updateProfile({
+         name: form.name.trim() || user().profile?.name,
+         bio: form.bio.trim(),
+         location: form.location.trim(),
+         website: form.website.trim()
+       });
+       setEditingProfile(false);
+       toastManager.success('Profile updated successfully');
+     } catch (error) {
+       logger.error('Profile update error:', error);
+       toastManager.error('Failed to update profile');
+     }
+   };
 
   const startEditing = () => {
-    setProfileForm({
-      name: user().profile?.name || '',
-      bio: user().profile?.bio || ''
-    });
-    setEditingProfile(true);
-  };
+     setProfileForm({
+       name: user().profile?.name || '',
+       bio: user().profile?.bio || '',
+       location: user().profile?.location || '',
+       website: user().profile?.website || ''
+     });
+     setEditingProfile(true);
+   };
 
   const cancelEditing = () => {
-    setEditingProfile(false);
-    setProfileForm({ name: '', bio: '' });
-  };
+     setEditingProfile(false);
+     setProfileForm({ name: '', bio: '', location: '', website: '' });
+   };
 
   return (
     <div class={`max-w-6xl mx-auto space-y-8 ${currentLang() === 'ar' ? 'rtl' : 'ltr'}`}>
@@ -337,15 +371,55 @@ const Profile = () => {
                        ></textarea>
                      </Show>
                    </div>
-                   <div>
-                     <label class="label">
-                       <span class="label-text font-medium">{t().memberSince}</span>
-                     </label>
-                     <div class="flex items-center gap-2 p-3 bg-base-200 rounded-lg">
-                       <i data-lucide="calendar" class="w-4 h-4 text-base-content/60"></i>
-                       <span>{formatDate(user().profile?.joinDate || user().created_at)}</span>
-                     </div>
-                   </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <label class="label">
+                          <span class="label-text font-medium">Location</span>
+                        </label>
+                        <Show when={editingProfile()} fallback={
+                          <div class="flex items-center gap-2 p-3 bg-base-200 rounded-lg">
+                            <i data-lucide="map-pin" class="w-4 h-4 text-base-content/60"></i>
+                            <span>{user().profile?.location || 'Not set'}</span>
+                          </div>
+                        }>
+                          <input
+                            type="text"
+                            class="input input-bordered w-full"
+                            placeholder="Enter your location"
+                            value={profileForm().location}
+                            onInput={(e) => setProfileForm(prev => ({ ...prev, location: e.target.value }))}
+                          />
+                        </Show>
+                      </div>
+                      <div>
+                        <label class="label">
+                          <span class="label-text font-medium">Website</span>
+                        </label>
+                        <Show when={editingProfile()} fallback={
+                          <div class="flex items-center gap-2 p-3 bg-base-200 rounded-lg">
+                            <i data-lucide="globe" class="w-4 h-4 text-base-content/60"></i>
+                            <span>{user().profile?.website ? <a href={user().profile.website} target="_blank" class="link link-primary">{user().profile.website}</a> : 'Not set'}</span>
+                          </div>
+                        }>
+                          <input
+                            type="url"
+                            class="input input-bordered w-full"
+                            placeholder="https://yourwebsite.com"
+                            value={profileForm().website}
+                            onInput={(e) => setProfileForm(prev => ({ ...prev, website: e.target.value }))}
+                          />
+                        </Show>
+                      </div>
+                    </div>
+                    <div>
+                      <label class="label">
+                        <span class="label-text font-medium">{t().memberSince}</span>
+                      </label>
+                      <div class="flex items-center gap-2 p-3 bg-base-200 rounded-lg">
+                        <i data-lucide="calendar" class="w-4 h-4 text-base-content/60"></i>
+                        <span>{formatDate(user().profile?.joinDate || user().created_at)}</span>
+                      </div>
+                    </div>
                    <Show when={editingProfile()}>
                      <div class="flex gap-2 pt-4">
                        <button
@@ -401,10 +475,57 @@ const Profile = () => {
             </div>
           </div>
 
-          {/* Right Column - Sidebar */}
-          <div class="space-y-6">
-            {/* Subscription Status */}
-            <div class="card bg-base-100 shadow-sm border border-base-200">
+           {/* Right Column - Sidebar */}
+           <div class="space-y-6">
+             {/* Privacy Settings */}
+             <div class="card bg-base-100 shadow-sm border border-base-200">
+               <div class="card-body">
+                 <h3 class="card-title">
+                   <i data-lucide="shield" class="w-5 h-5 mr-2"></i>
+                   Privacy Settings
+                 </h3>
+                 <div class="space-y-4">
+                   <div class="flex justify-between items-center">
+                     <span class="font-medium">Profile Visibility</span>
+                     <select
+                       class="select select-bordered select-sm"
+                       value={user().preferences?.privacy?.profileVisibility || 'private'}
+                       onChange={async (e) => {
+                         try {
+                           await updatePreferences({ privacy: { ...user().preferences.privacy, profileVisibility: e.target.value } });
+                           toastManager.success('Privacy settings updated');
+                         } catch (error) {
+                           toastManager.error('Failed to update privacy settings');
+                         }
+                       }}
+                     >
+                       <option value="public">Public</option>
+                       <option value="friends">Friends Only</option>
+                       <option value="private">Private</option>
+                     </select>
+                   </div>
+                   <div class="flex justify-between items-center">
+                     <span class="font-medium">Data Sharing</span>
+                     <input
+                       type="checkbox"
+                       class="toggle toggle-primary"
+                       checked={user().preferences?.privacy?.dataSharing || false}
+                       onChange={async (e) => {
+                         try {
+                           await updatePreferences({ privacy: { ...user().preferences.privacy, dataSharing: e.target.checked } });
+                           toastManager.success('Privacy settings updated');
+                         } catch (error) {
+                           toastManager.error('Failed to update privacy settings');
+                         }
+                       }}
+                     />
+                   </div>
+                 </div>
+               </div>
+             </div>
+
+             {/* Subscription Status */}
+             <div class="card bg-base-100 shadow-sm border border-base-200">
               <div class="card-body">
                 <h3 class="card-title">
                   <i data-lucide="credit-card" class="w-5 h-5 mr-2"></i>

@@ -15,10 +15,10 @@ const ProtectedRoute = (props) => {
     return true;
   });
 
-  // Show loading until auth is checked
-  if (!authChecked()) {
-    return <div class="flex justify-center items-center h-screen"><div class="loading loading-spinner loading-lg"></div></div>;
-  }
+  // Auth check is handled asynchronously but don't block with loading
+  // if (!authChecked()) {
+  //   return <div class="flex justify-center items-center h-screen"><div class="loading loading-spinner loading-lg"></div></div>;
+  // }
 
   // Check authentication status after check is done
   const auth = isAuthenticated();

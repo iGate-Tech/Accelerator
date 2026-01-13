@@ -184,7 +184,7 @@ app.get('/api/health', async (req, res) => {
 });
 
 // LLM API Route
-app.post('/api/llm/stream', async (req, res) => {
+app.post('/api/llm', async (req, res) => {
     const prompt = req.body.prompt || 'Hello';
     const startTime = Date.now();
 
@@ -260,12 +260,12 @@ STYLE
 Do NOT repeat the prompt. Treat the user input as a task and deliver a complete Markdown response.
 `;
 
-        logger.debug('server.js: Creating OpenAI stream with model:', AI_MODEL, 'systemPrompt length:', systemPrompt.length, 'userMessage length:', userMessage.length);
+        logger.debug('server.js: Creating OpenAI stream with model:', AI_MODEL, 'systemPrompt length:', systemPrompt.length, 'prompt length:', prompt.length);
         const stream = await openai.chat.completions.create({
             model: AI_MODEL,
             messages: [
                 { role: 'system', content: systemPrompt },
-                { role: 'user', content: userMessage }
+                { role: 'user', content: prompt }
             ],
             stream: true,
         });

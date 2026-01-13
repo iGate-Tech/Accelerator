@@ -116,8 +116,22 @@ const AgentInterface = (props) => {
     };
 
     const userName = () => {
-        const name = user()?.profile?.name;
-        return name ? name.split(" ").map((word) => word.charAt(0).toUpperCase() + word.slice(1)).join(" ") : "";
+        try {
+            const userData = user ? user() : null;
+            const name = userData?.profile?.name;
+            if (name) {
+                return name.split(" ").map((word) => word.charAt(0).toUpperCase() + word.slice(1)).join(" ");
+            }
+            // Fallback to email or "User"
+            const email = userData?.email;
+            if (email) {
+                return email.split("@")[0]; // Username part of email
+            }
+            return "User";
+        } catch (error) {
+            logger.error("Error getting user name:", error);
+            return "User";
+        }
     };
 
     // Button hover animations
@@ -144,10 +158,25 @@ const AgentInterface = (props) => {
     const handleTextareaBlur = () => { // Handle textarea blur if needed
     };
 
-    return (
-   
+    // Show loading state if essential data is not ready
+    const isLoading = () => {
+        if (!props.currentProjectId()) return false; // No loading when no project selected
+        return !props.machineStore || !props.tasksList || currentLang() === undefined;
+    };
 
-            <div id="agentBox"
+    if (isLoading()) {
+        return (
+            <div id="agentBox" class="flex flex-col rounded-lg mx-auto max-w-6xl">
+                <div class="flex items-center justify-center h-64">
+                    <div class="loading loading-spinner loading-lg text-primary"></div>
+                    <span class="ml-4 text-lg">Initializing agent interface...</span>
+                </div>
+            </div>
+        );
+    }
+
+    return (
+        <div id="agentBox"
                 class={
                     `${
                         props.agentBoxClass()
@@ -158,13 +187,13 @@ const AgentInterface = (props) => {
 
                 <div id="agentContent"
                     class={
-                        props.agentContentClass()
+                        props.agentContentClass ? props.agentContentClass() : ""
                 }>
                     <div class="flex flex-col gap-4">
                         <div ref={greetingRef}
                             id="greetingDiv"
                             class={
-                                props.greetingClass()
+                                props.greetingClass ? props.greetingClass() : ""
                         }>
                             <h1 class="text-2xl sm:text-3xl md:text-4xl font-sans font-light mb-2 sm:mb-2">
                                 <span class="text-base-content">
@@ -187,9 +216,9 @@ const AgentInterface = (props) => {
                             onMouseEnter={handleCardHover}
                             onMouseLeave={handleCardLeave}>
                             <div class="card-body relative p-4 !gap-0">
-                                 <Show when={
-                                     props.currentProjectId() !== null && (props.tasksList().length > 0 || props.machineStore.state === "processing")
-                                 }>
+                                  <Show when={
+                                      props.currentProjectId && props.currentProjectId() !== null && props.tasksList && (props.tasksList().length > 0 || (props.machineStore && props.machineStore.state === "processing"))
+                                  }>
                                     <ProgressAccordion machineStore={
                                             props.machineStore
                                         }
@@ -213,7 +242,7 @@ const AgentInterface = (props) => {
                                         }/>
                                  </Show>
                                  {/* Form */}
-                                 <Show when={props.tasksList().length === 0}>
+                                  <Show when={props.tasksList && props.tasksList().length === 0}>
                                      <form id="taskForm">
                                     <input type="hidden" name="action" id="action" value="send"/>
                                     <input type="hidden" name="taskContent" value=""/>
@@ -234,9 +263,9 @@ const AgentInterface = (props) => {
                                             placeholder={
                                                 t().placeholder
                                             }
-                                            value={
-                                                props.prompt()
-                                            }
+                                             value={
+                                                 props.prompt ? props.prompt() : ""
+                                             }
                                             onInput={
                                                 (e) => {
                                                     props.setPrompt(e.target.value);
@@ -249,37 +278,44 @@ const AgentInterface = (props) => {
                                             onBlur={handleTextareaBlur}
                                             onKeyDown={
                                                 (e) => {
-                                                    if (e.key === "Enter" && !e.shiftKey) {
-                                                        e.preventDefault();
-                                                        if (props.machineStore.state === "idle") {
-                                                            handleButtonPress(e.target.closest("form").querySelector('button[type="button"]:last-child'),);
-                                                            props.handleStart();
-                                                        }
-                                                    }
+                                                     if (e.key === "Enter" && !e.shiftKey) {
+                                                         e.preventDefault();
+                                                         if (props.machineStore && props.machineStore.state === "idle") {
+                                                             handleButtonPress(e.target.closest("form").querySelector('button[type="button"]:last-child'),);
+                                                             props.handleStart && props.handleStart();
+                                                         }
+                                                     }
                                                 }
                                             }
-                                            disabled={
-                                                props.machineStore.state !== "idle"
-                                        }></textarea>
-                                <Show when={
-                                    props.machineStore.state === "pause"
-                                }>
-                                    <div class="text-warning text-sm mt-2">
-                                        {
-                                        t().agentPaused
-                                    }</div>
-                                </Show>
+                                             disabled={
+                                                 props.machineStore ? props.machineStore.state !== "idle" : true
+                                         }></textarea>
+                                  <Show when={
+                                      props.machineStore && props.machineStore.state === "pause"
+                                  }>
+                                     <div class="text-warning text-sm mt-2">
+                                         {
+                                         t().agentPaused
+                                     }</div>
+                                 </Show>
+                                 <Show when={
+                                     props.machineStore && props.machineStore.state === "error"
+                                 }>
+                                     <div class="text-error text-sm mt-2">
+                                         Processing error: {props.machineStore.context?.uiMessage || 'Unknown error occurred'}
+                                     </div>
+                                 </Show>
                                 <div ref={buttonsRef}
                                     class="flex justify-between items-center mt-2">
                                     <div class="flex gap-2">
                                         <Show when={
-                                            props.machineStore.state === "idle"
+                                            props.machineStore && props.machineStore.state === "idle"
                                         }>
                                             <button type="button"
                                                 onClick={
                                                     (e) => {
                                                         handleButtonPress(e.currentTarget);
-                                                        props.handleImprove();
+                                                        props.handleImprove && props.handleImprove();
                                                     }
                                                 }
                                                 onMouseEnter={
@@ -318,17 +354,17 @@ const AgentInterface = (props) => {
                                             </button>
                                         </Show>
                                     </div>
-                                    <div class="flex gap-2">
-                                        <Show when={
-                                            props.machineStore.state === "idle"
-                                        }>
-                                            <button type="button"
-                                                onClick={
-                                                    (e) => {
-                                                        handleButtonPress(e.currentTarget);
-                                                        props.handleReset();
-                                                    }
-                                                }
+                                     <div class="flex gap-2">
+                                         <Show when={
+                                             props.machineStore && props.machineStore.state === "idle"
+                                         }>
+                                             <button type="button"
+                                                 onClick={
+                                                     (e) => {
+                                                         handleButtonPress(e.currentTarget);
+                                                         props.handleReset && props.handleReset();
+                                                     }
+                                                 }
                                                 onMouseEnter={
                                                     (e) => handleButtonHover(e.currentTarget)
                                                 }
@@ -343,12 +379,12 @@ const AgentInterface = (props) => {
                                                 }</span>
                                             </button>
                                             <button type="button"
-                                                onClick={
-                                                    (e) => {
-                                                        handleButtonPress(e.currentTarget);
-                                                        props.handleStart();
-                                                    }
-                                                }
+                                                 onClick={
+                                                     (e) => {
+                                                         handleButtonPress(e.currentTarget);
+                                                         props.handleStart && props.handleStart();
+                                                     }
+                                                 }
                                                 onMouseEnter={
                                                     (e) => handleButtonHover(e.currentTarget)
                                                 }

@@ -2,6 +2,8 @@ import { PGlite } from '@electric-sql/pglite';
 import { v4 as uuidv4 } from 'uuid';
 
 // -----------------------------------------------------------------------------
+// PGLite is loaded globally from index.html
+// -----------------------------------------------------------------------------
 // Global DB Instance and Pending Requests Map
 // -----------------------------------------------------------------------------
 let dbInstance = null;
@@ -25,35 +27,23 @@ self.onunhandledrejection = (event) => {
 };
 
 // -----------------------------------------------------------------------------
-// Database Worker Class with All Operations
+// Database Worker
 // -----------------------------------------------------------------------------
 const DatabaseWorker = {
-  // ---------------------------------------------------------------------------
-  // Initialization
-  // ---------------------------------------------------------------------------
-  async initDatabase(options = {}) {
-    console.log('initDatabase called with options:', options);
-
-    try {
-      console.log('Creating PGLite database instance...');
-      dbInstance = new PGlite(options.dataDir || 'idb://accelerator-db-v22');
-      console.log('PGLite database instance created successfully');
-    } catch (error) {
-      console.error('Failed to create PGLite instance:', error);
-      throw error;
-    }
-
-    // Always ensure schema exists (CREATE IF NOT EXISTS will handle duplicates)
-    console.debug('[DB Worker] Ensuring database schema exists...');
-
-    // Full Schema - Create if not exists for faster init
-    try {
-      console.log('Creating database schema...');
-      // Create tables one by one
-      console.log('Creating users table...');
-      await dbInstance.exec("CREATE TABLE IF NOT EXISTS users (id TEXT PRIMARY KEY, email TEXT UNIQUE NOT NULL, password_hash TEXT, avatar TEXT DEFAULT '/src/assets/avatar.png', bio TEXT, preferences TEXT, synced_at TEXT, last_modified TEXT, sync_status TEXT DEFAULT 'local', deleted_at TEXT, version INTEGER DEFAULT 1)");
-      console.log('Users table created');
-      await dbInstance.exec(`
+  // Helper function to create database schema
+  async createSchema() {
+    console.log('Creating database schema...');
+    // Create db_version table first
+    await dbInstance.exec(`
+      CREATE TABLE IF NOT EXISTS db_version (
+        version INTEGER PRIMARY KEY
+      );
+    `);
+    // Create tables one by one
+    console.log('Creating users table...');
+    await dbInstance.exec("CREATE TABLE IF NOT EXISTS users (id TEXT PRIMARY KEY, email TEXT UNIQUE NOT NULL, password_hash TEXT, avatar TEXT DEFAULT '/src/assets/avatar.png', bio TEXT, preferences TEXT, synced_at TEXT, last_modified TEXT, sync_status TEXT DEFAULT 'local', deleted_at TEXT, version INTEGER DEFAULT 1)");
+    console.log('Users table created');
+    await dbInstance.exec(`
 -- Projects table
 CREATE TABLE IF NOT EXISTS projects (
   id TEXT PRIMARY KEY,
@@ -302,14 +292,78 @@ CREATE TABLE IF NOT EXISTS project_votes (
   vote_type TEXT NOT NULL,
   created_at TEXT DEFAULT CURRENT_TIMESTAMP
 );
-      `);
-       console.log('Database schema created successfully');
-       console.debug('Database schema initialized successfully');
-    } catch (schemaError) {
-      console.error('Failed to initialize database schema:', schemaError);
-      throw schemaError;
+    `);
+    console.log('Database schema created successfully');
+    console.debug('Database schema initialized successfully');
+  },
+  // ---------------------------------------------------------------------------
+  // Initialization
+  // ---------------------------------------------------------------------------
+  async initDatabase(options = {}) {
+    console.log('initDatabase called with options:', options);
+
+    // Always ensure schema exists (CREATE IF NOT EXISTS will handle duplicates)
+    console.debug('[DB Worker] Ensuring database schema exists...');
+
+    let usePersistence = true;
+
+    // Test IndexedDB access before attempting PGLite
+    let indexedDBAvailable = false;
+    try {
+      console.log('Testing IndexedDB access...');
+      const testDB = indexedDB.open('test-db-access', 1);
+      await new Promise((resolve, reject) => {
+        testDB.onsuccess = () => {
+          testDB.result.close();
+          indexedDB.deleteDatabase('test-db-access');
+          console.log('IndexedDB access test: PASSED');
+          indexedDBAvailable = true;
+          resolve();
+        };
+        testDB.onerror = () => {
+          console.log('IndexedDB access test: FAILED');
+          reject(new Error('IndexedDB not accessible'));
+        };
+        testDB.onblocked = () => {
+          console.log('IndexedDB access test: BLOCKED');
+          reject(new Error('IndexedDB blocked'));
+        };
+      });
+    } catch (testError) {
+      console.warn('IndexedDB test failed:', testError.message);
     }
-    return { success: true };
+
+    try {
+      if (indexedDBAvailable) {
+        console.log('Creating PGLite database instance with persistence...');
+        dbInstance = new PGlite(options.dataDir, { relaxedDurability: true });
+        console.log('PGLite database instance created successfully');
+        await this.createSchema();
+        usePersistence = true;
+      } else {
+        throw new Error('IndexedDB not available');
+      }
+    } catch (error) {
+      console.error('Failed to initialize database with persistence:', {
+        name: error.name,
+        message: error.message,
+        stack: error.stack
+      });
+      console.warn('IndexedDB not available, falling back to in-memory database');
+      usePersistence = false;
+      try {
+        console.log('Creating PGLite database instance in-memory...');
+        dbInstance = new PGlite();
+        console.log('PGLite in-memory database instance created successfully');
+        await this.createSchema();
+      } catch (fallbackError) {
+        console.error('Failed to initialize in-memory database:', fallbackError);
+        throw fallbackError;
+      }
+    }
+
+    console.log(`Database initialized successfully (${usePersistence ? 'persistent' : 'in-memory'})`);
+    return { success: true, persistent: usePersistence };
   },
 
   // ---------------------------------------------------------------------------
@@ -498,166 +552,138 @@ CREATE TABLE IF NOT EXISTS project_votes (
   async createProject({ project, userId }) {
     try {
       const id = uuidv4();
-      const res = await dbInstance.query(`
-        INSERT INTO projects (id, name, description, user_id, created_at, last_modified, synced_at, sync_status, deleted_at, version, public, current_model, total_steps, completed_steps, consumed_credits, total_credits, ui_status)
-        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17)
-        RETURNING *
-      `, [
-        id,
-        project.name,
-        project.description,
-        userId,
-        new Date().toISOString(),
-        new Date().toISOString(),
-        new Date().toISOString(),
-        'local',
-        null,
-        1,
-        Boolean(project.public) || false,
-        project.currentModel || null,
-        Number(project.totalSteps) || 51,
-        Number(project.completedSteps) || 0,
-        Number(project.consumedCredits) || 0,
-        Number(project.totalCredits) || 100,
-        project.uiStatus || 'idle'
-      ]);
-      return res.rows[0];
-    } catch (err) {
-      console.error('Error creating project:', err);
-      throw err;
-    }
-  },
-
-  async getProjects({ userId = null }) {
-    try {
-      console.debug('Worker getProjects userId:', userId, 'type:', typeof userId);
-      if (!userId) {
-        throw new Error('userId required for getProjects');
-      }
-       const res = await dbInstance.query('SELECT * FROM projects WHERE user_id = $1 ORDER BY id DESC', [userId]);
-      return res.rows;
-    } catch (err) {
-      console.error('Error in worker getProjects:', err);
-      return [];
-    }
-  },
-
-   async getProjectById({ id }) {
-     try {
-       const res = await dbInstance.query('SELECT * FROM projects WHERE id = $1', [id]);
-       return res.rows[0];
-     } catch (err) {
-       console.error('Error loading project:', err);
-       return null;
-     }
-   },
-
-  async updateProject({ id, project }) {
-    console.debug('Worker updateProject called with id:', id, 'project:', project);
-
-    // Validate parameters
-    if (!id) throw new Error('Project ID is required in worker');
-    if (!project || typeof project !== 'object') throw new Error('Project data must be an object in worker');
-
-    try {
-      const result = await this.updateEntity({ table: 'projects', idField: 'id', id, updates: project });
-      if (!result.success) {
-        throw new Error(result.error);
-      }
-      return result.data;
-    } catch (err) {
-      console.error('Error updating project:', err);
-      throw err;
-    }
-  },
-
-  async deleteProject({ id }) {
-    try {
-       // First delete all associated tasks
-       await dbInstance.query('DELETE FROM tasks WHERE project_id = $1', [id]);
-       // Then delete the project
-       await dbInstance.query('DELETE FROM projects WHERE id = $1', [id]);
-      return { success: true };
-    } catch (err) {
-      console.error('Error deleting project:', err);
-      throw err;
-    }
-  },
-
-  async deleteAllProjects() {
-    try {
-      // First delete all tasks
-      await dbInstance.query('DELETE FROM tasks');
-      // Then delete all projects
-      await dbInstance.query('DELETE FROM projects');
-      return { success: true };
-    } catch (err) {
-      console.error('Error deleting all projects:', err);
-      throw err;
-    }
-  },
-
-  async toggleProjectPublic({ projectId, isPublic }) {
-    try {
-      const result = await this.updateEntity({ table: 'projects', idField: 'id', id: projectId, updates: { public: isPublic } });
-      if (!result.success) {
-        throw new Error(result.error);
-      }
-      return result;
-    } catch (err) {
-      console.error('Error toggling project public status:', err);
-      throw err;
-    }
-  },
-
-  // ---------------------------------------------------------------------------
-  // Task Operations
-  // ---------------------------------------------------------------------------
-  async getTasks({ project_id = null, userId = null }) {
-    try {
-      // Only return tasks if a project is selected
-      if (!project_id) {
-        return [];
-      }
-
-      let query = 'SELECT * FROM tasks';
-      let params = [];
-      const conditions = [];
-      conditions.push(`project_id = $${params.length + 1}`);
-      params.push(project_id);
-      if (userId) {
-        conditions.push(`user_id = $${params.length + 1}`);
-        params.push(userId);
-      }
-      query += ' WHERE ' + conditions.join(' AND ');
-       query += ' ORDER BY created_at DESC';
-      const res = await dbInstance.query(query, params);
-      return res.rows;
-    } catch (err) {
-      console.error('DB error in getTasks:', err);
-      return [];
-    }
-  },
-
-  async addTask({ task, project_id, userId }) {
-    try {
-      const id = uuidv4();
-        await dbInstance.query(
-          `INSERT INTO tasks
-          (id, user_id, project_id, content, prompt, llm_response, model, section, step_name, created_at, synced_at, last_modified, sync_status, deleted_at, version)
-          VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15)`,
-          [id, userId, project_id, task.content, task.prompt || null, null, task.model || null, task.section || null, task.stepName || null, task.timestamp || new Date().toISOString(), new Date().toISOString(), new Date().toISOString(), 'local', null, 1]
-        );
+       const totalSteps = parseInt(project.totalSteps, 10);
+       const completedSteps = parseInt(project.completedSteps, 10);
+       const consumedCredits = parseInt(project.consumedCredits, 10);
+       const totalCredits = parseInt(project.totalCredits, 10);
+        const values = [
+          id,
+          project.name,
+          project.description,
+          userId,
+          new Date().toISOString(),
+          new Date().toISOString(),
+          new Date().toISOString(),
+          'local',
+          null,
+          1,
+          project.public ? 1 : 0,
+          project.currentModel || null,
+          isNaN(totalSteps) ? 51 : totalSteps,
+          isNaN(completedSteps) ? 0 : completedSteps,
+          isNaN(consumedCredits) ? 0 : consumedCredits,
+          isNaN(totalCredits) ? 100 : totalCredits,
+          project.uiStatus || 'idle'
+        ];
+       console.log('Insert values:', values);
+        const res = await dbInstance.query(`
+          INSERT INTO projects (id, name, description, user_id, created_at, last_modified, synced_at, sync_status, deleted_at, version, public, current_model, total_steps, completed_steps, consumed_credits, total_credits, ui_status)
+          VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17)
+          RETURNING *
+        `, values);
       return { success: true };
     } catch (err) {
       console.error('DB error in addTask:', err);
       throw err;
     }
-  },
+   },
 
-  // ---------------------------------------------------------------------------
-  // Group Operations
-  // ---------------------------------------------------------------------------
+   async getProjectById({ id }) {
+     try {
+       const result = await dbInstance.query('SELECT * FROM projects WHERE id = $1', [id]);
+       return result.rows[0] || null;
+     } catch (err) {
+       console.error('Error getting project by id:', err);
+       return null;
+     }
+   },
+
+   async updateProject({ id, updates }) {
+     try {
+       const fields = Object.keys(updates);
+       const values = Object.values(updates);
+       const setClause = fields.map((field, index) => `${field} = $${index + 2}`).join(', ');
+       values.push(id);
+       await dbInstance.query(`UPDATE projects SET ${setClause}, last_modified = CURRENT_TIMESTAMP WHERE id = $${values.length}`, values);
+       return { success: true };
+     } catch (err) {
+       console.error('Error updating project:', err);
+       throw err;
+     }
+   },
+
+   async deleteProject({ id }) {
+     try {
+       await dbInstance.query('DELETE FROM projects WHERE id = $1', [id]);
+       return { success: true };
+     } catch (err) {
+       console.error('Error deleting project:', err);
+       throw err;
+     }
+   },
+
+   async deleteAllProjects({ userId }) {
+     try {
+       await dbInstance.query('DELETE FROM projects WHERE user_id = $1', [userId]);
+       return { success: true };
+     } catch (err) {
+       console.error('Error deleting all projects:', err);
+       throw err;
+     }
+   },
+
+   async toggleProjectPublic({ id }) {
+     try {
+       await dbInstance.query('UPDATE projects SET public = NOT public WHERE id = $1', [id]);
+       return { success: true };
+     } catch (err) {
+       console.error('Error toggling project public:', err);
+       throw err;
+     }
+    },
+
+   async getTasks({ projectId }) {
+     try {
+       const result = await dbInstance.query('SELECT * FROM tasks WHERE project_id = $1 ORDER BY created_at DESC', [projectId]);
+       return result.rows;
+     } catch (err) {
+       console.error('Error getting tasks:', err);
+       return [];
+     }
+   },
+
+   async addTask({ task }) {
+     try {
+       const id = uuidv4();
+       await dbInstance.query(`
+         INSERT INTO tasks (id, project_id, content, prompt, llm_response, model, section, step_name, created_at, last_modified, synced_at, sync_status, deleted_at, version)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)
+       `, [
+         id,
+         task.projectId,
+         task.content || null,
+         task.prompt || null,
+         task.llmResponse || null,
+         task.model || null,
+         task.section || null,
+         task.stepName || null,
+         new Date().toISOString(),
+         new Date().toISOString(),
+         new Date().toISOString(),
+         'local',
+         null,
+         1
+       ]);
+       return { success: true };
+     } catch (err) {
+       console.error('Error adding task:', err);
+       throw err;
+     }
+   },
+
+    // ---------------------------------------------------------------------------
+    // Group Operations
+    // ---------------------------------------------------------------------------
    async getGroups({ userId = null }) {
      const whereClause = userId ? 'WHERE user_id = $1' : '';
      const params = userId ? [userId] : [];
@@ -766,6 +792,16 @@ CREATE TABLE IF NOT EXISTS project_votes (
       return result.rows;
     } catch (err) {
       console.error('Error getting ungrouped projects:', err);
+      return [];
+    }
+  },
+
+  async getProjects({ userId }) {
+    try {
+      const result = await dbInstance.query('SELECT * FROM projects WHERE user_id = $1::text ORDER BY created_at DESC', [userId]);
+      return result.rows;
+    } catch (err) {
+      console.error('Error getting projects:', err);
       return [];
     }
   },

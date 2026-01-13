@@ -1,8 +1,8 @@
 // Simple logger wrapper
 const logger = {
-  trace: (...args) => console.log('[TRACE]', ...args),
-  debug: (...args) => console.log('[DEBUG]', ...args),
-  info: (...args) => console.log('[INFO]', ...args),
+  trace: () => {},
+  debug: () => {},
+  info: () => {},
   warn: (...args) => {
     console.warn('[WARN]', ...args);
     // Send warnings to Sentry if available

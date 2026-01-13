@@ -45,6 +45,7 @@ const AgentInterface = (props) => { // Defensive checks for required props
     };
 
     const [currentLang, setCurrentLang] = createSignal(lang ? lang() : 'en');
+    const [currentProject, setCurrentProject] = createSignal(null);
 
     // Animation refs
     let greetingRef;
@@ -65,6 +66,14 @@ const AgentInterface = (props) => { // Defensive checks for required props
 
     createEffect(() => {
         setCurrentLang(lang());
+    });
+
+    createEffect(() => {
+        if (props.projectData) {
+            setCurrentProject(props.projectData());
+        } else {
+            setCurrentProject(null);
+        }
     });
 
     // Auto-resize textarea when prompt changes

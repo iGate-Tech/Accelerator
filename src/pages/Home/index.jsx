@@ -602,7 +602,7 @@ const TasksContent = () => {
     return (
         <RouteGuard requireAuth={true}>
             <div class={`relative flex flex-col justify-center h-[calc(100vh-4rem)] items-center ${currentLang() === 'ar' ? 'rtl' : 'ltr'}`}>
-              <AgentInterface agentBoxClass={agentBoxClass} currentProjectId={currentProjectId}
+              <AgentInterface key={currentProjectId()} agentBoxClass={agentBoxClass} currentProjectId={currentProjectId}
                  agentContentClass={agentContentClass}
                  greetingClass={greetingClass}
                  cardRef={cardRef}

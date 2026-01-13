@@ -93,8 +93,7 @@ const AgentInterface = (props) => { // Defensive checks for required props
 
     });
 
-    // Use project data passed as prop instead of fetching
-    const currentProject = () => props.projectData ? props.projectData() : null;
+
 
     // Animate state changes
     createEffect(() => {

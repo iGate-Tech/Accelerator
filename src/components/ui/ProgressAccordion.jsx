@@ -117,13 +117,13 @@ const ProgressAccordion = (props) => {
         </div>
       </div>
       <div class="flex items-center gap-2 ml-4">
-        <progress
-          id="agent-progress"
-          class="progress progress-primary w-32 h-2"
-          value={props.machineStore.context.uiProgress}
-          max="100"
-        ></progress>
-        <span class="badge badge-primary badge-xs">{props.machineStore.context.completedSteps} / 51 Complete</span>
+         <progress
+           id="agent-progress"
+           class="progress progress-primary w-32 h-2"
+           value={isFinite(props.machineStore.context.uiProgress) ? props.machineStore.context.uiProgress : 0}
+           max="100"
+         ></progress>
+        <span class="badge badge-primary badge-xs">{props.machineStore.context.completedSteps || 0} / 51 Complete</span>
         <div class="flex gap-2">
           <Show when={props.machineStore.state === 'processing'}>
             <button type="button" onClick={props.handlePause} class="bg-warning/10 text-warning px-3 py-1 rounded-full flex items-center gap-1 text-xs hover:bg-warning/20 transition cursor-pointer">

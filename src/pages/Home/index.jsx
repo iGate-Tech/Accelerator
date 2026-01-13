@@ -365,9 +365,12 @@ const TasksContent = () => {
                    totalTime: project.totalTime,
                    consumedTime: project.consumedTime
                  };
-                 setMachineStore('context', { ...initialContext, ...contextFromDB });
-                  // Set machine state: use saved state or default to idle for new projects
-                  setMachineStore("state", project.uiStatus || "idle");
+                  console.log('Home: setting machine context', { ...initialContext, ...contextFromDB });
+                  setMachineStore('context', { ...initialContext, ...contextFromDB });
+                   // Set machine state: use saved state or default to idle for new projects
+                   const newState = project.uiStatus || "idle";
+                   console.log('Home: setting machine state to', newState);
+                   setMachineStore("state", newState);
         }
       });
 
@@ -377,7 +380,10 @@ const TasksContent = () => {
         if (project && typeof project === 'object') {
           // Refetch tasks for the opened project
           (async () => {
+            console.log('Home: refetching tasks for project', project.id);
             await refetch();
+            const currentTasks = tasks();
+            console.log('Home: tasks after refetch', currentTasks);
             logger.debug('Opened project', project.id, 'with context:', machineStore.context);
             logger.debug('Project tasks_list:', project.tasks_list);
 

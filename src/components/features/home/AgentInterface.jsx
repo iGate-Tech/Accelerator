@@ -47,6 +47,10 @@ const AgentInterface = (props) => { // Defensive checks for required props
     const [currentLang, setCurrentLang] = createSignal(lang ? lang() : 'en');
     const [currentProject, setCurrentProject] = createSignal(null);
 
+    createEffect(() => {
+        console.log('AgentInterface: currentProject signal changed', currentProject());
+    });
+
     // Animation refs
     let greetingRef;
     let cardRef;
@@ -70,8 +74,11 @@ const AgentInterface = (props) => { // Defensive checks for required props
 
     createEffect(() => {
         if (props.projectData) {
-            setCurrentProject(props.projectData());
+            const proj = props.projectData();
+            console.log('AgentInterface: setting currentProject', proj);
+            setCurrentProject(proj);
         } else {
+            console.log('AgentInterface: setting currentProject to null');
             setCurrentProject(null);
         }
     });

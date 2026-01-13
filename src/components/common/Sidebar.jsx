@@ -3,7 +3,7 @@ import { useContext, onMount, createSignal, createEffect, For, Show, createMemo 
 import { LangContext } from "../../context/LangContext";
 import { useUser } from "../../context/UserContext";
 import { translations } from "../../assets/translations/translations-index.js";
-import { getProjects, updateProject, deleteProject, deleteAllProjects, exportAllProjects, exportProject, exportReports } from "../../lib/db";
+import { getProjects, updateProject, deleteProject, deleteAllProjects, exportAllProjects, exportAllData, exportProject, exportReports } from "../../lib/db";
 // Removed sync imports
 import { toastManager } from "../../lib/feedback";
 import logger from "../../lib/logger.js";
@@ -79,10 +79,12 @@ const Sidebar = () => {
         break;
 
       case 'delete':
-        toastManager.warning(t().delete + ' "' + project.name + '"');
-        await deleteProject(projectId);
-        window.dispatchEvent(new CustomEvent('projectDeleted', { detail: { projectId } }));
-        await loadProjects();
+        if (window.confirm(t().delete + ' "' + project.name + '"?')) {
+          await deleteProject(projectId);
+          window.dispatchEvent(new CustomEvent('projectDeleted', { detail: { projectId } }));
+          toastManager.success(t().delete + ' ' + t().successful);
+          await loadProjects();
+        }
         break;
 
       case 'open':
@@ -95,10 +97,11 @@ const Sidebar = () => {
   };
 
   const handleDeleteAllProjects = async () => {
-    const message = t().deleteAllProjects;
-    toastManager.warning(message);
-    await deleteAllProjects();
-    await loadProjects();
+    if (window.confirm(t().deleteAllProjects + '?')) {
+      await deleteAllProjects();
+      toastManager.success(t().deleteAllProjects + ' ' + t().successful);
+      await loadProjects();
+    }
   };
 
   const handleExportAllProjects = async () => {
@@ -234,7 +237,7 @@ const Sidebar = () => {
                   </a>
                 </li>
                 <li>
-                  <a onclick={() => toastManager.info(t().backupAllData + ' - ' + 'Coming soon!')} class="flex items-center gap-2">
+                  <a onclick={async () => { try { const data = await exportAllData(currentUser?.id); downloadJSON(data, 'all_data_backup.json'); toastManager.success(t().backupAllData + ' ' + t().successful); } catch (error) { toastManager.error(t().backupAllData + ' ' + t().failed); } }} class="flex items-center gap-2">
                     <i data-lucide="archive" class="w-4 h-4"></i>
                     {t().backupAllData}
                   </a>

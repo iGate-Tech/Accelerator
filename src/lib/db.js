@@ -282,6 +282,26 @@ export const exportAllProjects = async (userId = null) => {
   return await _exportAllProjects({ userId });
 };
 
+export const exportAllData = async (userId = null) => {
+  if (!userId) {
+    const user = await getCurrentUser();
+    userId = user?.id;
+  }
+  if (!userId) return null;
+  try {
+    const projects = await exportAllProjects(userId);
+    // Add other data as needed
+    return {
+      projects: projects?.data || [],
+      exportedAt: new Date().toISOString(),
+      userId
+    };
+  } catch (error) {
+    console.error('Export all data failed:', error);
+    throw error;
+  }
+};
+
 export const exportProject = async (projectId) => {
   try {
     const project = await getProjectById(projectId);

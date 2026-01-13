@@ -172,9 +172,12 @@ const TasksContent = () => {
         setMachineStore('context', initialContext);
     };
     const handleStart = async () => {
+        console.log('HandleStart: starting process');
         setAutoProgress(true);
         await handleLLMProjectUpdate(prompt(), extractProjectName, currentProjectId, setCurrentProjectId, setPrompt, setStreamingContent);
+        console.log('HandleStart: after LLMProjectUpdate, starting process');
         startProcess();
+        console.log('HandleStart: process started, state:', machineStore.state, 'autoProgress:', autoProgress());
     };
     const handlePause = () => {
         pause();
@@ -517,7 +520,9 @@ const TasksContent = () => {
     });
 
     createEffect(() => {
+        console.log('CreateEffect: autoProgress:', autoProgress(), 'isLoading:', isLoading(), 'state:', machineStore.state);
         if (autoProgress() && !isLoading() && machineStore.state === 'processing') {
+            console.log('CreateEffect: calling handleLLMCall with prompt:', machineStore.context.currentPrompt);
             setAutoProgress(false);
             handleLLMCall(machineStore.context.currentPrompt);
         }

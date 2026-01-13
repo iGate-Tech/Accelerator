@@ -9,8 +9,8 @@
 -- PROJECTS
 -- =========================================================
 CREATE TABLE projects (
-  id BIGSERIAL PRIMARY KEY,
-  user_id UUID NOT NULL,
+  id TEXT PRIMARY KEY,
+  user_id TEXT NOT NULL,
 
   name TEXT NOT NULL,
   description TEXT,
@@ -47,9 +47,9 @@ CREATE TABLE projects (
 -- TASKS
 -- =========================================================
 CREATE TABLE tasks (
-  id BIGSERIAL PRIMARY KEY,
-  user_id UUID NOT NULL,
-  project_id BIGINT NOT NULL,
+  id TEXT PRIMARY KEY,
+  user_id TEXT NOT NULL,
+  project_id TEXT NOT NULL,
 
   content TEXT,
   prompt TEXT,
@@ -71,8 +71,8 @@ CREATE TABLE tasks (
 -- GROUPS / PORTFOLIOS
 -- =========================================================
 CREATE TABLE groups (
-  id BIGSERIAL PRIMARY KEY,
-  user_id UUID NOT NULL,
+  id TEXT PRIMARY KEY,
+  user_id TEXT NOT NULL,
 
   name TEXT NOT NULL,
   description TEXT,
@@ -90,9 +90,9 @@ CREATE TABLE groups (
 -- PROJECT ↔ GROUPS
 -- =========================================================
 CREATE TABLE project_groups (
-  project_id BIGINT NOT NULL,
-  group_id BIGINT NOT NULL,
-  user_id UUID NOT NULL,
+  project_id TEXT NOT NULL,
+  group_id TEXT NOT NULL,
+  user_id TEXT NOT NULL,
 
   added_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 
@@ -111,8 +111,8 @@ CREATE TABLE project_groups (
 -- CREDITS (LEDGER)
 -- =========================================================
 CREATE TABLE credits (
-  id UUID PRIMARY KEY,
-  user_id UUID NOT NULL,
+  id TEXT PRIMARY KEY,
+  user_id TEXT NOT NULL,
 
   type TEXT NOT NULL,
   amount REAL NOT NULL,
@@ -132,8 +132,8 @@ CREATE TABLE credits (
 -- BILLING
 -- =========================================================
 CREATE TABLE billing (
-  id UUID PRIMARY KEY,
-  user_id UUID NOT NULL,
+  id TEXT PRIMARY KEY,
+  user_id TEXT NOT NULL,
 
   type TEXT NOT NULL,
   amount REAL NOT NULL,
@@ -154,8 +154,8 @@ CREATE TABLE billing (
 -- NOTIFICATIONS
 -- =========================================================
 CREATE TABLE notifications (
-  id UUID PRIMARY KEY,
-  user_id UUID NOT NULL,
+  id TEXT PRIMARY KEY,
+  user_id TEXT NOT NULL,
 
   type TEXT NOT NULL,
   title TEXT NOT NULL,
@@ -189,8 +189,8 @@ CREATE TABLE packages (
 -- USER SUBSCRIPTIONS
 -- =========================================================
 CREATE TABLE user_subscriptions (
-  id UUID PRIMARY KEY,
-  user_id UUID NOT NULL,
+  id TEXT PRIMARY KEY,
+  user_id TEXT NOT NULL,
   package_id TEXT NOT NULL,
 
   status TEXT DEFAULT 'active',
@@ -209,7 +209,7 @@ CREATE TABLE user_subscriptions (
 -- PROFILES
 -- =========================================================
 CREATE TABLE profiles (
-  user_id UUID PRIMARY KEY,
+  user_id TEXT PRIMARY KEY,
 
   avatar TEXT,
   bio TEXT,
@@ -226,9 +226,9 @@ CREATE TABLE profiles (
 -- PORTFOLIO COLLABORATORS
 -- =========================================================
 CREATE TABLE portfolio_collaborators (
-  id BIGSERIAL PRIMARY KEY,
-  portfolio_id BIGINT NOT NULL,
-  user_id UUID NOT NULL,
+  id TEXT PRIMARY KEY,
+  portfolio_id TEXT NOT NULL,
+  user_id TEXT NOT NULL,
   inviter_id UUID NOT NULL,
 
   role TEXT DEFAULT 'editor',
@@ -247,8 +247,8 @@ CREATE TABLE portfolio_collaborators (
 -- PORTFOLIO INVITATIONS
 -- =========================================================
 CREATE TABLE portfolio_invitations (
-  id BIGSERIAL PRIMARY KEY,
-  portfolio_id BIGINT NOT NULL,
+  id TEXT PRIMARY KEY,
+  portfolio_id TEXT NOT NULL,
   inviter_id UUID NOT NULL,
 
   invitee_email TEXT NOT NULL,
@@ -274,8 +274,8 @@ CREATE TABLE portfolio_invitations (
 -- USER ACTIVITIES
 -- =========================================================
 CREATE TABLE user_activities (
-  id UUID PRIMARY KEY,
-  user_id UUID NOT NULL,
+  id TEXT PRIMARY KEY,
+  user_id TEXT NOT NULL,
 
   action_type TEXT NOT NULL,
   entity_type TEXT,
@@ -299,9 +299,9 @@ CREATE TABLE user_activities (
 -- PROJECT VOTES
 -- =========================================================
 CREATE TABLE project_votes (
-  id BIGSERIAL PRIMARY KEY,
-  project_id BIGINT NOT NULL,
-  user_id UUID NOT NULL,
+  id TEXT PRIMARY KEY,
+  project_id TEXT NOT NULL,
+  user_id TEXT NOT NULL,
 
   vote_type TEXT NOT NULL CHECK (vote_type IN ('upvote', 'downvote')),
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,

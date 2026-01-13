@@ -6,9 +6,9 @@ export default defineConfig({
   worker: {
     format: 'es'
   },
-  plugins: [
-    solidPlugin(),
-    VitePWA({
+   plugins: [
+     solidPlugin(),
+     VitePWA({
       disable: process.env.NODE_ENV === 'development',
       registerType: 'autoUpdate',
       includeAssets: ['avatar.png'],
@@ -24,7 +24,20 @@ export default defineConfig({
         categories: ['productivity', 'business'],
         lang: 'en-US',
         dir: 'ltr',
-        icons: []
+        icons: [
+          {
+            src: '/avatar.png',
+            sizes: '192x192',
+            type: 'image/png',
+            purpose: 'any maskable'
+          },
+          {
+            src: '/avatar.png',
+            sizes: '512x512',
+            type: 'image/png',
+            purpose: 'any maskable'
+          }
+        ]
       },
        workbox: {
          globPatterns: ['**/*.{js,css,html,ico,png,svg}'],

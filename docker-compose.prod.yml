@@ -12,6 +12,8 @@ services:
     volumes:
       # Mount .env file for environment variables
       - ./.env:/app/.env:ro
+      # Mount SSL certificates (optional)
+      - ./ssl:/app/ssl:ro
     networks:
       - accelerator-network
 

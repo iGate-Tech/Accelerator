@@ -2,7 +2,7 @@ import { createSignal, onMount, For, Show, createEffect } from "solid-js";
 import { useNavigate } from "@solidjs/router";
 import { useUser } from "../../context/UserContext";
 import { useLanguage } from "../../hooks/useLanguage";
-import { supabase, supabaseAdmin, signOut, deleteFromSupabase } from "../../lib/supabase.js";
+// Removed supabase imports
 import { getProjects, getUserCredits } from "../../lib/db";
 import logger from "../../lib/logger.js";
 
@@ -36,10 +36,7 @@ const Settings = () => {
   const [avatarPreview, setAvatarPreview] = createSignal(null);
   const [uploadingAvatar, setUploadingAvatar] = createSignal(false);
 
-  const deleteEntity = async (table, column, value) => {
-    const { error } = await supabase.from(table).delete().eq(column, value);
-    if (error) throw error;
-  };
+  // Removed deleteEntity for supabase
 
   const showMessage = (text, type = 'success') => {
     setMessage(text);
@@ -102,122 +99,23 @@ const Settings = () => {
   };
 
   const uploadAvatar = async () => {
-    if (!avatarFile()) return;
-
-    setUploadingAvatar(true);
-    try {
-      const fileExt = avatarFile().name.split('.').pop();
-      const fileName = `${Date.now()}.${fileExt}`;
-      const filePath = `${user().id}/${fileName}`;
-
-      logger.debug('Attempting to upload file:', filePath, 'to bucket: avatars');
-
-      // Upload to Supabase Storage
-      const { data, error } = await supabase.storage
-        .from('avatars')
-        .upload(filePath, avatarFile(), {
-          cacheControl: '3600',
-          upsert: false
-        });
-
-      if (error) {
-        logger.error('Supabase storage upload error:', error);
-        throw error;
-      }
-
-      logger.debug('Upload successful, getting public URL...');
-      // Get public URL
-      const { data: { publicUrl } } = supabase.storage
-        .from('avatars')
-        .getPublicUrl(filePath);
-
-      logger.debug('Public URL obtained:', publicUrl);
-      // Update user profile
-      await updateProfile({ avatar: publicUrl });
-
-      setAvatarFile(null);
-      setAvatarPreview(null);
-      showMessage('Avatar updated successfully');
-    } catch (error) {
-      logger.error('Avatar upload error:', error);
-      showMessage(`Failed to upload avatar: ${error.message}`, 'error');
-    } finally {
-      setUploadingAvatar(false);
-    }
+    // Avatar upload disabled for PGLite only
+    showMessage('Avatar upload not available in local mode', 'error');
   };
 
   const removeAvatar = async () => {
-    try {
-      await updateProfile({ avatar: avatar });
-      setAvatarPreview(null);
-      setAvatarFile(null);
-      toastManager.success('Avatar removed successfully!');
-    } catch (error) {
-      toastManager.error('Failed to remove avatar');
-    }
-   };
+    // Avatar removal disabled for PGLite only
+    toastManager.error('Avatar removal not available in local mode');
+  };
 
    const changePassword = async () => {
-    const form = passwordForm();
-    if (!form.current || !form.new || !form.confirm) {
-      showMessage('All fields are required', 'error');
-      return;
-    }
-    if (form.new !== form.confirm) {
-      showMessage('New passwords do not match', 'error');
-      return;
-    }
-    if (form.new.length < 6) {
-      showMessage('Password must be at least 6 characters', 'error');
-      return;
-    }
-
-    setChangingPassword(true);
-    try {
-      const { error } = await supabase.auth.updateUser({
-        password: form.new
-      });
-      if (error) throw error;
-
-      setPasswordForm({ current: '', new: '', confirm: '' });
-      showMessage('Password updated successfully');
-    } catch (error) {
-      showMessage('Failed to update password', 'error');
-      logger.error('Password change error:', error);
-    } finally {
-      setChangingPassword(false);
-    }
+    // Password change disabled for PGLite only
+    showMessage('Password change not available in local mode', 'error');
   };
 
   const deleteAccount = async () => {
-    if (!confirm('Are you sure you want to delete your account? This action cannot be undone and will permanently delete all your data.')) {
-      return;
-    }
-
-    try {
-      // Try to delete from Supabase first
-      if (supabaseAdmin) {
-        const { error: supabaseError } = await supabaseAdmin.auth.admin.deleteUser(user().id);
-        if (supabaseError) {
-          logger.warn('Supabase delete failed, proceeding with local cleanup:', supabaseError);
-        }
-      } else {
-        logger.warn('Supabase admin not available, skipping remote delete');
-      }
-
-      // Clean up local data
-      await deleteEntity('profiles', 'id', user().id);
-      await deleteEntity('credits', 'user_id', user().id);
-      await deleteEntity('notifications', 'user_id', user().id);
-
-      showMessage('Account deleted successfully. You will be logged out.');
-      await signOut();
-      // Navigate to login or home
-       navigate('/auth/login');
-    } catch (error) {
-      showMessage('Failed to delete account. Please contact support.', 'error');
-      logger.error('Delete account error:', error);
-    }
+    // Account deletion disabled for PGLite only
+    showMessage('Account deletion not available in local mode', 'error');
   };
 
    onMount(async () => {
@@ -315,18 +213,18 @@ const Settings = () => {
             </div>
           </div>
 
-          <div class="flex justify-end mt-4">
-            <button
-              class="btn btn-primary"
-              onClick={savePreferences}
-              disabled={saving()}
-            >
-              <Show when={saving()}>
-                <span class="loading loading-spinner loading-sm"></span>
-              </Show>
-              Save Preferences
-            </button>
-          </div>
+           <div class="flex justify-end mt-4">
+             <button
+               class="btn btn-primary"
+               onClick={savePreferences}
+               disabled={saving()}
+             >
+               <Show when={saving()}>
+                 <span class="loading loading-spinner loading-sm"></span>
+               </Show>
+               Save Preferences (Local Only)
+             </button>
+           </div>
         </div>
 
 

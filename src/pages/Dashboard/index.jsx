@@ -74,6 +74,11 @@ const Dashboard = () => {
     const totalCompletedSteps = projectsData.reduce((sum, p) => sum + (p.completedSteps || 0), 0);
     const totalSteps = projectsData.reduce((sum, p) => sum + (p.totalSteps || 51), 0);
 
+    const overallProgress = totalSteps > 0 ? (totalCompletedSteps / totalSteps) * 100 : 0;
+
+    const totalCreditsAvailable = user()?.subscription?.maxCredits || 100;
+    const totalCreditsConsumed = totalCreditsAvailable - (user()?.credits?.balance || 0);
+
     const statsResult = {
       totalProjects,
       completedProjects,
@@ -81,27 +86,13 @@ const Dashboard = () => {
       idleProjects,
       pausedProjects,
       totalCompletedSteps,
-      totalSteps
+      totalSteps,
+      overallProgress,
+      totalCreditsAvailable,
+      totalCreditsConsumed
     };
     logger.debug('Dashboard: Stats calculated:', statsResult);
     return statsResult;
-    const overallProgress = totalSteps > 0 ? (totalCompletedSteps / totalSteps) * 100 : 0;
-
-    const totalCreditsConsumed = projects().reduce((sum, p) => sum + (p.consumedCredits || 0), 0);
-    const totalCreditsAvailable = projects().reduce((sum, p) => sum + (p.totalCredits || 0), 0);
-    const totalTimeConsumed = projects().reduce((sum, p) => sum + (p.consumedTime || 0), 0);
-
-    return {
-      totalProjects,
-      completedProjects,
-      inProgressProjects,
-      idleProjects,
-      pausedProjects,
-      overallProgress,
-      totalCreditsConsumed,
-      totalCreditsAvailable,
-      totalTimeConsumed
-    };
   });
 
   const recentProjects = createMemo(() => {
@@ -325,11 +316,11 @@ const Dashboard = () => {
                     <span>{t().creditsUsed}</span>
                     <span>{stats().totalCreditsConsumed} / {stats().totalCreditsAvailable}</span>
                   </div>
-                  <progress
-                    class="progress progress-primary w-full"
-                    value={stats().totalCreditsConsumed}
-                    max={stats().totalCreditsAvailable || 1}
-                  ></progress>
+                   <progress
+                     class="progress progress-primary w-full"
+                     value={stats().totalCreditsConsumed || 0}
+                     max={stats().totalCreditsAvailable || 1}
+                   ></progress>
                 </div>
 
                 <div class="flex items-center justify-between text-sm">

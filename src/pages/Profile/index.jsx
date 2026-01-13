@@ -6,7 +6,7 @@ import { getUserCredits, getUserCreditBalance, getProjects } from "../../lib/db"
 import { formatLocaleDate } from "../../lib/utils";
 import { toastManager } from "../../lib/feedback";
 import avatar from "../../assets/avatar.png";
-import { supabase } from "../../lib/supabase";
+// Removed supabase import
 import logger from "../../lib/logger.js";
 
 
@@ -62,21 +62,8 @@ const Profile = () => {
         logger.error('Error loading projects:', e);
         setProjectsCount(0);
       }
-      try {
-        const { data, error } = await supabase.storage.from('avatars').list(user().id + '/');
-        if (!error && data && data.length > 0) {
-          const fileName = data[0].name;
-          const { data: urlData } = supabase.storage.from('avatars').getPublicUrl(user().id + '/' + fileName);
-          const response = await fetch(urlData.publicUrl, { method: 'HEAD' });
-          const size = parseInt(response.headers.get('content-length')) || 0;
-          setStorageUsed((size / (1024 * 1024)).toFixed(2));
-        } else {
-          setStorageUsed(0);
-        }
-      } catch (e) {
-        logger.error('Error loading storage used:', e);
-        setStorageUsed(0);
-      }
+      // Storage calculation disabled for PGLite only
+      setStorageUsed(0);
     }
   });
 
@@ -96,7 +83,8 @@ const Profile = () => {
     const transactions = credits() || [];
     if (transactions.length === 0) return null;
     const latest = transactions.sort((a, b) => new Date(b.date) - new Date(a.date))[0];
-    return new Date(latest.date);
+    const date = new Date(latest.date);
+    return isNaN(date.getTime()) ? null : date;
   };
 
   const handleAvatarChange = (e) => {
@@ -120,51 +108,13 @@ const Profile = () => {
   };
 
   const uploadAvatar = async () => {
-    if (!avatarFile()) return;
-
-    setUploadingAvatar(true);
-    try {
-      const fileName = `${user().id}/${Date.now()}.${avatarFile().name.split('.').pop()}`;
-      logger.debug('Attempting to upload file:', fileName, 'to bucket: avatars');
-
-      const { data, error } = await supabase.storage
-        .from('avatars')
-        .upload(fileName, avatarFile(), {
-          cacheControl: '3600',
-          upsert: false
-        });
-
-      if (error) {
-        logger.error('Supabase storage upload error:', error);
-        throw error;
-      }
-
-      logger.debug('Upload successful, getting public URL...');
-      const { data: { publicUrl } } = supabase.storage
-        .from('avatars')
-        .getPublicUrl(fileName);
-
-      logger.debug('Public URL obtained:', publicUrl);
-      await updateProfile({ avatar: publicUrl });
-      setAvatarFile(null);
-      setAvatarPreview(null);
-      toastManager.success('Avatar updated successfully');
-    } catch (error) {
-      logger.error('Avatar upload error:', error);
-      toastManager.error(`Failed to upload avatar: ${error.message}`);
-    } finally {
-      setUploadingAvatar(false);
-    }
+    // Avatar upload disabled for PGLite only
+    toastManager.error('Avatar upload not available in local mode');
   };
 
   const removeAvatar = async () => {
-    if (!confirm('Are you sure you want to remove your avatar?')) return;
-    try {
-      await updateProfile({ avatar: '/src/assets/avatar.png' });
-      toastManager.success('Avatar removed successfully');
-    } catch (error) {
-      toastManager.error('Failed to remove avatar');
-    }
+    // Avatar removal disabled for PGLite only
+    toastManager.error('Avatar removal not available in local mode');
   };
 
   const saveProfile = async () => {

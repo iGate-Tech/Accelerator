@@ -1,5 +1,5 @@
 import { Router, Route, Navigate, useLocation } from "@solidjs/router";
-import { lazy, createEffect, useContext } from "solid-js";
+import { lazy, createEffect, useContext, Suspense } from "solid-js";
 import { LangProvider } from "./context/LangContext";
 import { UserProvider, useUser } from "./context/UserContext";
 import { useLogger } from "./context/LoggerContext";
@@ -80,16 +80,18 @@ const AppRoutes = () => {
 };
 
 const App = () => {
-   logger.info('App: Application bootstrap starting');
-   const result = (
-     <LangProvider>
-       <UserProvider>
-         <AppRoutes />
-       </UserProvider>
-     </LangProvider>
-   );
-   logger.info('App: Application bootstrap completed');
-   return result;
- };
+    logger.info('App: Application bootstrap starting');
+    const result = (
+      <LangProvider>
+        <UserProvider>
+          <Suspense fallback={<div class="flex items-center justify-center h-screen"><div class="loading loading-spinner loading-lg"></div></div>}>
+            <AppRoutes />
+          </Suspense>
+        </UserProvider>
+      </LangProvider>
+    );
+    logger.info('App: Application bootstrap completed');
+    return result;
+  };
 
 export default App;

@@ -10,8 +10,8 @@ import logger from '../../lib/logger.js';
 
 const AuthLayout = (props) => {
   logger.trace('AuthLayout: Starting');
-     const context = useContext(LangContext) || { lang: () => 'ar', setLang: () => {}, serverReachable: () => true, setServerReachable: () => {} };
-   const {lang, setLang, serverReachable, setServerReachable} = context;
+     const context = useContext(LangContext) || { lang: () => 'ar', setLang: () => {} };
+   const {lang, setLang} = context;
 
      // Make component reactive to language changes
      const [currentLang, setCurrentLang] = createSignal(lang());
@@ -24,17 +24,7 @@ const AuthLayout = (props) => {
         logger.debug('Language changed to:', newLang);
     });
 
-    const checkServerConnectivity = async () => {
-        try {
-            const response = await fetch('/api/health', {
-                method: 'HEAD',
-                signal: AbortSignal.timeout(5000)
-            });
-            setServerReachable(response.ok);
-        } catch {
-            setServerReachable(false);
-        }
-    };
+
 
     onMount(async () => {
         logger.debug('AuthLayout onMount: initializing worker');
@@ -51,9 +41,7 @@ const AuthLayout = (props) => {
         if (themeController)
             themeController.checked = savedTheme === 'dark';
 
-        // Check server connectivity periodically
-        checkServerConnectivity();
-        const interval = setInterval(checkServerConnectivity, 30000); // Check every 30 seconds
+
 
         // Initialize database
         try {

@@ -14,11 +14,9 @@ const Layout = (props) => {
     const navigate = useNavigate();
     const context = useContext(LangContext) || {
         lang: () => 'ar',
-        setLang: () => {},
-        serverReachable: () => true,
-        setServerReachable: () => {}
+        setLang: () => {}
     };
-    const {lang, setLang, serverReachable, setServerReachable} = context;
+    const {lang, setLang} = context;
 
     // Make component reactive to language changes
     const [currentLang, setCurrentLang] = createSignal(lang());
@@ -30,17 +28,7 @@ const Layout = (props) => {
         logger.debug('Language changed to:', newLang);
     });
 
-    const checkServerConnectivity = async () => {
-        try {
-            const response = await fetch('/api/health', {
-                method: 'HEAD',
-                signal: AbortSignal.timeout(5000)
-            });
-            setServerReachable(response.ok);
-        } catch {
-            setServerReachable(false);
-        }
-    };
+
 
     onMount(async () => {
         logger.debug('Layout onMount');
@@ -56,11 +44,7 @@ const Layout = (props) => {
         if (themeController)
             themeController.checked = savedTheme === 'dark';
 
-        // Check server connectivity periodically
-        checkServerConnectivity();
-        const interval = setInterval(checkServerConnectivity, 30000); // Check every 30 seconds
 
-        return () => clearInterval(interval);
     });
 
     return (

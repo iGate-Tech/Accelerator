@@ -3,6 +3,38 @@
 // Data interfaces for easy Supabase migration
 // These functions can be easily replaced with Supabase calls
 
+// Simple token utilities for mock auth
+export const createMockToken = (userId) => {
+  return `mock_token_${userId}_${Date.now()}_${Math.random()}`;
+};
+
+export const verifyMockToken = (token) => {
+  // Simple mock verification - in production this would be proper JWT
+  if (!token || !token.startsWith('mock_token_')) return null;
+
+  const parts = token.split('_');
+  if (parts.length < 4) return null;
+
+  return { userId: parts[2] };
+};
+
+export const getCurrentUserFromToken = async (token) => {
+  try {
+    const decoded = verifyMockToken(token);
+    if (!decoded) return null;
+
+    // Check if session exists in database
+    const session = await getSessionByToken(token);
+    if (!session) return null;
+
+    // Get user data
+    const user = await getUserById(decoded.userId);
+    return user;
+  } catch (error) {
+    logger.error('getCurrentUserFromToken failed:', error.message);
+    return null;
+  }
+};
 import {
   getUserByEmail,
   getUserById,
@@ -37,11 +69,13 @@ export const authAPI = {
       const dbUser = await getUserByEmail(email);
       if (!dbUser) throw new Error('User not found');
 
-      // Simple password check (replace with proper hashing for production)
+      // Simple password check for mock auth (in production, use proper hashing)
       if (dbUser.password_hash !== password) throw new Error('Invalid password');
 
-      // Create session
-      const token = `token_${Date.now()}_${Math.random()}`;
+      // Create mock token for session
+      const token = createMockToken(dbUser.id);
+
+      // Store session in database for tracking
       const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
       await createSession(dbUser.id, token, expiresAt);
 
@@ -69,6 +103,7 @@ export const authAPI = {
         bio: ""
       };
 
+      // For mock auth, store password as-is (in production, hash server-side)
       const newUser = await createUser(userData.email, userData.password, profile);
       return { user: newUser };
     });

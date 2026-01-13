@@ -1,6 +1,6 @@
 import { createSignal, onMount } from "solid-js";
 import { voteOnProject, toggleProjectPublic } from "../../lib/db";
-import { getCurrentUser } from "../../lib/supabase";
+// Removed supabase import
 import { toastManager } from "../../lib/feedback";
 import logger from '../../lib/logger.js';
 
@@ -33,10 +33,7 @@ const ProjectCard = (props) => {
 
   const handleVote = async (voteType) => {
     try {
-      const user = await getCurrentUser();
-      if (!user) return;
-
-      const result = await voteOnProject(project.id, user.id, voteType);
+      const result = await voteOnProject(project.id, 'local-user', voteType);
 
       if (result.success === false) return;
 

@@ -495,6 +495,8 @@ function renderFilledTemplate(templateText) {
  * - Refills template
  * - Re-extracts data
  */
+import logger from './logger.js';
+
 function processLLMTemplate(template, data = {}, options = {}) {
   logger.info('processLLMTemplate: Starting with template length:', template?.length, 'data keys:', Object.keys(data), 'options:', options);
   const extractedInitial = extractTemplateData(template, options);

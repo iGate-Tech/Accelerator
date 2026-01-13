@@ -4,7 +4,7 @@ import { LangContext } from "../../context/LangContext";
 import { useUser } from "../../context/UserContext";
 import { translations } from "../../assets/translations/translations-index.js";
 import { getProjects, updateProject, deleteProject, deleteAllProjects, exportAllProjects } from "../../lib/db";
-import { getSyncStatus, performSync, syncInProgress } from "../../lib/sync";
+// Removed sync imports
 import { toastManager } from "../../lib/feedback";
 import logger from "../../lib/logger.js";
 
@@ -18,7 +18,7 @@ const Sidebar = () => {
   const [projects, setProjects] = createSignal([]);
   const [searchQuery, setSearchQuery] = createSignal("");
   const [editingProjectId, setEditingProjectId] = createSignal(null);
-  const [syncStatus, setSyncStatus] = createSignal(getSyncStatus());
+  // Removed sync status
 
   const [currentLang, setCurrentLang] = createSignal(lang());
 
@@ -136,70 +136,31 @@ const Sidebar = () => {
     >
       <div class="p-4">
         <ul class="menu bg-base-200 rounded-box w-full mb-5">
-          <li classList={{ "menu-active": location.pathname === "/" }}>
-            <A href="/" onClick={() => window.dispatchEvent(new CustomEvent('resetAgent'))} class="flex items-center gap-3 px-4 py-3 hover:bg-base-300 transition-colors">
-              <div class="p-1 bg-primary/10 rounded">
-                <i data-lucide="plus" class="w-4 h-4 text-primary"></i>
-              </div>
-              <span class="font-medium">{t().newProject}</span>
-            </A>
-          </li>
-          <li classList={{ "menu-active": location.pathname === "/explore" }}>
-            <A href="/explore" class="flex items-center gap-3 px-4 py-3 hover:bg-base-300 transition-colors">
-              <div class="p-1 bg-secondary/10 rounded">
-                <i data-lucide="compass" class="w-4 h-4 text-secondary"></i>
-              </div>
-              <span class="font-medium">{t().exploreIdeas}</span>
-            </A>
-          </li>
-          <li classList={{ "menu-active": location.pathname === "/help" }}>
-            <A href="/help" class="flex items-center gap-3 px-4 py-3 hover:bg-base-300 transition-colors">
-              <div class="p-1 bg-info/10 rounded">
-                <i data-lucide="help-circle" class="w-4 h-4 text-info"></i>
-              </div>
-              <span class="font-medium">{t().help}</span>
-            </A>
+           <li classList={{ "menu-active": location.pathname === "/" }}>
+             <A href="/" onClick={() => window.dispatchEvent(new CustomEvent('resetAgent'))} class="flex items-center gap-3 px-4 py-3 hover:bg-base-300 transition-colors" aria-label={`Create new project - ${t().newProject}`}>
+               <div class="p-1 bg-primary/10 rounded">
+                 <i data-lucide="plus" class="w-4 h-4 text-primary" aria-hidden="true"></i>
+               </div>
+               <span class="font-medium">{t().newProject}</span>
+             </A>
            </li>
-            <Show when={import.meta.env.NODE_ENV !== 'production'}>
-              <li>
-                <button
-                  onclick={async () => {
-                    try {
-                      await performSync();
-                      setSyncStatus(getSyncStatus());
-                      toastManager.success('Sync completed successfully!');
-                    } catch (error) {
-                      toastManager.error('Sync failed: ' + error.message);
-                    }
-                  }}
-                  disabled={syncInProgress()}
-                  class={`flex items-center gap-3 px-4 py-3 transition-all duration-200 ${
-                    syncInProgress()
-                      ? 'bg-base-300 cursor-not-allowed opacity-75'
-                      : 'hover:bg-base-300 cursor-pointer'
-                  }`}
-                >
-                  <div class={`p-1 rounded transition-all duration-300 ${
-                    syncInProgress() ? 'bg-warning/20 animate-pulse' : 'bg-success/10'
-                  }`}>
-                    <i
-                      data-lucide="refresh-ccw"
-                      class={`w-4 h-4 transition-all duration-300 ${
-                        syncInProgress()
-                          ? 'text-warning animate-spin'
-                          : 'text-success'
-                      }`}
-                    ></i>
-                  </div>
-                  <span class="font-medium">
-                    {syncInProgress() ? 'Syncing...' : 'Sync Data'}
-                  </span>
-                  <Show when={syncInProgress()}>
-                    <span class="loading loading-spinner loading-xs text-warning"></span>
-                  </Show>
-                </button>
-              </li>
-            </Show>
+           <li classList={{ "menu-active": location.pathname === "/explore" }}>
+             <A href="/explore" class="flex items-center gap-3 px-4 py-3 hover:bg-base-300 transition-colors" aria-label={`Explore project ideas - ${t().exploreIdeas}`}>
+               <div class="p-1 bg-secondary/10 rounded">
+                 <i data-lucide="compass" class="w-4 h-4 text-secondary" aria-hidden="true"></i>
+               </div>
+               <span class="font-medium">{t().exploreIdeas}</span>
+             </A>
+           </li>
+           <li classList={{ "menu-active": location.pathname === "/help" }}>
+             <A href="/help" class="flex items-center gap-3 px-4 py-3 hover:bg-base-300 transition-colors" aria-label={`Get help and support - ${t().help}`}>
+               <div class="p-1 bg-info/10 rounded">
+                 <i data-lucide="help-circle" class="w-4 h-4 text-info" aria-hidden="true"></i>
+               </div>
+               <span class="font-medium">{t().help}</span>
+             </A>
+            </li>
+
         </ul>
         <section class="menu bg-base-200 rounded-box w-full">
           <li>

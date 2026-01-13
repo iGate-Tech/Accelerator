@@ -8,8 +8,61 @@ import OpenAI from 'openai';
 import { fileURLToPath } from 'url';
 import logger from './src/lib/logger.js';
 
+// Simple in-memory rate limiter
+class RateLimiter {
+  constructor(windowMs = 60000, maxRequests = 10) {
+    this.windowMs = windowMs;
+    this.maxRequests = maxRequests;
+    this.requests = new Map();
+  }
+
+  checkLimit(key) {
+    const now = Date.now();
+    const windowStart = now - this.windowMs;
+
+    if (!this.requests.has(key)) {
+      this.requests.set(key, []);
+    }
+
+    const userRequests = this.requests.get(key);
+    // Remove old requests outside the window
+    const validRequests = userRequests.filter(timestamp => timestamp > windowStart);
+
+    if (validRequests.length >= this.maxRequests) {
+      return { allowed: false, resetTime: validRequests[0] + this.windowMs };
+    }
+
+    validRequests.push(now);
+    this.requests.set(key, validRequests);
+    return { allowed: true };
+  }
+}
+
+const llmRateLimiter = new RateLimiter(60000, 5); // 5 requests per minute for LLM endpoints
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+
+// Environment variable validation
+function validateEnvironment() {
+  const required = ['OPENROUTER_API_KEY'];
+  const missing = required.filter(key => !process.env[key]);
+
+  if (missing.length > 0) {
+    logger.error('Missing required environment variables:', missing);
+    process.exit(1);
+  }
+
+  // Warn about optional vars
+  const optional = ['SENTRY_DSN', 'GA_TRACKING_ID'];
+  optional.forEach(key => {
+    if (!process.env[key]) {
+      logger.warn(`Optional environment variable ${key} not set`);
+    }
+  });
+}
+
+validateEnvironment();
 
 const port = process.env.PORT || 3000;
 logger.trace('server.js: Server initialization starting, port:', port);
@@ -87,16 +140,65 @@ app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'dist', 'index.html'));
 });
 
-// Test route to verify server is working
-app.get('/api/health', (req, res) => {
+// Health check endpoint with detailed status
+app.get('/api/health', async (req, res) => {
     logger.info('server.js: Health check requested');
-    res.json({ status: 'ok', message: 'Server is running' });
+
+    const health = {
+        status: 'ok',
+        timestamp: new Date().toISOString(),
+        uptime: process.uptime(),
+        version: '1.0.0',
+        services: {}
+    };
+
+    try {
+        // Check OpenRouter API key
+        if (process.env.OPENROUTER_API_KEY) {
+            health.services.openrouter = 'configured';
+        } else {
+            health.services.openrouter = 'missing_api_key';
+            health.status = 'degraded';
+        }
+
+        // Check PGLite database (basic connectivity)
+        // Since PGLite is client-side, we can't check it from server
+        health.services.database = 'client_side_pglite';
+
+        // Check SSL status
+        const hasSSL = !!(process.env.SSL_KEY_PATH && process.env.SSL_CERT_PATH);
+        health.services.ssl = hasSSL ? 'enabled' : 'disabled';
+
+        // Memory usage
+        health.memory = process.memoryUsage();
+
+        res.json(health);
+    } catch (error) {
+        logger.error('Health check error:', error);
+        res.status(500).json({
+            status: 'error',
+            message: error.message,
+            timestamp: new Date().toISOString()
+        });
+    }
 });
 
 // LLM API Route
 app.post('/api/llm/stream', async (req, res) => {
     const prompt = req.body.prompt || 'Hello';
     const startTime = Date.now();
+
+    // Rate limiting
+    const clientIP = req.ip || req.connection.remoteAddress || 'unknown';
+    const rateLimitResult = llmRateLimiter.checkLimit(clientIP);
+    if (!rateLimitResult.allowed) {
+        logger.warn('server.js: Rate limit exceeded for IP:', clientIP);
+        res.status(429).json({
+            error: 'Rate limit exceeded',
+            retryAfter: Math.ceil((rateLimitResult.resetTime - Date.now()) / 1000)
+        });
+        return;
+    }
 
     logger.info('server.js: === STREAMING LLM API CALL RECEIVED ===');
     logger.debug('server.js: Request body keys:', Object.keys(req.body || {}), 'prompt length:', prompt.length);
@@ -199,6 +301,18 @@ Do NOT repeat the prompt. Treat the user input as a task and deliver a complete 
 app.post('/api/llm/quick', async (req, res) => {
     const prompt = req.body.prompt || 'Hello';
     const startTime = Date.now();
+
+    // Rate limiting
+    const clientIP = req.ip || req.connection.remoteAddress || 'unknown';
+    const rateLimitResult = llmRateLimiter.checkLimit(clientIP);
+    if (!rateLimitResult.allowed) {
+        logger.warn('server.js: Rate limit exceeded for IP:', clientIP);
+        res.status(429).json({
+            error: 'Rate limit exceeded',
+            retryAfter: Math.ceil((rateLimitResult.resetTime - Date.now()) / 1000)
+        });
+        return;
+    }
 
     logger.info('server.js: === QUICK LLM API CALL RECEIVED ===');
     logger.debug('server.js: Request body keys:', Object.keys(req.body || {}), 'prompt length:', prompt.length);

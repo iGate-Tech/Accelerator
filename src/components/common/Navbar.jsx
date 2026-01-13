@@ -18,7 +18,7 @@ const Navbar = () => {
   const { currentLang, t, setLang } = useLanguage();
   useLucideIcons();
 
-  const serverReachable = (() => true); // Default if not from context
+
   const isAuthenticated = userContext.isAuthenticated ?? (() => false);
   const user = userContext.user ?? (() => null);
   const logout = userContext.logout ?? (() => {});
@@ -174,12 +174,7 @@ const Navbar = () => {
           </ul>
         </div>
 
-        {/* SERVER STATUS - Desktop */}
-        <Show when={isAuthenticated()}>
-          <div class="hidden lg:flex">
-            <i data-lucide="dot" class={`w-12 h-12 ${serverReachable() ? 'text-success' : 'text-error'}`}></i>
-          </div>
-        </Show>
+
 
         {/* LANGUAGE SWITCHER */}
         <label class="swap">
@@ -200,9 +195,9 @@ const Navbar = () => {
           <div class="swap-off text-sm font-semibold flex items-center gap-1">
             EN <i data-lucide="languages" class="w-5 h-5"></i>
           </div>
-          <div class="swap-on text-sm font-semibold flex items-center gap-1">
-            عربي <i data-lucide="languages" class="w-5 h-5"></i>
-          </div>
+           <div class="swap-on text-sm font-semibold flex items-center gap-1">
+             عربي <i data-lucide="languages" class="w-5 h-5"></i>
+           </div>
         </label>
 
         {/* THEME SWITCHER */}

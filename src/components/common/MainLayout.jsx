@@ -5,14 +5,15 @@ import {useUser} from "../../context/UserContext";
 import Navbar from "./Navbar";
 import Sidebar from "./Sidebar";
 import { GlobalLoading, GlobalError, ToastContainer } from "./GlobalUI";
+import OfflineIndicator from "./OfflineIndicator";
 import favicon from "../../assets/favicon.svg";
 import logger from '../../lib/logger.js';
 
 
 const MainLayout = (props) => {
   logger.trace('MainLayout: Starting');
-    const context = useContext(LangContext) || { lang: () => 'ar', setLang: () => {}, serverReachable: () => true, setServerReachable: () => {} };
-  const {lang, setLang, serverReachable, setServerReachable} = context;
+    const context = useContext(LangContext) || { lang: () => 'ar', setLang: () => {} };
+  const {lang, setLang} = context;
   const { isAuthenticated } = useUser();
   const location = useLocation();
 
@@ -36,17 +37,7 @@ const MainLayout = (props) => {
         logger.debug('Language changed to:', newLang);
     });
 
-    const checkServerConnectivity = async () => {
-        try {
-            const response = await fetch('/api/health', {
-                method: 'HEAD',
-                signal: AbortSignal.timeout(5000)
-            });
-            setServerReachable(response.ok);
-        } catch {
-            setServerReachable(false);
-        }
-    };
+
 
     onMount(async () => {
         logger.debug('MainLayout onMount');
@@ -60,16 +51,9 @@ const MainLayout = (props) => {
         if (link)
             link.href = favicon;
 
-        // Check server connectivity initially and every 30 seconds
-        await checkServerConnectivity();
-        setInterval(checkServerConnectivity, 30000);
 
-        // Initialize theme
-        const savedTheme = localStorage.getItem('theme') || 'light';
-        document.documentElement.setAttribute('data-theme', savedTheme);
-        const themeController = document.getElementById('theme-controller');
-        if (themeController)
-            themeController.checked = savedTheme === 'dark';
+
+
 
         // Initialize language
         setLang(localStorage.getItem('lang') || 'en');
@@ -80,17 +64,22 @@ const MainLayout = (props) => {
 
     return (
         <>
+            {/* Skip to main content link for accessibility */}
+            <a href="#main-content" class="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 bg-primary text-primary-content px-4 py-2 rounded z-50">
+                Skip to main content
+            </a>
             <GlobalLoading />
             <GlobalError />
             <ToastContainer />
+            <OfflineIndicator />
             <Navbar />
             <div class="flex h-[calc(100vh-4rem)]">
               <Show when={isAuthenticated()}>
                 <Sidebar />
               </Show>
-              <main class={`px-5 overflow-auto ${isAuthenticated() ? 'flex-1' : 'flex-1'}`}>
-                {props.children}
-              </main>
+               <main id="main-content" class={`px-5 overflow-auto ${isAuthenticated() ? 'flex-1' : 'flex-1'}`}>
+                 {props.children}
+               </main>
             </div>
         </>
     );

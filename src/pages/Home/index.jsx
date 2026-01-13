@@ -46,9 +46,12 @@ import { handleLLMProjectUpdate } from "../../lib/utils";
 import {setMachineStore} from "../../lib/machine";
 import {marked} from 'marked';
 import {renderFilledTemplate} from '../../lib/llm-template';
+import { validateLLMPrompt } from '../../lib/security';
+import { useOnlineStatus } from '../../hooks/useOnlineStatus';
 import ResponseSection from '../../components/ui/ResponseSection';
 import AgentInterface from '../../components/features/home/AgentInterface';
 import RouteGuard from '../../components/common/RouteGuard';
+import ProtectedRoute from '../../components/common/ProtectedRoute';
 import { useContext } from "solid-js";
 import { LangContext } from "../../context/LangContext";
 import { translations } from "../../assets/translations/translations-index.js";
@@ -71,7 +74,7 @@ const getStepName = (task) => {
     return "Unknown Step";
 };
 
-const Tasks = () => {
+const TasksContent = () => {
     const { lang } = useContext(LangContext);
     const { user } = useUser();
     const activityLogger = useActivityLogger();
@@ -163,13 +166,17 @@ const Tasks = () => {
         try {
             // Check user authentication
             if (!user() || !user().id) {
-                logger.error('User not authenticated for LLM call');
-                throw new Error('You must be logged in to use AI features.');
+              toastManager.error('Please log in to use this feature');
+              return;
             }
-
-            // Consume credits
-            const creditsCost = 5; // Less credits for quick calls
-            const balance = user().credits?.balance || 0;
+            let balance = user().credits?.balance || 0;
+            if (balance === 0) {
+              try {
+                balance = await getCreditBalance(user().id);
+              } catch (e) {
+                logger.error('Error getting credit balance:', e);
+              }
+            }
             if (balance < creditsCost) {
                 logger.error('Insufficient credits - balance:', balance, 'required:', creditsCost);
                 throw new Error('Insufficient credits. You need at least ' + creditsCost + ' credits to use AI features.');
@@ -221,11 +228,23 @@ const Tasks = () => {
         setIsLoading(true);
         setStreamingContent('');
         try {
+            // Check online status for AI features
+            if (!isOnline()) {
+                throw new Error('AI features require an internet connection. Please check your connection and try again.');
+            }
+
             // Check user authentication
             if (!user() || !user().id) {
                 logger.error('Home: User not authenticated');
                 throw new Error('You must be logged in to use AI features.');
             }
+
+            // Validate and sanitize prompt for security
+            const promptValidation = validateLLMPrompt(prompt);
+            if (!promptValidation.valid) {
+                throw new Error(`Prompt validation failed: ${promptValidation.reason}`);
+            }
+            const sanitizedPrompt = promptValidation.sanitized;
 
             // Consume credits
             const creditsCost = 10;
@@ -233,21 +252,24 @@ const Tasks = () => {
             if (balance < creditsCost) {
                 throw new Error('Insufficient credits. You need at least ' + creditsCost + ' credits to use AI features.');
             }
-            await consumeCredits(user().id, creditsCost, `AI Processing: ${prompt.substring(0, 50)}...`);
+            await consumeCredits(user().id, creditsCost, `AI Processing: ${sanitizedPrompt.substring(0, 50)}...`);
 
             // Log activity
             if (activityLogger.user) {
-                activityLogger.logAI('used', null, 'LLM Stream', { creditsUsed: creditsCost, promptLength: prompt.length });
+                activityLogger.logAI('used', null, 'LLM Stream', { creditsUsed: creditsCost, promptLength: sanitizedPrompt.length });
             }
 
+            // Make real API call to streaming LLM endpoint
             const response = await fetch('/api/llm/stream', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ prompt })
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ prompt: sanitizedPrompt }),
             });
 
             if (!response.ok) {
-                throw new Error(`LLM API error: ${response.status}`);
+                throw new Error(`API request failed: ${response.status} ${response.statusText}`);
             }
 
             const reader = response.body.getReader();
@@ -353,7 +375,7 @@ const Tasks = () => {
                       llmResponse: taskData.llmResponse || null,
                       timestamp: taskData.timestamp || new Date().toISOString(),
                       completed: taskData.completed || false
-                    }, project.id, user()?.id);
+                    }, project.id, user()?.id || 'local-user');
                   }
                   // Refetch again to load the newly created tasks
                   await refetch();
@@ -582,5 +604,13 @@ const Tasks = () => {
     );
 };
 
+
+const Tasks = () => {
+    return (
+        <ProtectedRoute>
+            <TasksContent />
+        </ProtectedRoute>
+    );
+};
 
 export default Tasks;

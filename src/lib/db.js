@@ -1,9 +1,12 @@
 import { toastManager } from './feedback';
-import { performSync, syncService } from './sync';
-import { getCurrentUser } from './supabase';
 import { v4 as uuidv4 } from 'uuid';
 import PgliteWorker from '../workers/pglite-worker-v2.js?worker';
 import logger from './logger.js';
+
+// Local user management for PGLite only
+const getCurrentUser = async () => {
+  return { id: 'local-user' };
+};
 
 
 let worker = null;
@@ -54,22 +57,21 @@ class DatabaseWorker {
       this.initialized = true;
 
       logger.debug('Database worker initialized successfully');
-    } catch (error) {
-      logger.error('Failed to initialize database worker:', error);
-      // Set a flag to indicate database is unavailable
-      this.dbUnavailable = true;
-      logger.warn('Database unavailable, app will work in limited mode');
-      // Don't throw error - let app continue with limited functionality
-    }
-
-    // Check if database is already seeded
-    const alreadySeeded = await isSeeded();
-    if (!alreadySeeded) {
-  // Seed initial data after database is ready
-  await seedInitialData();
-    } else {
-      logger.debug('Database already seeded, skipping seeding');
-    }
+       // Check if database is already seeded
+       const alreadySeeded = await isSeeded();
+       if (!alreadySeeded) {
+         // Seed initial data after database is ready
+         await seedInitialData();
+       } else {
+         logger.debug('Database already seeded, skipping seeding');
+       }
+     } catch (error) {
+       logger.error('Failed to initialize database worker:', error);
+       // Set a flag to indicate database is unavailable
+       this.dbUnavailable = true;
+       logger.warn('Database unavailable, app will work in limited mode');
+       // Don't throw error - let app continue with limited functionality
+     }
   }
 
   async sendMessage(type, data) {
@@ -499,10 +501,29 @@ export const getPg = async () => {
   return pgInstance;
 };
 
-export const triggerSync = () => {
-  logger.trace('triggerSync: Starting');
-  syncService.performSync();
+// Fallback implementations for when database is unavailable
+const createFallbackResponse = (message) => ({
+  error: 'Database unavailable',
+  message,
+  fallback: true
+});
+
+// Helper to safely call database operations with fallbacks
+const safeDbCall = async (operation, fallbackValue = null, operationName = 'database operation') => {
+  try {
+    const pg = await getPg();
+    return await operation(pg);
+  } catch (error) {
+    if (error.message.includes('Database unavailable')) {
+      logger.warn(`Database unavailable, returning fallback for ${operationName}`);
+      return fallbackValue;
+    }
+    logger.error(`Error in ${operationName}:`, error);
+    return fallbackValue;
+  }
 };
+
+
 
 export const initDb = async () => {
   // Worker initializes automatically
@@ -528,12 +549,7 @@ export const initDb = async () => {
       logger.debug('updateEntity: PG connection obtained, executing update');
       const result = await pg.updateEntity(table, idField, id, updates, options);
       logger.debug('updateEntity: Update executed successfully, result:', result);
-      if (!options.noTrigger) {
-        logger.debug('updateEntity: Triggering sync');
-        triggerSync();
-      } else {
-        logger.debug('updateEntity: Skipping sync trigger');
-      }
+
       logger.trace('updateEntity: Completed successfully');
       return result;
     } catch (error) {
@@ -555,44 +571,39 @@ export const initDb = async () => {
      }
    };
 
-    export const addTask = async (task, project_id) => {
-      logger.debug('DB: addTask called with task content length:', task?.content?.length, 'project_id:', project_id);
-      try {
-          logger.debug('DB: getting current user');
-          const { getCurrentUser } = await import('./supabase');
-          const user = await getCurrentUser();
-          logger.debug('DB: current user:', user?.id);
-          logger.debug('DB: getting pg worker');
-          const pg = await getPg();
-          logger.debug('DB: calling pg.addTask');
-          await pg.addTask(task, project_id, user?.id);
-          logger.debug('DB: Task added successfully');
-          logger.debug('DB: triggering sync');
-          triggerSync();
-        } catch (e) {
-          logger.debug('DB: error in addTask:', e);
-        }
-     };
+     export const addTask = async (task, project_id) => {
+       logger.debug('DB: addTask called with task content length:', task?.content?.length, 'project_id:', project_id);
+       try {
+            logger.debug('DB: getting current user');
+            const user = await getCurrentUser();
+            logger.debug('DB: current user:', user?.id);
+            logger.debug('DB: getting pg worker');
+            const pg = await getPg();
+            logger.debug('DB: calling pg.addTask');
+            await pg.addTask(task, project_id, user?.id);
+            logger.debug('DB: Task added successfully');
+         } catch (e) {
+           logger.debug('DB: error in addTask:', e);
+         }
+      };
 
 export const clearAllTasks = async () => {
-    try {
-      const pg = await getPg();
-      await pg.clearAllTasks();
-      triggerSync();
-    } catch (e) {
-      logger.debug('DB not ready, skipping clearAllTasks');
-    }
+     try {
+       const pg = await getPg();
+       await pg.clearAllTasks();
+     } catch (e) {
+       logger.debug('DB not ready, skipping clearAllTasks');
+     }
  };
 
- export const updateTask = async (id, content) => {
-    try {
-      const pg = await getPg();
-      await pg.updateTask(id, content);
-      triggerSync();
-    } catch (e) {
-      logger.debug('DB not ready, skipping updateTask');
-    }
- };
+  export const updateTask = async (id, content) => {
+     try {
+       const pg = await getPg();
+       await pg.updateTask(id, content);
+     } catch (e) {
+       logger.debug('DB not ready, skipping updateTask');
+     }
+  };
 
 
 
@@ -600,12 +611,11 @@ export const clearAllTasks = async () => {
 
       export const getProjects = async (userId = null) => {
          try {
-           if (!userId || typeof userId !== 'string') {
-             const { getCurrentUser } = await import('./supabase');
-             const user = await getCurrentUser();
-             logger.debug('user from getCurrentUser:', user);
-             userId = user && typeof user.id === 'string' ? user.id : null;
-           }
+       if (!userId || typeof userId !== 'string') {
+              const user = await getCurrentUser();
+              logger.debug('user from getCurrentUser:', user);
+              userId = user && typeof user.id === 'string' ? user.id : null;
+            }
           const pg = await getPg();
           logger.debug('Getting projects for userId:', userId, 'type:', typeof userId);
           if (typeof userId !== 'string') {
@@ -660,74 +670,69 @@ export const clearAllTasks = async () => {
       }
     };
 
-   export const addProject = async (project) => {
-     try {
-       const { getCurrentUser } = await import('./supabase');
-       const user = await getCurrentUser();
-       if (!user) throw new Error('User not authenticated');
-
-        const pg = await getPg();
-        const newProject = await pg.addProject(project, user.id);
-        logger.debug('Added project:', newProject);
-
-         // Log activity
-         await logActivity(user.id, 'project_created', 'project', newProject.id, `Created project "${project.name}"`, { projectName: project.name });
-
-        triggerSync();
-        return newProject.id;
-     } catch (e) {
-       logger.debug('Error adding project:', e);
-       toastManager.error(`Failed to add project "${project.name}" (${project.description?.length || 0} chars description): ${e.message}`);
-     }
-   };
-
-    export const updateProject = async (id, project) => {
-      try {
-        // Validate parameters
-        if (!id) throw new Error('Project ID is required');
-        if (!project || typeof project !== 'object') throw new Error('Project data must be an object');
-
-        const user = await getCurrentUser();
-        if (!user) throw new Error('User not authenticated');
-
-        logger.debug('DB: updateProject called with id:', id, 'updates:', Object.keys(project));
-        const pg = await getPg();
-        logger.debug('DB: calling pg.updateProject');
-        await pg.updateProject(id, project);
-        logger.debug('DB: Updated project:', id);
-
-         // Log activity
-        await logActivity(user.id, 'project_updated', 'project', id, `Updated project`, { fields: Object.keys(project) });
-
-        triggerSync();
-      } catch (e) {
-       logger.debug('Error updating project:', e);
-       toastManager.error(`Failed to update project ${id} (${Object.keys(project).length} fields): ${e.message}`);
-     }
-  };
-
-    export const deleteProject = async (id) => {
-     try {
-         const { getCurrentUser } = await import('./supabase');
+     export const addProject = async (project) => {
+       try {
          const user = await getCurrentUser();
          if (!user) throw new Error('User not authenticated');
 
           const pg = await getPg();
-           await pg.deleteProject(id);
-          logger.debug('Deleted project:', id);
-
-           // Dispatch event to reset current project if it was deleted
-           window.dispatchEvent(new CustomEvent('projectDeleted', { detail: { projectId: id } }));
+          const newProject = await pg.addProject(project, user.id);
+          logger.debug('Added project:', newProject);
 
            // Log activity
-           await logActivity(user.id, 'project_deleted', 'project', id, `Deleted project`, {});
+           await logActivity(user.id, 'project_created', 'project', newProject.id, `Created project "${project.name}"`, { projectName: project.name });
 
-          triggerSync();
-        } catch (e) {
-         logger.debug('Error deleting project:', e);
-         toastManager.error(`Failed to delete project ${id}: ${e.message}`);
+          return newProject.id;
+       } catch (e) {
+         logger.debug('Error adding project:', e);
+         toastManager.error(`Failed to add project "${project.name}" (${project.description?.length || 0} chars description): ${e.message}`);
        }
+     };
+
+     export const updateProject = async (id, project) => {
+       try {
+         // Validate parameters
+         if (!id) throw new Error('Project ID is required');
+         if (!project || typeof project !== 'object') throw new Error('Project data must be an object');
+
+         const user = await getCurrentUser();
+         if (!user) throw new Error('User not authenticated');
+
+         logger.debug('DB: updateProject called with id:', id, 'updates:', Object.keys(project));
+         const pg = await getPg();
+         logger.debug('DB: calling pg.updateProject');
+         await pg.updateProject(id, project);
+         logger.debug('DB: Updated project:', id);
+
+          // Log activity
+         await logActivity(user.id, 'project_updated', 'project', id, `Updated project`, { fields: Object.keys(project) });
+
+       } catch (e) {
+        logger.debug('Error updating project:', e);
+        toastManager.error(`Failed to update project ${id} (${Object.keys(project).length} fields): ${e.message}`);
+      }
    };
+
+    export const deleteProject = async (id) => {
+      try {
+          const user = await getCurrentUser();
+          if (!user) throw new Error('User not authenticated');
+
+           const pg = await getPg();
+            await pg.deleteProject(id);
+           logger.debug('Deleted project:', id);
+
+            // Dispatch event to reset current project if it was deleted
+            window.dispatchEvent(new CustomEvent('projectDeleted', { detail: { projectId: id } }));
+
+            // Log activity
+            await logActivity(user.id, 'project_deleted', 'project', id, `Deleted project`, {});
+
+         } catch (e) {
+          logger.debug('Error deleting project:', e);
+          toastManager.error(`Failed to delete project ${id}: ${e.message}`);
+        }
+    };
 
    export const deleteAllProjects = async () => {
       try {
@@ -756,7 +761,6 @@ export const clearAllTasks = async () => {
       try {
         const pg = await getPg();
         const result = await pg.voteOnProject({ projectId, userId, voteType });
-        triggerSync();
         return result;
       } catch (e) {
         logger.debug('Error voting on project:', e);
@@ -793,22 +797,20 @@ export const clearAllTasks = async () => {
    }
  };
 
- export const addGroup = async (group) => {
-   try {
-     const { getCurrentUser } = await import('./supabase');
-     const user = await getCurrentUser();
-     if (!user) throw new Error('User not authenticated');
+  export const addGroup = async (group) => {
+    try {
+      const user = await getCurrentUser();
+      if (!user) throw new Error('User not authenticated');
 
-     const pg = await getPg();
-     const newGroup = await pg.addGroup(group, user.id);
-     logger.debug('Added group:', newGroup);
-     triggerSync();
-     return newGroup.id;
-   } catch (e) {
-     logger.debug('Error adding group:', e);
-     toastManager.error(`Failed to add group "${group.name}": ${e.message}`);
-   }
- };
+      const pg = await getPg();
+      const newGroup = await pg.addGroup(group, user.id);
+      logger.debug('Added group:', newGroup);
+      return newGroup.id;
+    } catch (e) {
+      logger.debug('Error adding group:', e);
+      toastManager.error(`Failed to add group "${group.name}": ${e.message}`);
+    }
+  };
 
  export const updateGroup = async (id, group) => {
    try {
@@ -824,17 +826,16 @@ export const clearAllTasks = async () => {
    }
  };
 
- export const deleteGroup = async (id) => {
-   try {
-     const pg = await getPg();
-     await pg.deleteGroup(id);
-     logger.debug('Deleted group:', id);
-     triggerSync();
-   } catch (e) {
-     logger.debug('Error deleting group:', e);
-     toastManager.error(`Failed to delete group ${id}: ${e.message}`);
-   }
- };
+  export const deleteGroup = async (id) => {
+    try {
+      const pg = await getPg();
+      await pg.deleteGroup(id);
+      logger.debug('Deleted group:', id);
+    } catch (e) {
+      logger.debug('Error deleting group:', e);
+      toastManager.error(`Failed to delete group ${id}: ${e.message}`);
+    }
+  };
 
 export const exportAllProjects = async (userId = null) => {
   try {
@@ -877,15 +878,15 @@ export const exportAllProjects = async (userId = null) => {
    }
  };
 
- export const getUngroupedProjects = async (userId = null) => {
-   try {
-     const pg = await getPg();
-     return await pg.getUngroupedProjects(userId);
-   } catch (e) {
-     logger.debug('Error getting ungrouped projects:', e);
-     return [];
-   }
- };
+  export const getUngroupedProjects = async (userId = null) => {
+    try {
+      const pg = await getPg();
+      return await pg.getUngroupedProjects({ userId });
+    } catch (e) {
+      logger.debug('Error getting ungrouped projects:', e);
+      return [];
+    }
+  };
 
  export const getGroupsWithProjects = async (userId = null) => {
    try {
@@ -898,17 +899,16 @@ export const exportAllProjects = async (userId = null) => {
  };
 
 // User functions
- export const createUser = async (email, passwordHash, profile = {}, userId = null) => {
-   try {
-     const pg = await getPg();
-      const user = await pg.createUser({ email, passwordHash, profile, userId });
-     triggerSync();
-     return user;
-   } catch (e) {
-     logger.debug('Error creating user:', e);
-     throw e;
-   }
- };
+  export const createUser = async (email, passwordHash, profile = {}, userId = null) => {
+    try {
+      const pg = await getPg();
+       const user = await pg.createUser({ email, passwordHash, profile, userId });
+      return user;
+    } catch (e) {
+      logger.debug('Error creating user:', e);
+      throw e;
+    }
+  };
 
  export const getUserByEmail = async (email) => {
    try {
@@ -942,31 +942,29 @@ export const exportAllProjects = async (userId = null) => {
    }
  };
 
- export const deleteUser = async (id) => {
-   try {
-     const pg = await getPg();
-     await pg.deleteUser(id);
-     logger.debug('Deleted user:', id);
-     triggerSync();
-   } catch (e) {
-     logger.debug('Error deleting user:', e);
-     throw e;
-   }
- };
+  export const deleteUser = async (id) => {
+    try {
+      const pg = await getPg();
+      await pg.deleteUser(id);
+      logger.debug('Deleted user:', id);
+    } catch (e) {
+      logger.debug('Error deleting user:', e);
+      throw e;
+    }
+  };
 
 // Session functions
- export const createSession = async (userId, token, expiresAt) => {
-   try {
-     const pg = await getPg();
-      const session = await pg.createSession({ userId, token, expiresAt });
-     logger.debug('Session created:', session);
-     triggerSync();
-     return session;
-   } catch (e) {
-     logger.debug('Error creating session:', e);
-     throw e;
-   }
- };
+  export const createSession = async (userId, token, expiresAt) => {
+    try {
+      const pg = await getPg();
+       const session = await pg.createSession({ userId, token, expiresAt });
+      logger.debug('Session created:', session);
+      return session;
+    } catch (e) {
+      logger.debug('Error creating session:', e);
+      throw e;
+    }
+  };
 
  export const getSessionByToken = async (token) => {
    try {
@@ -978,40 +976,37 @@ export const exportAllProjects = async (userId = null) => {
    }
  };
 
- export const deleteSession = async (token) => {
-   try {
-     const pg = await getPg();
-     await pg.deleteSession(token);
-     logger.debug('Deleted session:', token);
-     triggerSync();
-   } catch (e) {
-     logger.debug('Error deleting session:', e);
-   }
- };
+  export const deleteSession = async (token) => {
+    try {
+      const pg = await getPg();
+      await pg.deleteSession(token);
+      logger.debug('Deleted session:', token);
+    } catch (e) {
+      logger.debug('Error deleting session:', e);
+    }
+  };
 
- export const deleteExpiredSessions = async () => {
-   try {
-     const pg = await getPg();
-     await pg.deleteExpiredSessions();
-     logger.debug('Deleted expired sessions');
-     triggerSync();
-   } catch (e) {
-     logger.debug('Error deleting expired sessions:', e);
-   }
- };
+  export const deleteExpiredSessions = async () => {
+    try {
+      const pg = await getPg();
+      await pg.deleteExpiredSessions();
+      logger.debug('Deleted expired sessions');
+    } catch (e) {
+      logger.debug('Error deleting expired sessions:', e);
+    }
+  };
 
 // Credits functions
- export const addCreditTransaction = async (userId, type, amount, description) => {
-   try {
-     const pg = await getPg();
-      const transaction = await pg.addCreditTransaction({ userId, type, amount, description });
-     triggerSync();
-     return transaction;
-   } catch (error) {
-     logger.error('Error adding credit transaction:', error);
-     throw error;
-   }
- };
+  export const addCreditTransaction = async (userId, type, amount, description) => {
+    try {
+      const pg = await getPg();
+       const transaction = await pg.addCreditTransaction({ userId, type, amount, description });
+      return transaction;
+    } catch (error) {
+      logger.error('Error adding credit transaction:', error);
+      throw error;
+    }
+  };
 
 
 
@@ -1069,15 +1064,13 @@ export const exportAllProjects = async (userId = null) => {
    }
  };
 
- export const getCreditBalance = async (userId) => {
-   try {
-     const pg = await getPg();
-     return await pg.getCreditBalance(userId);
-   } catch (error) {
-     logger.error('Error getting credit balance:', error);
-     return 0;
-   }
- };
+export const getCreditBalance = async (userId) => {
+  return await safeDbCall(
+    (pg) => pg.getCreditBalance(userId),
+    0,
+    'getCreditBalance'
+  );
+};
 
   export const getCreditTransactions = async (userId) => {
     try {
@@ -1090,17 +1083,16 @@ export const exportAllProjects = async (userId = null) => {
   };
 
     // Activity functions
-export const logActivity = async (userId, actionType, entityType, entityId, description, metadata = {}) => {
-  try {
-    const pg = await getPg();
-    const activity = await pg.logActivity({ userId, actionType, entityType, entityId, description, metadata });
-    triggerSync();
-    return activity;
-  } catch (error) {
-    logger.error('Error logging activity:', error);
-    throw error;
-  }
-};
+ export const logActivity = async (userId, actionType, entityType, entityId, description, metadata = {}) => {
+   try {
+     const pg = await getPg();
+     const activity = await pg.logActivity({ userId, actionType, entityType, entityId, description, metadata });
+     return activity;
+   } catch (error) {
+     logger.error('Error logging activity:', error);
+     throw error;
+   }
+ };
 
 export const getUserActivities = async (userId, limit = 50, offset = 0) => {
   try {
@@ -1113,38 +1105,34 @@ export const getUserActivities = async (userId, limit = 50, offset = 0) => {
 };
 
   export const createNotification = async (userId, type, title, message, createdAt = null) => {
-   try {
-     const pg = await getPg();
-      const notification = await pg.createNotification({ userId, type, title, message });
-     triggerSync();
-     return notification;
-   } catch (error) {
-     logger.error('Error creating notification:', error);
-     throw error;
-   }
- };
+    try {
+      const pg = await getPg();
+       const notification = await pg.createNotification({ userId, type, title, message });
+      return notification;
+    } catch (error) {
+      logger.error('Error creating notification:', error);
+      throw error;
+    }
+  };
 
- export const getUserNotifications = async (userId) => {
-   try {
-     const pg = await getPg();
-     return await pg.getUserNotifications(userId);
-   } catch (error) {
-     logger.error('Error getting user notifications:', error);
-     return [];
-   }
- };
+export const getUserNotifications = async (userId) => {
+  return await safeDbCall(
+    (pg) => pg.getUserNotifications(userId),
+    [],
+    'getUserNotifications'
+  );
+};
 
- export const markNotificationRead = async (notificationId, userId) => {
-   try {
-     const pg = await getPg();
-      const result = await pg.markNotificationRead({ notificationId, userId });
-     triggerSync();
-     return result;
-   } catch (error) {
-     logger.error('Error marking notification read:', error);
-     return false;
-   }
- };
+  export const markNotificationRead = async (notificationId, userId) => {
+    try {
+      const pg = await getPg();
+       const result = await pg.markNotificationRead({ notificationId, userId });
+      return result;
+    } catch (error) {
+      logger.error('Error marking notification read:', error);
+      return false;
+    }
+  };
 
  export const getPackages = async () => {
    try {
@@ -1156,28 +1144,25 @@ export const getUserActivities = async (userId, limit = 50, offset = 0) => {
    }
  };
 
- export const getUserSubscription = async (userId) => {
-   try {
-     const pg = await getPg();
-     return await pg.getUserSubscription(userId);
-   } catch (error) {
-     logger.error('Error getting user subscription:', error);
-     return null;
-   }
- };
+export const getUserSubscription = async (userId) => {
+  return await safeDbCall(
+    (pg) => pg.getUserSubscription(userId),
+    null,
+    'getUserSubscription'
+  );
+};
 
-  export const createUserSubscription = async (userId, packageId, subscriptionData = {}) => {
-    try {
-      const pg = await getPg();
-       const subscription = await pg.createUserSubscription(userId, packageId, subscriptionData);
-      logger.debug('User subscription created:', subscription);
-      triggerSync();
-      return subscription;
-    } catch (error) {
-      logger.error('Error creating user subscription:', error);
-      throw error;
-    }
-  };
+   export const createUserSubscription = async (userId, packageId, subscriptionData = {}) => {
+     try {
+       const pg = await getPg();
+        const subscription = await pg.createUserSubscription(userId, packageId, subscriptionData);
+       logger.debug('User subscription created:', subscription);
+       return subscription;
+     } catch (error) {
+       logger.error('Error creating user subscription:', error);
+       throw error;
+     }
+   };
 
   export const changeUserSubscription = async (userId, newPackageId, currentSubscription = null) => {
     try {
@@ -1203,37 +1188,33 @@ export const getUserActivities = async (userId, limit = 50, offset = 0) => {
  };
 
  export const getUserProfile = async (userId) => {
-   try {
-     const pg = await getPg();
-     return await pg.getUserProfile(userId);
-   } catch (error) {
-     logger.error('Error getting user profile:', error);
-     return null;
-   }
- };
+  return await safeDbCall(
+    (pg) => pg.getUserProfile(userId),
+    null,
+    'getUserProfile'
+  );
+};
 
- export const createUserProfile = async (userId, profileData = {}) => {
-   try {
-     const pg = await getPg();
-      const profile = await pg.createUserProfile({ userId, profileData });
-     if (profile) triggerSync();
-     return profile;
-   } catch (error) {
-     logger.error('Error creating user profile:', error);
-     throw error;
-   }
- };
+  export const createUserProfile = async (userId, profileData = {}) => {
+    try {
+      const pg = await getPg();
+       const profile = await pg.createUserProfile({ userId, profileData });
+      return profile;
+    } catch (error) {
+      logger.error('Error creating user profile:', error);
+      throw error;
+    }
+  };
 
- export const updateBillingStatus = async (id, status) => {
-   try {
-     const pg = await getPg();
-     await pg.updateBillingStatus(id, status);
-     logger.debug('Updated billing status:', id, status);
-     triggerSync();
-   } catch (e) {
-     logger.debug('Error updating billing status:', e);
-   }
- };
+  export const updateBillingStatus = async (id, status) => {
+    try {
+      const pg = await getPg();
+      await pg.updateBillingStatus(id, status);
+      logger.debug('Updated billing status:', id, status);
+    } catch (e) {
+      logger.debug('Error updating billing status:', e);
+    }
+  };
 
 // Seeding function for initial data
   export const isSeeded = async () => {
@@ -1253,22 +1234,30 @@ export const getUserActivities = async (userId, limit = 50, offset = 0) => {
       logger.debug('Packages seeded successfully');
       return result;
     } catch (e) {
+      if (e.message.includes('Database unavailable')) {
+        logger.warn('Database unavailable, skipping package seeding');
+        return;
+      }
       logger.debug('Error seeding packages:', e);
     }
   };
 
- export const seedInitialData = async () => {
-   try {
-     logger.debug('Seeding initial data...');
+  export const seedInitialData = async () => {
+    try {
+      logger.debug('Seeding initial data...');
 
-     // Seed packages (these are system-wide, not user-specific)
-     await seedPackages();
+      // Seed packages (these are system-wide, not user-specific)
+      await seedPackages();
 
-     logger.debug('Initial data seeded successfully');
-   } catch (e) {
-     logger.debug('Error seeding data:', e);
-   }
- };
+      logger.debug('Initial data seeded successfully');
+    } catch (e) {
+      if (e.message.includes('Database unavailable')) {
+        logger.warn('Database unavailable, skipping initial data seeding');
+        return;
+      }
+      logger.debug('Error seeding data:', e);
+    }
+  };
 
  export const seedSampleNotifications = async (userId) => {
    try {
@@ -1281,18 +1270,17 @@ export const getUserActivities = async (userId, limit = 50, offset = 0) => {
 
 // Sync data with Supabase
 // Portfolio Collaboration Functions
- export const inviteCollaborator = async (portfolioId, inviteeEmail, role = 'editor', message = '') => {
-   try {
-     const inviterId = await getCurrentUserId();
-     const pg = await getPg();
-     const invitation = await pg.inviteCollaborator(portfolioId, inviteeEmail, role, message, inviterId);
-     triggerSync();
-     return invitation;
-   } catch (error) {
-     logger.error('Error inviting collaborator:', error);
-     throw error;
-   }
- };
+  export const inviteCollaborator = async (portfolioId, inviteeEmail, role = 'editor', message = '') => {
+    try {
+      const inviterId = await getCurrentUserId();
+      const pg = await getPg();
+      const invitation = await pg.inviteCollaborator(portfolioId, inviteeEmail, role, message, inviterId);
+      return invitation;
+    } catch (error) {
+      logger.error('Error inviting collaborator:', error);
+      throw error;
+    }
+  };
 
  export const getPortfolioInvitations = async (portfolioId) => {
    try {
@@ -1314,20 +1302,18 @@ export const getUserActivities = async (userId, limit = 50, offset = 0) => {
    }
  };
 
- export const respondToInvitation = async (invitationId, status) => {
-   try {
-     const userId = await getCurrentUserId();
-     const pg = await getPg();
-    const result = await pg.respondToInvitation(invitationId, status, userId);
+  export const respondToInvitation = async (invitationId, status) => {
+    try {
+      const userId = await getCurrentUserId();
+      const pg = await getPg();
+     const result = await pg.respondToInvitation(invitationId, status, userId);
 
-    triggerSync();
-    return result;
      return result;
-   } catch (error) {
-     logger.error('Error responding to invitation:', error);
-     throw error;
-   }
- };
+    } catch (error) {
+      logger.error('Error responding to invitation:', error);
+      throw error;
+    }
+  };
 
  export const getPortfolioCollaborators = async (portfolioId) => {
    try {
@@ -1339,34 +1325,32 @@ export const getUserActivities = async (userId, limit = 50, offset = 0) => {
    }
  };
 
- export const removeCollaborator = async (portfolioId, userId) => {
-   try {
-     const pg = await getPg();
-     const result = await pg.removeCollaborator(portfolioId, userId);
+  export const removeCollaborator = async (portfolioId, userId) => {
+    try {
+      const pg = await getPg();
+      const result = await pg.removeCollaborator(portfolioId, userId);
 
-     // Create notification for removed user
-     const groupName = await pg.getGroupName(portfolioId);
-     await pg.createNotification(userId, 'system', 'Removed from Portfolio', `You have been removed from portfolio "${groupName}".`);
+      // Create notification for removed user
+      const groupName = await pg.getGroupName(portfolioId);
+      await pg.createNotification(userId, 'system', 'Removed from Portfolio', `You have been removed from portfolio "${groupName}".`);
 
-     triggerSync();
-     return result;
-   } catch (error) {
-     logger.error('Error removing collaborator:', error);
-     throw error;
-   }
- };
+      return result;
+    } catch (error) {
+      logger.error('Error removing collaborator:', error);
+      throw error;
+    }
+  };
 
- export const updateCollaboratorRole = async (portfolioId, userId, role) => {
-   try {
-     const pg = await getPg();
-     const result = await pg.updateCollaboratorRole(portfolioId, userId, role);
-     triggerSync();
-     return result;
-   } catch (error) {
-     logger.error('Error updating collaborator role:', error);
-     throw error;
-   }
- };
+  export const updateCollaboratorRole = async (portfolioId, userId, role) => {
+    try {
+      const pg = await getPg();
+      const result = await pg.updateCollaboratorRole(portfolioId, userId, role);
+      return result;
+    } catch (error) {
+      logger.error('Error updating collaborator role:', error);
+      throw error;
+    }
+  };
 
 // Helper functions
  const getCurrentUserId = async () => {
@@ -1386,11 +1370,3 @@ export const getUserActivities = async (userId, limit = 50, offset = 0) => {
    }
  };
 
-export const syncData = async () => {
-  try {
-    await performSync();
-    logger.debug('Data sync completed');
-  } catch (error) {
-    logger.error('Sync failed:', error);
-  }
-};

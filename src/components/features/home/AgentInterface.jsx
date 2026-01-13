@@ -8,15 +8,34 @@ import {translations} from "../../../assets/translations/translations-index.js";
 import {useUser} from "../../../context/UserContext";
 
 const AgentInterface = (props) => {
+    // Defensive checks for required props
+    if (!props.machineStore || !props.tasksList || !props.agentBoxClass || !props.agentContentClass || !props.greetingClass) {
+        logger.warn('AgentInterface: Missing required props, showing loading state');
+        return (
+            <div id="agentBox" class="flex flex-col rounded-lg mx-auto max-w-6xl">
+                <div class="flex items-center justify-center h-64">
+                    <div class="loading loading-spinner loading-lg text-primary"></div>
+                    <span class="ml-4 text-lg">Loading agent interface...</span>
+                </div>
+            </div>
+        );
+    }
+
     const shouldShowFormContent = () => {
         const state = props.machineStore.state;
         const tasks = props.tasksList ?. ();
         const hasTasks = tasks && Array.isArray(tasks) && tasks.length > 0;
         return !hasTasks && (state === "idle" || state === "processing");
     };
-    const {lang} = useContext(LangContext);
-    const {user} = useUser();
-    const [currentLang, setCurrentLang] = createSignal(lang());
+
+    // Context with fallbacks
+    const langContext = useContext(LangContext);
+    const userContext = useUser();
+
+    const {lang} = langContext || { lang: () => 'en' };
+    const {user} = userContext || { user: () => null };
+
+    const [currentLang, setCurrentLang] = createSignal(lang ? lang() : 'en');
     const [currentProject, setCurrentProject] = createSignal(null);
 
     // Animation refs
@@ -26,7 +45,15 @@ const AgentInterface = (props) => {
     let buttonsRef;
     let badgeRef;
 
-    const t = () => translations[currentLang()];
+    const t = () => {
+        const langKey = currentLang();
+        const langTranslations = translations[langKey];
+        if (!langTranslations) {
+            logger.warn('AgentInterface: No translations found for language:', langKey);
+            return translations.en || {}; // Fallback to English
+        }
+        return langTranslations;
+    };
 
     createEffect(() => {
         setCurrentLang(lang());
@@ -53,10 +80,17 @@ const AgentInterface = (props) => {
 
     createEffect(() => {
         if (props.currentProjectId()) {
-            getProjectById(props.currentProjectId()).then((project) => {
-                logger.debug("Fetched project in AgentInterface:", project);
-                setCurrentProject(project);
-            });
+            getProjectById(props.currentProjectId())
+                .then((project) => {
+                    logger.debug("Fetched project in AgentInterface:", project);
+                    setCurrentProject(project);
+                })
+                .catch((error) => {
+                    logger.error("Failed to fetch project in AgentInterface:", error);
+                    setCurrentProject(null);
+                });
+        } else {
+            setCurrentProject(null);
         }
     });
 
@@ -153,9 +187,9 @@ const AgentInterface = (props) => {
                             onMouseEnter={handleCardHover}
                             onMouseLeave={handleCardLeave}>
                             <div class="card-body relative p-4 !gap-0">
-                                <Show when={
-                                    props.currentProjectId() !== null && props.tasksList().length > 0
-                                }>
+                                 <Show when={
+                                     props.currentProjectId() !== null && (props.tasksList().length > 0 || props.machineStore.state === "processing")
+                                 }>
                                     <ProgressAccordion machineStore={
                                             props.machineStore
                                         }
@@ -177,9 +211,10 @@ const AgentInterface = (props) => {
                                         handleResume={
                                             props.handleResume
                                         }/>
-                                </Show>
-                                {/* Form */}
-                                <form id="taskForm">
+                                 </Show>
+                                 {/* Form */}
+                                 <Show when={props.tasksList().length === 0}>
+                                     <form id="taskForm">
                                     <input type="hidden" name="action" id="action" value="send"/>
                                     <input type="hidden" name="taskContent" value=""/>
                                     <input type="hidden" name="taskTimestamp"
@@ -329,13 +364,14 @@ const AgentInterface = (props) => {
                                             </button>
                                         </Show>
                                     </div>
-                                 </div>
-                          </form>
-                     </div>
+                                  </div>
+                           </form>
+                                 </Show>
+                      </div>
+                  </div>
                  </div>
-                </div>
-            </div>
-        </div>
+             </div>
+         </div>
     );
 };
 

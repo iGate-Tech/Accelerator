@@ -111,6 +111,34 @@ const ResponseSection = (props) => {
   const shouldShow = startPressedCondition || tasksCondition;
   console.log('ResponseSection: Conditions - startPressed:', startPressedCondition, 'tasks:', tasksCondition, 'currentStep:', props.machineStore.context?.currentStep, 'shouldShow:', shouldShow);
   logger.debug('ResponseSection: component rendered, tasksList length:', props.tasksList()?.length, 'isLoading:', props.isLoading(), 'streamingContent length:', props.streamingContent()?.length);
+
+  // Group tasks by model
+  const groupedTasks = () => {
+    const groups = {};
+    props.tasksList().forEach(task => {
+      const model = task.model || "Manual";
+      if (!groups[model]) groups[model] = [];
+      groups[model].push(task);
+    });
+    return groups;
+  };
+
+  // Model generation order
+  const modelOrder = ["Idea Model", "Business Model", "Financial Model", "Funding Model", "Marketing Model", "Team Model", "Legal Model", "Technical Model"];
+
+  // Sort models in custom order: system, models (in generation sequence), reports
+  const sortedModels = () => {
+    const groups = groupedTasks();
+    const system = Object.keys(groups).filter(m => m.toLowerCase().includes('system'));
+    const reports = Object.keys(groups).filter(m => m.toLowerCase().includes('report'));
+    const models = modelOrder.filter(m => groups[m]); // Use generation order
+    const other = Object.keys(groups).filter(m =>
+      !system.includes(m) && !reports.includes(m) && !models.includes(m)
+    );
+
+    return [...system.sort(), ...models, ...reports.sort(), ...other.sort()];
+  };
+
   onMount(() => {
     logger.debug('ResponseSection: onMount');
     if (window.lucide) window.lucide.createIcons();
@@ -152,29 +180,48 @@ const ResponseSection = (props) => {
         </div>
         <div id="contentDiv" class="pb-20 max-w-6xl mx-auto space-y-6 h-[calc(100vh-14rem)] overflow-y-auto">
 
-          {/* Past Tasks */}
-           <For each={props.tasksList()}>
-             {(task) => (
-               <div class="collapse collapse-arrow bg-base-200 border border-base-300 rounded-xl shadow-lg overflow-hidden">
+           {/* Past Tasks */}
+            <For each={sortedModels()}>
+              {(model, modelIndex) => {
+                const modelTasks = groupedTasks()[model];
+                const sectionGroups = {};
+                modelTasks.forEach(task => {
+                  const section = task.section || "Unknown";
+                  if (!sectionGroups[section]) sectionGroups[section] = [];
+                  sectionGroups[section].push(task);
+                });
+                const sortedSections = Object.keys(sectionGroups).sort();
+
+                const modelNumber = modelIndex() + 1;
+                return (
+                  <div class="mb-6">
+                    <div class="flex items-center gap-2 mb-4">
+                      <span class="bg-blue-900 text-blue-100 dark:bg-blue-400/10 dark:text-blue-500 px-3 py-1 rounded-full flex items-center gap-1 text-xs">
+                        <i data-lucide="tag" class="w-3 h-3"></i>
+                        <span class="hidden sm:inline">{modelNumber}. {model}</span>
+                      </span>
+                    </div>
+                    <For each={sortedSections}>
+                      {(section, sectionIndex) => (
+                        <div class="flex flex-col mb-4 gap-2">
+                          <div class="flex items-center gap-2 mb-2">
+                            <span class="bg-emerald-900 text-emerald-100 dark:bg-emerald-400/10 dark:text-emerald-500 px-3 py-1 rounded-full flex items-center gap-1 text-xs">
+                              <i data-lucide="folder" class="w-3 h-3"></i>
+                              <span class="hidden sm:inline">{modelNumber}.{sectionIndex() + 1} {section}</span>
+                            </span>
+                          </div>
+                          <For each={sectionGroups[section].sort((a, b) => new Date(a.timestamp || 0) - new Date(b.timestamp || 0))}>
+                            {(task) => (
+               <div class="collapse collapse-arrow bg-base-200 border border-base-300 rounded-xl overflow-hidden">
                  <input type="checkbox" class="p-0" />
                   <div
                     class="collapse-title flex items-center gap-4 px-4 py-3 bg-base-300/40 cursor-pointer"
                     onClick={() => props.setActiveCardId(task.id)}
                   >
-                    <div class="flex items-center gap-2">
-                      <span class="bg-blue-100 text-blue-800 px-3 py-1 rounded-full flex items-center gap-1 text-xs">
-                        <i data-lucide="tag" class="w-3 h-3"></i>
-                        <span class="hidden sm:inline">{task.model || modelMap[task.step] || "Manual"}</span>
-                      </span>
-                      <span class="bg-emerald-100 text-emerald-800 px-3 py-1 rounded-full flex items-center gap-1 text-xs">
-                        <i data-lucide="folder" class="w-3 h-3"></i>
-                        <span class="hidden sm:inline">{task.section || "Unknown"}</span>
-                      </span>
-                      <span class="bg-violet-100 text-violet-800 px-3 py-1 rounded-full flex items-center gap-1 text-xs">
-                        <i data-lucide="list" class="w-3 h-3"></i>
-                        <span class="hidden sm:inline">{task.step_name || "Unknown"}</span>
-                      </span>
-                    </div>
+                    <span class="bg-violet-900 text-violet-100 dark:bg-violet-400/10 dark:text-violet-500 px-3 py-1 rounded-full flex items-center gap-1 text-xs">
+                      <i data-lucide="list" class="w-3 h-3"></i>
+                      <span class="hidden sm:inline">{task.step_name || "Unknown"}</span>
+                    </span>
                     <div class="ml-auto flex items-center gap-2">
                       <button type="button" onClick={() => props.handleImprove()} class="bg-primary/10 text-primary px-3 py-1 rounded-full flex items-center gap-1 text-xs hover:bg-primary/20 transition cursor-pointer">
                         <i data-lucide="sparkles" class="w-3 h-3"></i>
@@ -184,13 +231,13 @@ const ResponseSection = (props) => {
                         <i data-lucide="lightbulb" class="w-3 h-3"></i>
                         <span class="hidden sm:inline">AI Suggestion</span>
                       </button>
-                     <button type="button" class="mr-7 bg-neutral/10 text-neutral px-3 py-1 rounded-full flex items-center gap-1 text-xs hover:bg-neutral/20 transition cursor-pointer" onClick={(e) => {
-                       e.stopPropagation();
-                       navigator.clipboard.writeText(task.content);
-                     }}>
-                       <i data-lucide="copy" class="w-3 h-3"></i>
-                       <span class="hidden sm:inline">Copy</span>
-                     </button>
+                      <button type="button" class="mr-7 bg-yellow-900 text-yellow-100 dark:bg-yellow-400/10 dark:text-yellow-500 px-3 py-1 rounded-full flex items-center gap-1 text-xs hover:bg-yellow-900/20 dark:hover:bg-yellow-400/20 transition cursor-pointer" onClick={(e) => {
+                        e.stopPropagation();
+                        navigator.clipboard.writeText(task.content);
+                      }}>
+                        <i data-lucide="copy" class="w-3 h-3"></i>
+                        <span class="hidden sm:inline">Copy</span>
+                      </button>
                    </div>
                  </div>
                  <div class="collapse-content p-0">
@@ -229,9 +276,16 @@ const ResponseSection = (props) => {
                      </details>
                    </div>
                  </div>
-               </div>
-             )}
-          </For>
+                </div>
+              )}
+                          </For>
+                        </div>
+                      )}
+                    </For>
+                  </div>
+                );
+              }}
+            </For>
 
           {/* Streaming Response */}
           <Show when={props.isLoading() && props.streamingContent()}>

@@ -359,7 +359,7 @@ const Sidebar = () => {
                               <details open>
                                  <summary class="flex items-center gap-2">
                                    <i data-lucide="layers" class="w-4 h-4"></i>
-                                   <span classList={{ 'lg:hidden': isCollapsed() }}>{t().models}</span>
+                                   <span class="w-full" classList={{ 'lg:hidden': isCollapsed() }}>{t().models}</span>
                                  </summary>
                                <ul>
                                  <li>
@@ -457,7 +457,7 @@ const Sidebar = () => {
                                <details open>
                                  <summary class="flex items-center gap-2">
                                    <i data-lucide="file-text" class="w-4 h-4"></i>
-                                   <span classList={{ 'lg:hidden': isCollapsed() }}>{t().reports}</span>
+                                   <span class="w-full" classList={{ 'lg:hidden': isCollapsed() }}>{t().reports}</span>
                                  </summary>
                                <ul>
                                  <li>

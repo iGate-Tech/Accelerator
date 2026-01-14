@@ -74,10 +74,13 @@ const getSection = (task) =>
     : "Unknown Section");
 
 const getStepName = (task) =>
-  task.stepName ||
+  task.step_name ||
+  (task.step ? stepNames[task.step] : null) ||
   (Object.keys(promptToStepName).find(k => task.prompt?.includes(k))
     ? promptToStepName[Object.keys(promptToStepName).find(k => task.prompt?.includes(k))]
-    : task.step || "Unknown Step");
+    : null) ||
+  task.step ||
+  "Unknown Step";
 
 /* ---------- Component ---------- */
 
@@ -154,18 +157,25 @@ const ResponseSection = (props) => {
              {(task) => (
                <div class="collapse collapse-arrow bg-base-200 border border-base-300 rounded-xl shadow-lg overflow-hidden">
                  <input type="checkbox" class="p-0" />
-                 <div
-                   class="collapse-title flex items-center gap-4 px-4 py-3 bg-base-300/40 cursor-pointer"
-                   onClick={() => props.setActiveCardId(task.id)}
-                 >
-                   <span class="font-semibold text-sm">
-                     {getSection(task)} – {getStepName(task)}
-                   </span>
-                   <div class="ml-auto flex items-center gap-2">
-                     <span class="bg-info/10 text-info px-3 py-1 rounded-full flex items-center gap-1 text-xs">
-                       <i data-lucide="tag" class="w-3 h-3"></i>
-                       <span class="hidden sm:inline">{task.model || modelMap[task.step] || "Manual"}</span>
-                     </span>
+                  <div
+                    class="collapse-title flex items-center gap-4 px-4 py-3 bg-base-300/40 cursor-pointer"
+                    onClick={() => props.setActiveCardId(task.id)}
+                  >
+                    <div class="flex items-center gap-2">
+                      <span class="bg-blue-100 text-blue-800 px-3 py-1 rounded-full flex items-center gap-1 text-xs">
+                        <i data-lucide="tag" class="w-3 h-3"></i>
+                        <span class="hidden sm:inline">{task.model || modelMap[task.step] || "Manual"}</span>
+                      </span>
+                      <span class="bg-emerald-100 text-emerald-800 px-3 py-1 rounded-full flex items-center gap-1 text-xs">
+                        <i data-lucide="folder" class="w-3 h-3"></i>
+                        <span class="hidden sm:inline">{task.section || "Unknown"}</span>
+                      </span>
+                      <span class="bg-violet-100 text-violet-800 px-3 py-1 rounded-full flex items-center gap-1 text-xs">
+                        <i data-lucide="list" class="w-3 h-3"></i>
+                        <span class="hidden sm:inline">{task.step_name || "Unknown"}</span>
+                      </span>
+                    </div>
+                    <div class="ml-auto flex items-center gap-2">
                       <button type="button" onClick={() => props.handleImprove()} class="bg-primary/10 text-primary px-3 py-1 rounded-full flex items-center gap-1 text-xs hover:bg-primary/20 transition cursor-pointer">
                         <i data-lucide="sparkles" class="w-3 h-3"></i>
                         <span class="hidden sm:inline">Improve with AI </span>

@@ -16,18 +16,20 @@ export const handleLLMProjectUpdate = async (
   setPrompt,
   setStreamingContent
 ) => {
-  logger.info('Starting LLM project update process');
+  console.log(`[${new Date().toISOString()}] handleLLMProjectUpdate: Starting with prompt length: ${prompt?.length || 0}, currentProjectId: ${currentProjectId()}`);
   try {
     if (!currentProjectId()) {
-      logger.info('Creating initial project for streaming');
+      console.log(`[${new Date().toISOString()}] handleLLMProjectUpdate: No current project, creating initial project`);
       const tempName = 'New Project';
       const projectId = await addProject({ name: tempName, description: '', createdAt: new Date() });
+      console.log(`[${new Date().toISOString()}] handleLLMProjectUpdate: Initial project created with ID: ${projectId}`);
       setCurrentProjectId(projectId);
       window.dispatchEvent(new CustomEvent('projectAdded'));
-      logger.info('Initial project created with ID:', projectId);
+    } else {
+      console.log(`[${new Date().toISOString()}] handleLLMProjectUpdate: Using existing project: ${currentProjectId()}`);
     }
 
-    logger.info('Calling LLM with prompt length:', prompt.length);
+    console.log(`[${new Date().toISOString()}] handleLLMProjectUpdate: Calling LLM API with prompt length: ${prompt?.length || 0}`);
     const response = await fetch('/api/llm', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -35,31 +37,36 @@ export const handleLLMProjectUpdate = async (
     });
 
     if (!response.ok) {
+      console.log(`[${new Date().toISOString()}] handleLLMProjectUpdate: LLM API error: ${response.status}`);
       throw new Error(`LLM API error: ${response.status}`);
     }
 
+    console.log(`[${new Date().toISOString()}] handleLLMProjectUpdate: Starting to read streaming response`);
     const reader = response.body.getReader();
     const decoder = new TextDecoder();
     let responseText = '';
+    let chunkCount = 0;
 
     while (true) {
       const { done, value } = await reader.read();
-      if (done) break;
+      if (done) {
+        console.log(`[${new Date().toISOString()}] handleLLMProjectUpdate: Streaming complete, total chunks: ${chunkCount}, total response length: ${responseText.length}`);
+        break;
+      }
       const chunk = decoder.decode(value);
+      chunkCount++;
       responseText += chunk;
       setStreamingContent(responseText);
+
+      if (chunkCount % 10 === 0) {
+        console.log(`[${new Date().toISOString()}] handleLLMProjectUpdate: Received chunk ${chunkCount}, total length: ${responseText.length}`);
+      }
     }
 
-    setPrompt(responseText);
-    const projectName = extractProjectName(responseText);
-    logger.info('LLM response received, extracted project name:', projectName);
+    console.log(`[${new Date().toISOString()}] handleLLMProjectUpdate: Streaming completed successfully`);
 
-    logger.info('Updating project ID:', currentProjectId());
-    await updateProject(currentProjectId(), { name: projectName, description: responseText });
-    window.dispatchEvent(new CustomEvent('projectUpdated'));
-    logger.info('Project updated successfully');
   } catch (e) {
-    logger.error('Error in LLM project update process:', e.message);
+    console.log(`[${new Date().toISOString()}] handleLLMProjectUpdate: Error - ${e.message}`);
   }
 };
 

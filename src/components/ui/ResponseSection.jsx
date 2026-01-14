@@ -77,7 +77,7 @@ const getStepName = (task) =>
   task.stepName ||
   (Object.keys(promptToStepName).find(k => task.prompt?.includes(k))
     ? promptToStepName[Object.keys(promptToStepName).find(k => task.prompt?.includes(k))]
-    : "Unknown Step");
+    : task.step || "Unknown Step");
 
 /* ---------- Component ---------- */
 
@@ -103,6 +103,10 @@ const getStateIcon = (state) => {
 };
 
 const ResponseSection = (props) => {
+  const startPressedCondition = props.startPressed && props.startPressed();
+  const tasksCondition = props.tasksList && props.tasksList().length > 0 && props.machineStore.context?.currentStep !== 'done';
+  const shouldShow = startPressedCondition || tasksCondition;
+  console.log('ResponseSection: Conditions - startPressed:', startPressedCondition, 'tasks:', tasksCondition, 'currentStep:', props.machineStore.context?.currentStep, 'shouldShow:', shouldShow);
   logger.debug('ResponseSection: component rendered, tasksList length:', props.tasksList()?.length, 'isLoading:', props.isLoading(), 'streamingContent length:', props.streamingContent()?.length);
   onMount(() => {
     logger.debug('ResponseSection: onMount');
@@ -115,7 +119,7 @@ const ResponseSection = (props) => {
   });
   return (
     <div class="flex-1 p-4">
-      <Show when={props.tasksList().length > 0 || (props.isLoading() && props.streamingContent())}>
+      <Show when={shouldShow}>
         <div class="mb-4 max-w-6xl mx-auto">
           <div class="flex justify-between items-center">
               <div class="flex gap-3 items-center">
@@ -130,16 +134,16 @@ const ResponseSection = (props) => {
               </div>
             <div class="flex items-center gap-4">
            
-               <div class="flex gap-2">
-                 <div class="bg-info/10 text-info px-3 py-1 rounded-full flex items-center gap-1 text-xs">
-                   <i data-lucide="clock" class="w-3 h-3"></i>
-                   Time: {props.machineStore.context.consumedTime ? Math.round(props.machineStore.context.consumedTime / 60 * 10) / 10 : 0} / {props.machineStore.context.totalTime ? Math.round(props.machineStore.context.totalTime / 60 * 10) / 10 : 0} min
-                 </div>
-                 <div class="bg-warning/10 text-warning px-3 py-1 rounded-full flex items-center gap-1 text-xs">
-                   <i data-lucide="dollar-sign" class="w-3 h-3"></i>
-                   Credits: {props.machineStore.context.consumedCredits || 0} / {props.machineStore.context.totalCredits || 0}
-                 </div>
-               </div>
+                <div class="flex gap-2">
+                  <div class="bg-info/10 text-info px-3 py-1 rounded-full flex items-center gap-1 text-xs">
+                    <i data-lucide="clock" class="w-3 h-3"></i>
+                    Time: {props.machineStore.context.consumedTime ? Math.round(props.machineStore.context.consumedTime / 60 * 10) / 10 : 0} / {props.machineStore.context.totalTime ? Math.round(props.machineStore.context.totalTime / 60 * 10) / 10 : 0} min
+                  </div>
+                  <div class="bg-warning/10 text-warning px-3 py-1 rounded-full flex items-center gap-1 text-xs">
+                    <i data-lucide="dollar-sign" class="w-3 h-3"></i>
+                    Credits: {props.machineStore.context.consumedCredits || 0} / {props.machineStore.context.totalCredits || 0}
+                  </div>
+                </div>
             </div>
           </div>
         </div>
@@ -180,20 +184,20 @@ const ResponseSection = (props) => {
                    </div>
                  </div>
                  <div class="collapse-content p-0">
-                   {/* Body */}
-                   <div class="card-body px-5 py-4 bg-base-100">
-                      <div
-                        class="prose max-w-none"
-                        innerHTML={marked.parse(renderFilledTemplate(task.content), { breaks: true, gfm: true })}
-                      />
-                   </div>
+                    {/* Body */}
+                    <div class="card-body px-5 py-4 bg-base-100">
+                       <div
+                         class="prose max-w-none dark:prose-invert"
+                         innerHTML={marked.parse(renderFilledTemplate(task.content), { breaks: true, gfm: true })}
+                       />
+                    </div>
 
                    {/* Footer */}
                    <div class="px-4 py-3 bg-base-300/30">
-                     <div class="flex items-center justify-between text-sm opacity-70 mb-2">
-                       <span>{new Date(task.timestamp).toLocaleString()}</span>
-                       <span class="text-xs">{task.model || "Manual"}</span>
-                     </div>
+                      <div class="flex items-center justify-between text-sm opacity-70 mb-2">
+                        <span>{task.timestamp ? new Date(task.timestamp).toLocaleString() : 'Unknown'}</span>
+                        <span class="text-xs">{task.model || "Manual"}</span>
+                      </div>
 
                      {/* Additional Details */}
                      <details class="text-xs opacity-60">
@@ -240,12 +244,12 @@ const ResponseSection = (props) => {
                 <i data-lucide="loader" class="w-4 h-4 animate-spin" />
                </div>
 
-                <div class="card-body px-5 py-4 bg-base-100">
-                  <div
-                    class="prose max-w-none"
-                    innerHTML={marked.parse(props.streamingContent(), { breaks: true, gfm: true })}
-                  />
-                </div>
+                 <div class="card-body px-5 py-4 bg-base-100">
+                   <div
+                     class="prose max-w-none dark:prose-invert"
+                     innerHTML={marked.parse(props.streamingContent(), { breaks: true, gfm: true })}
+                   />
+                 </div>
 
               <div class="flex items-center px-4 py-3 bg-base-300/30 text-sm opacity-70">
                 <span class="animate-pulse">Streaming…</span>

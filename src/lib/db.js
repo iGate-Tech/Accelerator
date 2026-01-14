@@ -196,8 +196,8 @@ export const getTasks = async (project_id = null, userId = null) => {
   return await _getTasks({ projectId: project_id });
 };
 
-export const addTask = async (task, project_id) => {
-  const taskWithProjectId = { ...task, projectId: project_id };
+export const addTask = async (task, project_id, user_id) => {
+  const taskWithProjectId = { ...task, projectId: project_id, userId: user_id };
   const { _addTask } = await import('./db-projects.js');
   return await _addTask({ task: taskWithProjectId });
 };
@@ -345,8 +345,9 @@ export const exportReports = async (projectId) => {
 };
 
 export const addProjectToGroup = async (projectId, groupId) => {
+  const user = await getCurrentUser();
   const { _addProjectToGroup } = await import('./db-groups.js');
-  return await _addProjectToGroup({ projectId, groupId });
+  return await _addProjectToGroup({ projectId, groupId, userId: user.id });
 };
 
 export const removeProjectFromGroup = async (projectId, groupId) => {

@@ -143,7 +143,8 @@ describe('State Machine', () => {
         [],
         mockAddTask,
         mockUpdateProject,
-        'test-project'
+        'test-project',
+        'test-user'
       )).rejects.toThrow('Received undefined response from LLM');
     });
 
@@ -163,7 +164,8 @@ describe('State Machine', () => {
         () => tasksList,
         mockAddTask,
         mockUpdateProject,
-        'test-project'
+        'test-project',
+        'test-user'
       );
 
       // Should continue but log errors
@@ -171,6 +173,9 @@ describe('State Machine', () => {
     });
 
     it('should add response as task and update project', async () => {
+      // Set valid context
+      setMachineStore("context", { currentStep: 'system', completedSteps: 0 });
+
       const response = 'Test AI response';
       const projectId = 'test-project-123';
       const tasksList = [];
@@ -185,7 +190,8 @@ describe('State Machine', () => {
         () => tasksList,
         mockAddTask,
         mockUpdateProject,
-        projectId
+        projectId,
+        'test-user'
       );
 
       expect(mockAddTask).toHaveBeenCalledWith(
@@ -196,14 +202,14 @@ describe('State Machine', () => {
           section: 'Initialization',
           stepName: 'System Initialization'
         }),
-        projectId
+        projectId,
+        'test-user'
       );
 
       expect(mockUpdateProject).toHaveBeenCalledWith(
         projectId,
         expect.objectContaining({
-          llm_response: response,
-          last_modified: expect.any(Date)
+          llmResponse: response
         })
       );
     });

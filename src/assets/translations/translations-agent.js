@@ -11,7 +11,7 @@ export const agentTranslations = {
      resume: 'Resume',
      reset: 'Reset',
       greetingPrefix: "Hi",
-      greetingSuffix: ", what's your next big idea?",
+      greetingSuffix: ", what's your next amazing idea?",
      placeholder: "Enter your problem statement here...",
    },
    ar: {
@@ -23,7 +23,7 @@ export const agentTranslations = {
      resume: 'استئناف',
      reset: 'إعادة تعيين',
       greetingPrefix: "مرحباً",
-      greetingSuffix: "، ما هي فكرتك الكبيرة التالية؟",
+       greetingSuffix: "، ما هي فكرتك الرائعة التالية؟",
      placeholder: "أدخل بيان المشكلة هنا...",
    }
 };

@@ -24,7 +24,7 @@ export const helpTranslations = {
     ctrlK: 'Ctrl+K',
 
     // Getting Started Steps
-    createFirstProject: 'Create Your First Project',
+    createFirstProject: 'Create Your First Task',
     createProjectDesc: 'Go to the home page and describe your startup idea. Be specific about the problem you\'re solving and your target market.',
     followProcess: 'Follow the Accelerator Process',
     followProcessDesc: 'The AI will guide you through 51 structured steps covering problem validation, market analysis, business modeling, and funding strategy.',
@@ -222,7 +222,7 @@ export const helpTranslations = {
     ctrlK: 'Ctrl+K',
 
     // Getting Started Steps
-    createFirstProject: 'أنشئ مشروعك الأول',
+    createFirstProject: 'أنشئ مهمتك الأولى',
     createProjectDesc: 'اذهب إلى الصفحة الرئيسية وصف فكرة عملك. كن محدداً حول المشكلة التي تحلها وسوقك المستهدف.',
     followProcess: 'اتبع عملية المسرع',
     followProcessDesc: 'سيرشدك الذكاء الاصطناعي من خلال 51 خطوة منظمة تغطي التحقق من المشكلة وتحليل السوق ونمذجة الأعمال واستراتيجية التمويل.',

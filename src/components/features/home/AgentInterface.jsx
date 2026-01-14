@@ -85,7 +85,6 @@ const AgentInterface = (props) => { // Defensive checks for required props
 
     // Auto-resize textarea when prompt changes
     createEffect(() => {
-        console.log('AgentInterface: prompt changed to', props.prompt ? props.prompt() : 'undefined');
         props.prompt(); // Track prompt changes
         if (textareaRef && textareaRef.style) {
             textareaRef.style.height = 'auto';
@@ -187,6 +186,11 @@ const AgentInterface = (props) => { // Defensive checks for required props
                 } ${
                     currentLang() === "ar" ? "rtl" : "ltr"
                 }`
+        }
+        style={
+          (props.startPressed && props.startPressed()) ||
+          (props.tasksList && props.tasksList().length > 0 && props.machineStore.context?.currentStep !== 'done')
+            ? "position: fixed; bottom: 10px; z-index: 10;" : ""
         }>
 
             <div id="agentContent"
@@ -194,36 +198,40 @@ const AgentInterface = (props) => { // Defensive checks for required props
                     props.agentContentClass ? props.agentContentClass() : ""
             }>
                 <div class="flex flex-col gap-4">
-                    <div ref={greetingRef}
-                        id="greetingDiv"
-                        class={
-                            props.greetingClass ? props.greetingClass() : ""
-                    }>
-                        <h1 class="text-2xl sm:text-3xl md:text-4xl font-sans font-light mb-2 sm:mb-2">
-                            <span class="text-base-content">
-                                {
-                                t().greetingPrefix
-                            }</span>
-                            {" "}
-                            <span class="text-primary">
-                                {
-                                userName()
-                            }</span>
-                            <span class="text-base-content">
-                                {
-                                t().greetingSuffix
-                            }</span>
-                        </h1>
-                    </div>
+                    <Show when={!(props.startPressed && props.startPressed()) && !(props.tasksList && props.tasksList().length > 0)}>
+                        <div ref={greetingRef}
+                            id="greetingDiv"
+                            class={
+                                props.greetingClass ? props.greetingClass() : ""
+                        }>
+                            <h1 class="text-2xl sm:text-3xl md:text-4xl font-sans font-light mb-2 sm:mb-2">
+                                <span class="text-base-content">
+                                    {
+                                    t().greetingPrefix
+                                }</span>
+                                {" "}
+                                <span class="text-primary">
+                                    {
+                                    userName()
+                                }</span>
+                                <span class="text-base-content">
+                                    {
+                                    t().greetingSuffix
+                                }</span>
+                            </h1>
+                        </div>
+                    </Show>
                     <div class="btnshadow p-[3px]">
                     <div ref={cardRef}
                         class=" card  bg-base-100 border border-base-200 rounded-box "
                         onMouseEnter={handleCardHover}
                         onMouseLeave={handleCardLeave}>
                         <div class="card-body relative p-4 !gap-0">
-                             <Show when={
-                                 props.currentProjectId && props.currentProjectId() !== null && props.tasksList && (props.tasksList().length > 0 || (props.machineStore && props.machineStore.state === "processing"))
-                             }>
+                              <Show when={
+                                  props.currentProjectId && props.currentProjectId() !== null &&
+                                  (props.startPressed && props.startPressed() ||
+                                   (props.tasksList && props.tasksList().length > 0 && props.machineStore.context?.currentStep !== 'done'))
+                              }>
                                  <ProgressAccordion machineStore={
                                          props.machineStore
                                      }
@@ -246,11 +254,16 @@ const AgentInterface = (props) => { // Defensive checks for required props
                                          props.handleResume
                                      }/>
                              </Show>
-
+                             <Show when={props.machineStore.state === "processing" && props.streamingContent && props.streamingContent().trim()}>
+                                 <div class="mt-4 p-4 bg-base-200 rounded-lg">
+                                     <h3 class="text-sm font-semibold mb-2">AI Processing...</h3>
+                                     <div class="text-sm whitespace-pre-wrap">{props.streamingContent()}</div>
+                                 </div>
+                             </Show>
                              {/* Form */}
-                            <Show when={
-                                props.tasksList && props.tasksList().length === 0
-                            }>
+                              <Show when={
+                                  props.tasksList && (props.tasksList().length === 0 || props.machineStore.context?.currentStep === 'done') && !props.startPressed()
+                              }>
                                 <form id="taskForm">
                                     <input type="hidden" name="action" id="action" value="send"/>
                                     <input type="hidden" name="taskContent" value=""/>
@@ -263,11 +276,11 @@ const AgentInterface = (props) => { // Defensive checks for required props
                                         name="prompt"
                                         id="promptTextarea"
                                         class={
-                                            `custom-textarea text-base-content text-lg sm:text-xl md:text-2xl placeholder:text-base-content placeholder:text-lg sm:placeholder:text-xl md:placeholder:text-2xl focus:ring-0 active:ring-0 ${
+                                            `   text-base-content text-lg  w-full  focus:ring-0 active:ring-0 ${
                                                 props.machineStore.state !== "idle" ? "opacity-50 cursor-not-allowed" : ""
                                             }`
                                         }
-                                         style="resize: none; overflow-y: auto; min-height: 3rem; max-height: 400px; box-sizing: border-box;"
+                                        style="resize: none; overflow: hidden; min-height: 3rem; box-sizing: border-box;"
                                         placeholder={
                                             t().placeholder
                                         }
@@ -294,9 +307,37 @@ const AgentInterface = (props) => { // Defensive checks for required props
                                                 }
                                             }
                                         }
-                                         disabled={
-                                             props.machineStore ? props.machineStore.state !== "idle" && props.machineStore.state !== "processing" : true
-                                         }
+                                        disabled={
+                                            props.machineStore ? props.machineStore.state !== "idle" : true
+                                    }></textarea>
+                            <Show when={
+                                props.machineStore && props.machineStore.state === "pause"
+                            }>
+                                <div class="text-warning text-sm mt-2">
+                                    {
+                                    t().agentPaused
+                                }</div>
+                            </Show>
+                            <Show when={
+                                props.machineStore && props.machineStore.state === "error"
+                            }>
+                                <div class="text-error text-sm mt-2">
+                                    Processing error: {
+                                    props.machineStore.context ?. uiMessage || 'Unknown error occurred'
+                                } </div>
+                            </Show>
+                            <div ref={buttonsRef}
+                                class="flex justify-between items-center mt-2">
+                                <div class="flex gap-2">
+                                    <Show when={
+                                        props.machineStore && props.machineStore.state === "idle"
+                                    }>
+                                        <button type="button"
+                                            onClick={
+                                                (e) => {
+                                                    handleButtonPress(e.currentTarget);
+                                                    props.handleImprove && props.handleImprove();
+                                                }
                                             }
                                             onMouseEnter={
                                                 (e) => handleButtonHover(e.currentTarget)
@@ -358,13 +399,14 @@ const AgentInterface = (props) => { // Defensive checks for required props
                                                 t().reset
                                             }</span>
                                         </button>
-                                        <button type="button"
-                                            onClick={
-                                                (e) => {
-                                                    handleButtonPress(e.currentTarget);
-                                                    props.handleStart && props.handleStart();
-                                                }
-                                            }
+                                         <button type="button"
+                                             onClick={
+                                                 (e) => {
+                                                     console.log(`[${new Date().toISOString()}] AgentInterface: Start button clicked, calling handleStart`);
+                                                     handleButtonPress(e.currentTarget);
+                                                     props.handleStart && props.handleStart();
+                                                 }
+                                             }
                                             onMouseEnter={
                                                 (e) => handleButtonHover(e.currentTarget)
                                             }

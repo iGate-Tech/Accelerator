@@ -10,7 +10,6 @@ import { useUser } from "../../context/UserContext";
 import { useLanguage } from "../../hooks/useLanguage";
 import { useLucideIcons } from "../../hooks/useLucideIcons";
 import { getUserNotifications, markNotificationRead } from "../../lib/db";
-import avatar from "../../assets/avatar.png";
 
 const Navbar = () => {
   logger.trace('Navbar: Starting');
@@ -136,17 +135,9 @@ const Navbar = () => {
     >
       {/* LEFT */}
       <div class="navbar-start">
-        <A href="/" class="ml-2 mr-4">
-          <img src="/src/assets/favicon.svg" alt="Logo" class="w-8 h-8" />
-        </A>
+        <span class="text-base-content ml-4">iGate 1.0/Accelerator</span>
 
-        <Show when={isAuthenticated()}>
-          <div class="hidden lg:flex gap-6">
-            <NavItem href="/" label={t().home} />
-            <NavItem href="/dashboard" label={t().dashboard} />
-            <NavItem href="/portfolio" label={t().portfolio} />
-          </div>
-        </Show>
+
       </div>
 
 
@@ -160,17 +151,14 @@ const Navbar = () => {
           </button>
 
           <ul class="menu dropdown-content mt-3 p-2 shadow bg-base-100 rounded w-52">
-            <Show when={isAuthenticated()} fallback={
-              <>
-                <li><A href="/login" class="flex items-center gap-2"><i data-lucide="log-in" class="w-4 h-4"></i>Login</A></li>
-                <li><A href="/signup" class="flex items-center gap-2"><i data-lucide="user-plus" class="w-4 h-4"></i>Sign Up</A></li>
-              </>
-            }>
-              <li><A href="/" class="flex items-center gap-2"><i data-lucide="home" class="w-4 h-4"></i>Home</A></li>
-              <li><A href="/dashboard" class="flex items-center gap-2"><i data-lucide="bar-chart" class="w-4 h-4"></i>Dashboard</A></li>
-               <li><A href="/portfolio" class="flex items-center gap-2"><i data-lucide="briefcase" class="w-4 h-4"></i>Portfolio</A></li>
-               <li><A href="/invitations" class="flex items-center gap-2"><i data-lucide="user-plus" class="w-4 h-4"></i>Invitations</A></li>
-            </Show>
+             <Show when={isAuthenticated()} fallback={
+               <>
+                 <li><A href="/login" class="flex items-center gap-2"><i data-lucide="log-in" class="w-4 h-4"></i>Login</A></li>
+                 <li><A href="/signup" class="flex items-center gap-2"><i data-lucide="user-plus" class="w-4 h-4"></i>Sign Up</A></li>
+               </>
+             }>
+                <li><A href="/invitations" class="flex items-center gap-2"><i data-lucide="user-plus" class="w-4 h-4"></i>Invitations</A></li>
+             </Show>
           </ul>
         </div>
 
@@ -193,10 +181,10 @@ const Navbar = () => {
              }}
           />
           <div class="swap-off text-sm font-semibold flex items-center gap-1">
-            EN <i data-lucide="languages" class="w-5 h-5"></i>
+            EN
           </div>
            <div class="swap-on text-sm font-semibold flex items-center gap-1">
-             عربي <i data-lucide="languages" class="w-5 h-5"></i>
+             عربي
            </div>
         </label>
 
@@ -391,7 +379,13 @@ const Navbar = () => {
           <div class="dropdown dropdown-bottom dropdown-end">
             <button class="btn btn-ghost btn-circle avatar relative">
                 <div class="w-8 rounded-full">
-                  <img src={user()?.avatar && user()?.avatar !== '/src/assets/avatar.png' ? user()?.avatar : avatar} alt="User avatar" />
+                  {user()?.avatar && user()?.avatar !== '/src/assets/avatar.png' ? (
+                    <img src={user()?.avatar} alt="User avatar" />
+                  ) : (
+                    <div class="w-full h-full bg-base-300 rounded-full flex items-center justify-center">
+                      <i data-lucide="user" class="w-5 h-5 text-base-content"></i>
+                    </div>
+                  )}
                 </div>
               <div class="absolute bottom-0 right-0 w-3 h-3 bg-success border-2 border-base-100 rounded-full"></div>
             </button>
@@ -399,12 +393,18 @@ const Navbar = () => {
             <ul class="menu dropdown-content mt-3 z-50 p-0 shadow-xl bg-base-100 rounded-xl w-72 max-w-[calc(100vw-1rem)] border border-base-200">
               <li class="p-5 border-b border-base-200 bg-gradient-to-br from-primary/5 via-base-100 to-secondary/5">
                 <div class="flex items-center gap-4">
-                  <div class="avatar relative">
-                     <div class="w-14 rounded-full ring ring-primary/20">
-                       <img src={user()?.avatar && user()?.avatar !== '/src/assets/avatar.png' ? user()?.avatar : avatar} alt="Avatar" />
-                     </div>
-                    <div class="absolute bottom-0 right-0 w-4 h-4 bg-success border-2 border-base-100 rounded-full"></div>
-                  </div>
+                   <div class="avatar relative">
+                      <div class="w-14 rounded-full ring ring-primary/20">
+                        {user()?.avatar && user()?.avatar !== '/src/assets/avatar.png' ? (
+                          <img src={user()?.avatar} alt="Avatar" />
+                        ) : (
+                          <div class="w-full h-full bg-base-300 rounded-full flex items-center justify-center">
+                            <i data-lucide="user" class="w-8 h-8 text-base-content"></i>
+                          </div>
+                        )}
+                      </div>
+                     <div class="absolute bottom-0 right-0 w-4 h-4 bg-success border-2 border-base-100 rounded-full"></div>
+                   </div>
                   <div class="flex-1 min-w-0">
                     <div class="font-bold text-base-content text-lg">
                       {user()?.profile?.name ?? 'John Doe'}

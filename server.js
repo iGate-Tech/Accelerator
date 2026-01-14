@@ -142,7 +142,7 @@ app.get('/', (req, res) => {
 
 // Health check endpoint with detailed status
 app.get('/api/health', async (req, res) => {
-    logger.info('server.js: Health check requested');
+    console.log(`[${new Date().toISOString()}] SERVER: Health check requested from IP: ${req.ip}`);
 
     const health = {
         status: 'ok',
@@ -188,10 +188,15 @@ app.post('/api/llm', async (req, res) => {
     const prompt = req.body.prompt || 'Hello';
     const startTime = Date.now();
 
+    console.log(`[${new Date().toISOString()}] SERVER: === STREAMING LLM API CALL RECEIVED ===`);
+    console.log(`[${new Date().toISOString()}] SERVER: Request from IP: ${req.ip}, user-agent: ${req.get('User-Agent')?.substring(0, 50) || 'unknown'}`);
+    console.log(`[${new Date().toISOString()}] SERVER: Prompt length: ${prompt.length}, first 100 chars: "${prompt.substring(0, 100)}..."`);
+
     // Rate limiting
     const clientIP = req.ip || req.connection.remoteAddress || 'unknown';
     const rateLimitResult = llmRateLimiter.checkLimit(clientIP);
     if (!rateLimitResult.allowed) {
+        console.log(`[${new Date().toISOString()}] SERVER: RATE LIMIT EXCEEDED for IP: ${clientIP}, reset in ${Math.ceil((rateLimitResult.resetTime - Date.now()) / 1000)}s`);
         logger.warn('server.js: Rate limit exceeded for IP:', clientIP);
         res.status(429).json({
             error: 'Rate limit exceeded',
@@ -199,68 +204,75 @@ app.post('/api/llm', async (req, res) => {
         });
         return;
     }
+    console.log(`[${new Date().toISOString()}] SERVER: Rate limit check passed for IP: ${clientIP}`);
 
-    logger.info('server.js: === STREAMING LLM API CALL RECEIVED ===');
-    logger.debug('server.js: Request body keys:', Object.keys(req.body || {}), 'prompt length:', prompt.length);
-    logger.trace('server.js: Full request body:', req.body);
+    console.log(`[${new Date().toISOString()}] SERVER: Request body keys: ${Object.keys(req.body || {}).join(', ')}`);
+    console.log(`[${new Date().toISOString()}] SERVER: Full request headers:`, JSON.stringify(req.headers, null, 2));
 
     if (!openai) {
+        console.log(`[${new Date().toISOString()}] SERVER: ERROR - OpenAI client not initialized`);
         logger.error('server.js: OpenAI client not initialized');
         res.status(500).end('OpenAI client not configured');
         return;
     }
-    logger.debug('server.js: OpenAI client available, proceeding with request');
+    console.log(`[${new Date().toISOString()}] SERVER: OpenAI client available, proceeding with request`);
+    console.log(`[${new Date().toISOString()}] SERVER: Using model: ${AI_MODEL}`);
 
     try {
+        console.log(`[${new Date().toISOString()}] SERVER: Setting response headers for streaming`);
         res.setHeader('Content-Type', 'text/plain');
+
         const systemPrompt = `You are the iGate Accelerator Agent — an expert startup advisor guiding founders through a 51-step validation and acceleration process.
 
-Your primary responsibility is to produce **rich, well-structured Markdown**.
+        Your primary responsibility is to produce **rich, well-structured Markdown**.
 
-───────────────────────────────────────────────────────────────────────────────
-MANDATORY FORMAT
+        ───────────────────────────────────────────────────────────────────────────────
+        MANDATORY FORMAT
 
-- ALWAYS respond in valid Markdown
-- Use headings (## ###), bullet lists, numbered steps, tables, and emphasis
-- Prefer clarity, hierarchy, and depth over brevity
-- Responses MUST look like a polished startup playbook page
+        - ALWAYS respond in valid Markdown
+        - Use headings (## ###), bullet lists, numbered steps, tables, and emphasis
+        - Prefer clarity, hierarchy, and depth over brevity
+        - Responses MUST look like a polished startup playbook page
 
-───────────────────────────────────────────────────────────────────────────────
-EMBEDDED DATA (SECONDARY RULE)
+        ───────────────────────────────────────────────────────────────────────────────
+        EMBEDDED DATA (SECONDARY RULE)
 
-- Embed ONLY important, atomic facts using this format:
-  {{key: "value"}}
-- Use placeholders for numbers, metrics, roles, markets, tools, or decisions
-- NEVER embed placeholders in headings, lists labels, or tables
-- Do NOT force placeholders into every paragraph
+        - Embed ONLY important, atomic facts using this format:
+          {{key: "value"}}
+        - Use placeholders for numbers, metrics, roles, markets, tools, or decisions
+        - NEVER embed placeholders in headings, lists labels, or tables
+        - Do NOT force placeholders into every paragraph
 
-───────────────────────────────────────────────────────────────────────────────
-PLACEHOLDER RULES
+        ───────────────────────────────────────────────────────────────────────────────
+        PLACEHOLDER RULES
 
-- JSON only (string, number, array, object)
-- No markdown, no sentences inside placeholders
-- Max 2 placeholders per paragraph
+        - JSON only (string, number, array, object)
+        - No markdown, no sentences inside placeholders
+        - Max 2 placeholders per paragraph
 
-───────────────────────────────────────────────────────────────────────────────
-CONTENT RULES
+        ───────────────────────────────────────────────────────────────────────────────
+        CONTENT RULES
 
-- Fully answer the task with detailed Markdown
-- Break ideas into steps and sections
-- Use examples and assumptions
-- Markdown quality is more important than placeholder coverage
+        - Fully answer the task with detailed Markdown
+        - Break ideas into steps and sections
+        - Use examples and assumptions
+        - Markdown quality is more important than placeholder coverage
 
-───────────────────────────────────────────────────────────────────────────────
-STYLE
+        ───────────────────────────────────────────────────────────────────────────────
+        STYLE
 
-- Professional
-- Practical
-- Evidence-based
-- No hype
+        - Professional
+        - Practical
+        - Evidence-based
+        - No hype
 
-Do NOT repeat the prompt. Treat the user input as a task and deliver a complete Markdown response.
-`;
+        Do NOT repeat the prompt. Treat the user input as a task and deliver a complete Markdown response.
+        `;
 
-        logger.debug('server.js: Creating OpenAI stream with model:', AI_MODEL, 'systemPrompt length:', systemPrompt.length, 'prompt length:', prompt.length);
+        console.log(`[${new Date().toISOString()}] SERVER: System prompt length: ${systemPrompt.length}, user prompt length: ${prompt.length}`);
+        console.log(`[${new Date().toISOString()}] SERVER: Creating OpenAI stream with model: ${AI_MODEL}`);
+
+        const openaiStartTime = Date.now();
         const stream = await openai.chat.completions.create({
             model: AI_MODEL,
             messages: [
@@ -269,30 +281,41 @@ Do NOT repeat the prompt. Treat the user input as a task and deliver a complete 
             ],
             stream: true,
         });
-        logger.debug('server.js: OpenAI stream created successfully');
+        const openaiInitTime = Date.now() - openaiStartTime;
+        console.log(`[${new Date().toISOString()}] SERVER: OpenAI stream created successfully in ${openaiInitTime}ms`);
 
+        console.log(`[${new Date().toISOString()}] SERVER: Starting to stream response chunks to client`);
         let aiResponse = '';
         let chunkCount = 0;
-        logger.debug('server.js: Starting to stream response chunks');
+        let totalBytesSent = 0;
+
         for await (const chunk of stream) {
             const content = chunk.choices[0]?.delta?.content || '';
             aiResponse += content;
             res.write(content);
             chunkCount++;
+            totalBytesSent += Buffer.byteLength(content, 'utf8');
+
             if (chunkCount % 10 === 0) {
-                logger.trace('server.js: Streamed', chunkCount, 'chunks, current response length:', aiResponse.length);
+                console.log(`[${new Date().toISOString()}] SERVER: Streamed ${chunkCount} chunks, current response length: ${aiResponse.length}, bytes sent: ${totalBytesSent}`);
             }
         }
+
+        console.log(`[${new Date().toISOString()}] SERVER: Ending response stream`);
         res.end();
+
         const duration = Date.now() - startTime;
-        logger.info('server.js: Stream completed - total chunks:', chunkCount, 'response length:', aiResponse.length, 'duration:', duration + 'ms');
-        logger.debug('server.js: Full LLM Response preview:', aiResponse.substring(0, 200) + '...');
+        console.log(`[${new Date().toISOString()}] SERVER: === STREAM COMPLETED ===`);
+        console.log(`[${new Date().toISOString()}] SERVER: Total chunks: ${chunkCount}, response length: ${aiResponse.length}, bytes sent: ${totalBytesSent}, total duration: ${duration}ms`);
+        console.log(`[${new Date().toISOString()}] SERVER: Response preview: "${aiResponse.substring(0, 200)}..."`);
 
         // No longer update server-side history
     } catch (error) {
         const duration = Date.now() - startTime;
-        logger.error('server.js: Streaming LLM error after', duration + 'ms:', error.message, error.stack);
-        logger.trace('server.js: Full error object:', error);
+        console.log(`[${new Date().toISOString()}] SERVER: CRITICAL ERROR after ${duration}ms: ${error.message}`);
+        console.log(`[${new Date().toISOString()}] SERVER: Error stack:`, error.stack);
+        console.log(`[${new Date().toISOString()}] SERVER: Full error object:`, error);
+        console.log(`[${new Date().toISOString()}] SERVER: Sending 500 error response to client`);
         res.status(500).end('Error: ' + error.message);
     }
 });
@@ -302,10 +325,14 @@ app.post('/api/llm/quick', async (req, res) => {
     const prompt = req.body.prompt || 'Hello';
     const startTime = Date.now();
 
+    console.log(`[${new Date().toISOString()}] SERVER: === QUICK LLM API CALL RECEIVED ===`);
+    console.log(`[${new Date().toISOString()}] SERVER: Quick request from IP: ${req.ip}, prompt length: ${prompt.length}`);
+
     // Rate limiting
     const clientIP = req.ip || req.connection.remoteAddress || 'unknown';
     const rateLimitResult = llmRateLimiter.checkLimit(clientIP);
     if (!rateLimitResult.allowed) {
+        console.log(`[${new Date().toISOString()}] SERVER: QUICK - RATE LIMIT EXCEEDED for IP: ${clientIP}`);
         logger.warn('server.js: Rate limit exceeded for IP:', clientIP);
         res.status(429).json({
             error: 'Rate limit exceeded',
@@ -313,10 +340,7 @@ app.post('/api/llm/quick', async (req, res) => {
         });
         return;
     }
-
-    logger.info('server.js: === QUICK LLM API CALL RECEIVED ===');
-    logger.debug('server.js: Request body keys:', Object.keys(req.body || {}), 'prompt length:', prompt.length);
-    logger.trace('server.js: Full request body:', req.body);
+    console.log(`[${new Date().toISOString()}] SERVER: Quick - Rate limit check passed`);
 
     if (!openai) {
         logger.error('server.js: OpenAI client not initialized');
@@ -342,29 +366,37 @@ app.post('/api/llm/quick', async (req, res) => {
             });
             logger.debug('server.js: Quick OpenAI stream created successfully');
 
+            console.log(`[${new Date().toISOString()}] SERVER: Quick - Setting response headers for streaming`);
             res.setHeader('Content-Type', 'text/plain');
             let aiResponse = '';
             let chunkCount = 0;
-            logger.debug('server.js: Starting to stream quick response chunks');
-            for await (const chunk of stream) {
-                const content = chunk.choices[0]?.delta?.content || '';
-                aiResponse += content;
-                res.write(content);
-                chunkCount++;
-            }
+            let totalBytesSent = 0;
+            console.log(`[${new Date().toISOString()}] SERVER: Quick - Starting to stream response chunks`);
+        for await (const chunk of stream) {
+            const content = chunk.choices[0]?.delta?.content || '';
+            aiResponse += content;
+            res.write(content);
+            chunkCount++;
+            totalBytesSent += Buffer.byteLength(content, 'utf8');
+        }
+            console.log(`[${new Date().toISOString()}] SERVER: Quick - Ending response stream`);
             res.end();
             const duration = Date.now() - startTime;
-            logger.info('server.js: Quick stream completed - chunks:', chunkCount, 'response length:', aiResponse.length, 'duration:', duration + 'ms');
-            logger.debug('server.js: Quick LLM Response:', aiResponse);
+            console.log(`[${new Date().toISOString()}] SERVER: === QUICK STREAM COMPLETED ===`);
+            console.log(`[${new Date().toISOString()}] SERVER: Quick - Total chunks: ${chunkCount}, response length: ${aiResponse.length}, duration: ${duration}ms`);
+            console.log(`[${new Date().toISOString()}] SERVER: Quick - Response length: ${aiResponse.length}`);
             break; // success, exit loop
         } catch (error) {
             const duration = Date.now() - startTime;
             if (error.message.includes('429') && retries < maxRetries) {
                 retries++;
                 const waitTime = 5000 * retries; // 5s, 10s, 15s
+                console.log(`[${new Date().toISOString()}] SERVER: Quick - 429 rate limit error, retrying in ${waitTime}ms (attempt ${retries}/${maxRetries})`);
                 logger.warn(`server.js: 429 error, retrying in ${waitTime}ms (attempt ${retries}/${maxRetries})`);
                 await new Promise(resolve => setTimeout(resolve, waitTime));
             } else {
+                console.log(`[${new Date().toISOString()}] SERVER: Quick - CRITICAL ERROR after ${duration}ms: ${error.message}`);
+                console.log(`[${new Date().toISOString()}] SERVER: Quick - Error stack:`, error.stack);
                 logger.error('server.js: Quick LLM error after', duration + 'ms:', error.message, error.stack);
                 logger.trace('server.js: Full quick error object:', error);
                 res.status(500).end('Error: ' + error.message);
@@ -417,5 +449,10 @@ if (sslKeyPath && sslCertPath && fs.existsSync(sslKeyPath) && fs.existsSync(sslC
 }
 
 server.listen(port, () => {
+    console.log(`[${new Date().toISOString()}] SERVER: === SERVER STARTED SUCCESSFULLY ===`);
+    console.log(`[${new Date().toISOString()}] SERVER: Listening on port ${port}, protocol: ${sslKeyPath ? 'HTTPS' : 'HTTP'}`);
+    console.log(`[${new Date().toISOString()}] SERVER: Server URL: ${sslKeyPath ? 'https' : 'http'}://localhost:${port}`);
+    console.log(`[${new Date().toISOString()}] SERVER: Environment: ${process.env.NODE_ENV || 'development'}`);
+    console.log(`[${new Date().toISOString()}] SERVER: OpenRouter API configured: ${!!process.env.OPENROUTER_API_KEY}`);
     logger.info('server.js: Server listening on port', port, 'protocol:', sslKeyPath ? 'HTTPS' : 'HTTP');
 });

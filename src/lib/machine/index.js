@@ -12,6 +12,7 @@ export {
   pause,
   resume,
   reset,
+  resetToPreviousStep,
   fillPrompt,
   getPromptForStep,
   extractDataFromTasks,

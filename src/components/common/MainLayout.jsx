@@ -65,21 +65,25 @@ const MainLayout = (props) => {
     return (
         <>
             {/* Skip to main content link for accessibility */}
-            <a href="#main-content" class="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 bg-primary text-primary-content px-4 py-2 rounded z-50">
+            {/* <a href="#main-content" class="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 bg-primary text-primary-content px-4 py-2 rounded z-50">
                 Skip to main content
-            </a>
+            </a> */}
+            <div class="flex">
+
             <GlobalLoading />
             <GlobalError />
             <ToastContainer />
             <OfflineIndicator />
-            <Navbar />
-            <div class="flex h-[calc(100vh-4rem)]">
-              <Show when={isAuthenticated()}>
+                          <Show when={isAuthenticated()}>
                 <Sidebar />
               </Show>
+            <div class="flex flex-col w-full h-[calc(100vh-4rem)]">
+            <Navbar />
+
                <main id="main-content" class={`px-5 overflow-auto ${isAuthenticated() ? 'flex-1' : 'flex-1'}`}>
                  {props.children}
                </main>
+            </div>
             </div>
         </>
     );

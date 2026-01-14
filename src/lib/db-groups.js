@@ -58,11 +58,11 @@ export async function _deleteGroup({ id }) {
   }
 }
 
-export async function _addProjectToGroup({ projectId, groupId }) {
+export async function _addProjectToGroup({ projectId, groupId, userId }) {
   try {
      await dbInstance.query(
-       'INSERT INTO project_groups (project_id, group_id, added_at) VALUES ($1, $2, $3) ON CONFLICT (project_id, group_id) DO NOTHING',
-       [projectId, groupId, new Date().toISOString()]
+       'INSERT INTO project_groups (project_id, group_id, user_id, added_at) VALUES ($1, $2, $3, $4) ON CONFLICT (project_id, group_id) DO NOTHING',
+       [projectId, groupId, userId, new Date().toISOString()]
      );
     return { success: true };
   } catch (err) {

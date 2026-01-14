@@ -108,6 +108,7 @@ const TasksContent = () => {
     // Additional signals
     const [isLoading, setIsLoading] = createSignal(false);
     const [autoProgress, setAutoProgress] = createSignal(false);
+    const [startPressed, setStartPressed] = createSignal(false);
     const [streamingContent, setStreamingContent] = createSignal("");
     const [tasksList, setTasksList] = createSignal([]);
     const [editingTaskId, setEditingTaskId] = createSignal(null);
@@ -169,15 +170,21 @@ const TasksContent = () => {
         reset();
         setTasksList([]);
         setPrompt('');
+        setStartPressed(false);
+        setCurrentProjectId(null);
         setMachineStore('context', initialContext);
     };
     const handleStart = async () => {
-        console.log('HandleStart: starting process');
+        console.log(`[${new Date().toISOString()}] HandleStart: starting process - prompt length: ${prompt()?.length || 0}, currentProjectId: ${currentProjectId()}`);
+        setStartPressed(true);
+        console.log(`[${new Date().toISOString()}] HandleStart: setStartPressed(true)`);
         setAutoProgress(true);
+        console.log(`[${new Date().toISOString()}] HandleStart: setAutoProgress(true)`);
+        console.log(`[${new Date().toISOString()}] HandleStart: calling handleLLMProjectUpdate`);
         await handleLLMProjectUpdate(prompt(), extractProjectName, currentProjectId, setCurrentProjectId, setPrompt, setStreamingContent);
-        console.log('HandleStart: after LLMProjectUpdate, starting process');
+        console.log(`[${new Date().toISOString()}] HandleStart: after LLMProjectUpdate, starting machine process`);
         startProcess();
-        console.log('HandleStart: process started, state:', machineStore.state, 'autoProgress:', autoProgress());
+        console.log(`[${new Date().toISOString()}] HandleStart: process started, machine state: ${machineStore.state}, autoProgress: ${autoProgress()}`);
     };
     const handlePause = () => {
         pause();
@@ -255,8 +262,9 @@ const TasksContent = () => {
 
     // LLM Call handler
     const handleLLMCall = async (prompt) => {
+        console.log(`[${new Date().toISOString()}] Home/handleLLMCall: STARTING LLM CALL - prompt length: ${prompt?.length}, currentStep: ${machineStore.context?.currentStep}, userId: ${user()?.id}`);
         setIsLoading(true);
-        setStreamingContent('');
+        console.log(`[${new Date().toISOString()}] Home/handleLLMCall: setIsLoading(true), cleared streamingContent`);
         try {
 
             // Check user authentication
@@ -286,7 +294,9 @@ const TasksContent = () => {
             }
 
             // Make real API call to streaming LLM endpoint
-            const response = await fetch('/api/llm/stream', {
+            console.log(`[${new Date().toISOString()}] Home/handleLLMCall: Making API call to /api/llm with sanitized prompt length: ${sanitizedPrompt.length}`);
+            const apiStartTime = Date.now();
+            const response = await fetch('/api/llm', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -295,28 +305,45 @@ const TasksContent = () => {
             });
 
             if (!response.ok) {
-                throw new Error(`API request failed: ${response.status} ${response.statusText}`);
+              console.log(`[${new Date().toISOString()}] Home/handleLLMCall: API call failed with status: ${response.status}`);
+              throw new Error(`LLM API error: ${response.status}`);
             }
+            console.log(`[${new Date().toISOString()}] Home/handleLLMCall: API call successful, starting stream processing`);
 
-             const reader = response.body.getReader();
-             const decoder = new TextDecoder();
-             let aiResponse = '';
+              console.log(`[${new Date().toISOString()}] Home: Starting LLM response streaming`);
+              const reader = response.body.getReader();
+              const decoder = new TextDecoder();
+              let aiResponse = '';
+              let chunkCount = 0;
 
-             while (true) {
-                 const { done, value } = await reader.read();
-                 if (done) break;
-                 const chunk = decoder.decode(value);
-                 aiResponse += chunk;
-                 setPrompt(aiResponse);
-             }
+              while (true) {
+                  const { done, value } = await reader.read();
+                  if (done) {
+                      console.log(`[${new Date().toISOString()}] Home: Streaming finished - total chunks: ${chunkCount}, total response length: ${aiResponse.length}`);
+                      break;
+                  }
+                  const chunk = decoder.decode(value);
+                  chunkCount++;
+                  aiResponse += chunk;
+                  setPrompt(aiResponse);
+                  setStreamingContent(aiResponse); // Update streaming UI in real-time
+
+                  if (chunkCount % 5 === 0) {
+                      console.log(`[${new Date().toISOString()}] Home: Received chunk ${chunkCount}, current response length: ${aiResponse.length}`);
+                  }
+              }
 
             // After streaming, process the response
-            await receiveResponse(aiResponse, setAutoProgress, setTasksList, tasksList, addTask, updateProject, currentProjectId());
+            console.log(`[${new Date().toISOString()}] Home: Streaming complete, calling receiveResponse with response length: ${aiResponse.length}, projectId: ${currentProjectId()}, userId: ${user()?.id || 'local-user'}`);
+            await receiveResponse(aiResponse, setAutoProgress, setTasksList, tasksList, addTask, updateProject, currentProjectId(), user()?.id || 'local-user');
+            console.log(`[${new Date().toISOString()}] Home: receiveResponse completed, refetching tasks`);
             // Refetch tasks to update the UI
             await refetch();
+            setIsLoading(false); // Allow next API call
+            console.log(`[${new Date().toISOString()}] Home: Tasks refetched, step processing complete`);
         } catch (error) {
-            logger.error('LLM call error:', error);
-            toastManager.error(`Failed to get LLM response: ${error.message}`);
+            console.log(`[${new Date().toISOString()}] Home/handleLLMCall: ERROR - ${error.message}`);
+            console.log(`[${new Date().toISOString()}] Home/handleLLMCall: Setting isLoading to false due to error`);
             setIsLoading(false);
         }
     };
@@ -344,32 +371,48 @@ const TasksContent = () => {
      // Load project context when project data changes
      createEffect(() => {
        const project = projectData();
-       if (project && typeof project === 'object') {
-                 // Load context from flattened project fields
-                 const contextFromDB = {
-                   problem: project.description || "", // Use project description as problem
-                   solution: "", // Will be filled by AI during processing
-                   currentStep: project.currentStep,
-                   completedSteps: project.completedSteps,
-                   stepName: project.stepName,
-                   currentModel: project.currentModel,
-                   currentSection: project.currentSection,
-                   uiProgress: project.uiProgress,
-                   uiMessage: project.uiMessage,
-                   uiStatus: project.uiStatus,
-                   currentPrompt: project.currentPrompt,
-                   llmResponse: project.llmResponse,
-                   totalCredits: project.totalCredits,
-                   consumedCredits: project.consumedCredits,
-                   totalTime: project.totalTime,
-                   consumedTime: project.consumedTime
-                 };
-                  console.log('Home: setting machine context', { ...initialContext, ...contextFromDB });
-                  setMachineStore('context', { ...initialContext, ...contextFromDB });
-                  // Set machine state: use saved state or default to idle
-                  const newState = project.uiStatus || "idle";
-                  console.log('Home: setting machine state to', newState);
-                  setMachineStore("state", newState);
+        if (project && typeof project === 'object') {
+                  console.log('Home: LOADING PROJECT DATA - name:', project.name, 'currentStep:', project.currentStep, 'completedSteps:', project.completedSteps, 'uiStatus:', project.uiStatus);
+                  // Load context from flattened project fields
+                  const contextFromDB = {
+                    currentStep: project.currentStep,
+                    completedSteps: Number(project.completedSteps),
+                    stepName: project.stepName,
+                    currentModel: project.currentModel,
+                    currentSection: project.currentSection,
+                    uiProgress: Number(project.uiProgress),
+                    uiMessage: project.uiMessage,
+                    uiStatus: project.uiStatus,
+                    currentPrompt: project.currentPrompt,
+                    llmResponse: project.llmResponse,
+                    totalCredits: Number(project.totalCredits),
+                    consumedCredits: Number(project.consumedCredits),
+                    totalTime: Number(project.totalTime),
+                    consumedTime: Number(project.consumedTime)
+                  };
+                   console.log('Home: SETTING MACHINE CONTEXT - currentStep:', contextFromDB.currentStep, 'completedSteps:', contextFromDB.completedSteps);
+                   setMachineStore('context', { ...initialContext, ...contextFromDB });
+                   // Set machine state: use saved state, but override for resumable projects
+                   let newState = project.uiStatus || "idle";
+                   let shouldAutoProgress = false;
+                   if (contextFromDB.currentStep === 'done') {
+                     newState = "completed";
+                   } else if (contextFromDB.currentStep && contextFromDB.currentStep !== 'system') {
+                     // If we have a project with progress, allow resuming
+                     newState = "processing";
+                     shouldAutoProgress = true; // Enable auto-progress for resumable projects
+                   } else if (contextFromDB.currentStep === 'system' && contextFromDB.completedSteps > 0) {
+                     // Special case: if we're at system step but have completed steps, allow resuming
+                     newState = "processing";
+                     shouldAutoProgress = true;
+                   }
+                   console.log('Home: LOADING PROJECT - currentStep:', contextFromDB.currentStep, 'completedSteps:', contextFromDB.completedSteps, 'uiStatus:', project.uiStatus, 'setting state to:', newState, 'autoProgress:', shouldAutoProgress);
+                   setMachineStore("state", newState);
+                   if (shouldAutoProgress) {
+                     setAutoProgress(true);
+                     setStartPressed(true); // Also set startPressed to hide greeting immediately
+                     console.log('Home: Auto-progress and startPressed enabled for resumable project');
+                   }
 
                   // Set the prompt to project description
                   console.log('Home: setting prompt to project description', project.description);
@@ -456,15 +499,19 @@ const TasksContent = () => {
               handleReset();
           });
 
-          // Listen for open project
-          console.log('Home: adding openProject listener');
-          window.addEventListener('openProject', (e) => {
-              const pid = e.detail;
-              console.log('Home: openProject event received', pid);
-              // Save selected project to user profile
-              updateEntity({ table: 'profiles', idField: 'user_id', id: user().id, updates: { current_project_id: pid } });
-              setCurrentProjectId(pid);
-          });
+           // Listen for open project
+           logger.debug('Home: adding openProject listener');
+           window.addEventListener('openProject', (e) => {
+               const pid = e.detail;
+               logger.debug('Home: openProject event received', pid);
+               if (currentProjectId() === pid) {
+                   logger.debug('Home: Project already selected, skipping');
+                   return;
+               }
+               // Save selected project to user profile
+               updateEntity({ table: 'profiles', idField: 'user_id', id: user().id, updates: { current_project_id: pid } });
+               setCurrentProjectId(pid);
+           });
 
          // Create Lucide icons after a delay to ensure script loaded
           setTimeout(() => {
@@ -483,10 +530,13 @@ const TasksContent = () => {
       });
 
     createEffect(() => {
-        machineStore.state;
-        if (window.lucide) 
+        const currentState = machineStore.state;
+        const currentStep = machineStore.context?.currentStep;
+        const completedSteps = machineStore.context?.completedSteps;
+        console.log(`[${new Date().toISOString()}] Home/CreateEffect: Machine state changed - state: ${currentState}, currentStep: ${currentStep}, completedSteps: ${completedSteps}, uiMessage: ${machineStore.context?.uiMessage}`);
+        if (window.lucide)
             window.lucide.createIcons();
-        
+
     });
 
 
@@ -498,17 +548,22 @@ const TasksContent = () => {
         
     });
 
-     // Set tasksList when project changes
-     createEffect(() => {
-         currentProjectId();
-         logger.debug('Setting tasksList from resource:', tasks());
-         if (Array.isArray(tasks())) {
-             setTasksList(tasks());
-         }
-     });
+      // Set tasksList when project changes
+      createEffect(() => {
+          currentProjectId();
+          console.log('Home: Tasks resource changed - tasks:', tasks(), 'length:', tasks()?.length);
+          logger.debug('Setting tasksList from resource:', tasks());
+          if (Array.isArray(tasks())) {
+              setTasksList(tasks());
+              console.log('Home: setTasksList called with', tasks().length, 'tasks');
+          }
+      });
 
     createEffect(() => {
-        if (machineStore.state === 'idle') {
+        const hasTasks = tasksList && tasksList().length > 0;
+        const shouldShowGreeting = machineStore.state === 'idle' && !startPressed() && !hasTasks;
+        console.log('Home: Greeting logic - state:', machineStore.state, 'startPressed:', startPressed(), 'hasTasks:', hasTasks, 'shouldShowGreeting:', shouldShowGreeting);
+        if (shouldShowGreeting) {
             setGreetingClass("text-center py-4 h-auto overflow-visible transition-all duration-300 opacity-100");
         } else {
             setGreetingClass("text-center py-0 h-0 overflow-hidden transition-all duration-300 opacity-0");
@@ -516,10 +571,11 @@ const TasksContent = () => {
     });
 
     createEffect(() => {
-        console.log('CreateEffect: autoProgress:', autoProgress(), 'isLoading:', isLoading(), 'state:', machineStore.state);
+        console.log(`[${new Date().toISOString()}] Home/CreateEffect: Checking auto-progress - autoProgress: ${autoProgress()}, isLoading: ${isLoading()}, state: ${machineStore.state}, currentStep: ${machineStore.context?.currentStep}`);
         if (autoProgress() && !isLoading() && machineStore.state === 'processing') {
-            console.log('CreateEffect: calling handleLLMCall with prompt:', prompt());
+            console.log(`[${new Date().toISOString()}] Home/CreateEffect: AUTO-PROGRESS TRIGGERED - calling handleLLMCall for step: ${machineStore.context?.currentStep}, prompt length: ${prompt()?.length}`);
             setAutoProgress(false);
+            console.log(`[${new Date().toISOString()}] Home/CreateEffect: setAutoProgress(false), now calling handleLLMCall`);
             handleLLMCall(prompt());
         }
     });
@@ -557,35 +613,39 @@ const TasksContent = () => {
         }
     });
 
-    // Save progress to current project when context changes
+    // Save progress to current project when context changes (debounced)
+    let saveTimeout;
     createEffect(() => {
       machineStore.context; // trigger on change
-      if (currentProjectId() && machineStore.context && typeof machineStore.context === 'object') {
-        try {
-          const updates = {
-            currentPrompt: machineStore.context.currentPrompt,
-            llmResponse: machineStore.context.llmResponse,
-            currentStep: machineStore.context.currentStep,
-            completedSteps: machineStore.context.completedSteps,
-            stepName: machineStore.context.stepName,
-            currentModel: machineStore.context.currentModel,
-            currentSection: machineStore.context.currentSection,
-            uiProgress: machineStore.context.uiProgress,
-            uiMessage: machineStore.context.uiMessage,
-            uiStatus: machineStore.context.uiStatus,
-            totalCredits: machineStore.context.totalCredits,
-            consumedCredits: machineStore.context.consumedCredits,
-            totalTime: machineStore.context.totalTime,
-            consumedTime: machineStore.context.consumedTime
-          };
-          logger.debug('Updating project', currentProjectId(), 'with flattened context');
-          updateProject(currentProjectId(), updates);
-          // Update local project data to update UI
-          mutate((prev) => prev ? { ...prev, ...updates } : prev);
-        } catch (error) {
-          logger.error('Failed to update project in createEffect:', error);
+      if (saveTimeout) clearTimeout(saveTimeout);
+      saveTimeout = setTimeout(() => {
+        if (currentProjectId() && machineStore.context && typeof machineStore.context === 'object') {
+          try {
+            const updates = {
+              currentPrompt: machineStore.context.currentPrompt,
+              llmResponse: machineStore.context.llmResponse,
+              currentStep: machineStore.context.currentStep,
+              completedSteps: machineStore.context.completedSteps,
+              stepName: machineStore.context.stepName,
+              currentModel: machineStore.context.currentModel,
+              currentSection: machineStore.context.currentSection,
+              uiProgress: machineStore.context.uiProgress,
+              uiMessage: machineStore.context.uiMessage,
+              uiStatus: machineStore.context.uiStatus,
+              totalCredits: machineStore.context.totalCredits,
+              consumedCredits: machineStore.context.consumedCredits,
+              totalTime: machineStore.context.totalTime,
+              consumedTime: machineStore.context.consumedTime
+            };
+            logger.debug('Updating project', currentProjectId(), 'with flattened context');
+            updateProject(currentProjectId(), updates);
+            // Update local project data to update UI
+            mutate((prev) => prev ? { ...prev, ...updates } : prev);
+          } catch (error) {
+            logger.error('Failed to update project in createEffect:', error);
+          }
         }
-      }
+      }, 1000); // Debounce saves to once per second
     });
 
     // createEffect(() => {
@@ -622,43 +682,54 @@ const TasksContent = () => {
     return (
         <RouteGuard requireAuth={true}>
             <div class={`relative flex flex-col justify-center h-[calc(100vh-4rem)] items-center ${currentLang() === 'ar' ? 'rtl' : 'ltr'}`}>
-              <AgentInterface key={currentProjectId()} agentBoxClass={agentBoxClass} currentProjectId={currentProjectId}
-                 agentContentClass={agentContentClass}
-                 greetingClass={greetingClass}
-                 cardRef={cardRef}
-                 isAccordionOpen={isAccordionOpen}
-                 setIsAccordionOpen={setIsAccordionOpen}
-                 projectData={projectData}
-                 isLoading={isLoading}
-                 machineStore={machineStore}
-                 textareaRef={textareaRef}
-                 prompt={prompt}
-                 setPrompt={setPrompt}
-                 tasksList={tasksList}
-                 handleImprove={handleImprove}
-                 handleSuggest={handleSuggest}
-                 handleReset={handleReset}
-                 handleStart={handleStart}
-                 handlePause={handlePause}
-                 handleResume={handleResume}/>
-            <Show when={currentProjectId() && tasksList().length > 0}>
-                 <ResponseSection tasksList={tasksList}
-                 project={projectData()}
-                 editingTaskId={editingTaskId}
-                 setEditingTaskId={setEditingTaskId}
-                 editContent={editContent}
-                 setEditContent={setEditContent}
-                 updateTask={updateTask}
-                 setTasksList={setTasksList}
-                 isLoading={isLoading}
-                 streamingContent={streamingContent}
-                 machineStore={machineStore}
-                 streamingRef={streamingRef}
-                 activeCardId={activeCardId}
-                 setActiveCardId={setActiveCardId}
-                  taskRefs={taskRefs}
+               <AgentInterface key={currentProjectId()} agentBoxClass={agentBoxClass} currentProjectId={currentProjectId}
+                  agentContentClass={agentContentClass}
+                  greetingClass={greetingClass}
+                  cardRef={cardRef}
+                  isAccordionOpen={isAccordionOpen}
+                  setIsAccordionOpen={setIsAccordionOpen}
+                  projectData={projectData}
+                  isLoading={isLoading}
+                  machineStore={machineStore}
+                  textareaRef={textareaRef}
+                  prompt={prompt}
+                  setPrompt={setPrompt}
+                  tasksList={tasksList}
+                  startPressed={startPressed}
                   handleImprove={handleImprove}
-                  handleSuggest={handleSuggest}/>
+                  handleSuggest={handleSuggest}
+                  handleReset={handleReset}
+                  handleStart={handleStart}
+                  handlePause={handlePause}
+                  handleResume={handleResume}/>
+              <Show when={
+                (() => {
+                  const hasProject = !!currentProjectId();
+                  const startPressedCond = startPressed();
+                  const tasksCond = tasksList && tasksList().length > 0 && machineStore.context?.currentStep !== 'done';
+                  const shouldShowResponseSection = hasProject && (startPressedCond || tasksCond);
+                  console.log('Home: ResponseSection outer condition - hasProject:', hasProject, 'startPressed:', startPressedCond, 'tasksCond:', tasksCond, 'currentStep:', machineStore.context?.currentStep, 'shouldShow:', shouldShowResponseSection);
+                  return shouldShowResponseSection;
+                })()
+              }>
+                   <ResponseSection tasksList={tasksList}
+                  project={projectData()}
+                  editingTaskId={editingTaskId}
+                  setEditingTaskId={setEditingTaskId}
+                  editContent={editContent}
+                  setEditContent={setEditContent}
+                  updateTask={updateTask}
+                  setTasksList={setTasksList}
+                  isLoading={isLoading}
+                  streamingContent={streamingContent}
+                  machineStore={machineStore}
+                  streamingRef={streamingRef}
+                  activeCardId={activeCardId}
+                  setActiveCardId={setActiveCardId}
+                  startPressed={startPressed}
+                   taskRefs={taskRefs}
+                   handleImprove={handleImprove}
+                   handleSuggest={handleSuggest}/>
               </Show>
         </div>
         </RouteGuard>

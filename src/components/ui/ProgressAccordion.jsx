@@ -35,7 +35,7 @@ const ProgressAccordion = (props) => {
   });
   return (
     <div class="flex items-center w-full py-0">
-      <div class="collapse collapse-arrow bg-base-100 flex-1">
+      <div class="collapse collapse-arrow bg-base-100 flex-1 min-w-[400px]">
         <input
           type="checkbox"
           class="p-0"
@@ -43,8 +43,8 @@ const ProgressAccordion = (props) => {
           checked={false}
           onChange={() => props.setIsAccordionOpen(!props.isAccordionOpen())}
         />
-        <div class="collapse-title font-semibold text-primary !p-0">
-          <span>Accelerator Agent</span>
+        <div class="collapse-title font-semibold !p-0">
+          <span>iGate OS / Accelerator Agent</span>
         </div>
         <div class="collapse-content p-0">
          <div class="space-y-4">
@@ -116,28 +116,48 @@ const ProgressAccordion = (props) => {
           </div>
         </div>
       </div>
-      <div class="flex items-center gap-2 ml-4">
+      <div class="flex items-center gap-2 ml-4 ">
          <progress
            id="agent-progress"
-           class="progress progress-primary w-32 h-2"
+           class="progress progress-primary h-2 w-full px-4"
            value={isFinite(props.machineStore.context.uiProgress) ? props.machineStore.context.uiProgress : 0}
            max="100"
          ></progress>
-        <span class="badge badge-primary badge-xs">{props.machineStore.context.completedSteps || 0} / 51 Complete</span>
-        <div class="flex gap-2">
-          <Show when={props.machineStore.state === 'processing'}>
-            <button type="button" onClick={props.handlePause} class="bg-warning/10 text-warning px-3 py-1 rounded-full flex items-center gap-1 text-xs hover:bg-warning/20 transition cursor-pointer">
-              <i data-lucide="pause" class="w-3 h-3"></i>
-              <span class="hidden sm:inline">Pause</span>
-            </button>
-          </Show>
-          <Show when={props.machineStore.state === 'pause'}>
+         <span class="badge badge-primary badge-xs whitespace-nowrap">{props.machineStore.context.completedSteps || 0} / 51 Complete</span>
+         <Show when={props.machineStore.state === 'processing'}>
+           <button type="button" onClick={props.handlePause} class="bg-warning/10 text-warning px-3 py-1 rounded-full flex items-center gap-1 text-xs hover:bg-warning/20 transition cursor-pointer">
+             <i data-lucide="pause" class="w-3 h-3"></i>
+             <span class="hidden sm:inline">Pause</span>
+           </button>
+         </Show>
+         <Show when={props.machineStore.state === 'pause'}>
+           <button type="button" onClick={props.handleResume} class="bg-success/10 text-success px-3 py-1 rounded-full flex items-center gap-1 text-xs hover:bg-success/20 transition cursor-pointer">
+             <i data-lucide="play" class="w-3 h-3"></i>
+             <span class="hidden sm:inline">Resume</span>
+           </button>
+         </Show>
+          <Show when={
+            props.machineStore.state !== 'idle' &&
+            props.machineStore.state !== 'processing' &&
+            props.machineStore.state !== 'pause' &&
+            props.machineStore.context?.currentStep &&
+            props.machineStore.context?.currentStep !== 'done'
+          }>
             <button type="button" onClick={props.handleResume} class="bg-success/10 text-success px-3 py-1 rounded-full flex items-center gap-1 text-xs hover:bg-success/20 transition cursor-pointer">
               <i data-lucide="play" class="w-3 h-3"></i>
               <span class="hidden sm:inline">Resume</span>
             </button>
           </Show>
-        </div>
+          <Show when={
+            props.machineStore.state === 'idle' &&
+            props.machineStore.context?.currentStep &&
+            props.machineStore.context?.currentStep !== 'done'
+          }>
+            <button type="button" onClick={props.handleResume} class="bg-success/10 text-success px-3 py-1 rounded-full flex items-center gap-1 text-xs hover:bg-success/20 transition cursor-pointer">
+              <i data-lucide="play" class="w-3 h-3"></i>
+              <span class="hidden sm:inline">Resume</span>
+            </button>
+          </Show>
       </div>
     </div>
     </div>

@@ -1,5 +1,8 @@
 @import "tailwindcss";
 
+/* Tailwind Typography Plugin */
+@plugin "@tailwindcss/typography";
+
 /* Electrolize font */
 
 @font-face {

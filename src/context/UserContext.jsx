@@ -213,9 +213,9 @@ export const UserProvider = (props) => {
       id: localUserId,
       email: 'local@user.com',
       avatar: profileData?.avatar || avatar,
-      profile: {
-        name: 'Local User',
-        email: 'local@user.com',
+       profile: {
+         name: 'Dr. Jarallah Alghamdi',
+         email: 'local@user.com',
         bio: profileData?.bio || '',
         joinDate: new Date().toISOString(),
         ...profileData

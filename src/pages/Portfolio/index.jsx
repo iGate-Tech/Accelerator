@@ -67,7 +67,7 @@ const Portfolio = () => {
       name: newGroupName().trim(),
       description: newGroupDescription().trim(),
       color: newGroupColor(),
-      createdAt: new Date()
+      createdAt: new Date().toISOString()
     });
 
     setNewGroupName("");
@@ -100,6 +100,12 @@ const Portfolio = () => {
     await refreshData();
   };
 
+  const handleRemoveProjectFromGroup = async (project, group) => {
+    await removeProjectFromGroup(project.id, group.id);
+    await refreshData();
+    toastManager.success(`Removed ${project.name} from ${group.name}`);
+  };
+
   const handleDragStart = (e, project) => {
     setDraggedProject(project);
     e.dataTransfer.effectAllowed = "move";
@@ -127,8 +133,7 @@ const Portfolio = () => {
       }
     } else {
       // Add to group (this will handle the unique constraint)
-      await addProjec
-  logger.trace('handleProjectClick: Starting');tToGroup(project.id, groupId);
+      await addProjectToGroup(project.id, groupId);
     }
 
     setDraggedProject(null);
@@ -543,11 +548,12 @@ const Portfolio = () => {
                             onDragStart={(e) => handleDragStart(e, project)}
                             class="cursor-move"
                           >
-                            <ProjectCard
-                              project={project}
-                              onClick={handleProjectClick}
-                              compact={true}
-                            />
+                             <ProjectCard
+                               project={project}
+                               onClick={handleProjectClick}
+                               onRemove={(project) => handleRemoveProjectFromGroup(project, group)}
+                               compact={true}
+                             />
                           </div>
                         )}
                       </For>

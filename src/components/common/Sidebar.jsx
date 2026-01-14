@@ -18,6 +18,7 @@ const Sidebar = () => {
   const [projects, setProjects] = createSignal([]);
   const [searchQuery, setSearchQuery] = createSignal("");
   const [editingProjectId, setEditingProjectId] = createSignal(null);
+  const [isCollapsed, setIsCollapsed] = createSignal(false);
 
   const downloadJSON = (data, filename) => {
     const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
@@ -154,55 +155,102 @@ const Sidebar = () => {
     projects();
     searchQuery();
     currentLang(); // React to language changes
+    isCollapsed(); // React to collapse changes
     if (window.lucide) window.lucide.createIcons();
   });
 
   return (
     <aside
-      class="sidebar w-80 h-full bg-base-100 border-base-200 overflow-y-auto hidden lg:block z-[55]"
+      class="sidebar h-screen bg-base-100 border-base-200 overflow-y-auto w-[56] hidden lg:block z-[55]"
       classList={{
         'border-e': currentLang() === 'en',
         'border-s': currentLang() === 'ar'
       }}
-    >
-      <div class="p-4">
-        <ul class="menu bg-base-200 rounded-box w-full mb-5">
-           <li classList={{ "menu-active": location.pathname === "/" }}>
-             <A href="/" onClick={() => window.dispatchEvent(new CustomEvent('resetAgent'))} class="flex items-center gap-3 px-4 py-3 hover:bg-base-300 transition-colors" aria-label={`Create new project - ${t().newProject}`}>
-               <div class="p-1 bg-primary/10 rounded">
-                 <i data-lucide="plus" class="w-4 h-4 text-primary" aria-hidden="true"></i>
-               </div>
-               <span class="font-medium">{t().newProject}</span>
-             </A>
-           </li>
-           <li classList={{ "menu-active": location.pathname === "/explore" }}>
-             <A href="/explore" class="flex items-center gap-3 px-4 py-3 hover:bg-base-300 transition-colors" aria-label={`Explore project ideas - ${t().exploreIdeas}`}>
+     >
+              <div class="relative mb-4">
+                <A href="/" onClick={(e) => { e.preventDefault(); setIsCollapsed(!isCollapsed()); }} class="cursor-pointer flex w-full">
+                     <img src={isCollapsed() ? "/src/assets/favicon.svg" : "/src/assets/iGate-tech-logo.svg"} alt="Logo" class={isCollapsed() ? "h-8 mt-4 mx-auto" : "h-8 mt-4 ml-8"} />
+                   </A>
+                <Show when={!isCollapsed()}>
+                  <button
+                    onClick={() => setIsCollapsed(true)}
+                    class="absolute top-4 right-4 btn btn-ghost btn-sm btn-circle"
+                    aria-label="Collapse sidebar"
+                  >
+                    <i data-lucide="chevron-left" class="w-4 h-4"></i>
+                  </button>
+                </Show>
+              </div>
+      <div class="p-4 ">
+        <ul class="menu border border-base-200 rounded-box w-full mb-5">
+              <li classList={{ "menu-active": location.pathname === "/" }}>
+                <A href="/" onClick={() => window.dispatchEvent(new CustomEvent('resetAgent'))} class="flex items-center gap-3 px-4 py-3 hover:bg-base-300 transition-colors" classList={{ 'justify-center': isCollapsed(), 'justify-start': !isCollapsed() }} aria-label={`Create new project - ${t().newProject}`}>
+                 <div class="p-1 bg-primary/10 rounded">
+                   <i data-lucide="plus" class="w-4 h-4 text-primary" aria-hidden="true"></i>
+                 </div>
+                  <span class="font-medium" classList={{ 'lg:hidden': isCollapsed() }}>{t().newProject}</span>
+               </A>
+             </li>
+             <li classList={{ "menu-active": location.pathname === "/apps" }}>
+               <A href="/apps" class="flex items-center gap-3 px-4 py-3 hover:bg-base-300 transition-colors" classList={{ 'justify-center': isCollapsed(), 'justify-start': !isCollapsed() }} aria-label="Apps">
+                 <div class="p-1 bg-secondary/10 rounded">
+                   <i data-lucide="grid" class="w-4 h-4 text-secondary" aria-hidden="true"></i>
+                 </div>
+                 <span class="font-medium" classList={{ 'lg:hidden': isCollapsed() }}>Apps</span>
+               </A>
+             </li>
+              <li classList={{ "menu-active": location.pathname === "/dashboard" }}>
+               <A href="/dashboard" class="flex items-center gap-3 px-4 py-3 hover:bg-base-300 transition-colors" classList={{ 'justify-center': isCollapsed(), 'justify-start': !isCollapsed() }} aria-label={`Dashboard - ${t().dashboard}`}>
+                <div class="p-1 bg-warning/10 rounded">
+                  <i data-lucide="bar-chart" class="w-4 h-4 text-warning" aria-hidden="true"></i>
+                </div>
+                 <span class="font-medium" classList={{ 'lg:hidden': isCollapsed() }}>{t().dashboard}</span>
+              </A>
+            </li>
+              <li classList={{ "menu-active": location.pathname === "/portfolio" }}>
+                <A href="/portfolio" class="flex items-center gap-3 px-4 py-3 hover:bg-base-300 transition-colors" classList={{ 'justify-center': isCollapsed(), 'justify-start': !isCollapsed() }} aria-label={`Portfolio - ${t().portfolio}`}>
+                 <div class="p-1 bg-accent/10 rounded">
+                   <i data-lucide="briefcase" class="w-4 h-4 text-accent" aria-hidden="true"></i>
+                 </div>
+                  <span class="font-medium" classList={{ 'lg:hidden': isCollapsed() }}>{t().portfolio}</span>
+               </A>
+             </li>
+             <li classList={{ "menu-active": location.pathname === "/invitations" }}>
+               <A href="/invitations" class="flex items-center gap-3 px-4 py-3 hover:bg-base-300 transition-colors" classList={{ 'justify-center': isCollapsed(), 'justify-start': !isCollapsed() }} aria-label={`Collaborate - Invitations`}>
+                 <div class="p-1 bg-info/10 rounded">
+                   <i data-lucide="users" class="w-4 h-4 text-info" aria-hidden="true"></i>
+                 </div>
+                 <span class="font-medium" classList={{ 'lg:hidden': isCollapsed() }}>Collaborate</span>
+               </A>
+             </li>
+             <li classList={{ "menu-active": location.pathname === "/explore" }}>
+              <A href="/explore" class="flex items-center gap-3 px-4 py-3 hover:bg-base-300 transition-colors" classList={{ 'justify-center': isCollapsed(), 'justify-start': !isCollapsed() }} aria-label={`Explore project ideas - ${t().exploreIdeas}`}>
                <div class="p-1 bg-secondary/10 rounded">
                  <i data-lucide="compass" class="w-4 h-4 text-secondary" aria-hidden="true"></i>
                </div>
-               <span class="font-medium">{t().exploreIdeas}</span>
+                <span class="font-medium" classList={{ 'lg:hidden': isCollapsed() }}>{t().exploreIdeas}</span>
              </A>
            </li>
-           <li classList={{ "menu-active": location.pathname === "/help" }}>
-             <A href="/help" class="flex items-center gap-3 px-4 py-3 hover:bg-base-300 transition-colors" aria-label={`Get help and support - ${t().help}`}>
+            <li classList={{ "menu-active": location.pathname === "/help" }}>
+              <A href="/help" class="flex items-center gap-3 px-4 py-3 hover:bg-base-300 transition-colors" classList={{ 'justify-center': isCollapsed(), 'justify-start': !isCollapsed() }} aria-label={`Get help and support - ${t().help}`}>
                <div class="p-1 bg-info/10 rounded">
                  <i data-lucide="help-circle" class="w-4 h-4 text-info" aria-hidden="true"></i>
                </div>
-               <span class="font-medium">{t().help}</span>
+                <span class="font-medium" classList={{ 'lg:hidden': isCollapsed() }}>{t().help}</span>
              </A>
             </li>
 
         </ul>
-        <section class="menu bg-base-200 rounded-box w-full">
+         <section class="menu border border-base-200 rounded-box w-full" classList={{ 'lg:hidden': isCollapsed() }}>
           <li>
             <details open>
-              <summary class="flex items-center justify-between px-4 py-3 hover:bg-base-300 transition-colors cursor-pointer">
-                <div class="flex items-center gap-3">
+               <summary class="flex items-center justify-between px-4 py-3 hover:bg-base-300 transition-colors cursor-pointer" classList={{ 'justify-center': isCollapsed(), 'justify-between': !isCollapsed() }}>
+                <div class="flex items-center gap-3  w-full">
                   <div class="p-1 bg-accent/10 rounded">
                     <i data-lucide="folder" class="w-4 h-4 text-accent"></i>
                   </div>
-                  <span class="font-medium">{t().allProjects}</span>
-                  <span class="badge badge-sm badge-accent">{filteredProjects().length}</span>
+                   <span class="font-medium" classList={{ 'lg:hidden': isCollapsed() }}>{t().allProjects}</span>
+                   <span class="badge badge-sm badge-accent" classList={{ 'lg:hidden': isCollapsed() }}>{filteredProjects().length}</span>
                 </div>
                 <button
                   class="btn btn-ghost btn-xs opacity-60 hover:opacity-100"
@@ -252,8 +300,8 @@ const Sidebar = () => {
                 </li>
               </div>
 
-              <div class="px-4 pb-3">
-                <div class="relative">
+               <div class="px-4 pb-3" classList={{ 'lg:hidden': isCollapsed() }}>
+                 <div class="relative">
                   <input
                     type="text"
                     placeholder={t().sidebarSearch}
@@ -269,16 +317,17 @@ const Sidebar = () => {
                   {(project) => (
                      <li>
                        <details>
-                         <summary class="flex justify-between items-center px-4 py-2 hover:bg-base-300 rounded-lg transition-colors cursor-pointer">
+                          <summary class="flex justify-between items-center px-4 py-2 hover:bg-base-300 rounded-lg transition-colors cursor-pointer" classList={{ 'justify-center': isCollapsed() }}>
                             <span class="flex items-center w-full">
                               <div class="p-1 bg-base-300 rounded mr-2">
                                 <i data-lucide="folder" class="w-3 h-3 text-base-content/60"></i>
                               </div>
-                              <span
-                                class="ml-2"
-                                data-project-id={project.id}
-                                contentEditable={editingProjectId() === project.id}
-                                onBlur={(e) => {
+                               <span
+                                 class="ml-2"
+                                 classList={{ 'lg:hidden': isCollapsed() }}
+                                 data-project-id={project.id}
+                                 contentEditable={editingProjectId() === project.id}
+                                 onBlur={(e) => {
                                   if (editingProjectId() === project.id) {
                                     const newName = e.target.textContent.trim();
                                    if (newName && newName !== project.name) {
@@ -308,10 +357,10 @@ const Sidebar = () => {
                           <ul class="menu menu-xs bg-base-200 rounded-box max-w-xs w-full mt-2">
                             <li class="px-2">
                               <details open>
-                                <summary class="flex items-center gap-2">
-                                  <i data-lucide="layers" class="w-4 h-4"></i>
-                                  {t().models}
-                                </summary>
+                                 <summary class="flex items-center gap-2">
+                                   <i data-lucide="layers" class="w-4 h-4"></i>
+                                   <span classList={{ 'lg:hidden': isCollapsed() }}>{t().models}</span>
+                                 </summary>
                                <ul>
                                  <li>
                                    <div class="flex justify-between items-center">
@@ -405,11 +454,11 @@ const Sidebar = () => {
                              </details>
                            </li>
                             <li class="px-2">
-                              <details open>
-                                <summary class="flex items-center gap-2">
-                                  <i data-lucide="file-text" class="w-4 h-4"></i>
-                                  {t().reports}
-                                </summary>
+                               <details open>
+                                 <summary class="flex items-center gap-2">
+                                   <i data-lucide="file-text" class="w-4 h-4"></i>
+                                   <span classList={{ 'lg:hidden': isCollapsed() }}>{t().reports}</span>
+                                 </summary>
                                <ul>
                                  <li>
                                    <div class="flex justify-between items-center">
@@ -507,24 +556,25 @@ const Sidebar = () => {
                        <ul class="dropdown menu w-52 rounded-box bg-base-100 shadow-sm" popover id={`popover-project-${project.id}`} style={`position-anchor:--anchor-project-${project.id}`}>
                         <li><a onclick={() => { setEditingProjectId(project.id); setTimeout(() => { const span = document.querySelector(`[data-project-id="${project.id}"]`); if (span) { span.focus(); const range = document.createRange(); range.selectNodeContents(span); const sel = window.getSelection(); sel.removeAllRanges(); sel.addRange(range); } }, 0); }}><i data-lucide="edit" class="w-4 h-4"></i>{t().rename}</a></li>
                         <li><a onclick={() => handleProjectAction('delete', project.id)}><i data-lucide="trash" class="w-4 h-4"></i>{t().delete}</a></li>
-                         <li><a onclick={() => { console.log('Opening project:', project); window.dispatchEvent(new CustomEvent('openProject', { detail: project.id })); }}><i data-lucide="folder-open" class="w-4 h-4"></i>{t().open}</a></li>
+                          <li><a onclick={() => { logger.debug('Opening project:', project.id); window.dispatchEvent(new CustomEvent('openProject', { detail: project.id })); }}><i data-lucide="folder-open" class="w-4 h-4"></i>{t().open}</a></li>
                          <li><a onclick={async () => { try { const data = await exportProject(project.id); downloadJSON(data, `${project.name}-project.json`); toastManager.success(t().exportProject + ' ' + t().successful); } catch (error) { toastManager.error(t().exportProject + ' ' + t().failed); } }}><i data-lucide="download" class="w-4 h-4"></i>{t().exportProject}</a></li>
                          <li><a onclick={async () => { try { const data = await exportReports(project.id); downloadJSON(data, `${project.name}-report.json`); toastManager.success(t().exportReports + ' ' + t().successful); } catch (error) { toastManager.error(t().exportReports + ' ' + t().failed); } }}><i data-lucide="file-text" class="w-4 h-4"></i>{t().exportReports}</a></li>
                       </ul>
                     </li>
                   )}
                 </For>
-                <Show when={filteredProjects().length === 0}>
-                  <li class="text-center py-8 px-4">
-                    <i data-lucide="folder-x" class="w-12 h-12 mx-auto mb-3 text-base-content/40"></i>
-                    <div class="text-sm font-medium text-base-content/60 mb-1">
-                      {searchQuery() ? t().noProjectsMatch : t().noProjectsYet}
-                    </div>
-                    <div class="text-xs text-base-content/50">
-                      {searchQuery() ? t().tryAdjustingSearch : t().createFirstProject}
-                    </div>
-                  </li>
-                </Show>
+                 <Show when={filteredProjects().length === 0}>
+                   <li class="flex flex-col items-center justify-center py-8 px-4">
+                     <i data-lucide="folder-x" class="w-16 h-16 mb-4 text-base-content/40"></i>
+                      <div class="text-lg font-semibold mb-2 text-center" classList={{ 'lg:hidden': isCollapsed() }}>
+                        {searchQuery() ? t().noProjectsMatch : t().noProjectsYet}
+                      </div>
+                      <div class="text-sm text-base-content/60 mb-4 text-center" classList={{ 'lg:hidden': isCollapsed() }}>
+                        {searchQuery() ? t().tryAdjustingSearch : t().createFirstProject}
+                      </div>
+                      <button class="btn btn-primary btn-sm" onClick={() => window.dispatchEvent(new CustomEvent('resetAgent'))} classList={{ 'lg:hidden': isCollapsed() }}>Create Task</button>
+                   </li>
+                 </Show>
               </ul>
             </details>
           </li>

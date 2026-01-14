@@ -1,4 +1,4 @@
-import { createSignal, createResource, onMount, For, Show } from "solid-js";
+import { createSignal, createResource, onMount, For, Show, useContext } from "solid-js";
 import { useNavigate } from "@solidjs/router";
 import { useUser } from "../../context/UserContext";
 import { getUserInvitations, respondToInvitation } from "../../lib/db";

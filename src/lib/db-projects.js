@@ -116,7 +116,7 @@ export async function _toggleProjectPublic({ id }) {
 
 export async function _getTasks({ projectId }) {
   try {
-    const result = await dbInstance.query('SELECT * FROM tasks WHERE project_id = $1 ORDER BY created_at DESC', [projectId]);
+    const result = await dbInstance.query('SELECT * FROM tasks WHERE project_id = $1 ORDER BY created_at ASC', [projectId]);
     return result.rows;
   } catch (err) {
     console.error('Error getting tasks:', err);
@@ -128,10 +128,11 @@ export async function _addTask({ task }) {
   try {
     const id = uuidv4();
     await dbInstance.query(`
-      INSERT INTO tasks (id, project_id, content, prompt, llm_response, model, section, step_name, created_at, last_modified, synced_at, sync_status, deleted_at, version)
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)
+      INSERT INTO tasks (id, user_id, project_id, content, prompt, llm_response, model, section, step_name, created_at, last_modified, synced_at, sync_status, deleted_at, version)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)
     `, [
       id,
+      task.userId,
       task.projectId,
       task.content || null,
       task.prompt || null,

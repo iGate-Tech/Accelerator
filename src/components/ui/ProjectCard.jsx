@@ -8,18 +8,19 @@ import logger from '../../lib/logger.js';
 
 const ProjectCard = (props) => {
   logger.trace('ProjectCard: Starting');
-  const {
-    project,
-    onClick,
-    showProgress = true,
-    showStatus = true,
-    showVotes = false,
-    showVisibilityToggle = false,
-    onVote,
-    onVisibilityChange,
-    compact = false,
-    className = ""
-  } = props;
+   const {
+     project,
+     onClick,
+     showProgress = true,
+     showStatus = true,
+     showVotes = false,
+     showVisibilityToggle = false,
+     onVote,
+     onVisibilityChange,
+     onRemove,
+     compact = false,
+     className = ""
+   } = props;
 
   const [isHovered, setIsHovered] = createSignal(false);
   const [userVote, setUserVote] = createSignal(project.user_vote);
@@ -230,6 +231,15 @@ const ProjectCard = (props) => {
                 <i data-lucide="eye" class="w-4 h-4 mr-1 inline"></i>
                 View Project
               </div>
+              {onRemove && (
+                <button
+                  class="bg-error text-base-100 px-3 py-1 rounded-full text-sm font-medium"
+                  onClick={(e) => { e.stopPropagation(); onRemove(project); }}
+                >
+                  <i data-lucide="x" class="w-4 h-4 mr-1 inline"></i>
+                  Remove from Group
+                </button>
+              )}
               {showVisibilityToggle && (
                 <button
                   class={`btn btn-sm ${isPublic() ? 'btn-success' : 'btn-outline'} px-3 py-1 rounded-full text-xs font-medium`}

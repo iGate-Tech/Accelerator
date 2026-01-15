@@ -109,12 +109,12 @@ const AgentInterface = (props) => { // Defensive checks for required props
     const userName = () => {
         try {
             const userData = user ? user() : null;
-            const name = userData ?. profile ?. name;
+            const name = userData?.profile?.name;
             if (name) {
                 return name.split(" ").map((word) => word.charAt(0).toUpperCase() + word.slice(1)).join(" ");
             }
             // Fallback to email or "User"
-            const email = userData ?. email;
+            const email = userData?.email;
             if (email) {
                 return email.split("@")[0]; // Username part of email
             }
@@ -176,7 +176,7 @@ const AgentInterface = (props) => { // Defensive checks for required props
         style={
           (props.startPressed && props.startPressed()) ||
           (props.tasksList && props.tasksList().length > 0 && props.machineStore.context?.currentStep !== 'done')
-            ? "position: fixed; width:100%;bottom: 10px; z-index: 10;" : ""
+            ? "position: absolute !important; bottom: 10px !important; left: 50% !important; transform: translateX(-50%) !important; width: calc(100% - 40px) !important; max-width: 56rem !important; z-index: 50 !important;" : ""
         }>
 
             <div id="agentContent"
@@ -310,7 +310,7 @@ const AgentInterface = (props) => { // Defensive checks for required props
                             }>
                                 <div class="text-error text-sm mt-2">
                                     Processing error: {
-                                    props.machineStore.context ?. uiMessage || 'Unknown error occurred'
+                                    props.machineStore.context?.uiMessage || 'Unknown error occurred'
                                 } </div>
                             </Show>
                             <div ref={buttonsRef}

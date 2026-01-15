@@ -2,11 +2,10 @@ import { createSignal, onMount, createEffect } from "solid-js";
 import { useNavigate } from "@solidjs/router";
 import { useUser } from "../../context/UserContext";
 import { useLanguage } from "../../hooks/useLanguage";
-import { getUserCredits, getUserCreditBalance, getProjects, getUserById } from "../../lib/db";
+import { getUserCredits, getUserCreditBalance, getProjects, getUserById, updateUserProfile } from "../../lib/db";
 import { formatLocaleDate } from "../../lib/utils";
 import { toastManager } from "../../lib/feedback";
 import avatar from "../../assets/avatar.png";
-// Removed supabase import
 import logger from "../../lib/logger.js";
 
 
@@ -124,45 +123,48 @@ const Profile = () => {
   };
 
   const uploadAvatar = async () => {
-     if (avatarPreview()) {
-       try {
-         await updateProfile({ avatar: avatarPreview() });
-         setAvatarFile(null);
-         setAvatarPreview(null);
-         toastManager.success('Avatar updated successfully');
-       } catch (error) {
-         logger.error('Avatar update error:', error);
-         toastManager.error('Failed to update avatar');
-       }
-     }
-   };
+      if (avatarPreview()) {
+        try {
+          await updateUserProfile(user().id, { avatar: avatarPreview() });
+          await checkAuth();
+          setAvatarFile(null);
+          setAvatarPreview(null);
+          toastManager.success('Avatar updated successfully');
+        } catch (error) {
+          logger.error('Avatar update error:', error);
+          toastManager.error('Failed to update avatar');
+        }
+      }
+    };
 
   const removeAvatar = async () => {
-     try {
-       await updateProfile({ avatar: avatar });
-       toastManager.success('Avatar removed successfully');
-     } catch (error) {
-       logger.error('Avatar remove error:', error);
-       toastManager.error('Failed to remove avatar');
-     }
-   };
+      try {
+        await updateUserProfile(user().id, { avatar: '/src/assets/avatar.png' });
+        await checkAuth();
+        toastManager.success('Avatar removed successfully');
+      } catch (error) {
+        logger.error('Avatar remove error:', error);
+        toastManager.error('Failed to remove avatar');
+      }
+    };
 
   const saveProfile = async () => {
-     try {
-       const form = profileForm();
-       await updateProfile({
-         name: form.name.trim() || user().profile?.name,
-         bio: form.bio.trim(),
-         location: form.location.trim(),
-         website: form.website.trim()
-       });
-       setEditingProfile(false);
-       toastManager.success('Profile updated successfully');
-     } catch (error) {
-       logger.error('Profile update error:', error);
-       toastManager.error('Failed to update profile');
-     }
-   };
+      try {
+        const form = profileForm();
+        await updateUserProfile(user().id, {
+          name: form.name.trim() || user().profile?.name,
+          bio: form.bio.trim(),
+          location: form.location.trim(),
+          website: form.website.trim()
+        });
+        await checkAuth();
+        setEditingProfile(false);
+        toastManager.success('Profile updated successfully');
+      } catch (error) {
+        logger.error('Profile update error:', error);
+        toastManager.error('Failed to update profile');
+      }
+    };
 
   const startEditing = () => {
      setProfileForm({
@@ -180,11 +182,11 @@ const Profile = () => {
    };
 
   return (
-    <div class={`max-w-6xl mx-auto space-y-8 ${currentLang() === 'ar' ? 'rtl' : 'ltr'}`}>
+    <div class={`max-w-6xl mx-auto space-y-8 px-4 sm:px-6 ${currentLang() === 'ar' ? 'rtl' : 'ltr'}`}>
       {/* Header */}
       <div class="text-center">
-        <h1 class="text-4xl font-bold text-base-content mb-4">{t().profile}</h1>
-        <p class="text-lg text-base-content/70">
+        <h1 class="text-3xl sm:text-4xl font-bold text-base-content mb-4">{t().profile}</h1>
+        <p class="text-base sm:text-lg text-base-content/70">
           {t().viewManageProfile}
         </p>
         <Show when={editingProfile()}>

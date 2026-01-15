@@ -3,10 +3,10 @@ import { v4 as uuidv4 } from 'uuid';
 import logger from './logger.js';
 
 // Import core database functionality
-export { query, exec, transaction, close, getEntities, updateEntity, getPg } from './db-core.js';
+export { query, exec, close, getEntities, updateEntity, getPg } from './db-core.js';
 
 // Import user functions
-export { _createUser, _getUserById, _getUserByEmail, _updateUser, _deleteUser, _createUserProfile, _getUserProfile } from './db-users.js';
+export { _createUser, _getUserById, _getUserByEmail, _updateUser, _deleteUser, _createUserProfile, _getUserProfile, _updateUserProfile, _updateUserPassword } from './db-users.js';
 
 // Import project functions
 export { _createProject, _getProjectById, _updateProject, _deleteProject, _deleteAllProjects, _toggleProjectPublic, _getTasks, _addTask, _updateTask, _getProjects } from './db-projects.js';
@@ -90,12 +90,25 @@ export {
 } from './db-collaboration.js';
 
 // Local user management for PGLite only
-let currentUser = { id: 1 };
-const getCurrentUser = async () => {
+let currentUser = null;
+export const getCurrentUser = async () => {
+  if (!currentUser) {
+    const savedUserData = localStorage.getItem('userData');
+    if (savedUserData) {
+      try {
+        currentUser = JSON.parse(savedUserData);
+      } catch (e) {
+        console.error('Error parsing saved user data:', e);
+      }
+    }
+  }
   return currentUser;
 };
 export const setCurrentUser = (user) => {
-  currentUser = user || { id: 1 };
+  currentUser = user;
+  if (user) {
+    localStorage.setItem('userData', JSON.stringify(user));
+  }
 };
 
 // Exported API functions (wrappers for the internal functions)
@@ -133,12 +146,23 @@ export const getUserProfile = async (userId) => {
   try {
     const { getPg } = await import('./db-core.js');
     const db = await getPg();
+    if (!db) return null;
     const res = await db.query('SELECT * FROM profiles WHERE user_id = $1', [userId]);
     return res.rows[0] || null;
   } catch (err) {
     console.error('Error getting user profile:', err);
     return null;
   }
+};
+
+export const updateUserProfile = async (userId, updates) => {
+  const { _updateUserProfile } = await import('./db-users.js');
+  return await _updateUserProfile({ userId, updates });
+};
+
+export const updateUserPassword = async (userId, newPasswordHash) => {
+  const { _updateUserPassword } = await import('./db-users.js');
+  return await _updateUserPassword({ userId, newPasswordHash });
 };
 
 export const addProject = async (project) => {
@@ -509,6 +533,8 @@ export const inviteCollaborator = async (portfolioId, inviteeEmail, role = 'edit
 export const getPortfolioInvitations = async (portfolioId) => {
   return await _getPortfolioInvitations({ portfolioId });
 };
+
+import { _getUserInvitations, _respondToInvitation, _getPortfolioCollaborators, _removeCollaborator, _updateCollaboratorRole } from './db-collaboration.js';
 
 export const getUserInvitations = async (userEmail) => {
   return await _getUserInvitations({ userEmail });

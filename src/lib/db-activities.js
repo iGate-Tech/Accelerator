@@ -46,7 +46,7 @@ export async function _createNotification({ userId, type, title, message }) {
 
 export async function _getUserNotifications({ userId }) {
   if (!dbInstance) {
-    console.warn('Database not initialized, returning empty notifications');
+    console.debug('Database not initialized, returning empty notifications');
     return [];
   }
   try {

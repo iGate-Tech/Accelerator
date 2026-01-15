@@ -250,6 +250,118 @@ export const stepsConfig = [
   },
   {
     id: "step17",
+    name: "Technical Architecture",
+    model: "Technical Model",
+    section: "Technical Strategy",
+    prompt: {
+      template: standardPromptTemplate,
+      variables: ["solution", "modelType"],
+      outputKeys: ["techStack", "architecture", "patterns", "scalability"],
+      instructions:
+        "Design the technical architecture for {{solution}}. Recommend tech stack ({{techStack}}), architecture patterns ({{patterns}}), and scalability approach ({{scalability}}).",
+    },
+    transitions: { next: "step18" },
+  },
+  {
+    id: "step18",
+    name: "MVP Definition",
+    model: "Technical Model",
+    section: "MVP Planning",
+    prompt: {
+      template: standardPromptTemplate,
+      variables: ["solution", "coreFeatures"],
+      outputKeys: ["mvpFeatures", "scope", "prioritization"],
+      instructions:
+        "Define the MVP for {{solution}} by identifying {{mvpFeatures}} from {{coreFeatures}}. Explain scope and prioritization rationale.",
+    },
+    transitions: { next: "step19" },
+  },
+  {
+    id: "step19",
+    name: "Infrastructure & Hosting",
+    model: "Technical Model",
+    section: "Infrastructure",
+    prompt: {
+      template: standardPromptTemplate,
+      variables: ["solution", "scalability"],
+      outputKeys: ["cloudProvider", "hosting", "cdn", "costs"],
+      instructions:
+        "Plan infrastructure and hosting for {{solution}} considering {{scalability}}. Recommend cloud provider, hosting strategy, and CDN approach.",
+    },
+    transitions: { next: "step20" },
+  },
+  {
+    id: "step20",
+    name: "Security Architecture",
+    model: "Technical Model",
+    section: "Security",
+    prompt: {
+      template: standardPromptTemplate,
+      variables: ["solution", "persona"],
+      outputKeys: ["auth", "encryption", "compliance", "securityMeasures"],
+      instructions:
+        "Design security architecture for {{solution}} serving {{persona}}. Include authentication, encryption, compliance requirements, and security measures.",
+    },
+    transitions: { next: "step21" },
+  },
+  {
+    id: "step21",
+    name: "Data Architecture",
+    model: "Technical Model",
+    section: "Data Strategy",
+    prompt: {
+      template: standardPromptTemplate,
+      variables: ["solution", "market"],
+      outputKeys: ["databases", "dataFlow", "analytics", "storage"],
+      instructions:
+        "Plan data architecture for {{solution}} targeting {{market}}. Design databases, data flow, analytics pipeline, and storage strategy.",
+    },
+    transitions: { next: "step22" },
+  },
+  {
+    id: "step22",
+    name: "API & Integrations",
+    model: "Technical Model",
+    section: "Integration",
+    prompt: {
+      template: standardPromptTemplate,
+      variables: ["solution"],
+      outputKeys: ["apiDesign", "integrations", "webhooks", "partnerships"],
+      instructions:
+        "Design API strategy for {{solution}}. Plan REST/GraphQL design, third-party {{integrations}}, webhooks, and partnership opportunities.",
+    },
+    transitions: { next: "step23" },
+  },
+  {
+    id: "step23",
+    name: "Development Workflow",
+    model: "Technical Model",
+    section: "DevOps",
+    prompt: {
+      template: standardPromptTemplate,
+      variables: ["solution", "timeline"],
+      outputKeys: ["ciCd", "testing", "deployment", "monitoring"],
+      instructions:
+        "Establish development workflow for {{solution}} within {{timeline}}. Define CI/CD pipeline, testing strategy, deployment process, and monitoring.",
+    },
+    transitions: { next: "step24" },
+  },
+  {
+    id: "step24",
+    name: "Technical Roadmap",
+    model: "Technical Model",
+    section: "Planning",
+    prompt: {
+      template: standardPromptTemplate,
+      variables: ["solution", "mvpFeatures", "timeline"],
+      outputKeys: ["milestones", "resources", "risks", "timelinePhases"],
+      instructions:
+        "Create technical roadmap for {{solution}} with {{mvpFeatures}} in {{timeline}}. Define milestones, resources needed, technical risks, and timeline phases.",
+    },
+    transitions: { next: "step25" },
+  },
+  {
+    id: "step25",
     name: "Target Market",
     model: "Marketing Model",
     section: "Market Analysis",
@@ -260,10 +372,10 @@ export const stepsConfig = [
       instructions:
         "Clearly define the target market for {{solution}} by industry, size, and customer type.",
     },
-    transitions: { next: "step18" },
+    transitions: { next: "step26" },
   },
   {
-    id: "step18",
+    id: "step26",
     name: "Total Addressable Market",
     model: "Marketing Model",
     section: "Market Analysis",
@@ -274,10 +386,10 @@ export const stepsConfig = [
       instructions:
         "Estimate the Total Addressable Market (TAM) for {{market}}. Explain the calculation method.",
     },
-    transitions: { next: "step19" },
+    transitions: { next: "step27" },
   },
   {
-    id: "step19",
+    id: "step27",
     name: "Serviceable Available Market",
     model: "Marketing Model",
     section: "Market Analysis",
@@ -288,10 +400,10 @@ export const stepsConfig = [
       instructions:
         "Estimate the Serviceable Available Market (SAM) for {{market}}. Describe realistic reach.",
     },
-    transitions: { next: "step20" },
+    transitions: { next: "step28" },
   },
   {
-    id: "step20",
+    id: "step28",
     name: "Serviceable Obtainable Market",
     model: "Marketing Model",
     section: "Market Analysis",
@@ -315,10 +427,10 @@ export const stepsConfig = [
       outputKeys: ["valid", "message"],
       instructions: "Check if {{tam}} >= {{sam}} >= {{som}}.",
     },
-    transitions: { next: "step21" },
+    transitions: { next: "step29" },
   },
   {
-    id: "step21",
+    id: "step29",
     name: "Market Trends",
     model: "Marketing Model",
     section: "Market Strategy",
@@ -329,10 +441,10 @@ export const stepsConfig = [
       instructions:
         "Identify trends or tailwinds supporting {{market}} growth. Include rates if known.",
     },
-    transitions: { next: "step22" },
+    transitions: { next: "step30" },
   },
   {
-    id: "step22",
+    id: "step30",
     name: "Competitive Landscape",
     model: "Marketing Model",
     section: "Market Strategy",
@@ -343,10 +455,10 @@ export const stepsConfig = [
       instructions:
         "List direct and indirect competitors in {{market}}. Explain how {{solution}} differs.",
     },
-    transitions: { next: "step23" },
+    transitions: { next: "step31" },
   },
   {
-    id: "step23",
+    id: "step31",
     name: "Market Entry",
     model: "Marketing Model",
     section: "Market Strategy",
@@ -357,10 +469,10 @@ export const stepsConfig = [
       instructions:
         "Develop a strategy to enter {{market}} and acquire first customers.",
     },
-    transitions: { next: "step24" },
+    transitions: { next: "step32" },
   },
   {
-    id: "step24",
+    id: "step32",
     name: "Customer Acquisition",
     model: "Marketing Model",
     section: "Market Strategy",
@@ -371,10 +483,10 @@ export const stepsConfig = [
       instructions:
         "Identify channels to acquire customers in {{market}}. Rank by priority.",
     },
-    transitions: { next: "step25" },
+    transitions: { next: "step33" },
   },
   {
-    id: "step25",
+    id: "step33",
     name: "Sales Strategy",
     model: "Marketing Model",
     section: "Market Strategy",
@@ -385,10 +497,10 @@ export const stepsConfig = [
       instructions:
         "Describe the sales motion for {{market}}: self-serve, inside sales, or enterprise.",
     },
-    transitions: { next: "step26" },
+    transitions: { next: "step34" },
   },
   {
-    id: "step26",
+    id: "step34",
     name: "Customer Retention",
     model: "Marketing Model",
     section: "Market Strategy",
@@ -399,10 +511,10 @@ export const stepsConfig = [
       instructions:
         "Develop strategies to retain customers and grow revenue in {{market}}.",
     },
-    transitions: { next: "step27" },
+    transitions: { next: "step35" },
   },
   {
-    id: "step27",
+    id: "step35",
     name: "Revenue Logic",
     model: "Financial Model",
     section: "Financial Planning",
@@ -413,10 +525,10 @@ export const stepsConfig = [
       instructions:
         "Explain how revenue is generated per customer in {{modelType}}.",
     },
-    transitions: { next: "step28" },
+    transitions: { next: "step36" },
   },
   {
-    id: "step28",
+    id: "step36",
     name: "Unit Economics",
     model: "Financial Model",
     section: "Financial Planning",
@@ -427,10 +539,10 @@ export const stepsConfig = [
       instructions:
         "Provide Customer Acquisition Cost (CAC), Lifetime Value (LTV), and gross margin assumptions for {{modelType}}.",
     },
-    transitions: { next: "step29" },
+    transitions: { next: "step37" },
   },
   {
-    id: "step29",
+    id: "step37",
     name: "Cost Structure",
     model: "Financial Model",
     section: "Financial Planning",
@@ -440,10 +552,10 @@ export const stepsConfig = [
       outputKeys: ["fixedCosts", "variableCosts"],
       instructions: "List major fixed and variable costs for {{solution}}.",
     },
-    transitions: { next: "step30" },
+    transitions: { next: "step38" },
   },
   {
-    id: "step30",
+    id: "step38",
     name: "Financial Projections",
     model: "Financial Model",
     section: "Financial Planning",
@@ -454,10 +566,10 @@ export const stepsConfig = [
       instructions:
         "Provide 3-year revenue and expense projections for {{solution}}.",
     },
-    transitions: { next: "step31" },
+    transitions: { next: "step39" },
   },
   {
-    id: "step31",
+    id: "step39",
     name: "Monthly Burn Rate",
     model: "Financial Model",
     section: "Financial Planning",
@@ -468,10 +580,10 @@ export const stepsConfig = [
       instructions:
         "Calculate the monthly burn rate and runway for {{solution}}.",
     },
-    transitions: { next: "step32" },
+    transitions: { next: "step40" },
   },
   {
-    id: "step32",
+    id: "step40",
     name: "Profitability Timeline",
     model: "Financial Model",
     section: "Financial Planning",
@@ -481,10 +593,10 @@ export const stepsConfig = [
       outputKeys: ["breakeven"],
       instructions: "Determine when {{solution}} will break even.",
     },
-    transitions: { next: "step33" },
+    transitions: { next: "step41" },
   },
   {
-    id: "step33",
+    id: "step41",
     name: "Valuation Inputs",
     model: "Financial Model",
     section: "Valuation & Funding Prep",
@@ -495,10 +607,10 @@ export const stepsConfig = [
       instructions:
         "Provide current traction, team strength, market size ({{tam}}), and risk level for {{solution}}.",
     },
-    transitions: { next: "step34" },
+    transitions: { next: "step42" },
   },
   {
-    id: "step34",
+    id: "step42",
     name: "Company Valuation",
     model: "Financial Model",
     section: "Valuation & Funding Prep",
@@ -509,10 +621,10 @@ export const stepsConfig = [
       instructions:
         "Calculate the valuation for {{solution}} using Scorecard, Berkus, VC, and DCF-light methods with {{inputs}}.",
     },
-    transitions: { next: "step35" },
+    transitions: { next: "step43" },
   },
   {
-    id: "step35",
+    id: "step43",
     name: "Funding Stage",
     model: "Financial Model",
     section: "Valuation & Funding Prep",
@@ -523,10 +635,10 @@ export const stepsConfig = [
       instructions:
         "Determine the appropriate funding stage for {{solution}}: Pre-seed, Seed, Series A, etc.",
     },
-    transitions: { next: "step36" },
+    transitions: { next: "step44" },
   },
   {
-    id: "step36",
+    id: "step44",
     name: "Funding Amount",
     model: "Financial Model",
     section: "Valuation & Funding Prep",
@@ -550,10 +662,10 @@ export const stepsConfig = [
       outputKeys: ["valid", "message"],
       instructions: "Check if {{valuation}} aligns with {{ask}}.",
     },
-    transitions: { next: "step37" },
+    transitions: { next: "step45" },
   },
   {
-    id: "step37",
+    id: "step45",
     name: "Fund Allocation",
     model: "Funding Model",
     section: "Funding Strategy",
@@ -563,10 +675,10 @@ export const stepsConfig = [
       outputKeys: ["allocation"],
       instructions: "Plan the allocation of raised funds for {{solution}}.",
     },
-    transitions: { next: "step38" },
+    transitions: { next: "step46" },
   },
   {
-    id: "step38",
+    id: "step46",
     name: "Pre-Money Valuation",
     model: "Funding Model",
     section: "Funding Strategy",
@@ -590,10 +702,10 @@ export const stepsConfig = [
       outputKeys: ["valid", "message"],
       instructions: "Validate if {{preMoney}} < {{ask}}.",
     },
-    transitions: { next: "step39" },
+    transitions: { next: "step47" },
   },
   {
-    id: "step39",
+    id: "step47",
     name: "Target Investors",
     model: "Funding Model",
     section: "Funding Strategy",
@@ -603,10 +715,10 @@ export const stepsConfig = [
       outputKeys: ["investors"],
       instructions: "Identify target investor types for {{solution}}.",
     },
-    transitions: { next: "step40" },
+    transitions: { next: "step48" },
   },
   {
-    id: "step40",
+    id: "step48",
     name: "Funding Milestones",
     model: "Funding Model",
     section: "Funding Strategy",
@@ -617,10 +729,10 @@ export const stepsConfig = [
       instructions:
         "List milestones unlocked by this funding round for {{solution}}.",
     },
-    transitions: { next: "step41" },
+    transitions: { next: "step49" },
   },
   {
-    id: "step41",
+    id: "step49",
     name: "Founding Team",
     model: "Team Model",
     section: "Team Building",
@@ -631,10 +743,10 @@ export const stepsConfig = [
       instructions:
         "List founding team members for {{solution}} and their roles.",
     },
-    transitions: { next: "step42" },
+    transitions: { next: "step50" },
   },
   {
-    id: "step42",
+    id: "step50",
     name: "Team Gaps",
     model: "Team Model",
     section: "Team Building",
@@ -644,10 +756,10 @@ export const stepsConfig = [
       outputKeys: ["gaps"],
       instructions: "Identify key skills missing in the team for {{solution}}.",
     },
-    transitions: { next: "step43" },
+    transitions: { next: "step51" },
   },
   {
-    id: "step43",
+    id: "step51",
     name: "Hiring Plan",
     model: "Team Model",
     section: "Team Building",
@@ -658,10 +770,10 @@ export const stepsConfig = [
       instructions:
         "Develop a hiring plan for {{solution}} for the next 12-24 months.",
     },
-    transitions: { next: "step44" },
+    transitions: { next: "step52" },
   },
   {
-    id: "step44",
+    id: "step52",
     name: "Advisors & Board",
     model: "Team Model",
     section: "Team Building",
@@ -672,10 +784,10 @@ export const stepsConfig = [
       instructions:
         "List advisors, board members, and governance structure for {{solution}}.",
     },
-    transitions: { next: "step45" },
+    transitions: { next: "step53" },
   },
   {
-    id: "step45",
+    id: "step53",
     name: "Legal Structure",
     model: "Legal Model",
     section: "Legal Foundations",
@@ -686,10 +798,10 @@ export const stepsConfig = [
       instructions:
         "Determine the legal structure for the {{solution}} company.",
     },
-    transitions: { next: "step46" },
+    transitions: { next: "step54" },
   },
   {
-    id: "step46",
+    id: "step54",
     name: "IP Protection",
     model: "Legal Model",
     section: "Legal Foundations",
@@ -700,10 +812,10 @@ export const stepsConfig = [
       instructions:
         "Plan intellectual property ownership and protection for {{solution}}.",
     },
-    transitions: { next: "step47" },
+    transitions: { next: "step55" },
   },
   {
-    id: "step47",
+    id: "step55",
     name: "Contracts & Compliance",
     model: "Legal Model",
     section: "Legal Foundations",
@@ -714,10 +826,10 @@ export const stepsConfig = [
       instructions:
         "Identify key contracts and compliance requirements for {{solution}}.",
     },
-    transitions: { next: "step48" },
+    transitions: { next: "step56" },
   },
   {
-    id: "step48",
+    id: "step56",
     name: "Legal Risks",
     model: "Legal Model",
     section: "Legal Foundations",
@@ -728,10 +840,10 @@ export const stepsConfig = [
       instructions:
         "Identify legal and regulatory risks for AI-powered legal document review.",
     },
-    transitions: { next: "step49" },
+    transitions: { next: "step57" },
   },
   {
-    id: "step49",
+    id: "step57",
     name: "Pitch Deck Generation",
     model: "Pitch Deck Report",
     section: "Final Reports",
@@ -758,10 +870,10 @@ export const stepsConfig = [
       instructions:
         "Create a comprehensive and extremely professional Pitch Deck for {{solution}} in markdown format. Include slides for problem ({{problem}}), solution ({{solution}}), market opportunity ({{tam}}, {{sam}}, {{som}}), product demo ({{coreFeatures}}), traction ({{traction}}), business model ({{modelType}}), competition ({{competitors}}), financials ({{year1}}, {{year2}}, {{year3}}), team ({{team}}), ask ({{ask}}), and use of funds ({{allocation}}). Ensure the deck is concise, visually described, and compelling with proper slide structure, bullet points, and embedded variables.",
     },
-    transitions: { next: "step50" },
+    transitions: { next: "step58" },
   },
   {
-    id: "step50",
+    id: "step58",
     name: "Business Plan Generation",
     model: "Business Plan Report",
     section: "Final Reports",
@@ -790,10 +902,10 @@ export const stepsConfig = [
       instructions:
         "Develop a detailed and professional Business Plan for {{solution}} in markdown format. Include executive summary, company description, market analysis ({{market}}, {{tam}}, {{sam}}, {{som}}, {{trends}}), product/service description ({{solution}}, {{coreFeatures}}), business model ({{modelType}}), revenue streams ({{revenue}}), pricing ({{pricing}}), competitive analysis ({{competitors}}, {{differentiation}}), financial projections ({{year1}}, {{year2}}, {{year3}}), funding requirements ({{ask}}), and team overview ({{team}}). Use all extracted variables and ensure the plan is comprehensive and investor-ready with proper sections, tables, and formatting.",
     },
-    transitions: { next: "step51" },
+    transitions: { next: "step59" },
   },
   {
-    id: "step51",
+    id: "step59",
     name: "Valuation Report Generation",
     model: "Valuation Report",
     section: "Final Reports",

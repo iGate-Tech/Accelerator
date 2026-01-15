@@ -221,7 +221,7 @@ export const receiveResponse = async (
       completedSteps: prev.completedSteps + 1,
       uiProgress: 100,
       uiStatus: "completed",
-      uiMessage: "All 51 steps completed successfully!",
+      uiMessage: "All 60 steps completed successfully!",
       consumedCredits: newConsumedCredits,
       consumedTime: newConsumedTime,
     }));
@@ -229,7 +229,7 @@ export const receiveResponse = async (
     setMachineStore("context", (prev) => {
       const isSys = prev.currentStep === "system";
       const newCompletedSteps = isSys ? 1 : prev.completedSteps + 1;
-      const progress = Math.min((newCompletedSteps / 51) * 100, 100);
+      const progress = Math.min((newCompletedSteps / 63) * 100, 100);
       const message = isSys
         ? "Initialization complete. Starting step 1..."
         : `Step ${newCompletedSteps} complete. Moving to ${stepNames[nextStep] || "next step"}...`;

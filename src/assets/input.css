@@ -53,6 +53,18 @@
 
 body {
   overflow: hidden;
+  height: 100dvh; /* Dynamic viewport height for mobile */
+  max-height: 100vh;
+}
+
+html {
+  height: 100%;
+  overflow: hidden;
+}
+
+#root {
+  height: 100%;
+  overflow: hidden;
 }
 
 main {
@@ -113,9 +125,15 @@ main {
   border-left: none !important;
 }
 
-.sidebar {
-  width: 25rem;
+.sidebar.w-64 {
+  width: 16rem !important;
 }
+
+.sidebar.w-16 {
+  width: 4rem !important;
+}
+
+
 
 .rtl .menu li > details > summary::after {
   transform: rotate(90deg) translateX(-50%);
@@ -888,6 +906,16 @@ height: 150%;
   border-radius: calc(8px - 4px);
   z-index: -1;
 
+}
+
+#agentBox.agent-box-fixed {
+  position: fixed !important;
+  bottom: 10px !important;
+  left: 50% !important;
+  transform: translateX(-50%) !important;
+  width: calc(100% - 40px) !important;
+  max-width: 56rem !important;
+  z-index: 50 !important;
 }
 
 @keyframes spin {

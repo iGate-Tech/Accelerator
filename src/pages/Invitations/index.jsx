@@ -45,10 +45,10 @@ const Invitations = () => {
   };
 
   return (
-    <div class={`space-y-6 mt-10 ${currentLang() === 'ar' ? 'rtl' : 'ltr'}`}>
+    <div class={`space-y-6 mt-10 px-4 sm:px-6 ${currentLang() === 'ar' ? 'rtl' : 'ltr'}`}>
       {/* Header */}
-      <div>
-        <h1 class="text-4xl font-bold text-base-content">{t().portfolioInvitations}</h1>
+      <div class="text-center sm:text-left">
+        <h1 class="text-3xl sm:text-4xl font-bold text-base-content">{t().portfolioInvitations}</h1>
         <p class="text-base-content/70 mt-2">
           {t().manageInvitationsDesc}
         </p>

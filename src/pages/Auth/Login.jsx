@@ -57,13 +57,13 @@ const Login = () => {
     }
 
     try {
-      const success = await login(sanitizedEmail, sanitizedPassword);
-       if (success) {
+      const result = await login(sanitizedEmail, sanitizedPassword);
+       if (result && result.success) {
          logger.info('Login successful for:', sanitizedEmail);
          toastManager.success(`Login successful for ${sanitizedEmail}. Welcome back!`);
          navigate('/', { replace: true });
        } else {
-        toastManager.error(`Invalid credentials for ${sanitizedEmail}. Please check your email and password.`);
+        toastManager.error(result?.error || `Invalid credentials for ${sanitizedEmail}. Please check your email and password.`);
       }
     } catch (err) {
       toastManager.error(`Login failed for ${sanitizedEmail}. Error: ${err.message}. Please try again.`);
@@ -80,7 +80,7 @@ const Login = () => {
   <RouteGuard requireGuest={true}>
 
 
-    <div class="w-full max-w-md">
+    <div class="w-full max-w-md px-4 sm:px-6 lg:px-8 py-4">
         {/* Logo */}
          
          <div class="card w-full py-6 shadow-2xl bg-base-100 border border-base-300 backdrop-blur-sm">

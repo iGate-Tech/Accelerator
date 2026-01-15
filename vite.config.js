@@ -96,11 +96,15 @@ export default defineConfig({
     exclude: ['@electric-sql/pglite']
   },
    server: {
-     proxy: {
-       '/api': process.env.NODE_ENV === 'production' ? false : {
-         target: process.env.DOCKER_ENV === 'true' ? 'http://backend:3000' : 'http://localhost:3000',
-         changeOrigin: true
-       }
-     }
-   }
+      headers: {
+        'Cross-Origin-Opener-Policy': 'same-origin',
+        'Cross-Origin-Embedder-Policy': 'require-corp'
+      },
+      proxy: {
+        '/api': process.env.NODE_ENV === 'production' ? false : {
+          target: process.env.DOCKER_ENV === 'true' ? 'http://backend:3000' : 'http://localhost:3000',
+          changeOrigin: true
+        }
+      }
+    }
 });

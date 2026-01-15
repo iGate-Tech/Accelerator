@@ -2,9 +2,9 @@ import { A, useLocation, useNavigate } from "@solidjs/router";
 import { useContext, onMount, onCleanup, createSignal, createEffect, For, Show, createMemo } from "solid-js";
 import { LangContext } from "../../context/LangContext";
 import { useUser } from "../../context/UserContext";
+import { confirmDelete } from "../../components/ui/GlobalConfirm";
 import { translations } from "../../assets/translations/translations-index.js";
 import { getProjects, updateProject, deleteProject, deleteAllProjects, exportAllProjects, exportAllData, exportProject, exportReports } from "../../lib/db";
-// Removed sync imports
 import { toastManager } from "../../lib/feedback";
 import logger from "../../lib/logger.js";
 
@@ -81,7 +81,8 @@ const Sidebar = () => {
         break;
 
       case 'delete':
-        if (window.confirm(t().delete + ' "' + project.name + '"?')) {
+        const confirmed = await confirmDelete(project.name);
+        if (confirmed) {
           await deleteProject(projectId);
           window.dispatchEvent(new CustomEvent('projectDeleted', { detail: { projectId } }));
           toastManager.success(t().delete + ' ' + t().successful);
@@ -99,7 +100,8 @@ const Sidebar = () => {
   };
 
   const handleDeleteAllProjects = async () => {
-    if (window.confirm(t().deleteAllProjects + '?')) {
+    const confirmed = await confirmDelete(t().allProjects, "All projects will be permanently deleted.");
+    if (confirmed) {
       await deleteAllProjects();
       toastManager.success(t().deleteAllProjects + ' ' + t().successful);
       await loadProjects();
@@ -108,33 +110,34 @@ const Sidebar = () => {
 
   const handleExportAllProjects = async () => {
     const currentUser = user();
-    const data = await exportAllProjects(currentUser?.id);
-    if (data) {
-      const blob = new Blob([data], { type: 'application/json' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = t().allProjectsFilename;
-      a.click();
-      URL.revokeObjectURL(url);
-    } else {
+    if (!currentUser) return;
+    try {
+      const data = await exportAllData(currentUser.id);
+      downloadJSON(data, `accelerator-export-${new Date().toISOString().split('T')[0]}.json`);
+      toastManager.success(t().exportAllProjects + ' ' + t().successful);
+    } catch (error) {
+      logger.error('Failed to export projects:', error);
       toastManager.error(t().exportAllProjects + ' ' + t().failed);
     }
   };
 
-
+  const onProjectAdded = async () => {
+    await loadProjects();
+  };
+  const onProjectUpdated = async () => {
+    await loadProjects();
+  };
 
   onMount(async () => {
     await loadProjects();
-     const onProjectAdded = async () => {
-       await loadProjects();
-     };
-     const onProjectUpdated = async () => {
-       await loadProjects();
-     };
-     window.addEventListener('projectAdded', onProjectAdded);
-     window.addEventListener('projectUpdated', onProjectUpdated);
-     if (window.lucide) window.lucide.createIcons();
+    window.addEventListener('projectAdded', onProjectAdded);
+    window.addEventListener('projectUpdated', onProjectUpdated);
+    if (window.lucide) window.lucide.createIcons();
+  });
+
+  onCleanup(() => {
+    window.removeEventListener('projectAdded', onProjectAdded);
+    window.removeEventListener('projectUpdated', onProjectUpdated);
   });
 
   onCleanup(() => {
@@ -156,8 +159,10 @@ const Sidebar = () => {
 
   return (
     <aside
-      class="sidebar h-screen bg-base-100 border-base-200 overflow-y-auto max-w-[24] hidden lg:block z-[55]"
+      class="sidebar h-screen bg-base-100 border-base-200 overflow-y-auto hidden lg:block z-[55] transition-all duration-300 ease-in-out"
       classList={{
+        'w-64': !isCollapsed(),
+        'w-16': isCollapsed(),
         'border-e': currentLang() === 'en',
         'border-s': currentLang() === 'ar'
       }}

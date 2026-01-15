@@ -80,17 +80,18 @@ const Explore = () => {
     refetch();
   };
 
-    onMount(() => {
-      const onProjectAdded = () => refetch();
-      const onProjectUpdated = () => refetch();
-      window.addEventListener('projectAdded', onProjectAdded);
-      window.addEventListener('projectUpdated', onProjectUpdated);
-    });
+  const onProjectAdded = () => refetch();
+  const onProjectUpdated = () => refetch();
 
-    onCleanup(() => {
-      window.removeEventListener('projectAdded', onProjectAdded);
-      window.removeEventListener('projectUpdated', onProjectUpdated);
-    });
+  onMount(() => {
+    window.addEventListener('projectAdded', onProjectAdded);
+    window.addEventListener('projectUpdated', onProjectUpdated);
+  });
+
+  onCleanup(() => {
+    window.removeEventListener('projectAdded', onProjectAdded);
+    window.removeEventListener('projectUpdated', onProjectUpdated);
+  });
 
    const statusOptions = [
     { value: "all", label: t().allStatus, icon: "layers" },
@@ -110,9 +111,9 @@ const Explore = () => {
   return (
     <div class={`space-y-6  ${currentLang() === 'ar' ? 'rtl' : 'ltr'}`}>
       {/* Header */}
-      <div class="text-center py-8">
-        <h1 class="text-4xl font-bold text-base-content mb-4">{t().exploreProjects}</h1>
-        <p class="text-lg text-base-content/70 max-w-2xl mx-auto">
+      <div class="text-center py-8 px-4">
+        <h1 class="text-3xl sm:text-4xl font-bold text-base-content mb-4">{t().exploreProjects}</h1>
+        <p class="text-base sm:text-lg text-base-content/70 max-w-2xl mx-auto">
           {t().discoverManageProjects} {t().clickContinueProject}
         </p>
       </div>

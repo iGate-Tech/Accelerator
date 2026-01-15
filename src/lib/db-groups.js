@@ -3,6 +3,10 @@ import { dbInstance, updateEntity } from './db-core.js';
 
 // Group management functions
 export async function _getGroups({ userId = null }) {
+  if (!dbInstance) {
+    console.debug('Database not initialized, returning empty groups');
+    return [];
+  }
   const whereClause = userId ? 'WHERE user_id = $1' : '';
   const params = userId ? [userId] : [];
   const query = `SELECT * FROM groups ${whereClause} ORDER BY created_at DESC`;
@@ -98,6 +102,10 @@ export async function _getProjectsInGroup({ groupId }) {
 }
 
 export async function _getUngroupedProjects({ userId = null }) {
+  if (!dbInstance) {
+    console.debug('Database not initialized, returning empty ungrouped projects');
+    return [];
+  }
   try {
     const result = await dbInstance.query(`
       SELECT p.* FROM projects p
@@ -112,6 +120,10 @@ export async function _getUngroupedProjects({ userId = null }) {
 }
 
 export async function _getGroupsWithProjects({ userId = null }) {
+  if (!dbInstance) {
+    console.debug('Database not initialized, returning empty groups with projects');
+    return [];
+  }
   try {
     const groups = await _getGroups({ userId });
     const groupsWithProjects = await Promise.all(

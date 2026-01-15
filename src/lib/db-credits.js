@@ -1,18 +1,24 @@
 import { v4 as uuidv4 } from 'uuid';
-import { dbInstance } from './db-core.js';
+import { dbInstance, getPg } from './db-core.js';
 
 // Credit and billing management functions
 export async function _addCreditTransaction({ userId, type, amount, description }) {
   try {
-     amount = parseFloat(amount);
-     const balanceResult = await dbInstance.query('SELECT SUM(amount) as balance FROM credits WHERE user_id = $1', [userId]);
-     const currentBalance = parseFloat(balanceResult.rows[0]?.balance || 0);
-     const balance_after = currentBalance + amount;
-      const id = uuidv4();
-      await dbInstance.query(
-        'INSERT INTO credits (id, user_id, type, amount, description, balance_after, created_at, synced_at, last_modified, sync_status, deleted_at, version) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)',
-        [id, userId, type, amount, description, balance_after, new Date().toISOString(), new Date().toISOString(), new Date().toISOString(), 'local', null, 1]
-      );
+    await getPg();
+    if (!dbInstance) {
+      console.debug('Database not initialized, transaction saved locally');
+      return { id: uuidv4(), user_id: userId, type, amount, description, balance_after: amount, date: new Date().toISOString() };
+    }
+    
+    amount = parseFloat(amount);
+    const balanceResult = await dbInstance.query('SELECT SUM(amount) as balance FROM credits WHERE user_id = $1', [userId]);
+    const currentBalance = parseFloat(balanceResult.rows[0]?.balance || 0);
+    const balance_after = currentBalance + amount;
+    const id = uuidv4();
+    await dbInstance.query(
+      'INSERT INTO credits (id, user_id, type, amount, description, balance_after, created_at, synced_at, last_modified, sync_status, deleted_at, version) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)',
+      [id, userId, type, amount, description, balance_after, new Date().toISOString(), new Date().toISOString(), new Date().toISOString(), 'local', null, 1]
+    );
     return { id, user_id: userId, type, amount, description, balance_after, date: new Date().toISOString() };
   } catch (err) {
     console.error('Error adding credit transaction:', err);
@@ -22,6 +28,8 @@ export async function _addCreditTransaction({ userId, type, amount, description 
 
 export async function _getUserCredits({ userId }) {
   try {
+    await getPg();
+    if (!dbInstance) return [];
     const result = await dbInstance.query('SELECT * FROM credits WHERE user_id = $1 ORDER BY created_at DESC', [userId]);
     return result.rows;
   } catch (err) {
@@ -32,6 +40,8 @@ export async function _getUserCredits({ userId }) {
 
 export async function _getCreditTransactions({ userId }) {
   try {
+    await getPg();
+    if (!dbInstance) return [];
     const result = await dbInstance.query('SELECT * FROM credits WHERE user_id = $1 ORDER BY created_at DESC', [userId]);
     return result.rows;
   } catch (err) {
@@ -41,32 +51,35 @@ export async function _getCreditTransactions({ userId }) {
 }
 
 export async function _getCreditBalance({ userId }) {
-  if (!dbInstance) {
-    console.warn('Database not initialized, returning 0 balance');
-    return 0;
-  }
   try {
+    await getPg();
+    if (!dbInstance) {
+      console.debug('Database not initialized, returning null balance');
+      return null;
+    }
     const result = await dbInstance.query(
       'SELECT COALESCE(SUM(amount), 0) as balance FROM credits WHERE user_id = $1',
       [userId]
     );
-    return result.rows[0].balance || 0;
+    return parseFloat(result.rows[0]?.balance || 0);
   } catch (err) {
     console.error('Error getting credit balance:', err);
-    return 0;
+    return null;
   }
 }
 
 export async function _getUserCreditBalance({ userId }) {
   try {
+    await getPg();
+    if (!dbInstance) return null;
     const result = await dbInstance.query(
       'SELECT COALESCE(SUM(amount), 0) as balance FROM credits WHERE user_id = $1',
       [userId]
     );
-    return result.rows[0].balance || 0;
+    return parseFloat(result.rows[0]?.balance || 0);
   } catch (err) {
     console.error('Error getting user credit balance:', err);
-    return 0;
+    return null;
   }
 }
 

@@ -14,13 +14,13 @@ export const initialContext = {
   currentModel: "System",
   currentSection: "Initialization",
   uiProgress: 0,
-  uiMessage: "Ready to start the 48-step accelerator process",
+  uiMessage: "Ready to start the 60-step accelerator process",
   uiStatus: "idle",
   currentPrompt: "",
   llmResponse: "",
-  totalCredits: 510,
+  totalCredits: 600,
   consumedCredits: 0,
-  totalTime: 15300, // 255 min estimated
+  totalTime: 18900,
   consumedTime: 0,
 };
 

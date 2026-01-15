@@ -49,7 +49,8 @@ const StatusPage = () => {
   };
 
   return (
-    <div class={`max-w-4xl mx-auto space-y-8 py-8 ${currentLang() === 'ar' ? 'rtl' : 'ltr'}`}>
+    <div class={`h-full overflow-auto ${currentLang() === 'ar' ? 'rtl' : 'ltr'}`}>
+      <div class="max-w-4xl mx-auto space-y-8 py-8 px-4 sm:px-6">
       {/* Back Button */}
       <div class="mb-6">
         <button
@@ -62,8 +63,8 @@ const StatusPage = () => {
       </div>
 
       <div class="text-center">
-        <h1 class="text-4xl font-bold text-base-content mb-4">{t().statusPage}</h1>
-        <p class="text-lg text-base-content/70">
+        <h1 class="text-3xl sm:text-4xl font-bold text-base-content mb-4">{t().statusPage}</h1>
+        <p class="text-base sm:text-lg text-base-content/70">
           {t().systemStatusAndAvailability}
         </p>
       </div>
@@ -149,6 +150,7 @@ const StatusPage = () => {
             {t().subscribe}
           </button>
         </div>
+      </div>
       </div>
     </div>
   );

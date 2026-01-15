@@ -1,50 +1,47 @@
-import { createSignal, onMount, createEffect, For, Show } from "solid-js";
+import { createSignal, onMount, createEffect, For, Show, createResource } from "solid-js";
 import { useNavigate } from "@solidjs/router";
 import { useUser } from "../../context/UserContext";
 import { useLanguage } from "../../hooks/useLanguage";
+import { getUserNotifications, markNotificationRead, createNotification } from "../../lib/db";
 import { toastManager } from "../../lib/feedback";
 import logger from '../../lib/logger.js';
 
 const Notifications = () => {
   logger.trace('Notifications: Starting');
   const navigate = useNavigate();
-  const { user, isAuthenticated, updatePreferences } = useUser();
+  const { user, isAuthenticated } = useUser();
   const { currentLang, t } = useLanguage();
 
-  const [notifications, setNotifications] = createSignal([
-    {
-      id: 1,
-      type: 'project',
-      title: 'Project Completed',
-      message: 'Your project "Startup Idea" has been completed successfully.',
-      timestamp: new Date(Date.now() - 1000 * 60 * 30), // 30 minutes ago
-      read: false
-    },
-    {
-      id: 2,
-      type: 'credit',
-      title: 'Credit Alert',
-      message: 'You have used 25 credits this week.',
-      timestamp: new Date(Date.now() - 1000 * 60 * 60 * 2), // 2 hours ago
-      read: true
-    },
-    {
-      id: 3,
-      type: 'system',
-      title: 'Welcome to Accelerator',
-      message: 'Welcome! Your account has been set up successfully.',
-      timestamp: new Date(Date.now() - 1000 * 60 * 60 * 24), // 1 day ago
-      read: true
-    }
-  ]);
-
   const [settings, setSettings] = createSignal({
-    email: user()?.preferences?.notifications?.email ?? true,
     browser: user()?.preferences?.notifications?.browser ?? false,
     projectUpdates: user()?.preferences?.notifications?.projectUpdates ?? true
   });
 
-  const [filter, setFilter] = createSignal('all'); // all, unread
+  const [filter, setFilter] = createSignal('all');
+
+  const fetchNotifications = async () => {
+    if (!user()?.id) return [];
+    try {
+      const notifs = await getUserNotifications(user().id);
+      return notifs.map(n => ({
+        ...n,
+        id: n.id,
+        type: n.type,
+        title: n.title,
+        message: n.message,
+        timestamp: new Date(n.created_at || n.timestamp),
+        read: Boolean(n.read)
+      }));
+    } catch (error) {
+      logger.error('Error fetching notifications:', error);
+      return [];
+    }
+  };
+
+  const [notifications, { refetch: refetchNotifications }] = createResource(
+    () => user()?.id,
+    fetchNotifications
+  );
 
   // Redirect if not authenticated
   createEffect(() => {
@@ -55,9 +52,8 @@ const Notifications = () => {
 
   const saveSettings = async () => {
     try {
-      await updatePreferences({
-        notifications: settings()
-      });
+      const { updatePreferences } = await import("../../context/UserContext");
+      await updatePreferences({ notifications: settings() });
       toastManager.success('Notification settings saved successfully!');
     } catch (error) {
       logger.error('Error saving notification settings:', error);
@@ -65,19 +61,31 @@ const Notifications = () => {
     }
   };
 
-  const markAsRead = (id) => {
-    setNotifications(prev => prev.map(n => n.id === id ? { ...n, read: true } : n));
-    toastManager.success('Notification marked as read');
+  const markAsRead = async (id) => {
+    try {
+      await markNotificationRead(id, user().id);
+      refetchNotifications();
+      toastManager.success('Notification marked as read');
+    } catch (error) {
+      logger.error('Error marking notification as read:', error);
+    }
   };
 
-  const markAllAsRead = () => {
-    const unreadCount = notifications().filter(n => !n.read).length;
-    if (unreadCount === 0) {
+  const markAllAsRead = async () => {
+    const unreadNotifs = notifications()?.filter(n => !n.read) || [];
+    if (unreadNotifs.length === 0) {
       toastManager.info('No unread notifications');
       return;
     }
-    setNotifications(prev => prev.map(n => ({ ...n, read: true })));
-    toastManager.success(`Marked ${unreadCount} notifications as read`);
+    try {
+      for (const notif of unreadNotifs) {
+        await markNotificationRead(notif.id, user().id);
+      }
+      refetchNotifications();
+      toastManager.success(`Marked ${unreadNotifs.length} notifications as read`);
+    } catch (error) {
+      logger.error('Error marking all as read:', error);
+    }
   };
 
   const filteredNotifications = () => {
@@ -91,6 +99,13 @@ const Notifications = () => {
       case 'project': return 'folder';
       case 'credit': return 'credit-card';
       case 'system': return 'info';
+      case 'subscription': return 'star';
+      case 'collaboration': return 'users';
+      case 'getting-started': return 'book-open';
+      case 'credits': return 'coins';
+      case 'ai': return 'brain';
+      case 'explore': return 'compass';
+      case 'help': return 'help-circle';
       default: return 'bell';
     }
   };
@@ -100,6 +115,13 @@ const Notifications = () => {
       case 'project': return 'border-primary bg-primary/10';
       case 'credit': return 'border-warning bg-warning/10';
       case 'system': return 'border-info bg-info/10';
+      case 'subscription': return 'border-success bg-success/10';
+      case 'collaboration': return 'border-secondary bg-secondary/10';
+      case 'getting-started': return 'border-primary bg-primary/10';
+      case 'credits': return 'border-warning bg-warning/10';
+      case 'ai': return 'border-accent bg-accent/10';
+      case 'explore': return 'border-secondary bg-secondary/10';
+      case 'help': return 'border-info bg-info/10';
       default: return 'border-neutral bg-neutral/10';
     }
   };
@@ -111,53 +133,26 @@ const Notifications = () => {
     const hours = Math.floor(diff / (1000 * 60 * 60));
     const days = Math.floor(diff / (1000 * 60 * 60 * 24));
 
+    if (isNaN(diff)) return 'Unknown';
     if (minutes < 1) return 'Just now';
     if (minutes < 60) return `${minutes}m ago`;
     if (hours < 24) return `${hours}h ago`;
-    return `${days}d ago`;
+    if (days < 7) return `${days}d ago`;
+    return date.toLocaleDateString();
   };
 
-  const markAllAsRead = async () => {
+  const createSampleNotification = async () => {
     try {
-      const unreadNotifications = notifications().filter(n => !n.read);
-      if (unreadNotifications.length === 0) {
-        toastManager.info('No unread notifications');
-        return;
-      }
-      await Promise.all(unreadNotifications.map(n => markNotificationRead(n.id, user().id)));
-      refetch();
-      toastManager.success(`Marked ${unreadNotifications.length} notifications as read`);
+      await createNotification(
+        user().id,
+        'system',
+        'Welcome to Accelerator',
+        'Your account has been set up successfully. Start exploring your startup ideas!'
+      );
+      refetchNotifications();
+      toastManager.success('Sample notification created');
     } catch (error) {
-      toastManager.error('Failed to mark all notifications as read');
-    }
-  
-  logger.trace('filteredNotifications: Starting');};
-
-  const filteredNotifications = () => {
-    const notifs = notifications() || [];
-    if (filter() === 'unread') return n
-  logger.trace('getNotificationIcon: Starting');otifs.filter(n => !n.read);
-    return notifs;
-  };
-
-  const getNotificationIcon = (type) => {
-    switch (type) {
-      case 'system': return '🔔';
-      case 'billing': return '💳';
-      ca
-  logger.trace('getNotificationColor: Starting');se 'credits': return '💰';
-      case 'update': return '📢';
-      default: return '📧';
-    }
-  };
-
-  const getNotificationColor = (type) => {
-    switch (type) {
-      case 'system': return 'border-info bg-info/10';
-      case 'billing': return 'border-success bg-success/10';
-      case 'credits': return 'border-warning bg-warning/10';
-      case 'update': return 'border-secondary bg-secondary/10';
-      default: return 'border-neutral bg-neutral/10';
+      logger.error('Error creating notification:', error);
     }
   };
 
@@ -170,11 +165,11 @@ const Notifications = () => {
   });
 
   return (
-    <div class={`max-w-4xl mx-auto space-y-8 ${currentLang() === 'ar' ? 'rtl' : 'ltr'}`}>
+    <div class={`max-w-4xl mx-auto space-y-8 px-4 sm:px-6 ${currentLang() === 'ar' ? 'rtl' : 'ltr'}`}>
       {/* Header */}
       <div class="text-center">
-        <h1 class="text-4xl font-bold text-base-content mb-4">Notifications</h1>
-        <p class="text-lg text-base-content/70">
+        <h1 class="text-3xl sm:text-4xl font-bold text-base-content mb-4">Notifications</h1>
+        <p class="text-base sm:text-lg text-base-content/70">
           Manage your notifications and stay updated.
         </p>
       </div>
@@ -189,18 +184,6 @@ const Notifications = () => {
                 Notification Settings
               </h3>
               <div class="space-y-4">
-                <label class="flex items-center justify-between">
-                  <div>
-                    <span class="font-medium">Email Notifications</span>
-                    <p class="text-sm text-base-content/60">Receive emails</p>
-                  </div>
-                  <input
-                    type="checkbox"
-                    class="toggle toggle-primary"
-                    checked={settings().email}
-                    onChange={(e) => setSettings(prev => ({ ...prev, email: e.target.checked }))}
-                  />
-                </label>
                 <label class="flex items-center justify-between">
                   <div>
                     <span class="font-medium">Browser Notifications</span>
@@ -303,6 +286,13 @@ const Notifications = () => {
                   <div class="text-center py-12 text-base-content/60">
                     <i data-lucide="inbox" class="w-12 h-12 mx-auto mb-4 opacity-50"></i>
                     <p>{filter() === 'unread' ? 'No unread notifications' : 'No notifications yet'}</p>
+                    <button
+                      class="btn btn-primary btn-sm mt-4"
+                      onClick={createSampleNotification}
+                    >
+                      <i data-lucide="plus" class="w-4 h-4 mr-2"></i>
+                      Create Sample Notification
+                    </button>
                   </div>
                 </Show>
               </div>

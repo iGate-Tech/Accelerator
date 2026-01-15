@@ -14,7 +14,6 @@ import { sidebarTranslations } from './translations-sidebar.js';
 import { agentTranslations } from './translations-agent.js';
 import { helpTranslations } from './translations-help.js';
 import { authTranslations } from './translations-auth.js';
-import { onboardingTranslations } from './translations-onboarding.js';
 import { profileTranslations } from './translations-profile.js';
 import { privacyTranslations } from './translations-privacy.js';
 import { termsTranslations } from './translations-terms.js';
@@ -35,7 +34,6 @@ export { sidebarTranslations };
 export { agentTranslations };
 export { helpTranslations };
 export { authTranslations };
-export { onboardingTranslations };
 export { profileTranslations };
 export { privacyTranslations };
 export { termsTranslations };
@@ -57,7 +55,6 @@ export const translations = {
     ...agentTranslations.en,
     ...helpTranslations.en,
     ...authTranslations.en,
-    ...onboardingTranslations.en,
     ...profileTranslations.en,
     ...privacyTranslations.en,
     ...termsTranslations.en,
@@ -78,7 +75,6 @@ export const translations = {
     ...agentTranslations.ar,
     ...helpTranslations.ar,
     ...authTranslations.ar,
-    ...onboardingTranslations.ar,
     ...profileTranslations.ar,
     ...privacyTranslations.ar,
     ...termsTranslations.ar,

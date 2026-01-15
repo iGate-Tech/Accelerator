@@ -2,6 +2,9 @@ import { dbInstance } from './db-core.js';
 
 // Voting and public project functions
 export async function _voteOnProject({ projectId, userId, voteType }) {
+  if (!dbInstance) {
+    return { action: 'mock', voteType };
+  }
   try {
      const existingVote = await dbInstance.query(
        'SELECT id, vote_type FROM project_votes WHERE project_id = $1 AND user_id = $2',
@@ -30,6 +33,9 @@ export async function _voteOnProject({ projectId, userId, voteType }) {
 }
 
 export async function _getProjectVotes({ projectId }) {
+  if (!dbInstance) {
+    return [];
+  }
   try {
      const res = await dbInstance.query(`
        SELECT vote_type, COUNT(*) as count
@@ -45,6 +51,9 @@ export async function _getProjectVotes({ projectId }) {
 }
 
 export async function _getPublicProjectsWithVotes({ currentUserId }) {
+  if (!dbInstance) {
+    return [];
+  }
   try {
     const res = await dbInstance.query(`
       SELECT
@@ -66,7 +75,7 @@ export async function _getPublicProjectsWithVotes({ currentUserId }) {
         FROM project_votes
         GROUP BY project_id
       ) vs ON p.id = vs.project_id
-      WHERE p.public = true
+      WHERE p.public = 1
       ORDER BY (COALESCE(vs.upvotes, 0) - COALESCE(vs.downvotes, 0)) DESC, p.last_modified DESC
     `, [currentUserId]);
     return res.rows;
@@ -77,21 +86,27 @@ export async function _getPublicProjectsWithVotes({ currentUserId }) {
 }
 
 export async function _getPublicProjects() {
+  if (!dbInstance) {
+    return [];
+  }
   try {
     const res = await dbInstance.query('SELECT * FROM projects WHERE public = 1 ORDER BY last_modified DESC');
     return res.rows;
   } catch (err) {
-    console.error('Error getting public projects:', err);
+    console.debug('Error getting public projects:', err);
     return [];
   }
 }
 
 export async function _getProjectByName({ name }) {
+  if (!dbInstance) {
+    return null;
+  }
   try {
     const res = await dbInstance.query('SELECT * FROM projects WHERE name = $1', [name]);
     return res.rows[0] || null;
   } catch (err) {
-    console.error('Error getting project by name:', err);
+    console.debug('Error getting project by name:', err);
     return null;
   }
 }

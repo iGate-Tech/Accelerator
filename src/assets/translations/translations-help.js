@@ -69,11 +69,11 @@ export const helpTranslations = {
     privacy: 'Privacy',
 
     whatIsAccelerator: "What is the Startup Accelerator?",
-    acceleratorDesc: "The Startup Accelerator is an AI-powered tool that guides entrepreneurs through a comprehensive 51-step process to validate and develop their startup ideas. It covers everything from problem analysis to funding strategy.",
+    acceleratorDesc: "The Startup Accelerator is an AI-powered tool that guides entrepreneurs through a comprehensive 60-step process to validate and develop their startup ideas. It covers everything from problem analysis to funding strategy.",
     createProject: "How do I create a new project?",
     createProjectDesc: "Navigate to the home page and enter your startup idea in the text area. Click 'Start' to begin the accelerator process. Your project will be automatically saved and appear in your project list.",
     projectStatuses: "What are the different project statuses?",
-    projectStatusesDesc: "Projects can be in several states: Idle (not started), Processing (actively being worked on), Completed (all 51 steps finished), or Paused (temporarily stopped).",
+    projectStatusesDesc: "Projects can be in several states: Idle (not started), Processing (actively being worked on), Completed (all 60 steps finished), or Paused (temporarily stopped).",
     portfolioFeature: "How does the portfolio feature work?",
     portfolioFeatureDesc: "The Portfolio page allows you to organize your projects into custom groups. You can drag and drop projects between groups, create new groups, and manage your project organization visually.",
 

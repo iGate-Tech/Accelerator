@@ -6,7 +6,15 @@ import https from 'https';
 import http from 'http';
 import OpenAI from 'openai';
 import { fileURLToPath } from 'url';
-import logger from './src/lib/logger.js';
+
+// Simple console wrapper to replace logger
+const logger = {
+  trace: console.log,
+  debug: console.log,
+  info: console.log,
+  warn: console.warn,
+  error: console.error,
+};
 
 // Simple in-memory rate limiter
 class RateLimiter {

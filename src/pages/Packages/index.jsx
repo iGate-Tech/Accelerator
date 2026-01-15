@@ -2,13 +2,15 @@ import { createSignal, onMount, createEffect, For } from "solid-js";
 import { useNavigate } from "@solidjs/router";
 import { useUser } from "../../context/UserContext";
 import { useLanguage } from "../../hooks/useLanguage";
+import { createUserSubscription, getUserSubscription, seedPackages } from "../../lib/db";
+import { initDatabase } from "../../lib/db-core";
 import { toastManager } from "../../lib/feedback";
 import logger from "../../lib/logger.js";
 
 const Packages = () => {
   logger.trace('Packages: Starting');
   const navigate = useNavigate();
-  const { user, isAuthenticated, updateSubscription } = useUser();
+  const { user, isAuthenticated, updateSubscription, checkAuth } = useUser();
   const { currentLang, t } = useLanguage();
 
   const [packages] = createSignal([
@@ -64,7 +66,6 @@ const Packages = () => {
     }
   ]);
 
-  // Redirect if not authenticated
   createEffect(() => {
     if (!isAuthenticated()) {
       navigate('/auth/login', { replace: true });
@@ -73,19 +74,37 @@ const Packages = () => {
 
   const handleSubscribe = async (packageData) => {
     try {
-      // Check if user already has this active subscription
-      if (user()?.subscription?.plan === packageData.id) {
+      await initDatabase();
+      await seedPackages();
+      
+      const currentSub = await getUserSubscription(user().id);
+      if (currentSub && currentSub.package_id === packageData.id) {
         toastManager.info(`You already have the ${packageData.name} plan!`);
         return;
       }
 
-      // Update subscription locally
-      await updateSubscription({
+      await createUserSubscription(
+        user().id,
+        packageData.id,
+        {
+          status: 'active',
+          start_date: new Date().toISOString(),
+          end_date: null,
+          auto_renew: 1,
+          credits_included: packageData.credits_included,
+          price: packageData.price
+        }
+      );
+
+      updateSubscription({
         plan: packageData.id,
         status: 'active',
-        maxCredits: packageData.credits_included
+        maxCredits: packageData.credits_included,
+        credits_included: packageData.credits_included,
+        price: packageData.price
       });
 
+      await checkAuth();
       toastManager.success(`Successfully upgraded to ${packageData.name} plan!`);
     } catch (error) {
       logger.error('Subscription error:', error);
@@ -104,11 +123,11 @@ const Packages = () => {
   });
 
   return (
-    <div class={`max-w-6xl mx-auto space-y-8 ${currentLang() === 'ar' ? 'rtl' : 'ltr'}`}>
+    <div class={`max-w-6xl mx-auto space-y-8 px-4 sm:px-6 ${currentLang() === 'ar' ? 'rtl' : 'ltr'}`}>
       {/* Header */}
       <div class="text-center">
-        <h1 class="text-4xl font-bold text-base-content mb-4">Subscription Packages</h1>
-        <p class="text-lg text-base-content/70">
+        <h1 class="text-3xl sm:text-4xl font-bold text-base-content mb-4">Subscription Packages</h1>
+        <p class="text-base sm:text-lg text-base-content/70">
           Choose the perfect plan for your needs
         </p>
       </div>

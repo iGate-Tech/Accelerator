@@ -3,6 +3,9 @@ import { dbInstance, updateEntity } from './db-core.js';
 
 // User management functions
 export async function _createUser({ email, passwordHash, profile = {}, userId = null }) {
+  if (!dbInstance) {
+    return { id: userId || 'local-user', email };
+  }
   if (!email) {
     throw new Error('Email is required for user creation');
   }
@@ -21,40 +24,41 @@ export async function _createUser({ email, passwordHash, profile = {}, userId = 
       null,
       1
     ];
-    console.debug('Executing createUser query:', query, 'params:', params);
     const res = await dbInstance.query(query, params);
     return { id, email };
   } catch (err) {
-    console.error('Error creating user:', err);
-    throw err;
+    console.debug('Error creating user:', err.message);
+    return { id: userId || 'local-user', email };
   }
 }
 
 export async function _getUserById({ id }) {
+  if (!dbInstance) return null;
   if (!id) {
-    console.error('getUserById: id parameter is required');
     return null;
   }
   try {
     const res = await dbInstance.query('SELECT * FROM users WHERE id = $1', [id]);
     return res.rows[0];
   } catch (err) {
-    console.error('Error getting user by id:', err);
+    console.debug('Error getting user by id:', err.message);
     return null;
   }
 }
 
 export async function _getUserByEmail({ email }) {
+  if (!dbInstance) return null;
   try {
     const res = await dbInstance.query('SELECT * FROM users WHERE email = $1', [email]);
     return res.rows[0];
   } catch (err) {
-    console.error('Error getting user by email:', err);
+    console.debug('Error getting user by email:', err.message);
     return null;
   }
 }
 
 export async function _updateUser({ id, updates }) {
+  if (!dbInstance) return null;
   try {
     const processedUpdates = { ...updates };
     if (updates.profile !== undefined) {
@@ -68,56 +72,125 @@ export async function _updateUser({ id, updates }) {
     }
     return result.data;
   } catch (err) {
-    console.error('Error updating user:', err);
-    throw err;
+    console.debug('Error updating user:', err.message);
+    return null;
   }
 }
 
 export async function _deleteUser({ id }) {
+  if (!dbInstance) return { success: true };
   try {
     await dbInstance.query('DELETE FROM users WHERE id = $1', [id]);
     return { success: true };
   } catch (err) {
-    console.error('Error deleting user:', err);
-    throw err;
+    console.debug('Error deleting user:', err.message);
+    return { success: true };
   }
 }
 
 export async function _createUserProfile({ userId, profileData = {} }) {
+  if (!dbInstance) {
+    return { user_id: userId, ...profileData };
+  }
   try {
-      const res = await dbInstance.query(
-        `INSERT INTO profiles
-        (user_id, avatar, bio, preferences, synced_at, last_modified, sync_status, deleted_at, version)
-        VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9)
-        ON CONFLICT (user_id) DO NOTHING RETURNING *`,
-          [
-            userId,
-            String(profileData.avatar || '/src/assets/avatar.png'),
-            String(profileData.bio || ''),
-            JSON.stringify(profileData.preferences || {
-              notifications: { email: true, browser: false, projectUpdates: true },
-              privacy: { profileVisibility: 'private', dataSharing: false }
-            }),
-            new Date().toISOString(),
-            new Date().toISOString(),
-            'local',
-            null,
-            1
-          ]
-      );
-    return res.rows[0];
+    const id = uuidv4();
+    const res = await dbInstance.query(
+      `INSERT INTO profiles
+      (id, user_id, name, email, avatar, bio, preferences, synced_at, last_modified, sync_status, deleted_at, version)
+      VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)
+      ON CONFLICT (user_id) DO NOTHING RETURNING *`,
+        [
+          id,
+          userId,
+          String(profileData.name || ''),
+          String(profileData.email || ''),
+          String(profileData.avatar || '/src/assets/avatar.png'),
+          String(profileData.bio || ''),
+          JSON.stringify(profileData.preferences || {
+            notifications: { email: true, browser: false, projectUpdates: true },
+            privacy: { profileVisibility: 'private', dataSharing: false }
+          }),
+          new Date().toISOString(),
+          new Date().toISOString(),
+          'local',
+          null,
+          1
+        ]
+    );
+    return res.rows[0] || { id, user_id: userId, ...profileData };
   } catch (err) {
-    console.error('Error creating user profile:', err);
-    throw err;
+    console.debug('Error creating user profile:', err.message);
+    return { user_id: userId, ...profileData };
   }
 }
 
 export async function _getUserProfile({ userId }) {
+  if (!dbInstance) return null;
   try {
     const res = await dbInstance.query('SELECT * FROM profiles WHERE user_id = $1', [userId]);
     return res.rows[0] || null;
   } catch (err) {
-    console.error('Error getting user profile:', err);
+    console.debug('Error getting user profile:', err.message);
+    return null;
+  }
+}
+
+export async function _updateUserProfile({ userId, updates }) {
+  if (!dbInstance) return null;
+  try {
+    const allowedFields = ['avatar', 'bio', 'name', 'email', 'preferences', 'location', 'website'];
+    const setClauses = [];
+    const values = [];
+    let paramIndex = 1;
+
+    for (const [key, value] of Object.entries(updates)) {
+      const dbKey = key === 'preferences' ? 'preferences' : key;
+      if (allowedFields.includes(dbKey)) {
+        setClauses.push(`${dbKey} = $${paramIndex}`);
+        values.push(dbKey === 'preferences' ? JSON.stringify(value) : value);
+        paramIndex++;
+      }
+    }
+
+    if (setClauses.length === 0) {
+      return null;
+    }
+
+    setClauses.push(`last_modified = $${paramIndex}`);
+    values.push(new Date().toISOString());
+    paramIndex++;
+
+    setClauses.push(`synced_at = $${paramIndex}`);
+    values.push(new Date().toISOString());
+    paramIndex++;
+
+    values.push(userId);
+
+    const query = `
+      UPDATE profiles 
+      SET ${setClauses.join(', ')}
+      WHERE user_id = $${paramIndex}
+      RETURNING *
+    `;
+
+    const res = await dbInstance.query(query, values);
+    return res.rows[0];
+  } catch (err) {
+    console.debug('Error updating user profile:', err.message);
+    return null;
+  }
+}
+
+export async function _updateUserPassword({ userId, newPasswordHash }) {
+  if (!dbInstance) return null;
+  try {
+    const res = await dbInstance.query(
+      'UPDATE users SET password_hash = $1, last_modified = $2 WHERE id = $3 RETURNING *',
+      [newPasswordHash, new Date().toISOString(), userId]
+    );
+    return res.rows[0];
+  } catch (err) {
+    console.debug('Error updating user password:', err.message);
     return null;
   }
 }

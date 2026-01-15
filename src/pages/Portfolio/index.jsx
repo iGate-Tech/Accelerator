@@ -193,23 +193,24 @@ const Portfolio = () => {
        toastManager.success("Collaborator role updated!");
      } catch (error) {
        toastManager.error("Failed to update role: " + error.message);
-     }
-   };
+      }
+    };
 
-   onMount(async () => {
-     if (window.lucide) window.lucide.createIcons();
-     await refreshData();
+    const onProjectAdded = () => refreshData();
+    const onProjectUpdated = () => refreshData();
 
-     const onProjectAdded = () => refreshData();
-     const onProjectUpdated = () => refreshData();
-     window.addEventListener('projectAdded', onProjectAdded);
-     window.addEventListener('projectUpdated', onProjectUpdated);
-   });
+    onMount(async () => {
+      if (window.lucide) window.lucide.createIcons();
+      await refreshData();
 
-   onCleanup(() => {
-     window.removeEventListener('projectAdded', onProjectAdded);
-     window.removeEventListener('projectUpdated', onProjectUpdated);
-   });
+      window.addEventListener('projectAdded', onProjectAdded);
+      window.addEventListener('projectUpdated', onProjectUpdated);
+    });
+
+    onCleanup(() => {
+      window.removeEventListener('projectAdded', onProjectAdded);
+      window.removeEventListener('projectUpdated', onProjectUpdated);
+    });
 
    createEffect(() => {
      if (window.lucide) window.lucide.createIcons();
@@ -223,38 +224,19 @@ const Portfolio = () => {
   return (
     <div class={`space-y-6 mt-10 ${currentLang() === 'ar' ? 'rtl' : 'ltr'}`}>
        {/* Header */}
-       <div class="flex justify-between items-center">
-         {currentLang() === 'ar' ? (
-           <>
-             <button
-               class="btn btn-primary"
-               onClick={() => setShowCreateGroupModal(true)}
-             >
-               {t().createGroup}
-             </button>
-             <div>
-               <h1 class="text-4xl font-bold text-base-content">{t().portfolio}</h1>
-               <p class="text-base-content/70 mt-2">
-                 {t().organizeProjects}
-               </p>
-             </div>
-           </>
-         ) : (
-           <>
-             <div>
-               <h1 class="text-4xl font-bold text-base-content">{t().portfolio}</h1>
-               <p class="text-base-content/70 mt-2">
-                 {t().organizeProjects}
-               </p>
-             </div>
-             <button
-               class="btn btn-primary"
-               onClick={() => setShowCreateGroupModal(true)}
-             >
-               {t().createGroup}
-             </button>
-           </>
-         )}
+       <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
+         <div class="text-center sm:text-left">
+           <h1 class="text-3xl sm:text-4xl font-bold text-base-content">{t().portfolio}</h1>
+           <p class="text-base-content/70 mt-2">
+             {t().organizeProjects}
+           </p>
+         </div>
+         <button
+           class="btn btn-primary w-full sm:w-auto"
+           onClick={() => setShowCreateGroupModal(true)}
+         >
+           {t().createGroup}
+         </button>
        </div>
 
       {/* Create Group Modal */}

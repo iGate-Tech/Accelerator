@@ -1,24 +1,65 @@
-import { createSignal, onMount, createEffect, For, Show } from "solid-js";
+import { createSignal, onMount, createEffect, For, Show, createResource } from "solid-js";
 import { useNavigate } from "@solidjs/router";
 import { useUser } from "../../context/UserContext";
 import { useLanguage } from "../../hooks/useLanguage";
+import { getUserCredits, getUserCreditBalance, addCreditTransaction, consumeCredits } from "../../lib/db";
+import { initDatabase } from "../../lib/db-core";
 import { toastManager } from "../../lib/feedback";
 import logger from "../../lib/logger.js";
 
 const Credits = () => {
   logger.trace('Credits: Starting');
   const navigate = useNavigate();
-  const { user, isAuthenticated, updatePreferences } = useUser();
+  const { user, isAuthenticated, checkAuth, updateCredits } = useUser();
   const { currentLang, t } = useLanguage();
 
   const purchaseOptions = [
-    { amount: 100, price: 5 },
-    { amount: 500, price: 20 },
-    { amount: 1000, price: 35 },
-    { amount: 2500, price: 80 }
+    { amount: 100, price: 5, type: 'purchase' },
+    { amount: 500, price: 20, type: 'purchase' },
+    { amount: 1000, price: 35, type: 'purchase' },
+    { amount: 2500, price: 80, type: 'purchase' }
   ];
 
-  // Redirect if not authenticated
+  const fetchCreditsData = async () => {
+    if (!user()?.id) return { transactions: [], balance: user()?.credits?.balance || 0 };
+    try {
+      await initDatabase();
+      const [transactions, balance] = await Promise.all([
+        getUserCredits(user().id),
+        getUserCreditBalance(user().id)
+      ]);
+      
+      const formattedTransactions = transactions.map(t => ({
+        id: t.id,
+        type: t.type,
+        amount: t.amount,
+        description: t.description || `${t.type} credits`,
+        date: t.created_at || new Date().toISOString()
+      }));
+      
+      const finalBalance = balance !== null ? balance : (user()?.credits?.balance || 0);
+      return { transactions: formattedTransactions, balance: finalBalance };
+    } catch (error) {
+      logger.error('Error fetching credits data:', error);
+      return { transactions: [], balance: user()?.credits?.balance || 0 };
+    }
+  };
+
+  const [creditsData, { refetch, mutate }] = createResource(
+    () => user()?.id,
+    fetchCreditsData
+  );
+
+  const [transactions, setTransactions] = createSignal([]);
+  const [creditBalance, setCreditBalance] = createSignal(0);
+
+  createEffect(() => {
+    if (creditsData() && !creditsData.loading) {
+      setTransactions(creditsData().transactions || []);
+      setCreditBalance(creditsData().balance || 0);
+    }
+  });
+
   createEffect(() => {
     if (!isAuthenticated()) {
       navigate('/auth/login', { replace: true });
@@ -26,18 +67,44 @@ const Credits = () => {
   });
 
   const handlePurchase = async (option) => {
-    // In local mode, just show simulation
-    toastManager.info(`Purchase simulation: Added ${option.amount} credits for $${option.price}`);
+    try {
+      await initDatabase();
+      
+      await addCreditTransaction(
+        user().id,
+        option.type,
+        option.amount,
+        `Purchased ${option.amount} credits for $${option.price}`
+      );
+      
+      await consumeCredits(
+        user().id,
+        option.price,
+        `Payment for ${option.amount} credits`
+      );
+      
+      const newBalance = (creditBalance() || 0) + option.amount - option.price;
+      setCreditBalance(newBalance);
+      
+      updateCredits({ balance: newBalance });
+      
+      await checkAuth();
+      await refetch();
+      toastManager.success(`Successfully purchased ${option.amount} credits for $${option.price}`);
+    } catch (error) {
+      logger.error('Error purchasing credits:', error);
+      toastManager.error('Failed to purchase credits. Please try again.');
+    }
   };
 
-  const currentBalance = () => user()?.credits?.balance || 0;
+  const currentBalance = () => creditBalance() || user()?.credits?.balance || 0;
   const maxCredits = () => user()?.subscription?.maxCredits || 50;
   const usagePercent = () => Math.min((currentBalance() / maxCredits()) * 100, 100);
 
-  const transactions = () => user()?.credits?.transactions || [];
+  const transactionsList = () => transactions();
 
-  const totalUsed = () => transactions().filter(t => t.type === 'usage').reduce((sum, t) => sum + Math.abs(t.amount), 0);
-  const totalPurchased = () => transactions().filter(t => t.type === 'purchase').reduce((sum, t) => sum + t.amount, 0);
+  const totalUsed = () => transactionsList().filter(t => t.type === 'usage').reduce((sum, t) => sum + Math.abs(t.amount), 0);
+  const totalPurchased = () => transactionsList().filter(t => t.type === 'purchase' || t.amount > 0).reduce((sum, t) => sum + Math.abs(t.amount), 0);
 
   onMount(() => {
     if (window.lucide) window.lucide.createIcons();
@@ -48,11 +115,11 @@ const Credits = () => {
   });
 
   return (
-    <div class={`max-w-6xl mx-auto space-y-8 ${currentLang() === 'ar' ? 'rtl' : 'ltr'}`}>
+    <div class={`max-w-6xl mx-auto space-y-8 px-4 sm:px-6 ${currentLang() === 'ar' ? 'rtl' : 'ltr'}`}>
       {/* Header */}
       <div class="text-center">
-        <h1 class="text-4xl font-bold text-base-content mb-4">Credits</h1>
-        <p class="text-lg text-base-content/70">
+        <h1 class="text-3xl sm:text-4xl font-bold text-base-content mb-4">Credits</h1>
+        <p class="text-base sm:text-lg text-base-content/70">
           Manage your AI credits and view usage history
         </p>
       </div>
@@ -126,7 +193,7 @@ const Credits = () => {
             </div>
             <div class="alert alert-info mt-4">
               <i data-lucide="info" class="w-5 h-5"></i>
-              <span>Payment processing not implemented in local mode. This is for demonstration.</span>
+              <span>Credits are stored locally in your browser. For production, integrate with a payment provider.</span>
             </div>
           </div>
         </div>
@@ -139,7 +206,7 @@ const Credits = () => {
               Transaction History
             </h3>
             <div class="space-y-3 max-h-96 overflow-y-auto">
-              <For each={transactions().slice().reverse()}>
+              <For each={transactionsList().slice().reverse()}>
                 {(transaction) => (
                   <div class="flex items-center justify-between p-3 bg-base-200 rounded-lg">
                     <div class="flex items-center gap-3">
@@ -163,10 +230,11 @@ const Credits = () => {
                   </div>
                 )}
               </For>
-              {transactions().length === 0 && (
+              {transactionsList().length === 0 && (
                 <div class="text-center py-8 text-base-content/60">
                   <i data-lucide="inbox" class="w-8 h-8 mx-auto mb-2 opacity-50"></i>
                   <p>No transactions yet</p>
+                  <p class="text-xs">Purchase credits to get started</p>
                 </div>
               )}
             </div>

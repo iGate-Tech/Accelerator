@@ -50,7 +50,7 @@ const ForgotPassword = () => {
 
   return (
     <RouteGuard>
-      <div class="w-full max-w-md">
+      <div class="w-full max-w-md px-4 sm:px-6 lg:px-8 py-4">
         <div class="card w-full py-6 shadow-2xl bg-base-100 border border-base-300 backdrop-blur-sm">
           <div class="card-body">
             <div class="text-center mb-8">

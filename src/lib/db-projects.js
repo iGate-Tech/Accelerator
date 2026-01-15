@@ -5,38 +5,53 @@ import { dbInstance } from './db-core.js';
 export async function _createProject({ project, userId }) {
   try {
     const id = uuidv4();
-      const totalSteps = parseInt(project.totalSteps, 10);
-      const completedSteps = parseInt(project.completedSteps, 10);
-      const consumedCredits = parseInt(project.consumedCredits, 10);
-      const totalCredits = parseInt(project.totalCredits, 10);
-       const values = [
-         id,
-         project.name,
-         project.description,
-         userId,
-         new Date().toISOString(),
-         new Date().toISOString(),
-         new Date().toISOString(),
-         'local',
-         null,
-         1,
-         project.public ? 1 : 0,
-         project.currentModel || null,
-         isNaN(totalSteps) ? 51 : totalSteps,
-         isNaN(completedSteps) ? 0 : completedSteps,
-         isNaN(consumedCredits) ? 0 : consumedCredits,
-         isNaN(totalCredits) ? 100 : totalCredits,
-         project.uiStatus || 'idle'
-       ];
-      console.log('Insert values:', values);
-       const res = await dbInstance.query(`
-         INSERT INTO projects (id, name, description, user_id, created_at, last_modified, synced_at, sync_status, deleted_at, version, public, current_model, total_steps, completed_steps, consumed_credits, total_credits, ui_status)
-         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17)
-         RETURNING *
-       `, values);
+    const now = new Date().toISOString();
+    const totalSteps = parseInt(project.totalSteps, 10) || 60;
+    const completedSteps = parseInt(project.completedSteps, 10) || 0;
+    const consumedCredits = parseInt(project.consumedCredits, 10) || 0;
+    const totalCredits = parseInt(project.totalCredits, 10) || 600;
+    
+    const values = [
+      id,
+      project.name,
+      project.description,
+      userId,
+      now,
+      now,
+      now,
+      'local',
+      null,
+      1,
+      project.public ? 1 : 0,
+      project.currentModel || 'System',
+      totalSteps,
+      completedSteps,
+      consumedCredits,
+      totalCredits,
+      project.uiStatus || 'idle',
+      project.currentStep || 'system',
+      project.stepName || 'System Initialization',
+      project.currentSection || 'Initialization',
+      project.uiProgress || 0,
+      project.uiMessage || 'Ready to start',
+      project.currentPrompt || '',
+      project.llmResponse || ''
+    ];
+    
+    const res = await dbInstance.query(`
+      INSERT INTO projects (
+        id, name, description, user_id, created_at, last_modified, synced_at, 
+        sync_status, deleted_at, version, public, current_model, total_steps, 
+        completed_steps, consumed_credits, total_credits, ui_status, current_step,
+        step_name, current_section, ui_progress, ui_message, current_prompt, llm_response
+      )
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24)
+      RETURNING *
+    `, values);
+    
     return res.rows[0];
   } catch (err) {
-    console.error('DB error in addTask:', err);
+    console.error('DB error in createProject:', err);
     throw err;
   }
 }
@@ -54,33 +69,48 @@ export async function _getProjectById({ id }) {
 }
 
 export async function _updateProject({ id, updates }) {
+  if (!dbInstance) {
+    console.warn('Database not initialized, skipping project update');
+    return { success: false, error: 'Database not initialized' };
+  }
+
   try {
-    const { updateEntity } = await import('./db-core.js');
-    const fieldMappings = {
-      totalCredits: 'total_credits',
-      consumedCredits: 'consumed_credits',
-      totalTime: 'total_time',
-      consumedTime: 'consumed_time',
-      currentModel: 'current_model',
-      currentSection: 'current_section',
-      currentStep: 'current_step',
-      completedSteps: 'completed_steps',
-      stepName: 'step_name',
-      uiProgress: 'ui_progress',
-      uiMessage: 'ui_message',
-      uiStatus: 'ui_status',
-      currentPrompt: 'current_prompt',
-      llmResponse: 'llm_response',
-      createdAt: 'created_at',
-      syncedAt: 'synced_at',
-      lastModified: 'last_modified',
-      syncStatus: 'sync_status',
-      deletedAt: 'deleted_at'
-    };
-    return await updateEntity({ table: 'projects', idField: 'id', id, updates, options: { fieldMappings } });
+    const allowedFields = [
+      'current_step', 'completed_steps', 'step_name', 'current_model', 
+      'current_section', 'ui_progress', 'ui_message', 'ui_status',
+      'current_prompt', 'llm_response', 'total_credits', 'consumed_credits',
+      'total_time', 'consumed_time', 'name', 'description', 'status',
+      'last_opened', 'last_modified', 'sync_status'
+    ];
+    
+    const setClauses = [];
+    const values = [];
+    let paramIndex = 1;
+    
+    for (const [key, value] of Object.entries(updates)) {
+      const dbField = key.replace(/([A-Z])/g, '_$1').toLowerCase();
+      if (allowedFields.includes(dbField)) {
+        setClauses.push(`${dbField} = $${paramIndex}`);
+        values.push(value);
+        paramIndex++;
+      }
+    }
+    
+    if (setClauses.length === 0) {
+      return { success: true };
+    }
+    
+    values.push(id);
+    
+    await dbInstance.query(
+      `UPDATE projects SET ${setClauses.join(', ')}, last_modified = $${paramIndex} WHERE id = $${paramIndex + 1}`,
+      values
+    );
+    
+    return { success: true };
   } catch (err) {
     console.error('Error updating project:', err);
-    throw err;
+    return { success: false, error: err.message };
   }
 }
 
@@ -171,7 +201,7 @@ export async function _updateTask({ id, content }) {
 
 export async function _getProjects({ userId }) {
   if (!dbInstance) {
-    console.warn('Database not initialized, returning empty projects');
+    console.debug('Database not initialized, returning empty projects');
     return [];
   }
   try {

@@ -1,11 +1,103 @@
-import { updateProject, addProject } from './db';
-
+import { updateProject, addProject, getCreditBalance, consumeCredits } from './db';
 import logger from './logger';
 
 export const extractProjectName = (text) => {
-  // Extract project name from LLM response text
   const lines = text.split('\n').filter(line => line.trim());
   return lines[0]?.trim() || 'New Project';
+};
+
+export const handleQuickLLMCall = async (prompt, updatePrompt = true, setPrompt = null, userId = null) => {
+  logger.info('handleQuickLLMCall: Starting with prompt length:', prompt?.length);
+  try {
+    if (userId) {
+      const balance = await getCreditBalance(userId);
+      if (balance < 5) {
+        throw new Error('Insufficient credits. Need at least 5 credits.');
+      }
+    }
+
+    const response = await fetch('/api/llm/quick', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ prompt })
+    });
+
+    if (!response.ok) {
+      throw new Error(`LLM API error: ${response.status}`);
+    }
+
+    const reader = response.body.getReader();
+    const decoder = new TextDecoder();
+    let responseText = '';
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      const chunk = decoder.decode(value);
+      responseText += chunk;
+    }
+
+    if (userId) {
+      await consumeCredits(userId, 5, 'Quick LLM request');
+    }
+
+    if (updatePrompt && setPrompt) {
+      setPrompt(responseText);
+    }
+
+    logger.info('handleQuickLLMCall: Completed, response length:', responseText.length);
+    return responseText;
+  } catch (error) {
+    logger.error('handleQuickLLMCall error:', error);
+    throw error;
+  }
+};
+
+export const streamQuickLLMCall = async (prompt, userId = null, onStreamUpdate = null) => {
+  logger.info('streamQuickLLMCall: Starting with prompt length:', prompt?.length);
+  try {
+    if (userId) {
+      const balance = await getCreditBalance(userId);
+      if (balance < 5) {
+        throw new Error('Insufficient credits. Need at least 5 credits.');
+      }
+    }
+
+    const response = await fetch('/api/llm/quick', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ prompt })
+    });
+
+    if (!response.ok) {
+      throw new Error(`LLM API error: ${response.status}`);
+    }
+
+    const reader = response.body.getReader();
+    const decoder = new TextDecoder();
+    let responseText = '';
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      const chunk = decoder.decode(value);
+      responseText += chunk;
+      
+      if (onStreamUpdate) {
+        onStreamUpdate(responseText);
+      }
+    }
+
+    if (userId) {
+      await consumeCredits(userId, 5, 'Quick LLM request');
+    }
+
+    logger.info('streamQuickLLMCall: Completed, response length:', responseText.length);
+    return responseText;
+  } catch (error) {
+    logger.error('streamQuickLLMCall error:', error);
+    throw error;
+  }
 };
 
 export const handleLLMProjectUpdate = async (

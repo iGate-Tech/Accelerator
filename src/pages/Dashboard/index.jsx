@@ -127,12 +127,13 @@ const Dashboard = () => {
   };
 
   const formatDate = (dateString) => formatRelativeTime(dateString, t());
+  
+  const onProjectAdded = () => refetch();
+  const onProjectUpdated = () => refetch();
 
    onMount(async () => {
      if (window.lucide) window.lucide.createIcons();
 
-     const onProjectAdded = () => refetch();
-     const onProjectUpdated = () => refetch();
      window.addEventListener('projectAdded', onProjectAdded);
      window.addEventListener('projectUpdated', onProjectUpdated);
    });
@@ -142,15 +143,15 @@ const Dashboard = () => {
      window.removeEventListener('projectUpdated', onProjectUpdated);
    });
 
-   return (
-    <div class="space-y-8 ">
-      {/* Header */}
-      <div class="text-center py-6">
-        <h1 class="text-4xl font-bold text-base-content mb-2">{t().dashboard}</h1>
-        <p class="text-lg text-base-content/70">
-          {t().overview} {t().projectsLower} {t().progressLower}.
-        </p>
-      </div>
+    return (
+     <div class="space-y-8 ">
+       {/* Header */}
+       <div class="text-center py-6">
+         <h1 class="text-3xl sm:text-4xl font-bold text-base-content mb-2">{t().dashboard}</h1>
+         <p class="text-base sm:text-lg text-base-content/70">
+           {t().overview} {t().projectsLower} {t().progressLower}.
+         </p>
+       </div>
 
       <Show
         when={!projects.loading}

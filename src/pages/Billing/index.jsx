@@ -1,7 +1,8 @@
-import { createSignal, onMount, createEffect, For, Show } from "solid-js";
+import { createSignal, onMount, createEffect, For, Show, createResource } from "solid-js";
 import { useNavigate } from "@solidjs/router";
 import { useUser } from "../../context/UserContext";
 import { useLanguage } from "../../hooks/useLanguage";
+import { getUserBilling, getUserSubscription } from "../../lib/db";
 import { toastManager } from "../../lib/feedback";
 import logger from "../../lib/logger.js";
 
@@ -11,44 +12,44 @@ const Billing = () => {
   const { user, isAuthenticated } = useUser();
   const { currentLang, t } = useLanguage();
 
-  const [invoices] = createSignal([
-    {
-      id: 'inv-001',
-      date: '2024-01-15',
-      amount: 29.99,
-      status: 'paid',
-      description: 'Pro Plan - January 2024',
-      downloadUrl: '#'
-    },
-    {
-      id: 'inv-002',
-      date: '2023-12-15',
-      amount: 29.99,
-      status: 'paid',
-      description: 'Pro Plan - December 2023',
-      downloadUrl: '#'
-    },
-    {
-      id: 'inv-003',
-      date: '2023-11-15',
-      amount: 29.99,
-      status: 'paid',
-      description: 'Pro Plan - November 2023',
-      downloadUrl: '#'
-    }
-  ]);
+  const fetchBillingData = async () => {
+    if (!user()?.id) return { invoices: [], paymentMethods: [] };
+    try {
+      const [billingRecords, subscription] = await Promise.all([
+        getUserBilling(user().id),
+        getUserSubscription(user().id)
+      ]);
+      
+      const invoices = billingRecords.map(record => ({
+        id: record.id,
+        date: record.created_at || record.due_date,
+        amount: record.amount,
+        status: record.status || 'pending',
+        description: record.description || record.type,
+        downloadUrl: '#'
+      }));
 
-  const [paymentMethods] = createSignal([
-    {
-      id: 'pm-001',
-      type: 'card',
-      last4: '4242',
-      brand: 'Visa',
-      expiryMonth: 12,
-      expiryYear: 2025,
-      isDefault: true
+      return { invoices, paymentMethods: [], subscription };
+    } catch (error) {
+      logger.error('Error fetching billing data:', error);
+      return { invoices: [], paymentMethods: [], subscription: null };
     }
-  ]);
+  };
+
+  const [billingData, { refetch }] = createResource(
+    () => user()?.id,
+    fetchBillingData
+  );
+
+  const [invoices, setInvoices] = createSignal([]);
+  const [paymentMethods, setPaymentMethods] = createSignal([]);
+
+  createEffect(() => {
+    if (billingData() && !billingData.loading) {
+      setInvoices(billingData().invoices || []);
+      setPaymentMethods(billingData().paymentMethods || []);
+    }
+  });
 
   // Redirect if not authenticated
   createEffect(() => {
@@ -58,15 +59,23 @@ const Billing = () => {
   });
 
   const handleDownloadInvoice = (invoice) => {
-    toastManager.info(`Download invoice ${invoice.id} - Not implemented in local mode`);
+    const invoiceData = JSON.stringify(invoice, null, 2);
+    const blob = new Blob([invoiceData], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `invoice-${invoice.id}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+    toastManager.success(`Invoice ${invoice.id} downloaded`);
   };
 
   const handleUpdatePaymentMethod = () => {
-    toastManager.info('Update payment method - Not implemented in local mode');
+    toastManager.info('Payment methods are managed locally. Add payment details when ready.');
   };
 
   const handleAddPaymentMethod = () => {
-    toastManager.info('Add payment method - Not implemented in local mode');
+    toastManager.info('Payment method storage available. In production, integrate with payment provider.');
   };
 
   const currentPlan = () => user()?.subscription?.plan || 'free';
@@ -86,11 +95,11 @@ const Billing = () => {
    });
 
   return (
-    <div class={`max-w-6xl mx-auto space-y-8 ${currentLang() === 'ar' ? 'rtl' : 'ltr'}`}>
+    <div class={`max-w-6xl mx-auto space-y-8 px-4 sm:px-6 ${currentLang() === 'ar' ? 'rtl' : 'ltr'}`}>
       {/* Header */}
       <div class="text-center">
-        <h1 class="text-4xl font-bold text-base-content mb-4">Billing</h1>
-        <p class="text-lg text-base-content/70">
+        <h1 class="text-3xl sm:text-4xl font-bold text-base-content mb-4">Billing</h1>
+        <p class="text-base sm:text-lg text-base-content/70">
           Manage your billing information and payment methods
         </p>
       </div>

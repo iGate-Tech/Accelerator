@@ -3,6 +3,7 @@ import {
     For,
     createResource,
     onMount,
+    onCleanup,
     createEffect,
     Show,
     createMemo
@@ -479,15 +480,15 @@ const TasksContent = () => {
                }
              });
            }
-
-           onCleanup(() => {
-               window.removeEventListener('projectDeleted', onProjectDeleted);
-               window.removeEventListener('resetAgent', onResetAgent);
-               window.removeEventListener('openProject', onOpenProject);
-           });
        });
 
-       // Set tasksList when project changes
+       onCleanup(() => {
+           window.removeEventListener('projectDeleted', onProjectDeleted);
+           window.removeEventListener('resetAgent', onResetAgent);
+           window.removeEventListener('openProject', onOpenProject);
+       });
+
+        // Set tasksList when project changes
        createEffect(() => {
            currentProjectId();
            if (Array.isArray(tasks())) {

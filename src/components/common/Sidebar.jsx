@@ -1,5 +1,5 @@
 import { A, useLocation, useNavigate } from "@solidjs/router";
-import { useContext, onMount, createSignal, createEffect, For, Show, createMemo } from "solid-js";
+import { useContext, onMount, onCleanup, createSignal, createEffect, For, Show, createMemo } from "solid-js";
 import { LangContext } from "../../context/LangContext";
 import { useUser } from "../../context/UserContext";
 import { translations } from "../../assets/translations/translations-index.js";
@@ -135,11 +135,11 @@ const Sidebar = () => {
      window.addEventListener('projectAdded', onProjectAdded);
      window.addEventListener('projectUpdated', onProjectUpdated);
      if (window.lucide) window.lucide.createIcons();
+  });
 
-     onCleanup(() => {
-       window.removeEventListener('projectAdded', onProjectAdded);
-       window.removeEventListener('projectUpdated', onProjectUpdated);
-     });
+  onCleanup(() => {
+    window.removeEventListener('projectAdded', onProjectAdded);
+    window.removeEventListener('projectUpdated', onProjectUpdated);
   });
 
   createEffect(() => {

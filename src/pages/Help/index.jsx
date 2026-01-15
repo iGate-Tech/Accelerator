@@ -1,4 +1,4 @@
-import { createSignal, createEffect, onMount, For, Show, createResource, useContext } from "solid-js";
+import { createSignal, createEffect, onMount, onCleanup, For, Show, createResource, useContext } from "solid-js";
 import { useNavigate, A } from "@solidjs/router";
 import { LangContext } from "../../context/LangContext";
 import { translations } from "../../assets/translations/translations-index.js";
@@ -31,10 +31,10 @@ const Help = () => {
       }
 
       document.addEventListener('keydown', handleKeyPress);
+    });
 
-      onCleanup(() => {
-        document.removeEventListener('keydown', handleKeyPress);
-      });
+    onCleanup(() => {
+      document.removeEventListener('keydown', handleKeyPress);
     });
 
     createEffect(() => {

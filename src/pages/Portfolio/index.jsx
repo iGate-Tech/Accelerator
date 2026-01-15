@@ -1,4 +1,4 @@
-import { createSignal, createResource, createMemo, onMount, For, Show, createEffect, useContext } from "solid-js";
+import { createSignal, createResource, createMemo, onMount, onCleanup, For, Show, createEffect, useContext } from "solid-js";
 import { useNavigate } from "@solidjs/router";
 import logger from '../../lib/logger.js';
 import {
@@ -204,16 +204,16 @@ const Portfolio = () => {
      const onProjectUpdated = () => refreshData();
      window.addEventListener('projectAdded', onProjectAdded);
      window.addEventListener('projectUpdated', onProjectUpdated);
-
-     onCleanup(() => {
-       window.removeEventListener('projectAdded', onProjectAdded);
-       window.removeEventListener('projectUpdated', onProjectUpdated);
-     });
    });
 
-  createEffect(() => {
-    if (window.lucide) window.lucide.createIcons();
-  });
+   onCleanup(() => {
+     window.removeEventListener('projectAdded', onProjectAdded);
+     window.removeEventListener('projectUpdated', onProjectUpdated);
+   });
+
+   createEffect(() => {
+     if (window.lucide) window.lucide.createIcons();
+   });
 
   const colorOptions = [
     "#6366f1", "#ef4444", "#10b981", "#f59e0b",

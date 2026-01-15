@@ -1,4 +1,4 @@
-import { createSignal, createResource, createMemo, onMount, For, Show, useContext, createEffect } from "solid-js";
+import { createSignal, createResource, createMemo, onMount, onCleanup, For, Show, useContext, createEffect } from "solid-js";
 import { A, useNavigate } from "@solidjs/router";
 import { getProjects, getUserActivities } from "../../lib/db";
 import { useUser } from "../../context/UserContext";
@@ -135,14 +135,14 @@ const Dashboard = () => {
      const onProjectUpdated = () => refetch();
      window.addEventListener('projectAdded', onProjectAdded);
      window.addEventListener('projectUpdated', onProjectUpdated);
-
-     onCleanup(() => {
-       window.removeEventListener('projectAdded', onProjectAdded);
-       window.removeEventListener('projectUpdated', onProjectUpdated);
-     });
    });
 
-  return (
+   onCleanup(() => {
+     window.removeEventListener('projectAdded', onProjectAdded);
+     window.removeEventListener('projectUpdated', onProjectUpdated);
+   });
+
+   return (
     <div class="space-y-8 ">
       {/* Header */}
       <div class="text-center py-6">

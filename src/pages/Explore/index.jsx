@@ -1,4 +1,4 @@
-import { createSignal, createResource, createMemo, onMount, For, Show, createEffect, useContext } from "solid-js";
+import { createSignal, createResource, createMemo, onMount, onCleanup, For, Show, createEffect, useContext } from "solid-js";
 import { A, useNavigate } from "@solidjs/router";
 import { getPublicProjectsWithVotes } from "../../lib/db";
 // Removed supabase import
@@ -85,14 +85,14 @@ const Explore = () => {
       const onProjectUpdated = () => refetch();
       window.addEventListener('projectAdded', onProjectAdded);
       window.addEventListener('projectUpdated', onProjectUpdated);
-
-      onCleanup(() => {
-        window.removeEventListener('projectAdded', onProjectAdded);
-        window.removeEventListener('projectUpdated', onProjectUpdated);
-      });
     });
 
-  const statusOptions = [
+    onCleanup(() => {
+      window.removeEventListener('projectAdded', onProjectAdded);
+      window.removeEventListener('projectUpdated', onProjectUpdated);
+    });
+
+   const statusOptions = [
     { value: "all", label: t().allStatus, icon: "layers" },
     { value: "idle", label: t().idle, icon: "circle" },
     { value: "processing", label: t().processing, icon: "loader" },

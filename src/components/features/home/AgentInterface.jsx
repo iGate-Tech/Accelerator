@@ -54,6 +54,12 @@ const AgentInterface = (props) => { // Defensive checks for required props
         forceShowForm();
     });
 
+    let greetingRef;
+    let cardRef;
+    let textareaRef;
+    let buttonsRef;
+    let badgeRef;
+
     // Auto-resize textarea when prompt changes
     createEffect(() => {
         props.prompt(); // Track prompt changes

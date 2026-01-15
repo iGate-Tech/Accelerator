@@ -168,7 +168,7 @@ const MainLayout = (props) => {
       <GlobalError />
       <ToastContainer />
       <OfflineIndicator />
-      <div class="drawer md:drawer-open lg:drawer-open h-full min-h-0">
+      <div class="drawer h-full min-h-0">
         <Show when={isAuthenticated()}>
           <input 
             id="my-drawer-4" 
@@ -177,208 +177,214 @@ const MainLayout = (props) => {
             checked={isDrawerOpen()}
             onChange={(e) => setIsDrawerOpen(e.target.checked)}
           />
-          <div class="drawer-side is-drawer-close:overflow-visible z-[55]">
+          <div class="drawer-side z-[55]">
             <label 
               for="my-drawer-4" 
               aria-label="close sidebar" 
-              class="drawer-overlay md:hidden lg:hidden"
+              class="drawer-overlay"
             ></label>
             
             <div 
-              class="flex min-h-full flex-col items-start bg-base-100 border-base-200 w-72 lg:w-80 transition-all duration-300 ease-in-out"
+              class="flex min-h-full flex-col bg-base-100 border-base-200 transition-all duration-300 ease-in-out h-full"
               classList={{
+                'w-16': !isDrawerOpen(),
+                'w-72': isDrawerOpen(),
                 'border-e': currentLang() === 'en',
-                'border-s': currentLang() === 'ar'
+                'border-s': currentLang() === 'ar',
+                'is-drawer-close:overflow-visible': true
               }}
             >
-              <div class="relative mb-4 w-full p-4">
+              <div class="p-2">
                 <A 
                   href="/" 
                   onClick={(e) => { e.preventDefault(); setIsDrawerOpen(!isDrawerOpen()); }} 
-                  class="cursor-pointer flex items-center gap-3"
+                  class="cursor-pointer flex items-center justify-center gap-2 p-2 hover:bg-base-200 rounded-lg transition-colors"
+                  title={isDrawerOpen() ? 'Collapse sidebar' : 'Expand sidebar'}
                 >
-                  <img src="/src/assets/iGate-tech-logo.svg" alt="Logo" class="h-8" />
-                  <span class="font-bold text-lg">iGate</span>
+                  <img src="/src/assets/iGate-tech-logo.svg" alt="Logo" class="h-8 flex-shrink-0" />
+                  <Show when={isDrawerOpen()}>
+                    <span class="font-bold text-lg whitespace-nowrap">iGate</span>
+                  </Show>
+                  <Show when={!isDrawerOpen()}>
+                    <i data-lucide="chevron-right" class="w-4 h-4"></i>
+                  </Show>
                 </A>
               </div>
 
-              <div class="px-4 w-full">
-              <ul class="menu border border-base-200 rounded-box w-full mb-4">
-                <li classList={{ "menu-active": window.location.pathname === "/" }}>
-                  <A href="/" onClick={() => window.dispatchEvent(new CustomEvent('resetAgent'))} class="flex items-center gap-3 px-4 py-3 hover:bg-base-300 transition-colors" aria-label={`Create new project - ${t('newProject')}`}>
-                    <i data-lucide="plus" class="w-4 h-4 text-primary" aria-hidden="true"></i>
-                    <span class="font-medium">{t('newProject')}</span>
+              <div class="px-2 w-full flex-1 overflow-y-auto">
+              <ul class="menu w-full mb-2">
+                <li>
+                  <A href="/" onClick={() => window.dispatchEvent(new CustomEvent('resetAgent'))} class="flex justify-center py-3 hover:bg-base-200 rounded-lg" aria-label={t('newProject')}>
+                    <i data-lucide="plus" class="w-5 h-5 text-primary"></i>
                   </A>
                 </li>
-                <li classList={{ "menu-active": window.location.pathname === "/dashboard" }}>
-                  <A href="/dashboard" class="flex items-center gap-3 px-4 py-3 hover:bg-base-300 transition-colors" aria-label={`Dashboard - ${t('dashboard')}`}>
-                    <i data-lucide="bar-chart" class="w-4 h-4 text-warning" aria-hidden="true"></i>
-                    <span class="font-medium">{t('dashboard')}</span>
+                <li>
+                  <A href="/dashboard" class="flex justify-center py-3 hover:bg-base-200 rounded-lg" aria-label={t('dashboard')}>
+                    <i data-lucide="bar-chart" class="w-5 h-5 text-warning"></i>
                   </A>
                 </li>
-                <li classList={{ "menu-active": window.location.pathname === "/portfolio" }}>
-                  <A href="/portfolio" class="flex items-center gap-3 px-4 py-3 hover:bg-base-300 transition-colors" aria-label={`Portfolio - ${t('portfolio')}`}>
-                    <i data-lucide="briefcase" class="w-4 h-4 text-accent" aria-hidden="true"></i>
-                    <span class="font-medium">{t('portfolio')}</span>
+                <li>
+                  <A href="/portfolio" class="flex justify-center py-3 hover:bg-base-200 rounded-lg" aria-label={t('portfolio')}>
+                    <i data-lucide="briefcase" class="w-5 h-5 text-accent"></i>
                   </A>
                 </li>
-                <li classList={{ "menu-active": window.location.pathname === "/invitations" }}>
-                  <A href="/invitations" class="flex items-center gap-3 px-4 py-3 hover:bg-base-300 transition-colors" aria-label={`Collaborate - Invitations`}>
-                    <i data-lucide="users" class="w-4 h-4 text-info" aria-hidden="true"></i>
-                    <span class="font-medium">Collaborate</span>
+                <li>
+                  <A href="/invitations" class="flex justify-center py-3 hover:bg-base-200 rounded-lg" aria-label="Collaborate">
+                    <i data-lucide="users" class="w-5 h-5 text-info"></i>
                   </A>
                 </li>
-                <li classList={{ "menu-active": window.location.pathname === "/explore" }}>
-                  <A href="/explore" class="flex items-center gap-3 px-4 py-3 hover:bg-base-300 transition-colors" aria-label={`Explore project ideas - ${t('exploreIdeas')}`}>
-                    <i data-lucide="compass" class="w-4 h-4 text-secondary" aria-hidden="true"></i>
-                    <span class="font-medium">{t('exploreIdeas')}</span>
+                <li>
+                  <A href="/explore" class="flex justify-center py-3 hover:bg-base-200 rounded-lg" aria-label={t('exploreIdeas')}>
+                    <i data-lucide="compass" class="w-5 h-5 text-secondary"></i>
                   </A>
                 </li>
-                <li classList={{ "menu-active": window.location.pathname === "/help" }}>
-                  <A href="/help" class="flex items-center gap-3 px-4 py-3 hover:bg-base-300 transition-colors" aria-label={`Get help and support - ${t('help')}`}>
-                    <i data-lucide="help-circle" class="w-4 h-4 text-info" aria-hidden="true"></i>
-                    <span class="font-medium">{t('help')}</span>
+                <li>
+                  <A href="/help" class="flex justify-center py-3 hover:bg-base-200 rounded-lg" aria-label={t('help')}>
+                    <i data-lucide="help-circle" class="w-5 h-5 text-info"></i>
                   </A>
                 </li>
               </ul>
-              <section class="menu border border-base-200 rounded-box w-full">
-                <li>
-                  <details open>
-                    <summary class="flex items-center justify-between px-4 py-3 hover:bg-base-300 transition-colors cursor-pointer">
-                      <div class="flex items-center gap-3">
-                        <i data-lucide="folder" class="w-4 h-4 text-accent"></i>
-                        <span class="font-medium">{t('allProjects')}</span>
-                        <span class="badge badge-sm badge-accent">{filteredProjects().length}</span>
-                      </div>
-                      <button
-                        class="btn btn-ghost btn-xs opacity-60 hover:opacity-100"
-                        popovertarget="popover-all-projects"
-                        style="anchor-name:--anchor-all-projects"
-                      >
-                        <i data-lucide="more-vertical" class="w-4 h-4"></i>
-                      </button>
-                    </summary>
-
-                    <div
-                      class={`dropdown menu w-56 rounded-box bg-base-100 shadow-lg border border-base-200 ${
-                        currentLang() === 'ar' ? 'dropdown-start' : 'dropdown-end'
-                      }`}
-                      popover
-                      id="popover-all-projects"
-                      style="position-anchor:--anchor-all-projects"
-                    >
-                      <li>
-                        <A
-                          href="/"
-                          onClick={() => window.dispatchEvent(new CustomEvent('resetAgent'))}
-                          class="flex items-center gap-2"
+              
+              <Show when={isDrawerOpen()}>
+                <section class="menu border border-base-200 rounded-box w-full">
+                  <li>
+                    <details open>
+                      <summary class="flex items-center justify-between px-4 py-3 hover:bg-base-300 transition-colors cursor-pointer">
+                        <div class="flex items-center gap-3">
+                          <i data-lucide="folder" class="w-4 h-4 text-accent"></i>
+                          <span class="font-medium">{t('allProjects')}</span>
+                          <span class="badge badge-sm badge-accent">{filteredProjects().length}</span>
+                        </div>
+                        <button
+                          class="btn btn-ghost btn-xs opacity-60 hover:opacity-100"
+                          popovertarget="popover-all-projects"
+                          style="anchor-name:--anchor-all-projects"
                         >
-                          <i data-lucide="plus" class="w-4 h-4"></i>
-                          {t('newProject')}
-                        </A>
-                      </li>
-                      <li>
-                        <a onclick={handleExportAllProjects} class="flex items-center gap-2">
-                          <i data-lucide="download" class="w-4 h-4"></i>
-                          Export All
-                        </a>
-                      </li>
-                      <li>
-                        <a onclick={async () => { try { const data = await exportAllData(user()?.id); downloadJSON(data, 'all_data_backup.json'); toastManager.success('Backup successful'); } catch (error) { toastManager.error('Backup failed'); } }} class="flex items-center gap-2">
-                          <i data-lucide="archive" class="w-4 h-4"></i>
-                          Backup All
-                        </a>
-                      </li>
-                      <div class="divider my-1"></div>
-                      <li>
-                        <a onclick={handleDeleteAllProjects} class="flex items-center gap-2 text-error">
-                          <i data-lucide="trash" class="w-4 h-4"></i>
-                          Delete All
-                        </a>
-                      </li>
-                    </div>
+                          <i data-lucide="more-vertical" class="w-4 h-4"></i>
+                        </button>
+                      </summary>
 
-                    <div class="px-4 pb-3">
-                      <div class="relative">
-                        <input
-                          type="text"
-                          placeholder={t('sidebarSearch')}
-                          class="input input-bordered input-sm w-full pr-8"
-                          value={searchQuery()}
-                          onInput={(e) => setSearchQuery(e.target.value)}
-                        />
-                        <i data-lucide="search" class="absolute top-1/2 -translate-y-1/2 w-4 h-4 text-base-content/40" classList={{ 'right-2': currentLang() === 'en', 'left-2': currentLang() === 'ar' }}></i>
-                      </div>
-                    </div>
-                    <div>
-                      <For each={filteredProjects()}>
-                        {(project) => (
-                          <li>
-                            <div class="flex justify-between items-center px-4 py-2 hover:bg-base-300 rounded-lg transition-colors cursor-pointer">
-                              <span onclick={() => { logger.debug('Opening project:', project.id); window.dispatchEvent(new CustomEvent('openProject', { detail: project.id })); }} class="flex items-center w-full gap-2">
-                                <i data-lucide="folder" class="w-4 h-4 text-base-content/60 flex-shrink-0"></i>
-                                <span
-                                  data-project-id={project.id}
-                                  contentEditable={editingProjectId() === project.id}
-                                  onBlur={(e) => {
-                                    if (editingProjectId() === project.id) {
-                                      const newName = e.target.textContent.trim();
-                                      if (newName && newName !== project.name) {
-                                        handleProjectAction('rename', project.id, newName.trim());
-                                      }
-                                      setEditingProjectId(null);
-                                    }
-                                  }}
-                                  onKeyDown={(e) => {
-                                    if (e.key === 'Enter') {
-                                      e.preventDefault();
-                                      e.target.blur();
-                                    }
-                                    if (e.key === 'Escape') {
-                                      e.target.textContent = project.name;
-                                      setEditingProjectId(null);
-                                    }
-                                  }}
-                                >
-                                  {project.name}
-                                </span>
-                              </span>
-                              <button class="btn btn-ghost btn-xs" popovertarget={`popover-project-${project.id}`} style={`anchor-name:--anchor-project-${project.id}`}>
-                                <i data-lucide="more-vertical" class="w-4 h-4"></i>
-                              </button>
-                            </div>
-                            <ul class="dropdown menu w-52 rounded-box bg-base-100 shadow-sm" popover id={`popover-project-${project.id}`} style={`position-anchor:--anchor-project-${project.id}`}>
-                              <li><a onclick={() => { setEditingProjectId(project.id); setTimeout(() => { const span = document.querySelector(`[data-project-id="${project.id}"]`); if (span) { span.focus(); const range = document.createRange(); range.selectNodeContents(span); const sel = window.getSelection(); sel.removeAllRanges(); sel.addRange(range); } }, 0); }}><i data-lucide="edit" class="w-4 h-4"></i>Rename</a></li>
-                              <li><a onclick={() => handleProjectAction('delete', project.id)}><i data-lucide="trash" class="w-4 h-4"></i>Delete</a></li>
-                              <li><a onclick={async () => { try { const data = await exportProject(project.id); downloadJSON(data, `${project.name}-project.json`); toastManager.success('Export successful'); } catch (error) { toastManager.error('Export failed'); } }}><i data-lucide="download" class="w-4 h-4"></i>Export</a></li>
-                              <li><a onclick={async () => { try { const data = await exportReports(project.id); downloadJSON(data, `${project.name}-report.json`); toastManager.success('Export successful'); } catch (error) { toastManager.error('Export failed'); } }}><i data-lucide="file-text" class="w-4 h-4"></i>Export Report</a></li>
-                            </ul>
-                          </li>
-                        )}
-                      </For>
-                      <Show when={filteredProjects().length === 0}>
-                        <li class="flex flex-col items-center justify-center py-8 px-4">
-                          <i data-lucide="folder-x" class="w-12 h-12 mb-4 text-base-content/40"></i>
-                          <div class="text-lg font-semibold mb-2 text-center">
-                            {searchQuery() ? 'No matching tasks' : 'No tasks yet'}
-                          </div>
-                          <div class="text-sm text-base-content/60 mb-4 text-center">
-                            {searchQuery() ? 'Try adjusting search' : 'Create your first task'}
-                          </div>
-                          <button class="btn btn-primary btn-sm" onClick={() => window.dispatchEvent(new CustomEvent('resetAgent'))}>Create Task</button>
+                      <div
+                        class={`dropdown menu w-56 rounded-box bg-base-100 shadow-lg border border-base-200 ${
+                          currentLang() === 'ar' ? 'dropdown-start' : 'dropdown-end'
+                        }`}
+                        popover
+                        id="popover-all-projects"
+                        style="position-anchor:--anchor-all-projects"
+                      >
+                        <li>
+                          <A
+                            href="/"
+                            onClick={() => window.dispatchEvent(new CustomEvent('resetAgent'))}
+                            class="flex items-center gap-2"
+                          >
+                            <i data-lucide="plus" class="w-4 h-4"></i>
+                            {t('newProject')}
+                          </A>
                         </li>
-                      </Show>
-                    </div>
-                  </details>
-                </li>
-              </section>
-            </div>
+                        <li>
+                          <a onclick={handleExportAllProjects} class="flex items-center gap-2">
+                            <i data-lucide="download" class="w-4 h-4"></i>
+                            Export All
+                          </a>
+                        </li>
+                        <li>
+                          <a onclick={async () => { try { const data = await exportAllData(user()?.id); downloadJSON(data, 'all_data_backup.json'); toastManager.success('Backup successful'); } catch (error) { toastManager.error('Backup failed'); } }} class="flex items-center gap-2">
+                            <i data-lucide="archive" class="w-4 h-4"></i>
+                            Backup All
+                          </a>
+                        </li>
+                        <div class="divider my-1"></div>
+                        <li>
+                          <a onclick={handleDeleteAllProjects} class="flex items-center gap-2 text-error">
+                            <i data-lucide="trash" class="w-4 h-4"></i>
+                            Delete All
+                          </a>
+                        </li>
+                      </div>
+
+                      <div class="px-4 pb-3">
+                        <div class="relative">
+                          <input
+                            type="text"
+                            placeholder={t('sidebarSearch')}
+                            class="input input-bordered input-sm w-full pr-8"
+                            value={searchQuery()}
+                            onInput={(e) => setSearchQuery(e.target.value)}
+                          />
+                          <i data-lucide="search" class="absolute top-1/2 -translate-y-1/2 w-4 h-4 text-base-content/40" classList={{ 'right-2': currentLang() === 'en', 'left-2': currentLang() === 'ar' }}></i>
+                        </div>
+                      </div>
+                      <div>
+                        <For each={filteredProjects()}>
+                          {(project) => (
+                            <li>
+                              <div class="flex justify-between items-center px-4 py-2 hover:bg-base-300 rounded-lg transition-colors cursor-pointer">
+                                <span onclick={() => { logger.debug('Opening project:', project.id); window.dispatchEvent(new CustomEvent('openProject', { detail: project.id })); }} class="flex items-center w-full gap-2">
+                                  <i data-lucide="folder" class="w-4 h-4 text-base-content/60 flex-shrink-0"></i>
+                                  <span
+                                    data-project-id={project.id}
+                                    contentEditable={editingProjectId() === project.id}
+                                    onBlur={(e) => {
+                                      if (editingProjectId() === project.id) {
+                                        const newName = e.target.textContent.trim();
+                                        if (newName && newName !== project.name) {
+                                          handleProjectAction('rename', project.id, newName.trim());
+                                        }
+                                        setEditingProjectId(null);
+                                      }
+                                    }}
+                                    onKeyDown={(e) => {
+                                      if (e.key === 'Enter') {
+                                        e.preventDefault();
+                                        e.target.blur();
+                                      }
+                                      if (e.key === 'Escape') {
+                                        e.target.textContent = project.name;
+                                        setEditingProjectId(null);
+                                      }
+                                    }}
+                                  >
+                                    {project.name}
+                                  </span>
+                                </span>
+                                <button class="btn btn-ghost btn-xs" popovertarget={`popover-project-${project.id}`} style={`anchor-name:--anchor-project-${project.id}`}>
+                                  <i data-lucide="more-vertical" class="w-4 h-4"></i>
+                                </button>
+                              </div>
+                              <ul class="dropdown menu w-52 rounded-box bg-base-100 shadow-sm" popover id={`popover-project-${project.id}`} style={`position-anchor:--anchor-project-${project.id}`}>
+                                <li><a onclick={() => { setEditingProjectId(project.id); setTimeout(() => { const span = document.querySelector(`[data-project-id="${project.id}"]`); if (span) { span.focus(); const range = document.createRange(); range.selectNodeContents(span); const sel = window.getSelection(); sel.removeAllRanges(); sel.addRange(range); } }, 0); }}><i data-lucide="edit" class="w-4 h-4"></i>Rename</a></li>
+                                <li><a onclick={() => handleProjectAction('delete', project.id)}><i data-lucide="trash" class="w-4 h-4"></i>Delete</a></li>
+                                <li><a onclick={async () => { try { const data = await exportProject(project.id); downloadJSON(data, `${project.name}-project.json`); toastManager.success('Export successful'); } catch (error) { toastManager.error('Export failed'); } }}><i data-lucide="download" class="w-4 h-4"></i>Export</a></li>
+                                <li><a onclick={async () => { try { const data = await exportReports(project.id); downloadJSON(data, `${project.name}-report.json`); toastManager.success('Export successful'); } catch (error) { toastManager.error('Export failed'); } }}><i data-lucide="file-text" class="w-4 h-4"></i>Export Report</a></li>
+                              </ul>
+                            </li>
+                          )}
+                        </For>
+                        <Show when={filteredProjects().length === 0}>
+                          <li class="flex flex-col items-center justify-center py-8 px-4">
+                            <i data-lucide="folder-x" class="w-12 h-12 mb-4 text-base-content/40"></i>
+                            <div class="text-lg font-semibold mb-2 text-center">
+                              {searchQuery() ? 'No matching tasks' : 'No tasks yet'}
+                            </div>
+                            <div class="text-sm text-base-content/60 mb-4 text-center">
+                              {searchQuery() ? 'Try adjusting search' : 'Create your first task'}
+                            </div>
+                            <button class="btn btn-primary btn-sm" onClick={() => window.dispatchEvent(new CustomEvent('resetAgent'))}>Create Task</button>
+                          </li>
+                        </Show>
+                      </div>
+                    </details>
+                  </li>
+                </section>
+              </Show>
+              </div>
             </div>
           </div>
         </Show>
-        <div class="drawer-content flex flex-col h-full min-h-0 overflow-hidden">
+        <div class="drawer-content flex flex-col h-full min-h-0">
             <Navbar />
-            <main id="main-content" class="px-4 overflow-auto flex-1 w-full min-h-0">
+            <main id="main-content" class="flex-1 w-full min-h-0 overflow-auto">
             {props.children}
           </main>
         </div>

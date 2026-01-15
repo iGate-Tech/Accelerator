@@ -92,30 +92,22 @@ const Navbar = () => {
       dir={currentLang() === "ar" ? "rtl" : "ltr"}
     >
       <div class="navbar-start gap-2">
-        <Show when={isAuthenticated()}>
-          <label
-            for="my-drawer-4"
-            class="btn btn-square btn-ghost md:hidden p-1.5"
-            aria-label="Open sidebar"
-          >
-            <img src="/src/assets/favicon.svg" alt="Menu" class="w-6 h-6" />
-          </label>
-        </Show>
-        <div class="flex flex-col leading-tight hidden md:flex">
+        <label
+          for="my-drawer-4"
+          class="btn btn-square btn-ghost p-1.5"
+          aria-label="Toggle sidebar"
+        >
+          <img src="/src/assets/favicon.svg" alt="Menu" class="w-6 h-6" />
+        </label>
+        <div class="flex flex-col leading-tight">
           <div class="flex items-center gap-2">
             <span class="font-medium text-lg md:text-xl text-base-content/80 tracking-tight">iGate Accelerator</span>
           </div>
           <div class="flex items-center gap-2 mt-0.5">
             <span class="text-xs md:text-sm text-base-content/60">AI-Powered Startup Builder</span>
-            <span class="w-1 h-1 rounded-full bg-base-content/30"></span>
+            <span class="w-1 h-1 rounded-full bg-base-content/30 hidden md:block"></span>
             <span class="badge badge-primary badge-xs md:badge-sm">v1.0</span>
           </div>
-        </div>
-        
-        <div class="flex items-center gap-1.5 md:hidden">
-          <span class="font-medium text-base text-base-content/80">iGate</span>
-          <span class="text-sm text-base-content/60">Accelerator</span>
-          <span class="badge badge-primary badge-xs">v1.0</span>
         </div>
       </div>
 

@@ -214,33 +214,51 @@ const MainLayout = (props) => {
               <div class="px-2 w-full flex-1 overflow-y-auto">
               <ul class="menu w-full mb-2">
                 <li>
-                  <A href="/" onClick={() => window.dispatchEvent(new CustomEvent('resetAgent'))} class="flex justify-center py-3 hover:bg-base-200 rounded-lg" aria-label={t('newProject')}>
-                    <i data-lucide="plus" class="w-5 h-5 text-primary"></i>
+                  <A href="/" onClick={() => window.dispatchEvent(new CustomEvent('resetAgent'))} class="flex items-center gap-3 py-3 px-3 hover:bg-base-200 rounded-lg transition-colors" aria-label={t('newProject')}>
+                    <i data-lucide="plus" class="w-5 h-5 text-primary flex-shrink-0"></i>
+                    <Show when={isDrawerOpen()}>
+                      <span class="font-medium whitespace-nowrap">{t('newProject')}</span>
+                    </Show>
                   </A>
                 </li>
                 <li>
-                  <A href="/dashboard" class="flex justify-center py-3 hover:bg-base-200 rounded-lg" aria-label={t('dashboard')}>
-                    <i data-lucide="bar-chart" class="w-5 h-5 text-warning"></i>
+                  <A href="/dashboard" class="flex items-center gap-3 py-3 px-3 hover:bg-base-200 rounded-lg transition-colors" aria-label={t('dashboard')}>
+                    <i data-lucide="bar-chart" class="w-5 h-5 text-warning flex-shrink-0"></i>
+                    <Show when={isDrawerOpen()}>
+                      <span class="font-medium whitespace-nowrap">{t('dashboard')}</span>
+                    </Show>
                   </A>
                 </li>
                 <li>
-                  <A href="/portfolio" class="flex justify-center py-3 hover:bg-base-200 rounded-lg" aria-label={t('portfolio')}>
-                    <i data-lucide="briefcase" class="w-5 h-5 text-accent"></i>
+                  <A href="/portfolio" class="flex items-center gap-3 py-3 px-3 hover:bg-base-200 rounded-lg transition-colors" aria-label={t('portfolio')}>
+                    <i data-lucide="briefcase" class="w-5 h-5 text-accent flex-shrink-0"></i>
+                    <Show when={isDrawerOpen()}>
+                      <span class="font-medium whitespace-nowrap">{t('portfolio')}</span>
+                    </Show>
                   </A>
                 </li>
                 <li>
-                  <A href="/invitations" class="flex justify-center py-3 hover:bg-base-200 rounded-lg" aria-label="Collaborate">
-                    <i data-lucide="users" class="w-5 h-5 text-info"></i>
+                  <A href="/invitations" class="flex items-center gap-3 py-3 px-3 hover:bg-base-200 rounded-lg transition-colors" aria-label="Collaborate">
+                    <i data-lucide="users" class="w-5 h-5 text-info flex-shrink-0"></i>
+                    <Show when={isDrawerOpen()}>
+                      <span class="font-medium whitespace-nowrap">Collaborate</span>
+                    </Show>
                   </A>
                 </li>
                 <li>
-                  <A href="/explore" class="flex justify-center py-3 hover:bg-base-200 rounded-lg" aria-label={t('exploreIdeas')}>
-                    <i data-lucide="compass" class="w-5 h-5 text-secondary"></i>
+                  <A href="/explore" class="flex items-center gap-3 py-3 px-3 hover:bg-base-200 rounded-lg transition-colors" aria-label={t('exploreIdeas')}>
+                    <i data-lucide="compass" class="w-5 h-5 text-secondary flex-shrink-0"></i>
+                    <Show when={isDrawerOpen()}>
+                      <span class="font-medium whitespace-nowrap">{t('exploreIdeas')}</span>
+                    </Show>
                   </A>
                 </li>
                 <li>
-                  <A href="/help" class="flex justify-center py-3 hover:bg-base-200 rounded-lg" aria-label={t('help')}>
-                    <i data-lucide="help-circle" class="w-5 h-5 text-info"></i>
+                  <A href="/help" class="flex items-center gap-3 py-3 px-3 hover:bg-base-200 rounded-lg transition-colors" aria-label={t('help')}>
+                    <i data-lucide="help-circle" class="w-5 h-5 text-info flex-shrink-0"></i>
+                    <Show when={isDrawerOpen()}>
+                      <span class="font-medium whitespace-nowrap">{t('help')}</span>
+                    </Show>
                   </A>
                 </li>
               </ul>

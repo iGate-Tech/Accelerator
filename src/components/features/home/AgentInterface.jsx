@@ -60,6 +60,15 @@ const AgentInterface = (props) => { // Defensive checks for required props
     let buttonsRef;
     let badgeRef;
 
+    const t = () => {
+        const langKey = currentLang();
+        const langTranslations = translations[langKey];
+        if (!langTranslations) {
+            return translations.en || {};
+        }
+        return langTranslations;
+    };
+
     // Auto-resize textarea when prompt changes
     createEffect(() => {
         props.prompt(); // Track prompt changes

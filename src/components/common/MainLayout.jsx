@@ -197,13 +197,10 @@ const MainLayout = (props) => {
               <div class="p-2 border-b border-base-200">
                 <button 
                   onClick={(e) => { e.preventDefault(); setIsDrawerOpen(!isDrawerOpen()); }} 
-                  class="cursor-pointer flex items-center gap-3 p-2 hover:bg-base-200 rounded-lg transition-colors w-full"
+                  class="cursor-pointer flex items-center justify-center p-2 hover:bg-base-200 rounded-lg transition-colors w-full"
                   title={isDrawerOpen() ? 'Collapse sidebar' : 'Expand sidebar'}
                 >
-                  <img src="/src/assets/iGate-tech-logo.svg" alt="Logo" class="h-8 flex-shrink-0" />
-                  <Show when={isDrawerOpen()}>
-                    <span class="font-bold text-lg whitespace-nowrap">iGate</span>
-                  </Show>
+                  <img src="/src/assets/iGate-tech-logo.svg" alt="Logo" class="h-8" />
                 </button>
               </div>
 

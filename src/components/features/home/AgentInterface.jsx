@@ -43,44 +43,15 @@ const AgentInterface = (props) => { // Defensive checks for required props
     const [forceShowForm, setForceShowForm] = createSignal(false);
 
     createEffect(() => {
-        console.log('AgentInterface: currentProject signal changed', currentProject());
-    });
-
-    // Animation refs
-    let greetingRef;
-    let cardRef;
-    let textareaRef;
-    let buttonsRef;
-    let badgeRef;
-
-    const t = () => {
-        const langKey = currentLang();
-        const langTranslations = translations[langKey];
-        if (! langTranslations) {
-            logger.warn('AgentInterface: No translations found for language:', langKey);
-            return translations.en || {}; // Fallback to English
-        }
-        return langTranslations;
-    };
-
-    createEffect(() => {
-        setCurrentLang(lang());
-    });
-
-    createEffect(() => {
         if (props.projectData) {
-            const proj = props.projectData();
-            console.log('AgentInterface: setting currentProject', proj);
-            setCurrentProject(proj);
+            setCurrentProject(props.projectData());
         } else {
-            console.log('AgentInterface: setting currentProject to null');
             setCurrentProject(null);
         }
     });
 
     createEffect(() => {
         forceShowForm();
-        if (window.lucide) window.lucide.createIcons();
     });
 
     // Auto-resize textarea when prompt changes
@@ -401,13 +372,12 @@ const AgentInterface = (props) => { // Defensive checks for required props
                                             }</span>
                                         </button>
                                          <button type="button"
-                                             onClick={
-                                                 (e) => {
-                                                     console.log(`[${new Date().toISOString()}] AgentInterface: Start button clicked, calling handleStart`);
-                                                     handleButtonPress(e.currentTarget);
-                                                     props.handleStart && props.handleStart();
-                                                 }
-                                             }
+                                              onClick={
+                                                  (e) => {
+                                                      handleButtonPress(e.currentTarget);
+                                                      props.handleStart && props.handleStart();
+                                                  }
+                                              }
                                             onMouseEnter={
                                                 (e) => handleButtonHover(e.currentTarget)
                                             }

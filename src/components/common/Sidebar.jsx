@@ -126,22 +126,25 @@ const Sidebar = () => {
 
   onMount(async () => {
     await loadProjects();
-     // Listen for project added events
-     window.addEventListener('projectAdded', async () => {
+     const onProjectAdded = async () => {
        await loadProjects();
-     });
-     // Listen for project updated events
-     window.addEventListener('projectUpdated', async () => {
+     };
+     const onProjectUpdated = async () => {
        await loadProjects();
+     };
+     window.addEventListener('projectAdded', onProjectAdded);
+     window.addEventListener('projectUpdated', onProjectUpdated);
+     if (window.lucide) window.lucide.createIcons();
+
+     onCleanup(() => {
+       window.removeEventListener('projectAdded', onProjectAdded);
+       window.removeEventListener('projectUpdated', onProjectUpdated);
      });
-    // Create Lucide icons
-    if (window.lucide) window.lucide.createIcons();
   });
 
   createEffect(() => {
     const newLang = lang();
     setCurrentLang(newLang);
-    logger.debug('Sidebar language changed to:', newLang);
   });
 
   createEffect(() => {
@@ -149,14 +152,6 @@ const Sidebar = () => {
     if (currentUser && currentUser.id) {
       loadProjects();
     }
-  });
-
-  createEffect(() => {
-    projects();
-    searchQuery();
-    currentLang(); // React to language changes
-    isCollapsed(); // React to collapse changes
-    if (window.lucide) window.lucide.createIcons();
   });
 
   return (

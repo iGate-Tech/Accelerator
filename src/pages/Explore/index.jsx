@@ -80,11 +80,17 @@ const Explore = () => {
     refetch();
   };
 
-   onMount(() => {
-     // Listen for project updates
-     window.addEventListener('projectAdded', () => refetch());
-     window.addEventListener('projectUpdated', () => refetch());
-   });
+    onMount(() => {
+      const onProjectAdded = () => refetch();
+      const onProjectUpdated = () => refetch();
+      window.addEventListener('projectAdded', onProjectAdded);
+      window.addEventListener('projectUpdated', onProjectUpdated);
+
+      onCleanup(() => {
+        window.removeEventListener('projectAdded', onProjectAdded);
+        window.removeEventListener('projectUpdated', onProjectUpdated);
+      });
+    });
 
   const statusOptions = [
     { value: "all", label: t().allStatus, icon: "layers" },

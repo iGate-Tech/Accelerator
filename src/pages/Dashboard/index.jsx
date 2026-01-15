@@ -128,23 +128,19 @@ const Dashboard = () => {
 
   const formatDate = (dateString) => formatRelativeTime(dateString, t());
 
-  onMount(async () => {
-    logger.info('Dashboard: Component mounted');
-    logger.debug('Dashboard: Setting up Lucide icons');
-    if (window.lucide) window.lucide.createIcons();
+   onMount(async () => {
+     if (window.lucide) window.lucide.createIcons();
 
-    logger.debug('Dashboard: Adding event listeners for project updates');
-    // Listen for project updates
-    window.addEventListener('projectAdded', () => {
-      logger.debug('Dashboard: projectAdded event received, refetching projects');
-      refetch();
-    });
-    window.addEventListener('projectUpdated', () => {
-      logger.debug('Dashboard: projectUpdated event received, refetching projects');
-      refetch();
-    });
-    logger.trace('Dashboard: Mount setup completed');
-  });
+     const onProjectAdded = () => refetch();
+     const onProjectUpdated = () => refetch();
+     window.addEventListener('projectAdded', onProjectAdded);
+     window.addEventListener('projectUpdated', onProjectUpdated);
+
+     onCleanup(() => {
+       window.removeEventListener('projectAdded', onProjectAdded);
+       window.removeEventListener('projectUpdated', onProjectUpdated);
+     });
+   });
 
   return (
     <div class="space-y-8 ">

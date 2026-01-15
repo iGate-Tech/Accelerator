@@ -1,4 +1,4 @@
-import { For, Show, onMount, createEffect, createSignal } from "solid-js";
+import { For, Show, onMount, createEffect, createSignal, createMemo } from "solid-js";
 import { marked } from "marked";
 import { renderFilledTemplate } from "../../lib/llm-template";
 import { sectionMap, stepNames, modelMap } from "../../lib/machine";
@@ -84,36 +84,12 @@ const getStepName = (task) =>
 
 /* ---------- Component ---------- */
 
-const getBadgeClass = (state) => {
-  logger.trace('getBadgeClass: Starting');
-  const classes = {
-    idle: 'badge-neutral',
-    processing: 'badge-primary',
-    pause: 'badge-warning',
-    completed: 'badge-success'
-  };
-  return classes[state] || 'badge-neutral';
-};
-
-const getStateIcon = (state) => {
-  const icons = {
-    idle: 'clock',
-    processing: 'cog',
-    pause: 'pause-circle',
-     completed: 'check'
-  };
-  return icons[state] || 'help-circle';
-};
-
 const ResponseSection = (props) => {
   const startPressedCondition = props.startPressed && props.startPressed();
   const tasksCondition = props.tasksList && props.tasksList().length > 0 && props.machineStore.context?.currentStep !== 'done';
   const shouldShow = startPressedCondition || tasksCondition;
-  console.log('ResponseSection: Conditions - startPressed:', startPressedCondition, 'tasks:', tasksCondition, 'currentStep:', props.machineStore.context?.currentStep, 'shouldShow:', shouldShow);
-  logger.debug('ResponseSection: component rendered, tasksList length:', props.tasksList()?.length, 'isLoading:', props.isLoading(), 'streamingContent length:', props.streamingContent()?.length);
 
-  // Group tasks by model
-  const groupedTasks = () => {
+  const groupedTasks = createMemo(() => {
     const groups = {};
     props.tasksList().forEach(task => {
       const model = task.model || "Manual";
@@ -121,39 +97,29 @@ const ResponseSection = (props) => {
       groups[model].push(task);
     });
     return groups;
-  };
+  });
 
-  // Model generation order
   const modelOrder = ["Idea Model", "Business Model", "Financial Model", "Funding Model", "Marketing Model", "Team Model", "Legal Model", "Technical Model"];
 
-  // Sort models in custom order: system, models (in generation sequence), reports
-  const sortedModels = () => {
+  const sortedModels = createMemo(() => {
     const groups = groupedTasks();
     const system = Object.keys(groups).filter(m => m.toLowerCase().includes('system'));
     const reports = Object.keys(groups).filter(m => m.toLowerCase().includes('report'));
-    const models = modelOrder.filter(m => groups[m]); // Use generation order
+    const models = modelOrder.filter(m => groups[m]);
     const other = Object.keys(groups).filter(m =>
       !system.includes(m) && !reports.includes(m) && !models.includes(m)
     );
 
     return [...system.sort(), ...models, ...reports.sort(), ...other.sort()];
-  };
+  });
 
-  // Expanded states for each model group
   const expandedStates = new Map();
-
-  // Expanded states for each section group
   const sectionExpandedStates = new Map();
 
   onMount(() => {
-    logger.debug('ResponseSection: onMount');
     if (window.lucide) window.lucide.createIcons();
   });
-  createEffect(() => {
-    logger.debug('ResponseSection: createEffect triggered, tasksList changed');
-    props.tasksList();
-    if (window.lucide) window.lucide.createIcons();
-  });
+
   return (
     <div class="flex-1 p-4 max-w-6xl w-full">
       <Show when={shouldShow}>

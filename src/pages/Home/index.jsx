@@ -175,16 +175,10 @@ const TasksContent = () => {
         setMachineStore('context', initialContext);
     };
     const handleStart = async () => {
-        console.log(`[${new Date().toISOString()}] HandleStart: starting process - prompt length: ${prompt()?.length || 0}, currentProjectId: ${currentProjectId()}`);
         setStartPressed(true);
-        console.log(`[${new Date().toISOString()}] HandleStart: setStartPressed(true)`);
         setAutoProgress(true);
-        console.log(`[${new Date().toISOString()}] HandleStart: setAutoProgress(true)`);
-        console.log(`[${new Date().toISOString()}] HandleStart: calling handleLLMProjectUpdate`);
         await handleLLMProjectUpdate(prompt(), extractProjectName, currentProjectId, setCurrentProjectId, setPrompt, setStreamingContent);
-        console.log(`[${new Date().toISOString()}] HandleStart: after LLMProjectUpdate, starting machine process`);
         startProcess();
-        console.log(`[${new Date().toISOString()}] HandleStart: process started, machine state: ${machineStore.state}, autoProgress: ${autoProgress()}`);
     };
     const handlePause = () => {
         pause();
@@ -262,14 +256,11 @@ const TasksContent = () => {
 
     // LLM Call handler
     const handleLLMCall = async (prompt) => {
-        console.log(`[${new Date().toISOString()}] Home/handleLLMCall: STARTING LLM CALL - prompt length: ${prompt?.length}, currentStep: ${machineStore.context?.currentStep}, userId: ${user()?.id}`);
         setIsLoading(true);
-        console.log(`[${new Date().toISOString()}] Home/handleLLMCall: setIsLoading(true), cleared streamingContent`);
         try {
 
             // Check user authentication
             if (!user() || !user().id) {
-                logger.error('Home: User not authenticated');
                 throw new Error('You must be logged in to use AI features.');
             }
 
@@ -282,11 +273,6 @@ const TasksContent = () => {
 
             // Consume credits (free for testing)
             const creditsCost = 0;
-            // const balance = await getCreditBalance(user().id);
-            // if (balance < creditsCost) {
-            //     throw new Error('Insufficient credits. You need at least ' + creditsCost + ' credits to use AI features.');
-            // }
-            // await consumeCredits(user().id, creditsCost, `AI Processing: ${sanitizedPrompt.substring(0, 50)}...`);
 
             // Log activity
             if (activityLogger.user) {
@@ -294,8 +280,6 @@ const TasksContent = () => {
             }
 
             // Make real API call to streaming LLM endpoint
-            console.log(`[${new Date().toISOString()}] Home/handleLLMCall: Making API call to /api/llm with sanitized prompt length: ${sanitizedPrompt.length}`);
-            const apiStartTime = Date.now();
             const response = await fetch('/api/llm', {
                 method: 'POST',
                 headers: {
@@ -305,12 +289,9 @@ const TasksContent = () => {
             });
 
             if (!response.ok) {
-              console.log(`[${new Date().toISOString()}] Home/handleLLMCall: API call failed with status: ${response.status}`);
-              throw new Error(`LLM API error: ${response.status}`);
+                throw new Error(`LLM API error: ${response.status}`);
             }
-            console.log(`[${new Date().toISOString()}] Home/handleLLMCall: API call successful, starting stream processing`);
 
-              console.log(`[${new Date().toISOString()}] Home: Starting LLM response streaming`);
               const reader = response.body.getReader();
               const decoder = new TextDecoder();
               let aiResponse = '';
@@ -319,31 +300,22 @@ const TasksContent = () => {
               while (true) {
                   const { done, value } = await reader.read();
                   if (done) {
-                      console.log(`[${new Date().toISOString()}] Home: Streaming finished - total chunks: ${chunkCount}, total response length: ${aiResponse.length}`);
                       break;
                   }
                   const chunk = decoder.decode(value);
                   chunkCount++;
                   aiResponse += chunk;
                   setPrompt(aiResponse);
-                  setStreamingContent(aiResponse); // Update streaming UI in real-time
-
-                  if (chunkCount % 5 === 0) {
-                      console.log(`[${new Date().toISOString()}] Home: Received chunk ${chunkCount}, current response length: ${aiResponse.length}`);
-                  }
+                  setStreamingContent(aiResponse);
               }
 
             // After streaming, process the response
-            console.log(`[${new Date().toISOString()}] Home: Streaming complete, calling receiveResponse with response length: ${aiResponse.length}, projectId: ${currentProjectId()}, userId: ${user()?.id || 'local-user'}`);
             await receiveResponse(aiResponse, setAutoProgress, setTasksList, tasksList, addTask, updateProject, currentProjectId(), user()?.id || 'local-user');
-            console.log(`[${new Date().toISOString()}] Home: receiveResponse completed, refetching tasks`);
             // Refetch tasks to update the UI
             await refetch();
-            setIsLoading(false); // Allow next API call
-            console.log(`[${new Date().toISOString()}] Home: Tasks refetched, step processing complete`);
+
+            setIsLoading(false);
         } catch (error) {
-            console.log(`[${new Date().toISOString()}] Home/handleLLMCall: ERROR - ${error.message}`);
-            console.log(`[${new Date().toISOString()}] Home/handleLLMCall: Setting isLoading to false due to error`);
             setIsLoading(false);
         }
     };
@@ -368,90 +340,66 @@ const TasksContent = () => {
       return await getProjectById(projectId);
     });
 
-     // Load project context when project data changes
-     createEffect(() => {
-       const project = projectData();
-        if (project && typeof project === 'object') {
-                  console.log('Home: LOADING PROJECT DATA - name:', project.name, 'currentStep:', project.currentStep, 'completedSteps:', project.completedSteps, 'uiStatus:', project.uiStatus);
-                  // Load context from flattened project fields
-                  const contextFromDB = {
-                    currentStep: project.currentStep,
-                    completedSteps: Number(project.completedSteps),
-                    stepName: project.stepName,
-                    currentModel: project.currentModel,
-                    currentSection: project.currentSection,
-                    uiProgress: Number(project.uiProgress),
-                    uiMessage: project.uiMessage,
-                    uiStatus: project.uiStatus,
-                    currentPrompt: project.currentPrompt,
-                    llmResponse: project.llmResponse,
-                    totalCredits: Number(project.totalCredits),
-                    consumedCredits: Number(project.consumedCredits),
-                    totalTime: Number(project.totalTime),
-                    consumedTime: Number(project.consumedTime)
-                  };
-                   console.log('Home: SETTING MACHINE CONTEXT - currentStep:', contextFromDB.currentStep, 'completedSteps:', contextFromDB.completedSteps);
-                   setMachineStore('context', { ...initialContext, ...contextFromDB });
-                   // Set machine state: use saved state, but override for resumable projects
-                   let newState = project.uiStatus || "idle";
-                   let shouldAutoProgress = false;
-                   if (contextFromDB.currentStep === 'done') {
-                     newState = "completed";
-                   } else if (contextFromDB.currentStep && contextFromDB.currentStep !== 'system') {
-                     // If we have a project with progress, allow resuming
-                     newState = "processing";
-                     shouldAutoProgress = true; // Enable auto-progress for resumable projects
-                   } else if (contextFromDB.currentStep === 'system' && contextFromDB.completedSteps > 0) {
-                     // Special case: if we're at system step but have completed steps, allow resuming
-                     newState = "processing";
-                     shouldAutoProgress = true;
-                   }
-                   console.log('Home: LOADING PROJECT - currentStep:', contextFromDB.currentStep, 'completedSteps:', contextFromDB.completedSteps, 'uiStatus:', project.uiStatus, 'setting state to:', newState, 'autoProgress:', shouldAutoProgress);
-                   setMachineStore("state", newState);
-                   if (shouldAutoProgress) {
-                     setAutoProgress(true);
-                     setStartPressed(true); // Also set startPressed to hide greeting immediately
-                     console.log('Home: Auto-progress and startPressed enabled for resumable project');
-                   }
+      // Load project context when project data changes
+      createEffect(() => {
+        const project = projectData();
+         if (project && typeof project === 'object') {
+                   const contextFromDB = {
+                     currentStep: project.currentStep,
+                     completedSteps: Number(project.completedSteps),
+                     stepName: project.stepName,
+                     currentModel: project.currentModel,
+                     currentSection: project.currentSection,
+                     uiProgress: Number(project.uiProgress),
+                     uiMessage: project.uiMessage,
+                     uiStatus: project.uiStatus,
+                     currentPrompt: project.currentPrompt,
+                     llmResponse: project.llmResponse,
+                     totalCredits: Number(project.totalCredits),
+                     consumedCredits: Number(project.consumedCredits),
+                     totalTime: Number(project.totalTime),
+                     consumedTime: Number(project.consumedTime)
+                   };
+                    setMachineStore('context', { ...initialContext, ...contextFromDB });
+                    let newState = project.uiStatus || "idle";
+                    let shouldAutoProgress = false;
+                    if (contextFromDB.currentStep === 'done') {
+                      newState = "completed";
+                    } else if (contextFromDB.currentStep && contextFromDB.currentStep !== 'system') {
+                      newState = "processing";
+                      shouldAutoProgress = true;
+                    } else if (contextFromDB.currentStep === 'system' && contextFromDB.completedSteps > 0) {
+                      newState = "processing";
+                      shouldAutoProgress = true;
+                    }
+                    setMachineStore("state", newState);
+                    if (shouldAutoProgress) {
+                      setAutoProgress(true);
+                      setStartPressed(true);
+                    }
 
-                  // Set the prompt to project description
-                  console.log('Home: setting prompt to project description', project.description);
-                  setPrompt(project.description || "");
-        }
-      });
+                   setPrompt(project.description || "");
+         }
+       });
 
       // Handle async operations when project changes
       createEffect(() => {
         const project = projectData();
         if (project && typeof project === 'object') {
-          // Refetch tasks for the opened project
           (async () => {
-            console.log('Home: refetching tasks for project', project.id);
             await refetch();
-            console.log('Home: tasks after refetch', tasks());
-            logger.debug('Opened project', project.id, 'with context:', machineStore.context);
-            logger.debug('Project tasks_list:', project.tasks_list);
 
-            // Extract business data from loaded tasks
             const currentTasks = tasks();
             if (currentTasks && currentTasks.length > 0) {
               const extractedData = extractDataFromTasks(currentTasks);
               setMachineStore('context', (prev) => ({ ...prev, ...extractedData }));
-              logger.debug('Extracted business data from tasks:', extractedData);
             }
 
-            // If no tasks loaded and project has tasks_list, create tasks from it
-            logger.debug('Current tasks:', currentTasks);
-
             if ((!currentTasks || currentTasks.length === 0) && project.tasks_list) {
-              logger.debug('Attempting to create tasks from tasks_list...');
               try {
                 const tasksData = JSON.parse(project.tasks_list);
-                logger.debug('Parsed tasks_data:', tasksData);
                 if (Array.isArray(tasksData) && tasksData.length > 0) {
-                  logger.debug('Creating tasks from project tasks_list:', tasksData);
                   for (const taskData of tasksData) {
-                    logger.debug('Adding task:', taskData);
                     await addTask({
                       content: taskData.content || taskData,
                       llmResponse: taskData.llmResponse || null,
@@ -459,159 +407,126 @@ const TasksContent = () => {
                       completed: taskData.completed || false
                     }, project.id, user()?.id || 'local-user');
                   }
-                  // Refetch again to load the newly created tasks
                   await refetch();
-                  // Extract data from newly created tasks
                   const newTasks = tasks();
                   if (newTasks && newTasks.length > 0) {
-                    logger.debug('Extracted data from newly created tasks');
                     const extractedData = extractDataFromTasks(newTasks);
                     setMachineStore('context', (prev) => ({ ...prev, ...extractedData }));
                   }
-                } else {
-                  logger.debug('tasksData is not a valid array or is empty');
                 }
               } catch (e) {
-                logger.error('Error parsing or creating tasks from tasks_list:', e);
               }
-            } else {
-              logger.debug('Tasks already exist or no tasks_list, not creating tasks');
+            }
+
+            if (project.tasks_list) {
+              try {
+                const tasksData = JSON.parse(project.tasks_list);
+                if (Array.isArray(tasksData) && tasksData.length > 0) {
+                  const latestTask = tasksData[tasksData.length - 1];
+                  if (latestTask && latestTask.content) {
+                    setPrompt(latestTask.content);
+                  }
+                }
+              } catch (e) {
+              }
             }
           })();
         }
       });
 
-     // Event listeners and initialization
-     onMount(() => {
-         // Listen for project deletion
-         window.addEventListener('projectDeleted', (e) => {
-             if (currentProjectId() === e.detail.projectId) {
-                 logger.debug('Current project was deleted, resetting selection');
-                 setCurrentProjectId(null);
-                 setPrompt('');
-                 setTasksList([]);
-                 setMachineStore('context', initialContext);
-             }
-         });
+      // Event listeners and initialization
+      onMount(() => {
+          // Listen for project deletion
+          const onProjectDeleted = (e) => {
+              if (currentProjectId() === e.detail.projectId) {
+                  setCurrentProjectId(null);
+                  setPrompt('');
+                  setTasksList([]);
+                  setMachineStore('context', initialContext);
+              }
+          };
 
           // Listen for reset agent
-          window.addEventListener('resetAgent', () => {
+          const onResetAgent = () => {
               handleReset();
-          });
+          };
 
-           // Listen for open project
-           logger.debug('Home: adding openProject listener');
-           window.addEventListener('openProject', (e) => {
-               const pid = e.detail;
-               logger.debug('Home: openProject event received', pid);
-               if (currentProjectId() === pid) {
-                   logger.debug('Home: Project already selected, skipping');
-                   return;
-               }
-               // Save selected project to user profile
-               updateEntity({ table: 'profiles', idField: 'user_id', id: user().id, updates: { current_project_id: pid } });
-               setCurrentProjectId(pid);
-           });
-
-         // Create Lucide icons after a delay to ensure script loaded
-          setTimeout(() => {
-              if (window.lucide)
-                  window.lucide.createIcons();
-          }, 100);
-
-          // Load selected project from user profile
-          if (user()?.id) {
-            getUserProfile(user().id).then(profile => {
-              if (profile?.current_project_id) {
-                setCurrentProjectId(profile.current_project_id);
+          // Listen for open project
+          const onOpenProject = (e) => {
+              const pid = e.detail;
+              if (currentProjectId() === pid) {
+                  return;
               }
-            }).catch(e => logger.error('Error loading user profile:', e));
-          }
-      });
+              updateEntity({ table: 'profiles', idField: 'user_id', id: user().id, updates: { current_project_id: pid } });
+              setCurrentProjectId(pid);
+          };
 
-    createEffect(() => {
-        const currentState = machineStore.state;
-        const currentStep = machineStore.context?.currentStep;
-        const completedSteps = machineStore.context?.completedSteps;
-        console.log(`[${new Date().toISOString()}] Home/CreateEffect: Machine state changed - state: ${currentState}, currentStep: ${currentStep}, completedSteps: ${completedSteps}, uiMessage: ${machineStore.context?.uiMessage}`);
-        if (window.lucide)
-            window.lucide.createIcons();
+          window.addEventListener('projectDeleted', onProjectDeleted);
+          window.addEventListener('resetAgent', onResetAgent);
+          window.addEventListener('openProject', onOpenProject);
 
-    });
+           // Create Lucide icons after a delay to ensure script loaded
+           setTimeout(() => {
+               if (window.lucide)
+                   window.lucide.createIcons();
+           }, 100);
 
+           // Load selected project from user profile
+           if (user()?.id) {
+             getUserProfile(user().id).then(profile => {
+               if (profile?.current_project_id) {
+                 setCurrentProjectId(profile.current_project_id);
+               }
+             });
+           }
 
-    createEffect(() => {
-        machineStore.context.completedSteps;
-        machineStore.context.currentModel;
-        if (window.lucide) 
-            window.lucide.createIcons();
-        
-    });
+           onCleanup(() => {
+               window.removeEventListener('projectDeleted', onProjectDeleted);
+               window.removeEventListener('resetAgent', onResetAgent);
+               window.removeEventListener('openProject', onOpenProject);
+           });
+       });
 
-      // Set tasksList when project changes
-      createEffect(() => {
-          currentProjectId();
-          console.log('Home: Tasks resource changed - tasks:', tasks(), 'length:', tasks()?.length);
-          logger.debug('Setting tasksList from resource:', tasks());
-          if (Array.isArray(tasks())) {
-              setTasksList(tasks());
-              console.log('Home: setTasksList called with', tasks().length, 'tasks');
-          }
-      });
+       // Set tasksList when project changes
+       createEffect(() => {
+           currentProjectId();
+           if (Array.isArray(tasks())) {
+               setTasksList(tasks());
+           }
+       });
 
-    createEffect(() => {
-        const hasTasks = tasksList && tasksList().length > 0;
-        const shouldShowGreeting = machineStore.state === 'idle' && !startPressed() && !hasTasks;
-        console.log('Home: Greeting logic - state:', machineStore.state, 'startPressed:', startPressed(), 'hasTasks:', hasTasks, 'shouldShowGreeting:', shouldShowGreeting);
-        if (shouldShowGreeting) {
-            setGreetingClass("text-center py-4 h-auto overflow-visible transition-all duration-300 opacity-100");
-        } else {
-            setGreetingClass("text-center py-0 h-0 overflow-hidden transition-all duration-300 opacity-0");
-        }
-    });
+     createEffect(() => {
+         if (cardRef) {
+             let animationId;
+             let startTime = Date.now();
 
-    createEffect(() => {
-        console.log(`[${new Date().toISOString()}] Home/CreateEffect: Checking auto-progress - autoProgress: ${autoProgress()}, isLoading: ${isLoading()}, state: ${machineStore.state}, currentStep: ${machineStore.context?.currentStep}`);
-        if (autoProgress() && !isLoading() && machineStore.state === 'processing') {
-            console.log(`[${new Date().toISOString()}] Home/CreateEffect: AUTO-PROGRESS TRIGGERED - calling handleLLMCall for step: ${machineStore.context?.currentStep}, prompt length: ${prompt()?.length}`);
-            setAutoProgress(false);
-            console.log(`[${new Date().toISOString()}] Home/CreateEffect: setAutoProgress(false), now calling handleLLMCall`);
-            handleLLMCall(prompt());
-        }
-    });
+             const animate = () => {
+                 const elapsed = Date.now() - startTime;
+                 const t = elapsed * 0.001;
 
-    createEffect(() => {
-        if (cardRef) {
-            let animationId;
-            let startTime = Date.now();
+                 const x = Math.sin(t * 0.2) * 15;
+                 const y = Math.sin(t * 0.1) * 12;
+                 const blur = 25 + Math.sin(t * 0.3) * 15;
+                 const spread = Math.sin(t * 0.15) * 5;
 
-            const animate = () => {
-                const elapsed = Date.now() - startTime;
-                const t = elapsed * 0.001;
-                // time in seconds
+                 const hue = (t * 20) % 360;
+                 const color = `hsla(${hue}, 40%, 60%, 0.4)`;
 
-                // Smooth oscillating values using sine waves
-                const x = Math.sin(t * 0.2) * 15; // -15 to 15
-                const y = Math.sin(t * 0.1) * 12; // -12 to 12
-                const blur = 25 + Math.sin(t * 0.3) * 15; // 10 to 40
-                const spread = Math.sin(t * 0.15) * 5;
-                // -5 to 5
+                 cardRef.style.boxShadow = `${x}px ${y}px ${blur}px ${spread}px ${color}`;
 
-                // Smooth color transition
-                const hue = (t * 20) % 360; // Cycle through hues faster
-                const color = `hsla(${hue}, 40%, 60%, 0.4)`;
+                 animationId = requestAnimationFrame(animate);
+             };
 
-                cardRef.style.boxShadow = `${x}px ${y}px ${blur}px ${spread}px ${color}`;
+             const timeoutId = setTimeout(() => {
+                 animationId = requestAnimationFrame(animate);
+             }, 1000);
 
-                animationId = requestAnimationFrame(animate);
-            };
-
-            // Start animating after a short delay
-            setTimeout(() => {
-                animationId = requestAnimationFrame(animate);
-            }, 1000);
-        }
-    });
+             onCleanup(() => {
+                 cancelAnimationFrame(animationId);
+                 clearTimeout(timeoutId);
+             });
+         }
+     });
 
     // Save progress to current project when context changes (debounced)
     let saveTimeout;
@@ -636,17 +551,14 @@ const TasksContent = () => {
               consumedCredits: machineStore.context.consumedCredits,
               totalTime: machineStore.context.totalTime,
               consumedTime: machineStore.context.consumedTime
-            };
-            logger.debug('Updating project', currentProjectId(), 'with flattened context');
-            updateProject(currentProjectId(), updates);
-            // Update local project data to update UI
-            mutate((prev) => prev ? { ...prev, ...updates } : prev);
-          } catch (error) {
-            logger.error('Failed to update project in createEffect:', error);
-          }
-        }
-      }, 1000); // Debounce saves to once per second
-    });
+             };
+             updateProject(currentProjectId(), updates);
+             mutate((prev) => prev ? { ...prev, ...updates } : prev);
+           } catch (error) {
+           }
+         }
+       }, 1000);
+     });
 
     // createEffect(() => {
     // streamingContent();
@@ -702,16 +614,9 @@ const TasksContent = () => {
                   handleStart={handleStart}
                   handlePause={handlePause}
                   handleResume={handleResume}/>
-              <Show when={
-                (() => {
-                  const hasProject = !!currentProjectId();
-                  const startPressedCond = startPressed();
-                  const tasksCond = tasksList && tasksList().length > 0 && machineStore.context?.currentStep !== 'done';
-                  const shouldShowResponseSection = hasProject && (startPressedCond || tasksCond);
-                  console.log('Home: ResponseSection outer condition - hasProject:', hasProject, 'startPressed:', startPressedCond, 'tasksCond:', tasksCond, 'currentStep:', machineStore.context?.currentStep, 'shouldShow:', shouldShowResponseSection);
-                  return shouldShowResponseSection;
-                })()
-              }>
+               <Show when={
+                   !!currentProjectId() && (startPressed() || (tasksList && tasksList().length > 0 && machineStore.context?.currentStep !== 'done'))
+               }>
                    <ResponseSection tasksList={tasksList}
                   project={projectData()}
                   editingTaskId={editingTaskId}

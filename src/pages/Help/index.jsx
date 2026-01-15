@@ -21,37 +21,25 @@ const Help = () => {
 
 
 
-   onMount(() => {
-     if (window.lucide) window.lucide.createIcons();
+    onMount(() => {
+      if (window.lucide) window.lucide.createIcons();
 
-     // Load tutorial progress from localStorage
-     const savedProgress = localStorage.getItem('tutorial-progress');
-     if (savedProgress) {
-       setCompletedSteps(new Set(JSON.parse(savedProgress)));
-       setTutorialProgress(JSON.parse(savedProgress).length);
-     }
+      const savedProgress = localStorage.getItem('tutorial-progress');
+      if (savedProgress) {
+        setCompletedSteps(new Set(JSON.parse(savedProgress)));
+        setTutorialProgress(JSON.parse(savedProgress).length);
+      }
 
-     // Keyboard navigation
-     document.addEventListener('keydown', handleKeyPress);
-   });
+      document.addEventListener('keydown', handleKeyPress);
 
-   createEffect(() => {
-     if (window.lucide) {
-       // Small delay to ensure DOM is updated
-       setTimeout(() => window.lucide.createIcons(), 10);
-     }
-   });
+      onCleanup(() => {
+        document.removeEventListener('keydown', handleKeyPress);
+      });
+    });
 
-   createEffect(() => {
-     setCurrentLang(lang());
-   });
-
-   createEffect(() => {
-     activeSection();
-     if (window.lucide) {
-       setTimeout(() => window.lucide.createIcons(), 10);
-     }
-   });
+    createEffect(() => {
+      setCurrentLang(lang());
+    });
 
 
   logger.trace('handleKeyPress: Starting');   const handleKeyPress = (e) => {

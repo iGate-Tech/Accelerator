@@ -196,14 +196,20 @@ const Portfolio = () => {
      }
    };
 
-  onMount(async () => {
-    if (window.lucide) window.lucide.createIcons();
-    await refreshData();
+   onMount(async () => {
+     if (window.lucide) window.lucide.createIcons();
+     await refreshData();
 
-    // Listen for project updates
-    window.addEventListener('projectAdded', refreshData);
-    window.addEventListener('projectUpdated', refreshData);
-  });
+     const onProjectAdded = () => refreshData();
+     const onProjectUpdated = () => refreshData();
+     window.addEventListener('projectAdded', onProjectAdded);
+     window.addEventListener('projectUpdated', onProjectUpdated);
+
+     onCleanup(() => {
+       window.removeEventListener('projectAdded', onProjectAdded);
+       window.removeEventListener('projectUpdated', onProjectUpdated);
+     });
+   });
 
   createEffect(() => {
     if (window.lucide) window.lucide.createIcons();

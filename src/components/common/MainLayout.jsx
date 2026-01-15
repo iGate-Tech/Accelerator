@@ -168,7 +168,7 @@ const MainLayout = (props) => {
       <GlobalError />
       <ToastContainer />
       <OfflineIndicator />
-      <div class="drawer lg:drawer-open h-full min-h-0">
+      <div class="drawer md:drawer-open lg:drawer-open h-full min-h-0">
         <Show when={isAuthenticated()}>
           <input 
             id="my-drawer-4" 
@@ -181,110 +181,74 @@ const MainLayout = (props) => {
             <label 
               for="my-drawer-4" 
               aria-label="close sidebar" 
-              class="drawer-overlay lg:hidden"
+              class="drawer-overlay md:hidden lg:hidden"
             ></label>
             
             <div 
-              class="flex min-h-full flex-col items-start bg-base-100 border-base-200 is-drawer-close:w-24 is-drawer-open:w-80 transition-all duration-300 ease-in-out"
+              class="flex min-h-full flex-col items-start bg-base-100 border-base-200 w-72 lg:w-80 transition-all duration-300 ease-in-out"
               classList={{
                 'border-e': currentLang() === 'en',
                 'border-s': currentLang() === 'ar'
               }}
             >
-              <div class="relative mb-4 w-full">
+              <div class="relative mb-4 w-full p-4">
                 <A 
                   href="/" 
                   onClick={(e) => { e.preventDefault(); setIsDrawerOpen(!isDrawerOpen()); }} 
-                  class="cursor-pointer flex w-full"
+                  class="cursor-pointer flex items-center gap-3"
                 >
-                  <Show when={isDrawerOpen()}>
-                    <img src="/src/assets/iGate-tech-logo.svg" alt="Logo" class="h-8 mt-4 ml-8" />
-                  </Show>
-                  <Show when={!isDrawerOpen()}>
-                    <img src="/src/assets/favicon.svg" alt="Logo" class="h-8 mt-4 mx-auto" />
-                  </Show>
+                  <img src="/src/assets/iGate-tech-logo.svg" alt="Logo" class="h-8" />
+                  <span class="font-bold text-lg">iGate</span>
                 </A>
-                <Show when={isDrawerOpen()}>
-                  <button
-                    onClick={() => setIsDrawerOpen(false)}
-                    class="absolute top-4 btn btn-ghost btn-sm btn-circle"
-                    classList={{ 'right-4': currentLang() === 'en', 'left-4': currentLang() === 'ar' }}
-                    aria-label="Collapse sidebar"
-                  >
-                    <i data-lucide="chevron-left" class="w-4 h-4"></i>
-                  </button>
-                </Show>
               </div>
 
-              <div class="p-4 w-full pt-0">
-              <ul class="menu border border-base-200 rounded-box w-full mb-5">
+              <div class="px-4 w-full">
+              <ul class="menu border border-base-200 rounded-box w-full mb-4">
                 <li classList={{ "menu-active": window.location.pathname === "/" }}>
-                  <A href="/" onClick={() => window.dispatchEvent(new CustomEvent('resetAgent'))} class="flex items-center gap-3 px-4 py-3 hover:bg-base-300 transition-colors" classList={{ 'justify-center': !isDrawerOpen(), 'justify-start': isDrawerOpen() }} aria-label={`Create new project - ${t('newProject')}`}>
-                    <div class="p-1 rounded">
-                      <i data-lucide="plus" class="w-4 h-4 text-primary" aria-hidden="true"></i>
-                    </div>
-                    <span class="font-medium" classList={{ 'lg:hidden': !isDrawerOpen() }}>{t('newProject')}</span>
-                  </A>
-                </li>
-                <li classList={{ "menu-active": window.location.pathname === "/apps" }}>
-                  <A href="/apps" class="flex items-center gap-3 px-4 py-3 hover:bg-base-300 transition-colors" classList={{ 'justify-center': !isDrawerOpen(), 'justify-start': isDrawerOpen() }} aria-label="Apps">
-                    <div class="p-1 rounded">
-                      <i data-lucide="grid" class="w-4 h-4 text-secondary" aria-hidden="true"></i>
-                    </div>
-                    <span class="font-medium" classList={{ 'lg:hidden': !isDrawerOpen() }}>Apps</span>
+                  <A href="/" onClick={() => window.dispatchEvent(new CustomEvent('resetAgent'))} class="flex items-center gap-3 px-4 py-3 hover:bg-base-300 transition-colors" aria-label={`Create new project - ${t('newProject')}`}>
+                    <i data-lucide="plus" class="w-4 h-4 text-primary" aria-hidden="true"></i>
+                    <span class="font-medium">{t('newProject')}</span>
                   </A>
                 </li>
                 <li classList={{ "menu-active": window.location.pathname === "/dashboard" }}>
-                  <A href="/dashboard" class="flex items-center gap-3 px-4 py-3 hover:bg-base-300 transition-colors" classList={{ 'justify-center': !isDrawerOpen(), 'justify-start': isDrawerOpen() }} aria-label={`Dashboard - ${t('dashboard')}`}>
-                    <div class="p-1 rounded">
-                      <i data-lucide="bar-chart" class="w-4 h-4 text-warning" aria-hidden="true"></i>
-                    </div>
-                    <span class="font-medium" classList={{ 'lg:hidden': !isDrawerOpen() }}>{t('dashboard')}</span>
+                  <A href="/dashboard" class="flex items-center gap-3 px-4 py-3 hover:bg-base-300 transition-colors" aria-label={`Dashboard - ${t('dashboard')}`}>
+                    <i data-lucide="bar-chart" class="w-4 h-4 text-warning" aria-hidden="true"></i>
+                    <span class="font-medium">{t('dashboard')}</span>
                   </A>
                 </li>
                 <li classList={{ "menu-active": window.location.pathname === "/portfolio" }}>
-                  <A href="/portfolio" class="flex items-center gap-3 px-4 py-3 hover:bg-base-300 transition-colors" classList={{ 'justify-center': !isDrawerOpen(), 'justify-start': isDrawerOpen() }} aria-label={`Portfolio - ${t('portfolio')}`}>
-                    <div class="p-1 rounded">
-                      <i data-lucide="briefcase" class="w-4 h-4 text-accent" aria-hidden="true"></i>
-                    </div>
-                    <span class="font-medium" classList={{ 'lg:hidden': !isDrawerOpen() }}>{t('portfolio')}</span>
+                  <A href="/portfolio" class="flex items-center gap-3 px-4 py-3 hover:bg-base-300 transition-colors" aria-label={`Portfolio - ${t('portfolio')}`}>
+                    <i data-lucide="briefcase" class="w-4 h-4 text-accent" aria-hidden="true"></i>
+                    <span class="font-medium">{t('portfolio')}</span>
                   </A>
                 </li>
                 <li classList={{ "menu-active": window.location.pathname === "/invitations" }}>
-                  <A href="/invitations" class="flex items-center gap-3 px-4 py-3 hover:bg-base-300 transition-colors" classList={{ 'justify-center': !isDrawerOpen(), 'justify-start': isDrawerOpen() }} aria-label={`Collaborate - Invitations`}>
-                    <div class="p-1 rounded">
-                      <i data-lucide="users" class="w-4 h-4 text-info" aria-hidden="true"></i>
-                    </div>
-                    <span class="font-medium" classList={{ 'lg:hidden': !isDrawerOpen() }}>Collaborate</span>
+                  <A href="/invitations" class="flex items-center gap-3 px-4 py-3 hover:bg-base-300 transition-colors" aria-label={`Collaborate - Invitations`}>
+                    <i data-lucide="users" class="w-4 h-4 text-info" aria-hidden="true"></i>
+                    <span class="font-medium">Collaborate</span>
                   </A>
                 </li>
                 <li classList={{ "menu-active": window.location.pathname === "/explore" }}>
-                  <A href="/explore" class="flex items-center gap-3 px-4 py-3 hover:bg-base-300 transition-colors" classList={{ 'justify-center': !isDrawerOpen(), 'justify-start': isDrawerOpen() }} aria-label={`Explore project ideas - ${t('exploreIdeas')}`}>
-                    <div class="p-1 rounded">
-                      <i data-lucide="compass" class="w-4 h-4 text-secondary" aria-hidden="true"></i>
-                    </div>
-                    <span class="font-medium" classList={{ 'lg:hidden': !isDrawerOpen() }}>{t('exploreIdeas')}</span>
+                  <A href="/explore" class="flex items-center gap-3 px-4 py-3 hover:bg-base-300 transition-colors" aria-label={`Explore project ideas - ${t('exploreIdeas')}`}>
+                    <i data-lucide="compass" class="w-4 h-4 text-secondary" aria-hidden="true"></i>
+                    <span class="font-medium">{t('exploreIdeas')}</span>
                   </A>
                 </li>
                 <li classList={{ "menu-active": window.location.pathname === "/help" }}>
-                  <A href="/help" class="flex items-center gap-3 px-4 py-3 hover:bg-base-300 transition-colors" classList={{ 'justify-center': !isDrawerOpen(), 'justify-start': isDrawerOpen() }} aria-label={`Get help and support - ${t('help')}`}>
-                    <div class="p-1 rounded">
-                      <i data-lucide="help-circle" class="w-4 h-4 text-info" aria-hidden="true"></i>
-                    </div>
-                    <span class="font-medium" classList={{ 'lg:hidden': !isDrawerOpen() }}>{t('help')}</span>
+                  <A href="/help" class="flex items-center gap-3 px-4 py-3 hover:bg-base-300 transition-colors" aria-label={`Get help and support - ${t('help')}`}>
+                    <i data-lucide="help-circle" class="w-4 h-4 text-info" aria-hidden="true"></i>
+                    <span class="font-medium">{t('help')}</span>
                   </A>
                 </li>
               </ul>
-              <section class="menu border border-base-200 rounded-box w-full" classList={{ 'lg:hidden': !isDrawerOpen() }}>
+              <section class="menu border border-base-200 rounded-box w-full">
                 <li>
                   <details open>
-                    <summary class="flex items-center justify-between px-4 py-3 hover:bg-base-300 transition-colors cursor-pointer" classList={{ 'justify-center': !isDrawerOpen(), 'justify-between': isDrawerOpen() }}>
-                      <div class="flex items-center gap-3 w-full">
-                        <div class="p-1 rounded">
-                          <i data-lucide="folder" class="w-4 h-4 text-accent"></i>
-                        </div>
-                        <span class="font-medium" classList={{ 'lg:hidden': !isDrawerOpen() }}>{t('allProjects')}</span>
-                        <span class="badge badge-sm badge-accent" classList={{ 'lg:hidden': !isDrawerOpen() }}>{filteredProjects().length}</span>
+                    <summary class="flex items-center justify-between px-4 py-3 hover:bg-base-300 transition-colors cursor-pointer">
+                      <div class="flex items-center gap-3">
+                        <i data-lucide="folder" class="w-4 h-4 text-accent"></i>
+                        <span class="font-medium">{t('allProjects')}</span>
+                        <span class="badge badge-sm badge-accent">{filteredProjects().length}</span>
                       </div>
                       <button
                         class="btn btn-ghost btn-xs opacity-60 hover:opacity-100"
@@ -334,7 +298,7 @@ const MainLayout = (props) => {
                       </li>
                     </div>
 
-                    <div class="px-4 pb-3" classList={{ 'lg:hidden': !isDrawerOpen() }}>
+                    <div class="px-4 pb-3">
                       <div class="relative">
                         <input
                           type="text"
@@ -350,13 +314,10 @@ const MainLayout = (props) => {
                       <For each={filteredProjects()}>
                         {(project) => (
                           <li>
-                            <div class="flex justify-between items-center px-4 py-2 hover:bg-base-300 rounded-lg transition-colors cursor-pointer" classList={{ 'justify-center': !isDrawerOpen() }}>
-                              <span onclick={() => { logger.debug('Opening project:', project.id); window.dispatchEvent(new CustomEvent('openProject', { detail: project.id })); }} class="flex items-center w-full">
-                                <div class="rounded flex-shrink-0" classList={{ 'mr-2': currentLang() === 'en', 'ml-2': currentLang() === 'ar' }}>
-                                  <i data-lucide="folder" class="w-4 h-4 text-base-content/60"></i>
-                                </div>
+                            <div class="flex justify-between items-center px-4 py-2 hover:bg-base-300 rounded-lg transition-colors cursor-pointer">
+                              <span onclick={() => { logger.debug('Opening project:', project.id); window.dispatchEvent(new CustomEvent('openProject', { detail: project.id })); }} class="flex items-center w-full gap-2">
+                                <i data-lucide="folder" class="w-4 h-4 text-base-content/60 flex-shrink-0"></i>
                                 <span
-                                  classList={{ 'lg:hidden': !isDrawerOpen() }}
                                   data-project-id={project.id}
                                   contentEditable={editingProjectId() === project.id}
                                   onBlur={(e) => {
@@ -397,14 +358,14 @@ const MainLayout = (props) => {
                       </For>
                       <Show when={filteredProjects().length === 0}>
                         <li class="flex flex-col items-center justify-center py-8 px-4">
-                          <i data-lucide="folder-x" class="w-16 h-16 mb-4 text-base-content/40"></i>
-                          <div class="text-lg font-semibold mb-2 text-center" classList={{ 'lg:hidden': !isDrawerOpen() }}>
+                          <i data-lucide="folder-x" class="w-12 h-12 mb-4 text-base-content/40"></i>
+                          <div class="text-lg font-semibold mb-2 text-center">
                             {searchQuery() ? 'No matching tasks' : 'No tasks yet'}
                           </div>
-                          <div class="text-sm text-base-content/60 mb-4 text-center" classList={{ 'lg:hidden': !isDrawerOpen() }}>
+                          <div class="text-sm text-base-content/60 mb-4 text-center">
                             {searchQuery() ? 'Try adjusting search' : 'Create your first task'}
                           </div>
-                          <button class="btn btn-primary btn-sm" onClick={() => window.dispatchEvent(new CustomEvent('resetAgent'))} classList={{ 'lg:hidden': !isDrawerOpen() }}>Create Task</button>
+                          <button class="btn btn-primary btn-sm" onClick={() => window.dispatchEvent(new CustomEvent('resetAgent'))}>Create Task</button>
                         </li>
                       </Show>
                     </div>
@@ -415,12 +376,11 @@ const MainLayout = (props) => {
             </div>
           </div>
         </Show>
-        <div class="drawer-content flex flex-col h-full min-h-0 overflow-hidden relative">
+        <div class="drawer-content flex flex-col h-full min-h-0 overflow-hidden">
             <Navbar />
-            <main id="main-content" class="px-5 overflow-auto flex-1 w-full min-h-0 relative">
+            <main id="main-content" class="px-4 overflow-auto flex-1 w-full min-h-0">
             {props.children}
           </main>
-          <div id="agentbox-portal-container"></div>
         </div>
       </div>
     </>

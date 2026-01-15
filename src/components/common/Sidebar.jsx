@@ -161,7 +161,7 @@ const Sidebar = () => {
 
   return (
     <aside
-      class="sidebar h-screen bg-base-100 border-base-200 overflow-y-auto w-[56] hidden lg:block z-[55]"
+      class="sidebar h-screen bg-base-100 border-base-200 overflow-y-auto max-w-[24] hidden lg:block z-[55]"
       classList={{
         'border-e': currentLang() === 'en',
         'border-s': currentLang() === 'ar'
@@ -185,57 +185,57 @@ const Sidebar = () => {
         <ul class="menu border border-base-200 rounded-box w-full mb-5">
               <li classList={{ "menu-active": location.pathname === "/" }}>
                 <A href="/" onClick={() => window.dispatchEvent(new CustomEvent('resetAgent'))} class="flex items-center gap-3 px-4 py-3 hover:bg-base-300 transition-colors" classList={{ 'justify-center': isCollapsed(), 'justify-start': !isCollapsed() }} aria-label={`Create new project - ${t().newProject}`}>
-                 <div class="p-1 bg-primary/10 rounded">
-                   <i data-lucide="plus" class="w-4 h-4 text-primary" aria-hidden="true"></i>
-                 </div>
+                  <div class="p-1 rounded">
+                    <i data-lucide="plus" class="w-4 h-4 text-primary" aria-hidden="true"></i>
+                  </div>
                   <span class="font-medium" classList={{ 'lg:hidden': isCollapsed() }}>{t().newProject}</span>
                </A>
              </li>
              <li classList={{ "menu-active": location.pathname === "/apps" }}>
                <A href="/apps" class="flex items-center gap-3 px-4 py-3 hover:bg-base-300 transition-colors" classList={{ 'justify-center': isCollapsed(), 'justify-start': !isCollapsed() }} aria-label="Apps">
-                 <div class="p-1 bg-secondary/10 rounded">
-                   <i data-lucide="grid" class="w-4 h-4 text-secondary" aria-hidden="true"></i>
-                 </div>
+                  <div class="p-1 rounded">
+                    <i data-lucide="grid" class="w-4 h-4 text-secondary" aria-hidden="true"></i>
+                  </div>
                  <span class="font-medium" classList={{ 'lg:hidden': isCollapsed() }}>Apps</span>
                </A>
              </li>
               <li classList={{ "menu-active": location.pathname === "/dashboard" }}>
                <A href="/dashboard" class="flex items-center gap-3 px-4 py-3 hover:bg-base-300 transition-colors" classList={{ 'justify-center': isCollapsed(), 'justify-start': !isCollapsed() }} aria-label={`Dashboard - ${t().dashboard}`}>
-                <div class="p-1 bg-warning/10 rounded">
-                  <i data-lucide="bar-chart" class="w-4 h-4 text-warning" aria-hidden="true"></i>
-                </div>
+                 <div class="p-1 rounded">
+                   <i data-lucide="bar-chart" class="w-4 h-4 text-warning" aria-hidden="true"></i>
+                 </div>
                  <span class="font-medium" classList={{ 'lg:hidden': isCollapsed() }}>{t().dashboard}</span>
               </A>
             </li>
               <li classList={{ "menu-active": location.pathname === "/portfolio" }}>
                 <A href="/portfolio" class="flex items-center gap-3 px-4 py-3 hover:bg-base-300 transition-colors" classList={{ 'justify-center': isCollapsed(), 'justify-start': !isCollapsed() }} aria-label={`Portfolio - ${t().portfolio}`}>
-                 <div class="p-1 bg-accent/10 rounded">
-                   <i data-lucide="briefcase" class="w-4 h-4 text-accent" aria-hidden="true"></i>
-                 </div>
+                  <div class="p-1 rounded">
+                    <i data-lucide="briefcase" class="w-4 h-4 text-accent" aria-hidden="true"></i>
+                  </div>
                   <span class="font-medium" classList={{ 'lg:hidden': isCollapsed() }}>{t().portfolio}</span>
                </A>
              </li>
              <li classList={{ "menu-active": location.pathname === "/invitations" }}>
                <A href="/invitations" class="flex items-center gap-3 px-4 py-3 hover:bg-base-300 transition-colors" classList={{ 'justify-center': isCollapsed(), 'justify-start': !isCollapsed() }} aria-label={`Collaborate - Invitations`}>
-                 <div class="p-1 bg-info/10 rounded">
-                   <i data-lucide="users" class="w-4 h-4 text-info" aria-hidden="true"></i>
-                 </div>
+                  <div class="p-1 rounded">
+                    <i data-lucide="users" class="w-4 h-4 text-info" aria-hidden="true"></i>
+                  </div>
                  <span class="font-medium" classList={{ 'lg:hidden': isCollapsed() }}>Collaborate</span>
                </A>
              </li>
              <li classList={{ "menu-active": location.pathname === "/explore" }}>
               <A href="/explore" class="flex items-center gap-3 px-4 py-3 hover:bg-base-300 transition-colors" classList={{ 'justify-center': isCollapsed(), 'justify-start': !isCollapsed() }} aria-label={`Explore project ideas - ${t().exploreIdeas}`}>
-               <div class="p-1 bg-secondary/10 rounded">
-                 <i data-lucide="compass" class="w-4 h-4 text-secondary" aria-hidden="true"></i>
-               </div>
+                <div class="p-1 rounded">
+                  <i data-lucide="compass" class="w-4 h-4 text-secondary" aria-hidden="true"></i>
+                </div>
                 <span class="font-medium" classList={{ 'lg:hidden': isCollapsed() }}>{t().exploreIdeas}</span>
              </A>
            </li>
             <li classList={{ "menu-active": location.pathname === "/help" }}>
               <A href="/help" class="flex items-center gap-3 px-4 py-3 hover:bg-base-300 transition-colors" classList={{ 'justify-center': isCollapsed(), 'justify-start': !isCollapsed() }} aria-label={`Get help and support - ${t().help}`}>
-               <div class="p-1 bg-info/10 rounded">
-                 <i data-lucide="help-circle" class="w-4 h-4 text-info" aria-hidden="true"></i>
-               </div>
+                <div class="p-1 rounded">
+                  <i data-lucide="help-circle" class="w-4 h-4 text-info" aria-hidden="true"></i>
+                </div>
                 <span class="font-medium" classList={{ 'lg:hidden': isCollapsed() }}>{t().help}</span>
              </A>
             </li>
@@ -246,9 +246,9 @@ const Sidebar = () => {
             <details open>
                <summary class="flex items-center justify-between px-4 py-3 hover:bg-base-300 transition-colors cursor-pointer" classList={{ 'justify-center': isCollapsed(), 'justify-between': !isCollapsed() }}>
                 <div class="flex items-center gap-3  w-full">
-                  <div class="p-1 bg-accent/10 rounded">
-                    <i data-lucide="folder" class="w-4 h-4 text-accent"></i>
-                  </div>
+                   <div class="p-1 rounded">
+                     <i data-lucide="folder" class="w-4 h-4 text-accent"></i>
+                   </div>
                    <span class="font-medium" classList={{ 'lg:hidden': isCollapsed() }}>{t().allProjects}</span>
                    <span class="badge badge-sm badge-accent" classList={{ 'lg:hidden': isCollapsed() }}>{filteredProjects().length}</span>
                 </div>
@@ -312,15 +312,14 @@ const Sidebar = () => {
                   <i data-lucide="search" class="absolute right-2 top-1/2 -translate-y-1/2 w-4 h-4 text-base-content/40"></i>
                 </div>
                </div>
-               <ul class="menu bg-base-100 rounded-box w-full">
+               <div>
                  <For each={filteredProjects()}>
                   {(project) => (
                      <li>
-                       <details>
-                          <summary class="flex justify-between items-center px-4 py-2 hover:bg-base-300 rounded-lg transition-colors cursor-pointer" classList={{ 'justify-center': isCollapsed() }}>
-                            <span class="flex items-center w-full">
-                              <div class="p-1 bg-base-300 rounded mr-2">
-                                <i data-lucide="folder" class="w-3 h-3 text-base-content/60"></i>
+                          <div class="flex justify-between items-center px-4 py-2 hover:bg-base-300 rounded-lg transition-colors cursor-pointer" classList={{ 'justify-center': isCollapsed() }}>
+                            <span onclick={() => { logger.debug('Opening project:', project.id); window.dispatchEvent(new CustomEvent('openProject', { detail: project.id })); }} class="flex items-center w-full">
+                              <div class="rounded mr-2 flex-shrink-0">
+                                <i data-lucide="folder" class="w-4 h-4 text-base-content/60"></i>
                               </div>
                                <span
                                  class="ml-2"
@@ -353,210 +352,10 @@ const Sidebar = () => {
                            <button class="btn btn-ghost btn-xs" popovertarget={`popover-project-${project.id}`} style={`anchor-name:--anchor-project-${project.id}`}>
                              <i data-lucide="more-vertical" class="w-4 h-4"></i>
                            </button>
-                         </summary>
-                          <ul class="menu menu-xs bg-base-200 rounded-box max-w-xs w-full mt-2">
-                            <li class="px-2">
-                              <details open>
-                                 <summary class="flex items-center gap-2">
-                                   <i data-lucide="layers" class="w-4 h-4"></i>
-                                   <span class="w-full" classList={{ 'lg:hidden': isCollapsed() }}>{t().models}</span>
-                                 </summary>
-                               <ul>
-                                 <li>
-                                   <div class="flex justify-between items-center">
-                                     <a class="flex items-center">
-                                       <i data-lucide="lightbulb" class="w-4 h-4 mr-1"></i>
-                                       {t().ideaModel}
-                                     </a>
-                                     <button class="btn btn-ghost btn-xs" popovertarget="popover-idea-model">
-                                       <i data-lucide="more-vertical" class="w-4 h-4"></i>
-                                     </button>
-                                   </div>
-                                 </li>
-                                 <li>
-                                   <div class="flex justify-between items-center">
-                                     <a class="flex items-center">
-                                       <i data-lucide="briefcase" class="w-4 h-4 mr-1"></i>
-                                       {t().businessModel}
-                                     </a>
-                                     <button class="btn btn-ghost btn-xs" popovertarget="popover-business-model">
-                                       <i data-lucide="more-vertical" class="w-4 h-4"></i>
-                                     </button>
-                                   </div>
-                                 </li>
-                                 <li>
-                                   <div class="flex justify-between items-center">
-                                     <a class="flex items-center">
-                                       <i data-lucide="trending-up" class="w-4 h-4 mr-1"></i>
-                                       {t().financialModel}
-                                     </a>
-                                     <button class="btn btn-ghost btn-xs" popovertarget="popover-financial-model">
-                                       <i data-lucide="more-vertical" class="w-4 h-4"></i>
-                                     </button>
-                                   </div>
-                                 </li>
-                                 <li>
-                                   <div class="flex justify-between items-center">
-                                     <a class="flex items-center">
-                                       <i data-lucide="piggy-bank" class="w-4 h-4 mr-1"></i>
-                                       {t().fundingModel}
-                                     </a>
-                                     <button class="btn btn-ghost btn-xs" popovertarget="popover-funding-model">
-                                       <i data-lucide="more-vertical" class="w-4 h-4"></i>
-                                     </button>
-                                   </div>
-                                 </li>
-                                 <li>
-                                   <div class="flex justify-between items-center">
-                                     <a class="flex items-center">
-                                       <i data-lucide="megaphone" class="w-4 h-4 mr-1"></i>
-                                       {t().marketingModel}
-                                     </a>
-                                     <button class="btn btn-ghost btn-xs" popovertarget="popover-marketing-model">
-                                       <i data-lucide="more-vertical" class="w-4 h-4"></i>
-                                     </button>
-                                   </div>
-                                 </li>
-                                 <li>
-                                   <div class="flex justify-between items-center">
-                                     <a class="flex items-center">
-                                       <i data-lucide="users" class="w-4 h-4 mr-1"></i>
-                                       {t().teamModel}
-                                     </a>
-                                     <button class="btn btn-ghost btn-xs" popovertarget="popover-team-model">
-                                       <i data-lucide="more-vertical" class="w-4 h-4"></i>
-                                     </button>
-                                   </div>
-                                 </li>
-                                 <li>
-                                   <div class="flex justify-between items-center">
-                                     <a class="flex items-center">
-                                       <i data-lucide="scale" class="w-4 h-4 mr-1"></i>
-                                       {t().legalModel}
-                                     </a>
-                                     <button class="btn btn-ghost btn-xs" popovertarget="popover-legal-model">
-                                       <i data-lucide="more-vertical" class="w-4 h-4"></i>
-                                     </button>
-                                   </div>
-                                 </li>
-                                 <li>
-                                   <div class="flex justify-between items-center">
-                                     <a class="flex items-center">
-                                       <i data-lucide="cpu" class="w-4 h-4 mr-1"></i>
-                                       {t().technicalModel}
-                                     </a>
-                                     <button class="btn btn-ghost btn-xs" popovertarget="popover-technical-model">
-                                       <i data-lucide="more-vertical" class="w-4 h-4"></i>
-                                     </button>
-                                   </div>
-                                 </li>
-                               </ul>
-                             </details>
-                           </li>
-                            <li class="px-2">
-                               <details open>
-                                 <summary class="flex items-center gap-2">
-                                   <i data-lucide="file-text" class="w-4 h-4"></i>
-                                   <span class="w-full" classList={{ 'lg:hidden': isCollapsed() }}>{t().reports}</span>
-                                 </summary>
-                               <ul>
-                                 <li>
-                                   <div class="flex justify-between items-center">
-                                     <a class="flex items-center">
-                                       <i data-lucide="presentation" class="w-4 h-4 mr-1"></i>
-                                       {t().pitchDeck}
-                                     </a>
-                                     <button class="btn btn-ghost btn-xs" popovertarget="popover-pitch-deck">
-                                       <i data-lucide="more-vertical" class="w-4 h-4"></i>
-                                     </button>
-                                   </div>
-                                 </li>
-                                 <li>
-                                   <div class="flex justify-between items-center">
-                                     <a class="flex items-center">
-                                       <i data-lucide="clipboard-list" class="w-4 h-4 mr-1"></i>
-                                       {t().businessPlan}
-                                     </a>
-                                     <button class="btn btn-ghost btn-xs" popovertarget="popover-business-plan-report">
-                                       <i data-lucide="more-vertical" class="w-4 h-4"></i>
-                                     </button>
-                                   </div>
-                                 </li>
-                                 <li>
-                                   <div class="flex justify-between items-center">
-                                     <a class="flex items-center">
-                                       <i data-lucide="calculator" class="w-4 h-4 mr-1"></i>
-                                       {t().valuation}
-                                     </a>
-                                     <button class="btn btn-ghost btn-xs" popovertarget="popover-valuation-report">
-                                       <i data-lucide="more-vertical" class="w-4 h-4"></i>
-                                     </button>
-                                   </div>
-                                 </li>
-                               </ul>
-                             </details>
-                           </li>
-                         </ul>
-                       </details>
-                       <ul class="dropdown menu w-52 rounded-box bg-base-100 shadow-sm" popover id="popover-idea-model">
-                         <li><a><i data-lucide="eye" class="w-4 h-4 mr-1"></i>{t().view || 'View'}</a></li>
-                         <li><a><i data-lucide="edit" class="w-4 h-4 mr-1"></i>{t().edit || 'Edit'}</a></li>
-                         <li><a><i data-lucide="download" class="w-4 h-4 mr-1"></i>{t().export || 'Export'}</a></li>
-                       </ul>
-                       <ul class="dropdown menu w-52 rounded-box bg-base-100 shadow-sm" popover id="popover-business-model">
-                         <li><a><i data-lucide="eye" class="w-4 h-4 mr-1"></i>{t().view || 'View'}</a></li>
-                         <li><a><i data-lucide="edit" class="w-4 h-4 mr-1"></i>{t().edit || 'Edit'}</a></li>
-                         <li><a><i data-lucide="download" class="w-4 h-4 mr-1"></i>{t().export || 'Export'}</a></li>
-                       </ul>
-                       <ul class="dropdown menu w-52 rounded-box bg-base-100 shadow-sm" popover id="popover-financial-model">
-                         <li><a><i data-lucide="eye" class="w-4 h-4 mr-1"></i>{t().view || 'View'}</a></li>
-                         <li><a><i data-lucide="edit" class="w-4 h-4 mr-1"></i>{t().edit || 'Edit'}</a></li>
-                         <li><a><i data-lucide="download" class="w-4 h-4 mr-1"></i>{t().export || 'Export'}</a></li>
-                       </ul>
-                       <ul class="dropdown menu w-52 rounded-box bg-base-100 shadow-sm" popover id="popover-funding-model">
-                         <li><a><i data-lucide="eye" class="w-4 h-4 mr-1"></i>{t().view || 'View'}</a></li>
-                         <li><a><i data-lucide="edit" class="w-4 h-4 mr-1"></i>{t().edit || 'Edit'}</a></li>
-                         <li><a><i data-lucide="download" class="w-4 h-4 mr-1"></i>{t().export || 'Export'}</a></li>
-                       </ul>
-                       <ul class="dropdown menu w-52 rounded-box bg-base-100 shadow-sm" popover id="popover-marketing-model">
-                         <li><a><i data-lucide="eye" class="w-4 h-4 mr-1"></i>{t().view || 'View'}</a></li>
-                         <li><a><i data-lucide="edit" class="w-4 h-4 mr-1"></i>{t().edit || 'Edit'}</a></li>
-                         <li><a><i data-lucide="download" class="w-4 h-4 mr-1"></i>{t().export || 'Export'}</a></li>
-                       </ul>
-                       <ul class="dropdown menu w-52 rounded-box bg-base-100 shadow-sm" popover id="popover-team-model">
-                         <li><a><i data-lucide="eye" class="w-4 h-4 mr-1"></i>{t().view || 'View'}</a></li>
-                         <li><a><i data-lucide="edit" class="w-4 h-4 mr-1"></i>{t().edit || 'Edit'}</a></li>
-                         <li><a><i data-lucide="download" class="w-4 h-4 mr-1"></i>{t().export || 'Export'}</a></li>
-                       </ul>
-                       <ul class="dropdown menu w-52 rounded-box bg-base-100 shadow-sm" popover id="popover-legal-model">
-                         <li><a><i data-lucide="eye" class="w-4 h-4 mr-1"></i>{t().view || 'View'}</a></li>
-                         <li><a><i data-lucide="edit" class="w-4 h-4 mr-1"></i>{t().edit || 'Edit'}</a></li>
-                         <li><a><i data-lucide="download" class="w-4 h-4 mr-1"></i>{t().export || 'Export'}</a></li>
-                       </ul>
-                       <ul class="dropdown menu w-52 rounded-box bg-base-100 shadow-sm" popover id="popover-technical-model">
-                         <li><a><i data-lucide="eye" class="w-4 h-4 mr-1"></i>{t().view || 'View'}</a></li>
-                         <li><a><i data-lucide="edit" class="w-4 h-4 mr-1"></i>{t().edit || 'Edit'}</a></li>
-                         <li><a><i data-lucide="download" class="w-4 h-4 mr-1"></i>{t().export || 'Export'}</a></li>
-                       </ul>
-                       <ul class="dropdown menu w-52 rounded-box bg-base-100 shadow-sm" popover id="popover-pitch-deck">
-                         <li><a><i data-lucide="eye" class="w-4 h-4 mr-1"></i>{t().view || 'View'}</a></li>
-                         <li><a><i data-lucide="edit" class="w-4 h-4 mr-1"></i>{t().edit || 'Edit'}</a></li>
-                         <li><a><i data-lucide="download" class="w-4 h-4 mr-1"></i>{t().export || 'Export'}</a></li>
-                       </ul>
-                       <ul class="dropdown menu w-52 rounded-box bg-base-100 shadow-sm" popover id="popover-business-plan-report">
-                         <li><a><i data-lucide="eye" class="w-4 h-4 mr-1"></i>{t().view || 'View'}</a></li>
-                         <li><a><i data-lucide="edit" class="w-4 h-4 mr-1"></i>{t().edit || 'Edit'}</a></li>
-                         <li><a><i data-lucide="download" class="w-4 h-4 mr-1"></i>{t().export || 'Export'}</a></li>
-                       </ul>
-                       <ul class="dropdown menu w-52 rounded-box bg-base-100 shadow-sm" popover id="popover-valuation-report">
-                         <li><a><i data-lucide="eye" class="w-4 h-4 mr-1"></i>{t().view || 'View'}</a></li>
-                         <li><a><i data-lucide="edit" class="w-4 h-4 mr-1"></i>{t().edit || 'Edit'}</a></li>
-                         <li><a><i data-lucide="download" class="w-4 h-4 mr-1"></i>{t().export || 'Export'}</a></li>
-                       </ul>
+                          </div>
                        <ul class="dropdown menu w-52 rounded-box bg-base-100 shadow-sm" popover id={`popover-project-${project.id}`} style={`position-anchor:--anchor-project-${project.id}`}>
                         <li><a onclick={() => { setEditingProjectId(project.id); setTimeout(() => { const span = document.querySelector(`[data-project-id="${project.id}"]`); if (span) { span.focus(); const range = document.createRange(); range.selectNodeContents(span); const sel = window.getSelection(); sel.removeAllRanges(); sel.addRange(range); } }, 0); }}><i data-lucide="edit" class="w-4 h-4"></i>{t().rename}</a></li>
                         <li><a onclick={() => handleProjectAction('delete', project.id)}><i data-lucide="trash" class="w-4 h-4"></i>{t().delete}</a></li>
-                          <li><a onclick={() => { logger.debug('Opening project:', project.id); window.dispatchEvent(new CustomEvent('openProject', { detail: project.id })); }}><i data-lucide="folder-open" class="w-4 h-4"></i>{t().open}</a></li>
                          <li><a onclick={async () => { try { const data = await exportProject(project.id); downloadJSON(data, `${project.name}-project.json`); toastManager.success(t().exportProject + ' ' + t().successful); } catch (error) { toastManager.error(t().exportProject + ' ' + t().failed); } }}><i data-lucide="download" class="w-4 h-4"></i>{t().exportProject}</a></li>
                          <li><a onclick={async () => { try { const data = await exportReports(project.id); downloadJSON(data, `${project.name}-report.json`); toastManager.success(t().exportReports + ' ' + t().successful); } catch (error) { toastManager.error(t().exportReports + ' ' + t().failed); } }}><i data-lucide="file-text" class="w-4 h-4"></i>{t().exportReports}</a></li>
                       </ul>
@@ -575,7 +374,7 @@ const Sidebar = () => {
                       <button class="btn btn-primary btn-sm" onClick={() => window.dispatchEvent(new CustomEvent('resetAgent'))} classList={{ 'lg:hidden': isCollapsed() }}>Create Task</button>
                    </li>
                  </Show>
-              </ul>
+              </div>
             </details>
           </li>
         </section>

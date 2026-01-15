@@ -3,6 +3,9 @@
 /* Tailwind Typography Plugin */
 @plugin "@tailwindcss/typography";
 
+/* DaisyUI Plugin */
+@plugin "daisyui";
+
 /* Electrolize font */
 
 @font-face {
@@ -47,9 +50,6 @@
 }
 
 @source "./public/**/*.js";
-
-
-@plugin "daisyui";
 
 body {
   overflow: hidden;
@@ -111,6 +111,10 @@ main {
   right: auto !important;
   border-right: 1px solid hsl(var(--b2)) !important;
   border-left: none !important;
+}
+
+.sidebar {
+  width: 25rem;
 }
 
 .rtl .menu li > details > summary::after {

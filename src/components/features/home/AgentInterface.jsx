@@ -26,12 +26,6 @@ const AgentInterface = (props) => { // Defensive checks for required props
         );
     }
 
-    const shouldShowFormContent = () => {
-        const state = props.machineStore.state;
-        const tasks = props.tasksList ?. ();
-        const hasTasks = tasks && Array.isArray(tasks) && tasks.length > 0;
-        return ! hasTasks && (state === "idle" || state === "processing");
-    };
 
     // Context with fallbacks
     const langContext = useContext(LangContext);
@@ -46,6 +40,7 @@ const AgentInterface = (props) => { // Defensive checks for required props
 
     const [currentLang, setCurrentLang] = createSignal(lang ? lang() : 'en');
     const [currentProject, setCurrentProject] = createSignal(null);
+    const [forceShowForm, setForceShowForm] = createSignal(false);
 
     createEffect(() => {
         console.log('AgentInterface: currentProject signal changed', currentProject());
@@ -81,6 +76,11 @@ const AgentInterface = (props) => { // Defensive checks for required props
             console.log('AgentInterface: setting currentProject to null');
             setCurrentProject(null);
         }
+    });
+
+    createEffect(() => {
+        forceShowForm();
+        if (window.lucide) window.lucide.createIcons();
     });
 
     // Auto-resize textarea when prompt changes
@@ -190,7 +190,7 @@ const AgentInterface = (props) => { // Defensive checks for required props
         style={
           (props.startPressed && props.startPressed()) ||
           (props.tasksList && props.tasksList().length > 0 && props.machineStore.context?.currentStep !== 'done')
-            ? "position: fixed; bottom: 10px; z-index: 10;" : ""
+            ? "position: fixed; width:100%;bottom: 10px; z-index: 10;" : ""
         }>
 
             <div id="agentContent"
@@ -221,9 +221,9 @@ const AgentInterface = (props) => { // Defensive checks for required props
                             </h1>
                         </div>
                     </Show>
-                    <div class="btnshadow p-[3px]">
+                    <div class="">
                     <div ref={cardRef}
-                        class=" card  bg-base-100 border border-base-200 rounded-box "
+                        class=" card"
                         onMouseEnter={handleCardHover}
                         onMouseLeave={handleCardLeave}>
                         <div class="card-body relative p-4 !gap-0">
@@ -250,9 +250,12 @@ const AgentInterface = (props) => { // Defensive checks for required props
                                      handlePause={
                                          props.handlePause
                                      }
-                                     handleResume={
-                                         props.handleResume
-                                     }/>
+                                      handleResume={
+                                          props.handleResume
+                                      }
+                                      handleToggleForm={
+                                          () => setForceShowForm(!forceShowForm())
+                                      }/>
                              </Show>
                              <Show when={props.machineStore.state === "processing" && props.streamingContent && props.streamingContent().trim()}>
                                  <div class="mt-4 p-4 bg-base-200 rounded-lg">
@@ -260,11 +263,9 @@ const AgentInterface = (props) => { // Defensive checks for required props
                                      <div class="text-sm whitespace-pre-wrap">{props.streamingContent()}</div>
                                  </div>
                              </Show>
-                             {/* Form */}
-                              <Show when={
-                                  props.tasksList && (props.tasksList().length === 0 || props.machineStore.context?.currentStep === 'done') && !props.startPressed()
-                              }>
-                                <form id="taskForm">
+                              {/* Form */}
+                              <div class="btnshadow p-[1px]">
+                                 <form id="taskForm" class="p-4  bg-base-100 border border-base-200 rounded-box ">
                                     <input type="hidden" name="action" id="action" value="send"/>
                                     <input type="hidden" name="taskContent" value=""/>
                                     <input type="hidden" name="taskTimestamp"
@@ -423,8 +424,7 @@ const AgentInterface = (props) => { // Defensive checks for required props
                                     </Show>
                                 </div>
                             </div>
-                        </form>
-                    </Show>
+                        </form></div>
                 </div>
             </div>
             </div>

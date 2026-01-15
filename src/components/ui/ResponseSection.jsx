@@ -1,4 +1,4 @@
-import { For, Show, onMount, createEffect } from "solid-js";
+import { For, Show, onMount, createEffect, createSignal } from "solid-js";
 import { marked } from "marked";
 import { renderFilledTemplate } from "../../lib/llm-template";
 import { sectionMap, stepNames, modelMap } from "../../lib/machine";
@@ -139,6 +139,12 @@ const ResponseSection = (props) => {
     return [...system.sort(), ...models, ...reports.sort(), ...other.sort()];
   };
 
+  // Expanded states for each model group
+  const expandedStates = new Map();
+
+  // Expanded states for each section group
+  const sectionExpandedStates = new Map();
+
   onMount(() => {
     logger.debug('ResponseSection: onMount');
     if (window.lucide) window.lucide.createIcons();
@@ -149,15 +155,13 @@ const ResponseSection = (props) => {
     if (window.lucide) window.lucide.createIcons();
   });
   return (
-    <div class="flex-1 p-4">
+    <div class="flex-1 p-4 max-w-6xl w-full">
       <Show when={shouldShow}>
-        <div class="mb-4 max-w-6xl mx-auto">
+        <div class="mb-4  mx-auto">
           <div class="flex justify-between items-center">
               <div class="flex gap-3 items-center">
             <h2 class="text-xl font-bold text-primary">{props.project?.name || "Untitled Project"}</h2>
-               <span id="stepDisplay" class="font-semibold text-base-content">
-                {props.machineStore.state === 'idle' ? 'System - Initialization' : `${props.machineStore.context.currentModel} - ${props.machineStore.context.currentSection} - ${props.machineStore.context.stepName}`}
-              </span>
+
               <span id="agent-status-badge" class={`badge ${getBadgeClass(props.machineStore.state)} badge-sm flex items-center gap-1`}>
                 <i data-lucide={getStateIcon(props.machineStore.state)} class="w-3 h-3"></i>
                 {props.machineStore.context.uiStatus}
@@ -178,13 +182,14 @@ const ResponseSection = (props) => {
             </div>
           </div>
         </div>
-        <div id="contentDiv" class="pb-20 max-w-6xl mx-auto space-y-6 h-[calc(100vh-14rem)] overflow-y-auto">
+        <div id="contentDiv" class="pb-20 px-4 max-w-6xl mx-auto space-y-6 h-[calc(100vh-14rem)] overflow-y-auto">
 
            {/* Past Tasks */}
             <For each={sortedModels()}>
-              {(model, modelIndex) => {
-                const modelTasks = groupedTasks()[model];
-                const sectionGroups = {};
+               {(model, modelIndex) => {
+                 const modelTasks = groupedTasks()[model];
+                 const modelNumber = modelIndex() + 1;
+                 const sectionGroups = {};
                 modelTasks.forEach(task => {
                   const section = task.section || "Unknown";
                   if (!sectionGroups[section]) sectionGroups[section] = [];
@@ -192,100 +197,119 @@ const ResponseSection = (props) => {
                 });
                 const sortedSections = Object.keys(sectionGroups).sort();
 
-                const modelNumber = modelIndex() + 1;
+                // Get or create expanded state for this model
+                const key = model;
+                if (!expandedStates.has(key)) {
+                  expandedStates.set(key, createSignal(true)); // Start expanded
+                }
+                const [isExpanded, setIsExpanded] = expandedStates.get(key);
+
                 return (
                   <div class="mb-6">
-                    <div class="flex items-center gap-2 mb-4">
-                      <span class="bg-blue-900 text-blue-100 dark:bg-blue-400/10 dark:text-blue-500 px-3 py-1 rounded-full flex items-center gap-1 text-xs">
-                        <i data-lucide="tag" class="w-3 h-3"></i>
+                    <div class="flex items-center gap-2 mb-4 cursor-pointer" onClick={() => {
+                      setIsExpanded(!isExpanded());
+                      setTimeout(() => window.lucide?.createIcons(), 0);
+                    }}>
+                       <span class="bg-blue-900 text-blue-100 dark:bg-blue-100/10 dark:text-blue-500 px-4 py-2 rounded-full flex items-center gap-1 text-sm">
+                        <i data-lucide={isExpanded() ? "chevron-down" : "chevron-right"} class="w-3 h-3"></i>
                         <span class="hidden sm:inline">{modelNumber}. {model}</span>
                       </span>
                     </div>
-                    <For each={sortedSections}>
-                      {(section, sectionIndex) => (
-                        <div class="flex flex-col mb-4 gap-2">
-                          <div class="flex items-center gap-2 mb-2">
-                            <span class="bg-emerald-900 text-emerald-100 dark:bg-emerald-400/10 dark:text-emerald-500 px-3 py-1 rounded-full flex items-center gap-1 text-xs">
-                              <i data-lucide="folder" class="w-3 h-3"></i>
-                              <span class="hidden sm:inline">{modelNumber}.{sectionIndex() + 1} {section}</span>
-                            </span>
-                          </div>
-                          <For each={sectionGroups[section].sort((a, b) => new Date(a.timestamp || 0) - new Date(b.timestamp || 0))}>
-                            {(task) => (
-               <div class="collapse collapse-arrow bg-base-200 border border-base-300 rounded-xl overflow-hidden">
-                 <input type="checkbox" class="p-0" />
-                  <div
-                    class="collapse-title flex items-center gap-4 px-4 py-3 bg-base-300/40 cursor-pointer"
-                    onClick={() => props.setActiveCardId(task.id)}
-                  >
-                    <span class="bg-violet-900 text-violet-100 dark:bg-violet-400/10 dark:text-violet-500 px-3 py-1 rounded-full flex items-center gap-1 text-xs">
+                    <Show when={isExpanded()}>
+                      <For each={sortedSections}>
+                        {(section, sectionIndex) => {
+                          const sectionKey = `${model}-${section}`;
+                           if (!sectionExpandedStates.has(sectionKey)) {
+                             sectionExpandedStates.set(sectionKey, createSignal(true)); // Start expanded
+                           }
+                          const [isSectionExpanded, setIsSectionExpanded] = sectionExpandedStates.get(sectionKey);
+
+                          return (
+                            <div class="mb-4">
+                              <div class="flex items-center gap-2 mb-2 cursor-pointer" onClick={() => {
+                                setIsSectionExpanded(!isSectionExpanded());
+                                setTimeout(() => window.lucide?.createIcons(), 0);
+                              }}>
+                                 <span class="bg-emerald-900 text-emerald-100 dark:bg-emerald-100/10 dark:text-emerald-500 px-3 py-1.5 rounded-full flex items-center gap-1 text-xs">
+                                  <i data-lucide={isSectionExpanded() ? "chevron-down" : "chevron-right"} class="w-3 h-3"></i>
+                                  <i data-lucide="folder" class="w-3 h-3"></i>
+                                  <span class="hidden sm:inline">{modelNumber}.{sectionIndex() + 1} {section}</span>
+                                </span>
+                              </div>
+                              <Show when={isSectionExpanded()}>
+                                <For each={sectionGroups[section].sort((a, b) => new Date(a.timestamp || 0) - new Date(b.timestamp || 0))}>
+                                  {(task) => (
+                <div class="collapse collapse-arrow bg-base-200 border border-base-300 rounded-xl overflow-hidden mb-4">
+                  <input type="checkbox" class="p-0" />
+                   <div
+                     class="collapse-title flex items-center gap-4 px-4 py-3 bg-base-300/40 cursor-pointer"
+                     onClick={() => props.setActiveCardId(task.id)}
+                   >
+
+                    <span class="bg-violet-900 text-violet-100 dark:bg-violet-100/10 dark:text-violet-500 px-3 py-1 rounded-full flex items-center gap-1 text-xs">
                       <i data-lucide="list" class="w-3 h-3"></i>
                       <span class="hidden sm:inline">{task.step_name || "Unknown"}</span>
                     </span>
-                    <div class="ml-auto flex items-center gap-2">
-                      <button type="button" onClick={() => props.handleImprove()} class="bg-primary/10 text-primary px-3 py-1 rounded-full flex items-center gap-1 text-xs hover:bg-primary/20 transition cursor-pointer">
-                        <i data-lucide="sparkles" class="w-3 h-3"></i>
-                        <span class="hidden sm:inline">Improve with AI </span>
-                      </button>
-                      <button type="button" onClick={() => props.handleSuggest()} class="bg-secondary/10 text-secondary px-3 py-1 rounded-full flex items-center gap-1 text-xs hover:bg-secondary/20 transition cursor-pointer">
-                        <i data-lucide="lightbulb" class="w-3 h-3"></i>
-                        <span class="hidden sm:inline">AI Suggestion</span>
-                      </button>
-                      <button type="button" class="mr-7 bg-yellow-900 text-yellow-100 dark:bg-yellow-400/10 dark:text-yellow-500 px-3 py-1 rounded-full flex items-center gap-1 text-xs hover:bg-yellow-900/20 dark:hover:bg-yellow-400/20 transition cursor-pointer" onClick={(e) => {
-                        e.stopPropagation();
-                        navigator.clipboard.writeText(task.content);
-                      }}>
-                        <i data-lucide="copy" class="w-3 h-3"></i>
-                        <span class="hidden sm:inline">Copy</span>
-                      </button>
-                   </div>
-                 </div>
-                 <div class="collapse-content p-0">
-                    {/* Body */}
-                    <div class="card-body px-5 py-4 bg-base-100">
-                       <div
-                         class="prose max-w-none dark:prose-invert"
-                         innerHTML={marked.parse(renderFilledTemplate(task.content), { breaks: true, gfm: true })}
-                       />
-                    </div>
+                     <div class="ml-auto mr-5 flex items-center gap-2">
+                       <button type="button" onClick={() => props.handleImprove()} class="bg-primary/10 text-primary px-3 py-1 rounded-full flex items-center gap-1 text-xs hover:bg-primary/20 transition cursor-pointer">
+                         <i data-lucide="sparkles" class="w-3 h-3"></i>
+                         <span class="hidden sm:inline">Improve with AI </span>
+                       </button>
+                     </div>
+                  </div>
+                  <div class="collapse-content p-0">
+                     {/* Body */}
+                     <div class="card-body px-5 py-4 bg-base-100">
+                        <div
+                          class="prose max-w-none dark:prose-invert"
+                          innerHTML={marked.parse(renderFilledTemplate(task.content), { breaks: true, gfm: true })}
+                        />
+                     </div>
 
-                   {/* Footer */}
-                   <div class="px-4 py-3 bg-base-300/30">
-                      <div class="flex items-center justify-between text-sm opacity-70 mb-2">
-                        <span>{task.timestamp ? new Date(task.timestamp).toLocaleString() : 'Unknown'}</span>
-                        <span class="text-xs">{task.model || "Manual"}</span>
-                      </div>
-
-                     {/* Additional Details */}
-                     <details class="text-xs opacity-60">
-                       <summary class="cursor-pointer hover:opacity-80">Task Details</summary>
-                       <div class="mt-2 space-y-1">
-                         <div><strong>Model:</strong> {task.model || "Manual"}</div>
-                         <div><strong>LLM Model:</strong> {task.llm_model || "N/A"}</div>
-                         <div><strong>Section:</strong> {task.section || "Planning"}</div>
-                         <div><strong>Step:</strong> {task.stepName || "Project Setup"}</div>
-                         {task.prompt && (
-                           <div>
-                             <strong>Prompt:</strong>
-                             <div class="mt-1 p-2 bg-base-200 rounded text-xs max-h-20 overflow-y-auto">
-                               {task.prompt.length > 100 ? `${task.prompt.substring(0, 100)}...` : task.prompt}
-                             </div>
-                           </div>
-                         )}
+                    {/* Footer */}
+                    <div class="px-4 py-3 bg-base-300/30">
+                       <div class="flex items-center justify-between text-sm opacity-70 mb-2">
+                         <span>{task.timestamp ? new Date(task.timestamp).toLocaleString() : 'Unknown'}</span>
+                         <span class="text-xs">{task.model || "Manual"}</span>
                        </div>
-                     </details>
-                   </div>
-                 </div>
+
+                      {/* Additional Details */}
+                      <details class="text-xs opacity-60">
+                        <summary class="cursor-pointer hover:opacity-80">Task Details</summary>
+                        <div class="mt-2 space-y-1">
+                          <div><strong>Model:</strong> {task.model || "Manual"}</div>
+                          <div><strong>LLM Model:</strong> {task.llm_model || "N/A"}</div>
+                          <div><strong>Section:</strong> {task.section || "Planning"}</div>
+                          <div><strong>Step:</strong> {task.stepName || "Project Setup"}</div>
+                          {task.prompt && (
+                            <div>
+                              <strong>Prompt:</strong>
+                              <div class="mt-1 p-2 bg-base-200 rounded text-xs max-h-20 overflow-y-auto">
+                                {task.prompt.length > 100 ? `${task.prompt.substring(0, 100)}...` : task.prompt}
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      </details>
+                    </div>
+                  </div>
                 </div>
               )}
+
                           </For>
-                        </div>
-                      )}
+
+                        </Show>
+
+                       </div>
+
+                        );
+                      }}
                     </For>
-                  </div>
-                );
-              }}
-            </For>
+                  </Show>
+                </div>
+              );
+            }}
+          </For>
 
           {/* Streaming Response */}
           <Show when={props.isLoading() && props.streamingContent()}>

@@ -8,8 +8,8 @@ export default defineConfig({
   },
    plugins: [
      solidPlugin(),
-     VitePWA({
-      disable: process.env.NODE_ENV === 'development',
+      VitePWA({
+       disable: true,
       registerType: 'autoUpdate',
       includeAssets: ['avatar.png'],
       manifest: {

@@ -82,6 +82,26 @@ const getStepName = (task) =>
   task.step ||
   "Unknown Step";
 
+const getBadgeClass = (state) => {
+  const classes = {
+    idle: 'badge-neutral',
+    processing: 'badge-primary',
+    pause: 'badge-warning',
+    completed: 'badge-success'
+  };
+  return classes[state] || 'badge-neutral';
+};
+
+const getStateIcon = (state) => {
+  const icons = {
+    idle: 'clock',
+    processing: 'cog',
+    pause: 'pause-circle',
+     completed: 'check'
+  };
+  return icons[state] || 'help-circle';
+};
+
 /* ---------- Component ---------- */
 
 const ResponseSection = (props) => {

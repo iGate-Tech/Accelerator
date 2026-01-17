@@ -1,24 +1,26 @@
 {
   "name": "Accelerator",
   "version": "1.0.0",
-  "description": "AI-powered startup accelerator tool using XState for state management and OpenAI for simulations",
+  "description": "AI-powered startup accelerator tool using SolidJS for state management and OpenAI for simulations",
   "repository": "https://github.com/iGate-Tech/Accelerator.git",
   "main": "server.js",
   "type": "module",
   "scripts": {
     "start": "npm run build && node server.js",
-    "dev": "concurrently \"vite\" \"node server.js\"",
+    "dev": "concurrently \"vite\" \"nodemon server.js\"",
     "dev:vite": "vite",
-    "dev:server": "node server.js",
+    "dev:server": "nodemon server.js",
     "build": "vite build",
     "preview": "vite preview",
     "push": "git add . && git commit -m 'Update' && git push",
-    "test": "vitest",
-    "lint": "echo 'No linter configured yet - add ESLint or similar'",
-    "generate-ssl": "./scripts/generate-ssl.sh",
-    "backup:create": "node scripts/backup-db.js create",
-    "backup:list": "node scripts/backup-db.js list",
-    "validate-translations": "node validate-translations.js"
+    "docker:dev": "docker compose -f docker/docker-compose.yml --env-file docker/.env.development up",
+    "docker:dev:build": "docker compose -f docker/docker-compose.yml --env-file docker/.env.development up --build",
+    "docker:staging": "docker compose -f docker/docker-compose.yml --env-file docker/.env.staging up",
+    "docker:staging:build": "docker compose -f docker/docker-compose.yml --env-file docker/.env.staging up --build",
+    "docker:prod": "docker compose -f docker/docker-compose.yml --env-file docker/.env.production up -d",
+    "docker:prod:build": "docker compose -f docker/docker-compose.yml --env-file docker/.env.production up --build -d",
+    "docker:down": "docker compose -f docker/docker-compose.yml down",
+    "docker:logs": "docker compose -f docker/docker-compose.yml logs -f"
   },
   "keywords": [],
   "author": "",
@@ -32,10 +34,7 @@
     "dotenv": "^17.2.3",
     "express": "^5.2.1",
     "fast-sort": "^3.4.1",
-    "loglevel": "^1.9.2",
-    "loglevel-plugin-prefix": "^0.8.4",
-    "lucide": "^0.562.0",
-    "marked": "^17.0.1",
+"marked": "^17.0.1",
     "openai": "^6.15.0",
     "pg": "^8.16.3",
     "solid-js": "^1.9.10",
@@ -46,15 +45,12 @@
     "vite-plugin-solid": "^2.11.10"
   },
   "devDependencies": {
-    "@playwright/test": "^1.57.0",
     "@tailwindcss/postcss": "^4.1.18",
     "@tailwindcss/typography": "^0.5.15",
     "autoprefixer": "^10.4.23",
     "concurrently": "^9.2.1",
-    "jsdom": "^27.4.0",
     "nodemon": "^3.1.11",
     "postcss-preset-env": "^10.6.0",
-    "vite-plugin-pwa": "^1.2.0",
-    "vitest": "^4.0.16"
+    "vite-plugin-pwa": "^1.2.0"
   }
 }

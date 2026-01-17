@@ -1,0 +1,33 @@
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+      target: ${BUILD_TARGET:-production}
+    container_name: accelerator-${ENVIRONMENT:-prod}
+    ports:
+      - "${APP_PORT:-3000}:3000"
+    environment:
+      - NODE_ENV=${NODE_ENV:-production}
+      - PORT=3000
+      - ENVIRONMENT=${ENVIRONMENT:-prod}
+      - OPENROUTER_API_KEY=${OPENROUTER_API_KEY}
+      - SSL_KEY_PATH=${SSL_KEY_PATH:-/app/ssl/key.pem}
+      - SSL_CERT_PATH=${SSL_CERT_PATH:-/app/ssl/cert.pem}
+    volumes:
+      - ./.env:/app/.env:ro
+      - ./ssl:/app/ssl:ro
+    networks:
+      - accelerator-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:3000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+networks:
+  accelerator-network:
+    driver: bridge

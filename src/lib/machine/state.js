@@ -299,6 +299,64 @@ export const pause = () => {
   logger.trace('pause: Completed');
 };
 
+export const enterChatMode = () => {
+  logger.trace('enterChatMode: Starting');
+  // Store the current step so we can resume from the same point
+  setMachineStore("context", "chatPausedStep", machineStore.context.currentStep);
+  setMachineStore("context", "chatPausedStepName", machineStore.context.stepName);
+  setMachineStore("state", "chatting");
+  setMachineStore("context", "uiStatus", "chatting");
+  setMachineStore("context", "uiMessage", "Chat mode - ask questions or give instructions");
+  logger.debug('enterChatMode: Machine state set to chatting');
+  logger.trace('enterChatMode: Completed');
+};
+
+export const exitChatMode = () => {
+  logger.trace('exitChatMode: Starting');
+  const pausedStep = machineStore.context.chatPausedStep;
+  const pausedStepName = machineStore.context.chatPausedStepName;
+  
+  // Clear chat-specific context
+  setMachineStore("context", "chatPausedStep", undefined);
+  setMachineStore("context", "chatPausedStepName", undefined);
+  setMachineStore("context", "chatMessages", []);
+  
+  // Resume to processing state
+  setMachineStore("state", "processing");
+  setMachineStore("context", "uiStatus", "processing");
+  setMachineStore("context", "stepName", pausedStepName);
+  setMachineStore("context", "currentStep", pausedStep);
+  
+  // Refill the prompt for the resumed step
+  if (pausedStep && pausedStep !== "done") {
+    setMachineStore("context", "currentPrompt", fillPrompt(getPromptForStep(pausedStep), machineStore.context));
+  }
+  
+  logger.debug('exitChatMode: Machine state set to processing, resuming from:', pausedStep);
+  logger.trace('exitChatMode: Completed');
+  return pausedStep;
+};
+
+export const addChatMessage = (role, content) => {
+  logger.trace('addChatMessage: Adding message from', role);
+  const messages = machineStore.context.chatMessages || [];
+  const newMessage = {
+    id: Date.now().toString(),
+    role,
+    content,
+    timestamp: new Date().toISOString()
+  };
+  setMachineStore("context", "chatMessages", [...messages, newMessage]);
+  logger.debug('addChatMessage: Message added, total messages:', messages.length + 1);
+};
+
+export const clearChatMessages = () => {
+  logger.trace('clearChatMessages: Starting');
+  setMachineStore("context", "chatMessages", []);
+  logger.debug('clearChatMessages: Chat messages cleared');
+  logger.trace('clearChatMessages: Completed');
+};
+
 export const resume = () => {
   logger.trace('resume: Starting');
   if (machineStore.state !== 'pause') {

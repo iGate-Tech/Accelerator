@@ -206,6 +206,106 @@ const AgentInterface = (props) => { // Defensive checks for required props
                                 }</span>
                             </h1>
                         </div>
+                        {/* Always visible Chat with AI button */}
+                        <Show when={props.machineStore.state !== 'chatting'}>
+                            <button type="button"
+                                onClick={
+                                    (e) => {
+                                        console.log('Chat button clicked');
+                                        handleButtonPress(e.currentTarget);
+                                        if (props.handleEnterChat) {
+                                            props.handleEnterChat();
+                                        } else {
+                                            console.log('handleEnterChat prop is undefined');
+                                        }
+                                    }
+                                }
+                                onMouseEnter={
+                                    (e) => handleButtonHover(e.currentTarget)
+                                }
+                                onMouseLeave={
+                                    (e) => handleButtonLeave(e.currentTarget)
+                                }
+                                class="bg-info/10 text-info px-4 py-2 rounded-full flex items-center gap-2 text-sm hover:bg-info/20 transition cursor-pointer mx-auto">
+                                <i data-lucide="message-circle" class="w-4 h-4"></i>
+                                Chat with AI
+                            </button>
+                        </Show>
+                    </Show>
+                    {/* Chat Interface - Always accessible */}
+                    <Show when={props.machineStore.state === "chatting"}>
+                        <div class="chat-interface p-4 bg-base-200 rounded-lg">
+                            <div class="flex items-center justify-between mb-3">
+                                <h3 class="text-sm font-semibold text-info flex items-center gap-2">
+                                    <i data-lucide="message-circle" class="w-4 h-4"></i>
+                                    Chat with AI
+                                </h3>
+                                <button 
+                                    type="button"
+                                    onClick={props.handleExitChat}
+                                    class="bg-success/10 text-success px-3 py-1 rounded-full flex items-center gap-1.5 text-xs hover:bg-success/20 transition cursor-pointer">
+                                    <i data-lucide="play" class="w-3 h-3"></i>
+                                    Resume Accelerator
+                                </button>
+                            </div>
+                            {/* Chat Messages */}
+                            <div class="chat-messages max-h-80 overflow-y-auto space-y-3 mb-3 p-4 bg-base-100 rounded-lg">
+                                <For each={props.machineStore.context?.chatMessages || []}>
+                                    {(message) => (
+                                        <div class={`chat ${message.role === 'user' ? 'chat-end' : 'chat-start'}`}>
+                                            <div class={`chat-bubble text-xs ${message.role === 'user' ? 'bg-primary text-primary-content' : 'bg-base-300'}`}>
+                                                <div class="whitespace-pre-wrap">{message.content}</div>
+                                                <div class="text-[10px] opacity-50 mt-1">
+                                                    {new Date(message.timestamp).toLocaleTimeString()}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    )}
+                                </For>
+                                <Show when={props.isLoading && props.isLoading() && props.streamingContent && props.streamingContent()}>
+                                    <div class="chat chat-start">
+                                        <div class="chat-bubble bg-base-300 text-xs animate-pulse">
+                                            Thinking...
+                                        </div>
+                                    </div>
+                                </Show>
+                                <Show when={!props.machineStore.context?.chatMessages?.length}>
+                                    <div class="text-center text-sm opacity-50 py-4">
+                                        Ask me anything about your project or request changes...
+                                    </div>
+                                </Show>
+                            </div>
+                            {/* Chat Input */}
+                            <form onSubmit={(e) => {
+                                e.preventDefault();
+                                const input = e.target.elements.chatInput;
+                                if (input.value.trim()) {
+                                    props.handleSendChatMessage(input.value.trim());
+                                    input.value = '';
+                                }
+                            }}>
+                                <div class="flex gap-2">
+                                    <input 
+                                        type="text"
+                                        name="chatInput"
+                                        id="chatInput"
+                                        class="flex-1 text-base-content text-sm w-full px-3 py-2 bg-base-100 border border-base-300 rounded-lg focus:ring-0 focus:border-primary"
+                                        placeholder="Ask about your project or give instructions..."
+                                        disabled={props.isLoading && props.isLoading()}
+                                    />
+                                    <button 
+                                        type="submit"
+                                        disabled={props.isLoading && props.isLoading()}
+                                        class="bg-primary/10 text-primary px-4 py-2 rounded-lg flex items-center gap-1 text-xs hover:bg-primary/20 transition cursor-pointer disabled:opacity-50">
+                                        <i data-lucide="send" class="w-3 h-3"></i>
+                                        Send
+                                    </button>
+                                </div>
+                            </form>
+                            <div class="text-[10px] opacity-50 mt-1 text-center">
+                                Chat uses 5 credits per message
+                            </div>
+                        </div>
                     </Show>
                     <div class="">
                     <div ref={cardRef}
@@ -218,38 +318,41 @@ const AgentInterface = (props) => { // Defensive checks for required props
                                   (props.startPressed && props.startPressed() ||
                                    (props.tasksList && props.tasksList().length > 0))
                               }>
-                                 <ProgressAccordion machineStore={
-                                         props.machineStore
-                                     }
-                                     project={
-                                         currentProject()
-                                     }
-                                     isAccordionOpen={
-                                         props.isAccordionOpen
-                                     }
-                                     setIsAccordionOpen={
-                                         props.setIsAccordionOpen
-                                     }
-                                     isLoading={
-                                         props.isLoading
-                                     }
-                                     handlePause={
-                                         props.handlePause
-                                     }
-                                      handleResume={
-                                          props.handleResume
+                                  <ProgressAccordion machineStore={
+                                          props.machineStore
                                       }
-                                      handleToggleForm={
-                                          () => setForceShowForm(!forceShowForm())
-                                      }/>
-                             </Show>
-                             <Show when={props.machineStore.state === "processing" && props.streamingContent && props.streamingContent().trim()}>
-                                 <div class="mt-4 p-4 bg-base-200 rounded-lg">
-                                     <h3 class="text-sm font-semibold mb-2">AI Processing...</h3>
-                                     <div class="text-sm whitespace-pre-wrap">{props.streamingContent()}</div>
-                                 </div>
-                             </Show>
-                              {/* Form */}
+                                      project={
+                                          currentProject()
+                                      }
+                                      isAccordionOpen={
+                                          props.isAccordionOpen
+                                      }
+                                      setIsAccordionOpen={
+                                          props.setIsAccordionOpen
+                                      }
+                                      isLoading={
+                                          props.isLoading
+                                      }
+                                      handlePause={
+                                          props.handlePause
+                                      }
+                                       handleResume={
+                                           props.handleResume
+                                       }
+                                       handleEnterChat={
+                                           props.handleEnterChat
+                                       }
+                                       handleToggleForm={
+                                           () => setForceShowForm(!forceShowForm())
+                                       }/>
+                              </Show>
+                              <Show when={props.machineStore.state === "processing" && props.streamingContent && props.streamingContent().trim()}>
+                                  <div class="mt-4 p-4 bg-base-200 rounded-lg">
+                                      <h3 class="text-sm font-semibold mb-2">AI Processing...</h3>
+                                      <div class="text-sm whitespace-pre-wrap">{props.streamingContent()}</div>
+                                  </div>
+                              </Show>
+                               {/* Form */}
                               <div class="btnshadow p-[1px]">
                                  <form id="taskForm" class="p-4  bg-base-100 border border-base-200 rounded-box ">
                                     <input type="hidden" name="action" id="action" value="send"/>
@@ -360,6 +463,25 @@ const AgentInterface = (props) => { // Defensive checks for required props
                                                 t().aiSuggestion
                                             }</span>
                                         </button>
+                                        <Show when={props.machineStore.state !== 'chatting'}>
+                                            <button type="button"
+                                                onClick={
+                                                    (e) => {
+                                                        handleButtonPress(e.currentTarget);
+                                                        props.handleEnterChat && props.handleEnterChat();
+                                                    }
+                                                }
+                                                onMouseEnter={
+                                                    (e) => handleButtonHover(e.currentTarget)
+                                                }
+                                                onMouseLeave={
+                                                    (e) => handleButtonLeave(e.currentTarget)
+                                                }
+                                                class="bg-info/10 text-info px-3 py-1 rounded-full flex items-center gap-1 text-xs hover:bg-info/20 transition cursor-pointer">
+                                                <i data-lucide="message-circle" class="w-3 h-3"></i>
+                                                <span class="hidden sm:inline">Chat with AI</span>
+                                            </button>
+                                        </Show>
                                     </Show>
                                 </div>
                                 <div class="flex gap-2">

@@ -22,6 +22,10 @@ export const initialContext = {
   consumedCredits: 0,
   totalTime: 18900,
   consumedTime: 0,
+  // Chat mode fields
+  chatMessages: [],
+  chatPausedStep: undefined,
+  chatPausedStepName: undefined,
 };
 
 // Fields that should be persisted to the database

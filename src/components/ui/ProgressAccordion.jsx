@@ -112,6 +112,11 @@ const ProgressAccordion = (props) => {
         return (isCompleted || completedSteps > 0) && props.machineStore.state !== 'processing';
     });
 
+    const canChat = createMemo(() => {
+        // Show chat button in ANY state except when already chatting
+        return props.machineStore.state !== 'chatting';
+    });
+
     onMount(() => {
         if (window.lucide)
             window.lucide.createIcons();
@@ -194,6 +199,15 @@ const ProgressAccordion = (props) => {
                         </span>
                     </Show>
                     
+                    <Show when={canChat()}>
+                        <button type="button"
+                            onClick={props.handleEnterChat}
+                            class="bg-info/10 text-info px-3 py-1.5 rounded-full flex items-center gap-1.5 text-xs hover:bg-info/20 transition cursor-pointer">
+                            <i data-lucide="message-circle" class="w-3 h-3"></i>
+                            <span class="hidden sm:inline">Chat with AI</span>
+                        </button>
+                    </Show>
+
                     <Show when={canPause()}>
                         <button type="button"
                             onClick={props.handlePause}

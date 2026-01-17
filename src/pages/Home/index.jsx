@@ -16,6 +16,10 @@ import {
     pause,
     resume,
     reset,
+    enterChatMode,
+    exitChatMode,
+    addChatMessage,
+    clearChatMessages,
     modelCumul,
     stepOrder,
     getNextStep,
@@ -410,6 +414,19 @@ const TasksContent = () => {
         setStreamingContent("");
 
         try {
+          // Create project if not already created
+          let projectId = currentProjectId();
+          if (!projectId) {
+            const projectName = prompt().length > 50 ? prompt().substring(0, 50) + '...' : prompt();
+            projectId = await addProject({
+              name: projectName,
+              description: prompt(),
+              createdAt: new Date()
+            });
+            setCurrentProjectId(projectId);
+            logger.info('Project created, ID:', projectId);
+          }
+          
           startProcess(prompt());
           setMachineStore('state', 'processing');
           setMachineStore('context', 'uiStatus', 'processing');
@@ -445,6 +462,115 @@ const TasksContent = () => {
         setIsLoading(true);
         toastManager.success('Process resumed');
         await runNextStep();
+      };
+      
+      const handleEnterChat = () => {
+        console.log('handleEnterChat called, current state:', machineStore.state);
+        if (machineStore.state === 'chatting') {
+          console.log('Already in chat mode, skipping');
+          return;
+        }
+        
+        logger.info('Entering chat mode');
+        enterChatMode();
+        console.log('State after enterChatMode:', machineStore.state);
+        setAutoProgress(false);
+        toastManager.info('Chat mode - ask questions or give instructions');
+      };
+      
+      const handleExitChat = async () => {
+        console.log('handleExitChat called');
+        logger.info('Exiting chat mode');
+        const pausedStep = exitChatMode();
+        console.log('Exited chat, pausedStep:', pausedStep);
+        // Only resume accelerator if we were processing
+        if (pausedStep && pausedStep !== 'done') {
+          setAutoProgress(true);
+          setIsLoading(true);
+          toastManager.success('Resuming accelerator process');
+          await runNextStep();
+        } else {
+          console.log('No active step to resume, just closing chat');
+          toastManager.info('Chat closed');
+        }
+      };
+      
+      const handleSendChatMessage = async (message) => {
+        console.log('handleSendChatMessage called with:', message.substring(0, 50) + '...');
+        if (!message.trim() || !user()?.id) {
+          console.log('Early return: empty message or no user');
+          return;
+        }
+        
+        logger.info('Sending chat message:', message.substring(0, 50) + '...');
+        
+        // Add user message to chat
+        addChatMessage('user', message.trim());
+        
+        // Clear streaming content for chat response
+        setStreamingContent('');
+        
+        try {
+          // Get the current context for the chat
+          const contextData = {
+            ...machineStore.context,
+            projectName: projectData()?.name || 'Untitled Project',
+            completedTasks: tasksList().length,
+            currentProgress: machineStore.context.completedSteps,
+          };
+          
+          // Build chat prompt with context
+          const chatPrompt = `You are an AI startup accelerator assistant. 
+Current project: ${contextData.projectName}
+Progress: ${contextData.currentProgress} steps completed out of 60 steps.
+Tasks generated: ${contextData.completedTasks}
+
+${contextData.solution ? `Current solution: ${contextData.solution}` : ''}
+${contextData.problem ? `Problem statement: ${contextData.problem}` : ''}
+
+User message: ${message.trim()}
+
+Please respond helpfully, explaining what's been done so far, answering questions about the project, or implementing requested changes. Be concise but thorough.`;
+
+          // Call LLM for chat response (5 credits instead of 10)
+          const balance = await getCreditBalance(user().id);
+          if (balance < 5) {
+            toastManager.error('Insufficient credits for chat. Need at least 5 credits.');
+            return;
+          }
+          
+          setIsLoading(true);
+          
+          // Use streamQuickLLMCall for chat
+          await streamQuickLLMCall(
+            chatPrompt,
+            user()?.id,
+            (chunk) => {
+              setStreamingContent(prev => prev + chunk);
+            }
+          );
+          
+          // Add AI response to chat
+          const response = streamingContent();
+          if (response) {
+            addChatMessage('assistant', response);
+          }
+          
+          // Consume 5 credits for chat
+          await consumeCredits(user().id, 5, 'Chat message');
+          
+        } catch (error) {
+          logger.error('Chat error:', error);
+          toastManager.error('Failed to send message: ' + error.message);
+        } finally {
+          setIsLoading(false);
+          setStreamingContent('');
+        }
+      };
+       
+      const handleClearChat = () => {
+        clearChatMessages();
+        toastManager.info('Chat cleared');
       };
       
       const onProjectDeleted = (e) => {
@@ -663,15 +789,19 @@ const TasksContent = () => {
                machineStore={machineStore}
                textareaRef={textareaRef}
                prompt={prompt}
-               setPrompt={setPrompt}
-               tasksList={tasksList}
-               startPressed={startPressed}
-               handleImprove={handleImprove}
-               handleSuggest={handleSuggest}
-               handleReset={handleReset}
-               handleStart={handleStart}
-               handlePause={handlePause}
-               handleResume={handleResume}/>
+                setPrompt={setPrompt}
+                tasksList={tasksList}
+                startPressed={startPressed}
+                handleImprove={handleImprove}
+                handleSuggest={handleSuggest}
+                handleReset={handleReset}
+                handleStart={handleStart}
+                handlePause={handlePause}
+                handleResume={handleResume}
+                handleEnterChat={handleEnterChat}
+                handleExitChat={handleExitChat}
+                handleSendChatMessage={handleSendChatMessage}
+                isChatting={machineStore.state === 'chatting'}/>
              <Show when={
                  !!currentProjectId() && (startPressed() || (tasksList && tasksList().length > 0))
              }>

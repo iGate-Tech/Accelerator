@@ -153,8 +153,8 @@ const Navbar = () => {
                   </div>
                   <div class="absolute bottom-0 end-0 w-3 h-3 bg-success border-2 border-base-100 rounded-full shadow-sm"></div>
                 </button>
-                <div class="dropdown-content z-50">
-                  <div class="card bg-base-100 shadow-xl border border-base-200 rounded-xl w-80 overflow-hidden">
+                 <div class="dropdown-content z-[60]">
+                   <div class="card bg-base-100 shadow-xl border border-base-200 rounded-xl w-80 overflow-hidden max-h-[calc(100vh-2rem)] overflow-y-auto">
                     {/* User Info Header */}
                     <div class="bg-gradient-to-br from-primary/10 via-base-100 to-secondary/10 p-4 border-b border-base-200">
                       <div class="flex items-center gap-3">
@@ -320,29 +320,29 @@ const Navbar = () => {
                   </Show>
                 </button>
 
-                <div class="dropdown-content mt-3 z-50 w-72 max-w-[calc(100vw-1rem)] rounded-xl bg-base-100 shadow-xl border border-base-200 overflow-hidden">
-                  <div class="px-4 py-3 border-b border-base-200 text-xs font-semibold uppercase text-base-content">
-                    {nt().notifications}
-                  </div>
+                 <div class="dropdown-content mt-3 z-[60] w-72 max-w-[calc(100vw-1rem)] rounded-xl bg-base-100 shadow-xl border border-base-200 overflow-hidden">
+                   <div class="px-4 py-3 border-b border-base-200 text-xs font-semibold uppercase text-base-content">
+                     {nt().notifications}
+                   </div>
 
-                  <div class="px-3 py-2 border-b border-base-200">
-                    <div class="tabs tabs-boxed tabs-xs">
-                      <button
-                        class={`tab ${dropdownFilter() === 'all' ? 'tab-active' : ''}`}
-                        onClick={(e) => { e.stopPropagation(); setDropdownFilter('all'); }}
-                      >
-                        {nt().all}
-                      </button>
-                      <button
-                        class={`tab ${dropdownFilter() === 'unread' ? 'tab-active' : ''}`}
-                        onClick={(e) => { e.stopPropagation(); setDropdownFilter('unread'); }}
-                      >
-                        {nt().unread}
-                      </button>
-                    </div>
-                  </div>
+                   <div class="px-3 py-2 border-b border-base-200">
+                     <div class="tabs tabs-boxed tabs-xs">
+                       <button
+                         class={`tab ${dropdownFilter() === 'all' ? 'tab-active' : ''}`}
+                         onClick={(e) => { e.stopPropagation(); setDropdownFilter('all'); }}
+                       >
+                         {nt().all}
+                       </button>
+                       <button
+                         class={`tab ${dropdownFilter() === 'unread' ? 'tab-active' : ''}`}
+                         onClick={(e) => { e.stopPropagation(); setDropdownFilter('unread'); }}
+                       >
+                         {nt().unread}
+                       </button>
+                     </div>
+                   </div>
 
-                  <div class="max-h-80 overflow-y-auto">
+                   <div class="max-h-[calc(100vh-2rem)] overflow-y-auto">
                     <Show when={filteredDropdown().length > 0} fallback={
                       <div class="p-6 text-center text-base-content/50 flex flex-col items-center gap-2">
                         <i data-lucide="bell-off" class="w-8 h-8 opacity-40"></i>

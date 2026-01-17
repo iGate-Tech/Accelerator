@@ -409,41 +409,43 @@ Use consistent naming conventions and color coding for easy navigation.`
 
   return (
        <div class="max-w-6xl mx-auto space-y-8 px-4 sm:px-6 py-6 sm:py-8 overflow-visible">
-         {/* Header with Search */}
-         <div class="text-center py-6">
-           {/* Back Button */}
-           <div class="mb-4">
-             <button
-               onClick={() => window.history.back()}
-               class="btn btn-ghost btn-sm gap-2"
-             >
-               <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16" viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"/></svg>
-               <span class="hidden sm:inline">Back</span>
-             </button>
-           </div>
-
-           <h1 class="text-2xl sm:text-3xl md:text-4xl font-bold text-base-content mb-3">{t().helpDocumentation}</h1>
-           <p class="text-sm sm:text-base text-base-content/70 max-w-2xl mx-auto mb-6">
-             {t().everythingYouNeed}
-           </p>
-
-          {/* Global Search */}
-          <div class="max-w-md mx-auto">
-            <div class="relative">
-              <i data-lucide="search" class="absolute start-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-base-content/50"></i>
-              <input
-                id="help-search"
-                type="text"
-                placeholder={`${t().searchHelp} (${t().ctrlK})`}
-                class="input input-bordered w-full ps-10 pe-10 text-sm"
-                value={searchQuery()}
-                onInput={(e) => setSearchQuery(e.target.value)}
-              />
-              <kbd class="absolute end-2 top-1/2 transform -translate-y-1/2 hidden sm:block text-xs text-base-content/50 bg-base-200 px-1.5 py-0.5 rounded">
-                {t().ctrlK}
-              </kbd>
+          {/* Header with Search */}
+          <div class="py-6">
+            {/* Back Button */}
+            <div class="flex justify-start mb-4">
+              <button
+                onClick={() => window.history.back()}
+                class="btn btn-ghost btn-sm gap-2"
+              >
+                <svg class="w-4 h-4 rtl:transform rtl:scale-x-[-1]" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16" viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"/></svg>
+                <span class="hidden sm:inline">Back</span>
+              </button>
             </div>
-          </div>
+
+            <div class="text-center">
+              <h1 class="text-2xl sm:text-3xl md:text-4xl font-bold text-base-content mb-3">{t().helpDocumentation}</h1>
+              <p class="text-sm sm:text-base text-base-content/70 max-w-2xl mx-auto mb-6">
+                {t().everythingYouNeed}
+              </p>
+
+             {/* Global Search */}
+             <div class="max-w-md mx-auto">
+               <div class="relative">
+                 <i data-lucide="search" class="absolute start-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-base-content/50"></i>
+                 <input
+                   id="help-search"
+                   type="text"
+                   placeholder={`${t().searchHelp} (${t().ctrlK})`}
+                   class="input input-bordered w-full ps-10 pe-10 text-sm"
+                   value={searchQuery()}
+                   onInput={(e) => setSearchQuery(e.target.value)}
+                 />
+                 <kbd class="absolute end-2 top-1/2 transform -translate-y-1/2 hidden sm:block text-xs text-base-content/50 bg-base-200 px-1.5 py-0.5 rounded">
+                   {t().ctrlK}
+                 </kbd>
+               </div>
+             </div>
+            </div>
         </div>
 
         {/* Quick Actions */}

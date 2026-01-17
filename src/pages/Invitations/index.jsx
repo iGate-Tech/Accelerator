@@ -44,9 +44,20 @@ const Invitations = () => {
     }
   };
 
-  return (
-    <div class="space-y-6 mt-10 px-4 sm:px-6">
-      {/* Header */}
+   return (
+     <div class="max-w-6xl mx-auto space-y-8 px-4 sm:px-6 py-6 sm:py-8 overflow-visible">
+       {/* Back Button */}
+       <div class="flex justify-start mb-4">
+         <button
+           onClick={() => window.history.back()}
+           class="btn btn-ghost btn-sm gap-2"
+         >
+           <svg class="w-4 h-4 rtl:transform rtl:scale-x-[-1]" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16" viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"/></svg>
+           <span class="hidden sm:inline">Back</span>
+         </button>
+       </div>
+
+       {/* Header */}
       <div class="text-center sm:text-left">
         <h1 class="text-3xl sm:text-4xl font-bold text-base-content">{t().portfolioInvitations}</h1>
         <p class="text-base-content/70 mt-2">

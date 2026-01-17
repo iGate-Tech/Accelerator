@@ -21,12 +21,11 @@ const Sidebar = () => {
   const [searchQuery, setSearchQuery] = createSignal("");
   const [editingProjectId, setEditingProjectId] = createSignal(null);
   const [isCollapsed, setIsCollapsed] = createSignal(false);
-  const [dropdownFilter, setDropdownFilter] = createSignal('all');
   const [notifications, setNotifications] = createSignal([]);
   const [creditBalance, setCreditBalance] = createSignal(50);
   const [subscription, setSubscription] = createSignal({ plan: 'free' });
-  const [projectsCount, setProjectsCount] = createSignal(0);
-  const [projectsOpen, setProjectsOpen] = createSignal(true);
+   const [projectsCount, setProjectsCount] = createSignal(0);
+   const [projectsOpen, setProjectsOpen] = createSignal(true);
 
   const navbarT = t;
 
@@ -63,24 +62,6 @@ const Sidebar = () => {
     } catch (error) {
       logger.warn('Failed to load sidebar data:', error.message);
     }
-  };
-
-  const filteredDropdown = () => {
-    const notifs = notifications() || [];
-    if (dropdownFilter() === 'unread') return notifs.filter(n => !n.read);
-    return notifs;
-  };
-
-  const timeAgo = (date) => {
-    const now = new Date();
-    const diff = now - new Date(date);
-    const minutes = Math.floor(diff / 60000);
-    if (minutes < 1) return navbarT().justNow || 'Just now';
-    if (minutes < 60) return `${minutes}m ago`;
-    const hours = Math.floor(minutes / 60);
-    if (hours < 24) return `${hours}h ago`;
-    const days = Math.floor(hours / 24);
-    return `${days}d ago`;
   };
 
   const filteredProjects = createMemo(() => {
@@ -185,6 +166,8 @@ const Sidebar = () => {
     if (window.lucide) {
       window.lucide.createIcons();
     }
+
+    // User dropdown is always anchored above (footer menu pattern)
   });
 
   onCleanup(() => {
@@ -206,11 +189,7 @@ const Sidebar = () => {
 
   createEffect(() => {
     if (!isCollapsed() && window.lucide) {
-      const button = document.querySelector('button[popovertarget="popover-user"]');
-      if (button) {
-        button.querySelectorAll('svg[data-lucide="chevron-right"]').forEach(svg => svg.remove());
-        window.lucide.createIcons();
-      }
+      window.lucide.createIcons();
     }
   });
 
@@ -430,79 +409,126 @@ const Sidebar = () => {
         </ul>
         </div>
 
-        <Show when={isAuthenticated()}>
+        
           <div class="flex-shrink-0 border-t border-base-200">
             <ul class="menu w-full gap-1">
+        <Show when={isAuthenticated() && !isCollapsed()}>
+
               <li>
-                <button classList={{
+    <details class="w-full">
+   <summary
+     classList={{
+       'flex items-center p-3 hover:bg-base-300 transition-colors rounded-lg relative group w-full cursor-pointer list-none': true,
+       'justify-center': isCollapsed(),
+     }}
+   >
+    {/* Avatar */}
+    <div class="avatar relative flex-shrink-0">
+      <div class="w-8 rounded-full ring ring-primary/30 ring-offset-1 ring-offset-base-100">
+        {user()?.avatar ? (
+          <img
+            src={user()?.avatar}
+            alt="User avatar"
+            class="w-full h-full object-cover"
+          />
+        ) : (
+          <div class="w-full h-full bg-gradient-to-br from-primary/20 to-secondary/20 rounded-full flex items-center justify-center">
+            <i
+              data-lucide="user"
+              classList={{
+                'w-5 h-5': !isCollapsed(),
+                'w-6 h-6': isCollapsed(),
+              }}
+              class="text-primary"
+            ></i>
+          </div>
+        )}
+      </div>
+
+      {/* Online indicator */}
+      <div class="absolute bottom-0 end-0 w-2 h-2 bg-success border border-base-100 rounded-full"></div>
+    </div>
+
+     {/* Name + Chevron */}
+     <Show when={!isCollapsed()}>
+       <span class="font-medium ms-3 flex-1 min-w-0 truncate">
+         {user()?.profile?.name ?? 'User'}
+       </span>
+     </Show>
+
+
+   </summary>
+
+   {/* Dropdown */}
+   <ul
+     class="dropdown-content menu w-52 rounded-box bg-base-100 shadow-sm"
+   >
+     <li class="menu-title px-3 py-2 border-b border-base-200">
+       <span>{user()?.profile?.name ?? 'User'}</span>
+     </li>
+
+     <li>
+       <A href="/profile" class="flex items-center gap-2">
+         <i data-lucide="user" class="w-4 h-4"></i>
+         {navbarT().profile || 'Profile'}
+       </A>
+     </li>
+
+     <li>
+       <A href="/settings" class="flex items-center gap-2">
+         <i data-lucide="settings" class="w-4 h-4"></i>
+         {navbarT().settings || 'Settings'}
+       </A>
+     </li>
+
+     <li>
+       <A href="/packages" class="flex items-center gap-2">
+         <i data-lucide="crown" class="w-4 h-4 text-accent"></i>
+         {navbarT().packages || 'Packages'}
+       </A>
+     </li>
+
+      <li>
+        <A href="/billing" class="flex items-center gap-2">
+          <i data-lucide="credit-card" class="w-4 h-4"></i>
+          {navbarT().billingLabel || 'Billing'}
+        </A>
+      </li>
+
+      <li>
+        <A href="/credits" class="flex items-center gap-2">
+          <i data-lucide="coins" class="w-4 h-4 text-yellow-500"></i>
+          {navbarT().creditsLabel || 'Credits'}
+        </A>
+      </li>
+
+      <div class="divider my-1"></div>
+
+     <li>
+       <button
+         onClick={async () => {
+           await logout();
+           navigate('/auth/login');
+         }}
+         class="text-error hover:bg-error/10"
+       >
+         <i data-lucide="log-out" class="w-4 h-4"></i>
+         {navbarT().signOut || 'Sign Out'}
+       </button>
+      </li>
+    </ul>
+  </details>
+
+
+              </li>
+        </Show>
+
+              <li classList={{ "menu-active": location.pathname === "/notifications" }}>
+                <A href="/notifications" classList={{
                   'flex items-center p-3 hover:bg-base-300 transition-colors rounded-lg relative group w-full normal-case': true,
                   'justify-center': isCollapsed(),
                   'justify-start ltr:justify-start rtl:justify-end': !isCollapsed()
-                }} popovertarget="popover-user" style="anchor-name:--anchor-user">
-                  <div class="avatar relative flex-shrink-0">
-                    <div class="w-8 rounded-full ring ring-primary/30 ring-offset-1 ring-offset-base-100">
-                      {user()?.avatar ? (
-                        <img src={user()?.avatar} alt="User avatar" class="w-full h-full object-cover" />
-                      ) : (
-                        <div class="w-full h-full bg-gradient-to-br from-primary/20 to-secondary/20 rounded-full flex items-center justify-center">
-                          <i data-lucide="user" classList={{ "w-5 h-5": !isCollapsed(), "w-6 h-6": isCollapsed() }} class="text-primary"></i>
-                        </div>
-                      )}
-                    </div>
-                    <div class="absolute bottom-0 end-0 w-2 h-2 bg-success border border-base-100 rounded-full"></div>
-                  </div>
-                  <Show when={!isCollapsed()}>
-                    <span class="font-medium ltr:ml-3 rtl:mr-3 flex-1 min-w-0 truncate">{user()?.profile?.name ?? 'User'}</span>
-                    <i data-lucide="chevron-right" class="w-5 h-5 opacity-60"></i>
-                  </Show>
-                </button>
-                <ul class="dropdown menu min-w-56 rounded-lg bg-base-100 shadow-xl border border-base-200 z-50" popover id="popover-user" style="position: fixed; position-anchor: --anchor-user; inset-inline-end: calc(anchor(start) - 100%); bottom: anchor(bottom);">
-                  <li class="menu-title px-3 py-2 border-b border-base-200">
-                    <span>{user()?.profile?.name ?? 'User'}</span>
-                  </li>
-                  <li>
-                    <A href="/profile" class="flex items-center gap-2">
-                      <i data-lucide="user" class="w-4 h-4"></i>
-                      {navbarT().profile || 'Profile'}
-                    </A>
-                  </li>
-                  <li>
-                    <A href="/settings" class="flex items-center gap-2">
-                      <i data-lucide="settings" class="w-4 h-4"></i>
-                      {navbarT().settings || 'Settings'}
-                    </A>
-                  </li>
-                  <li>
-                    <A href="/packages" class="flex items-center gap-2">
-                      <i data-lucide="crown" class="w-4 h-4 text-accent"></i>
-                      {navbarT().packages || 'Packages'}
-                    </A>
-                  </li>
-                  <li>
-                    <A href="/billing" class="flex items-center gap-2">
-                      <i data-lucide="credit-card" class="w-4 h-4"></i>
-                      {navbarT().billingLabel || 'Billing'}
-                    </A>
-                  </li>
-                  <div class="divider my-1"></div>
-                  <li>
-                    <button
-                      onClick={async () => { await logout(); navigate('/auth/login'); }}
-                      class="text-error hover:bg-error/10"
-                    >
-                      <i data-lucide="log-out" class="w-4 h-4"></i>
-                      {navbarT().signOut || 'Sign Out'}
-                    </button>
-                  </li>
-                </ul>
-              </li>
-
-              <li>
-                <button classList={{
-                  'flex items-center p-3 hover:bg-base-300 transition-colors rounded-lg relative group w-full normal-case opacity-80 hover:opacity-100': true,
-                  'justify-center': isCollapsed(),
-                  'justify-start ltr:justify-start rtl:justify-end': !isCollapsed()
-                }} popovertarget="popover-notifications" style="anchor-name:--anchor-notifications">
+                }}>
                    <i data-lucide="bell" classList={{ "w-5 h-5": !isCollapsed(), "w-6 h-6": isCollapsed() }}></i>
                   <Show when={!isCollapsed()}>
                     <span class="font-medium ltr:ml-3 rtl:mr-3 flex-1 text-left">{navbarT().notifications || 'Notifications'}</span>
@@ -510,97 +536,7 @@ const Sidebar = () => {
                       <span class="badge badge-error badge-sm ltr:ml-auto rtl:mr-auto">{(notifications() || []).filter(n => !n.read).length}</span>
                     </Show>
                   </Show>
-                </button>
-                <ul class="dropdown menu w-72 rounded-lg bg-base-100 shadow-xl border border-base-200 p-0 overflow-hidden z-50" popover id="popover-notifications" style="position: fixed; position-anchor: --anchor-notifications; inset-inline-end: calc(anchor(start) - 100%); bottom: anchor(bottom);">
-                  <li class="menu-title px-3 py-2 border-b border-base-200 flex items-center justify-between">
-                    <span>{navbarT().notifications || 'Notifications'}</span>
-                    <button
-                      class="text-xs text-primary hover:underline"
-                      disabled={!(notifications() || []).some(n => !n.read)}
-                      onClick={async (e) => {
-                        e.stopPropagation();
-                        const unread = (notifications() || []).filter(n => !n.read);
-                        if (unread.length > 0) {
-                          try {
-                            const { markNotificationRead } = await import('../../lib/db');
-                            await Promise.all(unread.map(n => markNotificationRead(n.id, user()?.id)));
-                            setNotifications(prev => prev.map(n => ({ ...n, read: true })));
-                          } catch (error) {
-                            logger.warn('Error marking all:', error.message);
-                          }
-                        }
-                      }}
-                    >
-                      {navbarT().markAll || 'Mark all'}
-                    </button>
-                  </li>
-                  <div class="max-h-60 overflow-y-auto">
-                    <Show when={filteredDropdown().length > 0} fallback={
-                      <li class="p-4 text-center text-base-content/50 text-sm">
-                        <i data-lucide="bell-off" class="w-6 h-6 mx-auto mb-2 opacity-40"></i>
-                        <span>{navbarT().noNotifications || 'No notifications'}</span>
-                      </li>
-                    }>
-                      <For each={filteredDropdown()}>
-                        {(notif) => (
-                          <li>
-                            <div
-                              class={`flex gap-2 items-start cursor-pointer hover:bg-base-200 transition text-sm px-3 py-2 ${!notif.read ? 'bg-primary/5' : ''}`}
-                              onClick={async (e) => {
-                                e.stopPropagation();
-                                if (!notif.read && notif.id) {
-                                  try {
-                                    const { markNotificationRead } = await import('../../lib/db');
-                                    await markNotificationRead(notif.id, user()?.id);
-                                    setNotifications(prev => prev.map(n => n.id === notif.id ? { ...n, read: true } : n));
-                                  } catch (error) {
-                                    logger.warn('Error marking notification:', error.message);
-                                  }
-                                }
-                              }}
-                            >
-                              <div class={`mt-0.5 p-1 rounded-full shrink-0 ${
-                                notif.type === 'newMessage' || notif.type === 'message' ? 'bg-blue-500 text-white' :
-                                notif.type === 'systemUpdate' || notif.type === 'system' ? 'bg-green-500 text-white' :
-                                notif.type === 'billing' ? 'bg-purple-500 text-white' :
-                                notif.type === 'credits' ? 'bg-yellow-500 text-black' :
-                                notif.type === 'gettingStarted' ? 'bg-primary text-white' :
-                                notif.type === 'subscription' ? 'bg-success text-white' :
-                                notif.type === 'aiFeature' ? 'bg-accent text-white' :
-                                notif.type === 'explore' ? 'bg-secondary text-white' :
-                                notif.type === 'help' ? 'bg-info text-white' :
-                                notif.type === 'project' ? 'bg-primary/80 text-white' : 'bg-gray-500 text-white'
-                              }`}>
-                                <i data-lucide={
-                                  notif.type === 'newMessage' || notif.type === 'message' ? 'message-circle' :
-                                  notif.type === 'systemUpdate' || notif.type === 'system' ? 'settings' :
-                                  notif.type === 'billing' ? 'credit-card' :
-                                  notif.type === 'credits' ? 'coins' :
-                                  notif.type === 'gettingStarted' ? 'book-open' :
-                                  notif.type === 'subscription' ? 'star' :
-                                  notif.type === 'aiFeature' ? 'brain' :
-                                  notif.type === 'explore' ? 'compass' :
-                                  notif.type === 'help' ? 'help-circle' :
-                                  notif.type === 'project' ? 'folder' : 'bell'
-                                } class="w-3 h-3"></i>
-                              </div>
-                              <div class="flex-1 min-w-0">
-                                <div class="font-medium truncate text-xs">{notif.text}</div>
-                                <div class="text-xs text-base-content/60">{timeAgo(notif.time)}</div>
-                              </div>
-                              <Show when={!notif.read}>
-                                <span class="w-1.5 h-1.5 rounded-full bg-primary shrink-0 mt-1.5"></span>
-                              </Show>
-                            </div>
-                          </li>
-                        )}
-                      </For>
-                    </Show>
-                  </div>
-                  <li class="border-t border-base-200">
-                    <A href="/notifications" class="w-full">{navbarT().viewAll || 'View all'}</A>
-                  </li>
-                </ul>
+                </A>
               </li>
 
               <li>
@@ -650,7 +586,6 @@ const Sidebar = () => {
               </li>
             </ul>
           </div>
-        </Show>
       </div>
     </aside>
   );

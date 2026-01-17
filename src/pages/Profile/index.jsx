@@ -200,34 +200,48 @@ const Profile = () => {
    };
 
   return (
-    <div class="max-w-6xl mx-auto space-y-8 px-4 sm:px-6">
-      {/* Header */}
-      <div class="text-center">
-        <h1 class="text-3xl sm:text-4xl font-bold text-base-content mb-4">{t().profile}</h1>
-        <p class="text-base sm:text-lg text-base-content/70">
-          {t().viewManageProfile}
-        </p>
-        <Show when={editingProfile()}>
-          <div class="flex justify-center gap-2 mt-4">
-            <button
-              class="btn btn-primary"
-              onClick={saveProfile}
-            >
-              {t().saveProfile}
-            </button>
-            <button
-              class="btn btn-ghost"
-              onClick={cancelEditing}
-            >
-              {t().cancel}
-            </button>
-          </div>
-        </Show>
-      </div>
+     <div class="max-w-6xl mx-auto space-y-8 px-4 sm:px-6 py-6 sm:py-8 overflow-visible">
+       {/* Header */}
+       <div class="py-6">
+         <div class="flex justify-start mb-4">
+           <button
+             onClick={() => navigate('/')}
+             class="btn btn-ghost btn-sm gap-2"
+           >
+             <svg class="w-4 h-4 rtl:transform rtl:scale-x-[-1]" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16" viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"/></svg>
+             <span class="hidden sm:inline">Back</span>
+           </button>
+         </div>
+
+         <div class="text-center">
+           <h1 class="text-2xl sm:text-3xl md:text-4xl font-bold text-base-content mb-3">{t().profile}</h1>
+           <p class="text-sm sm:text-base text-base-content/70 max-w-2xl mx-auto mb-6">
+             {t().viewManageProfile}
+           </p>
+           <Show when={editingProfile()}>
+             <div class="flex justify-center gap-2 mt-4">
+               <button
+                 class="btn btn-primary"
+                 onClick={saveProfile}
+               >
+                 {t().saveProfile}
+               </button>
+               <button
+                 class="btn btn-ghost"
+                 onClick={cancelEditing}
+               >
+                 {t().cancel}
+               </button>
+             </div>
+           </Show>
+         </div>
+       </div>
 
       <Show when={user()}>
+      {/* Content */}
+      <div class="bg-base-100 rounded-box p-4 sm:p-6 md:p-8 shadow-sm border border-base-200">
         {/* Profile Header Card */}
-        <div class="card bg-gradient-to-br from-primary/5 via-base-100 to-secondary/5 border border-primary/20">
+        <div class="card bg-gradient-to-br from-primary/5 via-base-200 to-secondary/5 border border-primary/20 mb-8">
           <div class="card-body">
             <div class="flex flex-col md:flex-row items-center gap-6">
               {/* Avatar Section */}
@@ -252,13 +266,13 @@ const Profile = () => {
 
                 {/* User Info */}
                 <div class="flex-1 text-center md:text-left">
-                  <Show when={editingProfile()} fallback={
-                    <>
-                      <h2 class="text-3xl font-bold text-base-content">{user().profile?.name || t().defaultName}</h2>
-                      <p class="text-xl text-base-content/70 mb-2">{user().profile?.email || user().email}</p>
-                      <p class="text-base text-base-content/60 mb-4">{user().profile?.bio || t().noBio}</p>
-                    </>
-                  }>
+                   <Show when={editingProfile()} fallback={
+                     <div>
+                       <h2 class="text-3xl font-bold text-base-content">{user().profile?.name || t().defaultName}</h2>
+                       <p class="text-xl text-base-content/70 mb-2">{user().profile?.email || user().email}</p>
+                       <p class="text-base text-base-content/60 mb-4">{user().profile?.bio || t().noBio}</p>
+                     </div>
+                   }>
                     <div class="space-y-2">
                       <input
                         type="text"
@@ -306,7 +320,6 @@ const Profile = () => {
                       {t().cancel}
                     </button>
                   </div>
-                )}
                 )}
               </div>
             </div>
@@ -605,10 +618,11 @@ const Profile = () => {
               </div>
             </div>
           </div>
-        </div>
-      </Show>
-    </div>
-  );
-};
+         </div>
+         </div>
+       </Show>
+     </div>
+   );
+ };
 
 export default Profile;

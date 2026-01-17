@@ -201,14 +201,26 @@ const Settings = () => {
   });
 
   return (
-    <div class="max-w-4xl mx-auto space-y-8 px-4 sm:px-6">
-      {/* Header */}
-      <div class="text-center">
-        <h1 class="text-3xl sm:text-4xl font-bold text-base-content mb-4">{t().accountSettings}</h1>
-        <p class="text-base sm:text-lg text-base-content/70">
-          {t().manageAccount}.
-        </p>
-      </div>
+    <div class="max-w-6xl mx-auto space-y-8 px-4 sm:px-6 py-6 sm:py-8 overflow-visible">
+       {/* Header */}
+       <div class="py-6">
+         <div class="flex justify-start mb-4">
+           <button
+             onClick={() => navigate('/')}
+             class="btn btn-ghost btn-sm gap-2"
+           >
+             <svg class="w-4 h-4 rtl:transform rtl:scale-x-[-1]" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16" viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"/></svg>
+             <span class="hidden sm:inline">Back</span>
+           </button>
+         </div>
+
+         <div class="text-center">
+           <h1 class="text-2xl sm:text-3xl md:text-4xl font-bold text-base-content mb-3">{t().accountSettings}</h1>
+           <p class="text-sm sm:text-base text-base-content/70 max-w-2xl mx-auto mb-6">
+             {t().manageAccount}.
+           </p>
+         </div>
+       </div>
 
       {/* Success/Error Message */}
       <Show when={message()}>

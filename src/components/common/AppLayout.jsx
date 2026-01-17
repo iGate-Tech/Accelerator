@@ -2,10 +2,8 @@ import {onMount, createEffect, createSignal, useContext} from "solid-js";
 import {LangContext} from "../../context/LangContext";
 import {getPg} from "../../lib/db";
 
-import Navbar from "./Navbar";
 import Sidebar from "./Sidebar";
 import favicon from "../../assets/favicon.svg";
-import logger from '../../lib/logger.js';
 import logger from '../../lib/logger.js';
 
 
@@ -58,7 +56,6 @@ const AppLayout = (props) => {
     return (
         <>
             <link rel="icon" href="/favicon.svg" />
-            <Navbar />
             <main class="min-h-screen bg-base-200">
                 {props.children}
             </main>

@@ -387,7 +387,7 @@ export const UserProvider = (props) => {
     const localUser = {
       id: localUserId,
       email: 'local@user.com',
-      avatar: profileData?.avatar || avatar,
+      avatar: profileData?.avatar || null,
        profile: {
          name: 'local@user.com'.split('@')[0],
          email: 'local@user.com',

@@ -144,16 +144,16 @@ const ProjectCard = (props) => {
           : '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)'
       }}
     >
-      <div class="card-body">
+      <div class="card-body p-3 md:p-4">
         {/* Header with title and status */}
-        <div class="flex justify-between items-start mb-3">
-          <h3 class="card-title text-base font-semibold line-clamp-2 flex-1 mr-2">
+        <div class="flex justify-between items-start mb-2 md:mb-3 gap-2">
+          <h3 class="card-title text-sm md:text-base font-semibold line-clamp-2 flex-1 mr-2">
             {project.name || 'Unnamed Project'}
           </h3>
           {showStatus && (
-            <div class={`badge ${getStatusColor(project.uiStatus)} badge-sm gap-1`}>
-              <i data-lucide={getStatusIcon(project.uiStatus)} class="w-3 h-3"></i>
-              {project.uiStatus || 'idle'}
+            <div class={`badge ${getStatusColor(project.uiStatus)} badge-xs md:badge-sm gap-1 shrink-0`}>
+              <i data-lucide={getStatusIcon(project.uiStatus)} class="w-2.5 h-2.5 md:w-3 md:h-3"></i>
+              <span class="hidden xs:inline">{project.uiStatus || 'idle'}</span>
             </div>
           )}
         </div>
@@ -210,7 +210,7 @@ const ProjectCard = (props) => {
         )}
 
         {/* Footer with metadata */}
-        <div class="flex justify-between items-center text-xs text-base-content/50">
+        <div class="flex justify-between items-center text-xs text-base-content/50 flex-wrap gap-2">
           <div class="flex items-center gap-1">
             <i data-lucide="clock" class="w-3 h-3"></i>
             <span>{formatDate(project.createdAt)}</span>
@@ -218,7 +218,7 @@ const ProjectCard = (props) => {
           {project.currentModel && (
             <div class="flex items-center gap-1">
               <i data-lucide="cpu" class="w-3 h-3"></i>
-              <span>{project.currentModel}</span>
+              <span class="hidden sm:inline">{project.currentModel}</span>
             </div>
           )}
         </div>

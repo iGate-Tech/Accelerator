@@ -143,15 +143,15 @@ const Dashboard = () => {
      window.removeEventListener('projectUpdated', onProjectUpdated);
    });
 
-    return (
-     <div class="space-y-8 ">
-       {/* Header */}
-       <div class="text-center py-6">
-         <h1 class="text-3xl sm:text-4xl font-bold text-base-content mb-2">{t().dashboard}</h1>
-         <p class="text-base sm:text-lg text-base-content/70">
-           {t().overview} {t().projectsLower} {t().progressLower}.
-         </p>
-       </div>
+     return (
+      <div class="space-y-4 md:space-y-6 lg:space-y-8 px-2 md:px-4">
+        {/* Header */}
+        <div class="text-center py-4 md:py-6">
+          <h1 class="text-2xl sm:text-3xl md:text-4xl font-bold text-base-content mb-2">{t().dashboard}</h1>
+          <p class="text-sm sm:text-base text-base-content/70 px-2">
+            {t().overview} {t().projectsLower} {t().progressLower}.
+          </p>
+        </div>
 
       <Show
         when={!projects.loading}
@@ -162,8 +162,8 @@ const Dashboard = () => {
           </div>
         }
       >
-        {/* Stats Cards */}
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+         {/* Stats Cards */}
+         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-6">
           <div class="card bg-gradient-to-br from-primary to-primary/80 text-primary-content shadow-lg">
             <div class="card-body">
               <div class="flex items-center justify-between">
@@ -213,12 +213,12 @@ const Dashboard = () => {
           </div>
         </div>
 
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6 lg:gap-8">
           {/* Recent Projects */}
-          <div class="lg:col-span-2">
-            <div class="bg-base-100 rounded-box p-6 shadow-sm border border-base-200">
-              <div class="flex justify-between items-center mb-6">
-                <h2 class="text-2xl font-bold">{t().recentProjects}</h2>
+          <div class="lg:col-span-2 order-2 lg:order-1">
+            <div class="bg-base-100 rounded-box p-4 md:p-6 shadow-sm border border-base-200">
+              <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-4 md:mb-6">
+                <h2 class="text-lg md:text-xl font-bold">{t().recentProjects}</h2>
                 <A href="/explore" class="btn btn-ghost btn-sm">
                   {t().viewAll}
                   <i data-lucide="arrow-right" class="w-4 h-4 ml-1"></i>
@@ -240,7 +240,7 @@ const Dashboard = () => {
                   </div>
                 }
               >
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4">
                    <For each={recentProjects()}>
                      {(project) => (
                        <ProjectCard
@@ -258,9 +258,9 @@ const Dashboard = () => {
           </div>
 
           {/* Activity Feed */}
-          <div>
-            <div class="bg-base-100 rounded-box p-6 shadow-sm border border-base-200">
-              <h2 class="text-2xl font-bold mb-6">{t().recentActivity}</h2>
+          <div class="order-1 lg:order-2">
+            <div class="bg-base-100 rounded-box p-4 md:p-6 shadow-sm border border-base-200">
+              <h2 class="text-lg md:text-xl font-bold mb-4 md:mb-6">{t().recentActivity}</h2>
 
               <Show
                 when={recentActivity().length > 0}
@@ -271,11 +271,11 @@ const Dashboard = () => {
                   </div>
                 }
                >
-                  <div class="space-y-4 max-h-96 overflow-y-auto">
-                    <For each={recentActivity()}>
+                 <div class="space-y-3 max-h-64 md:max-h-96 overflow-y-auto">
+                   <For each={recentActivity()}>
                      {(activity) => (
-                       <div class="flex items-start gap-3">
-                         <div class={`p-2 rounded-full ${
+                       <div class="flex items-start gap-2 md:gap-3">
+                         <div class={`p-1.5 md:p-2 rounded-full shrink-0 ${
                            activity.type.includes('created') ? 'bg-info/10 text-info' :
                            activity.type.includes('completed') || activity.type.includes('credit') ? 'bg-success/10 text-success' :
                            activity.type.includes('deleted') ? 'bg-error/10 text-error' :
@@ -289,27 +289,27 @@ const Dashboard = () => {
                                activity.type.includes('deleted') ? 'trash' :
                                'activity'
                              }
-                             class="w-4 h-4"
+                             class="w-3 h-3 md:w-4 md:h-4"
                            ></i>
                          </div>
                          <div class="flex-1 min-w-0">
-                           <p class="text-sm text-base-content">{activity.message}</p>
+                           <p class="text-xs md:text-sm text-base-content truncate">{activity.message}</p>
                            <p class="text-xs text-base-content/60">{formatDate(activity.timestamp)}</p>
                          </div>
                        </div>
                      )}
                    </For>
                  </div>
-              </Show>
+               </Show>
             </div>
 
             {/* Resource Usage */}
-            <div class="bg-base-100 rounded-box p-6 shadow-sm border border-base-200 mt-6">
-              <h3 class="text-lg font-semibold mb-4">{t().resourceUsage}</h3>
+            <div class="bg-base-100 rounded-box p-4 md:p-6 shadow-sm border border-base-200 mt-4 md:mt-6">
+              <h3 class="text-base md:text-lg font-semibold mb-3 md:mb-4">{t().resourceUsage}</h3>
 
-              <div class="space-y-4">
+              <div class="space-y-3 md:space-y-4">
                 <div>
-                  <div class="flex justify-between text-sm mb-1">
+                  <div class="flex justify-between text-xs md:text-sm mb-1">
                     <span>{t().creditsUsed}</span>
                     <span>{stats().totalCreditsConsumed} / {stats().totalCreditsAvailable}</span>
                   </div>
@@ -320,9 +320,9 @@ const Dashboard = () => {
                    ></progress>
                 </div>
 
-                <div class="flex items-center justify-between text-sm">
+                <div class="flex items-center justify-between text-xs md:text-sm">
                   <span class="flex items-center gap-1">
-                    <i data-lucide="clock" class="w-4 h-4"></i>
+                    <i data-lucide="clock" class="w-3 h-3 md:w-4 md:h-4"></i>
                     Time Invested
                   </span>
                   <span>{formatTime(stats().totalTimeConsumed)}</span>

@@ -16,6 +16,7 @@ CREATE TABLE projects (
   description TEXT,
 
   current_step TEXT,
+  completed_steps INTEGER DEFAULT 0,
   step_name TEXT,
   current_model TEXT,
   current_section TEXT,

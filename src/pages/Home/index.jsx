@@ -152,8 +152,8 @@ const TasksContent = () => {
     const agentBoxClass = createMemo(() => {
         const hasProject = currentProjectId() !== null;
         const isActive = hasProject && (startPressed() || (tasksList() && tasksList().length > 0 && machineStore.context?.currentStep !== 'done'));
-        const base = isActive ? "w-full max-w-4xl mx-auto" : "w-full max-w-4xl mx-auto";
-        const expanded = ""; // Removed to prevent height issues
+        const base = hasProject ? "w-full max-w-4xl mx-auto" : "w-full max-w-4xl mx-auto flex flex-col items-center justify-center min-h-[calc(100vh-4rem)]";
+        const expanded = "";
         return `${base} ${expanded}`.trim();
     });
 
@@ -497,12 +497,13 @@ const TasksContent = () => {
        });
 
         // Set tasksList when project changes
-       createEffect(() => {
-           currentProjectId();
-           if (Array.isArray(tasks())) {
-               setTasksList(tasks());
-           }
-       });
+        createEffect(() => {
+            currentProjectId();
+            tasks();
+            if (Array.isArray(tasks())) {
+                setTasksList(tasks());
+            }
+        });
 
      createEffect(() => {
          if (cardRef) {
@@ -572,15 +573,26 @@ const TasksContent = () => {
       // Restore machine state from project data when project changes
       createEffect(() => {
         const pid = currentProjectId();
-        if (!pid) return;
-        
-        // Get the project data from the projects resource
         const projectsList = projects();
-        const project = projectsList?.find(p => p.id === pid);
         
-        if (project && project.current_step && project.completedSteps !== undefined) {
+        if (!pid || !projectsList) return;
+        
+        const project = projectsList.find(p => p.id === pid);
+        console.log('Checking project restoration:', pid, project?.current_step, project?.completed_steps);
+        
+        if (!project) return;
+        
+        // Set project data for UI display
+        setProjectData(project);
+        
+        // Set prompt to project description if available
+        if (project.description && !prompt()) {
+          setPrompt(project.description);
+        }
+        
+        if (project.current_step || project.completed_steps !== undefined) {
           // Only restore if we have saved progress (not initial state)
-          if (project.completedSteps > 0 || project.current_step !== 'system') {
+          if ((project.completed_steps !== undefined && project.completed_steps > 0) || (project.current_step && project.current_step !== 'system')) {
             const savedState = {
               currentStep: project.current_step,
               completedSteps: project.completed_steps,
@@ -590,7 +602,7 @@ const TasksContent = () => {
               uiProgress: project.ui_progress,
               uiMessage: project.ui_message,
               uiStatus: project.ui_status || 'idle',
-              currentPrompt: project.current_prompt || '',
+              currentPrompt: project.current_prompt || project.description || '',
               llmResponse: project.llm_response || '',
               totalCredits: project.total_credits || 600,
               consumedCredits: project.consumed_credits || 0,
@@ -600,14 +612,31 @@ const TasksContent = () => {
               solution: project.name || ''
             };
             
+            console.log('Restoring state:', savedState);
+            
             // Only update if different from current state
             const current = machineStore.context;
             if (current.currentStep !== savedState.currentStep || 
                 current.completedSteps !== savedState.completedSteps) {
               setMachineStore('context', savedState);
-              console.log('Restored machine state from project:', savedState);
+              
+              // Restore state based on currentStep
+              // Processing state should only be active during actual LLM calls, not when opening a project
+              let restoredState = 'idle';
+              if (savedState.currentStep === 'done') {
+                restoredState = 'completed';
+              } else if (project.ui_status === 'paused') {
+                restoredState = 'pause';
+              }
+              // Note: We don't restore 'processing' state - processing only happens during active LLM calls
+              setMachineStore('state', restoredState);
+              console.log('Restored machine state from project:', savedState, 'State:', restoredState);
             }
+          } else {
+            console.log('No progress to restore - completed_steps:', project.completed_steps, 'current_step:', project.current_step);
           }
+        } else {
+          console.log('No saved state found - current_step:', project.current_step, 'completed_steps:', project.completed_steps);
         }
       });
 
@@ -643,9 +672,9 @@ const TasksContent = () => {
                handleStart={handleStart}
                handlePause={handlePause}
                handleResume={handleResume}/>
-            <Show when={
-                !!currentProjectId() && (startPressed() || (tasksList && tasksList().length > 0 && machineStore.context?.currentStep !== 'done'))
-            }>
+             <Show when={
+                 !!currentProjectId() && (startPressed() || (tasksList && tasksList().length > 0))
+             }>
                 <ResponseSection tasksList={tasksList}
                project={projectData()}
                editingTaskId={editingTaskId}

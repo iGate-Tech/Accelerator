@@ -51,25 +51,92 @@
 
 @source "./public/**/*.js";
 
+/* Custom responsive utilities */
+@media (max-width: 479px) {
+  .xs\:block { display: block !important; }
+  .xs\:hidden { display: none !important; }
+  .xs\:inline { display: inline !important; }
+  .xs\:flex { display: flex !important; }
+  .xs\:grid { display: grid !important; }
+  .xs\:inline-block { display: inline-block !important; }
+  
+  .xs\:text-xs { font-size: 0.75rem !important; line-height: 1rem !important; }
+  .xs\:text-sm { font-size: 0.875rem !important; line-height: 1.25rem !important; }
+  .xs\:text-base { font-size: 1rem !important; line-height: 1.5rem !important; }
+  
+  .xs\:p-1 { padding: 0.25rem !important; }
+  .xs\:p-2 { padding: 0.5rem !important; }
+  .xs\:p-3 { padding: 0.75rem !important; }
+  .xs\:p-4 { padding: 1rem !important; }
+  
+  .xs\:m-0 { margin: 0 !important; }
+  .xs\:mx-1 { margin-left: 0.25rem !important; margin-right: 0.25rem !important; }
+  .xs\:mx-2 { margin-left: 0.5rem !important; margin-right: 0.5rem !important; }
+  
+  .xs\:gap-1 { gap: 0.25rem !important; }
+  .xs\:gap-2 { gap: 0.5rem !important; }
+  
+  .xs\:w-4 { width: 1rem !important; }
+  .xs\:w-5 { width: 1.25rem !important; }
+  .xs\:w-6 { width: 1.5rem !important; }
+  .xs\:w-8 { width: 2rem !important; }
+  
+  .xs\:h-4 { height: 1rem !important; }
+  .xs\:h-5 { height: 1.25rem !important; }
+  .xs\:h-6 { height: 1.5rem !important; }
+  .xs\:h-8 { height: 2rem !important; }
+  
+  .xs\:min-w-0 { min-width: 0 !important; }
+  .xs\:flex-1 { flex: 1 1 0% !important; }
+  .xs\:flex-wrap { flex-wrap: wrap !important; }
+  .xs\:flex-col { flex-direction: column !important; }
+  .xs\:flex-row { flex-direction: row !important; }
+  
+  .xs\:items-start { align-items: flex-start !important; }
+  .xs\:items-center { align-items: center !important; }
+  .xs\:justify-start { justify-content: flex-start !important; }
+  .xs\:justify-center { justify-content: center !important; }
+  .xs\:justify-between { justify-content: space-between !important; }
+  
+  .xs\:truncate { overflow: hidden !important; text-overflow: ellipsis !important; white-space: nowrap !important; }
+  .xs\:overflow-hidden { overflow: hidden !important; }
+  .xs\:overflow-auto { overflow: auto !important; }
+  
+  .xs\:border { border-width: 1px !important; }
+  .xs\:rounded { border-radius: 0.25rem !important; }
+  .xs\:rounded-lg { border-radius: 0.5rem !important; }
+  
+  .xs\:shadow { box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1) !important; }
+  .xs\:shadow-lg { box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1) !important; }
+}
+
 body {
-  overflow: hidden;
-  height: 100dvh; /* Dynamic viewport height for mobile */
-  max-height: 100vh;
+  min-height: 100dvh; /* Dynamic viewport height for mobile */
+  height: auto;
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 
 html {
-  height: 100%;
-  overflow: hidden;
+  height: auto;
+  min-height: 100%;
+  overflow: auto;
 }
 
 #root {
-  height: 100%;
-  overflow: hidden;
+  min-height: 100%;
+  height: auto;
+  overflow: auto;
 }
 
 main {
   overflow-y: auto;
   overflow-x: hidden;
+  min-height: calc(100vh - 4rem);
+}
+
+.drawer-content {
+  min-height: calc(100vh - 4rem);
 }
 
 /* Toast animations */
@@ -916,6 +983,15 @@ height: 150%;
   width: calc(100% - 40px) !important;
   max-width: 56rem !important;
   z-index: 50 !important;
+}
+
+#agentBox {
+  padding: 0 !important;
+}
+
+*:focus {
+  outline: none !important;
+  box-shadow: none !important;
 }
 
 @keyframes spin {

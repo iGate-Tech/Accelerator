@@ -395,7 +395,7 @@ const MainLayout = (props) => {
         </Show>
         <div class="drawer-content flex flex-col h-full min-h-0">
             <Navbar />
-            <main id="main-content" class="flex-1 w-full min-h-0 overflow-auto">
+            <main id="main-content" class="flex-1 w-full min-h-0 overflow-auto p-2 md:p-4 lg:p-6">
             {props.children}
           </main>
         </div>

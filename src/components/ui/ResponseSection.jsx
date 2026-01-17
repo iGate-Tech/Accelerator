@@ -106,7 +106,7 @@ const getStateIcon = (state) => {
 
 const ResponseSection = (props) => {
   const startPressedCondition = props.startPressed && props.startPressed();
-  const tasksCondition = props.tasksList && props.tasksList().length > 0 && props.machineStore.context?.currentStep !== 'done';
+  const tasksCondition = props.tasksList && props.tasksList().length > 0;
   const shouldShow = startPressedCondition || tasksCondition;
 
   const groupedTasks = createMemo(() => {
@@ -141,34 +141,34 @@ const ResponseSection = (props) => {
   });
 
   return (
-    <div class="flex-1 p-4 max-w-6xl w-full">
+    <div class="flex-1 p-2 md:p-4 max-w-full lg:max-w-6xl w-full mx-auto">
       <Show when={shouldShow}>
-        <div class="mb-4  mx-auto">
-          <div class="flex justify-between items-center">
-              <div class="flex gap-3 items-center">
-            <h2 class="text-xl font-bold text-primary">{props.project?.name || "Untitled Project"}</h2>
+        <div class="mb-4 mx-auto">
+          <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+              <div class="flex gap-2 items-center flex-wrap">
+            <h2 class="text-lg sm:text-xl font-bold text-primary">{props.project?.name || "Untitled Project"}</h2>
 
               <span id="agent-status-badge" class={`badge ${getBadgeClass(props.machineStore.state)} badge-sm flex items-center gap-1`}>
                 <i data-lucide={getStateIcon(props.machineStore.state)} class="w-3 h-3"></i>
                 {props.machineStore.context.uiStatus}
               </span>
               </div>
-            <div class="flex items-center gap-4">
+            <div class="flex items-center gap-2 w-full sm:w-auto overflow-x-auto">
            
-                <div class="flex gap-2">
-                  <div class="bg-info/10 text-info px-3 py-1 rounded-full flex items-center gap-1 text-xs">
+                <div class="flex gap-2 flex-wrap">
+                  <div class="bg-info/10 text-info px-2 py-1 rounded-full flex items-center gap-1 text-xs whitespace-nowrap">
                     <i data-lucide="clock" class="w-3 h-3"></i>
-                    Time: {props.machineStore.context.consumedTime ? Math.round(props.machineStore.context.consumedTime / 60 * 10) / 10 : 0} / {props.machineStore.context.totalTime ? Math.round(props.machineStore.context.totalTime / 60 * 10) / 10 : 0} min
+                    <span class="hidden xs:inline">Time:</span> {props.machineStore.context.consumedTime ? Math.round(props.machineStore.context.consumedTime / 60 * 10) / 10 : 0} / {props.machineStore.context.totalTime ? Math.round(props.machineStore.context.totalTime / 60 * 10) / 10 : 0} min
                   </div>
-                  <div class="bg-warning/10 text-warning px-3 py-1 rounded-full flex items-center gap-1 text-xs">
+                  <div class="bg-warning/10 text-warning px-2 py-1 rounded-full flex items-center gap-1 text-xs whitespace-nowrap">
                     <i data-lucide="dollar-sign" class="w-3 h-3"></i>
-                    Credits: {props.machineStore.context.consumedCredits || 0} / {props.machineStore.context.totalCredits || 0}
+                    <span class="hidden xs:inline">Credits:</span> {props.machineStore.context.consumedCredits || 0} / {props.machineStore.context.totalCredits || 0}
                   </div>
                 </div>
             </div>
           </div>
         </div>
-        <div id="contentDiv" class="pb-20 px-4 max-w-6xl mx-auto space-y-6 h-[calc(100vh-14rem)] overflow-y-auto">
+        <div id="contentDiv" class="pb-20 px-0 md:px-2 max-w-full lg:max-w-6xl mx-auto space-y-4 md:space-y-6 min-h-[200px]">
 
            {/* Past Tasks */}
             <For each={sortedModels()}>

@@ -88,22 +88,22 @@ const Navbar = () => {
   return (
     <div
       ref={navbarRef}
-      class="navbar bg-base-100 border-b border-base-200 flex-shrink-0"
+      class="navbar bg-base-100 border-b border-base-200 flex-shrink-0 px-2 md:px-4"
       dir={currentLang() === "ar" ? "rtl" : "ltr"}
     >
-      <div class="navbar-start gap-2">
+      <div class="navbar-start gap-1 md:gap-2">
         <label
           for="my-drawer-4"
           class="btn btn-square btn-ghost p-1.5"
           aria-label="Toggle sidebar"
         >
-          <img src="/src/assets/favicon.svg" alt="Menu" class="w-6 h-6" />
+          <img src="/src/assets/favicon.svg" alt="Menu" class="w-5 h-5 md:w-6 md:h-6" />
         </label>
-        <div class="flex flex-col leading-tight">
-          <div class="flex items-center gap-2">
-            <span class="font-medium text-lg md:text-xl text-base-content/80 tracking-tight">iGate Accelerator</span>
+        <div class="flex flex-col leading-tight hidden xs:block">
+          <div class="flex items-center gap-1 md:gap-2">
+            <span class="font-medium text-sm md:text-lg text-base-content/80 tracking-tight">iGate Accelerator</span>
           </div>
-          <div class="flex items-center gap-2 mt-0.5">
+          <div class="flex items-center gap-1 md:gap-2 mt-0.5">
             <span class="text-xs md:text-sm text-base-content/60">AI-Powered Startup Builder</span>
             <span class="w-1 h-1 rounded-full bg-base-content/30 hidden md:block"></span>
             <span class="badge badge-primary badge-xs md:badge-sm">v1.0</span>
@@ -111,7 +111,7 @@ const Navbar = () => {
         </div>
       </div>
 
-      <div class="navbar-end gap-3">
+      <div class="navbar-end gap-1 md:gap-3">
         <label class="swap">
           <input
             id="langSwap"

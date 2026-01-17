@@ -171,13 +171,13 @@ const AgentInterface = (props) => { // Defensive checks for required props
                     props.agentBoxClass()
                 } ${
                     currentLang() === "ar" ? "rtl" : "ltr"
-                }`
-        }
-        style={
-          (props.startPressed && props.startPressed()) ||
-          (props.tasksList && props.tasksList().length > 0 && props.machineStore.context?.currentStep !== 'done')
-            ? "position: absolute !important; bottom: 10px !important; left: 50% !important; transform: translateX(-50%) !important; width: calc(100% - 40px) !important; max-width: 56rem !important; z-index: 50 !important;" : ""
-        }>
+                } w-full`
+            }
+            style={
+              (props.startPressed && props.startPressed()) ||
+              (props.tasksList && props.tasksList().length > 0)
+                ? "position: fixed !important; bottom: 10px !important; left: 50% !important; transform: translateX(-50%) !important; width: calc(100% - 40px) !important; max-width: 56rem !important; z-index: 50 !important;" : ""
+            }>
 
             <div id="agentContent"
                 class={
@@ -212,11 +212,11 @@ const AgentInterface = (props) => { // Defensive checks for required props
                         class=" card"
                         onMouseEnter={handleCardHover}
                         onMouseLeave={handleCardLeave}>
-                        <div class="card-body relative p-4 !gap-0">
+                        <div class="card-body relative p-0 !gap-0">
                               <Show when={
                                   props.currentProjectId && props.currentProjectId() !== null &&
                                   (props.startPressed && props.startPressed() ||
-                                   (props.tasksList && props.tasksList().length > 0 && props.machineStore.context?.currentStep !== 'done'))
+                                   (props.tasksList && props.tasksList().length > 0))
                               }>
                                  <ProgressAccordion machineStore={
                                          props.machineStore
@@ -264,7 +264,7 @@ const AgentInterface = (props) => { // Defensive checks for required props
                                         id="promptTextarea"
                                         class={
                                             `   text-base-content text-lg  w-full  focus:ring-0 active:ring-0 ${
-                                                props.machineStore.state !== "idle" ? "opacity-50 cursor-not-allowed" : ""
+                                                props.machineStore.state === "processing" ? "opacity-50 cursor-not-allowed" : ""
                                             }`
                                         }
                                         style="resize: none; overflow: hidden; min-height: 3rem; box-sizing: border-box;"
@@ -287,7 +287,7 @@ const AgentInterface = (props) => { // Defensive checks for required props
                                             (e) => {
                                                 if (e.key === "Enter" && !e.shiftKey) {
                                                     e.preventDefault();
-                                                    if (props.machineStore && props.machineStore.state === "idle") {
+                                                    if (props.machineStore && (props.machineStore.state === "idle" || props.machineStore.state === "completed")) {
                                                         handleButtonPress(e.target.closest("form").querySelector('button[type="button"]:last-child'),);
                                                         props.handleStart && props.handleStart();
                                                     }
@@ -295,8 +295,8 @@ const AgentInterface = (props) => { // Defensive checks for required props
                                             }
                                         }
                                         disabled={
-                                            props.machineStore ? props.machineStore.state !== "idle" : true
-                                    }></textarea>
+                                            props.machineStore ? props.machineStore.state === "processing" : true
+                                        }></textarea>
                             <Show when={
                                 props.machineStore && props.machineStore.state === "pause"
                             }>
@@ -317,7 +317,7 @@ const AgentInterface = (props) => { // Defensive checks for required props
                                 class="flex justify-between items-center mt-2">
                                 <div class="flex gap-2">
                                     <Show when={
-                                        props.machineStore && props.machineStore.state === "idle"
+                                        props.machineStore && (props.machineStore.state === "idle" || props.machineStore.state === "completed")
                                     }>
                                         <button type="button"
                                             onClick={
@@ -364,7 +364,7 @@ const AgentInterface = (props) => { // Defensive checks for required props
                                 </div>
                                 <div class="flex gap-2">
                                     <Show when={
-                                        props.machineStore && props.machineStore.state === "idle"
+                                        props.machineStore && (props.machineStore.state === "idle" || props.machineStore.state === "completed")
                                     }>
                                         <button type="button"
                                             onClick={

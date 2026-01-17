@@ -23,14 +23,16 @@ const ProgressAccordion = (props) => {
             { name: 'Legal Model', icon: 'scale', color: 'warning', order: 8 }
         ];
 
-        const completedSteps = props.machineStore.context.completedSteps || 0;
-        const currentStep = props.machineStore.context.currentStep || 'system';
-        const currentModel = props.machineStore.context.currentModel || 'System';
+        // Get values from machineStore or fallback to project data
+        const completedSteps = props.machineStore.context.completedSteps ?? props.project?.completed_steps ?? props.project?.total_steps ?? 0;
+        const currentStep = props.machineStore.context.currentStep || props.project?.current_step || props.project?.status || 'system';
+        const currentModel = props.machineStore.context.currentModel || props.project?.current_model || 'System';
+        const isProjectCompleted = currentStep === 'done' || props.machineStore.state === 'completed' || completedSteps >= 60;
 
         return models.map(model => {
             const threshold = modelCumul[model.name] || 0;
-            const isCompleted = completedSteps >= threshold;
-            const isCurrent = currentModel === model.name;
+            const isCompleted = isProjectCompleted || completedSteps >= threshold;
+            const isCurrent = currentModel === model.name && !isProjectCompleted;
             
             return {
                 ...model,
@@ -50,13 +52,16 @@ const ProgressAccordion = (props) => {
             { name: 'Valuation Report', icon: 'file-text', color: 'primary', order: 2 }
         ];
 
-        const completedSteps = props.machineStore.context.completedSteps || 0;
-        const currentModel = props.machineStore.context.currentModel || 'System';
+        // Get values from machineStore or fallback to project data
+        const completedSteps = props.machineStore.context.completedSteps ?? props.project?.completed_steps ?? props.project?.total_steps ?? 0;
+        const currentModel = props.machineStore.context.currentModel || props.project?.current_model || 'System';
+        const currentStep = props.machineStore.context.currentStep || props.project?.current_step || props.project?.status || 'system';
+        const isProjectCompleted = currentStep === 'done' || props.machineStore.state === 'completed' || completedSteps >= 60;
 
         return reports.map(report => {
             const threshold = modelCumul[report.name] || 0;
-            const isCompleted = completedSteps >= threshold;
-            const isCurrent = currentModel === report.name;
+            const isCompleted = isProjectCompleted || completedSteps >= threshold;
+            const isCurrent = currentModel === report.name && !isProjectCompleted;
             
             return {
                 ...report,
@@ -68,26 +73,43 @@ const ProgressAccordion = (props) => {
     });
 
     const currentStepNumber = createMemo(() => {
-        const completed = props.machineStore.context?.completedSteps || 0;
-        const current = props.machineStore.context?.currentStep || 'system';
+        const completed = props.machineStore.context?.completedSteps || props.project?.completed_steps || 0;
+        const current = props.machineStore.context?.currentStep || props.project?.current_step || 'system';
         if (current === 'done') return TOTAL_STEPS;
         if (current === 'system') return 0;
         return completed;
     });
 
     const progressValue = createMemo(() => {
-        const progress = props.machineStore.context?.uiProgress || 0;
+        const currentStep = props.machineStore.context?.currentStep || props.project?.current_step || 'system';
+        if (currentStep === 'done' || props.machineStore.state === 'completed') {
+            return 100;
+        }
+        const progress = props.machineStore.context?.uiProgress || props.project?.ui_progress || 0;
         return isFinite(progress) ? progress : 0;
     });
 
-    const canResume = createMemo(() => {
-        return props.machineStore.state === 'pause' || 
-               (props.machineStore.state === 'processing' && props.machineStore.context?.uiStatus === 'paused');
+    const canPause = createMemo(() => {
+        const uiStatus = props.machineStore.context?.uiStatus || props.project?.ui_status || 'idle';
+        const currentStep = props.machineStore.context?.currentStep || props.project?.current_step || 'system';
+        const isCompleted = currentStep === 'done' || props.machineStore.state === 'completed';
+        // Show pause when processing and not completed
+        return props.machineStore.state === 'processing' && !isCompleted;
     });
 
-    const canPause = createMemo(() => {
-        return props.machineStore.state === 'processing' && 
-               props.machineStore.context?.uiStatus === 'processing';
+    const canResume = createMemo(() => {
+        const currentStep = props.machineStore.context?.currentStep || props.project?.current_step || 'system';
+        const isCompleted = currentStep === 'done' || props.machineStore.state === 'completed';
+        // Show resume when paused or idle with progress and not completed
+        return (props.machineStore.state === 'pause' || props.machineStore.state === 'idle') && !isCompleted;
+    });
+
+    const canRestart = createMemo(() => {
+        const currentStep = props.machineStore.context?.currentStep || props.project?.current_step || 'system';
+        const isCompleted = currentStep === 'done' || props.machineStore.state === 'completed';
+        const completedSteps = props.machineStore.context?.completedSteps || props.project?.completed_steps || 0;
+        // Show restart when completed OR idle with progress
+        return (isCompleted || completedSteps > 0) && props.machineStore.state !== 'processing';
     });
 
     onMount(() => {
@@ -104,11 +126,11 @@ const ProgressAccordion = (props) => {
                         () => props.setIsAccordionOpen && props.setIsAccordionOpen(!props.isAccordionOpen?.())
                     }/>
                 <div class="collapse-title font-semibold flex !p-2 items-center flex-wrap gap-2">
-                    <span class="badge bg-primary/10 badge-sm text-primary whitespace-nowrap">
+                    <span class={`badge badge-sm whitespace-nowrap ${currentStepNumber() >= TOTAL_STEPS ? 'bg-success/10 text-success' : 'bg-primary/10 text-primary'}`}>
                         iGate OS - Accelerator Agent: {currentStepNumber()} / {TOTAL_STEPS}
                     </span>
-                    <div class="flex px-4 w-full md:w-auto md:flex-1 gap-4 min-w-[200px]">
-                        <progress id="agent-progress" class="progress progress-primary h-2 w-full" 
+                    <div class="flex px-4 w-full md:w-auto md:flex-1 gap-4 min-w-[200px]  mr-6">
+                        <progress id="agent-progress" class={`progress h-2 w-full ${currentStepNumber() >= TOTAL_STEPS ? 'progress-success' : 'progress-primary'}`} 
                             value={progressValue()}
                             max="100"></progress>
                         <span class="text-xs whitespace-nowrap self-center">{Math.round(progressValue())}%</span>
@@ -131,8 +153,7 @@ const ProgressAccordion = (props) => {
                                                             <i data-lucide="circle-dot-dashed" class={`w-5 h-5 text-primary animate-pulse`}></i> :
                                                             <i data-lucide="circle-minus" class={`w-5 h-5 text-base-content/30`}></i>}
                                                     </span>
-                                                    <span class={`label-text flex items-center gap-1 text-sm ${model.checked ? 'text-success font-medium' : model.current ? 'text-primary font-semibold' : 'text-base-content/50'}`}>
-                                                        <i data-lucide={model.icon} class="w-3 h-3"></i>
+                                                    <span class={`label-text text-sm ${model.checked ? 'text-success font-medium' : model.current ? 'text-primary font-semibold' : 'text-base-content/50'}`}>
                                                         {model.name}
                                                     </span>
                                                 </label>
@@ -153,8 +174,7 @@ const ProgressAccordion = (props) => {
                                                             <i data-lucide="circle-dot-dashed" class={`w-5 h-5 text-primary animate-pulse`}></i> :
                                                             <i data-lucide="circle-minus" class={`w-5 h-5 text-base-content/30`}></i>}
                                                     </span>
-                                                    <span class={`label-text flex items-center gap-1 text-sm ${report.checked ? 'text-success font-medium' : report.current ? 'text-primary font-semibold' : 'text-base-content/50'}`}>
-                                                        <i data-lucide={report.icon} class="w-3 h-3"></i>
+                                                    <span class={`label-text text-sm ${report.checked ? 'text-success font-medium' : report.current ? 'text-primary font-semibold' : 'text-base-content/50'}`}>
                                                         {report.name}
                                                     </span>
                                                 </label>
@@ -167,7 +187,7 @@ const ProgressAccordion = (props) => {
                     </div>
                 </div>
                 <div class="flex items-center justify-end gap-2 ml-4 flex-wrap">
-                    <Show when={props.machineStore.context?.uiStatus === 'completed'}>
+                    <Show when={currentStepNumber() >= TOTAL_STEPS}>
                         <span class="badge badge-success gap-1">
                             <i data-lucide="check-circle" class="w-3 h-3"></i>
                             Complete
@@ -192,7 +212,7 @@ const ProgressAccordion = (props) => {
                         </button>
                     </Show>
 
-                    <Show when={props.machineStore.state === 'idle' && props.machineStore.context?.completedSteps > 0}>
+                    <Show when={canRestart()}>
                         <button type="button"
                             onClick={props.handleStart}
                             class="bg-primary/10 text-primary px-3 py-1.5 rounded-full flex items-center gap-1.5 text-xs hover:bg-primary/20 transition cursor-pointer">

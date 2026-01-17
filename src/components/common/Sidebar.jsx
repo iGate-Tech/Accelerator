@@ -8,8 +8,6 @@ import { translations } from "../../assets/translations/translations-index.js";
 import { getProjects, updateProject, deleteProject, deleteAllProjects, exportAllProjects, exportAllData, exportProject, exportReports, getUserNotifications, getCreditBalance, getUserSubscription } from "../../lib/db";
 import { toastManager } from "../../lib/feedback";
 import logger from "../../lib/logger.js";
-
-
 const Sidebar = () => {
   logger.trace('Sidebar: Starting');
   const { lang } = useContext(LangContext);
@@ -26,9 +24,7 @@ const Sidebar = () => {
   const [subscription, setSubscription] = createSignal({ plan: 'free' });
    const [projectsCount, setProjectsCount] = createSignal(0);
    const [projectsOpen, setProjectsOpen] = createSignal(true);
-
   const navbarT = t;
-
   const downloadJSON = (data, filename) => {
     const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
@@ -40,7 +36,6 @@ const Sidebar = () => {
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
   };
-
   const loadNotifications = async () => {
     const userId = user()?.id;
     if (!userId) return;
@@ -63,7 +58,6 @@ const Sidebar = () => {
       logger.warn('Failed to load sidebar data:', error.message);
     }
   };
-
   const filteredProjects = createMemo(() => {
     const projs = projects();
     if (!Array.isArray(projs)) return [];
@@ -73,7 +67,6 @@ const Sidebar = () => {
       project && typeof project === 'object' && project.name && typeof project.name === 'string' && project.name.toLowerCase().includes(query)
     );
   });
-
   const loadProjects = async () => {
     try {
       const currentUser = user();
@@ -91,11 +84,9 @@ const Sidebar = () => {
       setProjects([]);
     }
   };
-
   const handleProjectAction = async (action, projectId, newName = null) => {
     const project = projects().find(p => p.id === projectId);
     if (!project) return;
-
     switch (action) {
       case 'rename':
         if (newName && newName.trim()) {
@@ -105,7 +96,6 @@ const Sidebar = () => {
           await loadProjects();
         }
         break;
-
       case 'delete':
         const confirmed = await confirmDelete(project.name);
         if (confirmed) {
@@ -115,16 +105,13 @@ const Sidebar = () => {
           await loadProjects();
         }
         break;
-
       case 'open':
         window.dispatchEvent(new CustomEvent('openProject', { detail: projectId }));
         break;
-
       default:
         logger.debug('Unknown action:', action);
     }
   };
-
   const handleDeleteAllProjects = async () => {
     const confirmed = await confirmDelete(t().allProjects, "All projects will be permanently deleted.");
     if (confirmed) {
@@ -133,7 +120,6 @@ const Sidebar = () => {
       await loadProjects();
     }
   };
-
   const handleExportAllProjects = async () => {
     const currentUser = user();
     if (!currentUser) return;
@@ -146,18 +132,12 @@ const Sidebar = () => {
       toastManager.error(t().exportAllProjects + ' ' + t().failed);
     }
   };
-
   const onProjectAdded = async () => {
     await loadProjects();
   };
   const onProjectUpdated = async () => {
     await loadProjects();
   };
-
-
-
-
-
   onMount(async () => {
     await loadProjects();
     await loadNotifications();
@@ -166,33 +146,27 @@ const Sidebar = () => {
     if (window.lucide) {
       window.lucide.createIcons();
     }
-
     // User dropdown is always anchored above (footer menu pattern)
   });
-
   onCleanup(() => {
     window.removeEventListener('projectAdded', onProjectAdded);
     window.removeEventListener('projectUpdated', onProjectUpdated);
   });
-
   createEffect(() => {
     const newLang = lang();
     setLang(newLang);
   });
-
   createEffect(() => {
     const currentUser = user();
     if (currentUser && currentUser.id) {
       loadProjects();
     }
   });
-
   createEffect(() => {
     if (!isCollapsed() && window.lucide) {
       window.lucide.createIcons();
     }
   });
-
   return (
     <aside
       class={`sidebar h-screen bg-base-100 border-e border-base-300 flex flex-col z-[55] transition-all duration-300 ease-in-out overflow-hidden ${currentLang() === 'ar' ? 'rtl' : ''}`}
@@ -268,7 +242,6 @@ const Sidebar = () => {
                  </Show>
                </A>
              </li>
-
          
           </ul>
         <ul class="menu w-full gap-1">
@@ -291,7 +264,6 @@ const Sidebar = () => {
                       <i data-lucide="more-vertical" class="w-3 h-3"></i>
                     </button>
                   </summary>
-
                   <div
                     class="dropdown menu w-full min-w-56 rounded-box bg-base-100 shadow-lg border border-base-200 mt-1"
                     popover
@@ -328,7 +300,6 @@ const Sidebar = () => {
                       </a>
                     </li>
                   </div>
-
                   <div class="px-3 py-2">
                     <div class="relative">
                       <input
@@ -408,12 +379,10 @@ const Sidebar = () => {
             </Show>
         </ul>
         </div>
-
         
           <div class="flex-shrink-0 border-t border-base-200">
             <ul class="menu w-full gap-1">
         <Show when={isAuthenticated() && !isCollapsed()}>
-
               <li>
     <details class="w-full">
    <summary
@@ -466,35 +435,30 @@ const Sidebar = () => {
      <li class="menu-title px-3 py-2 border-b border-base-200">
        <span>{user()?.profile?.name ?? 'User'}</span>
      </li>
-
      <li>
        <A href="/profile" class="flex items-center gap-2">
          <i data-lucide="user" class="w-4 h-4"></i>
          {navbarT().profile || 'Profile'}
        </A>
      </li>
-
      <li>
        <A href="/settings" class="flex items-center gap-2">
          <i data-lucide="settings" class="w-4 h-4"></i>
          {navbarT().settings || 'Settings'}
        </A>
      </li>
-
      <li>
        <A href="/packages" class="flex items-center gap-2">
          <i data-lucide="crown" class="w-4 h-4 text-accent"></i>
          {navbarT().packages || 'Packages'}
        </A>
      </li>
-
       <li>
         <A href="/billing" class="flex items-center gap-2">
           <i data-lucide="credit-card" class="w-4 h-4"></i>
           {navbarT().billingLabel || 'Billing'}
         </A>
       </li>
-
       <li>
         <A href="/credits" class="flex items-center gap-2">
           <i data-lucide="coins" class="w-4 h-4 text-yellow-500"></i>
@@ -538,7 +502,6 @@ const Sidebar = () => {
                   </Show>
                 </A>
               </li>
-
               <li>
                 <button
                   classList={{
@@ -561,7 +524,6 @@ const Sidebar = () => {
                   </Show>
                 </button>
               </li>
-
               <li>
                 <button
                   classList={{
@@ -590,5 +552,4 @@ const Sidebar = () => {
     </aside>
   );
 };
-
 export default Sidebar;

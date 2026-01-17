@@ -1,7 +1,9 @@
-import { For, Show, onMount, createEffect, createSignal, createMemo } from "solid-js";
+import { For, Show, onMount, createEffect, createSignal, createMemo, useContext } from "solid-js";
 import { marked } from "marked";
 import { renderFilledTemplate } from "../../lib/llm-template";
 import { sectionMap, stepNames, modelMap } from "../../lib/machine";
+import { LangContext } from "../../context/LangContext";
+import { uiTranslations } from "../../assets/translations/translations-index.js";
 import logger from "../../lib/logger.js";
 
 
@@ -105,6 +107,21 @@ const getStateIcon = (state) => {
 /* ---------- Component ---------- */
 
 const ResponseSection = (props) => {
+  const { lang } = useContext(LangContext) || { lang: () => 'ar' };
+  const [currentLang, setCurrentLang] = createSignal(lang());
+
+  // Reactive translation function
+  const t = createMemo(() => {
+    const langKey = currentLang();
+    return uiTranslations[langKey] || uiTranslations.ar;
+  });
+
+  createEffect(() => {
+    if (lang) {
+      setCurrentLang(lang());
+    }
+  });
+
   const startPressedCondition = props.startPressed && props.startPressed();
   const tasksCondition = props.tasksList && props.tasksList().length > 0;
   const shouldShow = startPressedCondition || tasksCondition;
@@ -162,7 +179,7 @@ const ResponseSection = (props) => {
                   </div>
                   <div class="bg-warning/10 text-warning px-2 py-1 rounded-full flex items-center gap-1 text-xs whitespace-nowrap">
                     <i data-lucide="dollar-sign" class="w-3 h-3"></i>
-                    <span class="hidden xs:inline">Credits:</span> {props.machineStore.context.consumedCredits || 0} / {props.machineStore.context.totalCredits || 0}
+                    <span class="hidden xs:inline">{t().credits}:</span> {props.machineStore.context.consumedCredits || 0} / {props.machineStore.context.totalCredits || 0}
                   </div>
                 </div>
             </div>
@@ -234,9 +251,9 @@ const ResponseSection = (props) => {
 
                     <span class="bg-violet-900 text-violet-100 dark:bg-violet-100/10 dark:text-violet-500 px-3 py-1 rounded-full flex items-center gap-1 text-xs">
                       <i data-lucide="list" class="w-3 h-3"></i>
-                      <span class="hidden sm:inline">{task.step_name || "Unknown"}</span>
-                    </span>
-                     <div class="ml-auto mr-5 flex items-center gap-2">
+                     <span class="hidden sm:inline">{task.step_name || "Unknown"}</span>
+                     </span>
+                      <div class="ms-auto me-5 flex items-center gap-2">
                        <button type="button" onClick={() => props.handleImprove()} class="bg-primary/10 text-primary px-3 py-1 rounded-full flex items-center gap-1 text-xs hover:bg-primary/20 transition cursor-pointer">
                          <i data-lucide="sparkles" class="w-3 h-3"></i>
                          <span class="hidden sm:inline">Improve with AI </span>
@@ -327,7 +344,7 @@ const ResponseSection = (props) => {
 
               <div class="flex items-center px-4 py-3 bg-base-300/30 text-sm opacity-70">
                 <span class="animate-pulse">Streaming…</span>
-                <span class="ml-auto text-xs">
+                <span class="ms-auto text-xs">
                   {props.machineStore.context.currentModel}
                 </span>
               </div>

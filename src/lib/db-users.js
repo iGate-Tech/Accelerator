@@ -104,7 +104,7 @@ export async function _createUserProfile({ userId, profileData = {} }) {
           userId,
           String(profileData.name || ''),
           String(profileData.email || ''),
-          String(profileData.avatar || '/src/assets/avatar.png'),
+          String(profileData.avatar || ''),
           String(profileData.bio || ''),
           JSON.stringify(profileData.preferences || {
             notifications: { email: true, browser: false, projectUpdates: true },

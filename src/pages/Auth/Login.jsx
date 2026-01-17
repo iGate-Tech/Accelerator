@@ -121,13 +121,13 @@ const Login = () => {
                    autocomplete="current-password"
                    required
                  />
-                <button
-                  type="button"
-                  class="absolute right-3 top-1/2 -translate-y-1/2 btn btn-ghost btn-sm btn-circle"
-                  onClick={() => setShowPassword(!showPassword())}
-                  aria-label={showPassword() ? "Hide password" : "Show password"}
-                  ref={eyeButton}
-                >
+                 <button
+                   type="button"
+                   class="absolute end-3 top-1/2 -translate-y-1/2 btn btn-ghost btn-sm btn-circle"
+                   onClick={() => setShowPassword(!showPassword())}
+                   aria-label={showPassword() ? "Hide password" : "Show password"}
+                   ref={eyeButton}
+                 >
                   <i data-lucide={showPassword() ? "eye-off" : "eye"} class="w-4 h-4"></i>
                 </button>
               </div>

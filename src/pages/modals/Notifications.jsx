@@ -1,4 +1,4 @@
-import { createSignal, createResource, onMount, createEffect, useContext } from "solid-js";
+import { createSignal, createResource, createMemo, onMount, createEffect, useContext } from "solid-js";
 import { LangContext } from "../../context/LangContext";
 import { translations } from "../../assets/translations/translations-index.js";
 import { useUser } from "../../context/UserContext";
@@ -39,13 +39,13 @@ const Notifications = () => {
     }
   );
 
-  const t = () => translations[currentLang()];
+   const t = createMemo(() => translations[currentLang()]);
 
   const timeAgo = (date) => {
     const now = new Date();
     const diff = now - date;
     const minutes = Math.floor(diff / 60000);
-    if (minutes < 1) return 'Just now';
+    if (minutes < 1) return t().justNow || 'Just now';
     if (minutes < 60) return `${minutes}m ago`;
     const hours = Math.floor(minutes / 60);
     if (hours < 24) return `${hours}h ago`;
@@ -105,7 +105,7 @@ const Notifications = () => {
           <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
         </div>
       }>
-        <div class="flex items-center justify-between mb-6">
+          <div class="flex items-center justify-between mb-6">
           <h1 class="text-3xl font-bold text-base-content">{t().notifications} ({(notifications() || []).length})</h1>
           <div class="flex gap-2">
             <button
@@ -114,17 +114,17 @@ const Notifications = () => {
               disabled={!((notifications() || []).some(n => !n.read))}
             >
               <i data-lucide="check-circle" class="w-4 h-4"></i>
-              Mark All as Read
+              {t().markAllRead}
             </button>
           </div>
         </div>
 
         <div class="tabs tabs-boxed mb-6">
           <a class={`tab ${filter() === 'all' ? 'tab-active' : ''}`} onClick={() => setFilter('all')}>
-            All ({(notifications() || []).length})
+            {t().all} ({(notifications() || []).length})
           </a>
           <a class={`tab ${filter() === 'unread' ? 'tab-active' : ''}`} onClick={() => setFilter('unread')}>
-            Unread ({((notifications() || []).filter(n => !n.read)).length})
+            {t().unread} ({((notifications() || []).filter(n => !n.read)).length})
           </a>
         </div>
 
@@ -132,7 +132,7 @@ const Notifications = () => {
           {filteredNotifications().length === 0 ? (
             <div class="text-center py-12">
               <i data-lucide="bell-off" class="w-16 h-16 text-base-content/30 mx-auto mb-4"></i>
-              <p class="text-lg text-base-content/50">No notifications</p>
+              <p class="text-lg text-base-content/50">{t().noNotifications}</p>
             </div>
           ) : (
             filteredNotifications().map((notif) => (
@@ -165,14 +165,14 @@ const Notifications = () => {
                       <div class="flex items-center justify-between mb-2">
                         <h3 class="font-semibold text-base-content">
                           {notif.type === 'newMessage' || notif.type === 'message'
-                            ? 'New Message'
+                            ? t().newMessage
                             : notif.type === 'systemUpdate' || notif.type === 'system' || notif.type === 'update'
-                            ? 'System Update'
+                            ? t().systemUpdate
                             : notif.type === 'billing'
-                            ? 'Billing Update'
+                            ? t().billingUpdate
                             : notif.type === 'credits'
-                            ? 'Credit Update'
-                            : 'Notification'}
+                            ? t().creditsUpdate
+                            : t().notification}
                         </h3>
                         <span class="text-xs text-base-content/60">{timeAgo(notif.time)}</span>
                       </div>
@@ -186,7 +186,7 @@ const Notifications = () => {
                             class="btn btn-sm btn-outline"
                             onClick={() => markAsRead(notif.id)}
                           >
-                            Mark as Read
+                            {t().markAsRead}
                           </button>
                         )}
                       </div>

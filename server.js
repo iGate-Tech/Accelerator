@@ -135,12 +135,6 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.static(path.join(__dirname, 'dist'))); // For built files
 logger.debug('server.js: Static file directories configured:', path.join(__dirname, 'public'), path.join(__dirname, 'dist'));
 
-// Service worker
-app.get('/sw.js', (req, res) => {
-    logger.debug('server.js: Service worker requested, serving:', path.join(__dirname, 'public/sw.js'));
-    res.setHeader('Content-Type', 'application/javascript');
-    res.sendFile(path.join(__dirname, 'public/sw.js'));
-});
 
 // Health check and root route
 app.get('/', (req, res) => {

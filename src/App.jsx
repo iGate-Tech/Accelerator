@@ -1,6 +1,6 @@
 import { Router, Route, Navigate } from "@solidjs/router";
-import { lazy, Suspense, Show } from "solid-js";
-import { LangProvider } from "./context/LangContext";
+import { lazy, Suspense, Show, useContext } from "solid-js";
+import { LangProvider, LangContext } from "./context/LangContext";
 import { UserProvider, useUser } from "./context/UserContext";
 import ConfirmModal, { showConfirm, confirmDelete, confirmLogout, confirmReset, confirmDanger } from "./components/ui/GlobalConfirm";
 import MainLayout from "./components/common/MainLayout";
@@ -96,40 +96,48 @@ function ForgotPasswordPage() {
   return <ForgotPassword />;
 }
 
+const AppContent = () => {
+  const { langKey } = useContext(LangContext);
+  
+  return (
+    <UserProvider>
+      <ConfirmModal />
+      <Suspense fallback={<div class="flex items-center justify-center h-screen"><div class="loading loading-spinner loading-lg"></div></div>}>
+        <Router key={langKey()}>
+          <Route path="/auth" component={AuthLayout}>
+            <Route path="/login" component={LoginPage} />
+            <Route path="/signup" component={SignupPage} />
+            <Route path="/forgot-password" component={ForgotPasswordPage} />
+          </Route>
+          <Route path="/" component={MainLayout}>
+            <Route path="" component={HomePage} />
+            <Route path="dashboard" component={DashboardPage} />
+            <Route path="explore" component={ExplorePage} />
+            <Route path="portfolio" component={PortfolioPage} />
+            <Route path="help" component={Help} />
+            <Route path="profile" component={ProfilePage} />
+            <Route path="settings" component={SettingsPage} />
+            <Route path="packages" component={PackagesPage} />
+            <Route path="credits" component={CreditsPage} />
+            <Route path="billing" component={BillingPage} />
+            <Route path="invitations" component={InvitationsPage} />
+            <Route path="notifications" component={Notifications} />
+          </Route>
+          <Route path="/privacy-policy" component={PrivacyPolicy} />
+          <Route path="/terms-of-service" component={TermsOfService} />
+          <Route path="/status" component={StatusPage} />
+          <Route path="/changelog" component={Changelog} />
+          <Route path="*" component={() => <Navigate href="/" replace />} />
+        </Router>
+      </Suspense>
+    </UserProvider>
+  );
+};
+
 const App = () => {
   return (
     <LangProvider>
-      <UserProvider>
-        <ConfirmModal />
-        <Suspense fallback={<div class="flex items-center justify-center h-screen"><div class="loading loading-spinner loading-lg"></div></div>}>
-          <Router>
-            <Route path="/auth" component={AuthLayout}>
-              <Route path="/login" component={LoginPage} />
-              <Route path="/signup" component={SignupPage} />
-              <Route path="/forgot-password" component={ForgotPasswordPage} />
-            </Route>
-            <Route path="/" component={MainLayout}>
-              <Route path="" component={HomePage} />
-              <Route path="dashboard" component={DashboardPage} />
-              <Route path="explore" component={ExplorePage} />
-              <Route path="portfolio" component={PortfolioPage} />
-              <Route path="help" component={Help} />
-              <Route path="profile" component={ProfilePage} />
-              <Route path="settings" component={SettingsPage} />
-              <Route path="packages" component={PackagesPage} />
-              <Route path="credits" component={CreditsPage} />
-              <Route path="billing" component={BillingPage} />
-              <Route path="invitations" component={InvitationsPage} />
-              <Route path="notifications" component={Notifications} />
-            </Route>
-            <Route path="/privacy-policy" component={PrivacyPolicy} />
-            <Route path="/terms-of-service" component={TermsOfService} />
-            <Route path="/status" component={StatusPage} />
-            <Route path="/changelog" component={Changelog} />
-            <Route path="*" component={() => <Navigate href="/" replace />} />
-          </Router>
-        </Suspense>
-      </UserProvider>
+      <AppContent />
     </LangProvider>
   );
 };

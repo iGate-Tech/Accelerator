@@ -147,7 +147,7 @@ const ProjectCard = (props) => {
       <div class="card-body p-3 md:p-4">
         {/* Header with title and status */}
         <div class="flex justify-between items-start mb-2 md:mb-3 gap-2">
-          <h3 class="card-title text-sm md:text-base font-semibold line-clamp-2 flex-1 mr-2">
+          <h3 class="card-title text-sm md:text-base font-semibold line-clamp-2 flex-1 me-2">
             {project.name || 'Unnamed Project'}
           </h3>
           {showStatus && (
@@ -228,7 +228,7 @@ const ProjectCard = (props) => {
           <div class="absolute inset-0 bg-primary/5 rounded-lg flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity duration-200">
             <div class="flex flex-col gap-2">
               <div class="bg-primary text-base-100 px-3 py-1 rounded-full text-sm font-medium">
-                <i data-lucide="eye" class="w-4 h-4 mr-1 inline"></i>
+                <i data-lucide="eye" class="w-4 h-4 me-1 inline"></i>
                 View Project
               </div>
               {onRemove && (
@@ -236,7 +236,7 @@ const ProjectCard = (props) => {
                   class="bg-error text-base-100 px-3 py-1 rounded-full text-sm font-medium"
                   onClick={(e) => { e.stopPropagation(); onRemove(project); }}
                 >
-                  <i data-lucide="x" class="w-4 h-4 mr-1 inline"></i>
+                  <i data-lucide="x" class="w-4 h-4 me-1 inline"></i>
                   Remove from Group
                 </button>
               )}
@@ -245,7 +245,7 @@ const ProjectCard = (props) => {
                   class={`btn btn-sm ${isPublic() ? 'btn-success' : 'btn-outline'} px-3 py-1 rounded-full text-xs font-medium`}
                   onClick={(e) => { e.stopPropagation(); handleToggleVisibility(); }}
                 >
-                  <i data-lucide={isPublic() ? 'eye' : 'eye-off'} class="w-3 h-3 mr-1 inline"></i>
+                  <i data-lucide={isPublic() ? 'eye' : 'eye-off'} class="w-3 h-3 me-1 inline"></i>
                   {isPublic() ? 'Public' : 'Private'}
                 </button>
               )}

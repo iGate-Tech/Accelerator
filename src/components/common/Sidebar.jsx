@@ -35,7 +35,7 @@ const Sidebar = () => {
 
   const [currentLang, setCurrentLang] = createSignal(lang());
 
-  const t = () => translations[currentLang()];
+  const t = createMemo(() => translations[currentLang()]);
 
   // Computed values with debounced search
   const filteredProjects = createMemo(() => {
@@ -163,24 +163,22 @@ const Sidebar = () => {
       classList={{
         'w-64': !isCollapsed(),
         'w-16': isCollapsed(),
-        'border-e': currentLang() === 'en',
-        'border-s': currentLang() === 'ar'
       }}
-     >
-              <div class="relative mb-4">
-                <A href="/" onClick={(e) => { e.preventDefault(); setIsCollapsed(!isCollapsed()); }} class="cursor-pointer flex w-full">
-                     <img src={isCollapsed() ? "/src/assets/favicon.svg" : "/src/assets/iGate-tech-logo.svg"} alt="Logo" class={isCollapsed() ? "h-8 mt-4 mx-auto" : "h-8 mt-4 ml-8"} />
-                   </A>
-                <Show when={!isCollapsed()}>
-                  <button
-                    onClick={() => setIsCollapsed(true)}
-                    class="absolute top-4 right-4 btn btn-ghost btn-sm btn-circle"
-                    aria-label="Collapse sidebar"
-                  >
-                    <i data-lucide="chevron-left" class="w-4 h-4"></i>
-                  </button>
-                </Show>
-              </div>
+    >
+      <div class="relative mb-4">
+        <A href="/" onClick={(e) => { e.preventDefault(); setIsCollapsed(!isCollapsed()); }} class="cursor-pointer flex w-full">
+          <img src={isCollapsed() ? "/src/assets/favicon.svg" : "/src/assets/iGate-tech-logo.svg"} alt="Logo" class={isCollapsed() ? "h-8 mt-4 mx-auto" : "h-8 mt-4 ms-8"} />
+        </A>
+        <Show when={!isCollapsed()}>
+          <button
+            onClick={() => setIsCollapsed(true)}
+            class="absolute top-4 end-4 btn btn-ghost btn-sm btn-circle"
+            aria-label="Collapse sidebar"
+          >
+            <i data-lucide="chevron-left" class="w-4 h-4"></i>
+          </button>
+        </Show>
+      </div>
       <div class="p-4 ">
         <ul class="menu border border-base-200 rounded-box w-full mb-5">
               <li classList={{ "menu-active": location.pathname === "/" }}>
@@ -191,14 +189,14 @@ const Sidebar = () => {
                   <span class="font-medium" classList={{ 'lg:hidden': isCollapsed() }}>{t().newProject}</span>
                </A>
              </li>
-             <li classList={{ "menu-active": location.pathname === "/apps" }}>
-               <A href="/apps" class="flex items-center gap-3 px-4 py-3 hover:bg-base-300 transition-colors" classList={{ 'justify-center': isCollapsed(), 'justify-start': !isCollapsed() }} aria-label="Apps">
-                  <div class="p-1 rounded">
-                    <i data-lucide="grid" class="w-4 h-4 text-secondary" aria-hidden="true"></i>
-                  </div>
-                 <span class="font-medium" classList={{ 'lg:hidden': isCollapsed() }}>Apps</span>
-               </A>
-             </li>
+              <li classList={{ "menu-active": location.pathname === "/apps" }}>
+                <A href="/apps" class="flex items-center gap-3 px-4 py-3 hover:bg-base-300 transition-colors" classList={{ 'justify-center': isCollapsed(), 'justify-start': !isCollapsed() }} aria-label="Apps">
+                   <div class="p-1 rounded">
+                     <i data-lucide="grid" class="w-4 h-4 text-secondary" aria-hidden="true"></i>
+                   </div>
+                  <span class="font-medium" classList={{ 'lg:hidden': isCollapsed() }}>{t().apps}</span>
+                </A>
+              </li>
               <li classList={{ "menu-active": location.pathname === "/dashboard" }}>
                <A href="/dashboard" class="flex items-center gap-3 px-4 py-3 hover:bg-base-300 transition-colors" classList={{ 'justify-center': isCollapsed(), 'justify-start': !isCollapsed() }} aria-label={`Dashboard - ${t().dashboard}`}>
                  <div class="p-1 rounded">
@@ -216,13 +214,13 @@ const Sidebar = () => {
                </A>
              </li>
              <li classList={{ "menu-active": location.pathname === "/invitations" }}>
-               <A href="/invitations" class="flex items-center gap-3 px-4 py-3 hover:bg-base-300 transition-colors" classList={{ 'justify-center': isCollapsed(), 'justify-start': !isCollapsed() }} aria-label={`Collaborate - Invitations`}>
-                  <div class="p-1 rounded">
-                    <i data-lucide="users" class="w-4 h-4 text-info" aria-hidden="true"></i>
-                  </div>
-                 <span class="font-medium" classList={{ 'lg:hidden': isCollapsed() }}>Collaborate</span>
-               </A>
-             </li>
+                <A href="/invitations" class="flex items-center gap-3 px-4 py-3 hover:bg-base-300 transition-colors" classList={{ 'justify-center': isCollapsed(), 'justify-start': !isCollapsed() }} aria-label={`Collaborate - Invitations`}>
+                   <div class="p-1 rounded">
+                     <i data-lucide="users" class="w-4 h-4 text-info" aria-hidden="true"></i>
+                   </div>
+                  <span class="font-medium" classList={{ 'lg:hidden': isCollapsed() }}>{t().collaborate}</span>
+                </A>
+              </li>
              <li classList={{ "menu-active": location.pathname === "/explore" }}>
               <A href="/explore" class="flex items-center gap-3 px-4 py-3 hover:bg-base-300 transition-colors" classList={{ 'justify-center': isCollapsed(), 'justify-start': !isCollapsed() }} aria-label={`Explore project ideas - ${t().exploreIdeas}`}>
                 <div class="p-1 rounded">
@@ -261,14 +259,12 @@ const Sidebar = () => {
                 </button>
               </summary>
 
-              <div
-                class={`dropdown menu w-56 rounded-box bg-base-100 shadow-lg border border-base-200 ${
-                  currentLang() === 'ar' ? 'dropdown-start' : 'dropdown-end'
-                }`}
-                popover
-                id="popover-all-projects"
-                style="position-anchor:--anchor-all-projects"
-              >
+                <div
+                  class="dropdown menu w-56 rounded-box bg-base-100 shadow-lg border border-base-200"
+                  popover
+                  id="popover-all-projects"
+                  style="position-anchor:--anchor-all-projects"
+                >
                 <li>
                   <A
                     href="/"
@@ -300,30 +296,30 @@ const Sidebar = () => {
                 </li>
               </div>
 
-               <div class="px-4 pb-3" classList={{ 'lg:hidden': isCollapsed() }}>
-                 <div class="relative">
-                  <input
-                    type="text"
-                    placeholder={t().sidebarSearch}
-                    class="input input-bordered input-sm w-full pr-8"
-                    value={searchQuery()}
-                    onInput={(e) => setSearchQuery(e.target.value)}
-                  />
-                  <i data-lucide="search" class="absolute right-2 top-1/2 -translate-y-1/2 w-4 h-4 text-base-content/40"></i>
-                </div>
-               </div>
+                <div class="px-4 pb-3" classList={{ 'lg:hidden': isCollapsed() }}>
+                  <div class="relative">
+                    <input
+                      type="text"
+                      placeholder={t().sidebarSearch}
+                      class="input input-bordered input-sm w-full pe-8"
+                      value={searchQuery()}
+                      onInput={(e) => setSearchQuery(e.target.value)}
+                    />
+                    <i data-lucide="search" class="absolute top-1/2 -translate-y-1/2 end-2 w-4 h-4 text-base-content/40"></i>
+                  </div>
+                 </div>
                <div>
                  <For each={filteredProjects()}>
                   {(project) => (
                      <li>
                           <div class="flex justify-between items-center px-4 py-2 hover:bg-base-300 rounded-lg transition-colors cursor-pointer" classList={{ 'justify-center': isCollapsed() }}>
-                            <span onclick={() => { logger.debug('Opening project:', project.id); window.dispatchEvent(new CustomEvent('openProject', { detail: project.id })); }} class="flex items-center w-full">
-                              <div class="rounded mr-2 flex-shrink-0">
-                                <i data-lucide="folder" class="w-4 h-4 text-base-content/60"></i>
-                              </div>
-                               <span
-                                 class="ml-2"
-                                 classList={{ 'lg:hidden': isCollapsed() }}
+                             <span onclick={() => { logger.debug('Opening project:', project.id); window.dispatchEvent(new CustomEvent('openProject', { detail: project.id })); }} class="flex items-center w-full">
+                               <div class="rounded me-2 flex-shrink-0">
+                                 <i data-lucide="folder" class="w-4 h-4 text-base-content/60"></i>
+                               </div>
+                                <span
+                                  class="ms-2"
+                                  classList={{ 'lg:hidden': isCollapsed() }}
                                  data-project-id={project.id}
                                  contentEditable={editingProjectId() === project.id}
                                  onBlur={(e) => {
@@ -353,7 +349,7 @@ const Sidebar = () => {
                              <i data-lucide="more-vertical" class="w-4 h-4"></i>
                            </button>
                           </div>
-                       <ul class="dropdown menu w-52 rounded-box bg-base-100 shadow-sm" popover id={`popover-project-${project.id}`} style={`position-anchor:--anchor-project-${project.id}`}>
+                        <ul class="dropdown menu w-52 rounded-box bg-base-100 shadow-sm" popover id={`popover-project-${project.id}`} style={`position-anchor:--anchor-project-${project.id}`}>
                         <li><a onclick={() => { setEditingProjectId(project.id); setTimeout(() => { const span = document.querySelector(`[data-project-id="${project.id}"]`); if (span) { span.focus(); const range = document.createRange(); range.selectNodeContents(span); const sel = window.getSelection(); sel.removeAllRanges(); sel.addRange(range); } }, 0); }}><i data-lucide="edit" class="w-4 h-4"></i>{t().rename}</a></li>
                         <li><a onclick={() => handleProjectAction('delete', project.id)}><i data-lucide="trash" class="w-4 h-4"></i>{t().delete}</a></li>
                          <li><a onclick={async () => { try { const data = await exportProject(project.id); downloadJSON(data, `${project.name}-project.json`); toastManager.success(t().exportProject + ' ' + t().successful); } catch (error) { toastManager.error(t().exportProject + ' ' + t().failed); } }}><i data-lucide="download" class="w-4 h-4"></i>{t().exportProject}</a></li>
@@ -371,7 +367,7 @@ const Sidebar = () => {
                       <div class="text-sm text-base-content/60 mb-4 text-center" classList={{ 'lg:hidden': isCollapsed() }}>
                         {searchQuery() ? t().tryAdjustingSearch : t().createFirstProject}
                       </div>
-                      <button class="btn btn-primary btn-sm" onClick={() => window.dispatchEvent(new CustomEvent('resetAgent'))} classList={{ 'lg:hidden': isCollapsed() }}>Create Task</button>
+                      <button class="btn btn-primary btn-sm" onClick={() => window.dispatchEvent(new CustomEvent('resetAgent'))} classList={{ 'lg:hidden': isCollapsed() }}>{t().createTask}</button>
                    </li>
                  </Show>
               </div>

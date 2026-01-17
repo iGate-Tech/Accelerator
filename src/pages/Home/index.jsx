@@ -89,7 +89,7 @@ const TasksContent = () => {
     const activityLogger = useActivityLogger();
     const [currentLang, setCurrentLang] = createSignal(lang());
 
-    const t = () => translations[currentLang()];
+    const t = createMemo(() => translations[currentLang()]);
 
     createEffect(() => {
         setCurrentLang(lang());

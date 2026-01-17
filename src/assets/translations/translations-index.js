@@ -3,6 +3,8 @@ import logger from '../../lib/logger.js';
 // Main translations index
 import { navigationTranslations } from './translations-common.js';
 import { commonTranslations } from './translations-common.js';
+import { uiTranslations } from './translations-ui.js';
+import { navbarTranslations } from './translations-navbar.js';
 import { exploreTranslations } from './translations-explore.js';
 import { portfolioTranslations } from './translations-portfolio.js';
 import { dashboardTranslations } from './translations-dashboard.js';
@@ -23,6 +25,8 @@ import { changelogTranslations } from './translations-changelog.js';
 // Exports
 export { navigationTranslations };
 export { commonTranslations };
+export { uiTranslations };
+export { navbarTranslations };
 export { exploreTranslations };
 export { portfolioTranslations };
 export { dashboardTranslations };
@@ -44,6 +48,8 @@ export const translations = {
   en: {
     ...navigationTranslations.en,
     ...commonTranslations.en,
+    ...uiTranslations.en,
+    ...navbarTranslations.en,
     ...exploreTranslations.en,
     ...portfolioTranslations.en,
     ...dashboardTranslations.en,
@@ -64,6 +70,8 @@ export const translations = {
   ar: {
     ...navigationTranslations.ar,
     ...commonTranslations.ar,
+    ...uiTranslations.ar,
+    ...navbarTranslations.ar,
     ...exploreTranslations.ar,
     ...portfolioTranslations.ar,
     ...dashboardTranslations.ar,

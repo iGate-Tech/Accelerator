@@ -158,7 +158,7 @@ const Dashboard = () => {
         fallback={
           <div class="flex justify-center items-center py-16">
             <div class="loading loading-spinner loading-lg"></div>
-            <span class="ml-4 text-lg">{t().loadingDashboard}</span>
+            <span class="ms-4 text-lg">{t().loadingDashboard}</span>
           </div>
         }
       >
@@ -221,7 +221,7 @@ const Dashboard = () => {
                 <h2 class="text-lg md:text-xl font-bold">{t().recentProjects}</h2>
                 <A href="/explore" class="btn btn-ghost btn-sm">
                   {t().viewAll}
-                  <i data-lucide="arrow-right" class="w-4 h-4 ml-1"></i>
+                  <i data-lucide="arrow-right" class="w-4 h-4 ms-1"></i>
                 </A>
               </div>
 
@@ -323,7 +323,7 @@ const Dashboard = () => {
                 <div class="flex items-center justify-between text-xs md:text-sm">
                   <span class="flex items-center gap-1">
                     <i data-lucide="clock" class="w-3 h-3 md:w-4 md:h-4"></i>
-                    Time Invested
+                    {t().timeInvested}
                   </span>
                   <span>{formatTime(stats().totalTimeConsumed)}</span>
                 </div>

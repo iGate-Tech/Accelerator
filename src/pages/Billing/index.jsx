@@ -67,15 +67,15 @@ const Billing = () => {
     a.download = `invoice-${invoice.id}.json`;
     a.click();
     URL.revokeObjectURL(url);
-    toastManager.success(`Invoice ${invoice.id} downloaded`);
+    toastManager.success(t().invoiceDownloaded.replace('{id}', invoice.id));
   };
 
   const handleUpdatePaymentMethod = () => {
-    toastManager.info('Payment methods are managed locally. Add payment details when ready.');
+    toastManager.info(t().paymentMethodManaged);
   };
 
   const handleAddPaymentMethod = () => {
-    toastManager.info('Payment method storage available. In production, integrate with payment provider.');
+    toastManager.info(t().addPaymentMethodStorage);
   };
 
   const currentPlan = () => user()?.subscription?.plan || 'free';
@@ -95,12 +95,12 @@ const Billing = () => {
    });
 
   return (
-    <div class={`max-w-6xl mx-auto space-y-8 px-4 sm:px-6 ${currentLang() === 'ar' ? 'rtl' : 'ltr'}`}>
+    <div class="max-w-6xl mx-auto space-y-8 px-4 sm:px-6">
       {/* Header */}
       <div class="text-center">
-        <h1 class="text-3xl sm:text-4xl font-bold text-base-content mb-4">Billing</h1>
+        <h1 class="text-3xl sm:text-4xl font-bold text-base-content mb-4">{t().billingPayments}</h1>
         <p class="text-base sm:text-lg text-base-content/70">
-          Manage your billing information and payment methods
+          {t().manageSubscription}
         </p>
       </div>
 
@@ -111,9 +111,9 @@ const Billing = () => {
             <h2 class="card-title justify-center text-2xl font-bold text-primary">
               {currentPlan().toUpperCase()}
             </h2>
-            <p class="text-base-content/70">Current Plan</p>
+            <p class="text-base-content/70">{t().currentPlan}</p>
             <p class="text-sm text-base-content/60 mt-2">
-              {billingCycle()} billing
+              {billingCycle()} {t().billingCycle}
             </p>
           </div>
         </div>
@@ -123,9 +123,9 @@ const Billing = () => {
             <h2 class="card-title justify-center text-2xl font-bold text-success">
               ${user()?.subscription?.price || 0}
             </h2>
-            <p class="text-base-content/70">Monthly Cost</p>
+            <p class="text-base-content/70">{t().monthlyCost}</p>
             <p class="text-sm text-base-content/60 mt-2">
-              Next billing: {nextBillingDate()}
+              {t().nextBilling}: {nextBillingDate()}
             </p>
           </div>
         </div>
@@ -135,9 +135,9 @@ const Billing = () => {
             <h2 class="card-title justify-center text-2xl font-bold text-info">
               {invoices().filter(inv => inv.status === 'paid').length}
             </h2>
-            <p class="text-base-content/70">Paid Invoices</p>
+            <p class="text-base-content/70">{t().paidInvoices}</p>
             <p class="text-sm text-base-content/60 mt-2">
-              All up to date
+              {t().allUpToDate}
             </p>
           </div>
         </div>
@@ -149,15 +149,15 @@ const Billing = () => {
           <div class="card-body">
             <div class="flex justify-between items-center mb-6">
               <h3 class="card-title">
-                <i data-lucide="credit-card" class="w-5 h-5 mr-2"></i>
-                Payment Methods
+                <i data-lucide="credit-card" class="w-5 h-5 me-2"></i>
+                {t().paymentMethods}
               </h3>
               <button
                 class="btn btn-outline btn-sm"
                 onClick={handleAddPaymentMethod}
               >
-                <i data-lucide="plus" class="w-4 h-4 mr-2"></i>
-                Add Card
+                <i data-lucide="plus" class="w-4 h-4 me-2"></i>
+                {t().addCard}
               </button>
             </div>
             <div class="space-y-4">
@@ -173,10 +173,10 @@ const Billing = () => {
                           {method.brand} •••• {method.last4}
                         </p>
                         <p class="text-sm text-base-content/60">
-                          Expires {method.expiryMonth}/{method.expiryYear}
+                          {t().expiryDate}: {method.expiryMonth}/{method.expiryYear}
                         </p>
                         {method.isDefault && (
-                          <span class="badge badge-primary badge-sm">Default</span>
+                          <span class="badge badge-primary badge-sm">{t().setDefault}</span>
                         )}
                       </div>
                     </div>
@@ -192,12 +192,12 @@ const Billing = () => {
               {paymentMethods().length === 0 && (
                 <div class="text-center py-8 text-base-content/60">
                   <i data-lucide="credit-card" class="w-12 h-12 mx-auto mb-2 opacity-50"></i>
-                  <p>No payment methods added</p>
+                  <p>{t().noPaymentMethods}</p>
                   <button
                     class="btn btn-primary btn-sm mt-2"
                     onClick={handleAddPaymentMethod}
                   >
-                    Add Payment Method
+                    {t().addPaymentMethod}
                   </button>
                 </div>
               )}
@@ -209,8 +209,8 @@ const Billing = () => {
         <div class="card bg-base-100 shadow-sm border border-base-200">
           <div class="card-body">
             <h3 class="card-title">
-              <i data-lucide="receipt" class="w-5 h-5 mr-2"></i>
-              Billing History
+              <i data-lucide="receipt" class="w-5 h-5 me-2"></i>
+              {t().billingHistory}
             </h3>
             <div class="space-y-3 max-h-96 overflow-y-auto">
               <For each={invoices()}>
@@ -244,7 +244,7 @@ const Billing = () => {
               {invoices().length === 0 && (
                 <div class="text-center py-8 text-base-content/60">
                   <i data-lucide="inbox" class="w-8 h-8 mx-auto mb-2 opacity-50"></i>
-                  <p>No billing history</p>
+                  <p>{t().noBillingHistory}</p>
                 </div>
               )}
             </div>
@@ -256,20 +256,20 @@ const Billing = () => {
       <div class="card bg-base-100 shadow-sm border border-base-200">
         <div class="card-body">
           <h3 class="card-title">
-            <i data-lucide="settings" class="w-5 h-5 mr-2"></i>
-            Billing Settings
+            <i data-lucide="settings" class="w-5 h-5 me-2"></i>
+            {t().billingSettings}
           </h3>
           <div class="space-y-4">
             <div class="flex justify-between items-center">
               <div>
-                <span class="font-medium">Billing Cycle</span>
+                <span class="font-medium">{t().billingCycle}</span>
                 <p class="text-sm text-base-content/60">How often you're billed</p>
               </div>
               <span class="badge badge-primary">{billingCycle()}</span>
             </div>
             <div class="flex justify-between items-center">
               <div>
-                <span class="font-medium">Email Receipts</span>
+                <span class="font-medium">{t().emailReceipts}</span>
                 <p class="text-sm text-base-content/60">Receive billing emails</p>
               </div>
               <input
@@ -281,7 +281,7 @@ const Billing = () => {
             </div>
             <div class="alert alert-info">
               <i data-lucide="info" class="w-5 h-5"></i>
-              <span>Billing features are simulated in local mode. Real billing integration would require payment processor setup.</span>
+              <span>{t().billingFeaturesSimulated}</span>
             </div>
           </div>
         </div>

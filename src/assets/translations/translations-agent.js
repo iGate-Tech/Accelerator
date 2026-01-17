@@ -2,28 +2,84 @@ import logger from '../../lib/logger.js';
 
 // Agent interface translations
 export const agentTranslations = {
-   en: {
-     agentPaused: 'Agent is paused. Click Resume to continue.',
-     improveWithAI: 'Improve with AI',
-     aiSuggestion: 'AI Suggestion',
-     start: 'Start',
-     pause: 'Pause',
-     resume: 'Resume',
-     reset: 'Reset',
-      greetingPrefix: "Hi",
-      greetingSuffix: ", what's your next amazing idea?",
-     placeholder: "Enter your problem statement here...",
-   },
-   ar: {
-     agentPaused: 'الوكيل متوقف مؤقتاً. انقر استئناف للمتابعة.',
-     improveWithAI: 'تحسين بالذكاء الاصطناعي',
-     aiSuggestion: 'اقتراح ذكاء اصطناعي',
-     start: 'ابدأ',
-     pause: 'إيقاف مؤقت',
-     resume: 'استئناف',
-     reset: 'إعادة تعيين',
-      greetingPrefix: "مرحباً",
-       greetingSuffix: "، ما هي فكرتك الرائعة التالية؟",
-     placeholder: "أدخل بيان المشكلة هنا...",
-   }
+  en: {
+    // Loading states
+    loadingAgentInterface: 'Loading agent interface...',
+    initializingAgentInterface: 'Initializing agent interface...',
+
+    // Greeting
+    greetingPrefix: "Hi",
+    greetingSuffix: ", what's your next amazing idea?",
+
+    // Actions
+    start: 'Start',
+    pause: 'Pause',
+    resume: 'Resume',
+    reset: 'Reset',
+    improveWithAI: 'Improve with AI',
+    aiSuggestion: 'AI Suggestion',
+    send: 'Send',
+
+    // Chat interface
+    chatWithAI: 'Chat with AI',
+    resumeAccelerator: 'Resume Accelerator',
+    thinking: 'Thinking...',
+    askAboutProject: 'Ask me anything about your project or request changes...',
+    chatInputPlaceholder: 'Ask about your project or give instructions...',
+    chatUsesCredits: 'Chat uses 5 credits per message',
+
+    // AI Processing
+    aiProcessing: 'AI Processing...',
+
+    // Error states
+    agentPaused: 'Agent is paused. Click Resume to continue.',
+    processingError: 'Processing error:',
+    unknownError: 'Unknown error occurred',
+
+    // Placeholder
+    agentPlaceholder: "Enter your problem statement here...",
+
+    // Button labels
+    chatButton: 'Chat with AI',
+  },
+  ar: {
+    // Loading states
+    loadingAgentInterface: 'جاري تحميل واجهة الوكيل...',
+    initializingAgentInterface: 'جاري تهيئة واجهة الوكيل...',
+
+    // Greeting
+    greetingPrefix: "مرحباً",
+    greetingSuffix: "، ما هي فكرتك الرائعة التالية؟",
+
+    // Actions
+    start: 'ابدأ',
+    pause: 'إيقاف مؤقت',
+    resume: 'استئناف',
+    reset: 'إعادة تعيين',
+    improveWithAI: 'تحسين بالذكاء الاصطناعي',
+    aiSuggestion: 'اقتراح ذكاء اصطناعي',
+    send: 'إرسال',
+
+    // Chat interface
+    chatWithAI: 'دردش مع الذكاء الاصطناعي',
+    resumeAccelerator: 'استئناف المسرع',
+    thinking: 'جاري التفكير...',
+    askAboutProject: 'اسألني أي شيء عن مشروعك أو اطلب التغييرات...',
+    chatInputPlaceholder: 'اسأل عن مشروعك أو أعطِ تعليمات...',
+    chatUsesCredits: 'تستخدم الدردشة 5 اعتمادات لكل رسالة',
+
+    // AI Processing
+    aiProcessing: 'معالجة الذكاء الاصطناعي...',
+
+    // Error states
+    agentPaused: 'الوكيل متوقف مؤقتاً. انقر استئناف للمتابعة.',
+    processingError: 'خطأ في المعالجة:',
+    unknownError: 'حدث خطأ غير معروف',
+
+    // Placeholder
+    agentPlaceholder: "أدخل بيان المشكلة هنا...",
+
+    // Button labels
+    chatButton: 'دردش مع الذكاء الاصطناعي',
+  }
 };

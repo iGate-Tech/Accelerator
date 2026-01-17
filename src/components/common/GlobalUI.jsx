@@ -41,7 +41,7 @@ const GlobalLoading = () => {
 const GlobalError = () => {
   return (
     <Show when={globalError()}>
-      <div class="fixed top-4 right-4 z-50">
+      <div class="fixed top-4 end-4 z-50">
         <div class="alert alert-error shadow-lg max-w-md">
           <div>
             <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current flex-shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
@@ -82,7 +82,7 @@ const ToastContainer = () => {
   };
 
   return (
-    <div class="fixed top-6 right-6 z-50 space-y-4 max-w-sm">
+    <div class="fixed top-6 end-6 z-50 space-y-4 max-w-sm">
       <For each={toasts}>{(toast, index) => (
         <div
           class={`relative overflow-hidden rounded-2xl p-5 shadow-2xl border-0 backdrop-blur-sm transform transition-all duration-300 ease-out animate-in slide-in-from-right-4 fade-in-0 ${
@@ -132,7 +132,7 @@ const ToastContainer = () => {
 
           {/* Progress bar for auto-dismiss */}
           {toast.duration && toast.duration > 0 && (
-            <div class="absolute bottom-0 left-0 right-0 h-1 bg-base-100/20">
+            <div class="absolute bottom-0 start-0 end-0 h-1 bg-base-100/20">
               <div
                 class="h-full bg-base-content/60 transition-all duration-75 ease-linear"
                 style={{

@@ -58,7 +58,7 @@ const AuthLayout = (props) => {
         <>
             <link rel="icon" href="/favicon.svg" />
             <main class="min-h-screen bg-base-200 flex items-center justify-center relative">
-                <div class="absolute top-4 right-4 flex gap-2">
+                <div class="absolute top-4 end-4 flex gap-2">
                     <label class="swap">
                         <input
                             id="langSwap"
@@ -67,7 +67,6 @@ const AuthLayout = (props) => {
                             onChange={(e) => {
                                 const newLang = e.target.checked ? 'ar' : 'en';
                                 setLang(newLang);
-                                localStorage.setItem('lang', newLang);
                             }}
                         />
                         <div class="swap-off text-sm font-semibold flex items-center gap-1">

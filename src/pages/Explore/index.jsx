@@ -25,7 +25,7 @@ const Explore = () => {
 
   const [projects, { refetch }] = createResource(fetchProjects);
 
-  const t = () => translations[currentLang()];
+   const t = createMemo(() => translations[currentLang()]);
 
   createEffect(() => {
     setCurrentLang(lang());
@@ -109,7 +109,7 @@ const Explore = () => {
   ];
 
    return (
-    <div class={`space-y-4 md:space-y-6 ${currentLang() === 'ar' ? 'rtl' : 'ltr'}`}>
+    <div class="space-y-4 md:space-y-6">
       {/* Header */}
       <div class="text-center py-6 md:py-8 px-2 md:px-4">
         <h1 class="text-2xl sm:text-3xl md:text-4xl font-bold text-base-content mb-3 md:mb-4">{t().exploreProjects}</h1>
@@ -123,16 +123,16 @@ const Explore = () => {
         <div class="flex flex-col sm:flex-row gap-3 md:gap-4 items-center">
           {/* Search */}
           <div class="flex-1 w-full sm:w-auto">
-              <div class="relative">
-               <svg class="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-base-content/50" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16" viewBox="0 0 24 24"><path d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z"/></svg>
-               <input
-                 type="text"
-                 placeholder={t().searchProjects}
-                 class="input input-bordered w-full pl-10 text-sm md:text-base"
-                 value={search()}
-                 onInput={(e) => setSearch(e.target.value)}
-               />
-             </div>
+               <div class="relative">
+                <svg class="absolute start-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-base-content/50" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16" viewBox="0 0 24 24"><path d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z"/></svg>
+                <input
+                  type="text"
+                  placeholder={t().searchProjects}
+                  class="input input-bordered w-full ps-10 text-sm md:text-base"
+                  value={search()}
+                  onInput={(e) => setSearch(e.target.value)}
+                />
+              </div>
           </div>
 
           {/* Status Filter */}
@@ -177,7 +177,7 @@ const Explore = () => {
         fallback={
           <div class="flex justify-center items-center py-16 px-2">
             <div class="loading loading-spinner loading-lg"></div>
-            <span class="ml-4 text-sm md:text-lg">{t().loadingProjects}</span>
+            <span class="ms-4 text-sm md:text-lg">{t().loadingProjects}</span>
           </div>
         }
       >
@@ -193,13 +193,13 @@ const Explore = () => {
                    : t().getStartedCreateProject}
                </p>
                {!search() && statusFilter() === "all" && (
-                  <A
-                    href="/"
-                    class="btn btn-primary"
-                  >
-                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16" viewBox="0 0 24 24"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
-                    {t().createNewProject}
-                  </A>
+                    <A
+                      href="/"
+                      class="btn btn-primary"
+                    >
+                      <svg class="w-4 h-4 me-2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16" viewBox="0 0 24 24"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
+                      {t().createNewProject}
+                    </A>
                )}
              </div>
            }

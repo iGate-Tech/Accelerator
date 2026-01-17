@@ -134,7 +134,7 @@ const ProgressAccordion = (props) => {
                     <span class={`badge badge-sm whitespace-nowrap ${currentStepNumber() >= TOTAL_STEPS ? 'bg-success/10 text-success' : 'bg-primary/10 text-primary'}`}>
                         iGate OS - Accelerator Agent: {currentStepNumber()} / {TOTAL_STEPS}
                     </span>
-                    <div class="flex px-4 w-full md:w-auto md:flex-1 gap-4 min-w-[200px]  mr-6">
+                    <div class="flex px-4 w-full md:w-auto md:flex-1 gap-4 min-w-[200px]  me-6">
                         <progress id="agent-progress" class={`progress h-2 w-full ${currentStepNumber() >= TOTAL_STEPS ? 'progress-success' : 'progress-primary'}`} 
                             value={progressValue()}
                             max="100"></progress>
@@ -191,7 +191,7 @@ const ProgressAccordion = (props) => {
                         </div>
                     </div>
                 </div>
-                <div class="flex items-center justify-end gap-2 ml-4 flex-wrap">
+                <div class="flex items-center justify-end gap-2 ms-4 flex-wrap">
                     <Show when={currentStepNumber() >= TOTAL_STEPS}>
                         <span class="badge badge-success gap-1">
                             <i data-lucide="check-circle" class="w-3 h-3"></i>

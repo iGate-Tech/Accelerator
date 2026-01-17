@@ -54,10 +54,10 @@ const Notifications = () => {
     try {
       const { updatePreferences } = await import("../../context/UserContext");
       await updatePreferences({ notifications: settings() });
-      toastManager.success('Notification settings saved successfully!');
+      toastManager.success(t().settingsSaved);
     } catch (error) {
       logger.error('Error saving notification settings:', error);
-      toastManager.error('Failed to save settings');
+      toastManager.error(t().failedToSave);
     }
   };
 
@@ -65,7 +65,7 @@ const Notifications = () => {
     try {
       await markNotificationRead(id, user().id);
       refetchNotifications();
-      toastManager.success('Notification marked as read');
+      toastManager.success(t().markAsRead);
     } catch (error) {
       logger.error('Error marking notification as read:', error);
     }
@@ -74,7 +74,7 @@ const Notifications = () => {
   const markAllAsRead = async () => {
     const unreadNotifs = notifications()?.filter(n => !n.read) || [];
     if (unreadNotifs.length === 0) {
-      toastManager.info('No unread notifications');
+      toastManager.info(t().noUnreadNotifications);
       return;
     }
     try {
@@ -82,7 +82,7 @@ const Notifications = () => {
         await markNotificationRead(notif.id, user().id);
       }
       refetchNotifications();
-      toastManager.success(`Marked ${unreadNotifs.length} notifications as read`);
+      toastManager.success(t().markedAsRead.replace('{count}', unreadNotifs.length));
     } catch (error) {
       logger.error('Error marking all as read:', error);
     }
@@ -133,11 +133,11 @@ const Notifications = () => {
     const hours = Math.floor(diff / (1000 * 60 * 60));
     const days = Math.floor(diff / (1000 * 60 * 60 * 24));
 
-    if (isNaN(diff)) return 'Unknown';
-    if (minutes < 1) return 'Just now';
-    if (minutes < 60) return `${minutes}m ago`;
-    if (hours < 24) return `${hours}h ago`;
-    if (days < 7) return `${days}d ago`;
+    if (isNaN(diff)) return t().timeUnknown;
+    if (minutes < 1) return t().timeJustNow;
+    if (minutes < 60) return t().timeMinutesAgo.replace('{minutes}', minutes);
+    if (hours < 24) return t().timeHoursAgo.replace('{hours}', hours);
+    if (days < 7) return t().timeDaysAgo.replace('{days}', days);
     return date.toLocaleDateString();
   };
 
@@ -150,7 +150,7 @@ const Notifications = () => {
         'Your account has been set up successfully. Start exploring your startup ideas!'
       );
       refetchNotifications();
-      toastManager.success('Sample notification created');
+      toastManager.success(t().sampleCreated);
     } catch (error) {
       logger.error('Error creating notification:', error);
     }
@@ -165,12 +165,12 @@ const Notifications = () => {
   });
 
   return (
-    <div class={`max-w-4xl mx-auto space-y-8 px-4 sm:px-6 ${currentLang() === 'ar' ? 'rtl' : 'ltr'}`}>
+    <div class="max-w-4xl mx-auto space-y-8 px-4 sm:px-6">
       {/* Header */}
       <div class="text-center">
-        <h1 class="text-3xl sm:text-4xl font-bold text-base-content mb-4">Notifications</h1>
+        <h1 class="text-3xl sm:text-4xl font-bold text-base-content mb-4">{t().notificationsTitle}</h1>
         <p class="text-base sm:text-lg text-base-content/70">
-          Manage your notifications and stay updated.
+          {t().notificationsDesc}
         </p>
       </div>
 
@@ -180,14 +180,14 @@ const Notifications = () => {
           <div class="card bg-base-100 shadow-sm border border-base-200">
             <div class="card-body">
               <h3 class="card-title">
-                <i data-lucide="settings" class="w-5 h-5 mr-2"></i>
-                Notification Settings
+                <i data-lucide="settings" class="w-5 h-5 me-2"></i>
+                {t().notificationSettingsTitle}
               </h3>
               <div class="space-y-4">
                 <label class="flex items-center justify-between">
                   <div>
-                    <span class="font-medium">Browser Notifications</span>
-                    <p class="text-sm text-base-content/60">Show in browser</p>
+                    <span class="font-medium">{t().browserNotificationsTitle}</span>
+                    <p class="text-sm text-base-content/60">{t().showInBrowser}</p>
                   </div>
                   <input
                     type="checkbox"
@@ -198,8 +198,8 @@ const Notifications = () => {
                 </label>
                 <label class="flex items-center justify-between">
                   <div>
-                    <span class="font-medium">Project Updates</span>
-                    <p class="text-sm text-base-content/60">Project changes</p>
+                    <span class="font-medium">{t().projectUpdatesTitle}</span>
+                    <p class="text-sm text-base-content/60">{t().projectChanges}</p>
                   </div>
                   <input
                     type="checkbox"
@@ -212,7 +212,7 @@ const Notifications = () => {
                   class="btn btn-primary btn-block"
                   onClick={saveSettings}
                 >
-                  Save Settings
+                  {t().saveSettings}
                 </button>
               </div>
             </div>
@@ -225,23 +225,23 @@ const Notifications = () => {
             <div class="card-body">
               <div class="flex justify-between items-center mb-6">
                 <h3 class="card-title">
-                  <i data-lucide="bell" class="w-5 h-5 mr-2"></i>
-                  Recent Notifications
+                  <i data-lucide="bell" class="w-5 h-5 me-2"></i>
+                  {t().recentNotifications}
                 </h3>
                 <div class="flex gap-2">
                   <div class="tabs tabs-boxed">
                     <a class={`tab tab-sm ${filter() === 'all' ? 'tab-active' : ''}`} onClick={() => setFilter('all')}>
-                      All ({notifications().length})
+                      {t().all} ({notifications().length})
                     </a>
                     <a class={`tab tab-sm ${filter() === 'unread' ? 'tab-active' : ''}`} onClick={() => setFilter('unread')}>
-                      Unread ({notifications().filter(n => !n.read).length})
+                      {t().unread} ({notifications().filter(n => !n.read).length})
                     </a>
                   </div>
                   <button
                     class="btn btn-ghost btn-sm"
                     onClick={markAllAsRead}
                   >
-                    Mark All Read
+                    {t().markAllRead}
                   </button>
                 </div>
               </div>
@@ -267,7 +267,7 @@ const Notifications = () => {
                             <h4 class="font-semibold text-base-content">
                               {notification.title}
                             </h4>
-                            <span class="text-xs text-base-content/60 ml-2">
+                            <span class="text-xs text-base-content/60 ms-2">
                               {formatTime(notification.timestamp)}
                             </span>
                           </div>
@@ -285,13 +285,13 @@ const Notifications = () => {
                 <Show when={filteredNotifications().length === 0}>
                   <div class="text-center py-12 text-base-content/60">
                     <i data-lucide="inbox" class="w-12 h-12 mx-auto mb-4 opacity-50"></i>
-                    <p>{filter() === 'unread' ? 'No unread notifications' : 'No notifications yet'}</p>
+                    <p>{filter() === 'unread' ? t().noUnreadNotifications : t().noNotifications}</p>
                     <button
                       class="btn btn-primary btn-sm mt-4"
                       onClick={createSampleNotification}
                     >
-                      <i data-lucide="plus" class="w-4 h-4 mr-2"></i>
-                      Create Sample Notification
+                      <i data-lucide="plus" class="w-4 h-4 me-2"></i>
+                      {t().createSample}
                     </button>
                   </div>
                 </Show>

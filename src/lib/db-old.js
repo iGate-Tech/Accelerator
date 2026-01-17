@@ -88,7 +88,7 @@ async function createSchema() {
   `);
   // Create tables one by one
   console.log('Creating users table...');
-  await dbInstance.exec("CREATE TABLE IF NOT EXISTS users (id TEXT PRIMARY KEY, email TEXT UNIQUE NOT NULL, password_hash TEXT, avatar TEXT DEFAULT '/src/assets/avatar.png', bio TEXT, preferences TEXT, synced_at TEXT, last_modified TEXT, sync_status TEXT DEFAULT 'local', deleted_at TEXT, version INTEGER DEFAULT 1)");
+  await dbInstance.exec("CREATE TABLE IF NOT EXISTS users (id TEXT PRIMARY KEY, email TEXT UNIQUE NOT NULL, password_hash TEXT, avatar TEXT, bio TEXT, preferences TEXT, synced_at TEXT, last_modified TEXT, sync_status TEXT DEFAULT 'local', deleted_at TEXT, version INTEGER DEFAULT 1)");
   console.log('Users table created');
   await dbInstance.exec(`
 -- Projects table
@@ -440,7 +440,7 @@ export async function createSchema() {
   `);
   // Create tables one by one
   console.log('Creating users table...');
-  await dbInstance.exec("CREATE TABLE IF NOT EXISTS users (id TEXT PRIMARY KEY, email TEXT UNIQUE NOT NULL, password_hash TEXT, avatar TEXT DEFAULT '/src/assets/avatar.png', bio TEXT, preferences TEXT, synced_at TEXT, last_modified TEXT, sync_status TEXT DEFAULT 'local', deleted_at TEXT, version INTEGER DEFAULT 1)");
+  await dbInstance.exec("CREATE TABLE IF NOT EXISTS users (id TEXT PRIMARY KEY, email TEXT UNIQUE NOT NULL, password_hash TEXT, avatar TEXT, bio TEXT, preferences TEXT, synced_at TEXT, last_modified TEXT, sync_status TEXT DEFAULT 'local', deleted_at TEXT, version INTEGER DEFAULT 1)");
   console.log('Users table created');
   await dbInstance.exec(`
 -- Projects table
@@ -811,7 +811,7 @@ export async function _createUserProfile({ userId, profileData = {} }) {
         ON CONFLICT (user_id) DO NOTHING RETURNING *`,
           [
             userId,
-            String(profileData.avatar || '/src/assets/avatar.png'),
+            String(profileData.avatar || ''),
             String(profileData.bio || ''),
             JSON.stringify(profileData.preferences || {
               notifications: { email: true, browser: false, projectUpdates: true },

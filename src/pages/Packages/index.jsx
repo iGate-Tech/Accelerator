@@ -5,63 +5,70 @@ import { useLanguage } from "../../hooks/useLanguage";
 import { createUserSubscription, getUserSubscription, seedPackages } from "../../lib/db";
 import { initDatabase } from "../../lib/db-core";
 import { toastManager } from "../../lib/feedback";
+import { packagesTranslations } from "../../assets/translations/translations-index.js";
 import logger from "../../lib/logger.js";
 
 const Packages = () => {
   logger.trace('Packages: Starting');
   const navigate = useNavigate();
   const { user, isAuthenticated, updateSubscription, checkAuth } = useUser();
-  const { currentLang, t } = useLanguage();
+  const { currentLang, t: langT } = useLanguage();
+
+  // Get package translations reactively
+  const t = () => {
+    const langKey = currentLang() || 'ar';
+    return packagesTranslations[langKey] || packagesTranslations.ar;
+  };
 
   const [packages] = createSignal([
     {
       id: 'free',
-      name: 'Free',
-      price: 0,
+      name: t().freePlan,
+      price: t().freePrice,
       credits_included: 50,
       features: [
-        'AI-powered business plan generation',
-        'Basic market analysis',
-        'Financial projections',
-        '3 projects maximum',
-        'Community support',
-        'Basic export options'
+        t().aiBusinessPlan,
+        t().basicMarket,
+        t().financialProjections,
+        t().projectsMaximum,
+        t().communitySupport,
+        t().basicExport
       ]
     },
     {
       id: 'pro',
-      name: 'Pro',
-      price: 29,
+      name: t().proPlan,
+      price: t().proPrice,
       credits_included: 500,
       features: [
-        'Everything in Free plan',
-        'Unlimited projects',
-        'Advanced market research',
-        'Competitive analysis',
-        'Pitch deck generation',
-        'Financial modeling',
-        'Priority customer support',
-        'Advanced export formats',
-        'API access',
-        'Custom templates'
+        t().everythingInFree,
+        t().unlimitedProjects,
+        t().advancedMarket,
+        t().competitiveAnalysis,
+        t().pitchDeck,
+        t().financialModeling,
+        t().prioritySupport,
+        t().advancedExport,
+        t().apiAccess,
+        t().customTemplates
       ]
     },
     {
       id: 'enterprise',
-      name: 'Enterprise',
-      price: 99,
+      name: t().enterprisePlan,
+      price: t().enterprisePrice,
       credits_included: 2000,
       features: [
-        'Everything in Pro plan',
-        'Team collaboration tools',
-        'Advanced analytics dashboard',
-        'Custom integrations',
-        'White-label options',
-        'Dedicated success manager',
-        'Priority feature requests',
-        'Advanced security features',
-        'Custom AI model training',
-        '24/7 premium support'
+        t().everythingInPro,
+        t().teamCollaboration,
+        t().advancedAnalytics,
+        t().customIntegrationsFeature,
+        t().whiteLabel,
+        t().dedicatedManager,
+        t().priorityRequests,
+        t().advancedSecurity,
+        t().customAITraining,
+        t().premiumSupport
       ]
     }
   ]);
@@ -79,7 +86,7 @@ const Packages = () => {
       
       const currentSub = await getUserSubscription(user().id);
       if (currentSub && currentSub.package_id === packageData.id) {
-        toastManager.info(`You already have the ${packageData.name} plan!`);
+        toastManager.info(t().alreadySubscribed.replace('{plan}', packageData.name));
         return;
       }
 
@@ -98,17 +105,15 @@ const Packages = () => {
 
       updateSubscription({
         plan: packageData.id,
-        status: 'active',
         maxCredits: packageData.credits_included,
-        credits_included: packageData.credits_included,
         price: packageData.price
       });
-
+      
       await checkAuth();
-      toastManager.success(`Successfully upgraded to ${packageData.name} plan!`);
+      toastManager.success(t().subscriptionSuccess.replace('{plan}', packageData.name));
     } catch (error) {
-      logger.error('Subscription error:', error);
-      toastManager.error('Failed to process subscription. Please try again.');
+      logger.error('Error creating subscription:', error);
+      toastManager.error(t().failedToSubscribe);
     }
   };
 
@@ -123,12 +128,12 @@ const Packages = () => {
   });
 
   return (
-    <div class={`max-w-6xl mx-auto space-y-8 px-4 sm:px-6 ${currentLang() === 'ar' ? 'rtl' : 'ltr'}`}>
+    <div class="max-w-6xl mx-auto space-y-8 px-4 sm:px-6">
       {/* Header */}
       <div class="text-center">
-        <h1 class="text-3xl sm:text-4xl font-bold text-base-content mb-4">Subscription Packages</h1>
+        <h1 class="text-3xl sm:text-4xl font-bold text-base-content mb-4">{t().subscriptionPlans}</h1>
         <p class="text-base sm:text-lg text-base-content/70">
-          Choose the perfect plan for your needs
+          {t().choosePlan}
         </p>
       </div>
 
@@ -136,8 +141,8 @@ const Packages = () => {
       <div class="alert alert-info">
         <i data-lucide="info" class="w-5 h-5"></i>
         <div>
-          <h3 class="font-bold">Current Plan: {packages().find(p => p.id === currentPlan())?.name || 'Free'}</h3>
-          <div class="text-xs">Credits remaining: {user()?.credits?.balance || 0} / {user()?.subscription?.maxCredits || 50}</div>
+          <h3 class="font-bold">{t().currentPlanBanner.replace('{plan}', packages().find(p => p.id === currentPlan())?.name || t().freePlan)}</h3>
+          <div class="text-xs">{t().creditsRemaining.replace('{remaining}', user()?.credits?.balance || 0).replace('{max}', user()?.subscription?.maxCredits || 50)}</div>
         </div>
       </div>
 
@@ -147,10 +152,10 @@ const Packages = () => {
           {(pkg) => (
             <div class={`card bg-base-100 shadow-lg border-2 ${
               pkg.id === currentPlan() ? 'border-primary' : 'border-base-200'
-            } ${pkg.name === 'Pro' ? 'relative' : ''}`}>
-              {pkg.name === 'Pro' && (
-                <div class="absolute -top-3 left-1/2 transform -translate-x-1/2">
-                  <div class="badge badge-primary">Most Popular</div>
+            } ${pkg.name === t().proPlan ? 'relative' : ''}`}>
+                {pkg.name === t().proPlan && (
+                  <div class="absolute -top-3 start-1/2 transform -translate-x-1/2">
+                  <div class="badge badge-primary">{t().mostPopular}</div>
                 </div>
               )}
               <div class="card-body">
@@ -158,9 +163,9 @@ const Packages = () => {
                   <h2 class="card-title justify-center text-2xl">{pkg.name}</h2>
                   <div class="text-4xl font-bold text-primary my-4">
                     ${pkg.price}
-                    <span class="text-lg font-normal text-base-content/60">/month</span>
+                    <span class="text-lg font-normal text-base-content/60">{t().perMonth}</span>
                   </div>
-                  <p class="text-base-content/60">{pkg.credits_included} credits included</p>
+                  <p class="text-base-content/60">{t().creditsIncluded.replace('{credits}', pkg.credits_included)}</p>
                 </div>
 
                 <div class="divider"></div>
@@ -179,14 +184,14 @@ const Packages = () => {
                 <div class="card-actions justify-center mt-6">
                   {pkg.id === currentPlan() ? (
                     <button class="btn btn-primary btn-block" disabled>
-                      Current Plan
+                      {t().currentPlanButton}
                     </button>
                   ) : (
                     <button
                       class="btn btn-primary btn-block"
                       onClick={() => handleSubscribe(pkg)}
                     >
-                      {pkg.price === 0 ? 'Get Started' : 'Upgrade'}
+                      {pkg.price === 0 ? t().getStarted : t().upgrade}
                     </button>
                   )}
                 </div>
@@ -199,65 +204,65 @@ const Packages = () => {
       {/* Feature Comparison */}
       <div class="card bg-base-100 shadow-sm border border-base-200">
         <div class="card-body">
-          <h3 class="card-title">Feature Comparison</h3>
+          <h3 class="card-title">{t().featureComparison}</h3>
           <div class="overflow-x-auto">
             <table class="table table-zebra">
               <thead>
                 <tr>
-                  <th>Feature</th>
-                  <th>Free</th>
-                  <th>Pro</th>
-                  <th>Enterprise</th>
+                  <th>{t().feature}</th>
+                  <th>{t().free}</th>
+                  <th>{t().pro}</th>
+                  <th>{t().enterprise}</th>
                 </tr>
               </thead>
               <tbody>
                 <tr>
-                  <td>AI Assistance</td>
-                  <td>Basic</td>
-                  <td>Advanced</td>
-                  <td>Advanced</td>
+                  <td>{t().aiAssistance}</td>
+                  <td>{t().aiAssistanceFree}</td>
+                  <td>{t().aiAssistancePro}</td>
+                  <td>{t().aiAssistanceEnterprise}</td>
                 </tr>
                 <tr>
-                  <td>Projects per Month</td>
-                  <td>3</td>
-                  <td>Unlimited</td>
-                  <td>Unlimited</td>
+                  <td>{t().projectsPerMonth}</td>
+                  <td>{t().projectsFree}</td>
+                  <td>{t().projectsPro}</td>
+                  <td>{t().projectsEnterprise}</td>
                 </tr>
                 <tr>
-                  <td>Credits</td>
-                  <td>50</td>
-                  <td>500</td>
-                  <td>2000</td>
+                  <td>{t().creditsRow}</td>
+                  <td>{t().creditsFree}</td>
+                  <td>{t().creditsPro}</td>
+                  <td>{t().creditsEnterprise}</td>
                 </tr>
                 <tr>
-                  <td>Support</td>
-                  <td>Community</td>
-                  <td>Priority</td>
-                  <td>Dedicated</td>
+                  <td>{t().supportRow}</td>
+                  <td>{t().supportFree}</td>
+                  <td>{t().supportPro}</td>
+                  <td>{t().supportEnterprise}</td>
                 </tr>
                 <tr>
-                  <td>Templates</td>
-                  <td>Basic</td>
-                  <td>Premium</td>
-                  <td>Premium</td>
+                  <td>{t().templatesRow}</td>
+                  <td>{t().templatesFree}</td>
+                  <td>{t().templatesPro}</td>
+                  <td>{t().templatesEnterprise}</td>
                 </tr>
                 <tr>
-                  <td>Collaboration</td>
-                  <td>-</td>
-                  <td>✓</td>
-                  <td>✓</td>
+                  <td>{t().collaborationRow}</td>
+                  <td>{t().collaborationFree}</td>
+                  <td>{t().collaborationPro}</td>
+                  <td>{t().collaborationEnterprise}</td>
                 </tr>
                 <tr>
-                  <td>API Access</td>
-                  <td>-</td>
-                  <td>✓</td>
-                  <td>✓</td>
+                  <td>{t().apiAccessRow}</td>
+                  <td>{t().apiAccessFree}</td>
+                  <td>{t().apiAccessPro}</td>
+                  <td>{t().apiAccessEnterprise}</td>
                 </tr>
                 <tr>
-                  <td>Custom Integrations</td>
-                  <td>-</td>
-                  <td>-</td>
-                  <td>✓</td>
+                  <td>{t().customIntegrations}</td>
+                  <td>{t().customIntegrationsFree}</td>
+                  <td>{t().customIntegrationsPro}</td>
+                  <td>{t().customIntegrationsEnterprise}</td>
                 </tr>
               </tbody>
             </table>

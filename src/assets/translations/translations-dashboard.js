@@ -26,11 +26,12 @@ export const dashboardTranslations = {
      progressLower: 'progress',
      noRecentActivity: 'No recent activity',
      unnamedProject: 'Unnamed',
-     projectCreated: 'Project created',
-     projectCompleted: 'Project completed',
-     wasCreated: 'was created',
-     wasCompleted: 'was completed',
-   },
+      projectCreated: 'Project created',
+      projectCompleted: 'Project completed',
+      wasCreated: 'was created',
+      wasCompleted: 'was completed',
+      timeInvested: 'Time Invested',
+    },
   ar: {
     dashboard: 'لوحة التحكم',
     overview: 'نظرة عامة على تقدم مسرع بدء الأعمال وحالة المشاريع.',
@@ -55,9 +56,10 @@ export const dashboardTranslations = {
      progressLower: 'تقدم',
      noRecentActivity: 'لا يوجد نشاط حديث',
      unnamedProject: 'غير مسمى',
-     projectCreated: 'تم إنشاء المشروع',
-     projectCompleted: 'تم إكمال المشروع',
-     wasCreated: 'تم إنشاؤه',
-     wasCompleted: 'تم إكماله',
-   }
+      projectCreated: 'تم إنشاء المشروع',
+      projectCompleted: 'تم إكمال المشروع',
+      wasCreated: 'تم إنشاؤه',
+      wasCompleted: 'تم إكماله',
+      timeInvested: 'الوقت المستثمر',
+    }
 };

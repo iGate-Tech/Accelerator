@@ -4,7 +4,6 @@ import { updateEntity, getUserProfile, createUserProfile, getUserById, createUse
 import { initDatabase } from "../lib/db-core";
 import { toastManager } from "../lib/feedback";
 import { activityLogger } from "../lib/activity";
-import avatar from "../assets/avatar.png";
 import logger from "../lib/logger.js";
 import { confirmLogout } from "../components/ui/GlobalConfirm";
 

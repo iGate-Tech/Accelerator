@@ -1,4 +1,4 @@
-import { createSignal, createResource, onMount, For, Show, useContext } from "solid-js";
+import { createSignal, createResource, createMemo, onMount, For, Show, useContext } from "solid-js";
 import { useNavigate } from "@solidjs/router";
 import { useUser } from "../../context/UserContext";
 import { getUserInvitations, respondToInvitation } from "../../lib/db";
@@ -23,7 +23,7 @@ const Invitations = () => {
     }
   );
 
-  const t = () => translations[currentLang()];
+   const t = createMemo(() => translations[currentLang()]);
 
   onMount(() => {
     setCurrentLang(lang());
@@ -45,7 +45,7 @@ const Invitations = () => {
   };
 
   return (
-    <div class={`space-y-6 mt-10 px-4 sm:px-6 ${currentLang() === 'ar' ? 'rtl' : 'ltr'}`}>
+    <div class="space-y-6 mt-10 px-4 sm:px-6">
       {/* Header */}
       <div class="text-center sm:text-left">
         <h1 class="text-3xl sm:text-4xl font-bold text-base-content">{t().portfolioInvitations}</h1>
@@ -60,7 +60,7 @@ const Invitations = () => {
         fallback={
           <div class="flex justify-center items-center py-16">
             <div class="loading loading-spinner loading-lg"></div>
-            <span class="ml-4 text-lg">{t().loadingInvitations}</span>
+            <span class="ms-4 text-lg">{t().loadingInvitations}</span>
           </div>
         }
       >
@@ -101,19 +101,19 @@ const Invitations = () => {
                         {t().expiresOn} {new Date(invitation.expires_at).toLocaleDateString()}
                       </p>
                     </div>
-                    <div class="flex gap-2 ml-4">
+                    <div class="flex gap-2 ms-4">
                       <button
                         class="btn btn-success btn-sm"
                         onClick={() => handleRespondToInvitation(invitation.id, 'accepted')}
                       >
-                        <i data-lucide="check" class="w-4 h-4 mr-1"></i>
+                        <i data-lucide="check" class="w-4 h-4 me-1"></i>
                         {t().accept}
                       </button>
                       <button
                         class="btn btn-error btn-sm"
                         onClick={() => handleRespondToInvitation(invitation.id, 'rejected')}
                       >
-                        <i data-lucide="x" class="w-4 h-4 mr-1"></i>
+                        <i data-lucide="x" class="w-4 h-4 me-1"></i>
                         {t().decline}
                       </button>
                     </div>

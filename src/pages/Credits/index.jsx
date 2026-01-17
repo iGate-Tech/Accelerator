@@ -90,10 +90,10 @@ const Credits = () => {
       
       await checkAuth();
       await refetch();
-      toastManager.success(`Successfully purchased ${option.amount} credits for $${option.price}`);
+      toastManager.success(t().successfullyPurchased.replace('{amount}', option.amount).replace('${price}', option.price));
     } catch (error) {
       logger.error('Error purchasing credits:', error);
-      toastManager.error('Failed to purchase credits. Please try again.');
+      toastManager.error(t().failedToPurchase);
     }
   };
 
@@ -115,12 +115,12 @@ const Credits = () => {
   });
 
   return (
-    <div class={`max-w-6xl mx-auto space-y-8 px-4 sm:px-6 ${currentLang() === 'ar' ? 'rtl' : 'ltr'}`}>
+    <div class="max-w-6xl mx-auto space-y-8 px-4 sm:px-6">
       {/* Header */}
       <div class="text-center">
-        <h1 class="text-3xl sm:text-4xl font-bold text-base-content mb-4">Credits</h1>
+        <h1 class="text-3xl sm:text-4xl font-bold text-base-content mb-4">{t().creditsUsage}</h1>
         <p class="text-base sm:text-lg text-base-content/70">
-          Manage your AI credits and view usage history
+          {t().manageCredits}
         </p>
       </div>
 
@@ -131,7 +131,7 @@ const Credits = () => {
             <h2 class="card-title justify-center text-3xl font-bold text-primary">
               {currentBalance()}
             </h2>
-            <p class="text-base-content/70">Available Credits</p>
+            <p class="text-base-content/70">{t().availableCredits}</p>
             <div class="w-full bg-base-200 rounded-full h-2 mt-4">
               <div
                 class="bg-primary h-2 rounded-full transition-all duration-300"
@@ -139,7 +139,7 @@ const Credits = () => {
               ></div>
             </div>
             <p class="text-xs text-base-content/60 mt-2">
-              {currentBalance()} / {maxCredits()} credits
+              {currentBalance()} / {maxCredits()} {t().credits}
             </p>
           </div>
         </div>
@@ -149,8 +149,8 @@ const Credits = () => {
             <h2 class="card-title justify-center text-3xl font-bold text-success">
               {totalUsed()}
             </h2>
-            <p class="text-base-content/70">Credits Used</p>
-            <p class="text-xs text-base-content/60 mt-2">This month</p>
+            <p class="text-base-content/70">{t().creditsUsed}</p>
+            <p class="text-xs text-base-content/60 mt-2">{t().thisMonth}</p>
           </div>
         </div>
 
@@ -159,8 +159,8 @@ const Credits = () => {
             <h2 class="card-title justify-center text-3xl font-bold text-info">
               {totalPurchased()}
             </h2>
-            <p class="text-base-content/70">Credits Purchased</p>
-            <p class="text-xs text-base-content/60 mt-2">Total</p>
+            <p class="text-base-content/70">{t().creditsPurchased}</p>
+            <p class="text-xs text-base-content/60 mt-2">{t().total}</p>
           </div>
         </div>
       </div>
@@ -170,22 +170,22 @@ const Credits = () => {
         <div class="card bg-base-100 shadow-sm border border-base-200">
           <div class="card-body">
             <h3 class="card-title">
-              <i data-lucide="credit-card" class="w-5 h-5 mr-2"></i>
-              Purchase Credits
+              <i data-lucide="credit-card" class="w-5 h-5 me-2"></i>
+              {t().purchaseCredits}
             </h3>
             <div class="space-y-4">
               <For each={purchaseOptions}>
                 {(option) => (
                   <div class="flex justify-between items-center p-4 border border-base-200 rounded-lg">
                     <div>
-                      <span class="font-semibold">{option.amount} Credits</span>
-                      <p class="text-sm text-base-content/60">${option.price} ({(option.price / option.amount * 100).toFixed(2)}¢ per credit)</p>
+                      <span class="font-semibold">{option.amount} {t().credits}</span>
+                      <p class="text-sm text-base-content/60">${option.price} ({(option.price / option.amount * 100).toFixed(2)}{t().perCredit})</p>
                     </div>
                     <button
                       class="btn btn-primary btn-sm"
                       onClick={() => handlePurchase(option)}
                     >
-                      Buy
+                      {t().buy}
                     </button>
                   </div>
                 )}
@@ -193,7 +193,7 @@ const Credits = () => {
             </div>
             <div class="alert alert-info mt-4">
               <i data-lucide="info" class="w-5 h-5"></i>
-              <span>Credits are stored locally in your browser. For production, integrate with a payment provider.</span>
+              <span>{t().creditsStoredLocally}</span>
             </div>
           </div>
         </div>
@@ -202,8 +202,8 @@ const Credits = () => {
         <div class="card bg-base-100 shadow-sm border border-base-200">
           <div class="card-body">
             <h3 class="card-title">
-              <i data-lucide="history" class="w-5 h-5 mr-2"></i>
-              Transaction History
+              <i data-lucide="history" class="w-5 h-5 me-2"></i>
+              {t().transactionHistory}
             </h3>
             <div class="space-y-3 max-h-96 overflow-y-auto">
               <For each={transactionsList().slice().reverse()}>
@@ -233,8 +233,8 @@ const Credits = () => {
               {transactionsList().length === 0 && (
                 <div class="text-center py-8 text-base-content/60">
                   <i data-lucide="inbox" class="w-8 h-8 mx-auto mb-2 opacity-50"></i>
-                  <p>No transactions yet</p>
-                  <p class="text-xs">Purchase credits to get started</p>
+                  <p>{t().noTransactions}</p>
+                  <p class="text-xs">{t().purchaseCreditsToStart}</p>
                 </div>
               )}
             </div>
@@ -246,33 +246,33 @@ const Credits = () => {
       <div class="card bg-base-100 shadow-sm border border-base-200">
         <div class="card-body">
           <h3 class="card-title">
-            <i data-lucide="bar-chart" class="w-5 h-5 mr-2"></i>
-            Usage Analytics
+            <i data-lucide="bar-chart" class="w-5 h-5 me-2"></i>
+            {t().usageAnalytics}
           </h3>
           <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
             <div>
-              <h4 class="font-semibold mb-4">Credits by Type</h4>
+              <h4 class="font-semibold mb-4">{t().creditsByType}</h4>
               <div class="space-y-3">
                 <div class="flex justify-between">
-                  <span>AI Generations</span>
+                  <span>{t().aiGenerations}</span>
                   <span class="font-semibold">{Math.floor(totalUsed() * 0.7)}</span>
                 </div>
                 <div class="flex justify-between">
-                  <span>Analysis Tasks</span>
+                  <span>{t().analysisTasks}</span>
                   <span class="font-semibold">{Math.floor(totalUsed() * 0.2)}</span>
                 </div>
                 <div class="flex justify-between">
-                  <span>Export Operations</span>
+                  <span>{t().exportOperations}</span>
                   <span class="font-semibold">{Math.floor(totalUsed() * 0.1)}</span>
                 </div>
               </div>
             </div>
             <div>
-              <h4 class="font-semibold mb-4">Monthly Trends</h4>
+              <h4 class="font-semibold mb-4">{t().monthlyTrends}</h4>
               <div class="text-center py-8 text-base-content/60">
                 <i data-lucide="trending-up" class="w-12 h-12 mx-auto mb-2 opacity-50"></i>
-                <p>Analytics charts would be displayed here</p>
-                <p class="text-xs">Requires additional charting library</p>
+                <p>{t().analyticsCharts}</p>
+                <p class="text-xs">{t().requiresChartingLibrary}</p>
               </div>
             </div>
           </div>

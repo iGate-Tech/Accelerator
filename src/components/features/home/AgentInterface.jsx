@@ -2,6 +2,7 @@ import {
     Show,
     createSignal,
     createEffect,
+    createMemo,
     onMount,
     useContext
 } from "solid-js";
@@ -10,8 +11,8 @@ import logger from '../../../lib/logger.js';
 import ProgressAccordion from "../../ui/ProgressAccordion";
 
 import {LangContext} from "../../../context/LangContext";
-import {translations} from "../../../assets/translations/translations-index.js";
 import {useUser} from "../../../context/UserContext";
+import { agentTranslations } from "../../../assets/translations/translations-index.js";
 
 const AgentInterface = (props) => { // Defensive checks for required props
     if (!props.machineStore || !props.tasksList || !props.agentBoxClass || !props.agentContentClass || !props.greetingClass) {
@@ -20,7 +21,7 @@ const AgentInterface = (props) => { // Defensive checks for required props
             <div id="agentBox" class="flex flex-col rounded-lg mx-auto max-w-6xl">
                 <div class="flex items-center justify-center h-64">
                     <div class="loading loading-spinner loading-lg text-primary"></div>
-                    <span class="ml-4 text-lg">Loading agent interface...</span>
+                    <span class="ms-4 text-lg">{agentTranslations.en.loadingAgentInterface}</span>
                 </div>
             </div>
         );
@@ -42,6 +43,13 @@ const AgentInterface = (props) => { // Defensive checks for required props
     const [currentProject, setCurrentProject] = createSignal(null);
     const [forceShowForm, setForceShowForm] = createSignal(false);
 
+    // Reactive translation function
+    const t = createMemo(() => {
+        const langKey = currentLang();
+        const translations = agentTranslations[langKey] || agentTranslations.en;
+        return translations;
+    });
+
     createEffect(() => {
         if (props.projectData) {
             setCurrentProject(props.projectData());
@@ -54,20 +62,18 @@ const AgentInterface = (props) => { // Defensive checks for required props
         forceShowForm();
     });
 
+    // Track language changes
+    createEffect(() => {
+        if (lang) {
+            setCurrentLang(lang());
+        }
+    });
+
     let greetingRef;
     let cardRef;
     let textareaRef;
     let buttonsRef;
     let badgeRef;
-
-    const t = () => {
-        const langKey = currentLang();
-        const langTranslations = translations[langKey];
-        if (!langTranslations) {
-            return translations.en || {};
-        }
-        return langTranslations;
-    };
 
     // Auto-resize textarea when prompt changes
     createEffect(() => {
@@ -158,7 +164,7 @@ const AgentInterface = (props) => { // Defensive checks for required props
             <div id="agentBox" class="flex flex-col rounded-lg mx-auto max-w-6xl">
                 <div class="flex items-center justify-center h-64">
                     <div class="loading loading-spinner loading-lg text-primary"></div>
-                    <span class="ml-4 text-lg">Initializing agent interface...</span>
+                    <span class="ms-4 text-lg">{t().initializingAgentInterface}</span>
                 </div>
             </div>
         );
@@ -169,8 +175,6 @@ const AgentInterface = (props) => { // Defensive checks for required props
             class={
                 `${
                     props.agentBoxClass()
-                } ${
-                    currentLang() === "ar" ? "rtl" : "ltr"
                 } w-full`
             }
             style={
@@ -228,7 +232,7 @@ const AgentInterface = (props) => { // Defensive checks for required props
                                 }
                                 class="bg-info/10 text-info px-4 py-2 rounded-full flex items-center gap-2 text-sm hover:bg-info/20 transition cursor-pointer mx-auto">
                                 <i data-lucide="message-circle" class="w-4 h-4"></i>
-                                Chat with AI
+                                {t().chatWithAI}
                             </button>
                         </Show>
                     </Show>
@@ -238,14 +242,14 @@ const AgentInterface = (props) => { // Defensive checks for required props
                             <div class="flex items-center justify-between mb-3">
                                 <h3 class="text-sm font-semibold text-info flex items-center gap-2">
                                     <i data-lucide="message-circle" class="w-4 h-4"></i>
-                                    Chat with AI
+                                    {t().chatWithAI}
                                 </h3>
                                 <button 
                                     type="button"
                                     onClick={props.handleExitChat}
                                     class="bg-success/10 text-success px-3 py-1 rounded-full flex items-center gap-1.5 text-xs hover:bg-success/20 transition cursor-pointer">
                                     <i data-lucide="play" class="w-3 h-3"></i>
-                                    Resume Accelerator
+                                    {t().resumeAccelerator}
                                 </button>
                             </div>
                             {/* Chat Messages */}
@@ -265,13 +269,13 @@ const AgentInterface = (props) => { // Defensive checks for required props
                                 <Show when={props.isLoading && props.isLoading() && props.streamingContent && props.streamingContent()}>
                                     <div class="chat chat-start">
                                         <div class="chat-bubble bg-base-300 text-xs animate-pulse">
-                                            Thinking...
+                                            {t().thinking}
                                         </div>
                                     </div>
                                 </Show>
                                 <Show when={!props.machineStore.context?.chatMessages?.length}>
                                     <div class="text-center text-sm opacity-50 py-4">
-                                        Ask me anything about your project or request changes...
+                                        {t().askAboutProject}
                                     </div>
                                 </Show>
                             </div>
@@ -290,7 +294,7 @@ const AgentInterface = (props) => { // Defensive checks for required props
                                         name="chatInput"
                                         id="chatInput"
                                         class="flex-1 text-base-content text-sm w-full px-3 py-2 bg-base-100 border border-base-300 rounded-lg focus:ring-0 focus:border-primary"
-                                        placeholder="Ask about your project or give instructions..."
+                                        placeholder={t().askAboutProject}
                                         disabled={props.isLoading && props.isLoading()}
                                     />
                                     <button 
@@ -298,12 +302,12 @@ const AgentInterface = (props) => { // Defensive checks for required props
                                         disabled={props.isLoading && props.isLoading()}
                                         class="bg-primary/10 text-primary px-4 py-2 rounded-lg flex items-center gap-1 text-xs hover:bg-primary/20 transition cursor-pointer disabled:opacity-50">
                                         <i data-lucide="send" class="w-3 h-3"></i>
-                                        Send
+                                        {t().send}
                                     </button>
                                 </div>
                             </form>
                             <div class="text-[10px] opacity-50 mt-1 text-center">
-                                Chat uses 5 credits per message
+                                {t().chatUsesCredits}
                             </div>
                         </div>
                     </Show>
@@ -348,7 +352,7 @@ const AgentInterface = (props) => { // Defensive checks for required props
                               </Show>
                               <Show when={props.machineStore.state === "processing" && props.streamingContent && props.streamingContent().trim()}>
                                   <div class="mt-4 p-4 bg-base-200 rounded-lg">
-                                      <h3 class="text-sm font-semibold mb-2">AI Processing...</h3>
+                                      <h3 class="text-sm font-semibold mb-2">{t().aiProcessing}</h3>
                                       <div class="text-sm whitespace-pre-wrap">{props.streamingContent()}</div>
                                   </div>
                               </Show>
@@ -412,8 +416,8 @@ const AgentInterface = (props) => { // Defensive checks for required props
                                 props.machineStore && props.machineStore.state === "error"
                             }>
                                 <div class="text-error text-sm mt-2">
-                                    Processing error: {
-                                    props.machineStore.context?.uiMessage || 'Unknown error occurred'
+                                    {t().processingError} {
+                                    props.machineStore.context?.uiMessage || t().unknownError
                                 } </div>
                             </Show>
                             <div ref={buttonsRef}
@@ -463,25 +467,25 @@ const AgentInterface = (props) => { // Defensive checks for required props
                                                 t().aiSuggestion
                                             }</span>
                                         </button>
-                                        <Show when={props.machineStore.state !== 'chatting'}>
-                                            <button type="button"
-                                                onClick={
-                                                    (e) => {
-                                                        handleButtonPress(e.currentTarget);
-                                                        props.handleEnterChat && props.handleEnterChat();
-                                                    }
-                                                }
-                                                onMouseEnter={
-                                                    (e) => handleButtonHover(e.currentTarget)
-                                                }
-                                                onMouseLeave={
-                                                    (e) => handleButtonLeave(e.currentTarget)
-                                                }
-                                                class="bg-info/10 text-info px-3 py-1 rounded-full flex items-center gap-1 text-xs hover:bg-info/20 transition cursor-pointer">
-                                                <i data-lucide="message-circle" class="w-3 h-3"></i>
-                                                <span class="hidden sm:inline">Chat with AI</span>
-                                            </button>
-                                        </Show>
+                                         <Show when={props.machineStore.state !== 'chatting'}>
+                                             <button type="button"
+                                                 onClick={
+                                                     (e) => {
+                                                         handleButtonPress(e.currentTarget);
+                                                         props.handleEnterChat && props.handleEnterChat();
+                                                     }
+                                                 }
+                                                 onMouseEnter={
+                                                     (e) => handleButtonHover(e.currentTarget)
+                                                 }
+                                                 onMouseLeave={
+                                                     (e) => handleButtonLeave(e.currentTarget)
+                                                 }
+                                                 class="bg-info/10 text-info px-3 py-1 rounded-full flex items-center gap-1 text-xs hover:bg-info/20 transition cursor-pointer">
+                                                 <i data-lucide="message-circle" class="w-3 h-3"></i>
+                                                 <span class="hidden sm:inline">{t().chatButton}</span>
+                                             </button>
+                                         </Show>
                                     </Show>
                                 </div>
                                 <div class="flex gap-2">

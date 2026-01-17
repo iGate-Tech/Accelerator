@@ -8,10 +8,10 @@ export default defineConfig({
   },
    plugins: [
      solidPlugin(),
-      VitePWA({
-       disable: true,
+    VitePWA({
+      disable: true, // Disabled during development
       registerType: 'autoUpdate',
-      includeAssets: ['avatar.png'],
+      // includeAssets: ['avatar.png'],
       manifest: {
         name: 'Accelerator AI',
         short_name: 'Accelerator',
@@ -25,18 +25,7 @@ export default defineConfig({
         lang: 'en-US',
         dir: 'ltr',
         icons: [
-          {
-            src: '/avatar.png',
-            sizes: '192x192',
-            type: 'image/png',
-            purpose: 'any maskable'
-          },
-          {
-            src: '/avatar.png',
-            sizes: '512x512',
-            type: 'image/png',
-            purpose: 'any maskable'
-          }
+          // Icons can be added here when needed
         ]
       },
        workbox: {

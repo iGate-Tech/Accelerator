@@ -1,4 +1,4 @@
-import { createSignal, createEffect, onMount, useContext } from "solid-js";
+import { createSignal, createMemo, createEffect, onMount, useContext } from "solid-js";
 import { useNavigate } from "@solidjs/router";
 import { LangContext } from "../../context/LangContext";
 import { translations } from "../../assets/translations/translations-index.js";
@@ -9,7 +9,7 @@ const StatusPage = () => {
   logger.trace('StatusPage: Starting');
   const { lang } = useContext(LangContext);
   const [currentLang, setCurrentLang] = createSignal(lang());
-  const t = () => translations[currentLang()];
+  const t = createMemo(() => translations[currentLang()]);
 
   onMount(() => {
     if (window.lucide) window.lucide.createIcons();
@@ -49,7 +49,7 @@ const StatusPage = () => {
   };
 
   return (
-    <div class={`h-full overflow-auto ${currentLang() === 'ar' ? 'rtl' : 'ltr'}`}>
+    <div class="h-full overflow-auto">
       <div class="max-w-4xl mx-auto space-y-8 py-8 px-4 sm:px-6">
       {/* Back Button */}
       <div class="mb-6">

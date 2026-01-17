@@ -1,4 +1,4 @@
-import { createSignal, createEffect, onMount, onCleanup, For, Show, createResource, useContext } from "solid-js";
+import { createSignal, createEffect, onMount, onCleanup, For, Show, createResource, useContext, createMemo } from "solid-js";
 import { useNavigate, A } from "@solidjs/router";
 import { LangContext } from "../../context/LangContext";
 import { translations } from "../../assets/translations/translations-index.js";
@@ -10,7 +10,7 @@ const Help = () => {
   const navigate = useNavigate();
   const { lang } = useContext(LangContext);
   const [currentLang, setCurrentLang] = createSignal(lang());
-  const t = () => translations[currentLang()];
+  const t = createMemo(() => translations[currentLang()]);
   const [activeSection, setActiveSection] = createSignal('getting-started');
   const [searchQuery, setSearchQuery] = createSignal('');
   const [expandedFaq, setExpandedFaq] = createSignal(new Set());
@@ -408,7 +408,7 @@ Use consistent naming conventions and color coding for easy navigation.`
    ];
 
   return (
-       <div class={`max-w-6xl mx-auto space-y-8 px-4 sm:px-6 py-6 sm:py-8 overflow-visible ${currentLang() === 'ar' ? 'rtl' : 'ltr'}`}>
+       <div class="max-w-6xl mx-auto space-y-8 px-4 sm:px-6 py-6 sm:py-8 overflow-visible">
          {/* Header with Search */}
          <div class="text-center py-6">
            {/* Back Button */}
@@ -430,16 +430,16 @@ Use consistent naming conventions and color coding for easy navigation.`
           {/* Global Search */}
           <div class="max-w-md mx-auto">
             <div class="relative">
-              <i data-lucide="search" class="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-base-content/50"></i>
+              <i data-lucide="search" class="absolute start-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-base-content/50"></i>
               <input
                 id="help-search"
                 type="text"
                 placeholder={`${t().searchHelp} (${t().ctrlK})`}
-                class="input input-bordered w-full pl-10 pr-10 text-sm"
+                class="input input-bordered w-full ps-10 pe-10 text-sm"
                 value={searchQuery()}
                 onInput={(e) => setSearchQuery(e.target.value)}
               />
-              <kbd class="absolute right-2 top-1/2 transform -translate-y-1/2 hidden sm:block text-xs text-base-content/50 bg-base-200 px-1.5 py-0.5 rounded">
+              <kbd class="absolute end-2 top-1/2 transform -translate-y-1/2 hidden sm:block text-xs text-base-content/50 bg-base-200 px-1.5 py-0.5 rounded">
                 {t().ctrlK}
               </kbd>
             </div>
@@ -469,7 +469,7 @@ Use consistent naming conventions and color coding for easy navigation.`
             class={`tab flex-shrink-0 ${activeSection() === 'getting-started' ? 'tab-active' : ''}`}
             onClick={() => setActiveSection('getting-started')}
           >
-            <i data-lucide="play" class="w-4 h-4 mr-1.5"></i>
+            <i data-lucide="play" class="w-4 h-4 me-1.5"></i>
             <span class="hidden xs:inline">{t().gettingStarted}</span>
             <span class="xs:hidden">{t().start}</span>
           </button>
@@ -477,7 +477,7 @@ Use consistent naming conventions and color coding for easy navigation.`
             class={`tab flex-shrink-0 ${activeSection() === 'tutorials' ? 'tab-active' : ''}`}
             onClick={() => setActiveSection('tutorials')}
           >
-            <i data-lucide="book-open" class="w-4 h-4 mr-1.5"></i>
+            <i data-lucide="book-open" class="w-4 h-4 me-1.5"></i>
             <span class="hidden sm:inline">{t().advancedGuides}</span>
             <span class="sm:hidden">{t().guides}</span>
           </button>
@@ -485,7 +485,7 @@ Use consistent naming conventions and color coding for easy navigation.`
             class={`tab flex-shrink-0 ${activeSection() === 'features' ? 'tab-active' : ''}`}
             onClick={() => setActiveSection('features')}
           >
-            <i data-lucide="zap" class="w-4 h-4 mr-1.5"></i>
+            <i data-lucide="zap" class="w-4 h-4 me-1.5"></i>
             <span class="hidden sm:inline">{t().features}</span>
             <span class="sm:hidden">{t().feat}</span>
           </button>
@@ -493,7 +493,7 @@ Use consistent naming conventions and color coding for easy navigation.`
             class={`tab flex-shrink-0 ${activeSection() === 'faq' ? 'tab-active' : ''}`}
             onClick={() => setActiveSection('faq')}
           >
-            <i data-lucide="help-circle" class="w-4 h-4 mr-1.5"></i>
+            <i data-lucide="help-circle" class="w-4 h-4 me-1.5"></i>
             <span>{t().faq}</span>
           </button>
           <button
@@ -507,7 +507,7 @@ Use consistent naming conventions and color coding for easy navigation.`
             class={`tab flex-shrink-0 ${activeSection() === 'contact' ? 'tab-active' : ''}`}
             onClick={() => setActiveSection('contact')}
           >
-            <i data-lucide="message-circle" class="w-4 h-4 mr-1.5"></i>
+            <i data-lucide="message-circle" class="w-4 h-4 me-1.5"></i>
             <span class="hidden sm:inline">{t().contact}</span>
           </button>
         </div>
@@ -574,7 +574,7 @@ Use consistent naming conventions and color coding for easy navigation.`
                    class="btn btn-outline btn-sm"
                    onClick={resetTutorial}
                  >
-                   <i data-lucide="rotate-ccw" class="w-4 h-4 mr-2"></i>
+                    <i data-lucide="rotate-ccw" class="w-4 h-4 me-2"></i>
                    {t().resetProgress}
                  </button>
                  <div class="alert alert-info flex-1 text-sm">
@@ -679,10 +679,10 @@ Use consistent naming conventions and color coding for easy navigation.`
                        <p class="text-sm text-base-content/70 line-clamp-2">{video.description}</p>
                        <div class="flex justify-between items-center mt-2 sm:mt-3">
                          <div class="badge badge-neutral text-xs">{video.duration}</div>
-                         <button class="btn btn-primary btn-sm">
-                           <i data-lucide="play" class="w-4 h-4 mr-1"></i>
-                           {t().watch}
-                         </button>
+                          <button class="btn btn-primary btn-sm">
+                            <i data-lucide="play" class="w-4 h-4 me-1"></i>
+                            {t().watch}
+                          </button>
                        </div>
                      </div>
                    </div>
@@ -707,16 +707,16 @@ Use consistent naming conventions and color coding for easy navigation.`
             {/* Search and Filters */}
             <div class="mb-4 sm:mb-6 space-y-3">
                <div class="flex flex-col sm:flex-row gap-3">
-                 <div class="flex-1 relative">
-                   <i data-lucide="search" class="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-base-content/50"></i>
-                   <input
-                     type="text"
-                     placeholder={t().searchFAQ}
-                     class="input input-bordered w-full pl-10 text-sm"
-                     value={searchQuery()}
-                     onInput={(e) => setSearchQuery(e.target.value)}
-                   />
-                 </div>
+                  <div class="flex-1 relative">
+                    <i data-lucide="search" class="absolute start-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-base-content/50"></i>
+                    <input
+                      type="text"
+                      placeholder={t().searchFAQ}
+                      class="input input-bordered w-full ps-10 text-sm"
+                      value={searchQuery()}
+                      onInput={(e) => setSearchQuery(e.target.value)}
+                    />
+                  </div>
                  <select class="select select-bordered w-full sm:w-48 text-sm">
                    <option value="">{t().allCategories}</option>
                    <option value="Getting Started">{t().gettingStartedCat}</option>
@@ -879,10 +879,10 @@ Use consistent naming conventions and color coding for easy navigation.`
                           ></textarea>
                        </div>
 
-                        <button type="submit" class="btn btn-primary w-full">
-                          <i data-lucide="send" class="w-4 h-4 mr-2"></i>
-                          {t().send}
-                        </button>
+                         <button type="submit" class="btn btn-primary w-full">
+                           <i data-lucide="send" class="w-4 h-4 me-2"></i>
+                           {t().send}
+                         </button>
                       </div>
                     </form>
                   </div>

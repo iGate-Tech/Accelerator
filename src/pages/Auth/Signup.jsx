@@ -6,7 +6,6 @@ import { sanitizeInput, isValidEmail } from "../../lib/security";
 import { toastManager } from "../../lib/feedback";
 import RouteGuard from "../../components/common/RouteGuard";
 import logo from "../../assets/iGate-tech-logo.svg";
-import avatar from "../../assets/avatar.png";
 import logger from '../../lib/logger.js';
 
 
@@ -62,7 +61,7 @@ const Signup = () => {
     const { name, email, password, confirmPassword } = formData();
 
     if (password !== confirmPassword) {
-      toastManager.error('Passwords do not match. Please ensure both password fields are identical.');
+      toastManager.error(t().passwordMismatch);
       setLoading(false);
       return;
     }
@@ -71,7 +70,7 @@ const Signup = () => {
     const sanitizedName = sanitizeInput(name);
 
     if (!isValidEmail(sanitizedEmail)) {
-      toastManager.error(`Invalid email format: ${sanitizedEmail}. Please enter a valid email address.`);
+      toastManager.error(t().invalidEmail);
       setLoading(false);
       return;
     }
@@ -90,14 +89,14 @@ const Signup = () => {
       // Create user with Supabase
       const result = await signup(sanitizedEmail, password, profile);
       if (!result.success) {
-        toastManager.error(`Registration failed for ${sanitizedEmail}. ${result.error}`);
+        toastManager.error(t().registrationFailed.replace('{email}', sanitizedEmail));
         setLoading(false);
         return;
       }
 
       // Check if email confirmation is required
       if (result.needsConfirmation) {
-        toastManager.success(`Account created successfully for ${sanitizedEmail}! Please check your email and click the confirmation link to activate your account.`);
+        toastManager.success(t().accountCreated.replace('{email}', sanitizedEmail));
         setTimeout(() => {
           navigate('/auth/login');
         }, 3000);
@@ -106,7 +105,7 @@ const Signup = () => {
 
       // Signup includes automatic login
       if (result.success && result.user) {
-        toastManager.success(`Account created successfully for ${sanitizedEmail} and logged in!`);
+        toastManager.success(t().accountCreatedLoggedIn.replace('{email}', sanitizedEmail));
         if (result.warning) {
           toastManager.info(result.warning);
         }
@@ -114,7 +113,7 @@ const Signup = () => {
           navigate('/');
         }, 2000);
       } else {
-        toastManager.error(`Account created for ${sanitizedEmail} but automatic login failed. Please try logging in manually on the login page.`);
+        toastManager.error(t().accountCreatedManualLogin.replace('{email}', sanitizedEmail));
         setTimeout(() => {
           navigate('/auth/login');
         }, 2000);
@@ -122,9 +121,9 @@ const Signup = () => {
     } catch (err) {
       logger.error('Signup error:', err);
       if (err.message?.includes('User already registered')) {
-        toastManager.error(`Registration failed for ${sanitizedEmail}. An account with this email already exists. Please try logging in or use a different email.`);
+        toastManager.error(t().emailAlreadyExists);
       } else {
-        toastManager.error(`Registration failed for ${sanitizedEmail}. Error: ${err.message}. Please try again.`);
+        toastManager.error(t().registrationFailed.replace('{email}', sanitizedEmail) + ` Error: ${err.message}. Please try again.`);
       }
     } finally {
       setLoading(false);
@@ -191,42 +190,42 @@ const Signup = () => {
                  <input
                    type={showPassword() ? "text" : "password"}
                    placeholder={t().createPasswordPlaceholder}
-                   class="input input-bordered w-full pr-10"
+                    class="input input-bordered w-full pe-10"
                    value={formData().password}
                    onInput={(e) => updateFormData('password', e.target.value)}
                    autocomplete="new-password"
                    required
                    minLength="6"
                  />
-                <button
-                  type="button"
-                  class="absolute right-3 top-1/2 -translate-y-1/2 btn btn-ghost btn-sm btn-circle"
-                  onClick={() => setShowPassword(!showPassword())}
-                  aria-label={showPassword() ? "Hide password" : "Show password"}
-                  ref={passwordButton}
-                >
-                  <i data-lucide={showPassword() ? "eye-off" : "eye"} class="w-4 h-4"></i>
-                </button>
-              </div>
-            </div>
+                 <button
+                   type="button"
+                   class="absolute end-3 top-1/2 -translate-y-1/2 btn btn-ghost btn-sm btn-circle"
+                   onClick={() => setShowPassword(!showPassword())}
+                   aria-label={showPassword() ? "Hide password" : "Show password"}
+                   ref={passwordButton}
+                 >
+                   <i data-lucide={showPassword() ? "eye-off" : "eye"} class="w-4 h-4"></i>
+                 </button>
+               </div>
+             </div>
 
-            <div>
-               <label class="label">
-                 <span class="label-text">{t().confirmPassword}</span>
-               </label>
-              <div class="relative">
-                 <input
-                   type={showConfirmPassword() ? "text" : "password"}
-                   placeholder={t().confirmPasswordPlaceholder}
-                   class="input input-bordered w-full pr-10"
-                   value={formData().confirmPassword}
-                   onInput={(e) => updateFormData('confirmPassword', e.target.value)}
-                   autocomplete="new-password"
-                   required
-                 />
-                <button
-                  type="button"
-                  class="absolute right-3 top-1/2 -translate-y-1/2 btn btn-ghost btn-sm btn-circle"
+             <div>
+                <label class="label">
+                  <span class="label-text">{t().confirmPassword}</span>
+                </label>
+               <div class="relative">
+                  <input
+                    type={showConfirmPassword() ? "text" : "password"}
+                    placeholder={t().confirmPasswordPlaceholder}
+                    class="input input-bordered w-full pe-10"
+                    value={formData().confirmPassword}
+                    onInput={(e) => updateFormData('confirmPassword', e.target.value)}
+                    autocomplete="new-password"
+                    required
+                  />
+                 <button
+                   type="button"
+                   class="absolute end-3 top-1/2 -translate-y-1/2 btn btn-ghost btn-sm btn-circle"
                   onClick={() => setShowConfirmPassword(!showConfirmPassword())}
                   aria-label={showConfirmPassword() ? "Hide password" : "Show password"}
                   ref={confirmButton}

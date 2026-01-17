@@ -50,7 +50,7 @@ const Portfolio = () => {
    const [collaborators, { refetch: refetchCollaborators }] = createResource(() => selectedPortfolio(), getPortfolioCollaborators);
    const [invitations, { refetch: refetchInvitations }] = createResource(() => selectedPortfolio(), getPortfolioInvitations);
 
-  const t = () => translations[currentLang()];
+   const t = createMemo(() => translations[currentLang()]);
 
   createEffect(() => {
     setCurrentLang(lang());
@@ -222,7 +222,7 @@ const Portfolio = () => {
   ];
 
   return (
-    <div class={`space-y-6 mt-10 ${currentLang() === 'ar' ? 'rtl' : 'ltr'}`}>
+    <div class="space-y-6 mt-10">
        {/* Header */}
        <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
          <div class="text-center sm:text-left">
@@ -356,13 +356,11 @@ const Portfolio = () => {
                      <For each={collaborators()}>
                        {(collaborator) => (
                          <div class="flex items-center justify-between p-2 bg-base-200 rounded">
-                           <div class="flex items-center gap-2">
-                             <img
-                               src={collaborator.avatar || '/src/assets/avatar.png'}
-                               alt={collaborator.email}
-                               class="w-8 h-8 rounded-full"
-                             />
-                             <div>
+                            <div class="flex items-center gap-2">
+                              <div class="w-8 h-8 rounded-full bg-base-300 flex items-center justify-center">
+                                <i data-lucide="user" class="w-4 h-4"></i>
+                              </div>
+                              <div>
                                <p class="text-sm font-medium">{collaborator.email}</p>
                                <p class="text-xs text-base-content/60 capitalize">{collaborator.role}</p>
                              </div>
@@ -437,7 +435,7 @@ const Portfolio = () => {
         fallback={
           <div class="flex justify-center items-center py-16">
             <div class="loading loading-spinner loading-lg"></div>
-            <span class="ml-4 text-lg">{t().loadingPortfolio}</span>
+            <span class="ms-4 text-lg">{t().loadingPortfolio}</span>
           </div>
         }
       >

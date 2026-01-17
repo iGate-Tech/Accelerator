@@ -8,7 +8,9 @@ import OfflineIndicator from "./OfflineIndicator";
 import { A } from "@solidjs/router";
 import { getProjects, updateProject, deleteProject, deleteAllProjects, exportAllData, exportProject, exportReports } from "../../lib/db";
 import { toastManager } from "../../lib/feedback";
+import { sidebarTranslations } from "../../assets/translations/translations-index.js";
 import logger from "../../lib/logger.js";
+
 
 const MainLayout = (props) => {
   const context = useContext(LangContext) || { lang: () => 'ar', setLang: () => {} };
@@ -19,16 +21,10 @@ const MainLayout = (props) => {
   const [searchQuery, setSearchQuery] = createSignal("");
   const [editingProjectId, setEditingProjectId] = createSignal(null);
 
-  const downloadJSON = (data, filename) => {
-    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = filename;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
+  const t = (key) => {
+    const currentLang = lang() || 'ar';
+    const translations = sidebarTranslations[currentLang] || sidebarTranslations.en;
+    return translations[key] || sidebarTranslations.en[key] || key;
   };
 
   const loadProjects = async () => {
@@ -115,12 +111,6 @@ const MainLayout = (props) => {
       link.href = '/favicon.svg';
     }
 
-    const savedLang = localStorage.getItem('lang') || 'en';
-    if (savedLang !== lang()) {
-      setLang(savedLang);
-    }
-    document.documentElement.setAttribute('dir', savedLang === 'ar' ? 'rtl' : 'ltr');
-
     await loadProjects();
     window.addEventListener('projectAdded', onProjectAdded);
     window.addEventListener('projectUpdated', onProjectUpdated);
@@ -146,21 +136,7 @@ const MainLayout = (props) => {
         window.lucide.createIcons();
       }
     }, 50);
-  });
-
-  const currentLang = () => lang();
-  const t = (key) => {
-    const translations = {
-      newProject: "New Task",
-      dashboard: "Dashboard",
-      portfolio: "Portfolio",
-      exploreIdeas: "Explore Ideas",
-      help: "Help",
-      allProjects: "All Tasks",
-      sidebarSearch: "Search tasks...",
-    };
-    return translations[key] || key;
-  };
+   });
 
   return (
     <>
@@ -168,31 +144,17 @@ const MainLayout = (props) => {
       <GlobalError />
       <ToastContainer />
       <OfflineIndicator />
-      <div class="drawer h-full min-h-0">
+      <div class="flex h-screen min-h-0 overflow-hidden">
         <Show when={isAuthenticated()}>
-          <input 
-            id="my-drawer-4" 
-            type="checkbox" 
-            class="drawer-toggle" 
-            checked={isDrawerOpen()}
-            onChange={(e) => setIsDrawerOpen(e.target.checked)}
-          />
-          <div class="drawer-side z-[55]">
-            <label 
-              for="my-drawer-4" 
-              aria-label="close sidebar" 
-              class="drawer-overlay"
-            ></label>
-            
+          <aside
+            class="flex-shrink-0 bg-base-100 border-base-200 transition-all duration-300 ease-in-out h-full overflow-y-auto z-[55]"
+            classList={{
+              'w-16': !isDrawerOpen(),
+              'w-72': isDrawerOpen(),
+            }}
+          >
             <div 
-              class="flex min-h-full flex-col bg-base-100 border-base-200 transition-all duration-300 ease-in-out h-full"
-              classList={{
-                'w-16': !isDrawerOpen(),
-                'w-72': isDrawerOpen(),
-                'border-e': currentLang() === 'en',
-                'border-s': currentLang() === 'ar',
-                'is-drawer-close:overflow-visible': true
-              }}
+              class="flex min-h-full flex-col bg-base-100 h-full"
             >
               <div class="p-2 border-b border-base-200">
                 <button 
@@ -200,7 +162,11 @@ const MainLayout = (props) => {
                   class="cursor-pointer flex items-center justify-center p-2 hover:bg-base-200 rounded-lg transition-colors w-full"
                   title={isDrawerOpen() ? 'Collapse sidebar' : 'Expand sidebar'}
                 >
-                  <img src="/src/assets/iGate-tech-logo.svg" alt="Logo" class="h-8" />
+                  <img 
+                    src={isDrawerOpen() ? "/src/assets/iGate-tech-logo.svg" : "/src/assets/favicon.svg"} 
+                    alt="Logo" 
+                    class={isDrawerOpen() ? "h-8" : "h-8 mx-auto"} 
+                  />
                 </button>
               </div>
 
@@ -234,7 +200,7 @@ const MainLayout = (props) => {
                   <A href="/invitations" class="flex items-center gap-3 py-3 px-3 hover:bg-base-200 rounded-lg transition-colors" aria-label="Collaborate">
                     <i data-lucide="users" class="w-5 h-5 text-info flex-shrink-0"></i>
                     <Show when={isDrawerOpen()}>
-                      <span class="font-medium whitespace-nowrap">Collaborate</span>
+                      <span class="font-medium whitespace-nowrap">{t('collaborate')}</span>
                     </Show>
                   </A>
                 </li>
@@ -275,14 +241,12 @@ const MainLayout = (props) => {
                         </button>
                       </summary>
 
-                      <div
-                        class={`dropdown menu w-56 rounded-box bg-base-100 shadow-lg border border-base-200 ${
-                          currentLang() === 'ar' ? 'dropdown-start' : 'dropdown-end'
-                        }`}
-                        popover
-                        id="popover-all-projects"
-                        style="position-anchor:--anchor-all-projects"
-                      >
+                       <div
+                         class="dropdown menu w-56 rounded-box bg-base-100 shadow-lg border border-base-200"
+                         popover
+                         id="popover-all-projects"
+                         style="position-anchor:--anchor-all-projects"
+                       >
                         <li>
                           <A
                             href="/"
@@ -323,7 +287,7 @@ const MainLayout = (props) => {
                             value={searchQuery()}
                             onInput={(e) => setSearchQuery(e.target.value)}
                           />
-                          <i data-lucide="search" class="absolute top-1/2 -translate-y-1/2 w-4 h-4 text-base-content/40" classList={{ 'right-2': currentLang() === 'en', 'left-2': currentLang() === 'ar' }}></i>
+                           <i data-lucide="search" class="absolute top-1/2 -translate-y-1/2 end-2 w-4 h-4 text-base-content/40"></i>
                         </div>
                       </div>
                       <div>
@@ -391,9 +355,9 @@ const MainLayout = (props) => {
               </Show>
               </div>
             </div>
-          </div>
+          </aside>
         </Show>
-        <div class="drawer-content flex flex-col h-full min-h-0">
+        <div class="flex-1 flex flex-col min-h-0 overflow-hidden">
             <Navbar />
             <main id="main-content" class="flex-1 w-full min-h-0 overflow-auto p-2 md:p-4 lg:p-6">
             {props.children}

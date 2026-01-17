@@ -101,15 +101,6 @@ const Settings = () => {
     }
   };
 
-  const removeAvatar = async () => {
-    try {
-      await updateUserProfile(user().id, { avatar: '/src/assets/avatar.png' });
-      showMessage('Avatar removed successfully');
-    } catch (error) {
-      logger.debug('Avatar remove error:', error.message);
-    }
-  };
-
   const changePassword = async () => {
     const { current, new: newPassword, confirm } = passwordForm();
     
@@ -210,7 +201,7 @@ const Settings = () => {
   });
 
   return (
-    <div class={`max-w-4xl mx-auto space-y-8 px-4 sm:px-6 ${currentLang() === 'ar' ? 'rtl' : 'ltr'}`}>
+    <div class="max-w-4xl mx-auto space-y-8 px-4 sm:px-6">
       {/* Header */}
       <div class="text-center">
         <h1 class="text-3xl sm:text-4xl font-bold text-base-content mb-4">{t().accountSettings}</h1>
@@ -233,7 +224,7 @@ const Settings = () => {
         {/* Preferences */}
         <div class="card bg-base-200 p-4 sm:p-6 rounded-lg mb-8">
           <h2 class="text-xl sm:text-2xl font-bold mb-6 flex items-center">
-            <i data-lucide="settings" class="w-5 h-5 sm:w-6 sm:h-6 mr-2"></i>
+            <i data-lucide="settings" class="w-5 h-5 sm:w-6 sm:h-6 me-2"></i>
             {t().preferences}
           </h2>
 
@@ -244,8 +235,8 @@ const Settings = () => {
               <div class="space-y-3">
                 <label class="flex items-center justify-between">
                   <div>
-                    <span class="font-medium">Browser Notifications</span>
-                    <p class="text-sm text-base-content/60">Show desktop notifications</p>
+                    <span class="font-medium">{t().browserNotificationsTitle}</span>
+                    <p class="text-sm text-base-content/60">{t().browserNotificationsDesc}</p>
                   </div>
                   <input
                     type="checkbox"
@@ -259,8 +250,8 @@ const Settings = () => {
                 </label>
                 <label class="flex items-center justify-between">
                   <div>
-                    <span class="font-medium">Project Updates</span>
-                    <p class="text-sm text-base-content/60">Get notified about project changes</p>
+                    <span class="font-medium">{t().projectUpdatesTitle}</span>
+                    <p class="text-sm text-base-content/60">{t().projectUpdatesDesc}</p>
                   </div>
                   <input
                     type="checkbox"
@@ -277,11 +268,11 @@ const Settings = () => {
 
             {/* Appearance */}
             <div>
-              <h3 class="text-lg font-semibold mb-4">Appearance</h3>
+              <h3 class="text-lg font-semibold mb-4">{t().appearance}</h3>
               <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label class="label">
-                    <span class="label-text">Theme</span>
+                    <span class="label-text">{t().theme}</span>
                   </label>
                   <select
                     class="select select-bordered w-full"
@@ -294,22 +285,22 @@ const Settings = () => {
                       document.documentElement.setAttribute('data-theme', e.target.value);
                     }}
                   >
-                    <option value="light">Light</option>
-                    <option value="dark">Dark</option>
-                    <option value="auto">Auto</option>
+                    <option value="light">{t().lightTheme}</option>
+                    <option value="dark">{t().darkTheme}</option>
+                    <option value="auto">{t().autoTheme}</option>
                   </select>
                 </div>
                 <div>
                   <label class="label">
-                    <span class="label-text">Language</span>
+                    <span class="label-text">{t().language}</span>
                   </label>
                   <select
                     class="select select-bordered w-full"
                     value={currentLang()}
                     onChange={(e) => setLang(e.target.value)}
                   >
-                    <option value="en">English</option>
-                    <option value="ar">العربية</option>
+                    <option value="en">{t().english}</option>
+                    <option value="ar">{t().arabic}</option>
                   </select>
                 </div>
               </div>
@@ -317,11 +308,11 @@ const Settings = () => {
 
             {/* Privacy */}
             <div>
-              <h3 class="text-lg font-semibold mb-4">Privacy</h3>
+              <h3 class="text-lg font-semibold mb-4">{t().privacy}</h3>
               <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label class="label">
-                    <span class="label-text">Profile Visibility</span>
+                    <span class="label-text">{t().profileVisibility}</span>
                   </label>
                   <select
                     class="select select-bordered w-full"
@@ -331,16 +322,16 @@ const Settings = () => {
                       privacy: { ...preferencesForm().privacy, profileVisibility: e.target.value }
                     })}
                   >
-                    <option value="private">Private</option>
-                    <option value="friends">Friends Only</option>
-                    <option value="public">Public</option>
+                    <option value="private">{t().private}</option>
+                    <option value="friends">{t().friends}</option>
+                    <option value="public">{t().public}</option>
                   </select>
                 </div>
                 <div>
                   <label class="flex items-center justify-between h-full p-4 bg-base-100 rounded-lg">
                     <div>
-                      <span class="font-medium">Analytics & Tracking</span>
-                      <p class="text-sm text-base-content/60">Help improve our services</p>
+                      <span class="font-medium">{t().dataSharingTitle}</span>
+                      <p class="text-sm text-base-content/60">{t().dataSharingDesc}</p>
                     </div>
                     <input
                       type="checkbox"
@@ -366,7 +357,7 @@ const Settings = () => {
               <Show when={saving()}>
                 <span class="loading loading-spinner loading-sm"></span>
               </Show>
-              Save Preferences
+              {t().savePreferences}
             </button>
           </div>
         </div>
@@ -375,8 +366,8 @@ const Settings = () => {
         {/* Account */}
         <div class="card bg-base-200 p-4 sm:p-6 rounded-lg mb-8">
           <h2 class="text-xl sm:text-2xl font-bold mb-6 flex items-center">
-            <i data-lucide="shield" class="w-5 h-5 sm:w-6 sm:h-6 mr-2"></i>
-            Account Security
+            <i data-lucide="shield" class="w-5 h-5 sm:w-6 sm:h-6 me-2"></i>
+            {t().accountSecurity}
           </h2>
 
           <div class="space-y-6">
@@ -388,7 +379,7 @@ const Settings = () => {
                   <div class="space-y-4">
                     <input
                       type="password"
-                      placeholder="New password"
+                      placeholder={t().newPasswordPlaceholder}
                       class="input input-bordered w-full"
                       autocomplete="new-password"
                       value={passwordForm().new}
@@ -396,7 +387,7 @@ const Settings = () => {
                     />
                     <input
                       type="password"
-                      placeholder="Confirm new password"
+                      placeholder={t().confirmNewPasswordPlaceholder}
                       class="input input-bordered w-full"
                       autocomplete="new-password"
                       value={passwordForm().confirm}
@@ -407,7 +398,7 @@ const Settings = () => {
                       class="btn btn-primary"
                       disabled={changingPassword() || !passwordForm().new}
                     >
-                      {changingPassword() ? <span class="loading loading-spinner loading-sm"></span> : 'Update Password'}
+                      {changingPassword() ? <span class="loading loading-spinner loading-sm"></span> : t().updatePassword}
                     </button>
                   </div>
                 </form>
@@ -419,11 +410,11 @@ const Settings = () => {
               <div class="card-body">
                 <h3 class="card-title text-error">{t().dangerZone}</h3>
                 <p class="text-base-content/70 mb-4">
-                  Irreversible and destructive actions.
+                  {t().dangerZoneDesc}
                 </p>
                 <button class="btn btn-error btn-outline" onClick={deleteAccount}>
-                  <i data-lucide="trash" class="w-4 h-4 mr-2"></i>
-                  Delete Account
+                  <i data-lucide="trash" class="w-4 h-4 me-2"></i>
+                  {t().deleteAccount}
                 </button>
               </div>
             </div>
@@ -433,8 +424,8 @@ const Settings = () => {
         {/* Data & Privacy */}
         <div class="card bg-base-200 p-4 sm:p-6 rounded-lg">
           <h2 class="text-xl sm:text-2xl font-bold mb-6 flex items-center">
-            <i data-lucide="database" class="w-5 h-5 sm:w-6 sm:h-6 mr-2"></i>
-            Data & Privacy
+            <i data-lucide="database" class="w-5 h-5 sm:w-6 sm:h-6 me-2"></i>
+            {t().dataPrivacy}
           </h2>
 
           <div class="space-y-6">
@@ -443,12 +434,12 @@ const Settings = () => {
               <div class="card-body">
                 <h3 class="card-title">{t().exportYourData}</h3>
                 <p class="text-base-content/70 mb-4">
-                  Download a copy of all your data including projects, settings, and usage history.
+                  {t().exportDataFullDesc}
                 </p>
-                <button class="btn btn-outline" onClick={exportData}>
-                  <i data-lucide="download" class="w-4 h-4 mr-2"></i>
-                  Export Data
-                </button>
+                 <button class="btn btn-outline" onClick={exportData}>
+                   <i data-lucide="download" class="w-4 h-4 me-2"></i>
+                   {t().exportData}
+                 </button>
               </div>
             </div>
 
@@ -458,19 +449,19 @@ const Settings = () => {
                 <h3 class="card-title">{t().dataUsage}</h3>
                 <div class="grid grid-cols-2 sm:grid-cols-3 gap-4 mt-4">
                   <div class="stat bg-base-200 rounded-lg p-4">
-                    <div class="stat-title">Projects</div>
+                    <div class="stat-title">{t().projectsLabel}</div>
                     <div class="stat-value text-lg">{(projects() || []).length}</div>
-                    <div class="stat-desc">Active</div>
+                    <div class="stat-desc">{t().active}</div>
                   </div>
                   <div class="stat bg-base-200 rounded-lg p-4">
-                    <div class="stat-title">Credits Used</div>
+                    <div class="stat-title">{t().creditsUsedLabel}</div>
                     <div class="stat-value text-lg">{(credits() || []).filter(c => c.type === 'usage').reduce((sum, c) => sum + Math.abs(c.amount), 0)}</div>
-                    <div class="stat-desc">This month</div>
+                    <div class="stat-desc">{t().thisMonth}</div>
                   </div>
                   <div class="stat bg-base-200 rounded-lg p-4 col-span-2 sm:col-span-1">
-                    <div class="stat-title">Storage</div>
+                    <div class="stat-title">{t().storage}</div>
                     <div class="stat-value text-lg">{Math.max((projects() || []).length * 10 + 5, 5)} MB</div>
-                    <div class="stat-desc">Used</div>
+                    <div class="stat-desc">{t().used}</div>
                   </div>
                 </div>
               </div>

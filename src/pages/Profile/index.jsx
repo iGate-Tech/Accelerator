@@ -5,7 +5,7 @@ import { useLanguage } from "../../hooks/useLanguage";
 import { getUserCredits, getUserCreditBalance, getProjects, getUserById, updateUserProfile } from "../../lib/db";
 import { formatLocaleDate } from "../../lib/utils";
 import { toastManager } from "../../lib/feedback";
-import avatar from "../../assets/avatar.png";
+import { profileTranslations } from "../../assets/translations/translations-index.js";
 import logger from "../../lib/logger.js";
 
 
@@ -13,7 +13,14 @@ const Profile = () => {
   logger.trace('Profile: Starting');
   const navigate = useNavigate();
    const { user, isAuthenticated, updateProfile, updatePreferences, checkAuth } = useUser();
-  const { currentLang, t } = useLanguage();
+  const { currentLang, t: langT } = useLanguage();
+  
+  // Get profile translations reactively
+  const t = () => {
+    const langKey = currentLang() || 'ar';
+    return profileTranslations[langKey] || profileTranslations.ar;
+  };
+  
   const [credits, setCredits] = createSignal([]);
   const [creditBalance, setCreditBalance] = createSignal(0);
   const [projectsCount, setProjectsCount] = createSignal(0);
@@ -102,17 +109,38 @@ const Profile = () => {
     return isNaN(date.getTime()) ? null : date;
   };
 
+  const translateTransaction = (description) => {
+    if (!description) return '';
+    const desc = description.toLowerCase();
+    if (desc.includes('initialization') || desc.includes('تهيئة')) return t().stepInitialization;
+    if (desc.includes('chat') || desc.includes('دردشة')) return t().chatMessage;
+    if (desc.includes('llm') || desc.includes('LLM')) return t().quickLlmRequest;
+    if (desc.includes('payment') || desc.includes('دفع')) {
+      const match = description.match(/(\d+)/);
+      const amount = match ? match[1] : '';
+      return t().paymentCredits.replace('{amount}', amount);
+    }
+    if (desc.includes('purchased') || desc.includes('purchase') || desc.includes('شراء') || desc.includes('تم شراء')) {
+      const amountMatch = description.match(/(\d+)/);
+      const priceMatch = description.match(/\$([\d.]+)/);
+      const amount = amountMatch ? amountMatch[1] : '';
+      const price = priceMatch ? priceMatch[1] : '';
+      return t().purchasedCredits.replace('{amount}', amount).replace('{price}', price);
+    }
+    return description;
+  };
+
   const handleAvatarChange = (e) => {
     const file = e.target.files[0];
     if (!file) return;
 
     if (!file.type.startsWith('image/')) {
-      toastManager.error('Please select an image file');
+      toastManager.error(t().pleaseSelectImage);
       return;
     }
 
     if (file.size > 5 * 1024 * 1024) {
-      toastManager.error('File size must be less than 5MB');
+      toastManager.error(t().fileSizeLimit);
       return;
     }
 
@@ -123,30 +151,20 @@ const Profile = () => {
   };
 
   const uploadAvatar = async () => {
-      if (avatarPreview()) {
-        try {
-          await updateUserProfile(user().id, { avatar: avatarPreview() });
-          await checkAuth();
-          setAvatarFile(null);
-          setAvatarPreview(null);
-          toastManager.success('Avatar updated successfully');
-        } catch (error) {
-          logger.error('Avatar update error:', error);
-          toastManager.error('Failed to update avatar');
-        }
-      }
-    };
-
-  const removeAvatar = async () => {
+    if (avatarPreview()) {
       try {
-        await updateUserProfile(user().id, { avatar: '/src/assets/avatar.png' });
+        await updateUserProfile(user().id, { avatar: avatarPreview() });
         await checkAuth();
-        toastManager.success('Avatar removed successfully');
+        setAvatarFile(null);
+        setAvatarPreview(null);
+        toastManager.success(t().avatarUpdated);
       } catch (error) {
-        logger.error('Avatar remove error:', error);
-        toastManager.error('Failed to remove avatar');
+        logger.error('Avatar update error:', error);
+        toastManager.error(t().avatarUpdateFailed);
       }
-    };
+    }
+  };
+
 
   const saveProfile = async () => {
       try {
@@ -159,10 +177,10 @@ const Profile = () => {
         });
         await checkAuth();
         setEditingProfile(false);
-        toastManager.success('Profile updated successfully');
+        toastManager.success(t().profileUpdated);
       } catch (error) {
         logger.error('Profile update error:', error);
-        toastManager.error('Failed to update profile');
+        toastManager.error(t().profileUpdateFailed);
       }
     };
 
@@ -182,7 +200,7 @@ const Profile = () => {
    };
 
   return (
-    <div class={`max-w-6xl mx-auto space-y-8 px-4 sm:px-6 ${currentLang() === 'ar' ? 'rtl' : 'ltr'}`}>
+    <div class="max-w-6xl mx-auto space-y-8 px-4 sm:px-6">
       {/* Header */}
       <div class="text-center">
         <h1 class="text-3xl sm:text-4xl font-bold text-base-content mb-4">{t().profile}</h1>
@@ -195,13 +213,13 @@ const Profile = () => {
               class="btn btn-primary"
               onClick={saveProfile}
             >
-              Save Profile
+              {t().saveProfile}
             </button>
             <button
               class="btn btn-ghost"
               onClick={cancelEditing}
             >
-              Cancel
+              {t().cancel}
             </button>
           </div>
         </Show>
@@ -216,8 +234,8 @@ const Profile = () => {
               <div class="avatar relative">
                 <div class="w-32 h-32 rounded-full ring ring-primary/30 ring-offset-base-100 ring-offset-4">
                   <img
-                    src={avatarPreview() || (user().avatar && user().avatar !== '/src/assets/avatar.png' ? user().avatar : avatar)}
-                    alt="Profile avatar"
+                    src={avatarPreview() || user().avatar || ''}
+                    alt={t().avatarAlt}
                   />
                 </div>
                 <input
@@ -227,47 +245,47 @@ const Profile = () => {
                   class="absolute inset-0 opacity-0 cursor-pointer"
                   id="avatar-input"
                 />
-                <label for="avatar-input" class="absolute bottom-0 right-0 btn btn-circle btn-sm btn-primary">
+                <label for="avatar-input" class="absolute bottom-0 end-0 btn btn-circle btn-sm btn-primary">
                   <i data-lucide="camera" class="w-4 h-4"></i>
                 </label>
               </div>
 
-               {/* User Info */}
-               <div class="flex-1 text-center md:text-left">
-                 <Show when={editingProfile()} fallback={
-                   <>
-                     <h2 class="text-3xl font-bold text-base-content">{user().profile?.name || 'User'}</h2>
-                     <p class="text-xl text-base-content/70 mb-2">{user().profile?.email || user().email}</p>
-                     <p class="text-base text-base-content/60 mb-4">{user().profile?.bio || 'No bio yet'}</p>
-                   </>
-                 }>
-                   <div class="space-y-2">
-                     <input
-                       type="text"
-                       class="input input-bordered text-3xl font-bold text-center md:text-left"
-                       placeholder="Enter your full name"
-                       value={profileForm().name}
-                       onInput={(e) => setProfileForm(prev => ({ ...prev, name: e.target.value }))}
-                     />
-                     <p class="text-xl text-base-content/70">{user().profile?.email || user().email}</p>
-                     <textarea
-                       class="textarea textarea-bordered text-base text-center md:text-left"
-                       placeholder="Tell us about yourself..."
-                       rows="2"
-                       value={profileForm().bio}
-                       onInput={(e) => setProfileForm(prev => ({ ...prev, bio: e.target.value }))}
-                     ></textarea>
-                   </div>
+                {/* User Info */}
+                <div class="flex-1 text-center md:text-left">
+                  <Show when={editingProfile()} fallback={
+                    <>
+                      <h2 class="text-3xl font-bold text-base-content">{user().profile?.name || t().defaultName}</h2>
+                      <p class="text-xl text-base-content/70 mb-2">{user().profile?.email || user().email}</p>
+                      <p class="text-base text-base-content/60 mb-4">{user().profile?.bio || t().noBio}</p>
+                    </>
+                  }>
+                    <div class="space-y-2">
+                      <input
+                        type="text"
+                        class="input input-bordered text-3xl font-bold text-center md:text-left"
+                        placeholder={t().enterFullName}
+                        value={profileForm().name}
+                        onInput={(e) => setProfileForm(prev => ({ ...prev, name: e.target.value }))}
+                      />
+                      <p class="text-xl text-base-content/70">{user().profile?.email || user().email}</p>
+                      <textarea
+                        class="textarea textarea-bordered text-base text-center md:text-left"
+                        placeholder={t().tellAboutYourself}
+                        rows="2"
+                        value={profileForm().bio}
+                        onInput={(e) => setProfileForm(prev => ({ ...prev, bio: e.target.value }))}
+                      ></textarea>
+                    </div>
                  </Show>
 
                 <div class="flex flex-wrap justify-center md:justify-start gap-4 text-sm">
                   <div class="badge badge-primary badge-outline">
-                    <i data-lucide="calendar" class="w-3 h-3 mr-1"></i>
-                    Joined {formatDate(user().profile?.joinDate || user().created_at)}
+                    <i data-lucide="calendar" class="w-3 h-3 me-1"></i>
+                    {t().joined} {formatDate(user().profile?.joinDate || user().created_at)}
                   </div>
                   <div class="badge badge-secondary badge-outline">
-                    <i data-lucide="star" class="w-3 h-3 mr-1"></i>
-                    {user().subscription?.plan || 'Free'} Plan
+                    <i data-lucide="star" class="w-3 h-3 me-1"></i>
+                    {user().subscription?.plan ? (currentLang() === 'ar' && user().subscription?.plan === 'free' ? t().freePlan : user().subscription?.plan) : t().freePlan}
                   </div>
                 </div>
 
@@ -279,23 +297,16 @@ const Profile = () => {
                       onClick={uploadAvatar}
                       disabled={uploadingAvatar()}
                     >
-                      {uploadingAvatar() ? <span class="loading loading-spinner loading-sm"></span> : 'Upload'}
+                      {uploadingAvatar() ? <span class="loading loading-spinner loading-sm"></span> : t().upload}
                     </button>
                     <button
                       class="btn btn-ghost btn-sm"
                       onClick={() => { setAvatarFile(null); setAvatarPreview(null); }}
                     >
-                      Cancel
+                      {t().cancel}
                     </button>
                   </div>
                 )}
-                {!avatarFile() && user().avatar !== '/src/assets/avatar.png' && (
-                  <button
-                    class="btn btn-outline btn-sm mt-4"
-                    onClick={removeAvatar}
-                  >
-                    Remove Avatar
-                  </button>
                 )}
               </div>
             </div>
@@ -310,19 +321,19 @@ const Profile = () => {
              <div class="card bg-base-100 shadow-sm border border-base-200">
                <div class="card-body">
                  <div class="flex justify-between items-center">
-                   <h3 class="card-title">
-                     <i data-lucide="user" class="w-5 h-5 mr-2"></i>
-                     {t().personalInformation}
-                   </h3>
-                   <Show when={!editingProfile()}>
-                     <button
-                       class="btn btn-outline btn-sm"
-                       onClick={startEditing}
-                     >
-                       <i data-lucide="edit" class="w-4 h-4 mr-2"></i>
-                       Edit
-                     </button>
-                   </Show>
+                    <h3 class="card-title">
+                      <i data-lucide="user" class="w-5 h-5 me-2"></i>
+                      {t().personalInformation}
+                    </h3>
+                    <Show when={!editingProfile()}>
+                      <button
+                        class="btn btn-outline btn-sm"
+                        onClick={startEditing}
+                      >
+                        <i data-lucide="edit" class="w-4 h-4 me-2"></i>
+                        {t().edit}
+                      </button>
+                    </Show>
                  </div>
                  <div class="space-y-4">
                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -330,19 +341,19 @@ const Profile = () => {
                        <label class="label">
                          <span class="label-text font-medium">{t().fullName}</span>
                        </label>
-                       <Show when={editingProfile()} fallback={
-                         <div class="flex items-center gap-2 p-3 bg-base-200 rounded-lg">
-                           <i data-lucide="user" class="w-4 h-4 text-base-content/60"></i>
-                           <span>{user().profile?.name || 'Not set'}</span>
-                         </div>
-                       }>
-                         <input
-                           type="text"
-                           class="input input-bordered w-full"
-                           placeholder="Enter your full name"
-                           value={profileForm().name}
-                           onInput={(e) => setProfileForm(prev => ({ ...prev, name: e.target.value }))}
-                         />
+                        <Show when={editingProfile()} fallback={
+                          <div class="flex items-center gap-2 p-3 bg-base-200 rounded-lg">
+                            <i data-lucide="user" class="w-4 h-4 text-base-content/60"></i>
+                            <span>{user().profile?.name || t().notSet}</span>
+                          </div>
+                        }>
+                        <input
+                            type="text"
+                            class="input input-bordered w-full"
+                            placeholder={t().enterFullName}
+                            value={profileForm().name}
+                            onInput={(e) => setProfileForm(prev => ({ ...prev, name: e.target.value }))}
+                          />
                        </Show>
                      </div>
                      <div>
@@ -364,52 +375,52 @@ const Profile = () => {
                          <p class="text-base-content/80">{user().profile?.bio || t().noBioYet}</p>
                        </div>
                      }>
-                       <textarea
-                         class="textarea textarea-bordered w-full"
-                         placeholder="Tell us about yourself..."
-                         rows="3"
-                         value={profileForm().bio}
-                         onInput={(e) => setProfileForm(prev => ({ ...prev, bio: e.target.value }))}
-                       ></textarea>
-                     </Show>
-                   </div>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div>
-                        <label class="label">
-                          <span class="label-text font-medium">Location</span>
-                        </label>
-                        <Show when={editingProfile()} fallback={
-                          <div class="flex items-center gap-2 p-3 bg-base-200 rounded-lg">
-                            <i data-lucide="map-pin" class="w-4 h-4 text-base-content/60"></i>
-                            <span>{user().profile?.location || 'Not set'}</span>
-                          </div>
-                        }>
-                          <input
-                            type="text"
-                            class="input input-bordered w-full"
-                            placeholder="Enter your location"
-                            value={profileForm().location}
-                            onInput={(e) => setProfileForm(prev => ({ ...prev, location: e.target.value }))}
-                          />
-                        </Show>
-                      </div>
-                      <div>
-                        <label class="label">
-                          <span class="label-text font-medium">Website</span>
-                        </label>
-                        <Show when={editingProfile()} fallback={
-                          <div class="flex items-center gap-2 p-3 bg-base-200 rounded-lg">
-                            <i data-lucide="globe" class="w-4 h-4 text-base-content/60"></i>
-                            <span>{user().profile?.website ? <a href={user().profile.website} target="_blank" class="link link-primary">{user().profile.website}</a> : 'Not set'}</span>
-                          </div>
-                        }>
-                          <input
-                            type="url"
-                            class="input input-bordered w-full"
-                            placeholder="https://yourwebsite.com"
-                            value={profileForm().website}
-                            onInput={(e) => setProfileForm(prev => ({ ...prev, website: e.target.value }))}
-                          />
+                        <textarea
+                          class="textarea textarea-bordered w-full"
+                          placeholder={t().tellAboutYourself}
+                          rows="3"
+                          value={profileForm().bio}
+                          onInput={(e) => setProfileForm(prev => ({ ...prev, bio: e.target.value }))}
+                        ></textarea>
+                      </Show>
+                    </div>
+                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                       <div>
+                         <label class="label">
+                           <span class="label-text font-medium">{t().location}</span>
+                         </label>
+                         <Show when={editingProfile()} fallback={
+                           <div class="flex items-center gap-2 p-3 bg-base-200 rounded-lg">
+                             <i data-lucide="map-pin" class="w-4 h-4 text-base-content/60"></i>
+                             <span>{user().profile?.location || t().notSet}</span>
+                           </div>
+                         }>
+                           <input
+                             type="text"
+                             class="input input-bordered w-full"
+                             placeholder={t().enterLocation}
+                             value={profileForm().location}
+                             onInput={(e) => setProfileForm(prev => ({ ...prev, location: e.target.value }))}
+                           />
+                         </Show>
+                       </div>
+                        <div>
+                         <label class="label">
+                           <span class="label-text font-medium">{t().website}</span>
+                         </label>
+                         <Show when={editingProfile()} fallback={
+                           <div class="flex items-center gap-2 p-3 bg-base-200 rounded-lg">
+                             <i data-lucide="globe" class="w-4 h-4 text-base-content/60"></i>
+                             <span>{user().profile?.website ? <a href={user().profile.website} target="_blank" class="link link-primary">{user().profile.website}</a> : t().notSet}</span>
+                           </div>
+                         }>
+                         <input
+                             type="url"
+                             class="input input-bordered w-full"
+                             placeholder={t().websiteUrl}
+                             value={profileForm().website}
+                             onInput={(e) => setProfileForm(prev => ({ ...prev, website: e.target.value }))}
+                           />
                         </Show>
                       </div>
                     </div>
@@ -422,22 +433,22 @@ const Profile = () => {
                         <span>{formatDate(user().profile?.joinDate || user().created_at)}</span>
                       </div>
                     </div>
-                   <Show when={editingProfile()}>
-                     <div class="flex gap-2 pt-4">
-                       <button
-                         class="btn btn-primary btn-sm"
-                         onClick={saveProfile}
-                       >
-                         Save Changes
-                       </button>
-                       <button
-                         class="btn btn-ghost btn-sm"
-                         onClick={cancelEditing}
-                       >
-                         Cancel
-                       </button>
-                     </div>
-                   </Show>
+                    <Show when={editingProfile()}>
+                      <div class="flex gap-2 pt-4">
+                        <button
+                          class="btn btn-primary btn-sm"
+                          onClick={saveProfile}
+                        >
+                          {t().saveChanges}
+                        </button>
+                        <button
+                          class="btn btn-ghost btn-sm"
+                          onClick={cancelEditing}
+                        >
+                          {t().cancel}
+                        </button>
+                      </div>
+                    </Show>
                  </div>
                </div>
              </div>
@@ -446,7 +457,7 @@ const Profile = () => {
             <div class="card bg-base-100 shadow-sm border border-base-200">
               <div class="card-body">
                 <h3 class="card-title">
-                  <i data-lucide="activity" class="w-5 h-5 mr-2"></i>
+                  <i data-lucide="activity" class="w-5 h-5 me-2"></i>
                   {t().recentActivity}
                 </h3>
                 <div class="space-y-3">
@@ -455,12 +466,12 @@ const Profile = () => {
                       <div class={`p-2 rounded-full ${transaction.amount > 0 ? 'bg-success/20 text-success' : 'bg-error/20 text-error'}`}>
                         <i data-lucide={transaction.amount > 0 ? 'plus' : 'minus'} class="w-4 h-4"></i>
                       </div>
-                      <div class="flex-1">
-                        <p class="font-medium">{transaction.description}</p>
-                        <p class="text-sm text-base-content/60">
-                          {formatDate(transaction.date)}
-                        </p>
-                      </div>
+                       <div class="flex-1">
+                         <p class="font-medium">{translateTransaction(transaction.description)}</p>
+                         <p class="text-sm text-base-content/60">
+                           {formatDate(transaction.date)}
+                         </p>
+                       </div>
                       <div class={`font-semibold ${transaction.amount > 0 ? 'text-success' : 'text-error'}`}>
                         {transaction.amount > 0 ? '+' : ''}{transaction.amount}
                       </div>
@@ -479,48 +490,48 @@ const Profile = () => {
 
            {/* Right Column - Sidebar */}
            <div class="space-y-6">
-             {/* Privacy Settings */}
-             <div class="card bg-base-100 shadow-sm border border-base-200">
-               <div class="card-body">
-                 <h3 class="card-title">
-                   <i data-lucide="shield" class="w-5 h-5 mr-2"></i>
-                   Privacy Settings
-                 </h3>
-                 <div class="space-y-4">
-                   <div class="flex justify-between items-center">
-                     <span class="font-medium">Profile Visibility</span>
-                     <select
-                       class="select select-bordered select-sm"
-                       value={user().preferences?.privacy?.profileVisibility || 'private'}
-                       onChange={async (e) => {
-                         try {
-                           await updatePreferences({ privacy: { ...user().preferences.privacy, profileVisibility: e.target.value } });
-                           toastManager.success('Privacy settings updated');
-                         } catch (error) {
-                           toastManager.error('Failed to update privacy settings');
-                         }
-                       }}
-                     >
-                       <option value="public">Public</option>
-                       <option value="friends">Friends Only</option>
-                       <option value="private">Private</option>
-                     </select>
-                   </div>
-                   <div class="flex justify-between items-center">
-                     <span class="font-medium">Data Sharing</span>
-                     <input
-                       type="checkbox"
-                       class="toggle toggle-primary"
-                       checked={user().preferences?.privacy?.dataSharing || false}
-                       onChange={async (e) => {
-                         try {
-                           await updatePreferences({ privacy: { ...user().preferences.privacy, dataSharing: e.target.checked } });
-                           toastManager.success('Privacy settings updated');
-                         } catch (error) {
-                           toastManager.error('Failed to update privacy settings');
-                         }
-                       }}
-                     />
+              {/* Privacy Settings */}
+              <div class="card bg-base-100 shadow-sm border border-base-200">
+                <div class="card-body">
+                   <h3 class="card-title">
+                     <i data-lucide="shield" class="w-5 h-5 me-2"></i>
+                     {t().privacy}
+                   </h3>
+                  <div class="space-y-4">
+                    <div class="flex justify-between items-center">
+                      <span class="font-medium">{t().profileVisibility}</span>
+                      <select
+                        class="select select-bordered select-sm"
+                        value={user().preferences?.privacy?.profileVisibility || 'private'}
+                        onChange={async (e) => {
+                          try {
+                            await updatePreferences({ privacy: { ...user().preferences.privacy, profileVisibility: e.target.value } });
+                            toastManager.success(t().privacySettingsUpdated);
+                          } catch (error) {
+                            toastManager.error(t().privacySettingsFailed);
+                          }
+                        }}
+                      >
+                        <option value="public">{t().public}</option>
+                        <option value="friends">{t().friends}</option>
+                        <option value="private">{t().private}</option>
+                      </select>
+                    </div>
+                    <div class="flex justify-between items-center">
+                      <span class="font-medium">{t().dataSharing}</span>
+                      <input
+                        type="checkbox"
+                        class="toggle toggle-primary"
+                        checked={user().preferences?.privacy?.dataSharing || false}
+                        onChange={async (e) => {
+                          try {
+                            await updatePreferences({ privacy: { ...user().preferences.privacy, dataSharing: e.target.checked } });
+                            toastManager.success(t().privacySettingsUpdated);
+                          } catch (error) {
+                            toastManager.error(t().privacySettingsFailed);
+                          }
+                        }}
+                      />
                    </div>
                  </div>
                </div>
@@ -530,28 +541,28 @@ const Profile = () => {
              <div class="card bg-base-100 shadow-sm border border-base-200">
               <div class="card-body">
                 <h3 class="card-title">
-                  <i data-lucide="credit-card" class="w-5 h-5 mr-2"></i>
+                  <i data-lucide="credit-card" class="w-5 h-5 me-2"></i>
                   {t().subscription}
                 </h3>
-                <div class="space-y-4">
-                  <div class="flex justify-between items-center">
-                    <span class="font-medium">{t().plan}</span>
-                    <span class="badge badge-primary">{(user().subscription?.plan || 'free').toUpperCase()}</span>
-                  </div>
-                  <div class="flex justify-between items-center">
-                    <span class="font-medium">{t().status}</span>
-                    <span class={`badge ${user().subscription?.status === 'active' ? 'badge-success' : 'badge-warning'}`}>
-                      {user().subscription?.status || 'inactive'}
-                    </span>
-                  </div>
-                  <div class="flex justify-between items-center">
-                    <span class="font-medium">{t().credits}</span>
-                     <span class="font-semibold">{creditBalance() || 0} / {user().subscription?.maxCredits || 100}</span>
-                  </div>
-                  <div class="flex justify-between items-center">
-                    <span class="font-medium">{t().renewal}</span>
-                    <span class="text-sm">{user().subscription?.renewalDate ? formatDate(user().subscription.renewalDate) : 'N/A'}</span>
-                  </div>
+                 <div class="space-y-4">
+                   <div class="flex justify-between items-center">
+                     <span class="font-medium">{t().plan}</span>
+                     <span class="badge badge-primary">{(user().subscription?.plan ? (currentLang() === 'ar' && user().subscription?.plan === 'free' ? t().freePlan : user().subscription?.plan) : t().freePlan).toUpperCase()}</span>
+                   </div>
+                   <div class="flex justify-between items-center">
+                     <span class="font-medium">{t().status}</span>
+                     <span class={`badge ${user().subscription?.status === 'active' ? 'badge-success' : 'badge-warning'}`}>
+                       {user().subscription?.status || t().inactive}
+                     </span>
+                   </div>
+                   <div class="flex justify-between items-center">
+                     <span class="font-medium">{t().credits}</span>
+                      <span class="font-semibold">{creditBalance() || 0} / {user().subscription?.maxCredits || 100}</span>
+                   </div>
+                   <div class="flex justify-between items-center">
+                     <span class="font-medium">{t().renewal}</span>
+                     <span class="text-sm">{user().subscription?.renewalDate ? formatDate(user().subscription.renewalDate) : t().na}</span>
+                   </div>
                   <div class="w-full bg-base-200 rounded-full h-2">
                     <div
                       class="bg-primary h-2 rounded-full"
@@ -566,7 +577,7 @@ const Profile = () => {
             <div class="card bg-base-100 shadow-sm border border-base-200">
               <div class="card-body">
                 <h3 class="card-title">
-                  <i data-lucide="bar-chart" class="w-5 h-5 mr-2"></i>
+                  <i data-lucide="bar-chart" class="w-5 h-5 me-2"></i>
                   {t().statistics}
                 </h3>
                 <div class="space-y-3">

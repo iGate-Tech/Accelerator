@@ -114,7 +114,7 @@ const ConfirmModal = () => {
         <div class="modal-box relative">
           <button
             onClick={handleCancel}
-            class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2"
+            class="btn btn-sm btn-circle btn-ghost absolute end-2 top-2"
           >
             ✕
           </button>

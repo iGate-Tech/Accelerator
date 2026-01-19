@@ -309,7 +309,7 @@ function injectTemplateData(templateStr, data, options = {}) {
       const value = resolveNestedKey(data, key);
       if (value !== undefined) {
         try {
-          const replacement = typeof value === 'string' ? value : JSON.stringify(value);
+          const replacement = JSON.stringify(value);
           return replacement;
         } catch {
           return match;
@@ -323,7 +323,7 @@ function injectTemplateData(templateStr, data, options = {}) {
       const value = resolveNestedKey(data, key);
       if (value !== undefined) {
         try {
-          const replacement = typeof value === 'string' ? value : JSON.stringify(value);
+          const replacement = JSON.stringify(value);
           logger.trace('injectTemplateData: Replaced with value type:', typeof value);
           return `{{${key}: ${replacement}}}`;
         } catch (error) {
@@ -467,22 +467,106 @@ function mergeTemplateData(target, source) {
  */
 function renderFilledTemplate(templateText) {
   logger.trace('renderFilledTemplate: Starting with template length:', templateText?.length);
-  const result = templateText.replace(/\{\{(\s*)([\w.\-]+)\s*:\s*([^}]+)\}\}/g, (match, ws1, key, valueStr) => {
-    logger.trace('renderFilledTemplate: Processing filled placeholder for key:', key);
-    try {
-      const value = JSON.parse(valueStr.trim());
-      if (typeof value === 'string') {
-        logger.trace('renderFilledTemplate: Returning string value for key:', key);
-        return value;
-      } else {
-        logger.trace('renderFilledTemplate: Returning JSON stringified value for key:', key);
-        return JSON.stringify(value, null, 2);
-      }
-    } catch (error) {
-      logger.warn('renderFilledTemplate: Failed to parse value for key:', key, error.message);
-      return match;
+  const text = templateText;
+  const len = text.length;
+  let result = '';
+  let pos = 0;
+
+  while (pos < len) {
+    const nextOpen = text.indexOf("{{", pos);
+    if (nextOpen === -1) {
+      result += text.slice(pos);
+      break;
     }
-  });
+
+    result += text.slice(pos, nextOpen);
+    pos = nextOpen;
+
+    const start = pos;
+    pos += 2;
+
+    // Skip whitespace
+    while (pos < len && /\s/.test(text[pos])) pos++;
+
+    // Parse key
+    const keyStart = pos;
+    while (pos < len && /[\w.\-]/.test(text[pos])) pos++;
+    const key = text.slice(keyStart, pos);
+
+    if (!key) {
+      pos = start + 2;
+      result += text.slice(start, pos);
+      continue;
+    }
+
+    // Skip whitespace
+    while (pos < len && /\s/.test(text[pos])) pos++;
+
+    // Check if colon (filled placeholder)
+    if (text[pos] !== ":") {
+      pos = start + 2;
+      result += text.slice(start, pos);
+      continue;
+    }
+    pos++;
+
+    // Skip whitespace
+    while (pos < len && /\s/.test(text[pos])) pos++;
+
+    const valueStart = pos;
+
+    let inString = false;
+    let escaped = false;
+    let braceCount = 0;
+    let found = false;
+
+    // Scan until }}
+    while (pos < len - 1) {
+      const char = text[pos];
+
+      if (!inString && char === "}" && text[pos + 1] === "}" && braceCount === 0) {
+        found = true;
+        break;
+      }
+
+      if (inString) {
+        if (escaped) escaped = false;
+        else if (char === "\\") escaped = true;
+        else if (char === '"') inString = false;
+      } else {
+        if (char === '"') inString = true;
+        else if (char === '{') braceCount++;
+        else if (char === '}') braceCount--;
+      }
+
+      pos++;
+    }
+
+    if (!found) {
+      pos = start + 2;
+      result += text.slice(start, pos);
+    } else {
+      const valueStr = text.slice(valueStart, pos).trim();
+      pos += 2;
+
+      logger.trace('renderFilledTemplate: Processing filled placeholder for key:', key);
+      try {
+        const value = JSON.parse(valueStr);
+        if (typeof value === 'string') {
+          logger.trace('renderFilledTemplate: Returning string value for key:', key);
+          result += value;
+        } else {
+          logger.trace('renderFilledTemplate: Returning JSON stringified value for key:', key);
+          result += JSON.stringify(value, null, 2);
+        }
+      } catch (error) {
+        // logger.warn('renderFilledTemplate: Failed to parse value for key:', key, error.message);
+        // Treat as plain string if not valid JSON
+        result += valueStr;
+      }
+    }
+  }
+
   logger.trace('renderFilledTemplate: Completed');
   return result;
 }

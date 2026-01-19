@@ -5,7 +5,7 @@ export const sidebarTranslations = {
   en: {
     // Navigation
     newProject: 'New Task',
-    exploreIdeas: 'Explore Ideas',
+    exploreIdeas: 'Explore',
     allProjects: 'All Tasks',
     models: 'Models',
     reports: 'Reports',
@@ -69,7 +69,7 @@ export const sidebarTranslations = {
   ar: {
     // Navigation
     newProject: 'مهمة جديدة',
-    exploreIdeas: 'استكشف الأفكار',
+    exploreIdeas: 'استكشف',
     allProjects: 'جميع المهام',
     models: 'النماذج',
     reports: 'التقارير',

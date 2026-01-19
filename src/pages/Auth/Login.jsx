@@ -19,6 +19,7 @@ const Login = () => {
   const [email, setEmail] = createSignal('');
   const [password, setPassword] = createSignal('');
   const [showPassword, setShowPassword] = createSignal(false);
+  const [rememberMe, setRememberMe] = createSignal(false);
   let eyeButton;
   const [loading, setLoading] = createSignal(false);
 
@@ -57,7 +58,7 @@ const Login = () => {
     }
 
     try {
-      const result = await login(sanitizedEmail, sanitizedPassword);
+      const result = await login(sanitizedEmail, sanitizedPassword, rememberMe());
        if (result && result.success) {
          logger.info('Login successful for:', sanitizedEmail);
          toastManager.success(`Login successful for ${sanitizedEmail}. Welcome back!`);
@@ -131,19 +132,32 @@ const Login = () => {
                   <i data-lucide={showPassword() ? "eye-off" : "eye"} class="w-4 h-4"></i>
                 </button>
               </div>
-            </div>
+             </div>
 
-            <button
-              type="submit"
-              class="w-full btnshadow rounded-md border border-base-300 p-[2px]"
-              disabled={loading()}
-            >
-              <div class="bg-base-100 rounded-md w-full h-8 flex items-center justify-center">
+             {/* Remember Me Checkbox */}
+             <div class="flex items-center justify-between">
+               <label class="flex items-center gap-2 cursor-pointer">
+                 <input
+                   type="checkbox"
+                   class="checkbox checkbox-primary"
+                   checked={rememberMe()}
+                   onChange={(e) => setRememberMe(e.target.checked)}
+                 />
+                 <span class="text-sm">{t().rememberMe || 'Remember me'}</span>
+               </label>
+             </div>
 
-              {loading() && <span class="loading loading-spinner loading-sm"></span>}
-                {t().signIn}
-              </div>
-            </button>
+             <button
+               type="submit"
+               class="w-full btnshadow rounded-md border border-base-300 p-[2px]"
+               disabled={loading()}
+             >
+               <div class="bg-base-100 rounded-md w-full h-8 flex items-center justify-center">
+
+               {loading() && <span class="loading loading-spinner loading-sm"></span>}
+                 {t().signIn}
+               </div>
+             </button>
           </form>
 
           <div class="divider">OR</div>
@@ -165,7 +179,7 @@ const Login = () => {
              <a href="/privacy-policy" class="link link-hover">{t().privacyPolicy}</a>
              <a href="/terms-of-service" class="link link-hover">{t().termsOfService}</a>
            </div>
-            <p>© {new Date().getFullYear()} iGate. <em>"One Gate, Endless Possibilities."</em></p>
+            <p>© {new Date().getFullYear()} iGate. <em>{t().motto}</em></p>
          </footer>
         </div>
       </RouteGuard>

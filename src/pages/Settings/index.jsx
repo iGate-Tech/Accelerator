@@ -2,8 +2,10 @@ import { createSignal, onMount, For, Show, createEffect } from "solid-js";
 import { useNavigate } from "@solidjs/router";
 import { useUser } from "../../context/UserContext";
 import { useLanguage } from "../../hooks/useLanguage";
-import { getProjects, getUserCredits, getUserCreditBalance, updateUserProfile, updateEntity } from "../../lib/db";
+import { getProjects, getUserCredits, getUserCreditBalance, updateUserProfile, updateEntity, exportAllData } from "../../lib/db";
 import { confirmDanger } from "../../components/ui/GlobalConfirm";
+import { consentManager } from "../../lib/security.js";
+import { toastManager } from "../../lib/feedback";
 import logger from "../../lib/logger.js";
 
 
@@ -23,15 +25,17 @@ const Settings = () => {
   const [saving, setSaving] = createSignal(false);
   const [preferencesForm, setPreferencesForm] = createSignal({
     notifications: {
-      browser: true,
-      projectUpdates: true
+      browser: false,
+      projectUpdates: false
     },
+    theme: 'light',
     privacy: {
       profileVisibility: 'private',
       dataSharing: false
-    },
-    theme: 'light'
+    }
   });
+
+  const [consents, setConsents] = createSignal({});
   const [avatarFile, setAvatarFile] = createSignal(null);
   const [avatarPreview, setAvatarPreview] = createSignal(null);
   const [uploadingAvatar, setUploadingAvatar] = createSignal(false);
@@ -65,6 +69,65 @@ const Settings = () => {
     a.click();
     URL.revokeObjectURL(url);
     showMessage('Data exported successfully!');
+  };
+
+  const handleExportAllData = async () => {
+    try {
+      const data = await exportAllData(user()?.id);
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `accelerator-export-${new Date().toISOString().split('T')[0]}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+      showMessage('All data exported successfully!');
+    } catch (error) {
+      logger.error('Failed to export all data:', error);
+      showMessage('Export failed', 'error');
+    }
+  };
+
+  const handleImportData = async (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    try {
+      const text = await file.text();
+      const importData = JSON.parse(text);
+
+      // Basic validation
+      if (!importData.projects || !Array.isArray(importData.projects)) {
+        throw new Error('Invalid backup file format');
+      }
+
+      // Import logic would go here (simplified for now)
+      showMessage('Data import feature coming soon!');
+      logger.info('Import attempted with file:', file.name);
+
+    } catch (error) {
+      showMessage('Import failed: ' + error.message, 'error');
+    }
+
+    // Reset file input
+    event.target.value = '';
+  };
+
+  const handleManualBackup = () => {
+    // Trigger manual backup
+    const backupData = localStorage.getItem(`accelerator_backup_${user()?.id}`);
+    if (backupData) {
+      const blob = new Blob([backupData], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `accelerator-manual-backup-${new Date().toISOString().split('T')[0]}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+      showMessage('Manual backup created!');
+    } else {
+      showMessage('No automatic backup found - export data instead', 'error');
+    }
   };
 
   const handleAvatarChange = (event) => {
@@ -161,38 +224,27 @@ const Settings = () => {
   };
 
   onMount(async () => {
-    if (window.lucide) window.lucide.createIcons();
-    
-    if (user() && typeof user() === 'object' && user().id && typeof user().id === 'string') {
-      try {
-        const userProjects = await getProjects(user().id);
-        setProjects(userProjects || []);
-      } catch (e) {
-        logger.debug('Error loading projects:', e.message);
-        setProjects([]);
-      }
-      
-      try {
-        const userCredits = await getUserCredits(user().id);
-        setCredits(userCredits || []);
-      } catch (e) {
-        logger.debug('Error loading credits:', e.message);
-        setCredits([]);
-      }
-      
-      if (user().preferences) {
-        setPreferencesForm({
-          notifications: {
-            browser: user().preferences.notifications?.browser ?? true,
-            projectUpdates: user().preferences.notifications?.projectUpdates ?? true
-          },
-          privacy: {
-            profileVisibility: user().preferences.privacy?.profileVisibility ?? 'private',
-            dataSharing: user().preferences.privacy?.dataSharing ?? false
-          },
-          theme: user().preferences.theme ?? 'light'
-        });
-      }
+    // Load user preferences
+    if (user()) {
+      setPreferencesForm({
+        notifications: {
+          browser: user().preferences.notifications?.browser ?? false,
+          projectUpdates: user().preferences.notifications?.projectUpdates ?? false
+        },
+        theme: user().preferences.theme ?? 'light',
+        privacy: {
+          profileVisibility: user().preferences.privacy?.profileVisibility ?? 'private',
+          dataSharing: user().preferences.privacy?.dataSharing ?? false
+        }
+      });
+    }
+
+    // Load consent preferences
+    try {
+      const userConsents = await consentManager.getConsents();
+      setConsents(userConsents);
+    } catch (error) {
+      logger.error('Failed to load consents:', error);
     }
   });
 
@@ -441,21 +493,48 @@ const Settings = () => {
           </h2>
 
           <div class="space-y-6">
-            {/* Export Data */}
-            <div class="card bg-base-100">
-              <div class="card-body">
-                <h3 class="card-title">{t().exportYourData}</h3>
-                <p class="text-base-content/70 mb-4">
-                  {t().exportDataFullDesc}
-                </p>
-                 <button class="btn btn-outline" onClick={exportData}>
-                   <i data-lucide="download" class="w-4 h-4 me-2"></i>
-                   {t().exportData}
-                 </button>
-              </div>
-            </div>
+             {/* Export Data */}
+             <div class="card bg-base-100">
+               <div class="card-body">
+                 <h3 class="card-title">{t().exportYourData}</h3>
+                 <p class="text-base-content/70 mb-4">
+                   {t().exportDataFullDesc}
+                 </p>
+                  <button class="btn btn-outline" onClick={exportData}>
+                    <i data-lucide="download" class="w-4 h-4 me-2"></i>
+                    {t().exportData}
+                  </button>
+               </div>
+             </div>
 
-            {/* Data Usage Stats */}
+             {/* Data Management */}
+             <div class="card bg-base-100">
+               <div class="card-body">
+                 <h3 class="card-title">Data Management</h3>
+                 <div class="space-y-3">
+                   <button class="btn btn-outline w-full justify-start gap-2" onClick={handleExportAllData}>
+                     <i data-lucide="download" class="w-4 h-4"></i>
+                     Export All Data
+                   </button>
+                   <label class="btn btn-outline w-full justify-start gap-2 cursor-pointer">
+                     <i data-lucide="upload" class="w-4 h-4"></i>
+                     Import Data
+                     <input
+                       type="file"
+                       accept=".json"
+                       class="hidden"
+                       onChange={handleImportData}
+                     />
+                   </label>
+                   <button class="btn btn-outline w-full justify-start gap-2" onClick={handleManualBackup}>
+                     <i data-lucide="save" class="w-4 h-4"></i>
+                     Manual Backup
+                   </button>
+                 </div>
+               </div>
+             </div>
+
+             {/* Data Usage Stats */}
             <div class="card bg-base-100">
               <div class="card-body">
                 <h3 class="card-title">{t().dataUsage}</h3>
@@ -474,9 +553,123 @@ const Settings = () => {
                     <div class="stat-title">{t().storage}</div>
                     <div class="stat-value text-lg">{Math.max((projects() || []).length * 10 + 5, 5)} MB</div>
                     <div class="stat-desc">{t().used}</div>
-                  </div>
-                </div>
-              </div>
+               </div>
+
+               {/* Cookie & Consent Management */}
+               <div class="mt-6">
+                 <h4 class="text-md font-semibold mb-3">🍪 Cookie Preferences</h4>
+                 <div class="space-y-3">
+                   <div class="flex items-center justify-between p-3 bg-base-200 rounded-lg">
+                     <div>
+                       <span class="font-medium">Necessary Cookies</span>
+                       <p class="text-sm text-base-content/60">Required for basic functionality</p>
+                     </div>
+                     <input
+                       type="checkbox"
+                       class="checkbox checkbox-primary"
+                       checked={true}
+                       disabled={true}
+                     />
+                   </div>
+
+                   <div class="flex items-center justify-between p-3 bg-base-200 rounded-lg">
+                     <div>
+                       <span class="font-medium">Analytics</span>
+                       <p class="text-sm text-base-content/60">Help us improve our services</p>
+                     </div>
+                     <input
+                       type="checkbox"
+                       class="checkbox checkbox-primary"
+                       checked={consents().analytics || false}
+                       onChange={async (e) => {
+                         try {
+                           const updated = await consentManager.updateConsents({
+                             analytics: e.target.checked
+                           });
+                           setConsents(updated);
+                           toastManager.success('Consent preferences updated');
+                         } catch (error) {
+                           toastManager.error('Failed to update consent');
+                         }
+                       }}
+                     />
+                   </div>
+
+                   <div class="flex items-center justify-between p-3 bg-base-200 rounded-lg">
+                     <div>
+                       <span class="font-medium">Marketing</span>
+                       <p class="text-sm text-base-content/60">Personalized recommendations</p>
+                     </div>
+                     <input
+                       type="checkbox"
+                       class="checkbox checkbox-primary"
+                       checked={consents().marketing || false}
+                       onChange={async (e) => {
+                         try {
+                           const updated = await consentManager.updateConsents({
+                             marketing: e.target.checked
+                           });
+                           setConsents(updated);
+                           toastManager.success('Consent preferences updated');
+                         } catch (error) {
+                           toastManager.error('Failed to update consent');
+                         }
+                       }}
+                     />
+                   </div>
+
+                   <div class="flex items-center justify-between p-3 bg-base-200 rounded-lg">
+                     <div>
+                       <span class="font-medium">Preferences</span>
+                       <p class="text-sm text-base-content/60">Remember your settings</p>
+                     </div>
+                     <input
+                       type="checkbox"
+                       class="checkbox checkbox-primary"
+                       checked={consents().preferences || false}
+                       onChange={async (e) => {
+                         try {
+                           const updated = await consentManager.updateConsents({
+                             preferences: e.target.checked
+                           });
+                           setConsents(updated);
+                           toastManager.success('Consent preferences updated');
+                         } catch (error) {
+                           toastManager.error('Failed to update consent');
+                         }
+                       }}
+                     />
+                   </div>
+
+                   <div class="text-xs text-base-content/60 mt-4">
+                     <p><strong>GDPR Compliance:</strong> You can withdraw consent at any time. Last updated: {consents().updatedAt ? new Date(consents().updatedAt).toLocaleDateString() : 'Never'}</p>
+                     <button
+                       class="btn btn-ghost btn-xs text-error mt-2"
+                       onClick={async () => {
+                         const confirmed = await confirmDanger(
+                           'Withdraw All Consents',
+                           'This will disable all non-essential cookies and tracking. You can re-enable them later.',
+                           'Withdraw Consent'
+                         );
+
+                         if (confirmed) {
+                           try {
+                             const withdrawn = await consentManager.withdrawConsents();
+                             setConsents(withdrawn);
+                             toastManager.success('All consents withdrawn');
+                           } catch (error) {
+                             toastManager.error('Failed to withdraw consents');
+                           }
+                         }
+                       }}
+                     >
+                       Withdraw All Consents
+                     </button>
+                   </div>
+                 </div>
+               </div>
+             </div>
+           </div>
             </div>
           </div>
         </div>

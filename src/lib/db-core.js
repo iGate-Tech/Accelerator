@@ -33,6 +33,16 @@ export async function initDatabase(options = {}) {
       
       dbReady = true;
       console.log('PGLite database initialized successfully');
+
+      // Schedule automatic data retention enforcement for GDPR compliance
+      try {
+        const { scheduleDataRetention } = await import('./db.js');
+        scheduleDataRetention();
+        console.log('Data retention scheduler started');
+      } catch (error) {
+        console.warn('Failed to start data retention scheduler:', error.message);
+      }
+
       return dbInstance;
     } catch (error) {
       console.warn('Database init failed (non-blocking):', error.message);

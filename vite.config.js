@@ -1,3 +1,4 @@
+/// <reference types="vitest" />
 import { defineConfig } from 'vite';
 import solidPlugin from 'vite-plugin-solid';
 import { VitePWA } from 'vite-plugin-pwa';
@@ -81,9 +82,14 @@ export default defineConfig({
   build: {
     target: 'esnext',
   },
-  optimizeDeps: {
-    exclude: ['@electric-sql/pglite']
-  },
+   optimizeDeps: {
+     exclude: ['@electric-sql/pglite']
+   },
+   test: {
+     globals: true,
+     environment: 'jsdom',
+     setupFiles: ['./src/test/setup.ts'],
+   },
    server: {
       headers: {
         'Cross-Origin-Opener-Policy': 'same-origin',

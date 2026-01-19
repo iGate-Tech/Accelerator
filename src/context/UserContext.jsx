@@ -6,6 +6,8 @@ import { toastManager } from "../lib/feedback";
 import { activityLogger } from "../lib/activity";
 import logger from "../lib/logger.js";
 import { confirmLogout } from "../components/ui/GlobalConfirm";
+import { createAuthToken } from "../lib/data";
+import { secureLocalStorage } from "../lib/security.js";
 
 
 const UserContext = createContext();
@@ -15,11 +17,43 @@ export const UserProvider = (props) => {
   const [isAuthenticated, setIsAuthenticated] = createSignal(false);
   const [session, setSession] = createSignal(null);
 
-  const updateUser = (updates) => {
+  // Session management
+  const checkSession = async () => {
+    try {
+      const token = await secureLocalStorage.getItem('userToken');
+      if (!token) return false;
+
+      const { getSessionByToken } = await import('../lib/db');
+      const sessionData = await getSessionByToken(token);
+
+      if (!sessionData) {
+        // Session doesn't exist, clear local auth
+        await logout();
+        return false;
+      }
+
+      // Check if session is expired
+      const expiresAt = new Date(sessionData.expires_at);
+      if (expiresAt < new Date()) {
+        // Session expired, clear it
+        await logout();
+        return false;
+      }
+
+      setSession(sessionData);
+      return true;
+    } catch (error) {
+      logger.error('Session check failed:', error);
+      await logout();
+      return false;
+    }
+  };
+
+  const updateUser = async (updates) => {
     setUser(prev => {
       const newUser = { ...prev, ...updates };
-      // Save to localStorage
-      localStorage.setItem('userData', JSON.stringify(newUser));
+      // Save to secure localStorage
+      secureLocalStorage.setItem('userData', newUser);
       return newUser;
     });
   };
@@ -47,9 +81,9 @@ export const UserProvider = (props) => {
 
    const updatePreferences = async (preferenceUpdates) => {
      try {
-       // Update local state first
-       setUser(prev => ({ ...prev, preferences: { ...prev.preferences, ...preferenceUpdates } }));
-       localStorage.setItem('userData', JSON.stringify(user()));
+        // Update local state first
+        setUser(prev => ({ ...prev, preferences: { ...prev.preferences, ...preferenceUpdates } }));
+        await secureLocalStorage.setItem('userData', user());
 
         // Update database
         await updateEntity('profiles', 'user_id', user().id, {
@@ -86,33 +120,40 @@ export const UserProvider = (props) => {
   };
 
   // Auth functions (local)
-  const login = async (email, password) => {
+  const login = async (email, password, rememberMe = false) => {
     logger.info('User login initiated for:', email);
-    
+
+    // Rate limiting check
+    const { authRateLimiter } = await import('../lib/security');
+    if (authRateLimiter.isBlocked(email)) {
+      const remainingMs = authRateLimiter.getRemainingTime(email);
+      const remainingMinutes = Math.ceil(remainingMs / (60 * 1000));
+      logger.warn(`Login blocked for ${email}, ${remainingMinutes} minutes remaining`);
+      return { success: false, error: `Too many failed attempts. Try again in ${remainingMinutes} minutes.` };
+    }
+
     try {
       const { _getUserByEmail } = await import('../lib/db-users');
       const userRecord = await _getUserByEmail({ email });
-      
+
       if (!userRecord) {
         logger.info('User not found:', email);
-        return { success: false, error: 'User not found' };
+        authRateLimiter.recordAttempt(email, false);
+        return { success: false, error: 'Invalid credentials' };
       }
       
       let userId = userRecord.id;
       
-      // Verify password if hash exists
-      if (userRecord.password_hash && password) {
-        const encoder = new TextEncoder();
-        const data = encoder.encode(password + 'accelerator-salt');
-        const hashBuffer = await crypto.subtle.digest('SHA-256', data);
-        const hashArray = Array.from(new Uint8Array(hashBuffer));
-        const passwordHash = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-        
-        if (userRecord.password_hash !== passwordHash) {
-          logger.warn('Invalid password for user:', email);
-          return { success: false, error: 'Invalid password' };
-        }
-      }
+       // Verify password if hash exists
+       if (userRecord.password_hash && password) {
+        const { verifyPassword } = await import('../lib/security');
+        const isValidPassword = await verifyPassword(password, userRecord.password_hash);
+
+         if (!isValidPassword) {
+           authRateLimiter.recordAttempt(email, false);
+           return { success: false, error: 'Invalid credentials' };
+         }
+       }
 
       const profileData = await getUserProfile(userId);
 
@@ -168,13 +209,35 @@ export const UserProvider = (props) => {
         credits: { balance: creditBalance || 50, transactions: [] }
       };
 
-      setIsAuthenticated(true);
-      setUser(userData);
-      setCurrentUser(userData);
-      localStorage.setItem('userData', JSON.stringify(userData));
-      activityLogger.setUser(userData);
-      logger.info('Login successful for:', email);
-      return { success: true, user: userData };
+       // Create authentication token and session
+       try {
+         const { createSession } = await import('../lib/db');
+         const token = await createAuthToken(userId, rememberMe);
+         const expiresAt = new Date(Date.now() + (rememberMe ? 30 : 1) * 24 * 60 * 60 * 1000); // 30 days or 1 day
+
+         await createSession(userId, token, expiresAt.toISOString());
+
+        // Store token in secure localStorage
+        await secureLocalStorage.setItem('userToken', token);
+
+        setIsAuthenticated(true);
+        setUser(userData);
+        setCurrentUser(userData);
+        await secureLocalStorage.setItem('userData', userData);
+        activityLogger.setUser(userData);
+        authRateLimiter.recordAttempt(email, true); // Record successful login
+        logger.info('Login successful for:', email);
+        return { success: true, user: userData };
+      } catch (sessionError) {
+        logger.error('Session creation failed:', sessionError);
+        // Still allow login but without persistent session
+        setIsAuthenticated(true);
+        setUser(userData);
+        setCurrentUser(userData);
+        await secureLocalStorage.setItem('userData', userData);
+        activityLogger.setUser(userData);
+        return { success: true, user: userData, warning: 'Session persistence failed - you may need to login again' };
+      }
     } catch (error) {
       logger.error('Login error:', error);
       return { success: false, error: error.message };
@@ -186,15 +249,37 @@ export const UserProvider = (props) => {
     if (!shouldLogout) return;
 
     logger.info('User logout initiated');
-    if (user()) {
-      activityLogger.logAuth('logout');
-    }
 
-    setUser(null);
-    setIsAuthenticated(false);
-    localStorage.removeItem('userData');
-    logger.info('User logout successful');
-    toastManager.success('Logged out successfully');
+    try {
+      // Invalidate JWT token and delete session
+      const token = await secureLocalStorage.getItem('userToken');
+      if (token) {
+        const { deleteSession } = await import('../lib/db');
+        await deleteSession(token);
+        secureLocalStorage.removeItem('userToken');
+        logger.info('JWT token invalidated and session deleted');
+      }
+
+      if (user()) {
+        activityLogger.logAuth('logout');
+      }
+
+      setUser(null);
+      setIsAuthenticated(false);
+      setSession(null);
+      localStorage.removeItem('userData');
+      logger.info('User logout successful');
+      toastManager.success('Logged out successfully');
+    } catch (error) {
+      logger.error('Logout error:', error);
+      // Still perform local logout even if session cleanup fails
+      setUser(null);
+      setIsAuthenticated(false);
+      setSession(null);
+      secureLocalStorage.removeItem('userData');
+      secureLocalStorage.removeItem('userToken');
+      toastManager.success('Logged out locally');
+    }
   };
 
   const signup = async (email, password, profile = {}) => {
@@ -305,16 +390,93 @@ export const UserProvider = (props) => {
 
   const forgotPassword = async (email) => {
     logger.info('Password reset initiated for:', email);
-    return { success: true };
+
+    try {
+      // Check if user exists
+      const { _getUserByEmail } = await import('../lib/db-users');
+      const userRecord = await _getUserByEmail({ email });
+
+      if (!userRecord) {
+        // For security, don't reveal if email exists or not
+        logger.info('Password reset requested for non-existent email:', email);
+        return { success: true, message: 'If an account with this email exists, a password reset link has been sent.' };
+      }
+
+      // Generate reset token
+      const resetToken = crypto.randomUUID();
+      const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
+
+      // Store reset token in database
+      const { createPasswordResetToken } = await import('../lib/db');
+      await createPasswordResetToken(userRecord.id, resetToken, expiresAt.toISOString());
+
+      // In a real app, send email here. For now, log the reset link
+      const resetLink = `${window.location.origin}/auth/reset-password/${resetToken}`;
+      logger.info('Password reset link generated:', resetLink);
+
+      // For demo purposes, you could show this link to the user
+      // In production, this would be emailed
+
+      return { success: true, message: 'If an account with this email exists, a password reset link has been sent.' };
+    } catch (error) {
+      logger.error('Forgot password error:', error);
+      return { success: false, error: 'Failed to process password reset request. Please try again.' };
+    }
+  };
+
+  const resetPassword = async (token, newPassword) => {
+    logger.info('Password reset initiated with token');
+
+    try {
+      // Validate the reset token
+      const { validatePasswordResetToken, usePasswordResetToken } = await import('../lib/db');
+      const tokenValidation = await validatePasswordResetToken(token);
+
+      if (!tokenValidation.valid) {
+        return { success: false, error: tokenValidation.error };
+      }
+
+      // Validate new password strength
+      const { isValidPassword } = await import('../lib/security');
+      const passwordValidation = isValidPassword(newPassword);
+      if (!passwordValidation.valid) {
+        return { success: false, error: passwordValidation.message };
+      }
+
+      // Hash the new password
+      const encoder = new TextEncoder();
+      const data = encoder.encode(newPassword + 'accelerator-salt');
+      const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+      const hashArray = Array.from(new Uint8Array(hashBuffer));
+      const passwordHash = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+
+      // Update the user's password
+      const { _updateUserPassword } = await import('../lib/db-users');
+      await _updateUserPassword({ userId: tokenValidation.userId, passwordHash });
+
+      // Mark the token as used
+      await usePasswordResetToken(tokenValidation.tokenId);
+
+      // Log security event
+      activityLogger.logSecurity('password_reset', { method: 'token' });
+
+      logger.info('Password reset successful for user:', tokenValidation.userId);
+      return { success: true, message: 'Password has been reset successfully' };
+
+    } catch (error) {
+      logger.error('Password reset error:', error);
+      return { success: false, error: 'Failed to reset password. Please try again.' };
+    }
   };
 
   const checkAuth = async () => {
     logger.info('Auth check initiated');
-    
-    const savedUserData = localStorage.getItem('userData');
+
+    const savedUserData = await secureLocalStorage.getItem('userData');
     if (savedUserData) {
       try {
-        const parsedUser = JSON.parse(savedUserData);
+        // Handle both encrypted (object) and potentially corrupted (string) data
+        const parsedUser = typeof savedUserData === 'object' ? savedUserData : JSON.parse(savedUserData);
         if (parsedUser && parsedUser.id) {
           const userId = parsedUser.id;
           const profileData = await getUserProfile(userId);
@@ -405,7 +567,7 @@ export const UserProvider = (props) => {
 
     setUser(localUser);
     setIsAuthenticated(true);
-    localStorage.setItem('userData', JSON.stringify(localUser));
+    await secureLocalStorage.setItem('userData', localUser);
     activityLogger.setUser(localUser);
     return true;
   };
@@ -422,21 +584,20 @@ export const UserProvider = (props) => {
     }
 
     try {
-      const savedUserData = localStorage.getItem('userData');
+      const savedUserData = await secureLocalStorage.getItem('userData');
       if (savedUserData) {
         try {
-          const parsedUser = JSON.parse(savedUserData);
-          if (parsedUser && parsedUser.id) {
-            setUser(parsedUser);
-            setCurrentUser(parsedUser);
+          if (savedUserData && savedUserData.id) {
+            setUser(savedUserData);
+            setCurrentUser(savedUserData);
             setIsAuthenticated(true);
-            logger.debug('User loaded from localStorage');
+            logger.debug('User loaded from secure localStorage');
           } else {
-            localStorage.removeItem('userData');
+            secureLocalStorage.removeItem('userData');
           }
         } catch (parseError) {
           logger.error('Error parsing saved user data:', parseError);
-          localStorage.removeItem('userData');
+          secureLocalStorage.removeItem('userData');
         }
       }
 
@@ -458,6 +619,7 @@ export const UserProvider = (props) => {
       logout,
       signup,
       forgotPassword,
+      resetPassword,
       checkAuth,
       updateUser,
       updateProfile,

@@ -274,42 +274,79 @@ app.post('/api/llm', async (req, res) => {
         console.log(`[${new Date().toISOString()}] SERVER: System prompt length: ${systemPrompt.length}, user prompt length: ${prompt.length}`);
         console.log(`[${new Date().toISOString()}] SERVER: Creating OpenAI stream with model: ${AI_MODEL}`);
 
-        const openaiStartTime = Date.now();
-        const stream = await openai.chat.completions.create({
-            model: AI_MODEL,
-            messages: [
-                { role: 'system', content: systemPrompt },
-                { role: 'user', content: prompt }
-            ],
-            stream: true,
-        });
-        const openaiInitTime = Date.now() - openaiStartTime;
-        console.log(`[${new Date().toISOString()}] SERVER: OpenAI stream created successfully in ${openaiInitTime}ms`);
+        // Retry logic with exponential backoff
+        const maxRetries = 3;
+        let retries = 0;
+        let lastError = null;
 
-        console.log(`[${new Date().toISOString()}] SERVER: Starting to stream response chunks to client`);
-        let aiResponse = '';
-        let chunkCount = 0;
-        let totalBytesSent = 0;
+        while (retries <= maxRetries) {
+            try {
+                const openaiStartTime = Date.now();
+                const stream = await openai.chat.completions.create({
+                    model: AI_MODEL,
+                    messages: [
+                        { role: 'system', content: systemPrompt },
+                        { role: 'user', content: prompt }
+                    ],
+                    stream: true,
+                });
+                const openaiInitTime = Date.now() - openaiStartTime;
+                console.log(`[${new Date().toISOString()}] SERVER: OpenAI stream created successfully in ${openaiInitTime}ms (attempt ${retries + 1}/${maxRetries + 1})`);
 
-        for await (const chunk of stream) {
-            const content = chunk.choices[0]?.delta?.content || '';
-            aiResponse += content;
-            res.write(content);
-            chunkCount++;
-            totalBytesSent += Buffer.byteLength(content, 'utf8');
+                console.log(`[${new Date().toISOString()}] SERVER: Starting to stream response chunks to client`);
+                let aiResponse = '';
 
-            if (chunkCount % 10 === 0) {
-                console.log(`[${new Date().toISOString()}] SERVER: Streamed ${chunkCount} chunks, current response length: ${aiResponse.length}, bytes sent: ${totalBytesSent}`);
+                // Stream the response
+                for await (const chunk of stream) {
+                    const content = chunk.choices[0]?.delta?.content || '';
+                    if (content) {
+                        aiResponse += content;
+                        const chunkCount = aiResponse.split(' ').length;
+                        const totalBytesSent = Buffer.byteLength(aiResponse, 'utf8');
+                        console.log(`[${new Date().toISOString()}] SERVER: Streaming chunk: "${content}" (response so far: ${aiResponse.length} chars, ${chunkCount} words, ${totalBytesSent} bytes)`);
+                        res.write(content);
+                    }
+                }
+
+                const duration = Date.now() - startTime;
+                console.log(`[${new Date().toISOString()}] SERVER: Total chunks: ${chunkCount}, response length: ${aiResponse.length}, bytes sent: ${totalBytesSent}, total duration: ${duration}ms`);
+                console.log(`[${new Date().toISOString()}] SERVER: Response preview: "${aiResponse.substring(0, 200)}..."`);
+
+                // Success - break out of retry loop
+                break;
+
+            } catch (error) {
+                lastError = error;
+                const duration = Date.now() - startTime;
+                console.log(`[${new Date().toISOString()}] SERVER: Attempt ${retries + 1}/${maxRetries + 1} failed after ${duration}ms: ${error.message}`);
+
+                // Check if this is a retryable error
+                const isRetryable = error.message.includes('429') || // Rate limit
+                                   error.message.includes('500') || // Server error
+                                   error.message.includes('502') || // Bad gateway
+                                   error.message.includes('503') || // Service unavailable
+                                   error.message.includes('504') || // Gateway timeout
+                                   error.code === 'ECONNRESET' ||
+                                   error.code === 'ETIMEDOUT';
+
+                if (!isRetryable || retries >= maxRetries) {
+                    // Not retryable or max retries reached
+                    console.log(`[${new Date().toISOString()}] SERVER: Not retryable or max retries reached, failing request`);
+                    break;
+                }
+
+                // Calculate exponential backoff delay (1s, 2s, 4s)
+                const waitTime = Math.pow(2, retries) * 1000;
+                console.log(`[${new Date().toISOString()}] SERVER: Retrying in ${waitTime}ms (attempt ${retries + 1}/${maxRetries + 1})`);
+                await new Promise(resolve => setTimeout(resolve, waitTime));
+                retries++;
             }
         }
 
-        console.log(`[${new Date().toISOString()}] SERVER: Ending response stream`);
-        res.end();
-
-        const duration = Date.now() - startTime;
-        console.log(`[${new Date().toISOString()}] SERVER: === STREAM COMPLETED ===`);
-        console.log(`[${new Date().toISOString()}] SERVER: Total chunks: ${chunkCount}, response length: ${aiResponse.length}, bytes sent: ${totalBytesSent}, total duration: ${duration}ms`);
-        console.log(`[${new Date().toISOString()}] SERVER: Response preview: "${aiResponse.substring(0, 200)}..."`);
+        if (retries > maxRetries && lastError) {
+            // All retries failed, throw the last error
+            throw lastError;
+        }
 
         // No longer update server-side history
     } catch (error) {
@@ -317,8 +354,29 @@ app.post('/api/llm', async (req, res) => {
         console.log(`[${new Date().toISOString()}] SERVER: CRITICAL ERROR after ${duration}ms: ${error.message}`);
         console.log(`[${new Date().toISOString()}] SERVER: Error stack:`, error.stack);
         console.log(`[${new Date().toISOString()}] SERVER: Full error object:`, error);
-        console.log(`[${new Date().toISOString()}] SERVER: Sending 500 error response to client`);
-        res.status(500).end('Error: ' + error.message);
+
+        // Provide user-friendly error messages with recovery suggestions
+        let userMessage = 'An error occurred while processing your request. ';
+        let statusCode = 500;
+
+        if (error.message.includes('429') || error.message.includes('rate limit')) {
+            userMessage += 'The AI service is currently busy. Please try again in a few moments.';
+            statusCode = 429;
+        } else if (error.message.includes('400') || error.message.includes('invalid')) {
+            userMessage += 'There was an issue with your request. Please check your input and try again.';
+            statusCode = 400;
+        } else if (error.message.includes('500') || error.message.includes('502') || error.message.includes('503') || error.message.includes('504')) {
+            userMessage += 'The AI service is temporarily unavailable. Please try again later.';
+            statusCode = 503;
+        } else if (error.code === 'ECONNRESET' || error.code === 'ETIMEDOUT') {
+            userMessage += 'Connection to the AI service was interrupted. Please check your internet connection and try again.';
+            statusCode = 503;
+        } else {
+            userMessage += 'If this problem persists, please contact support.';
+        }
+
+        console.log(`[${new Date().toISOString()}] SERVER: Sending ${statusCode} error response to client: ${userMessage}`);
+        res.status(statusCode).end(userMessage);
     }
 });
 

@@ -19,7 +19,6 @@ class ActivityLogger {
   // Log an activity
   async log(actionType, entityType = null, entityId = null, description, metadata = {}) {
     if (!this.user || !this.user.id) {
-      logger.warn('Cannot log activity: User not set');
       return;
     }
 
@@ -81,6 +80,11 @@ class ActivityLogger {
     await this.log(`project_${action}`, 'project', projectId, `Project "${projectName}" ${action}`, details);
   }
 
+  async logTask(action, taskId, taskContent, projectId, details = {}) {
+    const truncatedContent = taskContent ? taskContent.substring(0, 100) + (taskContent.length > 100 ? '...' : '') : '';
+    await this.log(`task_${action}`, 'task', taskId, `Task ${action}: "${truncatedContent}"`, { ...details, projectId });
+  }
+
   async logCredit(action, amount, details = {}) {
     await this.log(`credit_${action}`, 'credit', null, `Credits ${action}: ${amount}`, { ...details, amount });
   }
@@ -89,12 +93,30 @@ class ActivityLogger {
     await this.log(`ai_${action}`, 'project', projectId, `AI ${action}: ${stepName}`, details);
   }
 
+  async logSecurity(event, details = {}) {
+    await this.log(`security_${event}`, 'security', null, `Security event: ${event}`, details);
+  }
+
+  async logData(action, dataType, details = {}) {
+    await this.log(`data_${action}`, dataType, null, `Data ${action}: ${dataType}`, details);
+  }
+
   async logProfile(action, details = {}) {
     await this.log(`profile_${action}`, 'profile', this.user.id, `Profile ${action}`, details);
   }
 
   async logPageVisit(page, details = {}) {
     await this.log('page_visit', 'page', page, `Visited ${page} page`, details);
+  }
+
+  async logValidation(event, field, details = {}) {
+    await this.log(`validation_${event}`, 'validation', field, `Validation ${event} for ${field}`, details);
+  }
+
+  async logError(event, error, details = {}) {
+    const errorMessage = error.message || error.toString();
+    const truncatedError = errorMessage.substring(0, 200) + (errorMessage.length > 200 ? '...' : '');
+    await this.log(`error_${event}`, 'error', null, `Error ${event}: ${truncatedError}`, { ...details, errorType: error.name });
   }
 }
 

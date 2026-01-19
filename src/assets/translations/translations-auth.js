@@ -43,7 +43,8 @@ export const authTranslations = {
     statusPage: 'Status Page',
     changelog: 'Changelog',
     help: 'Help',
-    copyright: '© {year} iGate. One Gate, Endless Possibilities.',
+    motto: 'One Gate, Endless Possibilities.',
+    copyright: '© {year} iGate. {motto}',
 
     // Toast messages
     passwordMismatch: 'Passwords do not match. Please ensure both password fields are identical.',
@@ -95,7 +96,8 @@ export const authTranslations = {
     statusPage: 'صفحة الحالة',
     changelog: 'سجل التغييرات',
     help: 'المساعدة',
-    copyright: '© {year} iGate. بوابة واحدة، إمكانيات لا حصر لها.',
+    motto: 'بوابة واحدة، إمكانيات لا حصر لها.',
+    copyright: '© {year} iGate. {motto}',
 
     // Toast messages
     passwordMismatch: 'كلمتا المرور غير متطابقتين. يرجى التأكد من أن كلا الحقلين متطابقان.',

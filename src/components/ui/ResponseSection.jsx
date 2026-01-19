@@ -1,108 +1,21 @@
-import { For, Show, onMount, createEffect, createSignal, createMemo, useContext } from "solid-js";
+import { Show, createEffect, createSignal, createMemo, useContext } from "solid-js";
 import { marked } from "marked";
 import { renderFilledTemplate } from "../../lib/llm-template";
-import { sectionMap, stepNames, modelMap } from "../../lib/machine";
+import { steps, stepNames } from "../../lib/machine";
 import { LangContext } from "../../context/LangContext";
 import { uiTranslations } from "../../assets/translations/translations-index.js";
-import logger from "../../lib/logger.js";
+import { Skeleton, TaskSkeleton } from "./Skeleton";
 
-
-/* ---------- Prompt Maps ---------- */
-
-const promptToSection = {
-  "You are an AI-powered startup accelerator": sectionMap.system,
-  "Analyze the problem": sectionMap.step2,
-  "Evaluate the severity": sectionMap.step3,
-  "List and categorize current solutions": sectionMap.step4,
-  "Analyze why current": sectionMap.step5,
-  "Develop a detailed user persona": sectionMap.step6,
-  "Assess the urgency": sectionMap.step7,
-  "Gather and validate evidence": sectionMap.step8,
-  "Design a comprehensive solution": sectionMap.step9,
-  "Craft a compelling value proposition": sectionMap.step10,
-  "List key features": sectionMap.step11,
-  "Determine the optimal business model": sectionMap.step12,
-  "Design revenue streams": sectionMap.step13,
-  "Develop a pricing strategy": sectionMap.step14,
-  "Build competitive moats": sectionMap.step15,
-  "List key assumptions": sectionMap.step16,
-  "Clearly define the target market": sectionMap.step17,
-  "Estimate the Total Addressable Market": sectionMap.step18,
-  "Estimate the Serviceable Available Market": sectionMap.step19,
-  "Estimate the Serviceable Obtainable Market": sectionMap.step20,
-  "Check if": sectionMap.validate_tam_sam_som,
-  "Identify trends": sectionMap.step21,
-  "List direct and indirect competitors": sectionMap.step22,
-  "Develop a strategy to enter": sectionMap.step23,
-  "Identify channels": sectionMap.step24,
-  "Describe the sales motion": sectionMap.step25,
-  "Develop strategies to retain": sectionMap.step26,
-  "Explain how revenue is generated": sectionMap.step27,
-  "Provide Customer Acquisition Cost": sectionMap.step28,
-  "List major fixed and variable costs": sectionMap.step29,
-  "Provide 3-year revenue": sectionMap.step30,
-  "Calculate the monthly burn rate": sectionMap.step31,
-  "Determine when": sectionMap.step32,
-  "Provide current traction": sectionMap.step33,
-  "Calculate the valuation": sectionMap.step34,
-  "Determine the appropriate funding stage": sectionMap.step35,
-  "Determine how much capital": sectionMap.step36,
-  "Check if {{valuation}}": sectionMap.validate_deck_ask,
-  "Plan the allocation": sectionMap.step37,
-  "Calculate the expected pre-money": sectionMap.step38,
-  "Validate if {{preMoney}}": sectionMap.validate_pre_money,
-  "Identify target investor types": sectionMap.step39,
-  "List milestones": sectionMap.step40,
-  "List founding team members": sectionMap.step41,
-  "Identify key skills": sectionMap.step42,
-  "Develop a hiring plan": sectionMap.step43,
-  "List advisors": sectionMap.step44,
-  "Determine the legal structure": sectionMap.step45,
-  "Plan intellectual property": sectionMap.step46,
-  "Identify key contracts": sectionMap.step47,
-  "Identify legal and regulatory risks": sectionMap.step48
-};
-
-const promptToStepName = Object.fromEntries(
-  Object.entries(promptToSection).map(([k, v]) => [k, stepNames[v]])
-);
 
 /* ---------- Helpers ---------- */
-
-const getSection = (task) =>
-  task.section ||
-  (Object.keys(promptToSection).find(k => task.prompt?.includes(k))
-    ? promptToSection[Object.keys(promptToSection).find(k => task.prompt?.includes(k))]
-    : "Unknown Section");
 
 const getStepName = (task) =>
   task.step_name ||
   (task.step ? stepNames[task.step] : null) ||
-  (Object.keys(promptToStepName).find(k => task.prompt?.includes(k))
-    ? promptToStepName[Object.keys(promptToStepName).find(k => task.prompt?.includes(k))]
-    : null) ||
   task.step ||
   "Unknown Step";
 
-const getBadgeClass = (state) => {
-  const classes = {
-    idle: 'badge-neutral',
-    processing: 'badge-primary',
-    pause: 'badge-warning',
-    completed: 'badge-success'
-  };
-  return classes[state] || 'badge-neutral';
-};
 
-const getStateIcon = (state) => {
-  const icons = {
-    idle: 'clock',
-    processing: 'cog',
-    pause: 'pause-circle',
-     completed: 'check'
-  };
-  return icons[state] || 'help-circle';
-};
 
 /* ---------- Component ---------- */
 
@@ -126,231 +39,377 @@ const ResponseSection = (props) => {
   const tasksCondition = props.tasksList && props.tasksList().length > 0;
   const shouldShow = startPressedCondition || tasksCondition;
 
-  const groupedTasks = createMemo(() => {
-    const groups = {};
-    props.tasksList().forEach(task => {
-      const model = task.model || "Manual";
-      if (!groups[model]) groups[model] = [];
-      groups[model].push(task);
+  const concatenatedTasksMarkdown = createMemo(() => {
+    const allTasks = props.tasksList().sort((a, b) => new Date(a.timestamp || 0) - new Date(b.timestamp || 0));
+    let markdown = '';
+
+    allTasks.forEach(task => {
+      if (props.editingTaskId && props.editingTaskId() === task.id) {
+        // Skip this task as it will be rendered as an editable textarea
+        return;
+      }
+      markdown += renderFilledTemplate(task.content) + '\n\n';
     });
-    return groups;
+
+    if (typeof props.streamingContent === 'function' && props.streamingContent()) {
+      // Format streaming content with proper markdown
+      let streamingText = props.streamingContent();
+      // Add typing cursor effect
+      if (props.isLoading && streamingText) {
+        streamingText += ' <span class="typing-cursor">|</span>';
+      }
+      markdown += streamingText;
+    }
+
+    return markdown;
   });
 
-  const modelOrder = ["Idea Model", "Business Model", "Financial Model", "Funding Model", "Marketing Model", "Team Model", "Legal Model", "Technical Model"];
+  let contentRef;
+  let lastProcessedHtml = '';
 
-  const sortedModels = createMemo(() => {
-    const groups = groupedTasks();
-    const system = Object.keys(groups).filter(m => m.toLowerCase().includes('system'));
-    const reports = Object.keys(groups).filter(m => m.toLowerCase().includes('report'));
-    const models = modelOrder.filter(m => groups[m]);
-    const other = Object.keys(groups).filter(m =>
-      !system.includes(m) && !reports.includes(m) && !models.includes(m)
-    );
+  const buttonsHtml = (taskId) => `
+    <div class="flex gap-2">
+      <button type="button" class="text-white px-2 py-1 rounded-full flex items-center text-xs transition group" style="background-color:#9e28b5">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="rotate-ccw" class="lucide lucide-rotate-ccw w-3 h-3"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path><path d="M3 3v5h5"></path></svg>
+        <span class="hidden group-hover:block ml-1">Reset</span>
+      </button>
+      <button type="button" class="text-white px-2 py-1 rounded-full flex items-center text-xs transition group" style="background-color:#00a7e0">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="book-open" class="lucide lucide-book-open w-3 h-3"><path d="M12 7v14"></path><path d="M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z"></path></svg>
+        <span class="hidden group-hover:block ml-1">Instruct</span>
+      </button>
+      <button type="button" class="text-white px-2 py-1 rounded-full flex items-center text-xs transition group" style="background-color:#ffc600">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="refresh-ccw" class="lucide lucide-refresh-ccw w-3 h-3"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path><path d="M3 3v5h5"></path><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"></path><path d="M16 16h5v5"></path></svg>
+        <span class="hidden group-hover:block ml-1">Regenerate</span>
+      </button>
+      <button type="button" class="text-white px-2 py-1 rounded-full flex items-center text-xs transition group" style="background-color:#6cd14d">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="check" class="lucide lucide-check w-3 h-3"><path d="M20 6 9 17l-5-5"></path></svg>
+        <span class="hidden group-hover:block ml-1">Confirm</span>
+      </button>
+    </div>
+  `;
 
-    return [...system.sort(), ...models, ...reports.sort(), ...other.sort()];
-  });
+  const createHeaderWrapper = (header, taskId) => {
+    if (!header || !header.parentNode) {
+      return { wrapper: null, indicator: null };
+    }
 
-  const expandedStates = new Map();
-  const sectionExpandedStates = new Map();
+    const existingWrapper = header.closest('.header-wrapper');
+    if (existingWrapper) {
+      return { wrapper: existingWrapper, indicator: existingWrapper.querySelector('.header-indicator') };
+    }
 
-  onMount(() => {
-    if (window.lucide) window.lucide.createIcons();
-  });
+    // Find the task to get priority
+    const task = props.tasksList().find(t => t.id === taskId);
+    const priority = task?.priority || 'medium';
+
+    const wrapper = document.createElement('div');
+    wrapper.className = 'header-wrapper flex items-center justify-between mb-2';
+    wrapper.style.marginBottom = '0.5rem';
+
+    const leftGroup = document.createElement('div');
+    leftGroup.className = 'flex items-center gap-2';
+
+    const indicator = document.createElement('span');
+    indicator.className = 'header-indicator cursor-pointer transition-transform duration-200';
+    indicator.innerHTML = `
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="m9 18 6-6-6-6" class="chevron"></path>
+      </svg>
+    `;
+
+    // Priority badge
+    const priorityBadge = document.createElement('span');
+    priorityBadge.className = `badge badge-sm ${
+      priority === 'high' ? 'badge-error' :
+      priority === 'medium' ? 'badge-warning' :
+      'badge-success'
+    }`;
+    priorityBadge.textContent = priority.toUpperCase();
+    priorityBadge.title = `Priority: ${priority}`;
+
+    const rightGroup = document.createElement('div');
+    rightGroup.className = 'header-actions';
+    rightGroup.innerHTML = buttonsHtml(taskId);
+
+    leftGroup.appendChild(indicator);
+    leftGroup.appendChild(priorityBadge);
+
+    wrapper.appendChild(leftGroup);
+    wrapper.appendChild(rightGroup);
+
+    header.parentNode.insertBefore(wrapper, header);
+
+    leftGroup.appendChild(header);
+
+    // Add event listener for edit button
+    const editBtn = rightGroup.querySelector('.edit-task-btn');
+    if (editBtn) {
+      editBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const task = props.tasksList().find(t => t.id === taskId);
+        if (task) {
+          startEditing(task);
+        }
+      });
+    }
+
+    return { wrapper, indicator };
+  };
+
+
+
+  // Auto-save functionality
+  let saveTimeout;
+  const handleEditChange = (taskId, newContent) => {
+    if (saveTimeout) clearTimeout(saveTimeout);
+    if (props.setEditContent) props.setEditContent(newContent);
+
+    saveTimeout = setTimeout(async () => {
+      try {
+        if (props.updateTask) await props.updateTask(taskId, { content: newContent });
+        console.log('Task auto-saved:', taskId);
+      } catch (error) {
+        console.error('Failed to auto-save task:', error);
+      }
+    }, 1000); // Auto-save after 1 second of no changes
+  };
+
+  const startEditing = (task) => {
+    if (props.setEditingTaskId) props.setEditingTaskId(task.id);
+    if (props.setEditContent) props.setEditContent(task.content || '');
+  };
+
+  const stopEditing = () => {
+    if (props.setEditingTaskId) props.setEditingTaskId(null);
+    if (props.setEditContent) props.setEditContent('');
+  };
 
   return (
     <div class="flex-1 p-2 md:p-4 max-w-full lg:max-w-6xl w-full mx-auto">
+      <style>
+        {`
+          .typing-cursor {
+            animation: blink 1s infinite;
+            color: #666;
+            font-weight: normal;
+          }
+          @keyframes blink {
+            0%, 50% { opacity: 1; }
+            51%, 100% { opacity: 0; }
+          }
+          .streaming-content {
+            border-left: 3px solid #3b82f6;
+            padding-left: 1rem;
+            margin: 1rem 0;
+            background: rgba(59, 130, 246, 0.05);
+            border-radius: 0 0.5rem 0.5rem 0;
+          }
+        `}
+      </style>
       <Show when={shouldShow}>
-        <div class="mb-4 mx-auto">
-          <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
-              <div class="flex gap-2 items-center flex-wrap">
-            <h2 class="text-lg sm:text-xl font-bold text-primary">{props.project?.name || "Untitled Project"}</h2>
+        <div id="contentDiv" class="pb-20 px-0 md:px-2 max-w-full lg:max-w-6xl mx-auto min-h-[200px]">
+           {/* Render editable task if one is being edited */}
+            <Show when={props.editingTaskId && typeof props.editingTaskId === 'function' && props.editingTaskId()}>
+              {(() => {
+                const editingTask = props.tasksList().find(task => task.id === props.editingTaskId());
+               if (!editingTask) return null;
 
-              <span id="agent-status-badge" class={`badge ${getBadgeClass(props.machineStore.state)} badge-sm flex items-center gap-1`}>
-                <i data-lucide={getStateIcon(props.machineStore.state)} class="w-3 h-3"></i>
-                {props.machineStore.context.uiStatus}
-              </span>
-              </div>
-            <div class="flex items-center gap-2 w-full sm:w-auto overflow-x-auto">
-           
-                <div class="flex gap-2 flex-wrap">
-                  <div class="bg-info/10 text-info px-2 py-1 rounded-full flex items-center gap-1 text-xs whitespace-nowrap">
-                    <i data-lucide="clock" class="w-3 h-3"></i>
-                    <span class="hidden xs:inline">Time:</span> {props.machineStore.context.consumedTime ? Math.round(props.machineStore.context.consumedTime / 60 * 10) / 10 : 0} / {props.machineStore.context.totalTime ? Math.round(props.machineStore.context.totalTime / 60 * 10) / 10 : 0} min
-                  </div>
-                  <div class="bg-warning/10 text-warning px-2 py-1 rounded-full flex items-center gap-1 text-xs whitespace-nowrap">
-                    <i data-lucide="dollar-sign" class="w-3 h-3"></i>
-                    <span class="hidden xs:inline">{t().credits}:</span> {props.machineStore.context.consumedCredits || 0} / {props.machineStore.context.totalCredits || 0}
-                  </div>
-                </div>
-            </div>
-          </div>
-        </div>
-        <div id="contentDiv" class="pb-20 px-0 md:px-2 max-w-full lg:max-w-6xl mx-auto space-y-4 md:space-y-6 min-h-[200px]">
-
-           {/* Past Tasks */}
-            <For each={sortedModels()}>
-               {(model, modelIndex) => {
-                 const modelTasks = groupedTasks()[model];
-                 const modelNumber = modelIndex() + 1;
-                 const sectionGroups = {};
-                modelTasks.forEach(task => {
-                  const section = task.section || "Unknown";
-                  if (!sectionGroups[section]) sectionGroups[section] = [];
-                  sectionGroups[section].push(task);
-                });
-                const sortedSections = Object.keys(sectionGroups).sort();
-
-                // Get or create expanded state for this model
-                const key = model;
-                if (!expandedStates.has(key)) {
-                  expandedStates.set(key, createSignal(true)); // Start expanded
-                }
-                const [isExpanded, setIsExpanded] = expandedStates.get(key);
-
-                return (
-                  <div class="mb-6">
-                    <div class="flex items-center gap-2 mb-4 cursor-pointer" onClick={() => {
-                      setIsExpanded(!isExpanded());
-                      setTimeout(() => window.lucide?.createIcons(), 0);
-                    }}>
-                       <span class="bg-blue-900 text-blue-100 dark:bg-blue-100/10 dark:text-blue-500 px-4 py-2 rounded-full flex items-center gap-1 text-sm">
-                        <i data-lucide={isExpanded() ? "chevron-down" : "chevron-right"} class="w-3 h-3"></i>
-                        <span class="hidden sm:inline">{modelNumber}. {model}</span>
-                      </span>
-                    </div>
-                    <Show when={isExpanded()}>
-                      <For each={sortedSections}>
-                        {(section, sectionIndex) => {
-                          const sectionKey = `${model}-${section}`;
-                           if (!sectionExpandedStates.has(sectionKey)) {
-                             sectionExpandedStates.set(sectionKey, createSignal(true)); // Start expanded
-                           }
-                          const [isSectionExpanded, setIsSectionExpanded] = sectionExpandedStates.get(sectionKey);
-
-                          return (
-                            <div class="mb-4">
-                              <div class="flex items-center gap-2 mb-2 cursor-pointer" onClick={() => {
-                                setIsSectionExpanded(!isSectionExpanded());
-                                setTimeout(() => window.lucide?.createIcons(), 0);
-                              }}>
-                                 <span class="bg-emerald-900 text-emerald-100 dark:bg-emerald-100/10 dark:text-emerald-500 px-3 py-1.5 rounded-full flex items-center gap-1 text-xs">
-                                  <i data-lucide={isSectionExpanded() ? "chevron-down" : "chevron-right"} class="w-3 h-3"></i>
-                                  <i data-lucide="folder" class="w-3 h-3"></i>
-                                  <span class="hidden sm:inline">{modelNumber}.{sectionIndex() + 1} {section}</span>
-                                </span>
-                              </div>
-                              <Show when={isSectionExpanded()}>
-                                <For each={sectionGroups[section].sort((a, b) => new Date(a.timestamp || 0) - new Date(b.timestamp || 0))}>
-                                  {(task) => (
-                <div class="collapse collapse-arrow bg-base-200 border border-base-300 rounded-xl overflow-hidden mb-4">
-                  <input type="checkbox" class="p-0" />
-                   <div
-                     class="collapse-title flex items-center gap-4 px-4 py-3 bg-base-300/40 cursor-pointer"
-                     onClick={() => props.setActiveCardId(task.id)}
-                   >
-
-                    <span class="bg-violet-900 text-violet-100 dark:bg-violet-100/10 dark:text-violet-500 px-3 py-1 rounded-full flex items-center gap-1 text-xs">
-                      <i data-lucide="list" class="w-3 h-3"></i>
-                     <span class="hidden sm:inline">{task.step_name || "Unknown"}</span>
-                     </span>
-                      <div class="ms-auto me-5 flex items-center gap-2">
-                       <button type="button" onClick={() => props.handleImprove()} class="bg-primary/10 text-primary px-3 py-1 rounded-full flex items-center gap-1 text-xs hover:bg-primary/20 transition cursor-pointer">
-                         <i data-lucide="sparkles" class="w-3 h-3"></i>
-                         <span class="hidden sm:inline">Improve with AI </span>
-                       </button>
-                     </div>
-                  </div>
-                  <div class="collapse-content p-0">
-                     {/* Body */}
-                     <div class="card-body px-5 py-4 bg-base-100">
-                        <div
-                          class="prose max-w-none dark:prose-invert"
-                          innerHTML={marked.parse(renderFilledTemplate(task.content), { breaks: true, gfm: true })}
-                        />
-                     </div>
-
-                    {/* Footer */}
-                    <div class="px-4 py-3 bg-base-300/30">
-                       <div class="flex items-center justify-between text-sm opacity-70 mb-2">
-                         <span>{task.timestamp ? new Date(task.timestamp).toLocaleString() : 'Unknown'}</span>
-                         <span class="text-xs">{task.model || "Manual"}</span>
-                       </div>
-
-                      {/* Additional Details */}
-                      <details class="text-xs opacity-60">
-                        <summary class="cursor-pointer hover:opacity-80">Task Details</summary>
-                        <div class="mt-2 space-y-1">
-                          <div><strong>Model:</strong> {task.model || "Manual"}</div>
-                          <div><strong>LLM Model:</strong> {task.llm_model || "N/A"}</div>
-                          <div><strong>Section:</strong> {task.section || "Planning"}</div>
-                          <div><strong>Step:</strong> {task.stepName || "Project Setup"}</div>
-                          {task.prompt && (
-                            <div>
-                              <strong>Prompt:</strong>
-                              <div class="mt-1 p-2 bg-base-200 rounded text-xs max-h-20 overflow-y-auto">
-                                {task.prompt.length > 100 ? `${task.prompt.substring(0, 100)}...` : task.prompt}
-                              </div>
-                            </div>
-                          )}
-                        </div>
-                      </details>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-                          </For>
-
-                        </Show>
-
-                       </div>
-
-                        );
-                      }}
-                    </For>
-                  </Show>
-                </div>
-              );
-            }}
-          </For>
-
-          {/* Streaming Response */}
-          <Show when={props.isLoading() && props.streamingContent()}>
-            <div
-              id="streaming"
-              ref={props.streamingRef}
-               class={`card shadow-lg rounded-xl border border-base-300 bg-base-200 overflow-hidden`}
-               onClick={() => props.setActiveCardId("streaming")}
-            >
-              <div class="flex items-center justify-between px-4 py-3 bg-base-300/40">
-                <div class="flex items-center gap-2">
-                  <span class="badge badge-outline badge-sm">
-                    {props.machineStore.context.currentModel}
-                  </span>
-                  <span class="font-semibold text-sm">
-                    {props.machineStore.context.currentSection} –{" "}
-                    {props.machineStore.context.stepName}
-                  </span>
-                </div>
-                <i data-lucide="loader" class="w-4 h-4 animate-spin" />
-               </div>
-
-                 <div class="card-body px-5 py-4 bg-base-100">
-                   <div
-                     class="prose max-w-none dark:prose-invert"
-                     innerHTML={marked.parse(props.streamingContent(), { breaks: true, gfm: true })}
+               return (
+                 <div class="mb-4 p-4 border border-primary rounded-lg bg-base-100">
+                   <div class="flex justify-between items-center mb-2">
+                     <h3 class="text-lg font-semibold">Editing Task: {getStepName(editingTask)}</h3>
+                     <button
+                       onClick={stopEditing}
+                       class="btn btn-sm btn-ghost"
+                     >
+                       ✕
+                     </button>
+                   </div>
+                   <div class="mb-4">
+                     <label class="label">
+                       <span class="label-text font-medium">Priority</span>
+                     </label>
+                     <select
+                       class="select select-bordered w-full"
+                       value={editingTask.priority || 'medium'}
+                        onChange={(e) => {
+                          const newPriority = e.target.value;
+                          if (props.updateTask) props.updateTask(editingTask.id, { priority: newPriority });
+                        }}
+                     >
+                       <option value="high">High</option>
+                       <option value="medium">Medium</option>
+                       <option value="low">Low</option>
+                     </select>
+                   </div>
+                    <textarea
+                      class="textarea textarea-bordered w-full min-h-[200px] font-mono text-sm"
+                      value={props.editContent && typeof props.editContent === 'function' ? props.editContent() : ''}
+                      onInput={(e) => handleEditChange(editingTask.id, e.target.value)}
+                     placeholder="Enter task content..."
                    />
+                   <div class="flex justify-end mt-2">
+                     <button
+                       onClick={stopEditing}
+                       class="btn btn-primary btn-sm"
+                     >
+                       Done Editing
+                     </button>
+                   </div>
                  </div>
+               );
+             })()}
+           </Show>
 
-              <div class="flex items-center px-4 py-3 bg-base-300/30 text-sm opacity-70">
-                <span class="animate-pulse">Streaming…</span>
-                <span class="ms-auto text-xs">
-                  {props.machineStore.context.currentModel}
-                </span>
-              </div>
+          {/* Show skeleton loading when no tasks and loading */}
+          <Show when={!props.tasksList || props.tasksList().length === 0}>
+            <div class="space-y-4">
+              <TaskSkeleton />
+              <TaskSkeleton />
+              <TaskSkeleton />
             </div>
           </Show>
 
+          {/* Render markdown content */}
+          <Show when={props.tasksList && props.tasksList().length > 0}>
+            <div ref={contentRef} class="prose max-w-none dark:prose-invert" innerHTML={marked.parse(concatenatedTasksMarkdown(), { breaks: true, gfm: true })} />
+          </Show>
+
+           {/* Streaming indicator overlay */}
+           <Show when={props.isLoading && typeof props.streamingContent === 'function' && props.streamingContent()}>
+             <div class="streaming-content">
+               <div class="flex items-center gap-2 mb-2">
+                 <div class="loading loading-spinner loading-sm"></div>
+                 <span class="text-sm font-medium text-primary">AI is generating response...</span>
+               </div>
+               <div class="text-sm text-base-content/70 mb-2">
+                 {props.streamingContent().length} characters generated
+               </div>
+               <div class="w-full bg-base-300 rounded-full h-1">
+                 <div
+                   class="bg-primary h-1 rounded-full transition-all duration-300"
+                   style={`width: ${Math.min((props.streamingContent().length / 1000) * 100, 100)}%`}
+                 ></div>
+               </div>
+               <div class="text-xs text-base-content/50 mt-1">
+                 Progress indicator - completion may vary
+               </div>
+             </div>
+           </Show>
+
+           {/* Streaming error display */}
+           <Show when={props.streamingError && typeof props.streamingError === 'function' && props.streamingError()}>
+             <div class="alert alert-error shadow-sm mt-4">
+               <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+               <div>
+                 <h4 class="font-medium">Streaming Error</h4>
+                 <p class="text-sm">{props.streamingError()}</p>
+               </div>
+             </div>
+           </Show>
+
+           {/* Add headers with buttons */}
+           <div class="hidden">
+             {(() => {
+               // This effect will run after the markdown is rendered
+               createEffect(() => {
+                 const html = concatenatedTasksMarkdown();
+                 if (contentRef && html !== lastProcessedHtml) {
+                   lastProcessedHtml = html;
+                   // Find all headers and add buttons
+                   const headers = contentRef.querySelectorAll('h1, h2, h3, h4');
+                   headers.forEach((header, index) => {
+                     if (header.classList.contains('header-processed')) return; // Already processed
+
+                     // Create indicator
+                     const indicator = document.createElement('span');
+                     indicator.className = 'header-indicator cursor-pointer transition-transform duration-200 mr-2';
+                     const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+                     svg.setAttribute('width', '16');
+                     svg.setAttribute('height', '16');
+                     svg.setAttribute('viewBox', '0 0 24 24');
+                     svg.setAttribute('fill', 'none');
+                     svg.setAttribute('stroke', 'currentColor');
+                     svg.setAttribute('stroke-width', '2');
+                     svg.setAttribute('stroke-linecap', 'round');
+                     svg.setAttribute('stroke-linejoin', 'round');
+                     const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                     path.setAttribute('d', 'm9 18 6-6-6-6');
+                     path.classList.add('chevron');
+                     svg.appendChild(path);
+                     indicator.appendChild(svg);
+
+                     // Create buttons
+                     const buttonsDiv = document.createElement('div');
+                     buttonsDiv.className = 'flex gap-2 ml-2';
+                     buttonsDiv.innerHTML = buttonsHtml(`header-${index}`);
+
+                     // Modify header to flex
+                     header.style.display = 'flex';
+                     header.style.alignItems = 'center';
+                     header.style.justifyContent = 'space-between';
+                     header.style.width = '100%';
+
+                     // Create span for header text
+                     const textSpan = document.createElement('span');
+                     textSpan.innerHTML = header.innerHTML;
+                     header.innerHTML = '';
+                     header.classList.add('header-processed');
+
+                     // Create left group for indicator and text
+                     const leftGroup = document.createElement('div');
+                     leftGroup.className = 'flex items-center';
+                     leftGroup.appendChild(indicator);
+                     leftGroup.appendChild(textSpan);
+
+                     // Hide buttons by default
+                     buttonsDiv.className = 'flex gap-2 ml-2 opacity-0 transition-opacity duration-200';
+                     buttonsDiv.style.opacity = '0';
+
+                     // Show buttons on hover
+                     header.addEventListener('mouseenter', () => {
+                       buttonsDiv.style.opacity = '1';
+                     });
+                     header.addEventListener('mouseleave', () => {
+                       buttonsDiv.style.opacity = '0';
+                     });
+
+                     // Append groups
+                     header.appendChild(leftGroup);
+                     header.appendChild(buttonsDiv);
+
+                     // Add toggle functionality for collapsible
+                     let isCollapsed = false;
+                     indicator.addEventListener('click', () => {
+                       isCollapsed = !isCollapsed;
+                       const chevron = indicator.querySelector('.chevron');
+                       if (chevron) {
+                         chevron.style.transform = isCollapsed ? 'rotate(-90deg)' : 'rotate(0deg)';
+                       }
+                       // Hide/show content until next header
+                       let sibling = header.nextElementSibling;
+                       while (sibling) {
+                         if (sibling.tagName && /^H[1-6]$/.test(sibling.tagName)) break;
+                         sibling.style.display = isCollapsed ? 'none' : '';
+                         sibling = sibling.nextElementSibling;
+                       }
+                     });
+
+                     // Add click to edit
+                     textSpan.addEventListener('click', (e) => {
+                       // Find the corresponding task
+                       const allTasks = props.tasksList().sort((a, b) => new Date(a.timestamp || 0) - new Date(b.timestamp || 0));
+                       const taskIndex = Array.from(headers).indexOf(header);
+                       if (allTasks[taskIndex] && !(props.editingTaskId && typeof props.editingTaskId === 'function' && props.editingTaskId())) {
+                         startEditing(allTasks[taskIndex]);
+                       }
+                     });
+                   });
+                 }
+               });
+               return null;
+             })()}
+           </div>
         </div>
       </Show>
     </div>

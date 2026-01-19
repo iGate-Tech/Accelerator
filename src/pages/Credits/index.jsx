@@ -106,6 +106,36 @@ const Credits = () => {
   const totalUsed = () => transactionsList().filter(t => t.type === 'usage').reduce((sum, t) => sum + Math.abs(t.amount), 0);
   const totalPurchased = () => transactionsList().filter(t => t.type === 'purchase' || t.amount > 0).reduce((sum, t) => sum + Math.abs(t.amount), 0);
 
+  // Analytics calculations
+  const usageThisMonth = () => {
+    const now = new Date();
+    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+    return transactionsList()
+      .filter(t => t.type === 'usage' && new Date(t.date) >= startOfMonth)
+      .reduce((sum, t) => sum + Math.abs(t.amount), 0);
+  };
+
+  const averageDailyUsage = () => {
+    const daysInMonth = new Date().getDate();
+    return usageThisMonth() / daysInMonth;
+  };
+
+  const predictedMonthlyUsage = () => averageDailyUsage() * 30;
+
+  const daysUntilDepletion = () => {
+    const dailyUsage = averageDailyUsage();
+    if (dailyUsage === 0) return Infinity;
+    return Math.floor(currentBalance() / dailyUsage);
+  };
+
+  const depletionAlert = () => {
+    const days = daysUntilDepletion();
+    if (days <= 3) return { type: 'danger', message: `Critical: Credits will deplete in ${days} days` };
+    if (days <= 7) return { type: 'warning', message: `Warning: Credits will deplete in ${days} days` };
+    if (days <= 14) return { type: 'info', message: `Info: Credits will deplete in ${days} days` };
+    return null;
+  };
+
   onMount(() => {
     if (window.lucide) window.lucide.createIcons();
   });
@@ -177,9 +207,74 @@ const Credits = () => {
             <p class="text-xs text-base-content/60 mt-2">{t().total}</p>
           </div>
         </div>
-      </div>
+        </div>
 
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        {/* Usage Analytics */}
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div class="card bg-base-100 shadow-sm border border-base-200">
+            <div class="card-body">
+              <h3 class="card-title">
+                <i data-lucide="trending-up" class="w-5 h-5 me-2"></i>
+                Usage Analytics
+              </h3>
+              <div class="space-y-4">
+                <div class="flex justify-between">
+                  <span class="text-sm">This Month Usage:</span>
+                  <span class="font-semibold">{usageThisMonth()} credits</span>
+                </div>
+                <div class="flex justify-between">
+                  <span class="text-sm">Daily Average:</span>
+                  <span class="font-semibold">{averageDailyUsage().toFixed(1)} credits/day</span>
+                </div>
+                <div class="flex justify-between">
+                  <span class="text-sm">Predicted Monthly:</span>
+                  <span class="font-semibold">{predictedMonthlyUsage().toFixed(0)} credits</span>
+                </div>
+                <div class="flex justify-between">
+                  <span class="text-sm">Days Until Depletion:</span>
+                  <span class={`font-semibold ${daysUntilDepletion() <= 7 ? 'text-error' : 'text-success'}`}>
+                    {daysUntilDepletion() === Infinity ? '∞' : daysUntilDepletion()}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card bg-base-100 shadow-sm border border-base-200">
+            <div class="card-body">
+              <h3 class="card-title">
+                <i data-lucide="alert-triangle" class="w-5 h-5 me-2"></i>
+                Alerts & Recommendations
+              </h3>
+              <div class="space-y-4">
+                <Show when={depletionAlert()}>
+                  <div class={`alert alert-${depletionAlert().type} shadow-sm`}>
+                    <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+                    <span>{depletionAlert().message}</span>
+                  </div>
+                </Show>
+                <Show when={currentBalance() < 50}>
+                  <div class="alert alert-warning shadow-sm">
+                    <i data-lucide="alert-circle" class="w-4 h-4"></i>
+                    <span>Low balance: Consider purchasing more credits</span>
+                  </div>
+                </Show>
+                <Show when={predictedMonthlyUsage() > currentBalance()}>
+                  <div class="alert alert-error shadow-sm">
+                    <i data-lucide="x-circle" class="w-4 h-4"></i>
+                    <span>Projected usage exceeds current balance</span>
+                  </div>
+                </Show>
+                <div class="alert alert-info shadow-sm">
+                  <i data-lucide="info" class="w-4 h-4"></i>
+                  <span>Tip: Credits are consumed based on AI usage complexity</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+       <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
         {/* Purchase Credits */}
         <div class="card bg-base-100 shadow-sm border border-base-200">
           <div class="card-body">

@@ -10,11 +10,25 @@ export async function _createUser({ email, passwordHash, profile = {}, userId = 
     throw new Error('Email is required for user creation');
   }
   try {
+    // Import security functions dynamically to avoid circular dependencies
+    const { validateAndSanitizeDbInput, isValidEmail } = await import('../lib/security.js');
+
+    // Validate email
+    if (!isValidEmail(email)) {
+      throw new Error('Invalid email format');
+    }
+
+    // Sanitize email for database
+    const emailValidation = validateAndSanitizeDbInput(email, 'email');
+    if (!emailValidation.valid) {
+      throw new Error(`Email validation failed: ${emailValidation.reason}`);
+    }
+
     const id = userId || uuidv4();
     const query = "INSERT INTO users (id, email, password_hash, preferences, created_at, last_modified, synced_at, sync_status, deleted_at, version) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)";
     const params = [
       id,
-      email,
+      emailValidation.sanitized,
       passwordHash || '',
       JSON.stringify(profile || {}),
       new Date().toISOString(),

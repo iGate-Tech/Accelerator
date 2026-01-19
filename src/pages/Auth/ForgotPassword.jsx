@@ -30,10 +30,20 @@ const ForgotPassword = () => {
     try {
       const result = await forgotPassword(email());
       if (result.success) {
-        toastManager.success(`Password reset request processed for ${email()}. If an account with this email exists, a reset link has been sent. Check your inbox and spam folder.`);
+        toastManager.success(`Password reset request processed for ${email()}. If an account with this email exists, a reset link has been generated.`);
+
+        // For development, show the reset link in console and create a temporary display
+        if (result.resetLink) {
+          console.log('🔗 Development Reset Link:', result.resetLink);
+          // You could also show this in a modal or alert for testing
+          setTimeout(() => {
+            alert(`Development Mode: Reset Link - ${result.resetLink}`);
+          }, 1000);
+        }
+
         setTimeout(() => {
           navigate('/auth/login');
-        }, 3000);
+        }, 5000); // Give more time for development link display
       } else {
         toastManager.error(`Failed to send reset email to ${email()}. ${result.error}`);
       }

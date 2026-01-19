@@ -52,7 +52,6 @@ const Navbar = () => {
       setSubscription(sub ? { plan: sub.package_name || 'free' } : (user()?.subscription || { plan: 'free' }));
       setProjectsCount(Array.isArray(projects) ? projects.length : 0);
     } catch (error) {
-      logger.warn('Failed to load navbar data:', error.message);
     }
   });
 

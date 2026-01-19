@@ -12,7 +12,7 @@ export async function createSchema() {
     await dbInstance.exec(`
       CREATE TABLE IF NOT EXISTS db_version (
         version INTEGER PRIMARY KEY DEFAULT 1,
-        created_at TEXT DEFAULT (datetime('now'))
+        created_at TEXT DEFAULT CURRENT_TIMESTAMP
       );
     `);
 
@@ -328,6 +328,23 @@ export async function createSchema() {
       );
     `);
 
+    await dbInstance.exec(`
+      CREATE TABLE IF NOT EXISTS password_reset_tokens (
+        id TEXT PRIMARY KEY,
+        user_id TEXT NOT NULL,
+        token TEXT UNIQUE NOT NULL,
+        expires_at TEXT NOT NULL,
+        created_at TEXT,
+        used_at TEXT,
+        synced_at TEXT,
+        last_modified TEXT,
+        sync_status TEXT DEFAULT 'local',
+        deleted_at TEXT,
+        version INTEGER DEFAULT 1,
+        FOREIGN KEY (user_id) REFERENCES users(id)
+      );
+    `);
+
     console.log('Database schema created successfully');
     return true;
   } catch (error) {
@@ -347,6 +364,8 @@ export async function migrateSchema() {
     
     const migrations = [
       // Add missing columns to projects table
+      "ALTER TABLE projects ADD COLUMN IF NOT EXISTS archived INTEGER DEFAULT 0",
+      "ALTER TABLE projects ADD COLUMN IF NOT EXISTS archived_at TEXT",
       "ALTER TABLE projects ADD COLUMN IF NOT EXISTS current_step TEXT DEFAULT 'system'",
       "ALTER TABLE projects ADD COLUMN IF NOT EXISTS completed_steps INTEGER DEFAULT 0",
       "ALTER TABLE projects ADD COLUMN IF NOT EXISTS step_name TEXT DEFAULT 'System Initialization'",
@@ -358,7 +377,7 @@ export async function migrateSchema() {
       "ALTER TABLE projects ADD COLUMN IF NOT EXISTS llm_response TEXT",
       "ALTER TABLE projects ADD COLUMN IF NOT EXISTS total_credits INTEGER DEFAULT 600",
       "ALTER TABLE projects ADD COLUMN IF NOT EXISTS total_steps INTEGER DEFAULT 60",
-      
+
       // Add missing columns to tasks table
       "ALTER TABLE tasks ADD COLUMN IF NOT EXISTS content TEXT",
       "ALTER TABLE tasks ADD COLUMN IF NOT EXISTS prompt TEXT",
@@ -366,6 +385,7 @@ export async function migrateSchema() {
       "ALTER TABLE tasks ADD COLUMN IF NOT EXISTS model TEXT",
       "ALTER TABLE tasks ADD COLUMN IF NOT EXISTS section TEXT",
       "ALTER TABLE tasks ADD COLUMN IF NOT EXISTS step_name TEXT",
+      "ALTER TABLE tasks ADD COLUMN IF NOT EXISTS priority TEXT DEFAULT 'medium'",
     ];
 
     for (const migration of migrations) {

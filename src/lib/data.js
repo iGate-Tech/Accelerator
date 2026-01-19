@@ -3,24 +3,29 @@
 // Data interfaces for easy Supabase migration
 // These functions can be easily replaced with Supabase calls
 
-// Simple token utilities for mock auth
-export const createMockToken = (userId) => {
-  return `mock_token_${userId}_${Date.now()}_${Math.random()}`;
+// Client-side authentication utilities
+export const createAuthToken = async (userId, rememberMe = false) => {
+  const { createSecureToken } = await import('./security');
+  return await createSecureToken(userId, rememberMe);
+};
+
+export const verifyAuthToken = async (token) => {
+  const { verifySecureToken } = await import('./security');
+  return await verifySecureToken(token);
+};
+
+// Legacy compatibility
+export const createMockToken = (userId, rememberMe = false) => {
+  return createAuthToken(userId, rememberMe);
 };
 
 export const verifyMockToken = (token) => {
-  // Simple mock verification - in production this would be proper JWT
-  if (!token || !token.startsWith('mock_token_')) return null;
-
-  const parts = token.split('_');
-  if (parts.length < 4) return null;
-
-  return { userId: parts[2] };
+  return verifyAuthToken(token);
 };
 
 export const getCurrentUserFromToken = async (token) => {
   try {
-    const decoded = verifyMockToken(token);
+    const decoded = await verifyMockToken(token);
     if (!decoded) return null;
 
     // Check if session exists in database
@@ -72,8 +77,8 @@ export const authAPI = {
       // Simple password check for mock auth (in production, use proper hashing)
       if (dbUser.password_hash !== password) throw new Error('Invalid password');
 
-      // Create mock token for session
-      const token = createMockToken(dbUser.id);
+      // Create JWT token for session
+      const token = createJWT(dbUser.id, rememberMe);
 
       // Store session in database for tracking
       const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000);

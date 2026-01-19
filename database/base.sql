@@ -14,6 +14,7 @@ CREATE TABLE projects (
 
   name TEXT NOT NULL,
   description TEXT,
+  instructions TEXT,
 
   current_step TEXT,
   completed_steps INTEGER DEFAULT 0,
@@ -32,6 +33,8 @@ CREATE TABLE projects (
   total_steps INTEGER,
 
   public BOOLEAN DEFAULT false,
+  archived BOOLEAN DEFAULT false,
+  archived_at TIMESTAMP,
 
   current_prompt TEXT,
   llm_response TEXT,

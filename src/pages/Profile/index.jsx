@@ -28,13 +28,18 @@ const Profile = () => {
   const [avatarFile, setAvatarFile] = createSignal(null);
   const [avatarPreview, setAvatarPreview] = createSignal(null);
   const [uploadingAvatar, setUploadingAvatar] = createSignal(false);
-  const [editingProfile, setEditingProfile] = createSignal(false);
-   const [profileForm, setProfileForm] = createSignal({
-     name: '',
-     bio: '',
-     location: '',
-     website: ''
-   });
+   const [editingProfile, setEditingProfile] = createSignal(false);
+    const [profileForm, setProfileForm] = createSignal({
+      name: '',
+      bio: '',
+      location: '',
+      website: ''
+    });
+    const [preferences, setPreferences] = createSignal({
+      notifications: { email: true, browser: false, projectUpdates: true },
+      privacy: { profileVisibility: 'private', dataSharing: false }
+    });
+    const [exportingData, setExportingData] = createSignal(false);
 
   // Redirect if not authenticated
   createEffect(() => {
@@ -195,9 +200,83 @@ const Profile = () => {
    };
 
   const cancelEditing = () => {
-     setEditingProfile(false);
-     setProfileForm({ name: '', bio: '', location: '', website: '' });
-   };
+      setEditingProfile(false);
+      setProfileForm({ name: '', bio: '', location: '', website: '' });
+    };
+
+  // Preferences management
+  const savePreferences = async () => {
+    try {
+      await updatePreferences(preferences());
+      toastManager.success(t().preferencesUpdated || 'Preferences updated successfully');
+    } catch (error) {
+      logger.error('Preferences update error:', error);
+      toastManager.error(t().preferencesUpdateFailed || 'Failed to update preferences');
+    }
+  };
+
+  const handlePreferenceChange = (category, key, value) => {
+    setPreferences(prev => ({
+      ...prev,
+      [category]: {
+        ...prev[category],
+        [key]: value
+      }
+    }));
+  };
+
+  // Data export functionality (GDPR compliance)
+  const exportPersonalData = async () => {
+    try {
+      setExportingData(true);
+
+      // Gather all user data
+      const userData = user();
+      const userProjects = await getProjects(user().id);
+      const userCredits = await getUserCredits(user().id);
+      const creditBalance = await getUserCreditBalance(user().id);
+
+      const exportData = {
+        exportDate: new Date().toISOString(),
+        userId: userData.id,
+        personalData: {
+          profile: userData.profile,
+          preferences: userData.preferences,
+          joinDate: userData.profile?.joinDate,
+          email: userData.email
+        },
+        projects: userProjects,
+        credits: {
+          balance: creditBalance,
+          transactions: userCredits
+        },
+        dataRetention: {
+          exportUnder: 'GDPR Article 20 - Right to Data Portability',
+          retentionPeriod: 'Data retained until account deletion',
+          lastActivity: getLastActivity()?.toISOString()
+        }
+      };
+
+      // Create and download JSON file
+      const dataStr = JSON.stringify(exportData, null, 2);
+      const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+
+      const exportFileName = `personal-data-export-${userData.id}-${new Date().toISOString().split('T')[0]}.json`;
+
+      const linkElement = document.createElement('a');
+      linkElement.setAttribute('href', dataUri);
+      linkElement.setAttribute('download', exportFileName);
+      linkElement.click();
+
+      toastManager.success(t().dataExported || 'Personal data exported successfully');
+
+    } catch (error) {
+      logger.error('Data export error:', error);
+      toastManager.error(t().dataExportFailed || 'Failed to export personal data');
+    } finally {
+      setExportingData(false);
+    }
+  };
 
   return (
      <div class="max-w-6xl mx-auto space-y-8 px-4 sm:px-6 py-6 sm:py-8 overflow-visible">
@@ -464,9 +543,169 @@ const Profile = () => {
                     </Show>
                  </div>
                </div>
-             </div>
+              </div>
 
-            {/* Recent Activity */}
+              {/* Preferences */}
+              <div class="card bg-base-100 shadow-sm border border-base-200">
+                <div class="card-body">
+                  <h3 class="card-title">
+                    <i data-lucide="settings" class="w-5 h-5 me-2"></i>
+                    Preferences
+                  </h3>
+                  <div class="space-y-6">
+                    {/* Notification Preferences */}
+                    <div>
+                      <h4 class="font-medium mb-3">Notifications</h4>
+                      <div class="space-y-3">
+                        <label class="flex items-center gap-3 cursor-pointer">
+                          <input
+                            type="checkbox"
+                            class="checkbox checkbox-primary"
+                            checked={preferences().notifications.email}
+                            onChange={(e) => handlePreferenceChange('notifications', 'email', e.target.checked)}
+                          />
+                          <span class="text-sm">Email notifications</span>
+                        </label>
+                        <label class="flex items-center gap-3 cursor-pointer">
+                          <input
+                            type="checkbox"
+                            class="checkbox checkbox-primary"
+                            checked={preferences().notifications.browser}
+                            onChange={(e) => handlePreferenceChange('notifications', 'browser', e.target.checked)}
+                          />
+                          <span class="text-sm">Browser notifications</span>
+                        </label>
+                        <label class="flex items-center gap-3 cursor-pointer">
+                          <input
+                            type="checkbox"
+                            class="checkbox checkbox-primary"
+                            checked={preferences().notifications.projectUpdates}
+                            onChange={(e) => handlePreferenceChange('notifications', 'projectUpdates', e.target.checked)}
+                          />
+                          <span class="text-sm">Project updates</span>
+                        </label>
+                      </div>
+                    </div>
+
+                    {/* Privacy Preferences */}
+                    <div>
+                      <h4 class="font-medium mb-3">Privacy</h4>
+                      <div class="space-y-3">
+                        <div>
+                          <label class="label">
+                            <span class="label-text text-sm">Profile visibility</span>
+                          </label>
+                          <select
+                            class="select select-bordered select-sm w-full"
+                            value={preferences().privacy.profileVisibility}
+                            onChange={(e) => handlePreferenceChange('privacy', 'profileVisibility', e.target.value)}
+                          >
+                            <option value="private">Private</option>
+                            <option value="public">Public</option>
+                            <option value="friends">Friends only</option>
+                          </select>
+                        </div>
+                        <label class="flex items-center gap-3 cursor-pointer">
+                          <input
+                            type="checkbox"
+                            class="checkbox checkbox-primary"
+                            checked={preferences().privacy.dataSharing}
+                            onChange={(e) => handlePreferenceChange('privacy', 'dataSharing', e.target.checked)}
+                          />
+                          <span class="text-sm">Allow anonymized data sharing for improvements</span>
+                        </label>
+                      </div>
+                    </div>
+
+                    <div class="flex justify-end">
+                      <button
+                        class="btn btn-primary btn-sm"
+                        onClick={savePreferences}
+                      >
+                        Save Preferences
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Data Export (GDPR Compliance) */}
+              <div class="card bg-base-100 shadow-sm border border-base-200">
+                <div class="card-body">
+                  <h3 class="card-title">
+                    <i data-lucide="download" class="w-5 h-5 me-2"></i>
+                    Data & Privacy
+                  </h3>
+                  <div class="space-y-4">
+                    <div class="alert alert-info">
+                      <i data-lucide="info" class="w-4 h-4"></i>
+                      <div>
+                        <h4 class="font-medium">GDPR Compliance</h4>
+                        <p class="text-sm">You have the right to access, export, and delete your personal data.</p>
+                      </div>
+                    </div>
+
+                    <div class="flex flex-col sm:flex-row gap-3">
+                      <button
+                        class="btn btn-outline btn-sm flex-1"
+                        onClick={exportPersonalData}
+                        disabled={exportingData()}
+                      >
+                        {exportingData() ? (
+                          <>
+                            <span class="loading loading-spinner loading-sm"></span>
+                            Exporting...
+                          </>
+                        ) : (
+                          <>
+                            <i data-lucide="download" class="w-4 h-4 me-2"></i>
+                            Export My Data
+                          </>
+                        )}
+                      </button>
+
+                      <button
+                        class="btn btn-outline btn-error btn-sm flex-1"
+                        onClick={async () => {
+                          const confirmed = await confirmDelete(
+                            'Delete Account',
+                            'This action cannot be undone. All your data, projects, tasks, and activity history will be permanently deleted in accordance with GDPR Article 17 (Right to Erasure).',
+                            'Delete Everything'
+                          );
+
+                          if (confirmed) {
+                            try {
+                              const { deleteUserAccount } = await import('../../lib/db');
+                              const result = await deleteUserAccount(user().id, 'user_request');
+
+                              if (result.success) {
+                                toastManager.success('Account deleted successfully. You will be logged out.');
+                                // Logout user
+                                const { logout } = await import('../../context/UserContext');
+                                logout();
+                              } else {
+                                toastManager.error('Account deletion failed: ' + result.error);
+                              }
+                            } catch (error) {
+                              toastManager.error('Account deletion failed: ' + error.message);
+                            }
+                          }
+                        }}
+                      >
+                        <i data-lucide="trash-2" class="w-4 h-4 me-2"></i>
+                        Delete Account
+                      </button>
+                    </div>
+
+                    <div class="text-xs text-base-content/60">
+                      <p>Last data export: Never</p>
+                      <p>Data retention: Until account deletion</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+             {/* Recent Activity */}
             <div class="card bg-base-100 shadow-sm border border-base-200">
               <div class="card-body">
                 <h3 class="card-title">

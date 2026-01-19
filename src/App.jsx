@@ -5,6 +5,9 @@ import { UserProvider, useUser } from "./context/UserContext";
 import ConfirmModal, { showConfirm, confirmDelete, confirmLogout, confirmReset, confirmDanger } from "./components/ui/GlobalConfirm";
 import MainLayout from "./components/common/MainLayout";
 import AuthLayout from "./components/common/AuthLayout";
+import ConsentBanner from "./components/common/ConsentBanner";
+import { GlobalErrorDisplay } from "./components/ui/ErrorHandler";
+import SupportModal from "./components/ui/SupportModal";
 
 import Home from "./pages/Home";
 const Dashboard = lazy(() => import("./pages/Dashboard"));
@@ -19,6 +22,7 @@ const Billing = lazy(() => import("./pages/Billing"));
 const Login = lazy(() => import("./pages/Auth/Login"));
 const Signup = lazy(() => import("./pages/Auth/Signup"));
 const ForgotPassword = lazy(() => import("./pages/Auth/ForgotPassword"));
+const ResetPassword = lazy(() => import("./pages/Auth/ResetPassword"));
 const PrivacyPolicy = lazy(() => import("./pages/modals/PrivacyPolicy"));
 const TermsOfService = lazy(() => import("./pages/modals/TermsOfService"));
 const StatusPage = lazy(() => import("./pages/modals/StatusPage"));
@@ -96,6 +100,10 @@ function ForgotPasswordPage() {
   return <ForgotPassword />;
 }
 
+function ResetPasswordPage() {
+  return <ResetPassword />;
+}
+
 const AppContent = () => {
   const { langKey } = useContext(LangContext);
   
@@ -108,6 +116,7 @@ const AppContent = () => {
             <Route path="/login" component={LoginPage} />
             <Route path="/signup" component={SignupPage} />
             <Route path="/forgot-password" component={ForgotPasswordPage} />
+            <Route path="/auth/reset-password/:token" component={ResetPasswordPage} />
           </Route>
           <Route path="/" component={MainLayout}>
             <Route path="" component={HomePage} />
@@ -129,6 +138,9 @@ const AppContent = () => {
           <Route path="/changelog" component={Changelog} />
           <Route path="*" component={() => <Navigate href="/" replace />} />
         </Router>
+        <ConsentBanner />
+        <GlobalErrorDisplay />
+        <SupportModal />
       </Suspense>
     </UserProvider>
   );

@@ -1,4 +1,4 @@
-import { createSignal, onMount, createEffect } from "solid-js";
+import { createSignal, onMount, createEffect, Show } from "solid-js";
 import { useNavigate } from "@solidjs/router";
 import { useUser } from "../../context/UserContext";
 import { useLanguage } from "../../hooks/useLanguage";
@@ -21,6 +21,9 @@ const Signup = () => {
     password: '',
     confirmPassword: ''
   });
+  const [passwordStrength, setPasswordStrength] = createSignal({ valid: false, message: '' });
+  const [agreeToTerms, setAgreeToTerms] = createSignal(false);
+  const [agreeToPrivacy, setAgreeToPrivacy] = createSignal(false);
   const [showPassword, setShowPassword] = createSignal(false);
   const [showConfirmPassword, setShowConfirmPassword] = createSignal(false);
   let passwordButton;
@@ -60,8 +63,36 @@ const Signup = () => {
 
     const { name, email, password, confirmPassword } = formData();
 
+    // Validate name
+    if (!name.trim()) {
+      toastManager.error(t().nameRequired || 'Name is required');
+      setLoading(false);
+      return;
+    }
+
+    // Validate password strength
+    const passwordValidation = isValidPassword(password);
+    if (!passwordValidation.valid) {
+      toastManager.error(passwordValidation.message);
+      setLoading(false);
+      return;
+    }
+
     if (password !== confirmPassword) {
       toastManager.error(t().passwordMismatch);
+      setLoading(false);
+      return;
+    }
+
+    // Check GDPR compliance agreements
+    if (!agreeToTerms()) {
+      toastManager.error('Please agree to the Terms of Service');
+      setLoading(false);
+      return;
+    }
+
+    if (!agreeToPrivacy()) {
+      toastManager.error('Please agree to the Privacy Policy');
       setLoading(false);
       return;
     }
@@ -80,7 +111,6 @@ const Signup = () => {
       const profile = {
         name: sanitizedName,
         email: sanitizedEmail,
-        avatar: avatar,
         joinDate: new Date().toISOString().split('T')[0],
         bio: ""
       };
@@ -132,6 +162,12 @@ const Signup = () => {
 
   const updateFormData = (field, value) => {
     setFormData({ ...formData(), [field]: value });
+
+    // Check password strength when password changes
+    if (field === 'password') {
+      const strength = isValidPassword(value);
+      setPasswordStrength(strength);
+    }
   };
 
   onMount(() => {
@@ -195,7 +231,7 @@ const Signup = () => {
                    onInput={(e) => updateFormData('password', e.target.value)}
                    autocomplete="new-password"
                    required
-                   minLength="6"
+                    minLength="8"
                  />
                  <button
                    type="button"
@@ -221,8 +257,9 @@ const Signup = () => {
                     value={formData().confirmPassword}
                     onInput={(e) => updateFormData('confirmPassword', e.target.value)}
                     autocomplete="new-password"
-                    required
-                  />
+                     required
+                     minLength="8"
+                   />
                  <button
                    type="button"
                    class="absolute end-3 top-1/2 -translate-y-1/2 btn btn-ghost btn-sm btn-circle"
@@ -233,16 +270,52 @@ const Signup = () => {
                   <i data-lucide={showConfirmPassword() ? "eye-off" : "eye"} class="w-4 h-4"></i>
                 </button>
               </div>
-            </div>
+             </div>
 
-            <button
-              type="submit"
-              class="btn btn-primary w-full"
-              disabled={loading()}
-            >
-              {loading() && <span class="loading loading-spinner loading-sm"></span>}
-               {t().createAccountBtn}
-            </button>
+             {/* Password Strength Indicator */}
+             <Show when={formData().password}>
+               <div class="text-sm">
+                 <div class={`badge ${passwordStrength().valid ? 'badge-success' : 'badge-error'} gap-1`}>
+                   {passwordStrength().valid ? '✓' : '✗'} {passwordStrength().message}
+                 </div>
+               </div>
+             </Show>
+
+             {/* GDPR Compliance Checkboxes */}
+             <div class="space-y-3">
+               <label class="flex items-start gap-2 cursor-pointer">
+                 <input
+                   type="checkbox"
+                   class="checkbox checkbox-primary mt-0.5"
+                   checked={agreeToTerms()}
+                   onChange={(e) => setAgreeToTerms(e.target.checked)}
+                 />
+                 <div class="text-sm">
+                   I agree to the <a href="/terms-of-service" class="link link-primary" target="_blank">Terms of Service</a>
+                 </div>
+               </label>
+
+               <label class="flex items-start gap-2 cursor-pointer">
+                 <input
+                   type="checkbox"
+                   class="checkbox checkbox-primary mt-0.5"
+                   checked={agreeToPrivacy()}
+                   onChange={(e) => setAgreeToPrivacy(e.target.checked)}
+                 />
+                 <div class="text-sm">
+                   I agree to the <a href="/privacy-policy" class="link link-primary" target="_blank">Privacy Policy</a> and consent to data processing
+                 </div>
+               </label>
+             </div>
+
+             <button
+               type="submit"
+               class="btn btn-primary w-full"
+               disabled={loading() || !agreeToTerms() || !agreeToPrivacy()}
+             >
+               {loading() && <span class="loading loading-spinner loading-sm"></span>}
+                {t().createAccountBtn}
+             </button>
           </form>
 
           <div class="divider">OR</div>

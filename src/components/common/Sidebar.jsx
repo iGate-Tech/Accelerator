@@ -8,22 +8,27 @@ import { translations } from "../../assets/translations/translations-index.js";
 import { getProjects, updateProject, deleteProject, deleteAllProjects, exportAllProjects, exportAllData, exportProject, exportReports, getUserNotifications, getCreditBalance, getUserSubscription } from "../../lib/db";
 import { toastManager } from "../../lib/feedback";
 import logger from "../../lib/logger.js";
+import { useActivityLogger } from "../../lib/activity";
+import { SidebarSkeleton } from "../../components/ui/Skeleton";
+
 const Sidebar = () => {
   logger.trace('Sidebar: Starting');
   const { lang } = useContext(LangContext);
   const { user, isAuthenticated, logout } = useUser();
   const location = useLocation();
   const navigate = useNavigate();
+  const activityLogger = useActivityLogger();
   const { currentLang, t, setLang } = useLanguage();
   const [projects, setProjects] = createSignal([]);
-  const [searchQuery, setSearchQuery] = createSignal("");
-  const [editingProjectId, setEditingProjectId] = createSignal(null);
-  const [isCollapsed, setIsCollapsed] = createSignal(false);
-  const [notifications, setNotifications] = createSignal([]);
+  const [projectsLoading, setProjectsLoading] = createSignal(true);
+  const [projectsCount, setProjectsCount] = createSignal(0);
+  const [projectsOpen, setProjectsOpen] = createSignal(true);
+   const [searchQuery, setSearchQuery] = createSignal('');
+   const [notifications, setNotifications] = createSignal([]);
   const [creditBalance, setCreditBalance] = createSignal(50);
   const [subscription, setSubscription] = createSignal({ plan: 'free' });
-   const [projectsCount, setProjectsCount] = createSignal(0);
-   const [projectsOpen, setProjectsOpen] = createSignal(true);
+  const [isCollapsed, setIsCollapsed] = createSignal(false);
+  const [editingProjectId, setEditingProjectId] = createSignal(null);
   const navbarT = t;
   const downloadJSON = (data, filename) => {
     const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
@@ -69,21 +74,20 @@ const Sidebar = () => {
   });
   const loadProjects = async () => {
     try {
-      const currentUser = user();
-      logger.debug('Sidebar loadProjects: currentUser:', currentUser);
-      if (!currentUser || typeof currentUser !== 'object' || !currentUser.id || typeof currentUser.id !== 'string') {
-        logger.debug('Sidebar loadProjects: no valid user, skipping');
-        return;
-      }
-      logger.debug('Sidebar loadProjects: loading projects for user:', currentUser.id);
-      const projs = await getProjects(currentUser.id) || [];
-      logger.debug('Sidebar loadProjects: loaded projects:', projs.length);
-      setProjects(projs);
+      setProjectsLoading(true);
+      const userProjects = await getProjects(user()?.id);
+      setProjects(userProjects);
+      setProjectsCount(userProjects.length);
     } catch (error) {
       logger.error('Failed to load projects:', error);
       setProjects([]);
+      setProjectsCount(0);
+    } finally {
+      setProjectsLoading(false);
     }
   };
+
+
   const handleProjectAction = async (action, projectId, newName = null) => {
     const project = projects().find(p => p.id === projectId);
     if (!project) return;
@@ -99,12 +103,29 @@ const Sidebar = () => {
       case 'delete':
         const confirmed = await confirmDelete(project.name);
         if (confirmed) {
+          // Audit logging before deletion
+          logger.info('Project deletion initiated', {
+            projectId,
+            projectName: project.name,
+            userId: user()?.id,
+            timestamp: new Date().toISOString()
+          });
+
           await deleteProject(projectId);
-          window.dispatchEvent(new CustomEvent('projectDeleted', { detail: { projectId } }));
-          toastManager.success(t().delete + ' ' + t().successful);
-          await loadProjects();
+
+          // Additional audit logging after successful deletion
+          logger.info('Project deletion completed', {
+            projectId,
+            projectName: project.name,
+            userId: user()?.id,
+            timestamp: new Date().toISOString()
+          });
+
+           window.dispatchEvent(new CustomEvent('projectDeleted', { detail: { projectId } }));
+           toastManager.success(t().delete + ' ' + t().successful);
+           await loadProjects();
         }
-        break;
+         break;
       case 'open':
         window.dispatchEvent(new CustomEvent('openProject', { detail: projectId }));
         break;
@@ -135,9 +156,9 @@ const Sidebar = () => {
   const onProjectAdded = async () => {
     await loadProjects();
   };
-  const onProjectUpdated = async () => {
-    await loadProjects();
-  };
+   const onProjectUpdated = async () => {
+     await loadProjects();
+   };
   onMount(async () => {
     await loadProjects();
     await loadNotifications();
@@ -146,6 +167,9 @@ const Sidebar = () => {
     if (window.lucide) {
       window.lucide.createIcons();
     }
+    // Load collapsed state from localStorage
+    const savedCollapsed = localStorage.getItem('sidebarCollapsed') === 'true';
+    setIsCollapsed(savedCollapsed);
     // User dropdown is always anchored above (footer menu pattern)
   });
   onCleanup(() => {
@@ -156,16 +180,21 @@ const Sidebar = () => {
     const newLang = lang();
     setLang(newLang);
   });
-  createEffect(() => {
-    const currentUser = user();
-    if (currentUser && currentUser.id) {
-      loadProjects();
-    }
-  });
+   createEffect(() => {
+     const currentUser = user();
+     if (currentUser && currentUser.id) {
+       loadProjects();
+     }
+   });
   createEffect(() => {
     if (!isCollapsed() && window.lucide) {
       window.lucide.createIcons();
     }
+  });
+
+  // Persist collapsed state
+  createEffect(() => {
+    localStorage.setItem('sidebarCollapsed', isCollapsed().toString());
   });
   return (
     <aside
@@ -188,23 +217,23 @@ const Sidebar = () => {
           <ul class="menu w-full gap-1">
               <li classList={{ "menu-active": location.pathname === "/" }}>
                 <A href="/" onClick={() => window.dispatchEvent(new CustomEvent('resetAgent'))} class="flex items-center justify-center ltr:justify-center rtl:justify-center p-3 hover:bg-base-300 transition-colors rounded-lg relative group" aria-label={`Create new project - ${t().newProject}`}>
-                  <i data-lucide="plus" classList={{ "w-5 h-5": !isCollapsed(), "w-6 h-6": isCollapsed() }} class="text-primary" aria-hidden="true"></i>
+                  <i data-lucide="plus" classList={{ "w-5 h-5": !isCollapsed(), "w-6 h-6": isCollapsed() }} class="text-base-content/60" aria-hidden="true"></i>
                   <Show when={!isCollapsed()}>
                     <span class="font-medium ltr:ml-3 rtl:mr-3">{t().newProject}</span>
                   </Show>
                 </A>
               </li>
-             <li classList={{ "menu-active": location.pathname === "/apps" }}>
-               <A href="/apps" class="flex items-center ltr:justify-start rtl:justify-end p-3 hover:bg-base-300 transition-colors rounded-lg group" aria-label="Apps">
-                 <i data-lucide="grid" classList={{ "w-5 h-5": !isCollapsed(), "w-6 h-6": isCollapsed() }} class="text-secondary" aria-hidden="true"></i>
-                 <Show when={!isCollapsed()}>
-                   <span class="font-medium ltr:ml-3 rtl:mr-3">{t().apps}</span>
-                 </Show>
-               </A>
-             </li>
-             <li classList={{ "menu-active": location.pathname === "/dashboard" }}>
-               <A href="/dashboard" class="flex items-center ltr:justify-start rtl:justify-end p-3 hover:bg-base-300 transition-colors rounded-lg group" aria-label={`Dashboard - ${t().dashboard}`}>
-                 <i data-lucide="bar-chart" classList={{ "w-5 h-5": !isCollapsed(), "w-6 h-6": isCollapsed() }} class="text-warning" aria-hidden="true"></i>
+              <li classList={{ "menu-active": location.pathname === "/explore" }}>
+                <A href="/explore" class="flex items-center ltr:justify-start rtl:justify-end p-3 hover:bg-base-300 transition-colors rounded-lg group" aria-label={`Explore - ${t().exploreIdeas}`}>
+                  <i data-lucide="compass" classList={{ "w-5 h-5": !isCollapsed(), "w-6 h-6": isCollapsed() }} class="text-base-content/60" aria-hidden="true"></i>
+                  <Show when={!isCollapsed()}>
+                    <span class="font-medium ltr:ml-3 rtl:mr-3">{t().exploreIdeas}</span>
+                  </Show>
+                </A>
+              </li>
+              <li classList={{ "menu-active": location.pathname === "/dashboard" }}>
+                <A href="/dashboard" class="flex items-center ltr:justify-start rtl:justify-end p-3 hover:bg-base-300 transition-colors rounded-lg group" aria-label={`Dashboard - ${t().dashboard}`}>
+                 <i data-lucide="bar-chart" classList={{ "w-5 h-5": !isCollapsed(), "w-6 h-6": isCollapsed() }} class="text-base-content/60" aria-hidden="true"></i>
                  <Show when={!isCollapsed()}>
                    <span class="font-medium ltr:ml-3 rtl:mr-3">{t().dashboard}</span>
                  </Show>
@@ -212,7 +241,7 @@ const Sidebar = () => {
              </li>
              <li classList={{ "menu-active": location.pathname === "/portfolio" }}>
                <A href="/portfolio" class="flex items-center ltr:justify-start rtl:justify-end p-3 hover:bg-base-300 transition-colors rounded-lg group" aria-label={`Portfolio - ${t().portfolio}`}>
-                 <i data-lucide="briefcase" classList={{ "w-5 h-5": !isCollapsed(), "w-6 h-6": isCollapsed() }} class="text-accent" aria-hidden="true"></i>
+                  <i data-lucide="briefcase" classList={{ "w-5 h-5": !isCollapsed(), "w-6 h-6": isCollapsed() }} class="text-base-content/60" aria-hidden="true"></i>
                  <Show when={!isCollapsed()}>
                    <span class="font-medium ltr:ml-3 rtl:mr-3">{t().portfolio}</span>
                  </Show>
@@ -220,28 +249,13 @@ const Sidebar = () => {
              </li>
              <li classList={{ "menu-active": location.pathname === "/invitations" }}>
                <A href="/invitations" class="flex items-center ltr:justify-start rtl:justify-end p-3 hover:bg-base-300 transition-colors rounded-lg group" aria-label={`Collaborate - Invitations`}>
-                 <i data-lucide="users" classList={{ "w-5 h-5": !isCollapsed(), "w-6 h-6": isCollapsed() }} class="text-info" aria-hidden="true"></i>
+                  <i data-lucide="users" classList={{ "w-5 h-5": !isCollapsed(), "w-6 h-6": isCollapsed() }} class="text-base-content/60" aria-hidden="true"></i>
                  <Show when={!isCollapsed()}>
                    <span class="font-medium ltr:ml-3 rtl:mr-3">{t().collaborate}</span>
                  </Show>
                </A>
-             </li>
-             <li classList={{ "menu-active": location.pathname === "/explore" }}>
-               <A href="/explore" class="flex items-center ltr:justify-start rtl:justify-end p-3 hover:bg-base-300 transition-colors rounded-lg group" aria-label={`Explore project ideas - ${t().exploreIdeas}`}>
-                 <i data-lucide="compass" classList={{ "w-5 h-5": !isCollapsed(), "w-6 h-6": isCollapsed() }} class="text-secondary" aria-hidden="true"></i>
-                 <Show when={!isCollapsed()}>
-                   <span class="font-medium ltr:ml-3 rtl:mr-3">{t().exploreIdeas}</span>
-                 </Show>
-               </A>
-             </li>
-             <li classList={{ "menu-active": location.pathname === "/help" }}>
-               <A href="/help" class="flex items-center ltr:justify-start rtl:justify-end p-3 hover:bg-base-300 transition-colors rounded-lg group" aria-label={`Get help and support - ${t().help}`}>
-                 <i data-lucide="help-circle" classList={{ "w-5 h-5": !isCollapsed(), "w-6 h-6": isCollapsed() }} class="text-info" aria-hidden="true"></i>
-                 <Show when={!isCollapsed()}>
-                   <span class="font-medium ltr:ml-3 rtl:mr-3">{t().help}</span>
-                 </Show>
-               </A>
-             </li>
+              </li>
+
          
           </ul>
         <ul class="menu w-full gap-1">
@@ -251,10 +265,10 @@ const Sidebar = () => {
                   <summary class="flex items-center ltr:justify-between rtl:justify-between px-4 py-2.5 hover:bg-base-300 transition-colors rounded-lg cursor-pointer">
                     <div class="flex items-center gap-3 w-full">
                       <div class="p-1 rounded">
-                         <i data-lucide="folder" classList={{ "w-4 h-4": !isCollapsed(), "w-5 h-5": isCollapsed() }} class="text-accent"></i>
+                         <i data-lucide="folder" classList={{ "w-4 h-4": !isCollapsed(), "w-5 h-5": isCollapsed() }} class="text-base-content/60"></i>
                       </div>
                       <span class="font-medium">{t().allProjects}</span>
-                      <span class="badge badge-sm badge-accent ltr:ml-auto rtl:mr-auto flex-shrink-0">{filteredProjects().length}</span>
+                       <span class="badge badge-sm badge-accent ltr:ml-auto rtl:mr-auto flex-shrink-0 border-none" style="background-color:#00a7e0">{filteredProjects().length}</span>
                     </div>
                     <button
                       class="btn btn-ghost btn-xs opacity-60 hover:opacity-100 btn-circle"
@@ -287,7 +301,7 @@ const Sidebar = () => {
                       </a>
                     </li>
                     <li>
-                      <a onclick={async () => { try { const data = await exportAllData(user()?.id); downloadJSON(data, 'all_data_backup.json'); toastManager.success(t().backupAllData + ' ' + t().successful); } catch (error) { toastManager.error(t().backupAllData + ' ' + t().failed); } }} class="flex items-center gap-2">
+                      <a onclick={async () => { try { const data = await exportAllData(user()?.id); downloadJSON(data, 'all_data_backup.json'); await activityLogger.logData('exported', 'all_data', { format: 'json' }); toastManager.success(t().backupAllData + ' ' + t().successful); } catch (error) { await activityLogger.logError('data_export_failed', error, { dataType: 'all_data' }); toastManager.error(t().backupAllData + ' ' + t().failed); } }} class="flex items-center gap-2">
                         <i data-lucide="archive" class="w-4 h-4"></i>
                         {t().backupAllData}
                       </a>
@@ -312,72 +326,73 @@ const Sidebar = () => {
                       <i data-lucide="search" class="absolute top-1/2 -translate-y-1/2 end-2 w-4 h-4 text-base-content/40"></i>
                     </div>
                   </div>
-                  <ul class="mt-1 space-y-1">
-                    <For each={filteredProjects()}>
-                      {(project) => (
-                        <li>
-                          <div class="flex justify-between ltr:justify-between rtl:justify-between items-center px-4 py-2 hover:bg-base-300 rounded-lg transition-colors cursor-pointer group">
-                            <span onclick={() => { logger.debug('Opening project:', project.id); window.dispatchEvent(new CustomEvent('openProject', { detail: project.id })); }} class="flex items-center w-full gap-2">
-                              <div class="rounded flex-shrink-0">
-                                <i data-lucide="folder" classList={{ "w-4 h-4": !isCollapsed(), "w-5 h-5": isCollapsed() }} class="text-base-content/60"></i>
+                   <ul class="mt-1 space-y-1">
+                     <Show when={projectsLoading()}>
+                       <SidebarSkeleton />
+                     </Show>
+                     <Show when={!projectsLoading()}>
+                        <For each={filteredProjects()}>
+                          {(project) => (
+                            <li>
+                              <div class="flex justify-between ltr:justify-between rtl:justify-between items-center px-4 py-2 hover:bg-base-300 rounded-lg transition-colors cursor-pointer group">
+                                <span onclick={() => { logger.debug('Opening project:', project.id); window.dispatchEvent(new CustomEvent('openProject', { detail: project.id })); }} class="flex items-center w-full gap-2">
+                                  <div class="rounded flex-shrink-0">
+                                    <i data-lucide="folder" classList={{ "w-4 h-4": !isCollapsed(), "w-5 h-5": isCollapsed() }} class="text-base-content/60"></i>
+                                  </div>
+                                  <span
+                                    class="ltr:ms-2 rtl:me-2 truncate flex-1 min-w-0"
+                                    data-project-id={project.id}
+                                    contentEditable={editingProjectId() === project.id}
+                                    onBlur={(e) => {
+                                      if (editingProjectId() === project.id) {
+                                        const newName = e.target.textContent.trim();
+                                        if (newName && newName !== project.name) {
+                                          handleProjectAction('rename', project.id, newName.trim());
+                                        }
+                                        setEditingProjectId(null);
+                                      }
+                                    }}
+                                    onKeyDown={(e) => {
+                                      if (e.key === 'Enter') {
+                                        e.preventDefault();
+                                        e.target.blur();
+                                      }
+                                      if (e.key === 'Escape') {
+                                        e.target.textContent = project.name;
+                                        setEditingProjectId(null);
+                                      }
+                                    }}
+                                   >
+                                     {project.name}
+                                   </span>
+                                 </span>
+                                 <div class="opacity-0 group-hover:opacity-100 transition-opacity">
+                                  <button
+                                    class="btn btn-ghost btn-xs"
+                                    onclick={(e) => { e.stopPropagation(); toggleProjectPopover(project.id); }}
+                                    aria-label="Project options"
+                                  >
+                                    <i data-lucide="more-vertical" class="w-4 h-4"></i>
+                                  </button>
+                                </div>
                               </div>
-                              <span
-                                class="ltr:ms-2 rtl:me-2 truncate flex-1 min-w-0"
-                                data-project-id={project.id}
-                                contentEditable={editingProjectId() === project.id}
-                                onBlur={(e) => {
-                                  if (editingProjectId() === project.id) {
-                                    const newName = e.target.textContent.trim();
-                                    if (newName && newName !== project.name) {
-                                      handleProjectAction('rename', project.id, newName.trim());
-                                    }
-                                    setEditingProjectId(null);
-                                  }
-                                }}
-                                onKeyDown={(e) => {
-                                  if (e.key === 'Enter') {
-                                    e.preventDefault();
-                                    e.target.blur();
-                                  }
-                                  if (e.key === 'Escape') {
-                                    e.target.textContent = project.name;
-                                    setEditingProjectId(null);
-                                  }
-                                }}
-                              >
-                                {project.name}
-                              </span>
-                            </span>
-                            <button class="btn btn-ghost btn-xs opacity-0 group-hover:opacity-100 btn-circle" popovertarget={`popover-project-${project.id}`} style={`anchor-name: --anchor-project-${project.id}`}>
-                              <i data-lucide="more-vertical" class="w-3 h-3"></i>
-                            </button>
-                          </div>
-                          <ul class="dropdown menu w-52 rounded-box bg-base-100 shadow-sm" popover id={`popover-project-${project.id}`} style={`position-anchor: --anchor-project-${project.id}`}>
-                            <li><a onclick={() => { setEditingProjectId(project.id); setTimeout(() => { const span = document.querySelector(`[data-project-id="${project.id}"]`); if (span) { span.focus(); const range = document.createRange(); range.selectNodeContents(span); const sel = window.getSelection(); sel.removeAllRanges(); sel.addRange(range); } }, 0); }}><i data-lucide="edit" class="w-4 h-4"></i>{t().rename}</a></li>
-                            <li><a onclick={() => handleProjectAction('delete', project.id)}><i data-lucide="trash" class="w-4 h-4"></i>{t().delete}</a></li>
-                            <li><a onclick={async () => { try { const data = await exportProject(project.id); downloadJSON(data, `${project.name}-project.json`); toastManager.success(t().exportProject + ' ' + t().successful); } catch (error) { toastManager.error(t().backupAllData + ' ' + t().failed); } }}><i data-lucide="download" class="w-4 h-4"></i>{t().exportProject}</a></li>
-                            <li><a onclick={async () => { try { const data = await exportReports(project.id); downloadJSON(data, `${project.name}-report.json`); toastManager.success(t().exportReports + ' ' + t().successful); } catch (error) { toastManager.error(t().exportReports + ' ' + t().failed); } }}><i data-lucide="file-text" class="w-4 h-4"></i>{t().exportReports}</a></li>
-                          </ul>
-                        </li>
-                      )}
-                    </For>
-                    <Show when={filteredProjects().length === 0}>
-                      <li class="flex flex-col items-center justify-center py-4 px-2">
-                        <i data-lucide="folder-x" classList={{ "w-8 h-8": !isCollapsed(), "w-10 h-10": isCollapsed() }} class="mb-2 text-base-content/40"></i>
-                        <div class="text-sm font-semibold mb-1 text-center">
-                          {searchQuery() ? t().noProjectsMatch : t().noProjectsYet}
-                        </div>
-                        <div class="text-xs text-base-content/60 mb-2 text-center">
-                          {searchQuery() ? t().tryAdjustingSearch : t().createFirstProject}
-                        </div>
-                        <button class="btn btn-primary btn-sm" onClick={() => window.dispatchEvent(new CustomEvent('resetAgent'))}>{t().createTask}</button>
-                      </li>
-                    </Show>
-                  </ul>
+                              <ul class="dropdown menu w-52 rounded-box bg-base-100 shadow-sm" popover id={`popover-project-${project.id}`} style={`position-anchor: --anchor-project-${project.id}`}>
+                                 <li><a onclick={() => { setEditingProjectId(project.id); setTimeout(() => { const span = document.querySelector(`[data-project-id="${project.id}"]`); if (span) { span.focus(); const range = document.createRange(); range.selectNodeContents(span); const sel = window.getSelection(); sel.removeAllRanges(); sel.addRange(range); } }, 0); }}><i data-lucide="edit" class="w-4 h-4"></i>{t().rename}</a></li>
+                                 <li><a onclick={() => handleProjectAction('delete', project.id)}><i data-lucide="trash" class="w-4 h-4"></i>{t().delete}</a></li>
+                                <li><a onclick={async () => { try { const data = await exportProject(project.id); downloadJSON(data, `${project.name}-project.json`); await activityLogger.logData('exported', 'project', { projectId: project.id, projectName: project.name, format: 'json' }); toastManager.success(t().exportProject + ' ' + t().successful); } catch (error) { await activityLogger.logError('project_export_failed', error, { projectId: project.id }); toastManager.error(t().backupAllData + ' ' + t().failed); } }}><i data-lucide="download" class="w-4 h-4"></i>{t().exportProject}</a></li>
+                                <li><a onclick={async () => { try { const data = await exportReports(project.id); downloadJSON(data, `${project.name}-report.json`); await activityLogger.logData('exported', 'reports', { projectId: project.id, projectName: project.name, format: 'json' }); toastManager.success(t().exportReports + ' ' + t().successful); } catch (error) { await activityLogger.logError('reports_export_failed', error, { projectId: project.id }); toastManager.error(t().exportReports + ' ' + t().failed); } }}><i data-lucide="file-text" class="w-4 h-4"></i>{t().exportReports}</a></li>
+                              </ul>
+                            </li>
+                          )}
+                        </For>
+                      </Show>
+                    </ul>
                 </details>
               </li>
-            </Show>
-        </ul>
+
+
+                      </Show>
+                   </ul>
         </div>
         
           <div class="flex-shrink-0 border-t border-base-200">
@@ -393,22 +408,22 @@ const Sidebar = () => {
    >
     {/* Avatar */}
     <div class="avatar relative flex-shrink-0">
-      <div class="w-8 rounded-full ring ring-primary/30 ring-offset-1 ring-offset-base-100">
-        {user()?.avatar ? (
-          <img
-            src={user()?.avatar}
-            alt="User avatar"
-            class="w-full h-full object-cover"
-          />
-        ) : (
-          <div class="w-full h-full bg-gradient-to-br from-primary/20 to-secondary/20 rounded-full flex items-center justify-center">
+       <div class="w-8 h-8 rounded-full bg-gray-100">
+         {user()?.avatar ? (
+           <img
+             src={user()?.avatar}
+             alt="User avatar"
+             class="w-full h-full object-cover rounded-full"
+           />
+         ) : (
+           <div class="w-full h-full flex items-center justify-center">
             <i
               data-lucide="user"
               classList={{
                 'w-5 h-5': !isCollapsed(),
                 'w-6 h-6': isCollapsed(),
               }}
-              class="text-primary"
+              class="text-base-content/60"
             ></i>
           </div>
         )}
@@ -430,55 +445,53 @@ const Sidebar = () => {
 
    {/* Dropdown */}
    <ul
-     class="dropdown-content menu w-52 rounded-box bg-base-100 shadow-sm"
+     class="menu m-0 border border-0 w-full bg-base-100"
    >
-     <li class="menu-title px-3 py-2 border-b border-base-200">
-       <span>{user()?.profile?.name ?? 'User'}</span>
-     </li>
+
      <li>
        <A href="/profile" class="flex items-center gap-2">
-         <i data-lucide="user" class="w-4 h-4"></i>
+          <i data-lucide="user" class="w-4 h-4 text-base-content/60"></i>
          {navbarT().profile || 'Profile'}
        </A>
      </li>
      <li>
        <A href="/settings" class="flex items-center gap-2">
-         <i data-lucide="settings" class="w-4 h-4"></i>
+          <i data-lucide="settings" class="w-4 h-4 text-base-content/60"></i>
          {navbarT().settings || 'Settings'}
        </A>
      </li>
      <li>
        <A href="/packages" class="flex items-center gap-2">
-         <i data-lucide="crown" class="w-4 h-4 text-accent"></i>
+          <i data-lucide="crown" class="w-4 h-4 text-base-content/60"></i>
          {navbarT().packages || 'Packages'}
        </A>
      </li>
       <li>
         <A href="/billing" class="flex items-center gap-2">
-          <i data-lucide="credit-card" class="w-4 h-4"></i>
+          <i data-lucide="credit-card" class="w-4 h-4 text-base-content/60"></i>
           {navbarT().billingLabel || 'Billing'}
         </A>
       </li>
       <li>
         <A href="/credits" class="flex items-center gap-2">
-          <i data-lucide="coins" class="w-4 h-4 text-yellow-500"></i>
+          <i data-lucide="coins" class="w-4 h-4 text-base-content/60"></i>
           {navbarT().creditsLabel || 'Credits'}
         </A>
       </li>
 
-      <div class="divider my-1"></div>
+
 
      <li>
-       <button
-         onClick={async () => {
-           await logout();
-           navigate('/auth/login');
-         }}
-         class="text-error hover:bg-error/10"
-       >
-         <i data-lucide="log-out" class="w-4 h-4"></i>
-         {navbarT().signOut || 'Sign Out'}
-       </button>
+        <button
+          onClick={async () => {
+            await logout();
+            navigate('/auth/login');
+          }}
+          class="text-error hover:bg-error/10"
+        >
+           <i data-lucide="log-out" class="w-4 h-4 text-error"></i>
+          {navbarT().signOut || 'Sign Out'}
+        </button>
       </li>
     </ul>
   </details>
@@ -487,65 +500,31 @@ const Sidebar = () => {
               </li>
         </Show>
 
-              <li classList={{ "menu-active": location.pathname === "/notifications" }}>
-                <A href="/notifications" classList={{
-                  'flex items-center p-3 hover:bg-base-300 transition-colors rounded-lg relative group w-full normal-case': true,
-                  'justify-center': isCollapsed(),
-                  'justify-start ltr:justify-start rtl:justify-end': !isCollapsed()
-                }}>
-                   <i data-lucide="bell" classList={{ "w-5 h-5": !isCollapsed(), "w-6 h-6": isCollapsed() }}></i>
-                  <Show when={!isCollapsed()}>
-                    <span class="font-medium ltr:ml-3 rtl:mr-3 flex-1 text-left">{navbarT().notifications || 'Notifications'}</span>
-                    <Show when={(notifications() || []).some(n => !n.read)}>
-                      <span class="badge badge-error badge-sm ltr:ml-auto rtl:mr-auto">{(notifications() || []).filter(n => !n.read).length}</span>
-                    </Show>
-                  </Show>
-                </A>
-              </li>
-              <li>
-                <button
-                  classList={{
-                    'flex items-center p-3 hover:bg-base-300 transition-colors rounded-lg relative group w-full normal-case': true,
-                    'justify-center': isCollapsed(),
-                    'justify-start ltr:justify-start rtl:justify-end': !isCollapsed()
-                  }}
-                  onClick={() => {
-                    const next = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
-                    document.documentElement.setAttribute('data-theme', next);
-                    localStorage.setItem('theme', next);
-                  }}
-                >
-                   <i data-lucide="sun-moon" classList={{ "w-5 h-5": !isCollapsed(), "w-6 h-6": isCollapsed() }}></i>
-                  <Show when={!isCollapsed()}>
-                    <span class="font-medium ltr:ml-3 rtl:mr-3 flex-1 text-left">{navbarT().theme || 'Theme'}</span>
-                    <span class="badge badge-sm ltr:ml-auto rtl:mr-auto">
-                      {document.documentElement.getAttribute('data-theme') === 'dark' ? 'Dark' : 'Light'}
-                    </span>
-                  </Show>
-                </button>
-              </li>
-              <li>
-                <button
-                  classList={{
-                    'flex items-center p-3 hover:bg-base-300 transition-colors rounded-lg relative group w-full normal-case': true,
-                    'justify-center': isCollapsed(),
-                    'justify-start ltr:justify-start rtl:justify-end': !isCollapsed()
-                  }}
-                  onClick={() => {
-                    const next = currentLang() === 'en' ? 'ar' : 'en';
-                    setLang(next);
-                    localStorage.setItem('lang', next);
-                  }}
-                >
-                   <i data-lucide="globe" classList={{ "w-5 h-5": !isCollapsed(), "w-6 h-6": isCollapsed() }}></i>
-                  <Show when={!isCollapsed()}>
-                    <span class="font-medium ltr:ml-3 rtl:mr-3 flex-1 text-left">{navbarT().language || 'Language'}</span>
-                    <span class="badge badge-outline badge-sm ltr:ml-auto rtl:mr-auto">
-                      {currentLang() === 'ar' ? 'AR' : 'EN'}
-                    </span>
-                  </Show>
-                </button>
-              </li>
+                <li class="grid grid-cols-4 gap-1 w-full bg-base-200 rounded-lg">
+                  <A href="/notifications" class="flex items-center justify-center p-3 hover:bg-base-300 transition-colors rounded-lg relative group normal-case" aria-label="Notifications">
+                     <i data-lucide="bell" class="w-5 h-5 text-base-content/40"></i>
+                     <Show when={(notifications() || []).some(n => !n.read)}>
+                       <span class="badge badge-error badge-xs absolute -top-1 -right-1">{(notifications() || []).filter(n => !n.read).length}</span>
+                     </Show>
+                  </A>
+                  <button class="flex items-center justify-center p-3 hover:bg-base-300 transition-colors rounded-lg relative group normal-case" onClick={() => {
+                      const next = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+                      document.documentElement.setAttribute('data-theme', next);
+                      localStorage.setItem('theme', next);
+                    }} aria-label="Toggle theme">
+                     <i data-lucide="sun-moon" class="w-5 h-5 text-base-content/40"></i>
+                  </button>
+                  <button class="flex items-center justify-center p-3 hover:bg-base-300 transition-colors rounded-lg relative group normal-case" onClick={() => {
+                      const next = currentLang() === 'en' ? 'ar' : 'en';
+                      setLang(next);
+                      localStorage.setItem('lang', next);
+                    }} aria-label="Change language">
+                     <i data-lucide="globe" class="w-5 h-5 text-base-content/40"></i>
+                  </button>
+                  <A href="/help" class="flex items-center justify-center p-3 hover:bg-base-300 transition-colors rounded-lg relative group normal-case" aria-label="Get help and support">
+                     <i data-lucide="help-circle" class="w-5 h-5 text-base-content/40"></i>
+                  </A>
+                </li>
             </ul>
           </div>
       </div>

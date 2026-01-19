@@ -441,20 +441,6 @@ height: 150%;
 
 }
 
-#agentBox.agent-box-fixed {
-  position: fixed !important;
-  bottom: 10px !important;
-  left: 50% !important;
-  transform: translateX(-50%) !important;
-  width: calc(100% - 40px) !important;
-  max-width: 56rem !important;
-  z-index: 50 !important;
-}
-
-#agentBox {
-  padding: 0 !important;
-}
-
 *:focus {
   outline: none !important;
   box-shadow: none !important;

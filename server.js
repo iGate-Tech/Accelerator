@@ -126,7 +126,7 @@ try {
 }
 
 // Model configuration
-const AI_MODEL = 'meta-llama/llama-3.2-3b-instruct:free';
+const AI_MODEL = 'google/gemma-3-27b-it:free';
 logger.debug('server.js: AI model configured as:', AI_MODEL);
 
 // Static files
@@ -255,7 +255,8 @@ app.post('/api/llm', async (req, res) => {
         ───────────────────────────────────────────────────────────────────────────────
         CONTENT RULES
 
-        - Fully answer the task with detailed Markdown
+        - If the user specifically requests JSON format, return valid JSON
+        - Otherwise, fully answer the task with detailed Markdown
         - Break ideas into steps and sections
         - Use examples and assumptions
         - Markdown quality is more important than placeholder coverage
@@ -295,14 +296,16 @@ app.post('/api/llm', async (req, res) => {
 
                 console.log(`[${new Date().toISOString()}] SERVER: Starting to stream response chunks to client`);
                 let aiResponse = '';
+                let chunkCount = 0;
+                let totalBytesSent = 0;
 
                 // Stream the response
                 for await (const chunk of stream) {
                     const content = chunk.choices[0]?.delta?.content || '';
                     if (content) {
                         aiResponse += content;
-                        const chunkCount = aiResponse.split(' ').length;
-                        const totalBytesSent = Buffer.byteLength(aiResponse, 'utf8');
+                        chunkCount = aiResponse.split(' ').length;
+                        totalBytesSent = Buffer.byteLength(aiResponse, 'utf8');
                         console.log(`[${new Date().toISOString()}] SERVER: Streaming chunk: "${content}" (response so far: ${aiResponse.length} chars, ${chunkCount} words, ${totalBytesSent} bytes)`);
                         res.write(content);
                     }
@@ -430,14 +433,12 @@ app.post('/api/llm/quick', async (req, res) => {
             res.setHeader('Content-Type', 'text/plain');
             let aiResponse = '';
             let chunkCount = 0;
-            let totalBytesSent = 0;
             console.log(`[${new Date().toISOString()}] SERVER: Quick - Starting to stream response chunks`);
         for await (const chunk of stream) {
             const content = chunk.choices[0]?.delta?.content || '';
             aiResponse += content;
             res.write(content);
             chunkCount++;
-            totalBytesSent += Buffer.byteLength(content, 'utf8');
         }
             console.log(`[${new Date().toISOString()}] SERVER: Quick - Ending response stream`);
             res.end();

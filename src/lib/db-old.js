@@ -865,7 +865,7 @@ export async function _createProject({ project, userId }) {
          isNaN(completedSteps) ? 0 : completedSteps,
          isNaN(consumedCredits) ? 0 : consumedCredits,
          isNaN(totalCredits) ? 100 : totalCredits,
-         project.uiStatus || 'idle'
+         project.ui_status || 'idle'
        ];
       console.log('Insert values:', values);
         const res = await dbInstance.query(`

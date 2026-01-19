@@ -546,6 +546,32 @@ export const UserProvider = (props) => {
       logger.debug('Error fetching subscription or credits in checkAuth:', error.message);
     }
 
+    // Ensure the local user exists in the database
+    try {
+      const { _createUser, _createUserProfile } = await import('../lib/db-users');
+      const existingUser = await getUserById(localUserId);
+      if (!existingUser) {
+        await _createUser({
+          email: 'local@user.com',
+          passwordHash: null,
+          userId: localUserId
+        });
+        // Create profile
+        await _createUserProfile({
+          userId: localUserId,
+          profileData: {
+            name: 'Local User',
+            email: 'local@user.com',
+            bio: '',
+            avatar: null
+          }
+        });
+        logger.debug('Created local user in database');
+      }
+    } catch (dbError) {
+      logger.warn('Failed to create local user in database:', dbError.message);
+    }
+
     const localUser = {
       id: localUserId,
       email: 'local@user.com',
@@ -566,6 +592,7 @@ export const UserProvider = (props) => {
     };
 
     setUser(localUser);
+    setCurrentUser(localUser);
     setIsAuthenticated(true);
     await secureLocalStorage.setItem('userData', localUser);
     activityLogger.setUser(localUser);

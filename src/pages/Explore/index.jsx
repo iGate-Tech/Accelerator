@@ -41,7 +41,7 @@ const Explore = () => {
         (project.description && project.description.toLowerCase().includes(search().toLowerCase()));
 
       // Status filter
-      const matchesStatus = statusFilter() === "all" || project.uiStatus === statusFilter();
+      const matchesStatus = statusFilter() === "all" || project.ui_status === statusFilter();
 
       return matchesSearch && matchesStatus;
     });
@@ -241,11 +241,11 @@ const Explore = () => {
              </div>
              <div class="flex items-center gap-1 md:gap-2">
                <svg class="w-3 h-3 md:w-4 md:h-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22,4 12,14.01 9,11.01"/></svg>
-               <span>{projects().filter(p => p.uiStatus === 'completed').length} {t().completed}</span>
+                <span>{projects().filter(p => p.ui_status === 'completed').length} {t().completed}</span>
              </div>
              <div class="flex items-center gap-1 md:gap-2">
                <svg class="w-3 h-3 md:w-4 md:h-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16" viewBox="0 0 24 24"><path d="M12 2v4"/><path d="m16.2 7.8 2.9-2.9"/><path d="M18 12h4"/><path d="m16.2 16.2 2.9 2.9"/><path d="M12 18v4"/><path d="m4.9 19.1 2.9-2.9"/><path d="M2 12h4"/><path d="m4.9 4.9 2.9 2.9"/></svg>
-               <span>{projects().filter(p => p.uiStatus === 'processing').length} {t().inProgress}</span>
+                <span>{projects().filter(p => p.ui_status === 'processing').length} {t().inProgress}</span>
              </div>
           </div>
         </div>

@@ -180,7 +180,7 @@ main {
   height: 100%;
   z-index: 40;
   overflow: hidden;
-  border-inline-end: 2px solid var(--color-base-300);
+  border-inline-end: 1px solid var(--color-base-300);
   transition: width 0.3s ease, max-width 0.3s ease;
   background-color: var(--color-base-100);
   flex-shrink: 0;

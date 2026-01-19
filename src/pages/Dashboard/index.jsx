@@ -66,10 +66,10 @@ const Dashboard = () => {
 
     const projectsData = projects();
     const totalProjects = projectsData.length;
-    const completedProjects = projectsData.filter(p => p.uiStatus === 'completed').length;
-    const inProgressProjects = projectsData.filter(p => p.uiStatus === 'processing').length;
-    const idleProjects = projectsData.filter(p => p.uiStatus === 'idle').length;
-    const pausedProjects = projectsData.filter(p => p.uiStatus === 'paused').length;
+    const completedProjects = projectsData.filter(p => p.ui_status === 'completed').length;
+    const inProgressProjects = projectsData.filter(p => p.ui_status === 'processing').length;
+    const idleProjects = projectsData.filter(p => p.ui_status === 'idle').length;
+    const pausedProjects = projectsData.filter(p => p.ui_status === 'paused').length;
 
     const totalCompletedSteps = projectsData.reduce((sum, p) => sum + (p.completedSteps || 0), 0);
     const totalSteps = projectsData.reduce((sum, p) => sum + (p.totalSteps || 51), 0);

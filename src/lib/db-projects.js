@@ -42,7 +42,7 @@ export async function _createProject({ project, userId }) {
       completedSteps,
       consumedCredits,
       totalCredits,
-      project.uiStatus || 'idle',
+      project.ui_status || 'idle',
       project.currentStep || 'system',
       project.stepName || 'System Initialization',
       project.currentSection || 'Initialization',

@@ -47,11 +47,11 @@ import { handleLLMProjectUpdate, extractProjectName, handleQuickLLMCall, streamQ
 import {setAgentStore} from "../../lib/machine";
 import {marked} from 'marked';
 import { confirmReset } from "../../components/ui/GlobalConfirm";
+import AgentInterface from '../../components/features/home/AgentInterface';
 import {renderFilledTemplate} from '../../lib/llm-template';
 import { validateLLMPrompt } from '../../lib/security';
 import { useOnlineStatus } from '../../hooks/useOnlineStatus';
 import ResponseSection from '../../components/ui/ResponseSection';
-import AgentInterface from '../../components/features/home/AgentInterface';
 import RouteGuard from '../../components/common/RouteGuard';
 import ProtectedRoute from '../../components/common/ProtectedRoute';
 import { useContext } from "solid-js";
@@ -128,10 +128,18 @@ const TasksContent = () => {
     const [aiSuggestions, setAiSuggestions] = createSignal([]);
     const [gettingSuggestions, setGettingSuggestions] = createSignal(false);
     const [switchingProject, setSwitchingProject] = createSignal(false);
-    const [priorityFilter, setPriorityFilter] = createSignal('all');
+
 
     // Project data signal
     const [projectData, setProjectData] = createSignal(null);
+
+    // Get AI suggestions when project description changes
+    createEffect(() => {
+      const desc = projectDescription();
+      if (desc && desc.trim().length >= 10 && showProjectModal()) {
+        getProjectSuggestions(desc);
+      }
+    });
 
     // Tasks resource
     const [tasks] = createResource(currentProjectId, async (projectId) => {
@@ -145,12 +153,9 @@ const TasksContent = () => {
         }
     });
 
-    // Filtered tasks based on priority
+    // Tasks list
     const filteredTasks = createMemo(() => {
-        const allTasks = tasks() || [];
-        const filter = priorityFilter();
-        if (filter === 'all') return allTasks;
-        return allTasks.filter(task => task.priority === filter);
+        return tasks() || [];
     });
 
     // Projects list resource (for state restoration)
@@ -399,6 +404,24 @@ const TasksContent = () => {
             throw new Error(errorText || `HTTP ${response.status}`);
           }
 
+          const reader = response.body.getReader();
+          const decoder = new TextDecoder();
+          let responseText = '';
+          let chunkCount = 0;
+          const startTime = Date.now();
+
+          while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
+            const chunk = decoder.decode(value);
+            chunkCount++;
+            responseText += chunk;
+            setStreamingContent(responseText);
+          }
+
+          clearTimeout(timeoutId);
+          return responseText;
+
         } catch (fetchError) {
           clearTimeout(timeoutId);
 
@@ -409,25 +432,6 @@ const TasksContent = () => {
           // Re-throw other errors
           throw fetchError;
         }
-
-        const reader = response.body.getReader();
-        const decoder = new TextDecoder();
-        let responseText = '';
-        let chunkCount = 0;
-        const startTime = Date.now();
-
-        while (true) {
-          const { done, value } = await reader.read();
-          if (done) break;
-          const chunk = decoder.decode(value);
-          chunkCount++;
-          responseText += chunk;
-          setStreamingContent(responseText);
-        }
-
-
-
-        return responseText;
       };
 
       const runNextStep = async () => {
@@ -636,7 +640,30 @@ const TasksContent = () => {
       const getProjectSuggestions = async (idea) => {
         if (!idea || idea.trim().length < 5) return;
 
+        // Clear any existing suggestions
+        setAiSuggestions([]);
         setGettingSuggestions(true);
+
+        // Set a timeout to prevent infinite loading
+        const timeoutId = setTimeout(() => {
+          console.warn('AI suggestions timeout, using fallback');
+          setGettingSuggestions(false);
+          setAiSuggestions([
+            {
+              title: "Market Research",
+              description: "Conduct thorough market research to validate your target audience and competitive landscape."
+            },
+            {
+              title: "Value Proposition",
+              description: "Clearly define what makes your solution unique and why customers will choose it."
+            },
+            {
+              title: "MVP Development",
+              description: "Focus on building a minimum viable product to test your core assumptions quickly."
+            }
+          ]);
+        }, 15000); // 15 second timeout
+
         try {
           const suggestionPrompt = `Analyze this startup idea and provide 3 specific suggestions to improve and refine it: "${idea}"
 
@@ -656,21 +683,74 @@ Return your response as a JSON array of objects, each with "title" and "descript
           const reader = response.body.getReader();
           let accumulatedText = '';
 
+          console.log('Starting to read AI suggestions stream...');
+
           while (true) {
             const { done, value } = await reader.read();
-            if (done) break;
+            if (done) {
+              console.log('Stream complete, final accumulated text length:', accumulatedText.length);
+              // Try one final parse when stream is complete
+              try {
+                // Look for JSON in markdown code blocks first
+                const codeBlockMatch = accumulatedText.match(/```(?:json)?\s*(\[[\s\S]*?\])\s*```/);
+                let jsonText = null;
+
+                if (codeBlockMatch) {
+                  jsonText = codeBlockMatch[1];
+                  console.log('Found JSON in code block');
+                } else {
+                  // Fallback to direct array match
+                  const arrayMatch = accumulatedText.match(/(\[[\s\S]*?\])/);
+                  if (arrayMatch) {
+                    jsonText = arrayMatch[1];
+                    console.log('Found JSON array directly');
+                  }
+                }
+
+                if (jsonText) {
+                  console.log('Attempting to parse JSON:', jsonText.substring(0, 200) + '...');
+                  const suggestions = JSON.parse(jsonText);
+                  if (Array.isArray(suggestions) && suggestions.length > 0) {
+                    console.log('Successfully parsed', suggestions.length, 'suggestions');
+                    setAiSuggestions(suggestions.slice(0, 3)); // Limit to 3 suggestions
+                  } else {
+                    console.warn('Parsed data is not a valid suggestions array');
+                  }
+                } else {
+                  console.warn('No JSON found in response');
+                }
+              } catch (e) {
+                console.warn('Could not parse AI suggestions from response:', e.message);
+                console.log('Full response text:', accumulatedText);
+              }
+              break;
+            }
 
             const chunk = new TextDecoder().decode(value);
             accumulatedText += chunk;
 
-            // Try to parse JSON from accumulated text
+            // Try to parse JSON from accumulated text during streaming
             try {
-              const jsonMatch = accumulatedText.match(/\[.*\]/s);
-              if (jsonMatch) {
-                const suggestions = JSON.parse(jsonMatch[0]);
+              // Look for JSON in markdown code blocks first
+              const codeBlockMatch = accumulatedText.match(/```(?:json)?\s*(\[[\s\S]*?\])\s*```/);
+              let jsonText = null;
+
+              if (codeBlockMatch) {
+                jsonText = codeBlockMatch[1];
+              } else {
+                // Fallback to direct array match
+                const arrayMatch = accumulatedText.match(/(\[[\s\S]*?\])/);
+                if (arrayMatch) {
+                  jsonText = arrayMatch[1];
+                }
+              }
+
+              if (jsonText) {
+                const suggestions = JSON.parse(jsonText);
                 if (Array.isArray(suggestions) && suggestions.length > 0) {
+                  console.log('Found valid suggestions during streaming');
                   setAiSuggestions(suggestions.slice(0, 3)); // Limit to 3 suggestions
-                  break;
+                  break; // Found valid suggestions, stop processing
                 }
               }
             } catch (e) {
@@ -696,6 +776,7 @@ Return your response as a JSON array of objects, each with "title" and "descript
             }
           ]);
         } finally {
+          clearTimeout(timeoutId);
           setGettingSuggestions(false);
         }
       };
@@ -723,6 +804,13 @@ Return your response as a JSON array of objects, each with "title" and "descript
 
           toastManager.success(`Project "${name}" created successfully!`);
           logger.info('Project created with setup, ID:', projectId);
+
+          // Start the AI process automatically
+          setStartPressed(true);
+          setLoading(true);
+          setStreamingContent("");
+          setStreamingError(null);
+          await regenerate(callLLMForStep, updateProject, projectId);
 
         } catch (error) {
           logger.error('Project creation failed:', error);
@@ -765,13 +853,20 @@ Return your response as a JSON array of objects, each with "title" and "descript
           return;
         }
 
-        // Open project creation modal instead of direct creation
+        // Set project details directly from prompt
         setProjectDescription(prompt());
         setProjectName(prompt().length > 30 ? prompt().substring(0, 30) + '...' : prompt());
-        setShowProjectModal(true);
 
-        // Get AI suggestions in background
-        getProjectSuggestions(prompt());
+        // Create project directly
+        await createProjectWithSetup();
+
+        // Start the AI process immediately
+        setStartPressed(true);
+        setLoading(true);
+        setStreamingContent("");
+        setStreamingError(null);
+
+        logger.info('Project created and instructions set, ready to start AI process...');
       };
 
       const handleStartConfirmed = async () => {
@@ -786,9 +881,7 @@ Return your response as a JSON array of objects, each with "title" and "descript
           await createProjectWithSetup();
 
           // Now start the AI process
-          enterInstructions(prompt());
-          logger.info('Instructions set, ready to regenerate...');
-          // Note: User now manually clicks regenerate in UI
+          logger.info('Instructions set, starting AI process...');
         } catch (error) {
           logger.error('Start process error:', error);
           toastManager.error('Failed to start process');
@@ -934,19 +1027,9 @@ Return your response as a JSON array of objects, each with "title" and "descript
                     window.lucide.createIcons();
             }, 100);
 
-            // Load selected project from user profile
-            if (user()?.id) {
-              getUserProfile(user().id).then(profile => {
-                if (profile?.current_project_id) {
-                  setCurrentProjectId(profile.current_project_id);
-                }
-              });
-            }
+            // Load selected project from user profile - this will be handled by createEffect below
 
-            // Load priority filter from URL
-            const urlParams = new URLSearchParams(location.search);
-            const priority = urlParams.get('priority') || 'all';
-            setPriorityFilter(priority);
+
         });
 
        onCleanup(() => {
@@ -955,11 +1038,24 @@ Return your response as a JSON array of objects, each with "title" and "descript
            window.removeEventListener('openProject', onOpenProject);
        });
 
+        // Watch for user authentication changes and load project
+        createEffect(() => {
+            const currentUser = user();
+            if (currentUser?.id) {
+                getUserProfile(currentUser.id).then(profile => {
+                    if (profile?.current_project_id) {
+                        setCurrentProjectId(profile.current_project_id);
+                    }
+                }).catch(error => {
+                    logger.debug('Failed to load user profile:', error);
+                });
+            }
+        });
+
         // Set tasksList when project changes or filter changes
         createEffect(() => {
             currentProjectId();
             tasks();
-            priorityFilter();
             if (Array.isArray(tasks())) {
                 setTasksList(filteredTasks());
             }
@@ -1042,8 +1138,17 @@ Return your response as a JSON array of objects, each with "title" and "descript
         }
     });
 
+    // Check if user authentication has completed
+    const isUserReady = () => !!user()?.id;
+
     return (
         <RouteGuard requireAuth={true}>
+        <Show when={isUserReady()} fallback={
+            <div class="flex justify-center items-center min-h-screen">
+                <div class="loading loading-spinner loading-lg text-primary"></div>
+                <span class="ms-4 text-lg">Loading your workspace...</span>
+            </div>
+        }>
 
         {/* Project Switching Loading Overlay */}
         <LoadingOverlay
@@ -1056,80 +1161,14 @@ Return your response as a JSON array of objects, each with "title" and "descript
         />
 
   <div className="flex flex-col items-center">
-              <Show when={!!currentProjectId()}>
-                <div class="w-full max-w-4xl mb-4">
-                  <div class="flex justify-end">
-                    <div class="form-control">
-                      <label class="label">
-                        <span class="label-text">Filter by Priority</span>
-                      </label>
-                      <select
-                        class="select select-bordered select-sm"
-                        value={priorityFilter()}
-                        onChange={(e) => {
-                          const newPriority = e.target.value;
-                          setPriorityFilter(newPriority);
-                          // Update URL
-                          const url = new URL(window.location);
-                          if (newPriority === 'all') {
-                            url.searchParams.delete('priority');
-                          } else {
-                            url.searchParams.set('priority', newPriority);
-                          }
-                          navigate(url.pathname + url.search, { replace: true });
-                        }}
-                      >
-                        <option value="all">All Priorities</option>
-                        <option value="high">High</option>
-                        <option value="medium">Medium</option>
-                        <option value="low">Low</option>
-                      </select>
-                    </div>
-                  </div>
-                </div>
-              </Show>
                <Show when={
                    !!currentProjectId() && (startPressed() || (tasksList && tasksList().length > 0))
                }>
                   <ResponseSection tasksList={tasksList} />
                </Show>
-              <Show when={!!currentProjectId() && filteredTasks().length === 0 && priorityFilter() !== 'all'}>
-                <div class="w-full max-w-4xl text-center py-8">
-                  <i data-lucide="filter-x" class="w-12 h-12 mx-auto mb-4 text-base-content/40"></i>
-                  <h3 class="text-lg font-medium mb-2">No tasks match the selected priority</h3>
-                  <p class="text-base-content/60 mb-4">Try selecting a different priority filter</p>
-                  <button
-                    class="btn btn-outline"
-                    onClick={() => setPriorityFilter('all')}
-                  >
-                    Show All Tasks
-                  </button>
-                </div>
-              </Show>
 
-             <AgentInterface key={currentProjectId()} agentBoxClass={agentBoxClass} currentProjectId={currentProjectId}
-                agentContentClass={agentContentClass}
-                greetingClass={greetingClass}
-               projectData={projectData}
-               isLoading={isLoading}
-               agentStore={agentStore}
-               textareaRef={textareaRef}
-               prompt={prompt}
-                setPrompt={setPrompt}
-                tasksList={tasksList}
-                startPressed={startPressed}
-                handleImprove={handleImprove}
-                 handleSuggest={handleSuggest}
-                 handleInstruct={handleInstruct}
-                 handleConfirm={handleConfirm}
-                 handleReset={handleReset}
-                 handleStart={handleStart}
-                handleRegenerate={handleRegenerate}
-                handleConfirmAccept={handleConfirmAccept}
-                handleConfirmRetry={handleConfirmRetry}
-                handleConfirmEdit={handleConfirmEdit}
-                handleConfirmReset={handleConfirmReset}
-              />
+
+
 
               {/* Instructions Modal */}
               <Show when={showInstructionsModal()}>
@@ -1270,9 +1309,41 @@ Return your response as a JSON array of objects, each with "title" and "descript
                   <div class="modal-backdrop bg-black/50" onClick={() => setShowProjectModal(false)}></div>
                 </div>
               </Show>
- </div>
-         </RouteGuard>
-     );
+
+              {/* Agent Interface - Show when user is authenticated */}
+              <Show when={agentStore && tasksList}>
+                <AgentInterface
+                  key={currentProjectId()}
+                  agentBoxClass={agentBoxClass}
+                  currentProjectId={currentProjectId}
+                  agentContentClass={agentContentClass}
+                  greetingClass={greetingClass}
+                  projectData={projectData}
+                  isLoading={isLoading}
+                  agentStore={agentStore}
+                  textareaRef={textareaRef}
+                  prompt={prompt}
+                  setPrompt={setPrompt}
+                  tasksList={tasksList}
+                  startPressed={startPressed}
+                  handleImprove={handleImprove}
+                  handleSuggest={handleSuggest}
+                  handleInstruct={handleInstruct}
+                  handleConfirm={handleConfirm}
+                  handleReset={handleReset}
+                  handleStart={handleStart}
+                  handleRegenerate={handleRegenerate}
+                  handleConfirmAccept={handleConfirmAccept}
+                  handleConfirmRetry={handleConfirmRetry}
+                  handleConfirmEdit={handleConfirmEdit}
+                  handleConfirmReset={handleConfirmReset}
+                  streamingContent={streamingContent}
+                 />
+              </Show>
+  </div>
+        </Show>
+          </RouteGuard>
+      );
 };
 
 

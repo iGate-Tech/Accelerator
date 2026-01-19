@@ -55,7 +55,7 @@ const AgentInterface = (props) => { // Defensive checks for required props
 </svg>
         );
     };
-    if (!props.agentStore || !props.tasksList || !props.agentBoxClass || !props.agentContentClass || !props.greetingClass) {
+    if (!props.agentStore || !props.tasksList) {
         return (
             <div id="agentBox" class="flex flex-col rounded-lg w-full">
                 <div class="flex items-center justify-center h-64">
@@ -147,15 +147,11 @@ const AgentInterface = (props) => { // Defensive checks for required props
 
     // Show loading state if essential data is not ready
     const isLoading = () => {
-        if (!props.currentProjectId()) 
+        if (!props.currentProjectId())
             return false;
          // No loading when no project selected
         return !props.agentStore || !props.tasksList || currentLang() === undefined;
     };
-
-    if (isLoading()) {
-        return (            <div id="agentBox" class="flex flex-col rounded-lg w-full">                <div class="flex items-center justify-center h-64">                   <div class="loading loading-spinner loading-lg text-primary"></div>                   <span class="ms-4 text-lg">{t().initializingAgentInterface}</span>               </div>           </div>       );
-    }
 
     return (
         <div id="agentBox"
@@ -223,7 +219,7 @@ const AgentInterface = (props) => { // Defensive checks for required props
                     <div class=" card">
                         <div class="card-body relative p-0 !gap-0">
 
-                              <Show when={props.agentStore.state === "processing" && props.streamingContent && props.streamingContent().trim()}>
+                              <Show when={(props.agentStore.state === "processing" || props.agentStore.state === "regenerate") && props.streamingContent && props.streamingContent().trim()}>
                                   <div class="mt-4 p-4 bg-base-200 rounded-lg">
                                       <h3 class="text-sm font-semibold mb-2">{t().aiProcessing}</h3>
                                       <div class="text-sm whitespace-pre-wrap">{props.streamingContent()}</div>
@@ -278,17 +274,16 @@ const AgentInterface = (props) => { // Defensive checks for required props
                                 
                                  <div class="flex gap-2">
                                                  <div class="relative">
-                                                    <button type="button" class="select text-gray-600 pr-8 py-1 rounded-full flex items-center gap-1 text-xs transition h-6 cursor-pointer border-0" style={`anchor-name:--mode-anchor;color: ${modeColors[selectedMode()] || 'gray'};`} popovertarget="mode-popover">
+                                                    <button type="button" class="select text-gray-600 pr-8 py-1 rounded-full flex items-center gap-1 text-xs transition h-6 cursor-pointer border-0" style="anchor-name:--mode-anchor;" popovertarget="mode-popover">
                                                        <LogoIcon fillColor={() => modeColors[selectedMode()] || 'gray'} />
                                                        {selectedMode()}
-                                                       <i data-lucide="chevron-down" class="w-4 h-4"></i>
                                                    </button>
                                                    <ul class="dropdown menu w-52 rounded-box bg-base-100 shadow-sm" popover id="mode-popover" style="position-anchor:--mode-anchor; inset: auto 0 100% 0;">
                                                        <For each={['General Mode', 'Accelerator Mode', 'Services Mode', 'Venture Mode', 'Studio Mode']}>
                                                            {(mode) => {
                                                                return (
                                                                    <li>
-                                                                        <a class="flex items-center gap-2 px-3 py-1 hover:bg-base-200 w-full text-left" style={`color: ${modeColors[mode]};`} onClick={() => setSelectedMode(mode)}>
+                                                                        <a class="flex items-center gap-2 px-3 py-1 hover:bg-base-200 w-full text-left text-gray-600" onClick={() => setSelectedMode(mode)}>
                                                                            <LogoIcon fillColor={modeColors[mode]} />
                                                                            {mode}
                                                                        </a>
@@ -298,7 +293,12 @@ const AgentInterface = (props) => { // Defensive checks for required props
                                                        </For>
                                                   </ul>
                                              </div>
-                                     <button type="button" style="background-color: #9e28b5;" class="text-white px-2 py-1 rounded-full flex items-center text-xs transition group" onClick={() => props.handleReset && props.handleReset()}>
+
+                                            
+                                 </div>
+                                    
+                                 <div class="flex gap-2">
+                                                                         <button type="button" style="background-color: #9e28b5;" class="text-white px-2 py-1 rounded-full flex items-center text-xs transition group" onClick={() => props.handleReset && props.handleReset()}>
                                          <i data-lucide="rotate-ccw" class="w-3 h-3"></i>
                                          <span class="hidden group-hover:block ml-1">Reset</span>
                                      </button>
@@ -314,10 +314,6 @@ const AgentInterface = (props) => { // Defensive checks for required props
                                          <i data-lucide="check" class="w-3 h-3"></i>
                                          <span class="hidden group-hover:block ml-1">Confirm</span>
                                      </button>
-                                            
-                                 </div>
-                                    
-                                 <div class="flex gap-2">
                                      <Show when={props.agentStore}>
                                          <Show when={props.agentStore.state === 'instructions' || props.agentStore.state === 'reset'}>
 

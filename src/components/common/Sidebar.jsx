@@ -366,15 +366,16 @@ const Sidebar = () => {
                                      {project.name}
                                    </span>
                                  </span>
-                                 <div class="opacity-0 group-hover:opacity-100 transition-opacity">
-                                  <button
-                                    class="btn btn-ghost btn-xs"
-                                    onclick={(e) => { e.stopPropagation(); toggleProjectPopover(project.id); }}
-                                    aria-label="Project options"
-                                  >
-                                    <i data-lucide="more-vertical" class="w-4 h-4"></i>
-                                  </button>
-                                </div>
+                                  <div class="opacity-0 group-hover:opacity-100 transition-opacity">
+                                   <button
+                                     class="btn btn-ghost btn-xs"
+                                     popovertarget={`popover-project-${project.id}`}
+                                     style={`anchor-name: --anchor-project-${project.id}`}
+                                     aria-label="Project options"
+                                   >
+                                     <i data-lucide="more-vertical" class="w-4 h-4"></i>
+                                   </button>
+                                 </div>
                               </div>
                               <ul class="dropdown menu w-52 rounded-box bg-base-100 shadow-sm" popover id={`popover-project-${project.id}`} style={`position-anchor: --anchor-project-${project.id}`}>
                                  <li><a onclick={() => { setEditingProjectId(project.id); setTimeout(() => { const span = document.querySelector(`[data-project-id="${project.id}"]`); if (span) { span.focus(); const range = document.createRange(); range.selectNodeContents(span); const sel = window.getSelection(); sel.removeAllRanges(); sel.addRange(range); } }, 0); }}><i data-lucide="edit" class="w-4 h-4"></i>{t().rename}</a></li>

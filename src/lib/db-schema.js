@@ -53,14 +53,14 @@ export async function createSchema() {
       );
     `);
 
-    await dbInstance.exec(`
+     await dbInstance.exec(`
       CREATE TABLE IF NOT EXISTS projects (
         id TEXT PRIMARY KEY,
         user_id TEXT NOT NULL,
         name TEXT NOT NULL,
         description TEXT,
         status TEXT DEFAULT 'active',
-        uiStatus TEXT DEFAULT 'in_progress',
+        ui_status TEXT DEFAULT 'idle',
         icon TEXT DEFAULT 'folder',
         color TEXT DEFAULT '#9E28B5',
         last_opened TEXT,
@@ -363,6 +363,9 @@ export async function migrateSchema() {
     console.log('Running schema migrations...');
     
     const migrations = [
+      // Fix ui_status column name mismatch (rename uiStatus to ui_status)
+      "ALTER TABLE projects ADD COLUMN IF NOT EXISTS ui_status TEXT DEFAULT 'idle'",
+
       // Add missing columns to projects table
       "ALTER TABLE projects ADD COLUMN IF NOT EXISTS archived INTEGER DEFAULT 0",
       "ALTER TABLE projects ADD COLUMN IF NOT EXISTS archived_at TEXT",
@@ -377,6 +380,13 @@ export async function migrateSchema() {
       "ALTER TABLE projects ADD COLUMN IF NOT EXISTS llm_response TEXT",
       "ALTER TABLE projects ADD COLUMN IF NOT EXISTS total_credits INTEGER DEFAULT 600",
       "ALTER TABLE projects ADD COLUMN IF NOT EXISTS total_steps INTEGER DEFAULT 60",
+
+      // Add missing created_at column to users table
+      "ALTER TABLE users ADD COLUMN IF NOT EXISTS created_at TEXT",
+
+      // Add missing ip_address and user_agent columns to user_activities table
+      "ALTER TABLE user_activities ADD COLUMN IF NOT EXISTS ip_address TEXT",
+      "ALTER TABLE user_activities ADD COLUMN IF NOT EXISTS user_agent TEXT",
 
       // Add missing columns to tasks table
       "ALTER TABLE tasks ADD COLUMN IF NOT EXISTS content TEXT",

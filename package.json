@@ -21,20 +21,8 @@
     "docker:prod:build": "docker compose -f docker/docker-compose.yml --env-file docker/.env.production up --build -d",
     "docker:down": "docker compose -f docker/docker-compose.yml down",
     "docker:logs": "docker compose -f docker/docker-compose.yml logs -f",
-    "generate-prd": "node scripts/generate-prd.js",
-    "update-prd": "node scripts/update-prd.js",
-    "update-progress": "node scripts/update-progress.js",
-    "setup-ralph": "mkdir -p archive && cp PRD.md PRD.md.backup 2>/dev/null || echo 'No PRD.md to backup'",
-    "ralph": "echo 'Run opencode with ralph agent for autonomous loop'",
     "lint": "eslint src/ server.js --ext .js,.jsx || echo 'ESLint not configured yet'",
-    "typecheck": "echo 'Typecheck skipped - project uses JavaScript'",
-    "test": "playwright test",
-    "test:ui": "playwright test --ui",
-    "test:unit": "vitest",
-    "test:run": "vitest run",
-    "test:ui": "vitest --ui",
-    "test:coverage": "vitest run --coverage",
-    "test:e2e": "playwright test"
+    "typecheck": "echo 'Typecheck skipped - project uses JavaScript'"
   },
   "keywords": [],
   "author": "",
@@ -59,20 +47,13 @@
     "vite-plugin-solid": "^2.11.10"
   },
   "devDependencies": {
-    "@playwright/test": "^1.57.0",
-    "@solidjs/testing-library": "^0.8.10",
     "@tailwindcss/postcss": "^4.1.18",
     "@tailwindcss/typography": "^0.5.15",
-    "@testing-library/jest-dom": "^6.9.1",
-    "@testing-library/user-event": "^14.6.1",
     "autoprefixer": "^10.4.23",
     "concurrently": "^9.2.1",
     "eslint": "^8.57.0",
-    "jsdom": "^27.4.0",
     "nodemon": "^3.1.11",
-    "playwright": "^1.57.0",
     "postcss-preset-env": "^10.6.0",
-    "vite-plugin-pwa": "^1.2.0",
-    "vitest": "^4.0.17"
+    "vite-plugin-pwa": "^1.2.0"
   }
 }

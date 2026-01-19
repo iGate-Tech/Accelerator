@@ -575,7 +575,7 @@ export const exportReports = async (projectId) => {
     return {
       projectName: project.name,
       description: project.description,
-      status: project.uiStatus,
+      status: project.ui_status,
       progress: `${progress.toFixed(1)}%`,
       totalTasks,
       completedTasks,

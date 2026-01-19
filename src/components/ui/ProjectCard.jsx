@@ -151,9 +151,9 @@ const ProjectCard = (props) => {
             {project.name || 'Unnamed Project'}
           </h3>
           {showStatus && (
-            <div class={`badge ${getStatusColor(project.uiStatus)} badge-xs md:badge-sm gap-1 shrink-0`}>
-              <i data-lucide={getStatusIcon(project.uiStatus)} class="w-2.5 h-2.5 md:w-3 md:h-3"></i>
-              <span class="hidden xs:inline">{project.uiStatus || 'idle'}</span>
+            <div class={`badge ${getStatusColor(project.ui_status)} badge-xs md:badge-sm gap-1 shrink-0`}>
+              <i data-lucide={getStatusIcon(project.ui_status)} class="w-2.5 h-2.5 md:w-3 md:h-3"></i>
+              <span class="hidden xs:inline">{project.ui_status || 'idle'}</span>
             </div>
           )}
         </div>

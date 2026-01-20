@@ -1,5 +1,5 @@
 import { createContext, useContext } from 'solid-js';
-import logger from '../lib/logger.js';
+import { logger } from '../lib/core';
 
 
 const LoggerContext = createContext();

@@ -1,4 +1,4 @@
-import logger from '../../lib/logger.js';
+
 
 // Packages page translations
 export const packagesTranslations = {

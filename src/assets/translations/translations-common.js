@@ -1,5 +1,3 @@
-import logger from '../../lib/logger.js';
-
 // Navigation translations
 export const navigationTranslations = {
   en: {

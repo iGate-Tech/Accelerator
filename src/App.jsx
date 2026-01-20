@@ -2,14 +2,11 @@ import { Router, Route, Navigate } from "@solidjs/router";
 import { lazy, Suspense, Show, useContext } from "solid-js";
 import { LangProvider, LangContext } from "./context/LangContext";
 import { UserProvider, useUser } from "./context/UserContext";
-import ConfirmModal, { showConfirm, confirmDelete, confirmLogout, confirmReset, confirmDanger } from "./components/ui/GlobalConfirm";
-import MainLayout from "./components/common/MainLayout";
-import AuthLayout from "./components/common/AuthLayout";
-import ConsentBanner from "./components/common/ConsentBanner";
-import { GlobalErrorDisplay } from "./components/ui/ErrorHandler";
-import SupportModal from "./components/ui/SupportModal";
+import { GlobalConfirm as ConfirmModal, ConsentBanner, GlobalErrorDisplay, SupportModal, MainLayout, AuthLayout } from "./components";
 
-import Home from "./pages/Home";
+
+
+const Home = lazy(() => import("./pages/Home"));
 const Dashboard = lazy(() => import("./pages/Dashboard"));
 const Explore = lazy(() => import("./pages/Explore"));
 const Portfolio = lazy(() => import("./pages/Portfolio"));
@@ -19,15 +16,15 @@ const Profile = lazy(() => import("./pages/Profile"));
 const Packages = lazy(() => import("./pages/Packages"));
 const Credits = lazy(() => import("./pages/Credits"));
 const Billing = lazy(() => import("./pages/Billing"));
-const Login = lazy(() => import("./pages/Auth/Login"));
-const Signup = lazy(() => import("./pages/Auth/Signup"));
-const ForgotPassword = lazy(() => import("./pages/Auth/ForgotPassword"));
-const ResetPassword = lazy(() => import("./pages/Auth/ResetPassword"));
-const PrivacyPolicy = lazy(() => import("./pages/modals/PrivacyPolicy"));
-const TermsOfService = lazy(() => import("./pages/modals/TermsOfService"));
-const StatusPage = lazy(() => import("./pages/modals/StatusPage"));
-const Changelog = lazy(() => import("./pages/modals/Changelog"));
-const Notifications = lazy(() => import("./pages/modals/Notifications"));
+const Login = lazy(() => import("./pages/Login"));
+const Signup = lazy(() => import("./pages/Signup"));
+const ForgotPassword = lazy(() => import("./pages/ForgotPassword"));
+const ResetPassword = lazy(() => import("./pages/ResetPassword"));
+const PrivacyPolicy = lazy(() => import("./components/PrivacyPolicy"));
+const TermsOfService = lazy(() => import("./components/TermsOfService"));
+const StatusPage = lazy(() => import("./components/StatusPage"));
+const Changelog = lazy(() => import("./components/Changelog"));
+const Notifications = lazy(() => import("./components/Notifications"));
 const Invitations = lazy(() => import("./pages/Invitations"));
 
 const ProtectedRoute = (props) => {

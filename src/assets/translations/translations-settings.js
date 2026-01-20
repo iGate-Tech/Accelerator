@@ -1,5 +1,3 @@
-import logger from '../../lib/logger.js';
-
 // Settings page translations
 export const settingsTranslations = {
   en: {
@@ -94,10 +92,10 @@ export const settingsTranslations = {
     timeHoursAgo: '{hours}h ago',
     timeDaysAgo: '{days}d ago',
     justNow: 'Just now',
-    markAllRead: 'Mark All as Read',
-    all: 'All',
-    unread: 'Unread',
-    noNotifications: 'No notifications',
+    markAllReadBtn: 'Mark All as Read',
+    allFilter: 'All',
+    unreadFilter: 'Unread',
+    noNotificationsFilter: 'No notifications',
     newMessage: 'New Message',
     systemUpdate: 'System Update',
     billingUpdate: 'Billing Update',
@@ -197,10 +195,10 @@ export const settingsTranslations = {
     timeHoursAgo: 'منذ {hours} ساعة',
     timeDaysAgo: 'منذ {days} يوم',
     justNow: 'الآن',
-    markAllRead: 'وضع علامة الكل كمقروء',
-    all: 'الكل',
-    unread: 'غير مقروء',
-    noNotifications: 'لا توجد إشعارات',
+    markAllReadBtn: 'وضع علامة الكل كمقروء',
+    allFilter: 'الكل',
+    unreadFilter: 'غير مقروء',
+    noNotificationsFilter: 'لا توجد إشعارات',
     newMessage: 'رسالة جديدة',
     systemUpdate: 'تحديث النظام',
     billingUpdate: 'تحديث الفوترة',

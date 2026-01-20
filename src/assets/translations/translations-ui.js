@@ -1,5 +1,3 @@
-import logger from '../../lib/logger.js';
-
 // UI Components translations
 export const uiTranslations = {
   en: {
@@ -65,7 +63,7 @@ export const uiTranslations = {
     inactive: 'Inactive',
     online: 'Online',
     offline: 'Offline',
-    pending: 'Pending',
+    pendingStatus: 'Pending',
     approved: 'Approved',
     rejected: 'Rejected',
 
@@ -137,7 +135,7 @@ export const uiTranslations = {
     inactive: 'غير نشط',
     online: 'متصل',
     offline: 'غير متصل',
-    pending: 'قيد الانتظار',
+    pendingStatus: 'قيد الانتظار',
     approved: 'موافق عليه',
     rejected: 'مرفوض',
 

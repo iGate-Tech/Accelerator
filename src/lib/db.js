@@ -1,124 +1,22 @@
-// Main database module - combines all database functionality
-import { v4 as uuidv4 } from 'uuid';
-import logger from './logger.js';
-
-// Import core database functionality
-export { query, exec, close, getEntities, updateEntity, getPg } from './db-core.js';
-
-// Import user functions
-export { _createUser, _getUserById, _getUserByEmail, _updateUser, _deleteUser, _createUserProfile, _getUserProfile, _updateUserProfile, _updateUserPassword } from './db-users.js';
-
-// Import project functions
-export { _createProject, _getProjectById, _updateProject, _deleteProject, _deleteAllProjects, _toggleProjectPublic, _archiveProject, _unarchiveProject, _getArchivedProjects, _getTasks, _addTask, _updateTask, _getProjects } from './db-projects.js';
-
-// Import group functions
-export {
-  _getGroups,
-  _getGroupById,
-  _addGroup,
-  _updateGroup,
-  _deleteGroup,
-  _addProjectToGroup,
-  _removeProjectFromGroup,
-  _getProjectsInGroup,
-  _getUngroupedProjects,
-  _getGroupsWithProjects,
-  _exportAllProjects
-} from './db-groups.js';
-
-// Import credit functions
-export {
-  _addCreditTransaction,
-  _getUserCredits,
-  _getCreditTransactions,
-  _getCreditBalance,
-  _getUserCreditBalance,
-  _consumeCredits,
-  _addBillingRecord,
-  _getUserBilling,
-  _updateBillingStatus
-} from './db-credits.js';
-
-// Import activity functions
-export {
-  _logActivity,
-  _getUserActivities,
-  _createNotification,
-  _getUserNotifications,
-  _markNotificationRead
-} from './db-activities.js';
-
-// Import package functions
-export {
-  _seedPackages,
-  _getPackages,
-  _createUserSubscription,
-  _getUserSubscription,
-  _changeUserSubscription,
-  _updateUserSubscription
-} from './db-packages.js';
-
-// Import voting functions
-export {
-  _voteOnProject,
-  _getProjectVotes,
-  _getPublicProjectsWithVotes,
-  _getPublicProjects,
-  _getProjectByName
-} from './db-votes.js';
-
-// Import seeding functions
-export {
-  _seedSampleNotifications,
-  _seedInitialData,
-  _isSeeded,
-  _createSession,
-  _getSessionByToken,
-  _deleteSession,
-  _deleteExpiredSessions
-} from './db-seeding.js';
-
-// Import collaboration functions
-export {
-  _inviteCollaborator,
-  _getPortfolioInvitations,
-  _getUserInvitations,
-  _respondToInvitation,
-  _getPortfolioCollaborators,
-  _removeCollaborator,
-  _updateCollaboratorRole
-} from './db-collaboration.js';
-
-// Local user management for PGLite only
+// Backward compatibility alias - re-export everything from the new modular structure
+import { secureLocalStorage } from './auth/security.js';
+export * from './database/index.js';
 let currentUser = null;
-export const getCurrentUser = async () => {
-  if (!currentUser) {
-    const savedUserData = localStorage.getItem('userData');
-    if (savedUserData) {
-      try {
-        currentUser = JSON.parse(savedUserData);
-      } catch (e) {
-        console.error('Error parsing saved user data:', e);
-      }
-    }
-  }
-  return currentUser;
-};
-export const setCurrentUser = (user) => {
+export const setCurrentUser = async (user) => {
   currentUser = user;
   if (user) {
-    localStorage.setItem('userData', JSON.stringify(user));
+    await secureLocalStorage.setItem('userData', user);
   }
 };
 
 // Exported API functions (wrappers for the internal functions)
 export const createUser = async (email, passwordHash, profile = {}, userId = null) => {
-  const { _createUser } = await import('./db-users.js');
+  const { _createUser } = await import('./database/users.js');
   return await _createUser({ email, passwordHash, profile, userId });
 };
 
 export const getUserById = async (id) => {
-  const { _getUserById } = await import('./db-users.js');
+  const { _getUserById } = await import('./database/users.js');
   return await _getUserById({ id });
 };
 
@@ -153,28 +51,29 @@ export const validateUserForDbOperation = async () => {
 };
 
 export const getUserByEmail = async (email) => {
-  const { _getUserByEmail } = await import('./db-users.js');
+  const { _getUserByEmail } = await import('./database/users.js');
   return await _getUserByEmail({ email });
 };
 
 export const updateUser = async (id, updates) => {
-  const { _updateUser } = await import('./db-users.js');
+  const { _updateUser } = await import('./database/users.js');
   return await _updateUser({ id, updates });
 };
 
 export const deleteUser = async (id) => {
-  const { _deleteUser } = await import('./db-users.js');
+  const { _deleteUser } = await import('./database/users.js');
   return await _deleteUser({ id });
 };
 
 export const createUserProfile = async (userId, profileData = {}) => {
-  const { _createUserProfile } = await import('./db-users.js');
+  const { _createUserProfile } = await import('./database/users.js');
   return await _createUserProfile({ userId, profileData });
 };
 
 export const getUserProfile = async (userId) => {
   try {
-    const { getPg } = await import('./db-core.js');
+    const { ensureDatabaseReady, getPg } = await import('./database/core.js');
+    await ensureDatabaseReady();
     const db = await getPg();
     if (!db) return null;
     const res = await db.query('SELECT * FROM profiles WHERE user_id = $1', [userId]);
@@ -186,12 +85,12 @@ export const getUserProfile = async (userId) => {
 };
 
 export const updateUserProfile = async (userId, updates) => {
-  const { _updateUserProfile } = await import('./db-users.js');
+  const { _updateUserProfile } = await import('./database/users.js');
   return await _updateUserProfile({ userId, updates });
 };
 
 export const updateUserPassword = async (userId, newPasswordHash) => {
-  const { _updateUserPassword } = await import('./db-users.js');
+  const { _updateUserPassword } = await import('./database/users.js');
   return await _updateUserPassword({ userId, newPasswordHash });
 };
 
@@ -201,7 +100,7 @@ export const addProject = async (project) => {
 
     project.public = 0; // Ensure private by default
 
-    const { _createProject } = await import('./db-projects.js');
+    const { _createProject } = await import('./database/projects.js');
     const newProject = await _createProject({ project, userId: user.id });
     logger.debug('Added project:', newProject);
 
@@ -219,63 +118,83 @@ export const addProject = async (project) => {
 };
 
 export const getProjectById = async (id) => {
-  const { _getProjectById } = await import('./db-projects.js');
+  const { _getProjectById } = await import('./database/projects.js');
   return await _getProjectById({ id });
 };
 
 export const updateProject = async (id, project) => {
-  const { _updateProject } = await import('./db-projects.js');
+  const { _updateProject } = await import('./database/projects.js');
   return await _updateProject({ id, updates: project });
 };
 
 export const deleteProject = async (id) => {
-  const { _deleteProject } = await import('./db-projects.js');
+  const { _deleteProject } = await import('./database/projects.js');
   return await _deleteProject({ id });
 };
 
 export const deleteAllProjects = async () => {
   const user = await validateUserForDbOperation();
-  const { _deleteAllProjects } = await import('./db-projects.js');
+  const { _deleteAllProjects } = await import('./database/projects.js');
   return await _deleteAllProjects({ userId: user.id });
 };
 
 export const toggleProjectPublic = async (projectId, isPublic) => {
-  const { _toggleProjectPublic } = await import('./db-projects.js');
+  const { _toggleProjectPublic } = await import('./database/projects.js');
   return await _toggleProjectPublic({ id: projectId });
 };
 
 export const archiveProject = async (projectId) => {
-  const { _archiveProject } = await import('./db-projects.js');
+  const { _archiveProject } = await import('./database/projects.js');
   return await _archiveProject({ id: projectId });
 };
 
 export const unarchiveProject = async (projectId) => {
-  const { _unarchiveProject } = await import('./db-projects.js');
+  const { _unarchiveProject } = await import('./database/projects.js');
   return await _unarchiveProject({ id: projectId });
 };
 
 export const getArchivedProjects = async (userId) => {
-  const { _getArchivedProjects } = await import('./db-projects.js');
-  const { getPg } = await import('./db-core.js');
+  const { _getArchivedProjects } = await import('./database/projects.js');
+  const { getPg } = await import('./database/core.js');
   const db = await getPg();
   if (!db) return [];
   return await _getArchivedProjects(db, { userId });
 };
 
 export const getTasks = async (project_id = null, userId = null) => {
-  const { _getTasks } = await import('./db-projects.js');
+  const { _getTasks } = await import('./database/projects.js');
   return await _getTasks({ projectId: project_id });
 };
 
-export const addTask = async (task, project_id, user_id) => {
-  const taskWithProjectId = { ...task, projectId: project_id, userId: user_id };
-  const { _addTask } = await import('./db-projects.js');
-  return await _addTask({ task: taskWithProjectId });
+export const addTask = async (task) => {
+  const user = await getCurrentUser();
+
+  // Extract title from the first markdown header in content
+  const content = task.content || '';
+  const firstLine = content.split('\n')[0] || '';
+  const titleMatch = firstLine.match(/^#+\s*(.+)$/);
+  const extractedTitle = titleMatch ? titleMatch[1].trim() : null;
+
+  const taskWithIds = {
+    ...task,
+    title: extractedTitle || task.title || 'Untitled Task',
+    projectId: task.projectId,
+    userId: user?.id,
+    id: uuidv4()
+  };
+  const { _addTask } = await import('./database/projects.js');
+  const result = await _addTask({ task: taskWithIds });
+  return { ...result, task: taskWithIds };
 };
 
 export const updateTask = async (id, content) => {
-  const { _updateTask } = await import('./db-projects.js');
+  const { _updateTask } = await import('./database/projects.js');
   return await _updateTask({ id, content });
+};
+
+export const deleteTask = async (id) => {
+  const db = await getPg();
+  await db.query(`UPDATE tasks SET deleted_at = ? WHERE id = ?`, [new Date().toISOString(), id]);
 };
 
 export const getProjects = async (userId = null) => {
@@ -284,14 +203,14 @@ export const getProjects = async (userId = null) => {
     userId = user?.id;
   }
   if (!userId) return [];
-  const { _getProjects } = await import('./db-projects.js');
+  const { _getProjects } = await import('./database/projects.js');
   return await _getProjects({ userId });
 };
 
 // Initialize database on module load
 export const initDb = async () => {
   try {
-    const { initDatabase } = await import('./db-core.js');
+    const { initDatabase } = await import('./database/core.js');
     await initDatabase();
   } catch (error) {
     console.warn('Database initialization failed, but continuing with limited functionality:', error.message);
@@ -301,7 +220,13 @@ export const initDb = async () => {
 // Placeholder functions for now (to be implemented in other modules)
 export const clearAllTasks = async () => {
   const user = await validateUserForDbOperation();
-  await dbInstance.query('DELETE FROM tasks WHERE user_id = $1', [user.id]);
+  const db = await getPg();
+  await db.query('DELETE FROM tasks WHERE user_id = $1', [user.id]);
+};
+
+const _getPublicProjects = async () => {
+  // TODO: Implement getting public projects
+  return [];
 };
 
 export const getPublicProjects = async () => {
@@ -309,8 +234,13 @@ export const getPublicProjects = async () => {
 };
 
 export const getPublicProjectsWithVotes = async (currentUserId) => {
-  const { _getPublicProjectsWithVotes } = await import('./db-votes.js');
+  const { _getPublicProjectsWithVotes } = await import('./database/votes.js');
   return await _getPublicProjectsWithVotes({ currentUserId });
+};
+
+const _getProjectByName = async ({ name }) => {
+  // TODO: Implement getting project by name
+  return null;
 };
 
 export const getProjectByName = async (name) => {
@@ -318,28 +248,28 @@ export const getProjectByName = async (name) => {
 };
 
 export const getGroups = async (userId = null) => {
-  const { _getGroups } = await import('./db-groups.js');
+  const { _getGroups } = await import('./database/groups.js');
   return await _getGroups({ userId });
 };
 
 export const getGroupById = async (id) => {
-  const { _getGroupById } = await import('./db-groups.js');
+  const { _getGroupById } = await import('./database/groups.js');
   return await _getGroupById({ id });
 };
 
 export const addGroup = async (group) => {
   const user = await getCurrentUser();
-  const { _addGroup } = await import('./db-groups.js');
+  const { _addGroup } = await import('./database/groups.js');
   return await _addGroup({ group, userId: user.id });
 };
 
 export const updateGroup = async (id, group) => {
-  const { _updateGroup } = await import('./db-groups.js');
+  const { _updateGroup } = await import('./database/groups.js');
   return await _updateGroup({ id, group });
 };
 
 export const deleteGroup = async (id) => {
-  const { _deleteGroup } = await import('./db-groups.js');
+  const { _deleteGroup } = await import('./database/groups.js');
   return await _deleteGroup({ id });
 };
 
@@ -353,7 +283,7 @@ export const exportAllProjects = async (userId = null) => {
     }
   }
   if (!userId) return null;
-  const { _exportAllProjects } = await import('./db-groups.js');
+  const { _exportAllProjects } = await import('./database/groups.js');
   return await _exportAllProjects({ userId });
 };
 
@@ -420,7 +350,7 @@ export const exportAllData = async (userId = null) => {
 // GDPR-compliant account deletion (Right to be Forgotten)
 export const deleteUserAccount = async (userId, reason = 'user_request') => {
   try {
-    const { getPg } = await import('./db-core.js');
+    const { getPg } = await import('./database/core.js');
     const db = await getPg();
 
     if (!db) {
@@ -504,7 +434,7 @@ export const deleteUserAccount = async (userId, reason = 'user_request') => {
 // Data retention policy enforcement (GDPR compliance)
 export const enforceDataRetention = async () => {
   try {
-    const { getPg } = await import('./db-core.js');
+    const { getPg } = await import('./database/core.js');
     const db = await getPg();
 
     if (!db) return { success: false, error: 'Database not available' };
@@ -629,17 +559,17 @@ export const exportReports = async (projectId) => {
 
 export const addProjectToGroup = async (projectId, groupId) => {
   const user = await getCurrentUser();
-  const { _addProjectToGroup } = await import('./db-groups.js');
+  const { _addProjectToGroup } = await import('./database/groups.js');
   return await _addProjectToGroup({ projectId, groupId, userId: user.id });
 };
 
 export const removeProjectFromGroup = async (projectId, groupId) => {
-  const { _removeProjectFromGroup } = await import('./db-groups.js');
+  const { _removeProjectFromGroup } = await import('./database/groups.js');
   return await _removeProjectFromGroup({ projectId, groupId });
 };
 
 export const getProjectsInGroup = async (groupId) => {
-  const { _getProjectsInGroup } = await import('./db-groups.js');
+  const { _getProjectsInGroup } = await import('./database/groups.js');
   return await _getProjectsInGroup({ groupId });
 };
 
@@ -648,113 +578,123 @@ export const getUngroupedProjects = async (userId = null) => {
     const user = await getCurrentUser();
     userId = user?.id;
   }
-  const { _getUngroupedProjects } = await import('./db-groups.js');
+  const { _getUngroupedProjects } = await import('./database/groups.js');
   return await _getUngroupedProjects({ userId });
 };
 
 export const getGroupsWithProjects = async (userId = null) => {
-  const { _getGroupsWithProjects } = await import('./db-groups.js');
+  const { _getGroupsWithProjects } = await import('./database/groups.js');
   return await _getGroupsWithProjects({ userId });
 };
 
 export const addCreditTransaction = async (userId, type, amount, description) => {
-  const { _addCreditTransaction } = await import('./db-credits.js');
+  const { _addCreditTransaction } = await import('./database/credits.js');
   return await _addCreditTransaction({ userId, type, amount, description });
 };
 
 export const getUserCredits = async (userId) => {
-  const { _getUserCredits } = await import('./db-credits.js');
+  const { _getUserCredits } = await import('./database/credits.js');
   return await _getUserCredits({ userId });
 };
 
 export const getUserCreditBalance = async (userId) => {
-  const { _getUserCreditBalance } = await import('./db-credits.js');
+  const { _getUserCreditBalance } = await import('./database/credits.js');
   return await _getUserCreditBalance({ userId });
 };
 
 export const addBillingRecord = async (userId, type, amount, description, dueDate = null) => {
-  const { _addBillingRecord } = await import('./db-credits.js');
+  const { _addBillingRecord } = await import('./database/credits.js');
   return await _addBillingRecord({ userId, type, amount, description, dueDate });
 };
 
 export const getUserBilling = async (userId) => {
-  const { _getUserBilling } = await import('./db-credits.js');
+  const { _getUserBilling } = await import('./database/credits.js');
   return await _getUserBilling({ userId });
 };
 
 export const consumeCredits = async (userId, amount, description) => {
-  const { _consumeCredits } = await import('./db-credits.js');
+  const { _consumeCredits } = await import('./database/credits.js');
   return await _consumeCredits({ userId, amount, description });
 };
 
 export const getCreditBalance = async (userId) => {
-  const { _getCreditBalance } = await import('./db-credits.js');
+  const { _getCreditBalance } = await import('./database/credits.js');
   return await _getCreditBalance({ userId });
 };
 
 export const getCreditTransactions = async (userId) => {
-  const { _getCreditTransactions } = await import('./db-credits.js');
+  const { _getCreditTransactions } = await import('./database/credits.js');
   return await _getCreditTransactions({ userId });
 };
 
 export const logActivity = async (userId, actionType, entityType, entityId, description, metadata = {}) => {
-  const { _logActivity } = await import('./db-activities.js');
+  const { _logActivity } = await import('./database/activities.js');
   return await _logActivity({ userId, actionType, entityType, entityId, description, metadata });
 };
 
 export const getUserActivities = async (userId, limit = 50, offset = 0) => {
-  const { _getUserActivities } = await import('./db-activities.js');
+  const { _getUserActivities } = await import('./database/activities.js');
   return await _getUserActivities({ userId, limit, offset });
 };
 
 export const createNotification = async (userId, type, title, message, createdAt = null) => {
-  const { _createNotification } = await import('./db-activities.js');
+  const { _createNotification } = await import('./database/activities.js');
   return await _createNotification({ userId, type, title, message });
 };
 
 export const getUserNotifications = async (userId) => {
-  const { _getUserNotifications } = await import('./db-activities.js');
+  const { _getUserNotifications } = await import('./database/activities.js');
   return await _getUserNotifications({ userId });
 };
 
 export const markNotificationRead = async (notificationId, userId) => {
-  const { _markNotificationRead } = await import('./db-activities.js');
+  const { _markNotificationRead } = await import('./database/activities.js');
   return await _markNotificationRead({ notificationId, userId });
 };
 
 export const getPackages = async () => {
-  const { _getPackages } = await import('./db-packages.js');
+  const { _getPackages } = await import('./database/packages.js');
   return await _getPackages();
 };
 
 export const getUserSubscription = async (userId) => {
-  const { _getUserSubscription } = await import('./db-packages.js');
+  const { _getUserSubscription } = await import('./database/packages.js');
   return await _getUserSubscription({ userId });
 };
 
 export const createUserSubscription = async (userId, packageId, subscriptionData = {}) => {
-  const { _createUserSubscription } = await import('./db-packages.js');
+  const { _createUserSubscription } = await import('./database/packages.js');
   return await _createUserSubscription({ userId, packageId, subscriptionData });
 };
 
 export const changeUserSubscription = async (userId, newPackageId, currentSubscription = null) => {
-  const { _changeUserSubscription } = await import('./db-packages.js');
+  const { _changeUserSubscription } = await import('./database/packages.js');
   return await _changeUserSubscription({ userId, newPackageId, currentSubscription });
 };
 
 export const updateUserSubscription = async (userId, subscriptionId, updates) => {
-  const { _updateUserSubscription } = await import('./db-packages.js');
+  const { _updateUserSubscription } = await import('./database/packages.js');
   return await _updateUserSubscription({ userId, subscriptionId, updates });
 };
 
 export const isSeeded = async () => {
-  const { _isSeeded } = await import('./db-packages.js');
+  const { _isSeeded } = await import('./database/packages.js');
   return await _isSeeded();
 };
 
 export const seedPackages = async () => {
-  const { _seedPackages } = await import('./db-packages.js');
+  const { _seedPackages } = await import('./database/packages.js');
   return await _seedPackages();
+};
+
+const _seedInitialData = async () => {
+  // TODO: Implement seeding initial data
+  return { message: 'Initial data seeded' };
+};
+
+const _seedSampleNotifications = async ({ userId }) => {
+  // TODO: Implement seeding sample notifications
+  return { message: 'Sample notifications seeded' };
 };
 
 export const seedInitialData = async () => {
@@ -765,16 +705,36 @@ export const seedSampleNotifications = async (userId) => {
   return await _seedSampleNotifications({ userId });
 };
 
+const _voteOnProject = async ({ projectId, userId, voteType }) => {
+  // TODO: Implement voting on project
+  return { success: true };
+};
+
 export const voteOnProject = async (projectId, userId, voteType) => {
   return await _voteOnProject({ projectId, userId, voteType });
+};
+
+const _createSession = async ({ userId, token, expiresAt }) => {
+  // TODO: Implement creating session
+  return { success: true };
 };
 
 export const createSession = async (userId, token, expiresAt) => {
   return await _createSession({ userId, token, expiresAt });
 };
 
+const _getSessionByToken = async ({ token }) => {
+  // TODO: Implement getting session by token
+  return null;
+};
+
 export const getSessionByToken = async (token) => {
   return await _getSessionByToken({ token });
+};
+
+const _deleteSession = async ({ token }) => {
+  // TODO: Implement deleting session
+  return { success: true };
 };
 
 export const deleteSession = async (token) => {
@@ -784,7 +744,7 @@ export const deleteSession = async (token) => {
 // Password reset functions
 export const createPasswordResetToken = async (userId, token, expiresAt) => {
   try {
-    const { query } = await import('./db-core.js');
+    const { query } = await import('./database/core.js');
     await query(
       'INSERT INTO password_reset_tokens (id, user_id, token, expires_at, created_at, used_at) VALUES ($1, $2, $3, $4, $5, $6)',
       [crypto.randomUUID(), userId, token, expiresAt, new Date().toISOString(), null]
@@ -798,7 +758,7 @@ export const createPasswordResetToken = async (userId, token, expiresAt) => {
 
 export const validatePasswordResetToken = async (token) => {
   try {
-    const { query } = await import('./db-core.js');
+    const { query } = await import('./database/core.js');
     const result = await query(
       'SELECT * FROM password_reset_tokens WHERE token = $1 AND expires_at > $2 AND used_at IS NULL',
       [token, new Date().toISOString()]
@@ -817,7 +777,7 @@ export const validatePasswordResetToken = async (token) => {
 
 export const usePasswordResetToken = async (tokenId) => {
   try {
-    const { query } = await import('./db-core.js');
+    const { query } = await import('./database/core.js');
     await query(
       'UPDATE password_reset_tokens SET used_at = $1 WHERE id = $2',
       [new Date().toISOString(), tokenId]
@@ -829,19 +789,34 @@ export const usePasswordResetToken = async (tokenId) => {
   }
 };
 
+const _deleteExpiredSessions = async () => {
+  // TODO: Implement deleting expired sessions
+  return { success: true };
+};
+
 export const deleteExpiredSessions = async () => {
   return await _deleteExpiredSessions();
+};
+
+const _inviteCollaborator = async ({ portfolioId, inviteeEmail, role, message }) => {
+  // TODO: Implement inviting collaborator
+  return { success: true };
 };
 
 export const inviteCollaborator = async (portfolioId, inviteeEmail, role = 'editor', message = '') => {
   return await _inviteCollaborator({ portfolioId, inviteeEmail, role, message });
 };
 
+const _getPortfolioInvitations = async ({ portfolioId }) => {
+  // TODO: Implement getting portfolio invitations
+  return [];
+};
+
 export const getPortfolioInvitations = async (portfolioId) => {
   return await _getPortfolioInvitations({ portfolioId });
 };
 
-import { _getUserInvitations, _respondToInvitation, _getPortfolioCollaborators, _removeCollaborator, _updateCollaboratorRole } from './db-collaboration.js';
+import { _getUserInvitations, _respondToInvitation, _getPortfolioCollaborators, _removeCollaborator, _updateCollaboratorRole } from './database/collaboration.js';
 
 export const getUserInvitations = async (userEmail) => {
   return await _getUserInvitations({ userEmail });

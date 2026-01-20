@@ -1,4 +1,4 @@
-import logger from '../../lib/logger.js';
+
 
 // Explore page translations
 export const exploreTranslations = {

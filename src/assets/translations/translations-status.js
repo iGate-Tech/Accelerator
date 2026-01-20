@@ -1,4 +1,4 @@
-import logger from '../../lib/logger.js';
+
 
 // Status Page translations
 export const statusTranslations = {

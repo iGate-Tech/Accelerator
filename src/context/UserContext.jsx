@@ -1,16 +1,18 @@
 import { createContext, createSignal, useContext, onMount } from "solid-js";
-import { dataAPI } from "../lib/data";
-import { updateEntity, getUserProfile, createUserProfile, getUserById, createUser, getUserSubscription, setCurrentUser } from "../lib/db";
-import { initDatabase } from "../lib/db-core";
-import { toastManager } from "../lib/feedback";
-import { activityLogger } from "../lib/activity";
-import logger from "../lib/logger.js";
-import { confirmLogout } from "../components/ui/GlobalConfirm";
-import { createAuthToken } from "../lib/data";
-import { secureLocalStorage } from "../lib/security.js";
+import { dataAPI } from "../lib/auth/data.js";
+import { updateEntity, getUserProfile, createUserProfile, getUserById, createUser, getUserSubscription, setCurrentUser } from "../lib/database";
+import { initDatabase } from "../lib/database/core.js";
+import { toastManager } from "../lib/ui/feedback.js";
+import { activityLogger } from "../lib/business/activity.js";
+import { logger } from "../lib/core";
+import { confirmLogout } from "../components";
+import { createAuthToken } from "../lib/auth/data.js";
+import { secureLocalStorage } from "../lib/auth/security.js";
 
 
 const UserContext = createContext();
+
+const DEFAULT_AVATAR = '/default-avatar.png';
 
 export const UserProvider = (props) => {
   const [user, setUser] = createSignal(null);
@@ -23,7 +25,7 @@ export const UserProvider = (props) => {
       const token = await secureLocalStorage.getItem('userToken');
       if (!token) return false;
 
-      const { getSessionByToken } = await import('../lib/db');
+      const { getSessionByToken } = await import('../lib/database');
       const sessionData = await getSessionByToken(token);
 
       if (!sessionData) {
@@ -60,7 +62,7 @@ export const UserProvider = (props) => {
 
    const updateProfile = async (profileUpdates) => {
      try {
-       const { updateUserProfile } = await import('../lib/db');
+       const { updateUserProfile } = await import('../lib/database');
        // Update database first
        await updateUserProfile(user().id, profileUpdates);
 
@@ -124,7 +126,7 @@ export const UserProvider = (props) => {
     logger.info('User login initiated for:', email);
 
     // Rate limiting check
-    const { authRateLimiter } = await import('../lib/security');
+    const { authRateLimiter } = await import('../lib/auth/security.js');
     if (authRateLimiter.isBlocked(email)) {
       const remainingMs = authRateLimiter.getRemainingTime(email);
       const remainingMinutes = Math.ceil(remainingMs / (60 * 1000));
@@ -133,7 +135,7 @@ export const UserProvider = (props) => {
     }
 
     try {
-      const { _getUserByEmail } = await import('../lib/db-users');
+      const { _getUserByEmail } = await import('../lib/database/users.js');
       const userRecord = await _getUserByEmail({ email });
 
       if (!userRecord) {
@@ -146,7 +148,7 @@ export const UserProvider = (props) => {
       
        // Verify password if hash exists
        if (userRecord.password_hash && password) {
-        const { verifyPassword } = await import('../lib/security');
+        const { verifyPassword } = await import('../lib/auth/security.js');
         const isValidPassword = await verifyPassword(password, userRecord.password_hash);
 
          if (!isValidPassword) {
@@ -160,12 +162,12 @@ export const UserProvider = (props) => {
       let subscriptionData = { plan: 'free', status: 'active', price: 0, renewalDate: null, maxCredits: 100, credits_included: 100 };
       let creditBalance = 50;
       try {
-        const { getUserSubscription, getCreditBalance: dbGetCreditBalance } = await import('../lib/db');
+          const { getUserSubscription, getCreditBalance: dbGetCreditBalance } = await import('../lib/database');
         
         // First try to get subscription from packages module
         let userSubscription = null;
         try {
-          const { _getUserSubscription, _getPackages } = await import('../lib/db-packages');
+          const { _getUserSubscription, _getPackages } = await import('../lib/database/packages.js');
           userSubscription = await _getUserSubscription({ userId });
           
           if (userSubscription) {
@@ -192,7 +194,7 @@ export const UserProvider = (props) => {
       const userData = {
         id: userId,
         email: email,
-        avatar: profileData?.avatar || avatar,
+        avatar: profileData?.avatar || DEFAULT_AVATAR,
         profile: {
           name: profileData?.name || email.split('@')[0],
           email: email,
@@ -211,7 +213,7 @@ export const UserProvider = (props) => {
 
        // Create authentication token and session
        try {
-         const { createSession } = await import('../lib/db');
+         const { createSession } = await import('../lib/database');
          const token = await createAuthToken(userId, rememberMe);
          const expiresAt = new Date(Date.now() + (rememberMe ? 30 : 1) * 24 * 60 * 60 * 1000); // 30 days or 1 day
 
@@ -222,7 +224,7 @@ export const UserProvider = (props) => {
 
         setIsAuthenticated(true);
         setUser(userData);
-        setCurrentUser(userData);
+        await setCurrentUser(userData);
         await secureLocalStorage.setItem('userData', userData);
         activityLogger.setUser(userData);
         authRateLimiter.recordAttempt(email, true); // Record successful login
@@ -233,7 +235,7 @@ export const UserProvider = (props) => {
         // Still allow login but without persistent session
         setIsAuthenticated(true);
         setUser(userData);
-        setCurrentUser(userData);
+        await setCurrentUser(userData);
         await secureLocalStorage.setItem('userData', userData);
         activityLogger.setUser(userData);
         return { success: true, user: userData, warning: 'Session persistence failed - you may need to login again' };
@@ -254,7 +256,7 @@ export const UserProvider = (props) => {
       // Invalidate JWT token and delete session
       const token = await secureLocalStorage.getItem('userToken');
       if (token) {
-        const { deleteSession } = await import('../lib/db');
+        const { deleteSession } = await import('../lib/database');
         await deleteSession(token);
         secureLocalStorage.removeItem('userToken');
         logger.info('JWT token invalidated and session deleted');
@@ -286,7 +288,7 @@ export const UserProvider = (props) => {
     logger.info('User signup initiated for:', email);
     try {
       const userId = `user_${Date.now()}`;
-      const { _createUser, _createUserProfile, _getUserByEmail } = await import('../lib/db-users');
+      const { _createUser, _createUserProfile, _getUserByEmail } = await import('../lib/database/users.js');
       
       const existingUser = await _getUserByEmail({ email });
       if (existingUser) {
@@ -307,7 +309,7 @@ export const UserProvider = (props) => {
       const profileData = {
         name: profile.name || email.split('@')[0],
         email: email,
-        avatar: profile.avatar || avatar,
+        avatar: profile.avatar || DEFAULT_AVATAR,
         bio: profile.bio || '',
         joinDate: new Date().toISOString()
       };
@@ -316,7 +318,7 @@ export const UserProvider = (props) => {
       
       // Create welcome notification
       try {
-        const { createNotification, addCreditTransaction, createUserSubscription, seedPackages } = await import('../lib/db');
+        const { createNotification, addCreditTransaction, createUserSubscription, seedPackages } = await import('../lib/database');
         
         // Seed packages if not exists
         try {
@@ -393,7 +395,7 @@ export const UserProvider = (props) => {
 
     try {
       // Check if user exists
-      const { _getUserByEmail } = await import('../lib/db-users');
+      const { _getUserByEmail } = await import('../lib/database/users.js');
       const userRecord = await _getUserByEmail({ email });
 
       if (!userRecord) {
@@ -407,7 +409,7 @@ export const UserProvider = (props) => {
       const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
 
       // Store reset token in database
-      const { createPasswordResetToken } = await import('../lib/db');
+      const { createPasswordResetToken } = await import('../lib/database');
       await createPasswordResetToken(userRecord.id, resetToken, expiresAt.toISOString());
 
       // In a real app, send email here. For now, log the reset link
@@ -429,7 +431,7 @@ export const UserProvider = (props) => {
 
     try {
       // Validate the reset token
-      const { validatePasswordResetToken, usePasswordResetToken } = await import('../lib/db');
+      const { validatePasswordResetToken, usePasswordResetToken } = await import('../lib/database');
       const tokenValidation = await validatePasswordResetToken(token);
 
       if (!tokenValidation.valid) {
@@ -437,7 +439,7 @@ export const UserProvider = (props) => {
       }
 
       // Validate new password strength
-      const { isValidPassword } = await import('../lib/security');
+      const { isValidPassword } = await import('../lib/auth/security.js');
       const passwordValidation = isValidPassword(newPassword);
       if (!passwordValidation.valid) {
         return { success: false, error: passwordValidation.message };
@@ -451,7 +453,7 @@ export const UserProvider = (props) => {
       const passwordHash = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
 
       // Update the user's password
-      const { _updateUserPassword } = await import('../lib/db-users');
+      const { _updateUserPassword } = await import('../lib/database/users.js');
       await _updateUserPassword({ userId: tokenValidation.userId, passwordHash });
 
       // Mark the token as used
@@ -482,7 +484,7 @@ export const UserProvider = (props) => {
           if (parsedUser._isFallback || parsedUser._fallbackReason === 'data_corruption') {
             logger.warn('User data was recovered as fallback - requiring re-authentication');
             setUser(null);
-            setCurrentUser(null);
+            await setCurrentUser(null);
             setIsAuthenticated(false);
             // Clear the corrupted data
             await secureLocalStorage.removeItem('userData');
@@ -499,7 +501,7 @@ export const UserProvider = (props) => {
             await secureLocalStorage.removeItem('userData');
             await secureLocalStorage.removeItem('userToken');
             setUser(null);
-            setCurrentUser(null);
+            await setCurrentUser(null);
             setIsAuthenticated(false);
             return false;
           }
@@ -518,7 +520,7 @@ export const UserProvider = (props) => {
               };
             }
 
-            const { getCreditBalance } = await import('../lib/db');
+            const { getCreditBalance } = await import('../lib/database');
             creditBalance = await getCreditBalance(userId);
           } catch (error) {
             logger.debug('Error fetching subscription or credits in checkAuth:', error.message);
@@ -536,7 +538,7 @@ export const UserProvider = (props) => {
           };
 
           setUser(userData);
-          setCurrentUser(userData);
+          await setCurrentUser(userData);
           setIsAuthenticated(true);
           activityLogger.setUser(userData);
           return true;
@@ -545,7 +547,23 @@ export const UserProvider = (props) => {
         logger.error('Error parsing saved user data:', error);
       }
     }
-    
+
+    // Check if database is available before trying local user initialization
+    try {
+      const { dbReady } = await import('../lib/database/core.js');
+      if (!dbReady) {
+        logger.debug('Database not ready, skipping local user initialization');
+        setUser(null);
+        setIsAuthenticated(false);
+        return false;
+      }
+    } catch (dbError) {
+      logger.debug('Error checking database readiness:', dbError.message);
+      setUser(null);
+      setIsAuthenticated(false);
+      return false;
+    }
+
     const localUserId = 'local-user';
     const profileData = await getUserProfile(localUserId);
 
@@ -563,7 +581,7 @@ export const UserProvider = (props) => {
         };
       }
 
-      const { getCreditBalance } = await import('../lib/db');
+      const { getCreditBalance } = await import('../lib/database');
       creditBalance = await getCreditBalance(localUserId);
     } catch (error) {
       logger.debug('Error fetching subscription or credits in checkAuth:', error.message);
@@ -571,7 +589,7 @@ export const UserProvider = (props) => {
 
     // Ensure the local user exists in the database
     try {
-      const { _createUser, _createUserProfile } = await import('../lib/db-users');
+      const { _createUser, _createUserProfile } = await import('../lib/database/users.js');
       const existingUser = await getUserById(localUserId);
       if (!existingUser) {
         await _createUser({
@@ -615,7 +633,7 @@ export const UserProvider = (props) => {
     };
 
     setUser(localUser);
-    setCurrentUser(localUser);
+    await setCurrentUser(localUser);
     setIsAuthenticated(true);
     await secureLocalStorage.setItem('userData', localUser);
     activityLogger.setUser(localUser);
@@ -639,7 +657,7 @@ export const UserProvider = (props) => {
         try {
           if (savedUserData && savedUserData.id) {
             setUser(savedUserData);
-            setCurrentUser(savedUserData);
+            await setCurrentUser(savedUserData);
             setIsAuthenticated(true);
             logger.debug('User loaded from secure localStorage');
           } else {

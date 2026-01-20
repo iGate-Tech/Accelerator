@@ -1,14 +1,12 @@
-import logger from '../../lib/logger.js';
-
 // Auth translations
 export const authTranslations = {
   en: {
     // Login
     welcomeBack: 'Welcome Back',
     signInToAccount: 'Sign in to your account',
-    email: 'Email',
-    password: 'Password',
-    emailPlaceholder: 'john.doe@example.com',
+    emailLogin: 'Email',
+    passwordLogin: 'Password',
+    emailPlaceholderLogin: 'john.doe@example.com',
     passwordPlaceholder: 'Enter your password',
     signIn: 'Sign In',
     createNewAccount: 'Create New Account',
@@ -18,11 +16,11 @@ export const authTranslations = {
     createAccount: 'Create Account',
     joinJourney: 'Join us to start your journey',
     fullName: 'Full Name',
-    email: 'Email',
-    password: 'Password',
+    emailSignup: 'Email',
+    passwordSignup: 'Password',
     confirmPassword: 'Confirm Password',
     fullNamePlaceholder: 'John Doe',
-    emailPlaceholder: 'john.doe@example.com',
+    emailPlaceholderSignup: 'john.doe@example.com',
     createPasswordPlaceholder: 'Create a password',
     confirmPasswordPlaceholder: 'Confirm your password',
     createAccountBtn: 'Create Account',
@@ -32,8 +30,8 @@ export const authTranslations = {
     // Forgot Password
     resetPassword: 'Reset Password',
     enterEmailReset: 'Enter your email to receive a reset link',
-    email: 'Email',
-    emailPlaceholder: 'john.doe@example.com',
+    emailReset: 'Email',
+    emailPlaceholderReset: 'john.doe@example.com',
     sendResetLink: 'Send Reset Link',
     backToLogin: 'Back to Login',
 
@@ -59,9 +57,9 @@ export const authTranslations = {
     // Login
     welcomeBack: 'مرحباً بعودتك',
     signInToAccount: 'سجل الدخول إلى حسابك',
-    email: 'البريد الإلكتروني',
-    password: 'كلمة المرور',
-    emailPlaceholder: 'john.doe@example.com',
+    emailLogin: 'البريد الإلكتروني',
+    passwordLogin: 'كلمة المرور',
+    emailPlaceholderLogin: 'john.doe@example.com',
     passwordPlaceholder: 'أدخل كلمة المرور',
     signIn: 'تسجيل الدخول',
     createNewAccount: 'إنشاء حساب جديد',
@@ -71,11 +69,11 @@ export const authTranslations = {
     createAccount: 'إنشاء حساب',
     joinJourney: 'انضم إلينا لبدء رحلتك',
     fullName: 'الاسم الكامل',
-    email: 'البريد الإلكتروني',
-    password: 'كلمة المرور',
+    emailSignup: 'البريد الإلكتروني',
+    passwordSignup: 'كلمة المرور',
     confirmPassword: 'تأكيد كلمة المرور',
     fullNamePlaceholder: 'جون دو',
-    emailPlaceholder: 'john.doe@example.com',
+    emailPlaceholderSignup: 'john.doe@example.com',
     createPasswordPlaceholder: 'إنشاء كلمة مرور',
     confirmPasswordPlaceholder: 'تأكيد كلمة المرور',
     createAccountBtn: 'إنشاء حساب',
@@ -85,8 +83,8 @@ export const authTranslations = {
     // Forgot Password
     resetPassword: 'إعادة تعيين كلمة المرور',
     enterEmailReset: 'أدخل بريدك الإلكتروني لتلقي رابط إعادة التعيين',
-    email: 'البريد الإلكتروني',
-    emailPlaceholder: 'john.doe@example.com',
+    emailReset: 'البريد الإلكتروني',
+    emailPlaceholderReset: 'john.doe@example.com',
     sendResetLink: 'إرسال رابط إعادة التعيين',
     backToLogin: 'العودة إلى تسجيل الدخول',
 

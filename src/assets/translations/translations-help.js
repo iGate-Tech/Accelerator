@@ -1,5 +1,3 @@
-import logger from '../../lib/logger.js';
-
 // Help page translations
 export const helpTranslations = {
   en: {
@@ -25,7 +23,7 @@ export const helpTranslations = {
 
     // Getting Started Steps
     createFirstProject: 'Create Your First Task',
-    createProjectDesc: 'Go to the home page and describe your startup idea. Be specific about the problem you\'re solving and your target market.',
+    createProjectDescGettingStarted: 'Go to the home page and describe your startup idea. Be specific about the problem you\'re solving and your target market.',
     followProcess: 'Follow the Accelerator Process',
     followProcessDesc: 'The AI will guide you through 51 structured steps covering problem validation, market analysis, business modeling, and funding strategy.',
     monitorProgress: 'Monitor Progress',
@@ -71,7 +69,7 @@ export const helpTranslations = {
     whatIsAccelerator: "What is the Startup Accelerator?",
     acceleratorDesc: "The Startup Accelerator is an AI-powered tool that guides entrepreneurs through a comprehensive 60-step process to validate and develop their startup ideas. It covers everything from problem analysis to funding strategy.",
     createProject: "How do I create a new project?",
-    createProjectDesc: "Navigate to the home page and enter your startup idea in the text area. Click 'Start' to begin the accelerator process. Your project will be automatically saved and appear in your project list.",
+    createProjectDescHowTo: "Navigate to the home page and enter your startup idea in the text area. Click 'Start' to begin the accelerator process. Your project will be automatically saved and appear in your project list.",
     projectStatuses: "What are the different project statuses?",
     projectStatusesDesc: "Projects can be in several states: Idle (not started), Processing (actively being worked on), Completed (all 60 steps finished), or Paused (temporarily stopped).",
     portfolioFeature: "How does the portfolio feature work?",
@@ -121,8 +119,8 @@ export const helpTranslations = {
       stillNeedHelp: 'Still need help?',
       contactSupportTeam: 'Contact our support team',
       orCheckOutOur: 'or check out our',
-      communityForums: 'Community Forums',
-      githubIssues: 'GitHub Issues',
+      communityForumsSupport: 'Community Forums',
+      githubIssuesSupport: 'GitHub Issues',
 
        // Additional FAQ Questions and Answers
        resourcesTracked: "What resources are tracked?",
@@ -178,22 +176,10 @@ export const helpTranslations = {
       describeIssue: "Describe your issue or question...",
 
       // Quick Support
-      quickSupport: "Quick Support",
-      emailSupport: "Email Support",
-      supportEmail: "support@accelerator.com",
-      liveChat: "Live Chat",
-      liveChatHours: "Available 9 AM - 6 PM EST",
-      documentation: "Documentation",
-      docsDesc: "Comprehensive guides & API docs",
-
-      // Community Resources
-      communityResources: "Community Resources",
-      communityForum: "Community Forum",
-      githubIssues: "GitHub Issues",
-      followTwitter: "Follow on Twitter",
-
-      // Response Time
-      responseTime: "Response Time",
+      quickSupportDetails: "Quick Support",
+      liveChatDetails: "Live Chat",
+      githubIssuesDetails: "GitHub Issues",
+      responseTimeDetails: "Response Time",
       responseTimeDesc: "We typically respond to support requests within 24 hours during business days.",
 
       // Pro Tip
@@ -222,8 +208,8 @@ export const helpTranslations = {
     ctrlK: 'Ctrl+K',
 
     // Getting Started Steps
-    createFirstProject: 'أنشئ مهمتك الأولى',
-    createProjectDesc: 'اذهب إلى الصفحة الرئيسية وصف فكرة عملك. كن محدداً حول المشكلة التي تحلها وسوقك المستهدف.',
+    createFirstProject: 'إنشاء أول مشروع لك',
+    createProjectDescGettingStarted: 'اذهب إلى الصفحة الرئيسية وصف فكرة عملك. كن محدداً حول المشكلة التي تحلها وسوقك المستهدف.',
     followProcess: 'اتبع عملية المسرع',
     followProcessDesc: 'سيرشدك الذكاء الاصطناعي من خلال 51 خطوة منظمة تغطي التحقق من المشكلة وتحليل السوق ونمذجة الأعمال واستراتيجية التمويل.',
     monitorProgress: 'راقب التقدم',
@@ -269,7 +255,7 @@ export const helpTranslations = {
     whatIsAccelerator: "ما هو مسرع بدء الأعمال؟",
     acceleratorDesc: "مسرع بدء الأعمال هو أداة مدعومة بالذكاء الاصطناعي ترشد رواد الأعمال من خلال عملية شاملة من 51 خطوة للتحقق من تطوير أفكار الشركات الناشئة. يغطي كل شيء من تحليل المشكلة إلى استراتيجية التمويل.",
     createProject: "كيف أنشئ مشروعاً جديداً؟",
-    createProjectDesc: "انتقل إلى الصفحة الرئيسية وأدخل فكرة عملك في منطقة النص. انقر 'ابدأ' لبدء عملية المسرع. سيتم حفظ مشروعك تلقائياً وسيظهر في قائمة مشاريعك.",
+    createProjectDescHowTo: "انتقل إلى الصفحة الرئيسية وأدخل فكرة عملك في منطقة النص. انقر 'ابدأ' لبدء عملية المسرع. سيتم حفظ مشروعك تلقائياً وسيظهر في قائمة مشاريعك.",
     projectStatuses: "ما هي حالات المشاريع المختلفة؟",
     projectStatusesDesc: "يمكن أن تكون المشاريع في عدة حالات: خامل (لم يبدأ)، قيد المعالجة (يتم العمل عليه بنشاط)، مكتمل (انتهت جميع الخطوات الـ51)، أو متوقف مؤقتاً (متوقف مؤقتاً).",
     portfolioFeature: "كيف تعمل ميزة المحفظة؟",
@@ -319,8 +305,8 @@ export const helpTranslations = {
       stillNeedHelp: 'لا تزال بحاجة إلى مساعدة؟',
       contactSupportTeam: 'تواصل مع فريق الدعم',
       orCheckOutOur: 'أو تحقق من',
-      communityForums: 'منتديات المجتمع',
-      githubIssues: 'مشاكل GitHub',
+      communityForumsSupport: 'منتديات المجتمع',
+      githubIssuesSupport: 'مشاكل GitHub',
 
       // Additional FAQ Questions and Answers
       resourcesTracked: "ما هي الموارد التي يتم تتبعها؟",
@@ -376,22 +362,10 @@ export const helpTranslations = {
       describeIssue: "صف مشكلتك أو سؤالك...",
 
       // Quick Support
-      quickSupport: "الدعم السريع",
-      emailSupport: "دعم البريد الإلكتروني",
-      supportEmail: "support@accelerator.com",
-      liveChat: "الدردشة الحية",
-      liveChatHours: "متاح من 9 صباحاً - 6 مساءً بتوقيت الشرق الأمريكي",
-      documentation: "التوثيق",
-      docsDesc: "دليل شامل ووثائق API",
-
-      // Community Resources
-      communityResources: "موارد المجتمع",
-      communityForum: "منتدى المجتمع",
-      githubIssues: "مشاكل GitHub",
-      followTwitter: "تابعنا على تويتر",
-
-      // Response Time
-      responseTime: "وقت الرد",
+      quickSupportDetails: "الدعم السريع",
+      liveChatDetails: "الدردشة المباشرة",
+      githubIssuesDetails: "مشاكل GitHub",
+      responseTimeDetails: "وقت الرد",
       responseTimeDesc: "نرد عادةً على طلبات الدعم خلال 24 ساعة خلال أيام العمل.",
 
       // Pro Tip

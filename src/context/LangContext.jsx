@@ -1,5 +1,5 @@
 import { createContext, createSignal, createEffect } from "solid-js";
-import logger from '../lib/logger.js';
+import { logger } from '../lib/core';
 
 
 export const LangContext = createContext();

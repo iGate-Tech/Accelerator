@@ -1,5 +1,3 @@
-import logger from '../../lib/logger.js';
-
 // Profile translations
 export const profileTranslations = {
   en: {
@@ -49,7 +47,7 @@ export const profileTranslations = {
       saveChanges: 'Save Changes',
       defaultName: 'User',
       noBio: 'No bio yet',
-      freePlan: 'Free',
+      freePlanLabel: 'Free',
       website: 'Website',
       inactive: 'inactive',
       na: 'N/A',
@@ -67,7 +65,7 @@ export const profileTranslations = {
       quickLlmRequest: 'Quick LLM request',
       paymentCredits: 'Payment for {amount} credits',
       purchasedCredits: 'Purchased {amount} credits for {price}',
-      freePlan: 'Free',
+      freePlanActivity: 'Free',
     },
    ar: {
      profile: 'الملف الشخصي',
@@ -116,7 +114,7 @@ export const profileTranslations = {
       saveChanges: 'حفظ التغييرات',
       defaultName: 'مستخدم',
       noBio: 'لا توجد سيرة ذاتية بعد',
-      freePlan: 'مجاني',
+      freePlanLabel: 'مجاني',
       website: 'الموقع الإلكتروني',
       inactive: 'غير نشط',
       na: 'غير متاح',
@@ -134,6 +132,6 @@ export const profileTranslations = {
       quickLlmRequest: 'طلب LLM سريع',
       paymentCredits: 'دفع {amount} اعتمادات',
       purchasedCredits: 'تم شراء {amount} اعتمادات بـ {price}',
-      freePlan: 'مجاني',
+      freePlanActivity: 'مجاني',
     }
 };

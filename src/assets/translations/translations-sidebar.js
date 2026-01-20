@@ -1,5 +1,3 @@
-import logger from '../../lib/logger.js';
-
 // Sidebar translations
 export const sidebarTranslations = {
   en: {

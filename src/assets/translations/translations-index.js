@@ -1,4 +1,4 @@
-import logger from '../../lib/logger.js';
+
 
 // Main translations index
 import { navigationTranslations } from './translations-common.js';

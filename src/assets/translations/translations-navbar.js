@@ -1,4 +1,4 @@
-import logger from '../../lib/logger.js';
+
 
 // Navbar and dropdown translations
 export const navbarTranslations = {

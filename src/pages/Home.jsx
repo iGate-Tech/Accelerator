@@ -259,19 +259,16 @@ const TasksContent = () => {
     };
 
     const handleResetProject = async () => {
-      const confirmed = await confirmReset(t().resetAgent, "All current progress and tasks will be cleared.", "This action cannot be undone.");
-      if (confirmed) {
-        const step = getStepHook();
-        if (step) {
-          await step.resetProject();
-        }
-        setCurrentProjectId(null);
-        setPrompt('');
-        setTasksList([]);
-        setStreamingContent("");
-        setStartPressed(false);
-        toastManager.success(t().resetSuccessful);
+      const step = getStepHook();
+      if (step) {
+        await step.resetProject();
       }
+      setCurrentProjectId(null);
+      setPrompt('');
+      setTasksList([]);
+      setStreamingContent("");
+      setStartPressed(false);
+      toastManager.success(t().resetSuccessful);
     };
 
     const handleRegenerate = async () => {
@@ -846,6 +843,16 @@ Return your response as a JSON array of objects, each with "title" and "descript
         window.removeEventListener('projectDeleted', onProjectDeleted);
         window.removeEventListener('resetAgent', onResetAgent);
         window.removeEventListener('openProject', onOpenProject);
+
+        // Automatically reset project state when navigating away from this page
+        if (currentProjectId()) {
+            setCurrentProjectId(null);
+            setPrompt('');
+            setTasksList([]);
+            setStreamingContent("");
+            setStartPressed(false);
+            stepHook = null;
+        }
     });
 
     createEffect(() => {

@@ -396,6 +396,9 @@ export async function migrateSchema() {
       "ALTER TABLE tasks ADD COLUMN IF NOT EXISTS section TEXT",
       "ALTER TABLE tasks ADD COLUMN IF NOT EXISTS step_name TEXT",
       "ALTER TABLE tasks ADD COLUMN IF NOT EXISTS priority TEXT DEFAULT 'medium'",
+
+      // Add current_project_id to profiles table for tracking user's current project
+      "ALTER TABLE profiles ADD COLUMN IF NOT EXISTS current_project_id TEXT",
     ];
 
     for (const migration of migrations) {

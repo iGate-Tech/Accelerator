@@ -478,9 +478,32 @@ export const UserProvider = (props) => {
         // Handle both encrypted (object) and potentially corrupted (string) data
         const parsedUser = typeof savedUserData === 'object' ? savedUserData : JSON.parse(savedUserData);
         if (parsedUser && parsedUser.id) {
+          // Check if user is a fallback user (corrupted data recovery)
+          if (parsedUser._isFallback || parsedUser._fallbackReason === 'data_corruption') {
+            logger.warn('User data was recovered as fallback - requiring re-authentication');
+            setUser(null);
+            setCurrentUser(null);
+            setIsAuthenticated(false);
+            // Clear the corrupted data
+            await secureLocalStorage.removeItem('userData');
+            await secureLocalStorage.removeItem('userToken');
+            return false;
+          }
+
           const userId = parsedUser.id;
           const profileData = await getUserProfile(userId);
-          
+
+          // Check if user exists in database
+          if (!profileData) {
+            logger.warn('User data found but user not in database - clearing corrupted data');
+            await secureLocalStorage.removeItem('userData');
+            await secureLocalStorage.removeItem('userToken');
+            setUser(null);
+            setCurrentUser(null);
+            setIsAuthenticated(false);
+            return false;
+          }
+
           let subscriptionData = { plan: 'free', status: 'active', price: 0, renewalDate: null, maxCredits: 100 };
           let creditBalance = 50;
           try {

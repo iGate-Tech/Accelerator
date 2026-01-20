@@ -54,6 +54,7 @@ const MainLayout = (props) => {
         </Show>
         <div class="flex-1 flex flex-col min-h-0 overflow-hidden">
           <main id="main-content" class="flex-1 w-full min-h-0 overflow-auto">
+            
             {props.children}
           </main>
         </div>

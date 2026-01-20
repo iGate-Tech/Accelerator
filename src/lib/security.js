@@ -327,35 +327,231 @@ export const secureLocalStorage = {
             stored === 'null' ||
             (!stored.startsWith('') && (stored.includes('{') || stored.includes('}')))) {
           logger.warn('Detected corrupted data pattern, clearing:', key, stored.substring(0, 50));
-          localStorage.removeItem(key);
-          return null;
+          // For user data, don't immediately clear - try to recover
+          if (key.includes('userData')) {
+            logger.warn('User data corrupted, attempting recovery...');
+            // Try to parse as regular JSON as fallback
+            try {
+              return JSON.parse(stored);
+            } catch (e) {
+              logger.warn('User data recovery failed, clearing...');
+              localStorage.removeItem(key);
+              return null;
+            }
+          } else {
+            localStorage.removeItem(key);
+            return null;
+          }
         }
 
         // Check if it's valid base64 before attempting decryption
+        let base64Valid = false;
+        let decodedData = null;
+        
         try {
           // Quick base64 validation
           if (stored.length % 4 !== 0 && !stored.endsWith('=')) {
             throw new Error('Invalid base64 length');
           }
-          atob(stored);
+          const testDecode = atob(stored);
+          // Additional validation: check if decoded string is valid UTF-8 and parseable
+          if (testDecode && testDecode.length > 0) {
+            base64Valid = true;
+          }
         } catch (e) {
-          logger.warn('Data is not valid base64, clearing corrupted data:', key, e.message);
-          localStorage.removeItem(key);
-          return null;
+          logger.warn('Data is not valid base64, attempting recovery:', key, e.message);
+        }
+
+        if (base64Valid) {
+          try {
+            decodedData = atob(stored);
+          } catch (decodeError) {
+            logger.warn('Base64 decode failed, attempting recovery:', key, decodeError.message);
+          }
+        }
+
+        // If initial validation failed or decode failed, try recovery strategies
+        if (!base64Valid || !decodedData) {
+          if (key.includes('userData')) {
+            logger.warn('User base64 data corrupted, attempting comprehensive recovery...');
+            
+            // Strategy 1: Try to fix padding issues
+            try {
+              let fixedData = stored;
+              while (fixedData.length % 4 !== 0) {
+                fixedData += '=';
+              }
+              const decoded = atob(fixedData);
+              if (decoded && decoded.length > 0) {
+                decodedData = decoded;
+                logger.info('User data recovered with padding fix');
+              }
+            } catch (paddingError) {
+              logger.debug('Padding fix failed:', paddingError.message);
+            }
+
+            // Strategy 2: Try URL-safe base64 decoding
+            if (!decodedData) {
+              try {
+                const urlSafeData = stored.replace(/-/g, '+').replace(/_/g, '/');
+                let fixedData = urlSafeData;
+                while (fixedData.length % 4 !== 0) {
+                  fixedData += '=';
+                }
+                const decoded = atob(fixedData);
+                if (decoded && decoded.length > 0) {
+                  decodedData = decoded;
+                  logger.info('User data recovered with URL-safe base64');
+                }
+              } catch (urlSafeError) {
+                logger.debug('URL-safe decode failed:', urlSafeError.message);
+              }
+            }
+
+            // Strategy 3: Try raw JSON parse (data might not be base64 encoded)
+            if (!decodedData) {
+              try {
+                // Check if it's already valid JSON
+                const parsed = JSON.parse(stored);
+                if (parsed && typeof parsed === 'object') {
+                  // Create a minimal user object to prevent complete logout
+                  const minimalUser = {
+                    id: parsed.id || parsed.userId,
+                    email: parsed.email,
+                    name: parsed.name,
+                    _recovered: true,
+                    _recoveryTimestamp: Date.now()
+                  };
+                  logger.warn('User data was not base64 encoded, using partial recovery');
+                  return minimalUser;
+                }
+              } catch (jsonError) {
+                logger.debug('JSON parse as-is failed:', jsonError.message);
+              }
+            }
+
+            // Strategy 4: Try to extract user info from partial base64
+            if (!decodedData) {
+              try {
+                // Try decoding with error suppression
+                const safeAtob = (str) => {
+                  try {
+                    return atob(str);
+                  } catch (e) {
+                    return null;
+                  }
+                };
+                const decoded = safeAtob(stored);
+                if (decoded) {
+                  // Try to find user data in the decoded string
+                  const userIdMatch = decoded.match(/"userId"\s*:\s*"?(\d+)"?/);
+                  const emailMatch = decoded.match(/"email"\s*:\s*"([^"]+)"/);
+                  const nameMatch = decoded.match(/"name"\s*:\s*"([^"]+)"/);
+                  
+                  if (userIdMatch || emailMatch || nameMatch) {
+                    const minimalUser = {
+                      id: userIdMatch ? userIdMatch[1] : null,
+                      email: emailMatch ? emailMatch[1] : null,
+                      name: nameMatch ? nameMatch[1] : null,
+                      _partialRecovery: true,
+                      _recoveryTimestamp: Date.now()
+                    };
+                    logger.warn('User data partially recovered from base64');
+                    return minimalUser;
+                  }
+                }
+              } catch (partialError) {
+                logger.debug('Partial recovery failed:', partialError.message);
+              }
+            }
+
+            // If all recovery strategies failed, check for sessionStorage backup
+            if (!decodedData) {
+              try {
+                const backup = sessionStorage.getItem(`${key}_backup`);
+                if (backup) {
+                  const backupData = JSON.parse(backup);
+                  if (backupData && backupData.data && Date.now() - backupData.timestamp < 86400000) {
+                    logger.info('Recovered user data from sessionStorage backup');
+                    return backupData.data;
+                  }
+                }
+              } catch (backupError) {
+                logger.debug('Backup recovery failed:', backupError.message);
+              }
+            }
+
+            // Final fallback: create minimal guest user to prevent app crash
+            if (!decodedData) {
+              logger.warn('All recovery strategies failed, creating fallback user');
+              return {
+                id: 'fallback_' + Date.now(),
+                email: 'fallback@example.com',
+                name: 'Fallback User',
+                _isFallback: true,
+                _fallbackReason: 'data_corruption',
+                _recoveryTimestamp: Date.now()
+              };
+            }
+          } else {
+            localStorage.removeItem(key);
+            return null;
+          }
         }
 
         try {
-          return await dataEncryption.decrypt(stored);
+          return await dataEncryption.decrypt(decodedData || stored);
         } catch (decryptError) {
-          logger.error('Decryption failed, clearing corrupted data:', key, decryptError.message);
-          localStorage.removeItem(key);
-          return null;
+          logger.error('Decryption failed, attempting recovery:', key, decryptError.message);
+          // For user data, don't immediately clear - try recovery
+          if (key.includes('userData')) {
+            logger.warn('User data decryption failed, attempting JSON fallback...');
+            // Try to parse as regular JSON as fallback
+            try {
+              const parsed = JSON.parse(decodedData || stored);
+              // Create backup in sessionStorage
+              try {
+                sessionStorage.setItem(`${key}_backup`, JSON.stringify({
+                  data: parsed,
+                  timestamp: Date.now()
+                }));
+              } catch (backupError) {
+                logger.debug('Could not create backup:', backupError.message);
+              }
+              return parsed;
+            } catch (e) {
+              logger.warn('User data recovery failed, using fallback user');
+              return {
+                id: 'fallback_' + Date.now(),
+                email: 'fallback@example.com',
+                name: 'Fallback User',
+                _isFallback: true,
+                _fallbackReason: 'decryption_failure',
+                _recoveryTimestamp: Date.now()
+              };
+            }
+          } else {
+            localStorage.removeItem(key);
+            return null;
+          }
         }
       } else {
         return JSON.parse(stored);
       }
     } catch (error) {
       logger.error('Failed to securely retrieve item:', error);
+      // For user data, be more careful about clearing
+      if (key.includes('userData')) {
+        logger.warn('Error retrieving user data, attempting recovery...');
+        try {
+          const stored = localStorage.getItem(key);
+          if (stored) {
+            return JSON.parse(stored);
+          }
+        } catch (e) {
+          logger.warn('User data recovery failed:', e.message);
+        }
+      }
       // Clear corrupted data
       localStorage.removeItem(key);
       return null;

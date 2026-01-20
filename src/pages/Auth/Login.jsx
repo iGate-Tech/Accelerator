@@ -137,19 +137,19 @@ const Login = () => {
              {/* Remember Me Checkbox */}
              <div class="flex items-center justify-between">
                <label class="flex items-center gap-2 cursor-pointer">
-                 <input
-                   type="checkbox"
-                   class="checkbox checkbox-primary"
-                   checked={rememberMe()}
-                   onChange={(e) => setRememberMe(e.target.checked)}
-                 />
+                  <input
+                    type="checkbox"
+                    class="checkbox checkbox-primary checkbox-xs"
+                    checked={rememberMe()}
+                    onChange={(e) => setRememberMe(e.target.checked)}
+                  />
                  <span class="text-sm">{t().rememberMe || 'Remember me'}</span>
                </label>
              </div>
 
              <button
                type="submit"
-               class="w-full btnshadow rounded-md border border-base-300 p-[2px]"
+               class="w-full btnshadow rounded-md border border-base-300 p-[1px]"
                disabled={loading()}
              >
                <div class="bg-base-100 rounded-md w-full h-8 flex items-center justify-center">
@@ -162,9 +162,9 @@ const Login = () => {
 
           <div class="divider">OR</div>
 
-           <button class="btn btn-outline w-full" onClick={() => navigate('/auth/signup')}>
-             {t().createNewAccount}
-           </button>
+            <button class="btn btn-outline w-full text-base-content/50 border-base-content/25 font-normal" onClick={() => navigate('/auth/signup')}>
+              {t().createNewAccount}
+            </button>
 
            <div class="text-center text-sm text-base-content/60">
               <a href="/auth/forgot-password" class="link link-primary">{t().forgotPassword}</a>

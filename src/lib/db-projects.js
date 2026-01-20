@@ -123,9 +123,11 @@ export async function _updateProject({ id, updates }) {
     if (setClauses.length === 0) {
       return { success: true };
     }
-    
+
+    const now = new Date().toISOString();
+    values.push(now);
     values.push(id);
-    
+
     await dbInstance.query(
       `UPDATE projects SET ${setClauses.join(', ')}, last_modified = $${paramIndex} WHERE id = $${paramIndex + 1}`,
       values
@@ -298,7 +300,26 @@ export async function _getProjects({ userId }) {
   }
   try {
     const result = await dbInstance.query('SELECT * FROM projects WHERE user_id = $1 AND archived = 0 ORDER BY created_at DESC', [userId]);
-    return result.rows;
+    console.log('Database query returned projects:', result.rows?.length || 0);
+    
+    // Ensure we always return an array, even if result.rows is null/undefined
+    const projects = result.rows || [];
+    
+    // Transform database columns to camelCase for frontend consistency
+    return projects.map(row => ({
+      id: row.id,
+      name: row.name,
+      description: row.description,
+      userId: row.user_id,
+      createdAt: row.created_at,
+      lastModified: row.last_modified,
+      currentStep: row.current_step,
+      stepName: row.step_name,
+      currentModel: row.current_model,
+      uiStatus: row.ui_status,
+      uiProgress: row.ui_progress,
+      public: row.public
+    }));
   } catch (err) {
     console.error('Error getting projects:', err);
     return [];

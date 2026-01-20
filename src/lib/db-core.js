@@ -6,13 +6,32 @@ let pgLiteLoading = false;
 let schemaCreated = false;
 
 export async function initDatabase(options = {}) {
-  const { timeout = 3000, force = false } = options;
+  const { timeout = 5000, force = false } = options; // Increased timeout
   
-  if (dbReady && !force) return dbInstance;
-  if (initPromise && !force) return initPromise;
+  if (dbReady && !force) {
+    console.log('Database already ready, returning instance');
+    return dbInstance;
+  }
+  
+  if (initPromise && !force) {
+    console.log('Database initialization already in progress, waiting for it');
+    return initPromise;
+  }
+
+  // Prevent multiple simultaneous initialization attempts
+  if (pgLiteLoading) {
+    console.log('PGLite loading in progress, waiting...');
+    // Wait a bit and check again
+    await new Promise(resolve => setTimeout(resolve, 500));
+    if (dbReady) return dbInstance;
+    if (initPromise) return initPromise;
+  }
 
   initPromise = (async () => {
+    pgLiteLoading = true;
     try {
+      console.log('Starting PGLite database initialization...');
+      
       const { PGlite } = await Promise.race([
         import('@electric-sql/pglite'),
         new Promise((_, reject) => 
@@ -20,19 +39,26 @@ export async function initDatabase(options = {}) {
         )
       ]);
 
+      console.log('PGlite loaded, creating instance...');
       dbInstance = new PGlite({ dataDir: 'idb://accelerator-db-v22' });
       
+      console.log('Waiting for database to be ready...');
       await dbInstance.waitReady;
+      console.log('Database ready, creating schema...');
       
       if (!schemaCreated || force) {
         const { createSchema, migrateSchema } = await import('./db-schema.js');
+        console.log('Creating schema...');
         await createSchema();
+        console.log('Running migrations...');
         await migrateSchema();
         schemaCreated = true;
+        console.log('Schema created and migrations completed');
       }
       
       dbReady = true;
       console.log('PGLite database initialized successfully');
+      pgLiteLoading = false;
 
       // Schedule automatic data retention enforcement for GDPR compliance
       try {
@@ -47,6 +73,7 @@ export async function initDatabase(options = {}) {
     } catch (error) {
       console.warn('Database init failed (non-blocking):', error.message);
       dbReady = false;
+      pgLiteLoading = false;
       return null;
     }
   })();

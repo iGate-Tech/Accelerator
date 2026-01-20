@@ -122,6 +122,36 @@ export const getUserById = async (id) => {
   return await _getUserById({ id });
 };
 
+// Utility function to validate user for database operations
+export const validateUserForDbOperation = async () => {
+  const user = await getCurrentUser();
+
+  if (!user) {
+    throw new Error('User not authenticated');
+  }
+
+  // Check if user is a fallback user (corrupted data recovery)
+  if (user._isFallback || user._fallbackReason === 'data_corruption') {
+    logger.warn('Fallback user detected - cannot perform database operations');
+    throw new Error('Session expired due to data corruption. Please log in again.');
+  }
+
+  // Validate user ID format
+  if (!user.id || user.id.startsWith('fallback_')) {
+    logger.warn('Invalid user ID detected:', user.id);
+    throw new Error('Session invalid. Please log in again.');
+  }
+
+  // Verify user exists in database
+  const dbUser = await getUserById(user.id);
+  if (!dbUser) {
+    logger.warn('User not found in database:', user.id);
+    throw new Error('User account not found. Please log in again.');
+  }
+
+  return user;
+};
+
 export const getUserByEmail = async (email) => {
   const { _getUserByEmail } = await import('./db-users.js');
   return await _getUserByEmail({ email });
@@ -167,8 +197,7 @@ export const updateUserPassword = async (userId, newPasswordHash) => {
 
 export const addProject = async (project) => {
   try {
-    const user = await getCurrentUser();
-    if (!user) throw new Error('User not authenticated');
+    const user = await validateUserForDbOperation();
 
     project.public = 0; // Ensure private by default
 
@@ -205,7 +234,7 @@ export const deleteProject = async (id) => {
 };
 
 export const deleteAllProjects = async () => {
-  const user = await getCurrentUser();
+  const user = await validateUserForDbOperation();
   const { _deleteAllProjects } = await import('./db-projects.js');
   return await _deleteAllProjects({ userId: user.id });
 };
@@ -271,7 +300,7 @@ export const initDb = async () => {
 
 // Placeholder functions for now (to be implemented in other modules)
 export const clearAllTasks = async () => {
-  const user = await getCurrentUser();
+  const user = await validateUserForDbOperation();
   await dbInstance.query('DELETE FROM tasks WHERE user_id = $1', [user.id]);
 };
 
@@ -316,8 +345,12 @@ export const deleteGroup = async (id) => {
 
 export const exportAllProjects = async (userId = null) => {
   if (!userId) {
-    const user = await getCurrentUser();
-    userId = user?.id;
+    try {
+      const user = await validateUserForDbOperation();
+      userId = user.id;
+    } catch (error) {
+      return null;
+    }
   }
   if (!userId) return null;
   const { _exportAllProjects } = await import('./db-groups.js');
@@ -326,8 +359,12 @@ export const exportAllProjects = async (userId = null) => {
 
 export const exportAllData = async (userId = null) => {
   if (!userId) {
-    const user = await getCurrentUser();
-    userId = user?.id;
+    try {
+      const user = await validateUserForDbOperation();
+      userId = user.id;
+    } catch (error) {
+      return null;
+    }
   }
   if (!userId) return null;
   try {

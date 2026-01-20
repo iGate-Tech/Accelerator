@@ -9,7 +9,7 @@ import {
     createMemo
 } from "solid-js";
 import { logger } from "../lib/core";
-import { errorHandler, handleAsyncError, Skeleton, TaskSkeleton, LoadingOverlay, ProgressLoader, AgentInterface } from "../components";
+import { errorHandler, handleAsyncError, Skeleton, TaskSkeleton, LoadingOverlay, ProgressLoader, AgentInterface, confirmReset } from "../components";
 import {
     steps,
     stepNames

@@ -39,48 +39,32 @@ export async function initDatabase(options = {}) {
         )
       ]);
 
-      console.log('PGlite loaded, creating instance...');
-      dbInstance = new PGlite({ dataDir: 'idb://accelerator-db-v22' });
-      
-       console.log('Waiting for database to be ready...');
-      let waitAttempts = 0;
-      const maxWaitAttempts = 5;
+      console.log('PGlite loaded, clearing any existing IndexedDB data...');
+      if (window.indexedDB) {
+        try {
+          await new Promise((resolve, reject) => {
+            const deleteRequest = indexedDB.deleteDatabase('accelerator-db-v22');
+            deleteRequest.onsuccess = () => resolve();
+            deleteRequest.onerror = () => reject(deleteRequest.error);
+          });
+          console.log('Cleared existing IndexedDB database');
+        } catch (e) {
+          console.warn('Failed to clear IndexedDB, proceeding anyway:', e);
+        }
+      }
 
-      while (waitAttempts < maxWaitAttempts) {
-         try {
-           await dbInstance.waitReady;
-           break; // Success, exit the loop
-         } catch (waitError) {
-           waitAttempts++;
-           if (waitAttempts >= maxWaitAttempts) {
-             console.warn('Database waitReady failed after', maxWaitAttempts, 'attempts, forcing reset:', waitError.message);
-             // Force a complete reset by creating a new instance with a different dataDir
-             dbInstance = new PGlite({ dataDir: 'idb://accelerator-db-reset-' + Date.now() });
-             try {
-               await dbInstance.waitReady;
-               console.log('Database reset successful');
-             } catch (resetError) {
-               console.warn('Database reset also failed, using memory-only mode:', resetError.message);
-               // As last resort, use memory-only database
-               dbInstance = new PGlite();
-               await dbInstance.waitReady;
-               console.log('Database fallback to memory-only mode successful');
-             }
-             break;
-           } else {
-             console.warn('Database waitReady failed (attempt', waitAttempts, '), retrying in', 1000 * waitAttempts, 'ms:', waitError.message);
-             await new Promise(resolve => setTimeout(resolve, 1000 * waitAttempts)); // Longer exponential backoff
-           }
-         }
-       }
-      console.log('Database ready, creating schema...');
+      console.log('Creating PGLite instance...');
+      dbInstance = new PGlite({ dataDir: 'idb://accelerator-db-v22' });
+
+      console.log('Database instance created, initializing schema...');
       
       if (!schemaCreated || force) {
         const { createSchema, migrateSchema } = await import('./schema.js');
         console.log('Creating schema...');
-        await createSchema();
+        const schemaSuccess = await createSchema();
         console.log('Running migrations...');
-        await migrateSchema();
+        const migrateSuccess = await migrateSchema();
+
         schemaCreated = true;
         console.log('Schema created and migrations completed');
       }

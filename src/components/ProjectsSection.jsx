@@ -1,4 +1,5 @@
 import { useContext, createSignal, createEffect, createMemo, onMount, onCleanup, For, Show } from "solid-js";
+import { useNavigate } from "@solidjs/router";
 import { LangContext } from "../context/LangContext";
 import { useUser } from "../context/UserContext";
 import { useLanguage } from "../hooks/useLanguage";
@@ -25,6 +26,7 @@ const ProjectsSection = (props) => {
     const { user } = useUser();
     const activityLogger = useActivityLogger();
     const { t, setLang } = useLanguage();
+    const navigate = useNavigate();
     const [projectsOpen, setProjectsOpen] = createSignal(true);
     const [editingProjectId, setEditingProjectId] = createSignal(null);
     const navbarT = t;
@@ -317,9 +319,10 @@ const ProjectsSection = (props) => {
                                  <For each={filteredProjects()} key={(project) => project.id}>{(project) => (
                                     <li>
                                         <div class={`flex justify-between ltr:justify-between rtl:justify-between items-center px-4 py-2 rounded-lg transition-colors cursor-pointer group ${project.id === projectsStore.currentProjectId ? '' : ''}`}>
-                                            <span onclick={() => {
+                                             <span onclick={() => {
                                                 logger.debug('Opening project:', project.id);
                                                 setPendingProjectId(project.id);
+                                                navigate('/');
                                             }} class="flex items-center w-full gap-2">
                                                 <div class="rounded flex-shrink-0">
                                                     <i data-lucide="folder" class={`w-4 h-4 ${project.id === projectsStore.currentProjectId ? 'text-primary' : 'text-base-content/60'}`}></i>

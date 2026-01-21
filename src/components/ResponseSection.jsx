@@ -7,8 +7,8 @@ const ResponseSection = (props) => {
   
   createEffect(() => {
     console.log('[ResponseSection] startPressed:', props.startPressed?.());
-    console.log('[ResponseSection] tasksList:', tasksListValue());
     console.log('[ResponseSection] tasksList.length:', tasksListValue().length);
+    console.log('[ResponseSection] First task content length:', tasksListValue()[0]?.content?.length || 0);
   });
 
   return (
@@ -24,6 +24,7 @@ const ResponseSection = (props) => {
             {tasksListValue().map((task) => (
               <UnifiedTaskCard
                 task={task}
+                taskContent={task.content}
                 editingTaskId={props.editingTaskId}
                 editContent={props.editContent}
                 setEditingTaskId={props.setEditingTaskId}

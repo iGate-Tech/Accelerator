@@ -138,7 +138,16 @@ logger.debug('server.js: Static file directories configured:', path.join(__dirna
 
 // Health check and root route
 app.get('/', (req, res) => {
-    logger.debug('server.js: Root route requested, serving SPA index.html');
+    const fs = require('fs');
+    const distPath = path.join(__dirname, 'dist');
+    logger.debug('server.js: Root route requested');
+    logger.debug('server.js: __dirname:', __dirname);
+    logger.debug('server.js: distPath:', distPath);
+    logger.debug('server.js: dist exists:', fs.existsSync(distPath));
+    if (fs.existsSync(distPath)) {
+        logger.debug('server.js: dist contents:', fs.readdirSync(distPath));
+    }
+    logger.debug('server.js: index.html exists:', fs.existsSync(path.join(distPath, 'index.html')));
     res.sendFile(path.join(__dirname, 'dist', 'index.html'));
 });
 

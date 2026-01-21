@@ -81,7 +81,8 @@ logger.trace('server.js: Express app created');
 // Force HTTPS redirect in production
 app.use((req, res, next) => {
   logger.trace('server.js: HTTPS redirect middleware - method:', req.method, 'url:', req.url, 'proto:', req.header('x-forwarded-proto'), 'env:', process.env.NODE_ENV);
-  if (req.header('x-forwarded-proto') !== 'https' && process.env.NODE_ENV === 'production') {
+  const proto = req.header('x-forwarded-proto') || (req.socket.encrypted ? 'https' : 'http');
+  if (proto !== 'https' && process.env.NODE_ENV === 'production') {
     logger.info('server.js: Redirecting to HTTPS:', `https://${req.header('host')}${req.url}`);
     res.redirect(301, `https://${req.header('host')}${req.url}`);
   } else {

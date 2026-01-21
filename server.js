@@ -78,15 +78,16 @@ logger.trace('server.js: Server initialization starting, port:', port);
 const app = express();
 logger.trace('server.js: Express app created');
 
-// Force HTTPS redirect in production
+// Force HTTPS redirect in production - only if not behind Traefik/reverse proxy
 app.use((req, res, next) => {
   logger.trace('server.js: HTTPS redirect middleware - method:', req.method, 'url:', req.url, 'proto:', req.header('x-forwarded-proto'), 'env:', process.env.NODE_ENV);
-  const proto = req.header('x-forwarded-proto') || (req.socket.encrypted ? 'https' : 'http');
-  if (proto !== 'https' && process.env.NODE_ENV === 'production') {
+  // Skip redirect if x-forwarded-proto is set (Traefik sets this)
+  const proto = req.header('x-forwarded-proto');
+  if (proto && proto !== 'https' && process.env.NODE_ENV === 'production') {
     logger.info('server.js: Redirecting to HTTPS:', `https://${req.header('host')}${req.url}`);
     res.redirect(301, `https://${req.header('host')}${req.url}`);
   } else {
-    logger.trace('server.js: No redirect needed');
+    logger.trace('server.js: No redirect needed (Traefik handles SSL or already HTTPS)');
     next();
   }
 });

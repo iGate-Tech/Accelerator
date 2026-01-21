@@ -6,6 +6,8 @@ import {
     createSignal,
     createEffect
 } from "solid-js";
+import logo from "../assets/images/iGate-tech-logo.svg";
+import favicon from "../assets/images/favicon.svg";
 import {LangContext} from "../context/LangContext";
 import {useUser} from "../context/UserContext";
 import {useLanguage} from "../hooks/useLanguage";
@@ -104,7 +106,7 @@ const Sidebar = () => {
                         }
                         class="cursor-pointer flex items-center rtl:justify-center">
                         <img src={
-                                isCollapsed() ? "/src/assets/images/favicon.svg" : "/src/assets/images/iGate-tech-logo.svg"
+                                isCollapsed() ? favicon : logo
                             }
                             alt="Logo"
                             classList={

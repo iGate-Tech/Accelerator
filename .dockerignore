@@ -27,3 +27,4 @@ Dockerfile*
 .github
 .eslintrc*
 .prettier*
+!package*.json

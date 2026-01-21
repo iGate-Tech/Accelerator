@@ -23,13 +23,12 @@ const Footer = ({isCollapsed, notifications}) => {
                                 {/* Avatar */}
                                 <div class="avatar relative flex-shrink-0">
                                     <div class="w-8 h-8 rounded-full bg-base-300 dark:bg-gray-100/40">
-                                        {user()?.avatar ? (
-                                            <img src={user()?.avatar} alt="User avatar" class="w-full h-full object-cover rounded-full"/>
-                                        ) : (
-                                            <div class="w-full h-full flex items-center justify-center">
-                                                <i data-lucide="user" classList={{'w-5 h-5': !isCollapsed(), 'w-6 h-6': isCollapsed()}} class="text-base-content/60"></i>
-                                            </div>
-                                        )}
+                                        {user()?.avatar && !user()?.avatar.startsWith('/default') ? (
+                                            <img src={user()?.avatar} alt="User avatar" class="w-full h-full object-cover rounded-full" onError={(e) => { e.target.style.display = 'none'; e.target.nextElementSibling?.style?.removeProperty('display'); }}/>
+                                        ) : null}
+                                        <div class={`w-full h-full flex items-center justify-center ${user()?.avatar && !user()?.avatar.startsWith('/default') ? 'hidden' : ''}`}>
+                                            <i data-lucide="user" classList={{'w-5 h-5': !isCollapsed(), 'w-6 h-6': isCollapsed()}} class="text-base-content/60"></i>
+                                        </div>
                                     </div>
                                     {/* Online indicator */}
                                     <div class="absolute bottom-0 end-0 w-2 h-2 bg-success border border-base-100 rounded-full"></div>

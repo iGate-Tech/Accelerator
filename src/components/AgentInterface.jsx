@@ -81,7 +81,8 @@ const AgentInterface = (props) => {
     });
 
     const isLoading = () => {
-        if (!props.tasksList || !props.agentStore) return true;
+        if (!props.tasksList) return false;
+        if (!props.agentStore) return false;
         return false;
     };
 
@@ -184,14 +185,14 @@ const AgentInterface = (props) => {
                             id="greetingDiv"
                             class="text-center fade-in">
                             <h1 class="text-lg sm:text-2xl md:text-3xl font-sans font-light mb-2 sm:mb-2">
-                                <span class="text-base-content">
-                                    {
-                                    t().greetingPrefix
-                                }</span>
-                                <span class="" style="color:#00a7e0">
-                                    {
-                                    userName()
-                                }</span>
+                                 <span class="text-base-content">
+                                     {
+                                     t().greetingPrefix
+                                 }</span>
+                                 <span class="ms-1" style="color:#00a7e0">
+                                     {
+                                     userName()
+                                 }</span>
                                 <span class="text-base-content">
                                     {
                                     t().greetingSuffix

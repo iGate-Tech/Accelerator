@@ -581,16 +581,20 @@ export const UserProvider = (props) => {
              logger.debug('Error fetching subscription or credits in checkAuth:', error.message);
            }
 
-           const userData = {
-             ...parsedUser,
-             avatar: profileData?.avatar || parsedUser.avatar,
-             profile: {
-               ...parsedUser.profile,
-               ...profileData
-             },
-             subscription: subscriptionData,
-             credits: { balance: creditBalance || 50, transactions: [] }
-           };
+            const userData = {
+              ...parsedUser,
+              avatar: (profileData?.avatar && !profileData?.avatar.startsWith('/default')) 
+                ? profileData?.avatar 
+                : (parsedUser.avatar && !parsedUser.avatar.startsWith('/default'))
+                  ? parsedUser.avatar
+                  : DEFAULT_AVATAR,
+              profile: {
+                ...parsedUser.profile,
+                ...profileData
+              },
+              subscription: subscriptionData,
+              credits: { balance: creditBalance || 50, transactions: [] }
+            };
 
            setUser(userData);
            await setCurrentUser(userData);

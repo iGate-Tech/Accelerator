@@ -10,11 +10,9 @@ WORKDIR /app
 # Install git (needed for some npm packages)
 RUN apk add --no-cache git
 
-# Copy package files
+# Copy package files and install dependencies
 COPY package*.json ./
-
-# Install dependencies
-RUN npm install --omit=dev
+RUN npm ci
 
 # ============================================
 # DEVELOPMENT STAGE

@@ -8,7 +8,7 @@ services:
       target: ${BUILD_TARGET:-production}
     container_name: accelerator-${ENVIRONMENT:-prod}
     ports:
-      - "${APP_PORT:-3000}:3000"
+      - "${APP_PORT:-3001}:3000"
     environment:
       - NODE_ENV=${NODE_ENV:-production}
       - PORT=3000

@@ -6,13 +6,14 @@ services:
       context: ..
       dockerfile: docker/Dockerfile
       target: ${BUILD_TARGET:-production}
-    container_name: accelerator-${ENVIRONMENT:-prod}
+    container_name: accelerator-${CONTAINER_NAME_SUFFIX:-prod}
     ports:
-      - "4000:3000"
+      - "${APP_PORT:-3000}:3000"
     environment:
       - NODE_ENV=${NODE_ENV:-production}
       - PORT=3000
       - ENVIRONMENT=${ENVIRONMENT:-prod}
+      - CONTAINER_NAME_SUFFIX=${CONTAINER_NAME_SUFFIX:-prod}
       - OPENROUTER_API_KEY=${OPENROUTER_API_KEY}
       - SSL_KEY_PATH=${SSL_KEY_PATH:-/app/ssl/key.pem}
       - SSL_CERT_PATH=${SSL_CERT_PATH:-/app/ssl/cert.pem}

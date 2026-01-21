@@ -3,12 +3,21 @@ import { toastManager } from '../ui/feedback';
 import { PGlite } from '@electric-sql/pglite';
 import { v4 as uuidv4 } from 'uuid';
 import { logger } from '../core';
-import { dbInstance, dbReady } from './core';
+import { dbInstance, dbReady, ensureDatabaseReady } from './core';
 
-// Local user management for PGLite only
 const getCurrentUser = async () => {
   return { id: 1 };
 };
+
+async function _query(sql, params = []) {
+  await ensureDatabaseReady();
+  return dbInstance.query(sql, params);
+}
+
+async function _exec(sql) {
+  await ensureDatabaseReady();
+  return dbInstance.exec(sql);
+}
 
 // Initialize PGLite database
 async function initDatabaseOld() {
@@ -78,16 +87,16 @@ async function initDatabaseOld() {
 async function createSchemaOld() {
   console.log('Creating database schema...');
   // Create db_version table first
-  await dbInstance.exec(`
+  await _exec(`
     CREATE TABLE IF NOT EXISTS db_version (
       version INTEGER PRIMARY KEY
     );
   `);
   // Create tables one by one
   console.log('Creating users table...');
-  await dbInstance.exec("CREATE TABLE IF NOT EXISTS users (id TEXT PRIMARY KEY, email TEXT UNIQUE NOT NULL, password_hash TEXT, avatar TEXT, bio TEXT, preferences TEXT, synced_at TEXT, last_modified TEXT, sync_status TEXT DEFAULT 'local', deleted_at TEXT, version INTEGER DEFAULT 1)");
+  await _exec("CREATE TABLE IF NOT EXISTS users (id TEXT PRIMARY KEY, email TEXT UNIQUE NOT NULL, password_hash TEXT, avatar TEXT, bio TEXT, preferences TEXT, synced_at TEXT, last_modified TEXT, sync_status TEXT DEFAULT 'local', deleted_at TEXT, version INTEGER DEFAULT 1)");
   console.log('Users table created');
-  await dbInstance.exec(`
+  await _exec(`
 -- Projects table
 CREATE TABLE IF NOT EXISTS projects (
   id TEXT PRIMARY KEY,
@@ -378,7 +387,7 @@ export async function close() {
 export async function getEntities({ table, selectFields = '*', whereClause = '', orderBy = '', params = [] }) {
   try {
     const query = `SELECT ${selectFields} FROM ${table} ${whereClause} ${orderBy}`;
-    const res = await dbInstance.query(query, params);
+    const res = await _query(query, params);
     return res;
   } catch (err) {
     console.error(`DB error in getEntities for ${table}:`, err);
@@ -418,7 +427,7 @@ export async function updateEntity({ table, idField, id, updates, options = {} }
   const query = `UPDATE ${table} SET ${fields.join(', ')} WHERE ${Array.isArray(idField) ? idField.map((f,i)=>`${f}=$${paramIndex+i}`).join(' AND ') : `${idField}=$${paramIndex}`}`;
 
   try {
-    const res = await dbInstance.query(query, values);
+    const res = await _query(query, values);
     return { success: true, data: res.rows[0] };
   } catch (err) {
     console.error(`DB error in updateEntity for ${table}:`, err);
@@ -430,16 +439,16 @@ export async function updateEntity({ table, idField, id, updates, options = {} }
 export async function createSchema() {
   console.log('Creating database schema...');
   // Create db_version table first
-  await dbInstance.exec(`
+  await _exec(`
     CREATE TABLE IF NOT EXISTS db_version (
       version INTEGER PRIMARY KEY
     );
   `);
   // Create tables one by one
   console.log('Creating users table...');
-  await dbInstance.exec("CREATE TABLE IF NOT EXISTS users (id TEXT PRIMARY KEY, email TEXT UNIQUE NOT NULL, password_hash TEXT, avatar TEXT, bio TEXT, preferences TEXT, synced_at TEXT, last_modified TEXT, sync_status TEXT DEFAULT 'local', deleted_at TEXT, version INTEGER DEFAULT 1)");
+  await _exec("CREATE TABLE IF NOT EXISTS users (id TEXT PRIMARY KEY, email TEXT UNIQUE NOT NULL, password_hash TEXT, avatar TEXT, bio TEXT, preferences TEXT, synced_at TEXT, last_modified TEXT, sync_status TEXT DEFAULT 'local', deleted_at TEXT, version INTEGER DEFAULT 1)");
   console.log('Users table created');
-  await dbInstance.exec(`
+  await _exec(`
 -- Projects table
 CREATE TABLE IF NOT EXISTS projects (
   id TEXT PRIMARY KEY,
@@ -780,7 +789,7 @@ export async function createUser({ email, passwordHash, profile = {}, userId = n
       1
     ];
     console.debug('Executing createUser query:', query, 'params:', params);
-    const res = await dbInstance.query(query, params);
+    const res = await _query(query, params);
     return { id, email };
   } catch (err) {
     console.error('Error creating user:', err);
@@ -790,7 +799,7 @@ export async function createUser({ email, passwordHash, profile = {}, userId = n
 
 export async function _createUserProfile({ userId, profileData = {} }) {
   try {
-      const res = await dbInstance.query(
+      const res = await _query(
         `INSERT INTO profiles
         (user_id, avatar, bio, preferences, synced_at, last_modified, sync_status, deleted_at, version)
         VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9)
@@ -819,7 +828,7 @@ export async function _createUserProfile({ userId, profileData = {} }) {
 
 export async function _getUserProfile({ userId }) {
   try {
-    const res = await dbInstance.query('SELECT * FROM profiles WHERE user_id = $1', [userId]);
+    const res = await _query('SELECT * FROM profiles WHERE user_id = $1', [userId]);
     return res.rows[0] || null;
   } catch (err) {
     console.error('Error getting user profile:', err);
@@ -854,7 +863,7 @@ export async function _createProject({ project, userId }) {
          project.ui_status || 'idle'
        ];
       console.log('Insert values:', values);
-        const res = await dbInstance.query(`
+        const res = await _query(`
           INSERT INTO projects (id, name, description, user_id, created_at, last_modified, synced_at, sync_status, deleted_at, version, public, current_model, total_steps, completed_steps, consumed_credits, total_credits, ui_status)
           VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17)
           RETURNING *
@@ -868,7 +877,7 @@ export async function _createProject({ project, userId }) {
 
 export async function _getProjectById({ id }) {
   try {
-    const result = await dbInstance.query('SELECT * FROM projects WHERE id = $1', [id]);
+    const result = await _query('SELECT * FROM projects WHERE id = $1', [id]);
     return result.rows[0] || null;
   } catch (err) {
     console.error('Error getting project by id:', err);
@@ -882,7 +891,7 @@ export async function _updateProject({ id, updates }) {
     const values = Object.values(updates);
     const setClause = fields.map((field, index) => `${field} = $${index + 2}`).join(', ');
     values.push(id);
-    await dbInstance.query(`UPDATE projects SET ${setClause}, last_modified = CURRENT_TIMESTAMP WHERE id = $${values.length}`, values);
+    await _query(`UPDATE projects SET ${setClause}, last_modified = CURRENT_TIMESTAMP WHERE id = $${values.length}`, values);
     return { success: true };
   } catch (err) {
     console.error('Error updating project:', err);
@@ -892,7 +901,7 @@ export async function _updateProject({ id, updates }) {
 
 export async function _deleteProject({ id }) {
   try {
-    await dbInstance.query('DELETE FROM projects WHERE id = $1', [id]);
+    await _query('DELETE FROM projects WHERE id = $1', [id]);
     return { success: true };
   } catch (err) {
     console.error('Error deleting project:', err);
@@ -902,7 +911,7 @@ export async function _deleteProject({ id }) {
 
 export async function deleteAllProjects({ userId }) {
   try {
-    await dbInstance.query('DELETE FROM projects WHERE user_id = $1', [userId]);
+    await _query('DELETE FROM projects WHERE user_id = $1', [userId]);
     return { success: true };
   } catch (err) {
     console.error('Error deleting all projects:', err);
@@ -912,7 +921,7 @@ export async function deleteAllProjects({ userId }) {
 
 export async function toggleProjectPublic({ id }) {
   try {
-    await dbInstance.query('UPDATE projects SET public = NOT public WHERE id = $1', [id]);
+    await _query('UPDATE projects SET public = NOT public WHERE id = $1', [id]);
     return { success: true };
   } catch (err) {
     console.error('Error toggling project public:', err);
@@ -922,7 +931,7 @@ export async function toggleProjectPublic({ id }) {
 
 export async function getTasks({ projectId }) {
   try {
-    const result = await dbInstance.query('SELECT * FROM tasks WHERE project_id = $1 ORDER BY created_at ASC', [projectId]);
+    const result = await _query('SELECT * FROM tasks WHERE project_id = $1 ORDER BY created_at ASC', [projectId]);
     return result.rows;
   } catch (err) {
     console.error('Error getting tasks:', err);
@@ -933,7 +942,7 @@ export async function getTasks({ projectId }) {
 export async function _addTask({ task, userId }) {
   try {
     const id = uuidv4();
-    await dbInstance.query(`
+    await _query(`
       INSERT INTO tasks (id, project_id, user_id, title, content, prompt, llm_response, model, section, step_name, created_at, last_modified, synced_at, sync_status, deleted_at, version)
       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)
     `, [
@@ -965,13 +974,13 @@ export async function getGroups({ userId = null }) {
   const whereClause = userId ? 'WHERE user_id = $1' : '';
   const params = userId ? [userId] : [];
   const query = `SELECT * FROM groups ${whereClause} ORDER BY created_at DESC`;
-  const res = await dbInstance.query(query, params);
+  const res = await _query(query, params);
   return res.rows;
 }
 
 export async function getGroupById({ id }) {
   try {
-    const res = await dbInstance.query('SELECT * FROM groups WHERE id = $1', [id]);
+    const res = await _query('SELECT * FROM groups WHERE id = $1', [id]);
     return res.rows[0];
   } catch (err) {
     console.debug('Error loading group:', err);
@@ -982,7 +991,7 @@ export async function getGroupById({ id }) {
 export async function addGroup({ group, userId }) {
   try {
       const id = uuidv4();
-      const res = await dbInstance.query(
+      const res = await _query(
         'INSERT INTO groups (id, user_id, name, description, color, created_at, synced_at, last_modified, sync_status, deleted_at, version) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11) RETURNING id',
         [id, userId, group.name, group.description || '', group.color || '#6366f1', group.createdAt || new Date().toISOString(), new Date().toISOString(), new Date().toISOString(), 'local', null, 1]
       );
@@ -1008,8 +1017,8 @@ export async function updateGroup({ id, group }) {
 
 export async function deleteGroup({ id }) {
   try {
-     await dbInstance.query('DELETE FROM project_groups WHERE group_id = $1', [id]);
-     await dbInstance.query('DELETE FROM groups WHERE id = $1', [id]);
+     await _query('DELETE FROM project_groups WHERE group_id = $1', [id]);
+     await _query('DELETE FROM groups WHERE id = $1', [id]);
     return { success: true };
   } catch (err) {
     console.debug('Error deleting group:', err);
@@ -1019,7 +1028,7 @@ export async function deleteGroup({ id }) {
 
 export async function addProjectToGroup({ projectId, groupId }) {
   try {
-     await dbInstance.query(
+     await _query(
        'INSERT INTO project_groups (project_id, group_id, added_at) VALUES ($1, $2, $3) ON CONFLICT (project_id, group_id) DO NOTHING',
        [projectId, groupId, new Date().toISOString()]
      );
@@ -1032,7 +1041,7 @@ export async function addProjectToGroup({ projectId, groupId }) {
 
 export async function removeProjectFromGroup({ projectId, groupId }) {
   try {
-     await dbInstance.query('DELETE FROM project_groups WHERE project_id = $1 AND group_id = $2', [projectId, groupId]);
+     await _query('DELETE FROM project_groups WHERE project_id = $1 AND group_id = $2', [projectId, groupId]);
     return { success: true };
   } catch (err) {
     console.debug('Error removing project from group:', err);
@@ -1042,7 +1051,7 @@ export async function removeProjectFromGroup({ projectId, groupId }) {
 
 export async function getProjectsInGroup({ groupId }) {
   try {
-     const res = await dbInstance.query(`
+     const res = await _query(`
        SELECT p.*, pg.added_at as addedToGroupAt
        FROM projects p
        JOIN project_groups pg ON p.id = pg.project_id
@@ -1058,7 +1067,7 @@ export async function getProjectsInGroup({ groupId }) {
 
 export async function getUngroupedProjects({ userId = null }) {
   try {
-    const result = await dbInstance.query(`
+    const result = await _query(`
       SELECT p.* FROM projects p
       LEFT JOIN project_groups pg ON p.id = pg.project_id
       WHERE pg.group_id IS NULL AND p.user_id = $1::text
@@ -1072,7 +1081,7 @@ export async function getUngroupedProjects({ userId = null }) {
 
 export async function getProjects({ userId }) {
   try {
-    const result = await dbInstance.query('SELECT * FROM projects WHERE user_id = $1::text ORDER BY created_at DESC', [userId]);
+    const result = await _query('SELECT * FROM projects WHERE user_id = $1::text ORDER BY created_at DESC', [userId]);
     return result.rows;
   } catch (err) {
     console.error('Error getting projects:', err);
@@ -1118,7 +1127,7 @@ export async function getCreditTransactions({ userId }) {
 
 export async function getCreditBalance({ userId }) {
   try {
-    const result = await dbInstance.query(
+    const result = await _query(
       'SELECT COALESCE(SUM(amount), 0) as balance FROM credits WHERE user_id = $1',
       [userId]
     );
@@ -1131,7 +1140,7 @@ export async function getCreditBalance({ userId }) {
 
 export async function getUserCreditBalance({ userId }) {
   try {
-    const result = await dbInstance.query(
+    const result = await _query(
       'SELECT COALESCE(SUM(amount), 0) as balance FROM credits WHERE user_id = $1',
       [userId]
     );
@@ -1145,11 +1154,11 @@ export async function getUserCreditBalance({ userId }) {
 export async function addCreditTransaction({ userId, type, amount, description }) {
   try {
      amount = parseFloat(amount);
-     const balanceResult = await dbInstance.query('SELECT SUM(amount) as balance FROM credits WHERE user_id = $1', [userId]);
+     const balanceResult = await _query('SELECT SUM(amount) as balance FROM credits WHERE user_id = $1', [userId]);
      const currentBalance = parseFloat(balanceResult.rows[0]?.balance || 0);
      const balance_after = currentBalance + amount;
       const id = uuidv4();
-      await dbInstance.query(
+      await _query(
         'INSERT INTO credits (id, user_id, type, amount, description, balance_after, created_at, synced_at, last_modified, sync_status, deleted_at, version) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)',
         [id, userId, type, amount, description, balance_after, new Date().toISOString(), new Date().toISOString(), new Date().toISOString(), 'local', null, 1]
       );
@@ -1173,7 +1182,7 @@ export async function consumeCredits({ userId, amount, description }) {
 export async function logActivity({ userId, actionType, entityType, entityId, description, metadata = {} }) {
   try {
     const id = uuidv4();
-      const res = await dbInstance.query(
+      const res = await _query(
         'INSERT INTO user_activities (id, user_id, action_type, entity_type, entity_id, description, metadata, ip_address, user_agent, created_at, synced_at, last_modified, sync_status, deleted_at, version) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15) RETURNING *',
         [id, userId, actionType, entityType, entityId, description, JSON.stringify(metadata), null, null, new Date().toISOString(), new Date().toISOString(), new Date().toISOString(), 'local', null, 1]
       );
@@ -1186,7 +1195,7 @@ export async function logActivity({ userId, actionType, entityType, entityId, de
 
 export async function getUserActivities({ userId, limit = 50, offset = 0 }) {
   try {
-      const res = await dbInstance.query(
+      const res = await _query(
         'SELECT * FROM user_activities WHERE user_id = $1 ORDER BY created_at DESC LIMIT $2 OFFSET $3',
         [userId, limit, offset]
       );
@@ -1200,7 +1209,7 @@ export async function getUserActivities({ userId, limit = 50, offset = 0 }) {
 export async function addBillingRecord({ userId, type, amount, description, dueDate = null }) {
   try {
     const id = uuidv4();
-      const res = await dbInstance.query(
+      const res = await _query(
         'INSERT INTO billing (id, user_id, type, amount, status, description, due_date, created_at, synced_at, last_modified, sync_status, deleted_at, version) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13) RETURNING id',
           [id, userId, type, amount, 'pending', description, dueDate, new Date().toISOString(), new Date().toISOString(), new Date().toISOString(), 'local', null, 1]
       );
@@ -1213,7 +1222,7 @@ export async function addBillingRecord({ userId, type, amount, description, dueD
 
 export async function getUserBilling({ userId }) {
   try {
-     const res = await dbInstance.query(
+     const res = await _query(
        'SELECT * FROM billing WHERE user_id = $1 ORDER BY last_modified DESC',
        [userId]
      );
@@ -1226,7 +1235,7 @@ export async function getUserBilling({ userId }) {
 
 export async function updateBillingStatus({ id, status }) {
   try {
-     await dbInstance.query('UPDATE billing SET status = $1, last_modified = $2 WHERE id = $3', [status, new Date().toISOString(), id]);
+     await _query('UPDATE billing SET status = $1, last_modified = $2 WHERE id = $3', [status, new Date().toISOString(), id]);
     return { success: true };
   } catch (err) {
     console.debug('Error updating billing status:', err);
@@ -1237,7 +1246,7 @@ export async function updateBillingStatus({ id, status }) {
 export async function createNotification({ userId, type, title, message }) {
   try {
     const id = uuidv4();
-    await dbInstance.query(
+    await _query(
       `INSERT INTO notifications (id,user_id,type,title,message,read,created_at,synced_at,last_modified,sync_status,deleted_at,version)
       VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)`,
       [id, userId, type, title, message, 0, new Date().toISOString(), new Date().toISOString(), new Date().toISOString(), 'local', null, 1]
@@ -1250,12 +1259,12 @@ export async function createNotification({ userId, type, title, message }) {
 }
 
 export async function getUserNotifications({ userId }) {
-  const res = await dbInstance.query('SELECT * FROM notifications WHERE user_id = $1 ORDER BY created_at DESC', [userId]);
+  const res = await _query('SELECT * FROM notifications WHERE user_id = $1 ORDER BY created_at DESC', [userId]);
   return res.rows;
 }
 
 export async function markNotificationRead({ notificationId, userId }) {
-  await dbInstance.query('UPDATE notifications SET read = 1 WHERE id = $1 AND user_id = $2', [notificationId, userId]);
+  await _query('UPDATE notifications SET read = 1 WHERE id = $1 AND user_id = $2', [notificationId, userId]);
 }
 
 export async function updateUserSubscription({ userId, subscriptionId, updates }) {
@@ -1302,21 +1311,21 @@ export async function changeUserSubscription({ userId, newPackageId, currentSubs
 
 export async function voteOnProject({ projectId, userId, voteType }) {
   try {
-     const existingVote = await dbInstance.query(
+     const existingVote = await _query(
        'SELECT id, vote_type FROM project_votes WHERE project_id = $1 AND user_id = $2',
        [projectId, userId]
      );
      if (existingVote.rows.length > 0) {
        const currentVote = existingVote.rows[0];
        if (currentVote.vote_type === voteType) {
-         await dbInstance.query('DELETE FROM project_votes WHERE id = $1', [currentVote.id]);
+         await _query('DELETE FROM project_votes WHERE id = $1', [currentVote.id]);
          return { action: 'removed', voteType: null };
        } else {
-         await dbInstance.query('UPDATE project_votes SET vote_type = $1 WHERE id = $2', [voteType, currentVote.id]);
+         await _query('UPDATE project_votes SET vote_type = $1 WHERE id = $2', [voteType, currentVote.id]);
          return { action: 'changed', voteType };
        }
      } else {
-        await dbInstance.query(
+        await _query(
           'INSERT INTO project_votes (project_id, user_id, vote_type, created_at) VALUES ($1, $2, $3, $4)',
           [projectId, userId, voteType, new Date().toISOString()]
         );
@@ -1330,7 +1339,7 @@ export async function voteOnProject({ projectId, userId, voteType }) {
 
 export async function getProjectVotes({ projectId }) {
   try {
-     const res = await dbInstance.query(`
+     const res = await _query(`
        SELECT vote_type, COUNT(*) as count
        FROM project_votes
        WHERE project_id = $1
@@ -1345,7 +1354,7 @@ export async function getProjectVotes({ projectId }) {
 
 export async function getPublicProjectsWithVotes({ currentUserId }) {
   try {
-    const res = await dbInstance.query(`
+    const res = await _query(`
       SELECT
         p.*,
         COALESCE(v.user_vote, null) as user_vote,
@@ -1377,7 +1386,7 @@ export async function getPublicProjectsWithVotes({ currentUserId }) {
 
 export async function seedSampleNotifications({ userId }) {
   try {
-    const existingNotifications = await dbInstance.query('SELECT COUNT(*) as count FROM notifications WHERE user_id = $1', [userId]);
+    const existingNotifications = await _query('SELECT COUNT(*) as count FROM notifications WHERE user_id = $1', [userId]);
     if (existingNotifications.rows[0].count > 0) {
       return { message: 'User already has notifications' };
     }
@@ -1435,7 +1444,7 @@ export async function getLocalChanges({ tableName }) {
 export async function createSession({ userId, token, expiresAt }) {
   try {
     const id = uuidv4();
-    const res = await dbInstance.query(
+    const res = await _query(
       'INSERT INTO sessions (id, user_id, token, expires_at, created_at, synced_at, last_modified, sync_status, deleted_at, version) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING *',
       [id, userId, token, expiresAt, new Date().toISOString(), new Date().toISOString(), new Date().toISOString(), 'local', null, 1]
     );
@@ -1448,7 +1457,7 @@ export async function createSession({ userId, token, expiresAt }) {
 
 export async function getSessionByToken({ token }) {
   try {
-    const res = await dbInstance.query('SELECT * FROM sessions WHERE token = $1', [token]);
+    const res = await _query('SELECT * FROM sessions WHERE token = $1', [token]);
     return res.rows[0];
   } catch (err) {
     console.debug('Error getting session by token:', err);
@@ -1457,15 +1466,15 @@ export async function getSessionByToken({ token }) {
 }
 
 export async function deleteSession({ token }) {
-  await dbInstance.query('DELETE FROM sessions WHERE token = $1', [token]);
+  await _query('DELETE FROM sessions WHERE token = $1', [token]);
 }
 
 export async function deleteExpiredSessions() {
-  await dbInstance.query('DELETE FROM sessions WHERE expires_at < $1', [new Date().toISOString()]);
+  await _query('DELETE FROM sessions WHERE expires_at < $1', [new Date().toISOString()]);
 }
 
 export async function updateBillingStatus2({ userId, status }) {
-  await dbInstance.query('UPDATE users SET billing_status = $1 WHERE id = $2', [status, userId]);
+  await _query('UPDATE users SET billing_status = $1 WHERE id = $2', [status, userId]);
 }
 
 export async function seedPackages() {
@@ -1502,7 +1511,7 @@ export async function seedPackages() {
      ];
 
      for (const pkg of packages) {
-       await dbInstance.query(`
+       await _query(`
          INSERT INTO packages (id, name, description, price, credits_included, features, active, created_at, synced_at, last_modified, sync_status, deleted_at, version)
          VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
          ON CONFLICT (id) DO NOTHING
@@ -1533,7 +1542,7 @@ export async function seedPackages() {
 
 export async function getPackages() {
   try {
-    const res = await dbInstance.query('SELECT * FROM packages WHERE active = 1 ORDER BY price ASC');
+    const res = await _query('SELECT * FROM packages WHERE active = 1 ORDER BY price ASC');
     return res.rows;
   } catch (error) {
     console.error('Error getting packages:', error);
@@ -1544,7 +1553,7 @@ export async function getPackages() {
 export async function createUserSubscription({ userId, packageId, subscriptionData = {} }) {
   try {
     const id = uuidv4();
-    const res = await dbInstance.query(`
+    const res = await _query(`
       INSERT INTO user_subscriptions (id, user_id, package_id, status, start_date, end_date, auto_renew, synced_at, last_modified, sync_status, deleted_at, version)
       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
       RETURNING *
@@ -1571,7 +1580,7 @@ export async function createUserSubscription({ userId, packageId, subscriptionDa
 
 export async function getUserSubscription({ userId }) {
   try {
-    const res = await dbInstance.query('SELECT * FROM user_subscriptions WHERE user_id = $1 AND status = \'active\' ORDER BY start_date DESC LIMIT 1', [userId]);
+    const res = await _query('SELECT * FROM user_subscriptions WHERE user_id = $1 AND status = \'active\' ORDER BY start_date DESC LIMIT 1', [userId]);
     return res.rows[0];
   } catch (error) {
     console.error('Error getting user subscription:', error);
@@ -1600,7 +1609,7 @@ export async function _createUser({ email, passwordHash, profile = {}, userId = 
       1
     ];
     console.debug('Executing createUser query:', query, 'params:', params);
-    const res = await dbInstance.query(query, params);
+    const res = await _query(query, params);
     return { id, email };
   } catch (err) {
     console.error('Error creating user:', err);
@@ -1614,7 +1623,7 @@ export async function _getUserById({ id }) {
     return null;
   }
   try {
-    const res = await dbInstance.query("SELECT * FROM users WHERE id = $1 AND deleted_at IS NULL", [id]);
+    const res = await _query("SELECT * FROM users WHERE id = $1 AND deleted_at IS NULL", [id]);
     return res.rows[0] || null;
   } catch (err) {
     console.error('Error getting user by id:', err);
@@ -1628,7 +1637,7 @@ export async function _getUserByEmail({ email }) {
     return null;
   }
   try {
-    const res = await dbInstance.query("SELECT * FROM users WHERE email = $1 AND deleted_at IS NULL", [email]);
+    const res = await _query("SELECT * FROM users WHERE email = $1 AND deleted_at IS NULL", [email]);
     return res.rows[0] || null;
   } catch (err) {
     console.error('Error getting user by email:', err);
@@ -1655,7 +1664,7 @@ export async function _updateUser({ id, updates }) {
 
 export async function _deleteUser({ id }) {
   try {
-    const res = await dbInstance.query("UPDATE users SET deleted_at = $1, sync_status = 'local' WHERE id = $2", [new Date().toISOString(), id]);
+    const res = await _query("UPDATE users SET deleted_at = $1, sync_status = 'local' WHERE id = $2", [new Date().toISOString(), id]);
     return { success: true };
   } catch (err) {
     console.error('Error deleting user:', err);

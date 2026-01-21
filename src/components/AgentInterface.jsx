@@ -1,6 +1,6 @@
 import {
     Show,
-    For, 
+    For,
     createSignal,
     createEffect,
     createMemo,
@@ -11,7 +11,6 @@ import { logger } from '../lib/core';
 import { LangContext } from "../context/LangContext";
 import { useUser } from "../context/UserContext";
 import { agentTranslations } from "../assets/translations/translations-index.js";
-import { marked } from 'marked';
 
 const AgentInterface = (props) => {
     const LogoIcon = ({
@@ -69,10 +68,20 @@ const AgentInterface = (props) => {
         );
     };
 
-    const isLoading = () => { // Don't block loading if no agentStore (no project yet)
-        if (!props.tasksList) 
-            return true;
-        
+    const selectedTaskIdValue = createMemo(() => {
+        const sid = props.selectedTaskId;
+        if (typeof sid === 'function') {
+            return sid();
+        }
+        return sid;
+    });
+
+    createEffect(() => {
+        console.log('AgentInterface selectedTaskId changed to:', selectedTaskIdValue());
+    });
+
+    const isLoading = () => {
+        if (!props.tasksList || !props.agentStore) return true;
         return false;
     };
 
@@ -102,8 +111,6 @@ const AgentInterface = (props) => {
     };
 
     const [currentLang, setCurrentLang] = createSignal(lang ? lang() : 'en');
-    const [currentProject, setCurrentProject] = createSignal(null);
-    const [forceShowForm, setForceShowForm] = createSignal(false);
     const [selectedMode, setSelectedMode] = createSignal('Accelerator Mode');
 
     const modeColors = {
@@ -122,17 +129,7 @@ const AgentInterface = (props) => {
         return translations;
     });
 
-    createEffect(() => {
-        if (props.projectData) {
-            setCurrentProject(props.projectData());
-        } else {
-            setCurrentProject(null);
-        }
-    });
 
-    createEffect(() => {
-        forceShowForm();
-    });
 
     createEffect(() => {
         if (lang) {
@@ -141,7 +138,6 @@ const AgentInterface = (props) => {
     });
 
     let greetingRef;
-    let cardRef;
     let textareaRef;
 
     onMount(() => {
@@ -163,11 +159,6 @@ const AgentInterface = (props) => {
     };
 
     const uiState = () => props.agentStore ?. uiState ?. () || 'idle';
-    const stepIndex = () => props.agentStore ?. stepIndex ?. () || 0;
-    const currentStepName = () => props.agentStore ?. stepName ?. () || 'Unknown';
-    const isComplete = () => props.agentStore ?. isComplete ?. () || false;
-    const totalSteps = () => props.steps ?. length || 59;
-    const isLoadingProp = () => props.isLoading ?. () || false;
 
     return (
         <div id="agentBox"
@@ -223,14 +214,22 @@ const AgentInterface = (props) => {
                                             value={
                                                 new Date().toLocaleString()
                                             }/>
-                                         <Show when={props.selectedTaskId && props.selectedTaskId()}>
-                                             <div class="mb-2">
-                                                 <span class="badge badge-info">Selected Task: {(() => {
-                                                     const task = props.tasksList?.().find(t => t.id === props.selectedTaskId());
-                                                     return task?.title || 'Unknown';
-                                                 })()}</span>
-                                             </div>
-                                         </Show>
+                                          <Show when={selectedTaskIdValue()}>
+                                              <div class="mb-2 flex items-center gap-2">
+                                                  <span class="badge badge-info">Selected Task: {(() => {
+                                                      const task = props.tasksList?.().find(t => t.id === selectedTaskIdValue());
+                                                      return task?.title || 'Unknown';
+                                                  })()}</span>
+                                                  <button
+                                                      type="button"
+                                                      class="btn btn-xs btn-ghost btn-circle"
+                                                      onClick={() => props.setSelectedTaskId && props.setSelectedTaskId(null)}
+                                                      title="Deselect task"
+                                                  >
+                                                      ×
+                                                  </button>
+                                              </div>
+                                          </Show>
                                          <textarea ref={textareaRef}
                                              rows="1"
                                              name="prompt"
@@ -250,127 +249,84 @@ const AgentInterface = (props) => {
                                             onInput={
                                                 (e) => props.setPrompt(e.target.value)
                                             }
-                                             onKeyDown={
-                                                 (e) => {
-                                                     if (e.key === "Enter" && !e.shiftKey) {
-                                                         e.preventDefault();
-                                                         if (uiState() === 'idle' || uiState() === 'completed') {
-                                                             if (props.selectedTaskId && props.selectedTaskId()) {
-                                                                 props.handleInstructSubmit && props.handleInstructSubmit();
-                                                             } else {
-                                                                 props.handleStart && props.handleStart();
-                                                             }
-                                                         }
-                                                     }
-                                                 }
-                                             }
+                                              onKeyDown={
+                                                  (e) => {
+                                                      if (e.key === "Enter" && !e.shiftKey) {
+                                                          e.preventDefault();
+                                                          // Allow Enter key to work regardless of uiState for better UX
+                                                          if (selectedTaskIdValue()) {
+                                                              props.handleInstructSubmit && props.handleInstructSubmit();
+                                                          } else {
+                                                              props.handleStart && props.handleStart();
+                                                          }
+                                                      }
+                                                  }
+                                              }
                                             disabled={
                                                 uiState() === 'processing'
                                         }></textarea>
 
-                                    <div class="flex justify-between items-center mt-2 overflow-visible">
+                                      <div class="flex justify-between items-center mt-2 overflow-visible">
 
-                                         <div class="flex gap-2 overflow-visible">
-                                             <div class="flex gap-2 overflow-visible">
-                                                 <button type="button" class="select text-base-content/50 pr-8 py-1 rounded-full flex items-center gap-1 flex gap-3 transition h-6 cursor-pointer border-0" popovertarget="mode-popover-1" style="anchor-name:--mode-anchor-1">
-                                                     <LogoIcon fillColor={
-                                                         () => modeColors[selectedMode()] || 'gray'
-                                                     }/> {
-                                                     selectedMode()
-                                                 } </button>
-                                                 <ul class="dropdown menu w-52 rounded-box bg-base-100 shadow-sm" popover id="mode-popover-1" style="position-anchor:--mode-anchor-1">
-                                                      <For each={
-                                                          [
-                                                              'General Mode',
-                                                              'Accelerator Mode',
-                                                              'Services Mode',
-                                                              'Venture Mode',
-                                                              'Studio Mode'
-                                                          ]
-                                                      }>
-                                                          {(mode) => (
-                                                              <li>
-                                                                  <button type="button" class="flex items-center flex gap-3 gap-2 px-3 py-2 hover:bg-base-200 w-full text-left text-base-content/50 cursor-pointer"
-                                                                      onClick={
-                                                                          (e) => {
-                                                                              e.preventDefault();
-                                                                              setSelectedMode(mode);
-                                                                          }
-                                                                  }>
-                                                                      <LogoIcon fillColor={
-                                                                          modeColors[mode]
-                                                                      }/> {mode} </button>
-                                                              </li>
-                                                          )}
-                                                      </For>
-                                                 </ul>
-                                             </div>
-
-
-                                         </div>
-
-                                        <div class="flex gap-2">
-                                            {/* <button type="button" style="background-color: #9e28b5;" class="text-white px-2 py-1 rounded-full flex items-center text-xs transition group" onClick={() => props.handleResetStep && props.handleResetStep()}>
-                                          <i data-lucide="rotate-ccw" class="w-3 h-4"></i>
-                                          <span class="hidden group-hover:block ml-1">Reset Step</span>
-                                      </button> */}
+                                          <div class="flex gap-2 overflow-visible">
+                                              <div class="flex gap-2 overflow-visible">
+                                                  <button type="button" class="select text-base-content/50 pr-8 py-1 rounded-full flex items-center gap-1 flex gap-3 transition h-6 cursor-pointer border-0" popovertarget="mode-popover-1" style="anchor-name:--mode-anchor-1">
+                                                      <LogoIcon fillColor={
+                                                          () => modeColors[selectedMode()] || 'gray'
+                                                      }/> {
+                                                      selectedMode()
+                                                  } </button>
+                                                  <ul class="dropdown menu w-52 rounded-box bg-base-100 shadow-sm" popover id="mode-popover-1" style="position-anchor:--mode-anchor-1">
+                                                       <For each={
+                                                           [
+                                                               'General Mode',
+                                                               'Accelerator Mode',
+                                                               'Services Mode',
+                                                               'Venture Mode',
+                                                               'Studio Mode'
+                                                           ]
+                                                       }>
+                                                           {(mode) => (
+                                                               <li>
+                                                                   <button type="button" class="flex items-center flex gap-3 gap-2 px-3 py-2 hover:bg-base-200 w-full text-left text-base-content/50 cursor-pointer"
+                                                                       onClick={
+                                                                           (e) => {
+                                                                               e.preventDefault();
+                                                                               setSelectedMode(mode);
+                                                                           }
+                                                                   }>
+                                                                       <LogoIcon fillColor={
+                                                                           modeColors[mode]
+                                                                       }/> {mode} </button>
+                                                               </li>
+                                                           )}
+                                                       </For>
+                                                  </ul>
+                                              </div>
 
 
-                                            {/* State-based buttons */}
-                                            <Show when={
-                                                uiState() === 'idle'
-                                            }>
-                                                <button type="button"
-                                                    onClick={
-                                                        (e) => props.handleStart && props.handleStart()
-                                                    }
-                                                    class="text-base-content/50 border border-gray-400 px-2 py-1 rounded-full flex items-center text-xs transition group hover:bg-gray-600 hover:border-gray-500">
-                                                    <i data-lucide="arrow-up" class="w-3 h-4 group-hover:text-white transition-colors"></i>
-                                                </button>
-                                            </Show>
+                                          </div>
 
-                                            <Show when={
-                                                uiState() === 'confirm'
-                                            }>
-                                                <div class="flex gap-1">
-                                                    <button type="button"
-                                                        onClick={
-                                                            (e) => props.handleConfirmAccept && props.handleConfirmAccept()
-                                                        }
-                                                        class="bg-success/10 text-success px-2 py-1 rounded-full flex items-center gap-1 text-xs hover:bg-success/20 transition cursor-pointer">
-                                                        <i data-lucide="check" class="w-3 h-4"></i>
-                                                        Accept
-                                                    </button>
-                                                    <button type="button"
-                                                        onClick={
-                                                            (e) => props.handleConfirmRetry && props.handleConfirmRetry()
-                                                        }
-                                                        class="bg-warning/10 text-warning px-2 py-1 rounded-full flex items-center gap-1 text-xs hover:bg-warning/20 transition cursor-pointer">
-                                                        <i data-lucide="rotate-ccw" class="w-3 h-4"></i>
-                                                        Retry
-                                                    </button>
-                                                    <button type="button"
-                                                        onClick={
-                                                            (e) => props.handleConfirmEdit && props.handleConfirmEdit()
-                                                        }
-                                                        class="bg-info/10 text-info px-2 py-1 rounded-full flex items-center gap-1 text-xs hover:bg-info/20 transition cursor-pointer">
-                                                        <i data-lucide="edit" class="w-3 h-3"></i>
-                                                        Edit
-                                                    </button>
-                                                    <button type="button"
-                                                        onClick={
-                                                            (e) => props.handleConfirmReset && props.handleConfirmReset()
-                                                        }
-                                                        class="bg-error/10 text-error px-2 py-1 rounded-full flex items-center gap-1 text-xs hover:bg-error/20 transition cursor-pointer">
-                                                        <i data-lucide="x" class="w-3 h-3"></i>
-                                                        Reset
-                                                    </button>
-                                                </div>
-                                            </Show>
+                                           <button
+                                               type="button"
+                                               class="btn btn-ghost btn-sm btn-circle"
+                                               onClick={() => {
+                                                   if (selectedTaskIdValue()) {
+                                                       props.handleInstructSubmit && props.handleInstructSubmit();
+                                                   } else {
+                                                       props.handleStart && props.handleStart();
+                                                   }
+                                               }}
+                                               disabled={uiState() === 'processing'}
+                                               title={selectedTaskIdValue() ? 'Send Instructions' : 'Start'}
+                                           >
+                                              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                  <line x1="12" y1="19" x2="12" y2="5"></line>
+                                                  <polyline points="5,12 12,5 19,12"></polyline>
+                                              </svg>
+                                          </button>
 
-
-                                        </div>
-                                    </div>
+                                     </div>
                                 </form>
                             </div>
                         </div>

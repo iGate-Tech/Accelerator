@@ -9,7 +9,7 @@ import {
     createMemo
 } from "solid-js";
 import { logger } from "../lib/core";
-import { errorHandler, handleAsyncError, Skeleton, TaskSkeleton, LoadingOverlay, ProgressLoader, AgentInterface, confirmReset } from "../components";
+import { errorHandler, LoadingOverlay, AgentInterface } from "../components";
 import {
     steps,
     stepNames
@@ -36,15 +36,14 @@ import {
 import { useUser } from "../context/UserContext";
 import { toastManager } from "../lib/ui/feedback";
 import { useActivityLogger } from "../lib/business/activity.js";
-import { handleLLMProjectUpdate, extractProjectName, handleQuickLLMCall, streamQuickLLMCall } from "../lib/utils/general.js";
+import { streamQuickLLMCall } from "../lib/utils/general.js";
 import {renderFilledTemplate} from '../lib/ui/llm-template.js';
-import { validateLLMPrompt } from '../lib/auth/security.js';
-import { useOnlineStatus } from '../hooks/useOnlineStatus';
 import { ResponseSection, RouteGuard, ProtectedRoute } from '../components';
 import { useContext } from "solid-js";
 import { useLocation, useNavigate } from "@solidjs/router";
 import { LangContext } from "../context/LangContext";
 import { translations } from "../assets/translations/translations-index.js";
+import { projectsStore, setProjectsStore } from "../stores/projectsStore";
 
 const getStepName = (task) => {
   return task.step_name || "Unknown Step";
@@ -75,25 +74,26 @@ const TasksContent = () => {
         if (idValue !== null && typeof idValue !== 'string') {
             return;
         }
-        return setCurrentProjectId(idValue);
+        setCurrentProjectId(idValue);
+        setProjectsStore('currentProjectId', idValue);
+        return idValue;
     };
     const [prompt, setPrompt] = createSignal("");
     const [startPressed, setStartPressed] = createSignal(false);
-    const [streamingContent, setStreamingContent] = createSignal("");
-    const [streamingError, setStreamingError] = createSignal(null);
+
     const [tasksList, setTasksList] = createSignal([]);
     const [editingTaskId, setEditingTaskId] = createSignal(null);
     const [editContent, setEditContent] = createSignal("");
     const [activeCardId, setActiveCardId] = createSignal(null);
     const [loading, setLoading] = createSignal(false);
-    const [showInstructionsModal, setShowInstructionsModal] = createSignal(false);
-    const [instructionsText, setInstructionsText] = createSignal("");
+
     const [showProjectModal, setShowProjectModal] = createSignal(false);
     const [projectName, setProjectName] = createSignal('');
     const [projectDescription, setProjectDescription] = createSignal('');
     const [aiSuggestions, setAiSuggestions] = createSignal([]);
     const [gettingSuggestions, setGettingSuggestions] = createSignal(false);
     const [switchingProject, setSwitchingProject] = createSignal(false);
+    const [selectedTaskId, setSelectedTaskId] = createSignal(null);
     const [projectData, setProjectData] = createSignal(null);
 
     let stepHook = null;
@@ -130,7 +130,7 @@ const TasksContent = () => {
         return tasks() || [];
     });
 
-    const [projects] = createResource(
+    const [projects, { refetch: refetchProjects }] = createResource(
         () => user()?.id,
         async (userId) => {
             if (!userId) return [];
@@ -161,8 +161,6 @@ const TasksContent = () => {
         return "text-center mb-8 fade-in";
     });
 
-    let streamingRef;
-    let taskRefs = {};
     let textareaRef;
 
     const handleImprove = async () => {
@@ -173,17 +171,16 @@ const TasksContent = () => {
       
       const improvedPrompt = `Improve this startup idea for better clarity, specificity, and market potential. Start with the improved idea name followed by ': ' and then provide a concise description in simple English, in only 3 lines. Do not generate in markdown: ${prompt()}`;
       
-      setLoading(true);
-      setActiveCardId('streaming');
-      setStreamingContent('');
-      
-      try {
-        const improvedText = await streamQuickLLMCall(
-          improvedPrompt,
-          user()?.id,
-          (chunk) => {
-            setStreamingContent(chunk);
-          }
+       setLoading(true);
+       setActiveCardId('streaming');
+
+       try {
+         const improvedText = await streamQuickLLMCall(
+           improvedPrompt,
+           user()?.id,
+           (chunk) => {
+             // Handle streaming chunks if needed
+           }
         );
         
         setPrompt(improvedText);
@@ -201,12 +198,10 @@ const TasksContent = () => {
         
         setLoading(false);
         setActiveCardId(null);
-        setStreamingContent('');
         toastManager.success('Project improved successfully!');
       } catch (error) {
         setLoading(false);
         setActiveCardId(null);
-        setStreamingContent('');
         logger.error('Improve error:', error);
         toastManager.error('Failed to improve project: ' + error.message);
       }
@@ -223,14 +218,13 @@ const TasksContent = () => {
       
       setLoading(true);
       setActiveCardId('streaming');
-      setStreamingContent('');
-      
+
       try {
         const suggestedText = await streamQuickLLMCall(
           suggestPrompt,
           user()?.id,
           (chunk) => {
-            setStreamingContent(chunk);
+            // Handle streaming chunks if needed
           }
         );
         
@@ -248,14 +242,11 @@ const TasksContent = () => {
         
         setLoading(false);
         setActiveCardId(null);
-        setStreamingContent('');
-        
         logger.info('Project created from AI suggestion, ID:', projectId);
         toastManager.success('New project created with AI suggestion!');
       } catch (error) {
         setLoading(false);
         setActiveCardId(null);
-        setStreamingContent('');
         logger.error('AI suggestion process failed:', error.message);
         toastManager.error('Failed to get AI suggestion: ' + error.message);
       }
@@ -263,97 +254,209 @@ const TasksContent = () => {
 
 
 
-    const handleRegenerate = async () => {
-      const step = getStepHook();
-      if (!step || !currentProjectId()) return;
-      
-      setLoading(true);
-      setStreamingContent("");
-      setStreamingError(null);
-      
-      try {
-        const response = await step.regenerate(callLLMForStep, prompt());
-        setStreamingContent(response);
-      } catch (error) {
-        logger.error('Regenerate error:', error);
-        toastManager.error('Regeneration failed: ' + error.message);
-        setStreamingError(error.message);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    const handleConfirmAccept = async () => {
-      const step = getStepHook();
-      if (!step) return;
-      
-      try {
-        // Get response from streaming content or step hook
-        const response = streamingContent() || step.currentResponse();
-        
-        if (response && response.trim().length > 0) {
-          await addTask({
-            projectId: currentProjectId(),
-            title: step.stepName(),
-            content: response,
-            prompt: buildPrompt(step.currentStep(), {}, prompt()),
-            llmResponse: response,
-            model: 'System',
-            section: 'Initialization',
-            stepName: step.stepName()
-          }, currentProjectId(), user()?.id);
-          // Clear streaming content after task is saved
-          setStreamingContent("");
-          // Also clear step's current response
-          step.setCurrentResponse?.(null);
+    const handleRegenerate = async (taskId) => {
+      logger.debug('Home: handleRegenerate called with taskId:', taskId);
+      if (taskId) {
+        const task = tasksList().find(t => t.id === taskId);
+        if (task) {
+          try {
+            const newResponse = await callLLMForStep(task.prompt);
+            await updateTask(taskId, { llm_response: newResponse, last_modified: new Date().toISOString() });
+            setTasksList(await getTasks(currentProjectId()));
+            toastManager.success('Task regenerated successfully');
+          } catch (error) {
+            logger.error('Error regenerating task:', error);
+            toastManager.error('Failed to regenerate task');
+          }
         }
-        
-         await step.confirm();
-
-         if (step.isComplete()) {
-           toastManager.success('All steps completed successfully!');
-         } else {
-           // Auto-start the next step
-           await step.regenerate(callLLMForStep, prompt());
-         }
-      } catch (error) {
-        logger.error('Confirm accept error:', error);
-        toastManager.error('Confirmation failed');
+      } else {
+        const hook = getStepHook();
+        if (hook) {
+          await hook.regenerate(callLLMForStep, { problem: prompt() });
+        } else {
+          logger.warn('handleRegenerate: No step hook available');
+          toastManager.error('No active step to regenerate');
+        }
       }
     };
 
-    const handleConfirmRetry = async () => {
-      await handleRegenerate();
+
+
+
+
+
+
+
+
+    const handleReset = async (taskId) => {
+      logger.debug('Home: handleReset called with taskId:', taskId);
+      if (taskId) {
+        const task = tasksList().find(t => t.id === taskId);
+        if (task) {
+          // Clear the response, keep content as old response
+          await updateTask(taskId, { llm_response: '' });
+          // Select the task for new instructions
+          setSelectedTaskId(taskId);
+          // Refresh tasks
+          setTasksList(await getTasks(currentProjectId()));
+          toastManager.success('Task reset and selected for new instructions');
+        }
+      } else {
+        // Reset current step
+        // Implement if needed
+      }
     };
 
-    const handleConfirmEdit = () => {
-      setShowInstructionsModal(true);
+    const handleInstruct = async (taskId) => {
+      logger.debug('Home: handleInstruct called with taskId:', taskId);
+      setSelectedTaskId(taskId);
     };
 
-    const handleConfirmReset = async () => {
-      await handleResetStep();
+    const handleInstructSubmit = async () => {
+      const taskId = selectedTaskId();
+      console.log('=== INSTRUCT SUBMIT DEBUG ===');
+      console.log('1. selectedTaskId():', taskId);
+      console.log('2. tasksList():', tasksList());
+      if (taskId) {
+        const task = tasksList().find(t => t.id === taskId);
+        console.log('3. Found task:', task ? task.id : 'not found');
+        if (task) {
+          console.log('4. Task ID:', task.id);
+          console.log('5. Task title:', task.title);
+          console.log('6. Current task content length:', task.content?.length || 0);
+          console.log('7. User instruction:', prompt());
+
+          // Create instruction prompt to modify existing content
+          const instructionPrompt = `Take this existing content and apply the following instruction: "${prompt()}"
+
+Existing content:
+${task.content || task.llm_response || ''}
+
+Please provide the modified content that follows the instruction.`;
+
+          console.log('8. Instruction prompt:', instructionPrompt.substring(0, 200) + '...');
+          console.log('9. Calling LLM...');
+          try {
+            const modifiedContent = await callLLMForStep(instructionPrompt);
+            console.log('10. Modified content received, length:', modifiedContent.length);
+            console.log('11. Calling updateTask with taskId:', taskId);
+            await updateTask(taskId, {
+              content: modifiedContent,
+              llm_response: modifiedContent,
+              prompt: instructionPrompt,
+              last_modified: new Date().toISOString()
+            });
+            console.log('12. Task updated successfully');
+            console.log('13. Refreshing tasks list...');
+            setTasksList(await getTasks(currentProjectId()));
+            console.log('14. Tasks list refreshed');
+            setSelectedTaskId(null);
+            console.log('15. Selection cleared');
+            toastManager.success('Task modified successfully');
+          } catch (error) {
+            console.error('16. Error:', error);
+            logger.error('Error modifying task:', error);
+            toastManager.error('Failed to modify task');
+          }
+        } else {
+          console.log('3b. Task not found in tasksList');
+        }
+      } else {
+        console.log('3b. No taskId selected');
+      }
+      console.log('=== END INSTRUCT SUBMIT DEBUG ===');
     };
 
-    const handleInstruct = async () => {
-      logger.debug('Home: handleInstruct called');
-      setInstructionsText(prompt());
-      setShowInstructionsModal(true);
+
+
+    const handleConfirm = async (taskId) => {
+      console.log('=== handleConfirm called with taskId:', taskId, '===');
+      logger.debug('Home: handleConfirm called with taskId:', taskId);
+      const step = getStepHook();
+      console.log('step:', step, 'isComplete:', step?.isComplete());
+      if (step && !step.isComplete()) {
+        console.log('Advancing to next step...');
+        toastManager.info('Advancing to next step...');
+        try {
+          await step.confirm();
+          console.log('step.confirm() completed, step.isComplete() now:', step.isComplete());
+        } catch (error) {
+          console.error('Error in step.confirm():', error);
+          return;
+        }
+
+        if (!step.isComplete()) {
+          console.log('Creating new task for next step');
+          try {
+            // Create a new streaming task for the next step
+            const projectId = currentProjectId();
+            const userId = user()?.id;
+            console.log('projectId:', projectId, 'userId:', userId);
+            console.log('currentStep:', step.currentStep());
+            console.log('stepName:', step.stepName());
+
+            const newTaskId = await addTask({
+              projectId: projectId,
+              title: step.stepName(),
+              content: '',
+              prompt: buildPrompt(step.currentStep(), step.stepData(), prompt()),
+              llm_response: '',
+              model: step.currentStep()?.model || 'System',
+              section: step.currentStep()?.section || 'Processing',
+              stepName: step.stepName()
+            }, projectId, userId);
+            console.log('New task created with ID:', newTaskId);
+
+            // Start streaming the response for the next step
+            let accumulatedResponse = '';
+            try {
+              const stepPrompt = buildPrompt(step.currentStep(), step.stepData(), prompt());
+              console.log('Starting streaming for prompt:', stepPrompt.substring(0, 100) + '...');
+              const response = await callLLMForStep(stepPrompt, (chunk) => {
+                accumulatedResponse += chunk;
+
+                // Update the task content in the UI progressively
+                setTasksList(currentTasks => {
+                  const updatedTasks = currentTasks.map(task => {
+                    if (task.id === newTaskId) {
+                      return { ...task, content: accumulatedResponse, last_modified: new Date().toISOString() };
+                    }
+                    return task;
+                  });
+                  return [...updatedTasks];
+                });
+              });
+
+              console.log('Streaming completed, response length:', response?.length);
+              if (response && typeof response === 'string' && response.trim().length > 0) {
+                // Update the task in DB with the final response
+                await updateTask(newTaskId, {
+                  content: response,
+                  llm_response: response
+                });
+
+                // Refresh tasks list from DB
+                setTasksList(await getTasks(currentProjectId()));
+              }
+            } catch (streamError) {
+              console.error('Streaming failed for next step:', streamError);
+              if (accumulatedResponse.trim().length > 0) {
+                await updateTask(newTaskId, {
+                  content: accumulatedResponse,
+                  llm_response: accumulatedResponse
+                });
+                setTasksList(await getTasks(currentProjectId()));
+              }
+            }
+          } catch (error) {
+            console.error('Error creating task for next step:', error);
+            toastManager.error('Failed to create next step task');
+          }
+        }
+      }
     };
 
-    const handleSaveInstructions = async () => {
-      logger.debug('Home: handleSaveInstructions called');
-      setPrompt(instructionsText());
-      setShowInstructionsModal(false);
-      toastManager.success('Instructions saved successfully!');
-    };
-
-    const handleConfirm = async () => {
-      logger.debug('Home: handleConfirm called');
-      await handleConfirmAccept();
-    };
-
-    const callLLMForStep = async (promptText) => {
-      setStreamingContent("");
+    const callLLMForStep = async (promptText, onChunk) => {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 60000);
 
@@ -375,173 +478,32 @@ const TasksContent = () => {
         const reader = response.body.getReader();
         const decoder = new TextDecoder();
         let responseText = '';
-        let chunkCount = 0;
 
         while (true) {
           const { done, value } = await reader.read();
           if (done) break;
           const chunk = decoder.decode(value);
-          chunkCount++;
           responseText += chunk;
-          setStreamingContent(responseText);
+          if (onChunk) {
+            onChunk(chunk);
+          }
         }
 
         clearTimeout(timeoutId);
+
         return responseText;
 
       } catch (fetchError) {
         clearTimeout(timeoutId);
-        if (fetchError.name === 'AbortError') {
-          throw new Error('Request timed out. The AI service is taking too long to respond. Please try again.');
-        }
         throw fetchError;
       }
     };
 
-    const runNextStep = async () => {
-      const step = getStepHook();
-      if (!step) return;
 
-      const currentStep = step.currentStep();
-      if (!currentStep) {
-        logger.error('No current step');
-        setLoading(false);
-        return;
-      }
 
-      const builtPrompt = buildPrompt(currentStep, {}, prompt());
-      if (!builtPrompt) {
-        logger.error('No prompt available for current step');
-        setLoading(false);
-        return;
-      }
 
-      try {
-        setStreamingContent("");
-        setStreamingError(null);
-        const responseText = await callLLMForStep(builtPrompt);
-        
-        if (responseText && responseText.trim().length > 0) {
-          setStreamingContent(responseText);
-        } else {
-          setStreamingContent('No response generated.');
-        }
-        setLoading(false);
-      } catch (error) {
-        await errorHandler.handleError(error, {
-          action: 'llm_call',
-          step: step.stepIndex()
-        }, {
-          category: 'ai',
-          recoverable: true,
-          recoveryAction: 'retry'
-        });
 
-        setStreamingError(error.message || 'Failed to get AI response');
-        setLoading(false);
-      }
-    };
 
-    const exportProjectData = async () => {
-      try {
-        const u = user();
-        if (!u?.id) {
-          toastManager.error('User not authenticated');
-          return;
-        }
-
-        const projectsList = await getProjects(u.id);
-        const exportData = {
-          exportDate: new Date().toISOString(),
-          userId: u.id,
-          projects: []
-        };
-
-        for (const project of projectsList) {
-          const tasks = await getTasks(project.id);
-          exportData.projects.push({
-            ...project,
-            tasks: tasks
-          });
-        }
-
-        const dataStr = JSON.stringify(exportData, null, 2);
-        const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
-        const exportFileDefaultName = `accelerator-backup-${new Date().toISOString().split('T')[0]}.json`;
-
-        const linkElement = document.createElement('a');
-        linkElement.setAttribute('href', dataUri);
-        linkElement.setAttribute('download', exportFileDefaultName);
-        linkElement.click();
-
-        toastManager.success('Project data exported successfully!');
-        logger.info('Project data exported for user:', u.id);
-
-      } catch (error) {
-        await errorHandler.handleError(error, {
-          action: 'export_project',
-          projectId: currentProjectId()
-        }, {
-          category: 'storage',
-          recoverable: true
-        });
-      }
-    };
-
-    const importProjectData = async (event) => {
-      try {
-        const file = event.target.files[0];
-        if (!file) return;
-
-        const text = await file.text();
-        const importData = JSON.parse(text);
-
-        const u = user();
-        if (!u?.id || importData.userId !== u.id) {
-          toastManager.error('Invalid backup file or user mismatch');
-          return;
-        }
-
-        for (const projectData of importData.projects) {
-          const existingProject = await getProjectById(projectData.id);
-          if (!existingProject) {
-            const projectId = await addProject({
-              name: projectData.name,
-              description: projectData.description,
-              createdAt: new Date()
-            });
-            await updateProject(projectId, {
-              currentModel: projectData.current_model,
-              totalSteps: projectData.total_steps,
-              completedSteps: projectData.completed_steps,
-              consumedCredits: projectData.consumed_credits,
-              totalCredits: projectData.total_credits,
-              public: projectData.public
-            });
-          }
-
-          for (const task of projectData.tasks) {
-            await addTask({
-              projectId: projectData.id,
-              content: task.content,
-              prompt: task.prompt,
-              llmResponse: task.llm_response,
-              model: task.model,
-              section: task.section,
-              stepName: task.step_name
-            }, projectData.id, user()?.id);
-          }
-        }
-
-        refetchProjects();
-        toastManager.success('Project data imported successfully!');
-        logger.info('Project data imported for user:', u.id);
-
-      } catch (error) {
-        logger.error('Import failed:', error);
-        toastManager.error('Failed to import project data');
-      }
-    };
 
     const getProjectSuggestions = async (idea) => {
       if (!idea || idea.trim().length < 5) return;
@@ -645,18 +607,84 @@ Return your response as a JSON array of objects, each with "title" and "descript
 
         setStartPressed(true);
         setLoading(true);
-        setStreamingContent("");
-        setStreamingError(null);
 
         const step = getStepHook();
-        if (step) {
-          const response = await step.regenerate(callLLMForStep, description);
-          setStreamingContent(response);
+        if (step && currentProjectId() && user()?.id) {
+          // Create task first with empty content
+           const taskId = await addTask({
+             projectId: currentProjectId(),
+             title: step.stepName(),
+             content: '',
+             prompt: buildPrompt(step.currentStep(), {}, description),
+             llm_response: '',
+             model: step.currentStep()?.model || 'System',
+             section: step.currentStep()?.section || 'Initialization',
+             stepName: step.stepName()
+           }, currentProjectId(), user()?.id);
+
+          // Update tasks list to show the new task
+          setTasksList(await getTasks(currentProjectId()));
+
+            // Now start the streaming process that updates the task
+            let accumulatedResponse = '';
+            const prompt = buildPrompt(step.currentStep(), {}, description);
+
+            try {
+              const response = await callLLMForStep(prompt, (chunk) => {
+                accumulatedResponse += chunk;
+
+                // Update the task content in the UI progressively
+                setTasksList(currentTasks => {
+                  const updatedTasks = currentTasks.map(task => {
+                    if (task.id === taskId) {
+                      return { ...task, content: accumulatedResponse, last_modified: new Date().toISOString() };
+                    }
+                    return task;
+                  });
+                  return [...updatedTasks]; // Ensure new array reference
+                });
+              });
+
+              if (response && typeof response === 'string' && response.trim().length > 0) {
+               // Update the existing task in DB with the final response
+               await updateTask(taskId, {
+                 content: response,
+                 llm_response: response
+               });
+
+               // Refresh tasks list from DB
+               setTasksList(await getTasks(currentProjectId()));
+               toastManager.success('First step completed!');
+             } else {
+               console.error('Invalid response:', response);
+               toastManager.error('Failed to generate response');
+             }
+           } catch (streamError) {
+             console.error('Streaming failed:', streamError);
+             // Still save whatever we got
+             if (accumulatedResponse.trim().length > 0) {
+               console.log('Saving accumulated response due to error:', accumulatedResponse);
+               await updateTask(taskId, {
+                 content: accumulatedResponse,
+                 llm_response: accumulatedResponse
+               });
+               setTasksList(await getTasks(currentProjectId()));
+             }
+             throw streamError;
+           }
         }
 
       } catch (error) {
         logger.error('Project creation failed:', error);
         toastManager.error('Failed to create project');
+      }
+    };
+
+    const handleBeforeUnload = (e) => {
+      const step = getStepHook();
+      if (currentProjectId() && step && step.isDirty && step.isDirty()) {
+        e.preventDefault();
+        e.returnValue = '';
       }
     };
 
@@ -669,47 +697,58 @@ Return your response as a JSON array of objects, each with "title" and "descript
           step.persist();
         }
       }, 5 * 60 * 1000);
+
+      window.addEventListener('beforeunload', handleBeforeUnload);
+
       onCleanup(() => {
         clearInterval(backupInterval);
         clearInterval(stateSaveInterval);
+        window.removeEventListener('beforeunload', handleBeforeUnload);
       });
     });
 
-    const handleBeforeUnload = () => {
-      const step = getStepHook();
-      if (currentProjectId() && step) {
-        step.persist();
-      }
-    };
-
-    onMount(() => {
-      window.addEventListener('beforeunload', handleBeforeUnload);
-      onCleanup(() => window.removeEventListener('beforeunload', handleBeforeUnload));
-    });
-
     const handleStart = async () => {
-      if (!prompt() || prompt().trim().length < 5) {
-        toastManager.error('Please enter a valid startup idea (at least 5 characters)');
-        return;
-      }
+        const problemText = prompt();
+        if (!problemText || !problemText.trim()) {
+            toastManager.error('Please enter a problem statement first');
+            return;
+        }
 
-      setProjectDescription(prompt());
-      setProjectName(prompt().length > 30 ? prompt().substring(0, 30) + '...' : prompt());
-      await createProjectWithSetup();
-      setStartPressed(true);
-      setLoading(true);
-      setStreamingContent("");
-      setStreamingError(null);
+        setStartPressed(true);
 
-      logger.info('Project created and instructions set, ready to start AI process...');
+        try {
+            // Create a new project with the problem statement
+            const projectData = {
+                name: problemText.trim().substring(0, 50) + (problemText.length > 50 ? '...' : ''),
+                description: problemText.trim()
+            };
+            const projectId = await addProject(projectData, user()?.id);
+
+            // Set the current project
+            _setCurrentProjectId(projectId);
+
+            // Create step hook for the new project
+            const newStepHook = createStepHook(projectId, () => {
+                // onStepChange callback
+            });
+            stepHook = newStepHook;
+
+            // Load project state
+            await loadProjectState(projectId);
+
+            // Now regenerate the system step
+            await newStepHook.regenerate(callLLMForStep, { problem: problemText });
+        } catch (error) {
+            logger.error('Failed to start project:', error);
+            toastManager.error('Failed to start project: ' + error.message);
+            setStartPressed(false);
+        }
     };
 
     const handleStartConfirmed = async () => {
       logger.info('Starting AI agent process with confirmed project');
       setStartPressed(true);
       setLoading(true);
-      setStreamingContent("");
-      setStreamingError(null);
       setShowProjectModal(false);
 
       try {
@@ -825,13 +864,10 @@ Return your response as a JSON array of objects, each with "title" and "descript
       }
     };
 
-    const refetchProjects = () => {
-      projects.refetch();
-    };
-
     onMount(() => {
         window.addEventListener('projectDeleted', onProjectDeleted);
         window.addEventListener('openProject', onOpenProject);
+        window.addEventListener('projectAdded', () => refetchProjects());
 
         setTimeout(() => {
             if (window.lucide) window.lucide.createIcons();
@@ -841,6 +877,7 @@ Return your response as a JSON array of objects, each with "title" and "descript
     onCleanup(() => {
         window.removeEventListener('projectDeleted', onProjectDeleted);
         window.removeEventListener('openProject', onOpenProject);
+        window.removeEventListener('projectAdded', () => refetchProjects());
     });
 
 
@@ -877,24 +914,24 @@ Return your response as a JSON array of objects, each with "title" and "descript
       }
      });
 
-     const isLoading = () => {
-        try {
-            if (!currentProjectId()) return false;
-            const step = getStepHook();
-            if (!step) return true;
-            return !tasksList || currentLang() === undefined;
-        } catch {
-            return false;
-        }
-    };
+      const isLoading = () => {
+         try {
+             if (!currentProjectId()) return false;
+             const stepHook = getStepHook();
+             if (!stepHook) return true;
+             return !tasksList || currentLang() === undefined;
+         } catch {
+             return false;
+         }
+     };
 
-    const step = createMemo(() => getStepHook());
+    const stepHookMemo = createMemo(() => getStepHook());
 
     createEffect(() => {
-        if (isLoading() && streamingContent()) {
+        if (isLoading()) {
            setActiveCardId('streaming');
-       } else {
-           const currentStep = step()?.currentStep();
+        } else {
+           const currentStep = stepHookMemo()?.currentStep();
            const currentStepName = currentStep?.name;
            const matchingTask = [...tasksList()].reverse().find(task => getStepName(task) === currentStepName);
            setActiveCardId(matchingTask ? matchingTask.id : null);
@@ -925,56 +962,27 @@ Return your response as a JSON array of objects, each with "title" and "descript
                 <Show when={
                     !!currentProjectId() && (startPressed() || (tasksList && tasksList().length > 0))
                 }>
-                    <ResponseSection
-                      tasksList={tasksList}
-                      startPressed={startPressed}
-                      streamingContent={streamingContent}
-                      streamingError={streamingError}
-                      isLoading={loading}
-                      updateTask={updateTask}
-                      setEditContent={setEditContent}
-                      editingTaskId={editingTaskId}
-                      setEditingTaskId={setEditingTaskId}
-                      selectedTaskId={activeCardId}
-
-                      handleInstruct={handleInstruct}
-                      handleRegenerate={handleRegenerate}
-                      handleConfirm={handleConfirm}
-                    />
+                       <ResponseSection
+                         tasksList={tasksList}
+                         startPressed={startPressed}
+                         isLoading={loading}
+                        updateTask={updateTask}
+                        setEditContent={setEditContent}
+                        editingTaskId={editingTaskId}
+                        setEditingTaskId={setEditingTaskId}
+                        selectedTaskId={selectedTaskId}
+                        setSelectedTaskId={setSelectedTaskId}
+                         stepName={stepHookMemo()?.stepName || (() => 'Unknown Step')}
+                        callLLMForStep={callLLMForStep}
+                        refreshTasks={async () => setTasksList(await getTasks(currentProjectId()))}
+                        projectName={projectData()?.name}
+                        handleInstruct={handleInstruct}
+                        handleRegenerate={handleRegenerate}
+                        handleConfirm={handleConfirm}
+                      />
                 </Show>
 
-              {/* Instructions Modal */}
-              <Show when={showInstructionsModal()}>
-                <div class="modal modal-open">
-                  <div class="modal-box max-w-2xl">
-                    <h3 class="font-bold text-lg mb-4">Custom Instructions</h3>
-                    <p class="text-sm text-base-content/70 mb-4">
-                      Provide custom instructions for the AI agent. These will guide how the AI processes your startup idea through the accelerator steps.
-                    </p>
-                    <textarea
-                      class="textarea textarea-bordered w-full h-48 resize-none"
-                      placeholder="Enter your custom instructions here..."
-                      value={instructionsText()}
-                      onInput={(e) => setInstructionsText(e.target.value)}
-                    ></textarea>
-                    <div class="modal-action">
-                      <button
-                        class="btn btn-ghost"
-                        onClick={() => setShowInstructionsModal(false)}
-                      >
-                        Cancel
-                      </button>
-                      <button
-                        class="btn btn-primary"
-                        onClick={handleSaveInstructions}
-                      >
-                        Save Instructions
-                      </button>
-                    </div>
-                  </div>
-                  <div class="modal-backdrop bg-black/50" onClick={() => setShowInstructionsModal(false)}></div>
-                </div>
-              </Show>
+
 
               {/* Project Creation Modal */}
               <Show when={showProjectModal()}>
@@ -1088,7 +1096,7 @@ Return your response as a JSON array of objects, each with "title" and "descript
                  agentContentClass={agentContentClass}
                  greetingClass={greetingClass}
                  projectData={projectData}
-                 agentStore={step()}
+                  agentStore={stepHookMemo()}
                  textareaRef={textareaRef}
                  prompt={prompt}
                  setPrompt={setPrompt}
@@ -1100,14 +1108,15 @@ Return your response as a JSON array of objects, each with "title" and "descript
                   handleConfirm={handleConfirm}
                   handleStart={handleStart}
                  handleRegenerate={handleRegenerate}
-                  handleConfirmAccept={handleConfirmAccept}
-                  handleConfirmRetry={handleConfirmRetry}
-                  handleConfirmEdit={handleConfirmEdit}
-                  streamingContent={streamingContent}
-                 streamingError={streamingError}
-                 steps={steps}
-                 stepNames={stepNames}
-               />
+
+                  steps={steps}
+                  stepNames={stepNames}
+                  selectedTaskId={selectedTaskId}
+                  setSelectedTaskId={setSelectedTaskId}
+                  handleInstructSubmit={handleInstructSubmit}
+                  callLLMForStep={callLLMForStep}
+                  refreshTasks={async () => setTasksList(await getTasks(currentProjectId()))}
+                />
       </div>
         </Show>
           </RouteGuard>

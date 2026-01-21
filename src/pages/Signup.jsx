@@ -2,7 +2,7 @@ import { createSignal, onMount, createEffect, Show } from "solid-js";
 import { useNavigate } from "@solidjs/router";
 import { useUser } from "../context/UserContext";
 import { useLanguage } from "../hooks/useLanguage";
-import { sanitizeInput, isValidEmail } from "../lib/auth/security";
+import { sanitizeInput, isValidEmail, isValidPassword } from "../lib/auth/security";
 import { toastManager } from "../lib/ui/feedback";
 import { RouteGuard } from "../components";
 import logo from "../assets/images/iGate-tech-logo.svg";
@@ -175,7 +175,7 @@ const Signup = () => {
   });
 
   return (
-    <RouteGuard>
+    <RouteGuard requireGuest={true}>
       <div class="w-full max-w-md px-4 sm:px-6 lg:px-8 py-4">
 
          <div class="card w-full py-6 shadow-2xl bg-base-100 border border-base-300 backdrop-blur-sm">
@@ -207,15 +207,15 @@ const Signup = () => {
                <label class="label">
                  <span class="label-text">{t().email}</span>
                </label>
-               <input
-                 type="email"
-                 placeholder={t().emailPlaceholder}
-                 class="input input-bordered w-full"
-                 value={formData().email}
-                 onInput={(e) => updateFormData('email', e.target.value)}
-                 autocomplete="email"
-                 required
-               />
+                <input
+                  type="email"
+                  placeholder={t().emailPlaceholderSignup}
+                  class="input input-bordered w-full"
+                  value={formData().email}
+                  onInput={(e) => updateFormData('email', e.target.value)}
+                  autocomplete="email"
+                  required
+                />
             </div>
 
             <div>
@@ -308,21 +308,21 @@ const Signup = () => {
                </label>
              </div>
 
-             <button
-               type="submit"
-               class="btn btn-primary w-full"
-               disabled={loading() || !agreeToTerms() || !agreeToPrivacy()}
-             >
-               {loading() && <span class="loading loading-spinner loading-sm"></span>}
-                {t().createAccountBtn}
-             </button>
+              <button
+                type="submit"
+                class="btn btn-primary w-full font-normal"
+                disabled={loading() || !agreeToTerms() || !agreeToPrivacy()}
+              >
+                {loading() && <span class="loading loading-spinner loading-sm"></span>}
+                 {t().createAccountBtn}
+              </button>
           </form>
 
           <div class="divider">OR</div>
 
-           <button class="btn btn-outline w-full" onClick={() => navigate('/auth/login')}>
-             {t().alreadyHaveAccount}
-           </button>
+            <button class="btn btn-outline w-full font-normal" onClick={() => navigate('/auth/login')}>
+              {t().alreadyHaveAccount}
+            </button>
 
            <div class="text-center text-xs text-base-content/60">
              {t().termsAgreement}

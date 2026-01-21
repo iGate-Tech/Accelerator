@@ -1,157 +1,124 @@
-// db/core.js (or whatever this file is)
+// src/lib/database/core.js
+// PGLite with IndexedDB persistence
 
 import { PGlite } from '@electric-sql/pglite';
 
 export let dbInstance = null;
 export let dbReady = false;
+export let dbError = null;
 
 let initPromise = null;
 let schemaCreated = false;
 
-const DB_NAME = 'accelerator-db-v22';
-const DATA_DIR = `idb://${DB_NAME}`;
-const INIT_TIMEOUT = 8000;
-
-/**
- * Load WASM module and filesystem bundle manually to avoid bundler issues
- */
-async function loadPgliteAssets() {
-  const baseUrl = import.meta.env.DEV ? '/' : '/dist/';
-  
-  const [wasmModule, fsBundle] = await Promise.all([
-    WebAssembly.compileStreaming(fetch(`${baseUrl}pglite.wasm`)),
-    fetch(`${baseUrl}pglite.data`).then(response => response.blob()),
-  ]);
-  
-  return { wasmModule, fsBundle };
+function isBrowser() {
+  return typeof window !== 'undefined';
 }
 
-/**
- * Initialize database (singleton, safe, race-proof)
- */
+async function testIndexedDBAccess() {
+  if (!isBrowser()) return false;
+  
+  return new Promise((resolve) => {
+    try {
+      const testDB = indexedDB.open('idb-test-access', 1);
+      testDB.onsuccess = () => {
+        testDB.result.close();
+        indexedDB.deleteDatabase('idb-test-access');
+        resolve(true);
+      };
+      testDB.onerror = () => resolve(false);
+      testDB.onblocked = () => resolve(false);
+    } catch (e) {
+      resolve(false);
+    }
+  });
+}
+
+export async function ensureDatabaseReady() {
+  if (dbReady && dbInstance) return dbInstance;
+  return await initDatabase();
+}
+
 export async function initDatabase({ force = false } = {}) {
-  if (dbReady && dbInstance && !force) {
-    return dbInstance;
-  }
+  if (dbReady && dbInstance && !force) return dbInstance;
+  if (initPromise && !force) return initPromise;
 
-  if (initPromise && !force) {
-    return initPromise;
-  }
+  initPromise = (async () => {
+    try {
+      console.log('[DB] Initializing PGLite...');
+      dbError = null;
 
-   initPromise = (async () => {
-     try {
-       console.log('[DB] Initializing PGLite…');
+      const idbAvailable = isBrowser() && await testIndexedDBAccess();
+      
+      if (idbAvailable) {
+        console.log('[DB] Creating PGLite with IndexedDB...');
+        dbInstance = await PGlite.create('idb://accelerator_db', {
+          relaxedDurability: true
+        });
+      } else {
+        console.log('[DB] Using in-memory database');
+        dbInstance = await PGlite.create({
+          relaxedDurability: true
+        });
+      }
 
-       // Load WASM assets manually
-       const { wasmModule, fsBundle } = await loadPgliteAssets();
-
-       // --- Create DB (fallback to memory if IndexedDB fails)
-       try {
-         dbInstance = await PGlite.create({ 
-           dataDir: DATA_DIR,
-           wasmModule,
-           fsBundle
-         });
-       } catch (e) {
-         console.warn('[DB] IndexedDB failed, using memory DB:', e.message);
-         try {
-           dbInstance = await PGlite.create({ wasmModule, fsBundle });
-         } catch (memError) {
-           throw new Error(`PGLite initialization failed. Error: ${memError.message}`);
-         }
-       }
-
-      // --- Wait for DB to be usable
       await dbInstance.waitReady;
+      console.log('[DB] PGLite ready');
 
-      // --- Schema & migrations (only once)
       if (!schemaCreated || force) {
         const { createSchema, migrateSchema } = await import('./schema.js');
-
-        console.log('[DB] Creating schema…');
         await createSchema(dbInstance);
-
-        console.log('[DB] Running migrations…');
         await migrateSchema(dbInstance);
-
         schemaCreated = true;
+        console.log('[DB] Schema ready');
       }
 
       dbReady = true;
-      console.log('[DB] Ready');
-
+      console.log('[DB] Database ready');
       return dbInstance;
-    } catch (err) {
-      throw new Error(`Database initialization failed: ${err.message}`);
+    } catch (error) {
+      console.error('[DB] Init error:', error);
+      dbError = error;
+      dbReady = false;
+      throw error;
     }
   })();
 
   return initPromise;
 }
 
-/**
- * Safe query wrapper
- */
 export async function query(sql, params = []) {
-  if (!dbReady) {
-    await initDatabase();
-  }
-
-  try {
-    const result = await dbInstance.query(sql, params);
-    return { rows: result.rows, rowCount: result.rowCount };
-  } catch (err) {
-    console.error('[DB] Query failed:', err);
-    throw err;
-  }
+  const db = await ensureDatabaseReady();
+  return db.query(sql, params);
 }
 
-/**
- * Execute raw SQL
- */
 export async function exec(sql) {
-  if (!dbReady) {
-    await initDatabase();
-  }
+  const db = await ensureDatabaseReady();
+  return db.exec(sql);
+}
 
+export async function getPg() {
+  return await ensureDatabaseReady();
+}
+
+export async function safeQuery(sql, params = []) {
   try {
-    await dbInstance.exec(sql);
-    return { success: true };
-  } catch (err) {
-    console.error('[DB] Exec failed:', err);
-    throw err;
+    const db = await ensureDatabaseReady();
+    return await db.query(sql, params);
+  } catch (error) {
+    console.error('[DB] safeQuery error:', error);
+    return null;
   }
 }
 
-/**
- * Explicit close/reset (used in logout / testing)
- */
+export function getDbStatus() {
+  return { ready: dbReady, schemaCreated, error: dbError?.message || null };
+}
+
 export async function close() {
+  if (dbInstance) await dbInstance.close();
   dbReady = false;
   dbInstance = null;
   initPromise = null;
   schemaCreated = false;
+  dbError = null;
 }
-
-/**
- * Guaranteed DB getter (never returns null)
- */
-export async function getPg() {
-  if (!dbReady) {
-    await initDatabase();
-  }
-  return dbInstance;
-}
-
-/**
- * Ensure DB is ready (used by route guards, app boot)
- */
-export async function ensureDatabaseReady() {
-  await initDatabase();
-  // No warning needed, app handles gracefully
-}
-
-/**
- * Alias for defensive usage
- */
-export const safeQuery = query;

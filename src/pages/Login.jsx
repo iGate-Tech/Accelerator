@@ -12,7 +12,6 @@ import { logger } from '../lib/core';
 
 const Login = () => {
   logger.trace('Login: Starting');
-  logger.trace('Login: Starting');
   const navigate = useNavigate();
   const { login, isAuthenticated } = useUser();
   const { currentLang, t } = useLanguage();
@@ -97,15 +96,15 @@ const Login = () => {
                <label class="label">
                  <span class="label-text">{t().email}</span>
                </label>
-               <input
-                 type="email"
-                 placeholder={t().emailPlaceholder}
-                 class="input input-bordered w-full"
-                 value={email()}
-                 onInput={(e) => setEmail(e.target.value)}
-                 autocomplete="email"
-                 required
-               />
+                <input
+                  type="email"
+                  placeholder={t().emailPlaceholderLogin}
+                  class="input input-bordered w-full"
+                  value={email()}
+                  onInput={(e) => setEmail(e.target.value)}
+                  autocomplete="email"
+                  required
+                />
             </div>
 
             <div>
@@ -147,22 +146,19 @@ const Login = () => {
                </label>
              </div>
 
-             <button
-               type="submit"
-               class="w-full btnshadow rounded-md border border-base-300 p-[1px]"
-               disabled={loading()}
-             >
-               <div class="bg-base-100 rounded-md w-full h-8 flex items-center justify-center">
-
-               {loading() && <span class="loading loading-spinner loading-sm"></span>}
-                 {t().signIn}
-               </div>
-             </button>
+              <button
+                type="submit"
+                class="w-full btn font-normal"
+                disabled={loading()}
+              >
+                {loading() && <span class="loading loading-spinner loading-sm"></span>}
+                {t().signIn}
+              </button>
           </form>
 
           <div class="divider">OR</div>
 
-            <button class="btn btn-outline w-full text-base-content/50 border-base-content/25 font-normal" onClick={() => navigate('/auth/signup')}>
+            <button class="btn w-full font-normal" onClick={() => navigate('/auth/signup')}>
               {t().createNewAccount}
             </button>
 

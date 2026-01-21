@@ -292,22 +292,38 @@ export async function _addTask({ task }) {
   }
 }
 
-export async function _updateTask({ id, content }) {
+export async function _updateTask({ id, content, llm_response }) {
   try {
     // Import security functions dynamically to avoid circular dependencies
     const { validateAndSanitizeDbInput } = await import('../auth/security.js');
 
-    // Validate and sanitize task content
-    const validation = validateAndSanitizeDbInput(content, 'task content');
-    if (!validation.valid) {
-      throw new Error(`Task validation failed: ${validation.reason}`);
+    const updates = {};
+
+    if (content !== undefined) {
+      const validation = validateAndSanitizeDbInput(content, 'task content');
+      if (!validation.valid) {
+        throw new Error(`Task validation failed: ${validation.reason}`);
+      }
+      updates.content = validation.sanitized;
+    }
+
+    if (llm_response !== undefined) {
+      const validation = validateAndSanitizeDbInput(llm_response, 'llm response');
+      if (!validation.valid) {
+        throw new Error(`LLM response validation failed: ${validation.reason}`);
+      }
+      updates.llm_response = validation.sanitized;
+    }
+
+    if (Object.keys(updates).length === 0) {
+      throw new Error('No fields to update');
     }
 
     const result = await updateEntity({
       table: 'tasks',
       idField: 'id',
       id,
-      updates: { content: validation.sanitized }
+      updates
     });
     return result;
   } catch (err) {

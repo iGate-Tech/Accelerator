@@ -1,11 +1,16 @@
 import { createSignal } from 'solid-js';
 import { steps, stepNames } from './steps.js';
 import { _updateProject } from '../database/projects.js';
+import { getStepData, updateStepData } from '../ui/stepDataStore.js';
+import { extractTemplateData, injectTemplateData } from '../ui/llm-template.js';
+import { logger } from '../core';
 
 export function createStepHook(projectId, onStepChange) {
   const [stepIndex, setStepIndex] = createSignal(0);
   const [uiState, setUiState] = createSignal('idle');
   const [currentResponse, setCurrentResponse] = createSignal(null);
+  const [stepData, setStepData] = createSignal({});
+  const [isSaving, setIsSaving] = createSignal(false);
   
   const currentStep = () => steps[stepIndex()];
   const isFirst = () => stepIndex() === 0;
@@ -17,12 +22,10 @@ export function createStepHook(projectId, onStepChange) {
   const persist = async (state = uiState()) => {
     if (!projectId) return;
     
-    // Ensure projectId is a string
     const projectIdString = typeof projectId === 'string' ? projectId : String(projectId);
     
     if (!projectIdString) return;
     
-    // Ensure all values are plain JavaScript values, not signals or derived values
     const currentStepValue = currentStep();
     const stepIndexValue = Number(stepIndex()) || 0;
     const progressValue = Number(progress()) || 0;
@@ -73,15 +76,40 @@ export function createStepHook(projectId, onStepChange) {
 
   const regenerate = async (callLLM, instructions) => {
     setUiState('processing');
-    const prompt = buildPrompt(currentStep(), {}, instructions);
-    const response = await callLLM(prompt);
-    setCurrentResponse(response);
-    setUiState('confirm');
-    await persist('confirm');
-    return response;
+    setIsSaving(true);
+    try {
+      const context = stepData();
+      const prompt = buildPrompt(currentStep(), context, instructions);
+      logger.debug('regenerate: Built prompt, length:', prompt?.length);
+      
+      const response = await callLLM(prompt);
+      setCurrentResponse(response);
+
+      const extracted = extractTemplateData(response);
+      logger.debug('regenerate: Extracted', Object.keys(extracted).length, 'keys from response');
+
+      if (Object.keys(extracted).length > 0) {
+        const newData = { ...stepData(), ...extracted };
+        setStepData(newData);
+        await updateStepData(projectId, extracted);
+        logger.debug('regenerate: Saved extracted data to storage');
+      }
+
+      setUiState('confirm');
+      await persist('confirm');
+      logger.debug('regenerate: Step completed, ready for confirmation');
+      return response;
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const confirm = async (output = currentResponse()) => {
+    if (isSaving()) {
+      logger.warn('confirm: Blocked - still saving data');
+      throw new Error('Please wait while data is being saved');
+    }
+    
     setUiState('idle');
     setCurrentResponse(null);
 
@@ -104,7 +132,7 @@ export function createStepHook(projectId, onStepChange) {
     }
   };
 
-  const loadFromProject = (project) => {
+  const loadFromProject = async (project) => {
     if (project?.current_step) {
       const idx = steps.findIndex(s => s.id === project.current_step);
       if (idx >= 0) setStepIndex(idx);
@@ -112,6 +140,8 @@ export function createStepHook(projectId, onStepChange) {
     if (project?.ui_status) {
       setUiState(project.ui_status);
     }
+    const data = await getStepData(projectId);
+    setStepData(data);
   };
 
   return {
@@ -119,6 +149,7 @@ export function createStepHook(projectId, onStepChange) {
     uiState,
     currentResponse,
     setCurrentResponse,
+    stepData,
     currentStep,
     isFirst,
     isLast,
@@ -134,21 +165,29 @@ export function createStepHook(projectId, onStepChange) {
     confirm,
     goToStep,
     loadFromProject,
-    persist
+    persist,
+    isSaving
   };
 }
 
 function buildPrompt(step, context, instructions) {
   if (!step) return '';
-  const template = step.promptTemplate(step.instructions, step.variables, step.outputKeys);
-  return injectTemplateData(template, { ...context, ...instructions });
+  
+  const mergedContext = { ...context, ...instructions };
+  
+  if (step.variables && step.variables.length > 0) {
+    const missingVars = step.variables.filter(v => {
+      const value = mergedContext[v];
+      return value === undefined || value === null || value === '';
+    });
+    
+    if (missingVars.length > 0) {
+      logger.warn('buildPrompt: Missing required variables for step', step.id, ':', missingVars);
+    }
+  }
+  
+  const template = step.promptTemplate(step.detailedPrompt, step.variables);
+  return injectTemplateData(template, mergedContext);
 }
 
-function injectTemplateData(template, data) {
-  if (!template || !data) return template || '';
-  return template.replace(/\{\{(\w+)(?::([^}]*))?\}\}/g, (match, key, defaultValue) => {
-    const value = data[key];
-    if (value === undefined || value === null) return defaultValue || '';
-    return value;
-  });
-}
+

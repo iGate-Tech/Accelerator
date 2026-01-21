@@ -59,7 +59,7 @@ const ForgotPassword = () => {
   });
 
   return (
-    <RouteGuard>
+    <RouteGuard requireGuest={true}>
       <div class="w-full max-w-md px-4 sm:px-6 lg:px-8 py-4">
         <div class="card w-full py-6 shadow-2xl bg-base-100 border border-base-300 backdrop-blur-sm">
           <div class="card-body">
@@ -74,30 +74,30 @@ const ForgotPassword = () => {
                 <label class="label">
                   <span class="label-text">{t().email}</span>
                 </label>
-                <input
-                  type="email"
-                  placeholder={t().emailPlaceholder}
-                  class="input input-bordered w-full"
-                  value={email()}
-                  onInput={(e) => setEmail(e.target.value)}
-                  required
-                />
+                 <input
+                   type="email"
+                   placeholder={t().emailPlaceholderReset}
+                   class="input input-bordered w-full"
+                   value={email()}
+                   onInput={(e) => setEmail(e.target.value)}
+                   required
+                 />
               </div>
 
-              <button
-                type="submit"
-                class="btn btn-primary w-full"
-                disabled={loading()}
-              >
-                {loading() && <span class="loading loading-spinner loading-sm"></span>}
-                {t().sendResetLink}
-              </button>
+               <button
+                 type="submit"
+                 class="btn btn-primary w-full font-normal"
+                 disabled={loading()}
+               >
+                 {loading() && <span class="loading loading-spinner loading-sm"></span>}
+                 {t().sendResetLink}
+               </button>
             </form>
 
             <div class="text-center">
-              <button class="btn btn-ghost btn-sm" onClick={() => navigate('/auth/login')}>
-                {t().backToLogin}
-              </button>
+               <button class="btn btn-ghost btn-sm font-normal" onClick={() => navigate('/auth/login')}>
+                 {t().backToLogin}
+               </button>
             </div>
           </div>
         </div>

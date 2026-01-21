@@ -314,6 +314,8 @@ app.post('/api/llm', async (req, res) => {
                 const duration = Date.now() - startTime;
                 console.log(`[${new Date().toISOString()}] SERVER: Total chunks: ${chunkCount}, response length: ${aiResponse.length}, bytes sent: ${totalBytesSent}, total duration: ${duration}ms`);
                 console.log(`[${new Date().toISOString()}] SERVER: Response preview: "${aiResponse.substring(0, 200)}..."`);
+                console.log(`[${new Date().toISOString()}] SERVER: Ending response stream`);
+                res.end();
 
                 // Success - break out of retry loop
                 break;

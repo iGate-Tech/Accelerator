@@ -741,7 +741,7 @@ export const validateAndSanitizeDbInput = (input, fieldName = 'input') => {
 
   // For database inputs, use basic sanitization to prevent SQL injection patterns
   // Note: We rely on parameterized queries, but this provides additional defense
-  const sanitized = stringInput.replace(/['";\\]/g, '');
+  const sanitized = stringInput.replace(/['";\\]/g, '').replace(/\0/g, '');
 
   return { valid: true, sanitized };
 };

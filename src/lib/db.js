@@ -2,6 +2,10 @@
 import { secureLocalStorage } from './auth/security.js';
 export * from './database/index.js';
 let currentUser = null;
+export const getCurrentUser = async () => {
+  return currentUser;
+};
+
 export const setCurrentUser = async (user) => {
   currentUser = user;
   if (user) {

@@ -1,4 +1,5 @@
 import { steps, stepNames, modelMap, sectionMap, modelCumul } from './steps.js';
+import { extractTemplateData, injectTemplateData } from '../ui/llm-template.js';
 
 const stepOrder = steps.map(s => s.id);
 
@@ -9,20 +10,10 @@ export const getNextStep = (current) => {
   return stepOrder[index + 1] || null;
 };
 
+// Legacy wrapper for backward compatibility
 export const extractFromResponse = (response) => {
   if (!response) return {};
-  const data = {};
-  const regex = /\{\{(\w+)(?::([^}]*))?\}\}\s*[:=]?\s*["']?([^}"']+)["']?/g;
-  let match;
-  while ((match = regex.exec(response)) !== null) {
-    const [, key, , value] = match;
-    try {
-      data[key] = JSON.parse(value);
-    } catch {
-      data[key] = value;
-    }
-  }
-  return data;
+  return extractTemplateData(response);
 };
 
 export const extractData = (response) => {
@@ -34,19 +25,12 @@ export const extractData = (response) => {
   return extracted;
 };
 
-export const fillPrompt = (template, ctx) => {
-  if (!template || !ctx) return template || '';
-  return template.replace(/\{\{(\w+)(?::([^}]*))?\}\}/g, (match, key, defaultValue) => {
-    const value = ctx[key];
-    if (value === undefined || value === null) return defaultValue || '';
-    return value;
-  });
-};
+export const fillPrompt = (template, ctx) => injectTemplateData(template, ctx);
 
 export const buildPrompt = (step, context, instructions) => {
   if (!step) return '';
-  const template = typeof step.promptTemplate === 'function' 
-    ? step.promptTemplate(step.instructions, step.variables, step.outputKeys)
-    : step.instructions || '';
+  const template = typeof step.promptTemplate === 'function'
+    ? step.promptTemplate(step.detailedPrompt, step.variables)
+    : step.detailedPrompt || '';
   return fillPrompt(template, { ...context, ...instructions });
 };

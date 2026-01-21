@@ -12,7 +12,7 @@ import { secureLocalStorage } from "../lib/auth/security.js";
 
 const UserContext = createContext();
 
-const DEFAULT_AVATAR = '/default-avatar.png';
+const DEFAULT_AVATAR = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="%23666" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"%3E%3Cpath d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"%3E%3C/path%3E%3Ccircle cx="12" cy="7" r="4"%3E%3C/circle%3E%3C/svg%3E';
 
 export const UserProvider = (props) => {
   const [user, setUser] = createSignal(null);
@@ -296,10 +296,39 @@ export const UserProvider = (props) => {
       }
       
       const encoder = new TextEncoder();
-      const data = encoder.encode(password + 'accelerator-salt');
-      const hashBuffer = await crypto.subtle.digest('SHA-256', data);
-      const hashArray = Array.from(new Uint8Array(hashBuffer));
-      const passwordHash = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+      const passwordData = encoder.encode(password);
+      const salt = crypto.getRandomValues(new Uint8Array(16)); // 16-byte salt for PBKDF2
+
+      const keyMaterial = await crypto.subtle.importKey(
+        'raw',
+        passwordData,
+        'PBKDF2',
+        false,
+        ['deriveBits', 'deriveKey']
+      );
+
+      const key = await crypto.subtle.deriveKey(
+        {
+          name: 'PBKDF2',
+          salt: salt,
+          iterations: 100000,
+          hash: 'SHA-256'
+        },
+        keyMaterial,
+        { name: 'AES-GCM', length: 256 },
+        true,
+        ['encrypt', 'decrypt']
+      );
+
+      const hashBuffer = await crypto.subtle.exportKey('raw', key);
+      const hashArray = new Uint8Array(hashBuffer);
+
+      // Combine salt and hash (same format as verifyPassword expects)
+      const combined = new Uint8Array(salt.length + hashArray.length);
+      combined.set(salt);
+      combined.set(hashArray, salt.length);
+
+      const passwordHash = btoa(String.fromCharCode(...combined));
       
       // Create user in database
       const userResult = await _createUser({ email, passwordHash, userId, profile });
@@ -445,12 +474,41 @@ export const UserProvider = (props) => {
         return { success: false, error: passwordValidation.message };
       }
 
-      // Hash the new password
+      // Hash the new password using PBKDF2
       const encoder = new TextEncoder();
-      const data = encoder.encode(newPassword + 'accelerator-salt');
-      const hashBuffer = await crypto.subtle.digest('SHA-256', data);
-      const hashArray = Array.from(new Uint8Array(hashBuffer));
-      const passwordHash = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+      const passwordData = encoder.encode(newPassword);
+      const salt = crypto.getRandomValues(new Uint8Array(16)); // 16-byte salt for PBKDF2
+
+      const keyMaterial = await crypto.subtle.importKey(
+        'raw',
+        passwordData,
+        'PBKDF2',
+        false,
+        ['deriveBits', 'deriveKey']
+      );
+
+      const key = await crypto.subtle.deriveKey(
+        {
+          name: 'PBKDF2',
+          salt: salt,
+          iterations: 100000,
+          hash: 'SHA-256'
+        },
+        keyMaterial,
+        { name: 'AES-GCM', length: 256 },
+        true,
+        ['encrypt', 'decrypt']
+      );
+
+      const hashBuffer = await crypto.subtle.exportKey('raw', key);
+      const hashArray = new Uint8Array(hashBuffer);
+
+      // Combine salt and hash (same format as verifyPassword expects)
+      const combined = new Uint8Array(salt.length + hashArray.length);
+      combined.set(salt);
+      combined.set(hashArray, salt.length);
+
+      const passwordHash = btoa(String.fromCharCode(...combined));
 
       // Update the user's password
       const { _updateUserPassword } = await import('../lib/database/users.js');
@@ -480,164 +538,81 @@ export const UserProvider = (props) => {
         // Handle both encrypted (object) and potentially corrupted (string) data
         const parsedUser = typeof savedUserData === 'object' ? savedUserData : JSON.parse(savedUserData);
         if (parsedUser && parsedUser.id) {
-          // Check if user is a fallback user (corrupted data recovery)
-          if (parsedUser._isFallback || parsedUser._fallbackReason === 'data_corruption') {
-            logger.warn('User data was recovered as fallback - requiring re-authentication');
-            setUser(null);
-            await setCurrentUser(null);
-            setIsAuthenticated(false);
-            // Clear the corrupted data
-            await secureLocalStorage.removeItem('userData');
-            await secureLocalStorage.removeItem('userToken');
-            return false;
-          }
 
           const userId = parsedUser.id;
-          const profileData = await getUserProfile(userId);
+          let profileData = await getUserProfile(userId);
 
           // Check if user exists in database
           if (!profileData) {
-            logger.warn('User data found but user not in database - clearing corrupted data');
-            await secureLocalStorage.removeItem('userData');
-            await secureLocalStorage.removeItem('userToken');
-            setUser(null);
-            await setCurrentUser(null);
-            setIsAuthenticated(false);
-            return false;
-          }
+            logger.warn('User data found but user not in database - creating user in database');
+            try {
+              const { createUser, createUserProfile } = await import('../lib/database');
+              await createUser(parsedUser.email, 'dummy', parsedUser.profile || {}, parsedUser.id);
+              await createUserProfile(parsedUser.id, parsedUser.profile || {});
+              profileData = await getUserProfile(parsedUser.id); // Refresh profileData
+            } catch (error) {
+              logger.error('Failed to create user in database:', error);
+              await secureLocalStorage.removeItem('userData');
+              await secureLocalStorage.removeItem('userToken');
+              setUser(null);
+              await setCurrentUser(null);
+              setIsAuthenticated(false);
+               return false;
+             }
+           }
 
-          let subscriptionData = { plan: 'free', status: 'active', price: 0, renewalDate: null, maxCredits: 100 };
-          let creditBalance = 50;
-          try {
-            const userSubscription = await getUserSubscription(userId);
-            if (userSubscription) {
-              subscriptionData = {
-                plan: userSubscription.name,
-                status: userSubscription.status,
-                price: userSubscription.price,
-                renewalDate: userSubscription.end_date,
-                maxCredits: userSubscription.credits_included
-              };
-            }
+           let subscriptionData = { plan: 'free', status: 'active', price: 0, renewalDate: null, maxCredits: 100 };
+           let creditBalance = 50;
+           try {
+             const userSubscription = await getUserSubscription(userId);
+             if (userSubscription) {
+               subscriptionData = {
+                 plan: userSubscription.name,
+                 status: userSubscription.status,
+                 price: userSubscription.price,
+                 renewalDate: userSubscription.end_date,
+                 maxCredits: userSubscription.credits_included
+               };
+             }
 
-            const { getCreditBalance } = await import('../lib/database');
-            creditBalance = await getCreditBalance(userId);
-          } catch (error) {
-            logger.debug('Error fetching subscription or credits in checkAuth:', error.message);
-          }
+             const { getCreditBalance } = await import('../lib/database');
+             creditBalance = await getCreditBalance(userId);
+           } catch (error) {
+             logger.debug('Error fetching subscription or credits in checkAuth:', error.message);
+           }
 
-          const userData = {
-            ...parsedUser,
-            avatar: profileData?.avatar || parsedUser.avatar,
-            profile: {
-              ...parsedUser.profile,
-              ...profileData
-            },
-            subscription: subscriptionData,
-            credits: { balance: creditBalance || 50, transactions: [] }
-          };
+           const userData = {
+             ...parsedUser,
+             avatar: profileData?.avatar || parsedUser.avatar,
+             profile: {
+               ...parsedUser.profile,
+               ...profileData
+             },
+             subscription: subscriptionData,
+             credits: { balance: creditBalance || 50, transactions: [] }
+           };
 
-          setUser(userData);
-          await setCurrentUser(userData);
-          setIsAuthenticated(true);
-          activityLogger.setUser(userData);
-          return true;
-        }
-      } catch (error) {
-        logger.error('Error parsing saved user data:', error);
-      }
-    }
+           setUser(userData);
+           await setCurrentUser(userData);
+           setIsAuthenticated(true);
+           activityLogger.setUser(userData);
+           return true;
+         }
+       } catch (error) {
+         logger.error('Error parsing user data:', error);
+         await secureLocalStorage.removeItem('userData');
+         await secureLocalStorage.removeItem('userToken');
+         setUser(null);
+         await setCurrentUser(null);
+         setIsAuthenticated(false);
+         return false;
+       }
+     }
 
-    // Check if database is available before trying local user initialization
-    try {
-      const { dbReady } = await import('../lib/database/core.js');
-      if (!dbReady) {
-        logger.debug('Database not ready, skipping local user initialization');
-        setUser(null);
-        setIsAuthenticated(false);
-        return false;
-      }
-    } catch (dbError) {
-      logger.debug('Error checking database readiness:', dbError.message);
-      setUser(null);
-      setIsAuthenticated(false);
-      return false;
-    }
-
-    const localUserId = 'local-user';
-    const profileData = await getUserProfile(localUserId);
-
-    let subscriptionData = { plan: 'free', status: 'active', price: 0, renewalDate: null, maxCredits: 100 };
-    let creditBalance = 50;
-    try {
-      const userSubscription = await getUserSubscription(localUserId);
-      if (userSubscription) {
-        subscriptionData = {
-          plan: userSubscription.name,
-          status: userSubscription.status,
-          price: userSubscription.price,
-          renewalDate: userSubscription.end_date,
-          maxCredits: userSubscription.credits_included
-        };
-      }
-
-      const { getCreditBalance } = await import('../lib/database');
-      creditBalance = await getCreditBalance(localUserId);
-    } catch (error) {
-      logger.debug('Error fetching subscription or credits in checkAuth:', error.message);
-    }
-
-    // Ensure the local user exists in the database
-    try {
-      const { _createUser, _createUserProfile } = await import('../lib/database/users.js');
-      const existingUser = await getUserById(localUserId);
-      if (!existingUser) {
-        await _createUser({
-          email: 'local@user.com',
-          passwordHash: null,
-          userId: localUserId
-        });
-        // Create profile
-        await _createUserProfile({
-          userId: localUserId,
-          profileData: {
-            name: 'Local User',
-            email: 'local@user.com',
-            bio: '',
-            avatar: null
-          }
-        });
-        logger.debug('Created local user in database');
-      }
-    } catch (dbError) {
-      logger.warn('Failed to create local user in database:', dbError.message);
-    }
-
-    const localUser = {
-      id: localUserId,
-      email: 'local@user.com',
-      avatar: profileData?.avatar || null,
-       profile: {
-         name: 'local@user.com'.split('@')[0],
-         email: 'local@user.com',
-         bio: profileData?.bio || '',
-         joinDate: new Date().toISOString(),
-         ...profileData
-       },
-       preferences: {
-         notifications: { email: true, browser: false, projectUpdates: true },
-         privacy: { profileVisibility: 'private', dataSharing: false }
-       },
-       subscription: subscriptionData,
-       credits: { balance: creditBalance || 50, transactions: [] }
-    };
-
-    setUser(localUser);
-    await setCurrentUser(localUser);
-    setIsAuthenticated(true);
-    await secureLocalStorage.setItem('userData', localUser);
-    activityLogger.setUser(localUser);
-    return true;
+     // No saved user data found, require proper authentication
+     setUser(null);
+     setIsAuthenticated(false);
+     return false;
   };
 
 

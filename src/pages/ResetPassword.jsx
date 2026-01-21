@@ -2,7 +2,7 @@ import { createSignal, onMount, createEffect } from "solid-js";
 import { useNavigate, useParams } from "@solidjs/router";
 import { useUser } from "../context/UserContext";
 import { useLanguage } from "../hooks/useLanguage";
-import { isValidPassword } from "../lib/auth/security";
+import { sanitizeInput, isValidEmail, isValidPassword } from "../lib/auth/security";
 import { toastManager } from "../lib/ui/feedback";
 import { RouteGuard } from "../components";
 import logo from "../assets/images/iGate-tech-logo.svg";
@@ -144,12 +144,12 @@ const ResetPassword = () => {
                   <i data-lucide="alert-circle" class="w-4 h-4"></i>
                   <span>This password reset link is invalid or has expired.</span>
                 </div>
-                <button
-                  class="btn btn-primary"
-                  onClick={() => navigate('/auth/forgot-password')}
-                >
-                  Request New Reset Link
-                </button>
+                 <button
+                   class="btn btn-primary font-normal"
+                   onClick={() => navigate('/auth/forgot-password')}
+                 >
+                   Request New Reset Link
+                 </button>
               </div>
             ) : tokenValid() === null ? (
               <div class="text-center py-8">
@@ -220,22 +220,22 @@ const ResetPassword = () => {
                   </div>
                 </div>
 
-                <button
-                  type="submit"
-                  class="btn btn-primary w-full"
-                  disabled={loading() || !isValidPassword(newPassword()).valid}
-                >
-                  {loading() && <span class="loading loading-spinner loading-sm"></span>}
-                  {t().resetPassword || 'Reset Password'}
-                </button>
+                 <button
+                   type="submit"
+                   class="btn btn-primary w-full font-normal"
+                   disabled={loading() || !isValidPassword(newPassword()).valid}
+                 >
+                   {loading() && <span class="loading loading-spinner loading-sm"></span>}
+                   {t().resetPassword || 'Reset Password'}
+                 </button>
               </form>
             )}
 
             <div class="divider">OR</div>
 
-            <button class="btn btn-outline w-full" onClick={() => navigate('/auth/login')}>
-              {t().backToLogin || 'Back to Login'}
-            </button>
+             <button class="btn btn-outline w-full font-normal" onClick={() => navigate('/auth/login')}>
+               {t().backToLogin || 'Back to Login'}
+             </button>
           </div>
         </div>
       </div>

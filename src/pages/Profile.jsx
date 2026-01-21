@@ -5,6 +5,7 @@ import { useLanguage } from "../hooks/useLanguage";
 import { getUserCredits, getUserCreditBalance, getProjects, getUserById, updateUserProfile } from "../lib/database";
 import { formatLocaleDate } from "../lib/utils/general";
 import { toastManager } from "../lib/ui/feedback";
+import { confirmDelete } from "../components";
 import { profileTranslations } from "../assets/translations/translations-index.js";
 import { logger } from "../lib/core";
 
@@ -157,6 +158,7 @@ const Profile = () => {
 
   const uploadAvatar = async () => {
     if (avatarPreview()) {
+      setUploadingAvatar(true);
       try {
         await updateUserProfile(user().id, { avatar: avatarPreview() });
         await checkAuth();
@@ -166,6 +168,8 @@ const Profile = () => {
       } catch (error) {
         logger.error('Avatar update error:', error);
         toastManager.error(t().avatarUpdateFailed);
+      } finally {
+        setUploadingAvatar(false);
       }
     }
   };
@@ -174,12 +178,18 @@ const Profile = () => {
   const saveProfile = async () => {
       try {
         const form = profileForm();
-        await updateUserProfile(user().id, {
+        const updates = {
           name: form.name.trim() || user().profile?.name,
           bio: form.bio.trim(),
           location: form.location.trim(),
           website: form.website.trim()
-        });
+        };
+        if (avatarPreview()) {
+          updates.avatar = avatarPreview();
+          setAvatarFile(null);
+          setAvatarPreview(null);
+        }
+        await updateUserProfile(user().id, updates);
         await checkAuth();
         setEditingProfile(false);
         toastManager.success(t().profileUpdated);
@@ -323,14 +333,21 @@ const Profile = () => {
         <div class="card bg-gradient-to-br from-primary/5 via-base-200 to-secondary/5 border border-primary/20 mb-8">
           <div class="card-body">
             <div class="flex flex-col md:flex-row items-center gap-6">
-              {/* Avatar Section */}
-              <div class="avatar relative">
-                <div class="w-32 h-32 rounded-full ring ring-primary/30 ring-offset-base-100 ring-offset-4">
-                  <img
-                    src={avatarPreview() || user().avatar || ''}
-                    alt={t().avatarAlt}
-                  />
-                </div>
+               {/* Avatar Section */}
+               <div class="avatar relative">
+                 <div class="w-32 h-32 rounded-full ring ring-primary/30 ring-offset-base-100 ring-offset-4">
+                   {avatarPreview() || user()?.avatar ? (
+                     <img
+                       src={avatarPreview() || user()?.avatar}
+                       alt={t().avatarAlt}
+                       class="w-full h-full object-cover rounded-full"
+                     />
+                   ) : (
+                     <div class="w-full h-full flex items-center justify-center">
+                       <i data-lucide="user" class="w-16 h-16 text-base-content/60"></i>
+                     </div>
+                   )}
+                 </div>
                 <input
                   type="file"
                   accept="image/*"

@@ -73,6 +73,58 @@
  */
 // ws ::= [ \t\n\r]*
 
+function safeParseValue(valueStr) {
+  if (!valueStr || typeof valueStr !== 'string') {
+    return { value: valueStr, method: 'direct' };
+  }
+
+  const trimmed = valueStr.trim();
+
+  if (!trimmed) {
+    return { value: trimmed, method: 'empty' };
+  }
+
+  if (trimmed.startsWith('"') && trimmed.endsWith('"')) {
+    try {
+      return { value: JSON.parse(trimmed), method: 'json' };
+    } catch {
+      return { value: trimmed.slice(1, -1), method: 'unquoted' };
+    }
+  }
+
+  if (trimmed.startsWith("'") && trimmed.endsWith("'")) {
+    return { value: trimmed.slice(1, -1), method: 'single_quoted' };
+  }
+
+  if (trimmed === 'true') return { value: true, method: 'boolean' };
+  if (trimmed === 'false') return { value: false, method: 'boolean' };
+  if (trimmed === 'null') return { value: null, method: 'null' };
+  if (trimmed === 'undefined') return { value: undefined, method: 'undefined' };
+
+  const numMatch = trimmed.match(/^-?\d+(\.\d+)?$/);
+  if (numMatch) {
+    return { value: parseFloat(trimmed), method: 'number' };
+  }
+
+  if (trimmed.startsWith('[') && trimmed.endsWith(']')) {
+    try {
+      return { value: JSON.parse(trimmed), method: 'json_array' };
+    } catch {
+      return { value: trimmed, method: 'raw' };
+    }
+  }
+
+  if (trimmed.startsWith('{') && trimmed.endsWith('}')) {
+    try {
+      return { value: JSON.parse(trimmed), method: 'json_object' };
+    } catch {
+      return { value: trimmed, method: 'raw' };
+    }
+  }
+
+  return { value: trimmed, method: 'raw' };
+}
+
 function extractTemplateData(templateText, options = {}) {
   logger.trace('extractTemplateData: Starting with template length:', templateText?.length, 'options:', options);
   const { expandNestedKeys = false, duplicateHandling = 'lastWins' } = options;
@@ -81,7 +133,6 @@ function extractTemplateData(templateText, options = {}) {
   const obj = {};
   let pos = 0;
 
-  // Helper to set nested value
   function _assignNestedKey(obj, keyPath, value, duplicateHandling) {
     logger.trace('_assignNestedKey: Starting with keyPath:', keyPath, 'value type:', typeof value);
     const keys = keyPath.split('.');
@@ -108,7 +159,6 @@ function extractTemplateData(templateText, options = {}) {
         }
         current[finalKey].push(value);
       } else {
-        // lastWins
         current[finalKey] = value;
       }
     } else {
@@ -117,16 +167,15 @@ function extractTemplateData(templateText, options = {}) {
   }
 
   let placeholderCount = 0;
+  let extractCount = 0;
+
   while ((pos = text.indexOf("{{", pos)) !== -1) {
     placeholderCount++;
-    logger.trace('extractTemplateData: Found placeholder', placeholderCount, 'at position:', pos);
     const start = pos;
     pos += 2;
 
-    // Skip whitespace
     while (pos < len && /\s/.test(text[pos])) pos++;
 
-    // Parse key
     const keyStart = pos;
     while (pos < len && /[\w.-]/.test(text[pos])) pos++;
     const key = text.slice(keyStart, pos);
@@ -136,17 +185,14 @@ function extractTemplateData(templateText, options = {}) {
       continue;
     }
 
-    // Skip whitespace
     while (pos < len && /\s/.test(text[pos])) pos++;
 
-    // Expect colon
     if (text[pos] !== ":") {
       pos = start + 2;
       continue;
     }
     pos++;
 
-    // Skip whitespace
     while (pos < len && /\s/.test(text[pos])) pos++;
 
     const valueStart = pos;
@@ -156,7 +202,6 @@ function extractTemplateData(templateText, options = {}) {
     let braceCount = 0;
     let found = false;
 
-    // Scan until }}
     while (pos < len - 1) {
       const char = text[pos];
 
@@ -185,9 +230,10 @@ function extractTemplateData(templateText, options = {}) {
       const valueStr = text.slice(valueStart, pos).trim();
       pos += 2;
 
-      let value;
-      try {
-        value = JSON.parse(valueStr);
+      const { value } = safeParseValue(valueStr);
+
+      if (value !== undefined) {
+        extractCount++;
         if (expandNestedKeys && key.includes('.')) {
           _assignNestedKey(obj, key, value, duplicateHandling);
         } else {
@@ -200,73 +246,17 @@ function extractTemplateData(templateText, options = {}) {
               }
               obj[key].push(value);
             } else {
-              // lastWins
               obj[key] = value;
             }
           } else {
             obj[key] = value;
           }
         }
-      } catch (e) {
-        // Try parsing as multiple key-value pairs separated by commas
-        const pairs = valueStr.split(',').map(s => s.trim());
-        for (const pair of pairs) {
-          const match = pair.match(/^([\w.-]+)\s*:\s*(.+)$/);
-          if (match) {
-            const subKey = match[1];
-            const subValueStr = match[2];
-            try {
-              const subValue = JSON.parse(subValueStr);
-              if (expandNestedKeys && subKey.includes('.')) {
-                _assignNestedKey(obj, subKey, subValue, duplicateHandling);
-              } else {
-                if (subKey in obj) {
-                  if (duplicateHandling === 'error') {
-                    throw new Error(`Duplicate key '${subKey}'`);
-                  } else if (duplicateHandling === 'array') {
-                    if (!Array.isArray(obj[subKey])) {
-                      obj[subKey] = [obj[subKey]];
-                    }
-                    obj[subKey].push(subValue);
-                  } else {
-                    // lastWins
-                    obj[subKey] = subValue;
-                  }
-                } else {
-                  obj[subKey] = subValue;
-                }
-              }
-             } catch (subE) {
-               logger.debug('JSON parse error for sub-value:', subValueStr, subE.message);
-               // Treat as string if not valid JSON
-               if (expandNestedKeys && subKey.includes('.')) {
-                 _assignNestedKey(obj, subKey, subValueStr, duplicateHandling);
-               } else {
-                 if (subKey in obj) {
-                   if (duplicateHandling === 'error') {
-                     throw new Error(`Duplicate key '${subKey}'`);
-                   } else if (duplicateHandling === 'array') {
-                     if (!Array.isArray(obj[subKey])) {
-                       obj[subKey] = [obj[subKey]];
-                     }
-                     obj[subKey].push(subValueStr);
-                   } else {
-                     // lastWins
-                     obj[subKey] = subValueStr;
-                   }
-                 } else {
-                   obj[subKey] = subValueStr;
-                 }
-               }
-             }
-          }
-        }
-        // Skip setting value since we handled it here
       }
     }
   }
 
-  logger.debug('extractTemplateData: Completed, extracted', Object.keys(obj).length, 'keys from', placeholderCount, 'placeholders');
+  logger.debug('extractTemplateData: Completed, extracted', extractCount, 'keys from', placeholderCount, 'placeholders');
   logger.trace('extractTemplateData: Final extracted object:', obj);
   return obj;
 }
@@ -467,6 +457,7 @@ function mergeTemplateData(target, source) {
  */
 function renderFilledTemplate(templateText) {
   logger.trace('renderFilledTemplate: Starting with template length:', templateText?.length);
+  if (!templateText) return templateText || '';
   const text = templateText;
   const len = text.length;
   let result = '';
@@ -572,6 +563,19 @@ function renderFilledTemplate(templateText) {
 }
 
 /**
+ * Extracts output keys from a prompt text by scanning for {{key: }} patterns
+ */
+function extractKeysFromPrompt(promptText) {
+  const keyRegex = /\{\{\s*(\w+(?:[-.]\w+)*)\s*:/g;
+  const keys = [];
+  let match;
+  while ((match = keyRegex.exec(promptText)) !== null) {
+    keys.push(match[1]);
+  }
+  return keys;
+}
+
+/**
  * Unified bidirectional processor.
  * - Extracts data
  * - Merges input
@@ -581,22 +585,32 @@ function renderFilledTemplate(templateText) {
  */
 import { logger } from '../core';
 
-function processLLMTemplate(template, data = {}, options = {}) {
+function processLLMTemplate(template, data = {}, options = {}, updateDataFn) {
   logger.info('processLLMTemplate: Starting with template length:', template?.length, 'data keys:', Object.keys(data), 'options:', options);
+  logger.debug('processLLMTemplate: Input data:', data);
+
   const extractedInitial = extractTemplateData(template, options);
   logger.debug('processLLMTemplate: Initial extraction completed, keys:', Object.keys(extractedInitial));
 
   const mergedData = mergeTemplateData(extractedInitial, data);
-  logger.debug('processLLMTemplate: Data merged, total keys:', Object.keys(mergedData));
+  logger.debug('processLLMTemplate: Data merged, total keys:', Object.keys(mergedData), 'merged data:', mergedData);
 
   const normalizedTemplate = resetTemplatePlaceholders(template, options);
   logger.debug('processLLMTemplate: Template normalized, length:', normalizedTemplate.length);
 
   const processedTemplate = injectTemplateData(normalizedTemplate, mergedData, options);
-  logger.debug('processLLMTemplate: Template processed with data injection');
+  logger.debug('processLLMTemplate: Template processed with data injection, processed template preview:', processedTemplate.substring(0, 200) + '...');
 
   const extractedData = extractTemplateData(processedTemplate, options);
-  logger.debug('processLLMTemplate: Final extraction completed, extracted keys:', Object.keys(extractedData));
+  logger.debug('processLLMTemplate: Final extraction completed, extracted keys:', Object.keys(extractedData), 'extracted data:', extractedData);
+
+  // Persist extracted data if update function provided
+  if (updateDataFn && typeof updateDataFn === 'function') {
+    updateDataFn(extractedData);
+    logger.debug('processLLMTemplate: Data persisted via update function');
+  } else {
+    logger.warn('processLLMTemplate: No update function provided, data not persisted');
+  }
 
   const result = {
     inputData: data,
@@ -613,5 +627,6 @@ export {
   resetTemplatePlaceholders,
   mergeTemplateData,
   renderFilledTemplate,
-  processLLMTemplate
+  processLLMTemplate,
+  extractKeysFromPrompt
 };

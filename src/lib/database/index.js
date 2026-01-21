@@ -1,12 +1,12 @@
 // Database module exports
-export { dbInstance, dbReady, initDatabase, query, exec, close, getPg, ensureDatabaseReady, safeQuery } from './core.js';
+export { dbInstance, dbReady, initDatabase, query, exec, close, getPg, ensureDatabaseReady, safeQuery, getDbStatus } from './core.js';
 export { updateEntity, getEntities, createSchema } from './operations.js';
 
 // Simple exports for commonly used functions
 export const getProjects = async (userId = null) => {
   if (!userId) {
-    const { getCurrentUser } = await import('../auth/data.js');
-    const user = await getCurrentUser();
+    const { authAPI } = await import('../auth/data.js');
+    const user = await authAPI.getCurrentUser();
     userId = user?.id;
   }
   if (!userId) return [];
@@ -82,8 +82,8 @@ export const deleteProject = async (id) => {
 
 export const deleteAllProjects = async () => {
   // Get current user
-  const { getCurrentUser } = await import('../auth/data.js');
-  const user = await getCurrentUser();
+  const { authAPI } = await import('../auth/data.js');
+  const user = await authAPI.getCurrentUser();
   if (!user) {
     throw new Error('User not authenticated');
   }
@@ -93,8 +93,8 @@ export const deleteAllProjects = async () => {
 
 export const exportAllProjects = async (userId = null) => {
   if (!userId) {
-    const { getCurrentUser } = await import('../auth/data.js');
-    const user = await getCurrentUser();
+    const { authAPI } = await import('../auth/data.js');
+    const user = await authAPI.getCurrentUser();
     if (!user) {
       throw new Error('User not authenticated');
     }
@@ -107,8 +107,8 @@ export const exportAllProjects = async (userId = null) => {
 
 export const exportAllData = async (userId = null) => {
   if (!userId) {
-    const { getCurrentUser } = await import('../auth/data.js');
-    const user = await getCurrentUser();
+    const { authAPI } = await import('../auth/data.js');
+    const user = await authAPI.getCurrentUser();
     if (!user) {
       throw new Error('User not authenticated');
     }
@@ -371,7 +371,8 @@ export const respondToInvitation = async (invitationId, status) => {
 
 export const addTask = async (task, projectId, userId = null) => {
   const { _addTask } = await import('./operations.js');
-  return await _addTask({ task, projectId, userId });
+  const result = await _addTask({ task, projectId, userId });
+  return result.id;
 };
 
 export const clearAllTasks = async () => {
@@ -394,7 +395,7 @@ export const getTasks = async (projectId) => {
   return await _getTasks({ projectId });
 };
 
-export const updateTask = async (id, content) => {
+export const updateTask = async (id, updates) => {
   const { _updateTask } = await import('./projects.js');
-  return await _updateTask({ id, content });
+  return await _updateTask({ id, ...updates });
 };

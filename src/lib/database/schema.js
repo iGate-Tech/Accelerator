@@ -88,32 +88,44 @@ export async function createSchema() {
       );
     `);
 
-    await dbInstance.exec(`
-      CREATE TABLE IF NOT EXISTS tasks (
-        id TEXT PRIMARY KEY,
-        project_id TEXT NOT NULL,
-        user_id TEXT NOT NULL,
-        title TEXT NOT NULL,
-        description TEXT,
-        content TEXT,
-        prompt TEXT,
-        llm_response TEXT,
-        model TEXT,
-        section TEXT,
-        step_name TEXT,
-        status TEXT DEFAULT 'pending',
-        priority TEXT DEFAULT 'medium',
-        due_date TEXT,
-        created_at TEXT,
-        synced_at TEXT,
-        last_modified TEXT,
-        sync_status TEXT DEFAULT 'local',
-        deleted_at TEXT,
-        version INTEGER DEFAULT 1,
-        FOREIGN KEY (project_id) REFERENCES projects(id),
-        FOREIGN KEY (user_id) REFERENCES users(id)
-      );
-    `);
+     await dbInstance.exec(`
+       CREATE TABLE IF NOT EXISTS tasks (
+         id TEXT PRIMARY KEY,
+         project_id TEXT NOT NULL,
+         user_id TEXT NOT NULL,
+         title TEXT NOT NULL,
+         description TEXT,
+         content TEXT,
+         prompt TEXT,
+         llm_response TEXT,
+         model TEXT,
+         section TEXT,
+         step_name TEXT,
+         status TEXT DEFAULT 'pending',
+         priority TEXT DEFAULT 'medium',
+         due_date TEXT,
+         created_at TEXT,
+         synced_at TEXT,
+         last_modified TEXT,
+         sync_status TEXT DEFAULT 'local',
+         deleted_at TEXT,
+         version INTEGER DEFAULT 1,
+         FOREIGN KEY (project_id) REFERENCES projects(id),
+         FOREIGN KEY (user_id) REFERENCES users(id)
+       );
+     `);
+
+      await dbInstance.exec(`
+        CREATE TABLE IF NOT EXISTS step_data (
+          id TEXT PRIMARY KEY,
+          project_id TEXT NOT NULL,
+          key TEXT NOT NULL,
+          value JSONB,
+          updated_at TEXT DEFAULT CURRENT_TIMESTAMP,
+          UNIQUE(project_id, key),
+          FOREIGN KEY (project_id) REFERENCES projects(id)
+        );
+      `);
 
     await dbInstance.exec(`
       CREATE TABLE IF NOT EXISTS groups (

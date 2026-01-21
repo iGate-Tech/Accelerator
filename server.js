@@ -137,6 +137,18 @@ logger.debug('server.js: Static file directories configured:', path.join(__dirna
 
 
 // Health check and root route
+app.get('/test', (req, res) => {
+    const fs = require('fs');
+    const distPath = path.join(__dirname, 'dist');
+    res.json({
+        __dirname,
+        distPath,
+        distExists: fs.existsSync(distPath),
+        distContents: fs.existsSync(distPath) ? fs.readdirSync(distPath) : [],
+        indexHtmlExists: fs.existsSync(path.join(distPath, 'index.html'))
+    });
+});
+
 app.get('/', (req, res) => {
     const fs = require('fs');
     const distPath = path.join(__dirname, 'dist');

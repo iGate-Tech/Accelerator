@@ -79,6 +79,8 @@ export function createStepHook(projectId, onStepChange) {
     setIsSaving(true);
     try {
       const context = stepData();
+      logger.debug('regenerate: stepData context keys:', Object.keys(context));
+      logger.debug('regenerate: problem in context:', context?.problem);
       const prompt = buildPrompt(currentStep(), context, instructions);
       logger.debug('regenerate: Built prompt, length:', prompt?.length);
       
@@ -116,6 +118,11 @@ export function createStepHook(projectId, onStepChange) {
     if (!isLast()) {
       setStepIndex(s => s + 1);
       await persist('idle');
+      // Reload step data for the new step to ensure we have the latest context
+      const freshData = await getStepData(projectId);
+      logger.debug('confirm: Reloaded step data for new step, keys:', Object.keys(freshData));
+      logger.debug('confirm: problem in fresh data:', freshData?.problem);
+      setStepData(freshData);
       if (onStepChange) onStepChange();
     } else {
       setUiState('completed');
@@ -140,7 +147,10 @@ export function createStepHook(projectId, onStepChange) {
     if (project?.ui_status) {
       setUiState(project.ui_status);
     }
+    logger.debug('loadFromProject: Loading step data for projectId:', projectId);
     const data = await getStepData(projectId);
+    logger.debug('loadFromProject: Loaded step data keys:', Object.keys(data));
+    logger.debug('loadFromProject: problem value:', data?.problem);
     setStepData(data);
   };
 

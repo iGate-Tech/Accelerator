@@ -158,7 +158,12 @@ const ProjectsSection = (props) => {
         const confirmed = await confirmDelete(t().allProjects, "All projects will be permanently deleted.");
         if (confirmed) {
             try {
-                await deleteAllProjects();
+                const currentUser = user();
+                if (!currentUser?.id) {
+                    toastManager.error('User not authenticated');
+                    return;
+                }
+                await deleteAllProjects(currentUser.id);
                 toastManager.success(t().deleteAllProjects + ' ' + t().successful);
                 await loadProjects();
             } catch (error) {
@@ -172,12 +177,40 @@ const ProjectsSection = (props) => {
         if (!currentUser) return;
 
         try {
-            const data = await exportAllData(currentUser.id);
-            downloadJSON(data, `accelerator-export-${new Date().toISOString().split('T')[0]}.json`);
-            toastManager.success(t().exportAllProjects + ' ' + t().successful);
+            const blob = await exportAllProjects(currentUser.id);
+            if (blob) {
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `projects-export-${new Date().toISOString().split('T')[0]}.json`;
+                a.click();
+                URL.revokeObjectURL(url);
+                toastManager.success(t().exportSuccessful);
+            }
         } catch (error) {
-            logger.error('Failed to export projects:', error);
-            toastManager.error(t().exportAllProjects + ' ' + t().failed);
+            console.log('Caught error in export all projects:', error.message);
+            toastManager.error(t().exportFailed + ': ' + error.message);
+        }
+    };
+
+    const handleBackupAllData = async () => {
+        const currentUser = user();
+        if (!currentUser) return;
+
+        try {
+            const blob = await exportAllData(currentUser.id);
+            if (blob) {
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `backup-${new Date().toISOString().split('T')[0]}.json`;
+                a.click();
+                URL.revokeObjectURL(url);
+                toastManager.success(t().backupSuccessful);
+            }
+        } catch (error) {
+            console.log('Caught error in backup all data:', error.message);
+            toastManager.error(t().backupFailed + ': ' + error.message);
         }
     };
     const handleCreateProject = async () => {

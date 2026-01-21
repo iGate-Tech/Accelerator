@@ -76,10 +76,6 @@ const AgentInterface = (props) => {
         return sid;
     });
 
-    createEffect(() => {
-        console.log('AgentInterface selectedTaskId changed to:', selectedTaskIdValue());
-    });
-
     const isLoading = () => {
         if (!props.tasksList) return false;
         if (!props.agentStore) return false;
@@ -231,39 +227,37 @@ const AgentInterface = (props) => {
                                                   </button>
                                               </div>
                                           </Show>
-                                         <textarea ref={textareaRef}
-                                             rows="1"
-                                             name="prompt"
-                                             id="promptTextarea"
-                                             class={
-                                                 `text-base-content text-lg w-full focus:ring-0 active:ring-0 ${
-                                                     uiState() === 'processing' ? 'opacity-50 cursor-not-allowed' : ''
-                                                 }`
-                                             }
-                                             style="resize: none; overflow: hidden; box-sizing: border-box;"
-                                             placeholder={
-                                                 props.selectedTaskId && props.selectedTaskId() ? 'Enter instructions for selected task...' : t().agentPlaceholder
-                                             }
-                                            value={
-                                                props.prompt ? props.prompt() : ""
-                                            }
-                                            onInput={
-                                                (e) => props.setPrompt(e.target.value)
-                                            }
-                                               onKeyDown={
-                                                   (e) => {
-                                                       if (e.key === "Enter" && !e.shiftKey) {
-                                                           e.preventDefault();
-                                                           console.log('[AgentInterface] Enter key pressed, calling handleStart');
-                                                           // Allow Enter key to work regardless of uiState for better UX
-                                                           if (selectedTaskIdValue()) {
-                                                               props.handleInstructSubmit && props.handleInstructSubmit();
-                                                           } else {
-                                                               props.handleStart && props.handleStart();
-                                                           }
-                                                       }
-                                                   }
-                                               }
+                                          <textarea ref={textareaRef}
+                                              rows="1"
+                                              name="prompt"
+                                              id="promptTextarea"
+                                              class={
+                                                  `text-base-content text-lg w-full focus:ring-0 active:ring-0 ${
+                                                      uiState() === 'processing' ? 'opacity-50 cursor-not-allowed' : ''
+                                                  }`
+                                              }
+                                              style="resize: none; overflow: hidden; box-sizing: border-box;"
+                                              placeholder={
+                                                  props.selectedTaskId && props.selectedTaskId() ? 'Enter instructions for selected task...' : t().agentPlaceholder
+                                              }
+                                              value={
+                                                  props.prompt ? props.prompt() : ""
+                                              }
+                                              onInput={
+                                                  (e) => props.setPrompt(e.target.value)
+                                              }
+                                                onKeyDown={
+                                                    (e) => {
+                                                        if (e.key === "Enter" && !e.shiftKey) {
+                                                            e.preventDefault();
+                                                            if (selectedTaskIdValue()) {
+                                                                props.handleInstructSubmit && props.handleInstructSubmit();
+                                                            } else {
+                                                                props.handleStart && props.handleStart();
+                                                            }
+                                                        }
+                                                    }
+                                                }
                                             disabled={
                                                 uiState() === 'processing'
                                         }></textarea>
@@ -309,21 +303,19 @@ const AgentInterface = (props) => {
 
                                           </div>
 
-                                           <button
-                                                type="button"
-                                                class="btn btn-ghost btn-sm btn-circle"
-                                                onClick={() => {
-                                                    console.log('[AgentInterface] Button clicked, selectedTaskId:', selectedTaskIdValue());
-                                                    if (selectedTaskIdValue()) {
-                                                        props.handleInstructSubmit && props.handleInstructSubmit();
-                                                    } else {
-                                                        console.log('[AgentInterface] Calling handleStart...');
-                                                        props.handleStart && props.handleStart();
-                                                    }
-                                                }}
-                                                disabled={uiState() === 'processing'}
-                                                title={selectedTaskIdValue() ? 'Send Instructions' : 'Start'}
-                                            >
+                                            <button
+                                                 type="button"
+                                                 class="btn btn-ghost btn-sm btn-circle"
+                                                 onClick={() => {
+                                                     if (selectedTaskIdValue()) {
+                                                         props.handleInstructSubmit && props.handleInstructSubmit();
+                                                     } else {
+                                                         props.handleStart && props.handleStart();
+                                                     }
+                                                 }}
+                                                 disabled={uiState() === 'processing'}
+                                                 title={selectedTaskIdValue() ? 'Send Instructions' : 'Start'}
+                                             >
                                               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                                   <line x1="12" y1="19" x2="12" y2="5"></line>
                                                   <polyline points="5,12 12,5 19,12"></polyline>

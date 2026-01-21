@@ -190,7 +190,21 @@ export async function _deleteProject({ id }) {
 
 export async function _deleteAllProjects({ userId }) {
   try {
+    // First, delete all tasks associated with the user's projects
+    await dbInstance.query(`
+      DELETE FROM tasks 
+      WHERE project_id IN (SELECT id FROM projects WHERE user_id = $1)
+    `, [userId]);
+    
+    // Delete step_data associated with the projects
+    await dbInstance.query(`
+      DELETE FROM step_data 
+      WHERE project_id IN (SELECT id FROM projects WHERE user_id = $1)
+    `, [userId]);
+    
+    // Then delete all projects
     await dbInstance.query('DELETE FROM projects WHERE user_id = $1', [userId]);
+    
     return { success: true };
   } catch (err) {
     console.error('Error deleting all projects:', err);
@@ -285,7 +299,7 @@ export async function _addTask({ task }) {
       null,
       1
     ]);
-    return { success: true };
+    return { success: true, id };
   } catch (err) {
     console.error('Error adding task:', err);
     throw err;
@@ -294,7 +308,6 @@ export async function _addTask({ task }) {
 
 export async function _updateTask({ id, content, llm_response }) {
   try {
-    // Import security functions dynamically to avoid circular dependencies
     const { validateAndSanitizeDbInput } = await import('../auth/security.js');
 
     const updates = {};
@@ -327,7 +340,7 @@ export async function _updateTask({ id, content, llm_response }) {
     });
     return result;
   } catch (err) {
-    console.error('Error updating task:', err);
+    console.error('[_updateTask] Error updating task:', err);
     throw err;
   }
 }
@@ -339,12 +352,9 @@ export async function _getProjects({ userId }) {
   }
   try {
     const result = await dbInstance.query('SELECT * FROM projects WHERE user_id = $1 AND archived = 0 ORDER BY created_at DESC', [userId]);
-    console.log('Database query returned projects:', result.rows?.length || 0);
     
-    // Ensure we always return an array, even if result.rows is null/undefined
     const projects = result.rows || [];
     
-    // Transform database columns to camelCase for frontend consistency
     return projects.map(row => ({
       id: row.id,
       name: row.name,

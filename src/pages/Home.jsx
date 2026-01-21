@@ -6,7 +6,8 @@ import {
     onCleanup,
     createEffect, 
     Show,
-    createMemo
+    createMemo,
+    batch
 } from "solid-js";
 import { logger } from "../lib/core";
 import { errorHandler, LoadingOverlay, AgentInterface } from "../components";
@@ -37,7 +38,8 @@ import { useUser } from "../context/UserContext";
 import { toastManager } from "../lib/ui/feedback";
 import { useActivityLogger } from "../lib/business/activity.js";
 import { streamQuickLLMCall } from "../lib/utils/general.js";
-import {renderFilledTemplate} from '../lib/ui/llm-template.js';
+import {renderFilledTemplate, extractTemplateData} from '../lib/ui/llm-template.js';
+import { updateStepData } from '../lib/ui/stepDataStore.js';
 import { ResponseSection, RouteGuard, ProtectedRoute } from '../components';
 import { useContext } from "solid-js";
 import { useLocation, useNavigate } from "@solidjs/router";
@@ -314,19 +316,12 @@ const TasksContent = () => {
 
     const handleInstructSubmit = async () => {
       const taskId = selectedTaskId();
-      console.log('=== INSTRUCT SUBMIT DEBUG ===');
-      console.log('1. selectedTaskId():', taskId);
-      console.log('2. tasksList():', tasksList());
       if (taskId) {
         const task = tasksList().find(t => t.id === taskId);
-        console.log('3. Found task:', task ? task.id : 'not found');
         if (task) {
-          console.log('4. Task ID:', task.id);
-          console.log('5. Task title:', task.title);
-          console.log('6. Current task content length:', task.content?.length || 0);
-          console.log('7. User instruction:', prompt());
-
-          // Create instruction prompt to modify existing content
+          console.log('[Journey] ============================================');
+          console.log('[Journey] INSTRUCT: Modifying task based on user instruction');
+          
           const instructionPrompt = `Take this existing content and apply the following instruction: "${prompt()}"
 
 Existing content:
@@ -334,123 +329,131 @@ ${task.content || task.llm_response || ''}
 
 Please provide the modified content that follows the instruction.`;
 
-          console.log('8. Instruction prompt:', instructionPrompt.substring(0, 200) + '...');
-          console.log('9. Calling LLM...');
           try {
+            console.log('[Journey] Calling LLM to apply instruction...');
             const modifiedContent = await callLLMForStep(instructionPrompt);
-            console.log('10. Modified content received, length:', modifiedContent.length);
-            console.log('11. Calling updateTask with taskId:', taskId);
+            console.log('[Journey] Modified content received, length:', modifiedContent.length);
+            
+            console.log('[Journey] Saving updated task...');
             await updateTask(taskId, {
               content: modifiedContent,
               llm_response: modifiedContent,
               prompt: instructionPrompt,
               last_modified: new Date().toISOString()
             });
-            console.log('12. Task updated successfully');
-            console.log('13. Refreshing tasks list...');
+            
+            console.log('[Journey] Refreshing task list...');
             setTasksList(await getTasks(currentProjectId()));
-            console.log('14. Tasks list refreshed');
             setSelectedTaskId(null);
-            console.log('15. Selection cleared');
+            console.log('[Journey] Task modified successfully');
+            console.log('[Journey] ============================================');
             toastManager.success('Task modified successfully');
           } catch (error) {
-            console.error('16. Error:', error);
+            console.error('[Journey] Error modifying task:', error.message);
             logger.error('Error modifying task:', error);
             toastManager.error('Failed to modify task');
           }
-        } else {
-          console.log('3b. Task not found in tasksList');
         }
-      } else {
-        console.log('3b. No taskId selected');
       }
-      console.log('=== END INSTRUCT SUBMIT DEBUG ===');
     };
 
 
-
     const handleConfirm = async (taskId) => {
-      console.log('=== handleConfirm called with taskId:', taskId, '===');
-      logger.debug('Home: handleConfirm called with taskId:', taskId);
       const step = getStepHook();
-      console.log('step:', step, 'isComplete:', step?.isComplete());
       if (step && !step.isComplete()) {
-        console.log('Advancing to next step...');
+        console.log('[Journey] ============================================');
+        console.log('[Journey] STEP CONFIRM: User confirmed task, advancing to next step');
         toastManager.info('Advancing to next step...');
         try {
           await step.confirm();
-          console.log('step.confirm() completed, step.isComplete() now:', step.isComplete());
+          console.log('[Journey] Step confirmed');
         } catch (error) {
-          console.error('Error in step.confirm():', error);
+          console.error('[Journey] Error in step.confirm():', error.message);
           return;
         }
 
         if (!step.isComplete()) {
-          console.log('Creating new task for next step');
+          console.log('[Journey] Creating new task for next step...');
           try {
-            // Create a new streaming task for the next step
             const projectId = currentProjectId();
             const userId = user()?.id;
-            console.log('projectId:', projectId, 'userId:', userId);
-            console.log('currentStep:', step.currentStep());
-            console.log('stepName:', step.stepName());
+            const currentStep = step.currentStep();
+            const stepName = step.stepName();
+            console.log('[Journey] Next step:', currentStep?.name || stepName);
 
             const newTaskId = await addTask({
               projectId: projectId,
-              title: step.stepName(),
+              title: stepName,
               content: '',
               prompt: buildPrompt(step.currentStep(), step.stepData(), prompt()),
               llm_response: '',
-              model: step.currentStep()?.model || 'System',
-              section: step.currentStep()?.section || 'Processing',
-              stepName: step.stepName()
+              model: currentStep?.model || 'System',
+              section: currentStep?.section || 'Processing',
+              stepName: stepName
             }, projectId, userId);
-            console.log('New task created with ID:', newTaskId);
+            console.log('[Journey] Task created:', newTaskId);
 
-            // Start streaming the response for the next step
+            console.log('[Journey] Starting LLM streaming for step...');
             let accumulatedResponse = '';
             try {
               const stepPrompt = buildPrompt(step.currentStep(), step.stepData(), prompt());
-              console.log('Starting streaming for prompt:', stepPrompt.substring(0, 100) + '...');
               const response = await callLLMForStep(stepPrompt, (chunk) => {
                 accumulatedResponse += chunk;
-
-                // Update the task content in the UI progressively
-                setTasksList(currentTasks => {
-                  const updatedTasks = currentTasks.map(task => {
-                    if (task.id === newTaskId) {
-                      return { ...task, content: accumulatedResponse, last_modified: new Date().toISOString() };
-                    }
-                    return task;
+                batch(() => {
+                  setTasksList(currentTasks => {
+                    const updatedTasks = currentTasks.map(task => {
+                      if (task.id === newTaskId) {
+                        return { ...task, content: accumulatedResponse, last_modified: new Date().toISOString() };
+                      }
+                      return task;
+                    });
+                    return [...updatedTasks];
                   });
-                  return [...updatedTasks];
                 });
               });
 
-              console.log('Streaming completed, response length:', response?.length);
+              console.log('[Journey] Streaming complete, length:', accumulatedResponse.length);
               if (response && typeof response === 'string' && response.trim().length > 0) {
-                // Update the task in DB with the final response
+                console.log('[Journey] Saving response to task...');
                 await updateTask(newTaskId, {
                   content: response,
                   llm_response: response
                 });
 
-                // Refresh tasks list from DB
+                console.log('[Journey] Extracting template data...');
+                const extractedData = extractTemplateData(response);
+                console.log('[Journey] Extracted data:', JSON.stringify(extractedData));
+                
+                if (Object.keys(extractedData).length > 0 && currentProjectId()) {
+                  await updateStepData(currentProjectId(), extractedData);
+                  console.log('[Journey] Data saved to step_data');
+                }
+
+                console.log('[Journey] Refreshing task list...');
                 setTasksList(await getTasks(currentProjectId()));
+                console.log('[Journey] Task ID in list:', newTaskId);
+                console.log('[Journey] ============================================');
               }
             } catch (streamError) {
-              console.error('Streaming failed for next step:', streamError);
+              console.error('[Journey] Streaming failed:', streamError.message);
               if (accumulatedResponse.trim().length > 0) {
                 await updateTask(newTaskId, {
                   content: accumulatedResponse,
                   llm_response: accumulatedResponse
                 });
+                const extractedData = extractTemplateData(accumulatedResponse);
+                if (Object.keys(extractedData).length > 0 && currentProjectId()) {
+                  await updateStepData(currentProjectId(), extractedData);
+                }
                 setTasksList(await getTasks(currentProjectId()));
+                toastManager.warning('Saved partial response due to streaming error');
+              } else {
+                toastManager.error('Streaming failed: ' + streamError.message);
               }
             }
-          } catch (error) {
-            console.error('Error creating task for next step:', error);
-            toastManager.error('Failed to create next step task');
+          } catch (taskError) {
+            console.error('[Journey] Error creating task:', taskError.message);
+            toastManager.error('Failed to advance to next step');
           }
         }
       }
@@ -708,112 +711,110 @@ Return your response as a JSON array of objects, each with "title" and "descript
     });
 
     const handleStart = async () => {
-        console.log('[handleStart] FUNCTION ENTERED');
+        console.log('[Journey] ============================================');
+        console.log('[Journey] STEP 1: User input received');
         const problemText = prompt();
-        console.log('[handleStart] prompt text:', problemText ? problemText.substring(0, 30) + '...' : 'EMPTY');
+        console.log('[Journey] Input:', `"${problemText?.substring(0, 50)}${problemText?.length > 50 ? '...' : ''}"`);
+        
         if (!problemText || !problemText.trim()) {
             toastManager.error('Please enter a problem statement first');
             return;
         }
 
-        console.log('[handleStart] 1. Starting project creation with problem:', problemText.substring(0, 50) + '...');
+        console.log('[Journey] STEP 2: Creating project...');
         setStartPressed(true);
         setLoading(true);
 
         try {
-            // Create a new project with the problem statement
             const projectData = {
                 name: problemText.trim().substring(0, 50) + (problemText.length > 50 ? '...' : ''),
                 description: problemText.trim()
             };
-            console.log('[handleStart] 2. Creating project with data:', projectData);
-            
             const projectId = await addProject(projectData, user()?.id);
-            console.log('[handleStart] 3. Project created with ID:', projectId);
-
-            // Set the current project
+            console.log('[Journey] Project created:', projectId);
             _setCurrentProjectId(projectId);
-            console.log('[handleStart] 4. currentProjectId set to:', currentProjectId());
             setPrompt(problemText);
 
-            // Create step hook for the new project
-            const newStepHook = createStepHook(projectId, () => {
-                // onStepChange callback
-            });
+            console.log('[Journey] STEP 3: Creating task...');
+            const newStepHook = createStepHook(projectId, () => {});
             stepHook = newStepHook;
-            console.log('[handleStart] 5. Step hook created');
 
             const step = getStepHook();
             if (step && currentProjectId() && user()?.id) {
-                console.log('[handleStart] 6. Creating initial task for first step...');
-                
-                // Create task first with empty content (same as createProjectWithSetup)
                 const taskId = await addTask({
                     projectId: currentProjectId(),
                     title: step.stepName(),
                     content: '',
-                    prompt: buildPrompt(step.currentStep(), {}, problemText),
+                    prompt: buildPrompt(step.currentStep(), {}, { problem: problemText }),
                     llm_response: '',
                     model: step.currentStep()?.model || 'System',
                     section: step.currentStep()?.section || 'Initialization',
                     stepName: step.stepName()
                 }, currentProjectId(), user()?.id);
-                
-                console.log('[handleStart] 7. Task created with ID:', taskId);
-
-                // Update tasks list to show the new task
+                console.log('[Journey] Task created:', taskId);
                 await setTasksList(await getTasks(currentProjectId()));
-                console.log('[handleStart] 8. Tasks list updated:', tasksList());
 
-                // Now start the streaming process that updates the task progressively
+                console.log('[Journey] STEP 4: Starting LLM streaming...');
                 let accumulatedResponse = '';
-                const streamingPrompt = buildPrompt(step.currentStep(), {}, problemText);
-                console.log('[handleStart] 9. Starting streaming with prompt length:', streamingPrompt.length);
+                const streamingPrompt = buildPrompt(step.currentStep(), {}, { problem: problemText });
 
                 try {
                     const response = await callLLMForStep(streamingPrompt, (chunk) => {
                         accumulatedResponse += chunk;
-                        console.log('[handleStart] Streaming chunk received, length:', accumulatedResponse.length);
-
-                        // Update the task content in the UI progressively
-                        setTasksList(currentTasks => {
-                            const updatedTasks = currentTasks.map(task => {
-                                if (task.id === taskId) {
-                                    return { ...task, content: accumulatedResponse, llm_response: accumulatedResponse, last_modified: new Date().toISOString() };
-                                }
-                                return task;
+                        batch(() => {
+                            setTasksList(currentTasks => {
+                                const updatedTasks = currentTasks.map(task => {
+                                    if (task.id === taskId) {
+                                        return { ...task, content: accumulatedResponse, llm_response: accumulatedResponse, last_modified: new Date().toISOString() };
+                                    }
+                                    return task;
+                                });
+                                return [...updatedTasks];
                             });
-                            return [...updatedTasks]; // Ensure new array reference
                         });
                     });
 
-                    console.log('[handleStart] 10. Streaming completed, total length:', accumulatedResponse.length);
+                    console.log('[Journey] STEP 5: Streaming complete, length:', accumulatedResponse.length);
+                    console.log('[Journey] Raw response preview:', accumulatedResponse.substring(0, 150) + '...');
 
                     if (response && typeof response === 'string' && response.trim().length > 0) {
-                        // Update the existing task in DB with the final response
-                        console.log('[handleStart] 11. Updating task in DB with final response...');
-                        await updateTask(taskId, {
-                            content: response,
-                            llm_response: response
-                        });
-
-                        // Refresh tasks list from DB
-                        await setTasksList(await getTasks(currentProjectId()));
-                        console.log('[handleStart] 12. Final tasks list:', tasksList());
-                        toastManager.success('First step completed!');
-                    } else {
-                        console.error('[handleStart] Invalid response:', response);
-                        toastManager.error('Failed to generate response');
-                    }
-                } catch (streamError) {
-                    console.error('[handleStart] Streaming failed:', streamError);
-                    // Still save whatever we got
-                    if (accumulatedResponse.trim().length > 0) {
-                        console.log('[handleStart] Saving partial response to task...');
+                        console.log('[Journey] STEP 6: Saving final response to task...');
                         await updateTask(taskId, {
                             content: accumulatedResponse,
                             llm_response: accumulatedResponse
                         });
+
+                        console.log('[Journey] STEP 7: Extracting template data...');
+                        const extractedData = extractTemplateData(response);
+                        console.log('[Journey] Extracted data:', JSON.stringify(extractedData));
+                        
+                        if (Object.keys(extractedData).length > 0 && currentProjectId()) {
+                            await updateStepData(currentProjectId(), extractedData);
+                            console.log('[Journey] Data saved to step_data');
+                        }
+
+                        console.log('[Journey] STEP 8: Refreshing task list...');
+                        const finalTasks = await getTasks(currentProjectId());
+                        await setTasksList(finalTasks);
+                        console.log('[Journey] Task ID in list:', finalTasks[0]?.id);
+                        console.log('[Journey] ============================================');
+                        toastManager.success('First step completed!');
+                    } else {
+                        console.error('[Journey] Invalid response received');
+                        toastManager.error('Failed to generate response');
+                    }
+                } catch (streamError) {
+                    console.error('[Journey] Streaming failed:', streamError.message);
+                    if (accumulatedResponse.trim().length > 0) {
+                        console.log('[Journey] Saving partial response...');
+                        await updateTask(taskId, {
+                            content: accumulatedResponse,
+                            llm_response: accumulatedResponse
+                        });
+                        const extractedData = extractTemplateData(accumulatedResponse);
+                        if (Object.keys(extractedData).length > 0 && currentProjectId()) {
+                            await updateStepData(currentProjectId(), extractedData);
+                        }
                         await setTasksList(await getTasks(currentProjectId()));
                         toastManager.warning('Saved partial response due to streaming error');
                     } else {
@@ -821,18 +822,15 @@ Return your response as a JSON array of objects, each with "title" and "descript
                     }
                 }
             } else {
-                console.warn('[handleStart] No step hook available, falling back to regenerate');
-                // Fallback to original regenerate logic if something went wrong
+                console.warn('[Journey] No step hook available, using fallback');
                 await newStepHook.regenerate(callLLMForStep, { problem: problemText });
             }
             
-            console.log('[handleStart] 13. Final tasksList:', tasksList());
-            console.log('[handleStart] 14. Final startPressed:', startPressed());
             setLoading(false);
         } catch (error) {
             setLoading(false);
-            console.error('[handleStart] Failed to start project:', error);
-            logger.error('[handleStart] Failed to start project:', error);
+            console.error('[Journey] Failed:', error.message);
+            logger.error('[Journey] Failed to start project:', error);
             toastManager.error('Failed to start project: ' + error.message);
             setStartPressed(false);
         }
@@ -974,16 +972,30 @@ Return your response as a JSON array of objects, each with "title" and "descript
       }
     };
 
+    const [processedPendingId, setProcessedPendingId] = createSignal(null);
+    
     onMount(() => {
         window.addEventListener('projectDeleted', onProjectDeleted);
         window.addEventListener('openProject', onOpenProject);
         window.addEventListener('projectAdded', () => refetchProjects());
 
-        if (projectsStore.pendingProjectId) {
+        if (projectsStore.pendingProjectId && projectsStore.pendingProjectId !== processedPendingId()) {
           const pendingId = projectsStore.pendingProjectId;
+          setProcessedPendingId(pendingId);
           clearPendingProjectId();
           onOpenProject({ detail: pendingId });
         }
+
+        // Watch for pending project changes while component is mounted
+        createEffect(() => {
+          const pendingId = projectsStore.pendingProjectId;
+          if (pendingId && pendingId !== processedPendingId()) {
+            console.log('[Home] Detected pending project while mounted:', pendingId);
+            setProcessedPendingId(pendingId);
+            clearPendingProjectId();
+            onOpenProject({ detail: pendingId });
+          }
+        });
 
         setTimeout(() => {
             if (window.lucide) window.lucide.createIcons();
@@ -1018,8 +1030,16 @@ Return your response as a JSON array of objects, each with "title" and "descript
       
       setProjectData(project);
       
+      console.log('[loadProjectState] project.description:', JSON.stringify(project.description));
+      console.log('[loadProjectState] prompt() current value:', JSON.stringify(prompt()));
+      
       if (project.description && !prompt()) {
+        console.log('[loadProjectState] Setting prompt from project.description');
         setPrompt(project.description);
+      } else if (!project.description) {
+        console.log('[loadProjectState] project.description is empty or missing');
+      } else if (prompt()) {
+        console.log('[loadProjectState] prompt() already has value, not overwriting');
       }
       
       if (project.current_step || project.completed_steps !== undefined) {
@@ -1099,14 +1119,6 @@ Return your response as a JSON array of objects, each with "title" and "descript
                         handleConfirm={handleConfirm}
                       />
                 </Show>
-                 <div style={{display: 'none'}} data-debug-show={(() => {
-                     console.log('[DEBUG-UI] shouldShowResponseSection:', !!(currentProjectId() && (startPressed() || (tasksList && tasksList().length > 0))));
-                     console.log('[DEBUG-UI] currentProjectId:', currentProjectId());
-                     console.log('[DEBUG-UI] startPressed:', startPressed());
-                     console.log('[DEBUG-UI] tasksList:', tasksList());
-                     console.log('[DEBUG-UI] tasksList.length:', tasksList ? tasksList().length : 'N/A');
-                     return '';
-                 })()}></div>
 
 
               {/* Project Creation Modal */}

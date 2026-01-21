@@ -84,16 +84,22 @@ async function saveToStorage(data, projectId) {
       return;
     }
     
+    console.log('[StepDataStore] saveToStorage: Saving data for project:', projectId);
+    console.log('[StepDataStore] saveToStorage: Data keys:', Object.keys(data));
+    console.log('[StepDataStore] saveToStorage: problem value:', data?.problem);
+    
     await db.query('DELETE FROM step_data WHERE project_id = $1', [projectId]);
     const now = new Date().toISOString();
     
     for (const [key, value] of Object.entries(data)) {
-      const jsonValue = typeof value === 'string' ? value : JSON.stringify(value);
+      const jsonValue = JSON.stringify(value);
+      const id = `${projectId}_${key}`;
       await db.query(
-        'INSERT INTO step_data (project_id, key, value, updated_at) VALUES ($1, $2, $3, $4)',
-        [projectId, key, jsonValue, now]
+        'INSERT INTO step_data (id, project_id, key, value, updated_at) VALUES ($1, $2, $3, $4, $5)',
+        [id, projectId, key, jsonValue, now]
       );
     }
+    console.log('[StepDataStore] saveToStorage: Complete');
   } catch (e) {
     console.warn('Failed to save step data to PGLite:', e);
   }

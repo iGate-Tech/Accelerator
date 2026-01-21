@@ -259,7 +259,11 @@ class DataEncryption {
       combined.set(new Uint8Array(encrypted), iv.length);
 
       // Convert to base64 for storage
-      return btoa(String.fromCharCode(...combined));
+      let binary = '';
+      for (let i = 0; i < combined.length; i++) {
+        binary += String.fromCharCode(combined[i]);
+      }
+      return btoa(binary);
     } catch (error) {
       logger.error('Encryption failed:', error);
       throw error;
@@ -566,7 +570,11 @@ export const hashPassword = async (password) => {
     combined.set(hashArray, salt.length);
 
     // Convert to base64 for storage
-    const hashString = btoa(String.fromCharCode(...combined));
+    let hashBinary = '';
+    for (let i = 0; i < combined.length; i++) {
+      hashBinary += String.fromCharCode(combined[i]);
+    }
+    const hashString = btoa(hashBinary);
 
     logger.debug('Password hashed successfully');
     return hashString;
@@ -660,7 +668,11 @@ export const createSecureToken = async (userId, rememberMe = false) => {
     combined.set(signatureArray, encoder.encode(payloadStr).length);
 
     // Base64 encode
-    const token = btoa(String.fromCharCode(...combined));
+    let tokenBinary = '';
+    for (let i = 0; i < combined.length; i++) {
+      tokenBinary += String.fromCharCode(combined[i]);
+    }
+    const token = btoa(tokenBinary);
 
     logger.debug('Secure token created');
     return token;

@@ -13,13 +13,6 @@ const UnifiedTaskCard = (props) => {
   const content = () => props.taskContent ?? task?.content ?? '';
   const llmResponse = () => task?.llm_response ?? '';
 
-  createEffect(() => {
-    console.log('[UnifiedTaskCard] taskId:', taskId);
-    console.log('[UnifiedTaskCard] task.content:', task?.content?.substring(0, 50) || 'EMPTY');
-    console.log('[UnifiedTaskCard] props.taskContent:', props.taskContent?.substring(0, 50) || 'EMPTY');
-    console.log('[UnifiedTaskCard] content():', content().substring(0, 50) || 'EMPTY');
-  });
-
   const isEditing = () => props.editingTaskId && props.editingTaskId() === taskId;
   const isSelected = () => props.selectedTaskId && props.selectedTaskId() === taskId;
   const [isExpanded, setIsExpanded] = createSignal(false);
@@ -32,10 +25,7 @@ const UnifiedTaskCard = (props) => {
   createEffect(() => {
     const currentContent = content();
     const expanded = isExpanded();
-    console.log('[UnifiedTaskCard Effect] content length:', currentContent?.length || 0, 'isExpanded:', expanded);
-    // If card is collapsed and content becomes non-empty, auto-expand
     if (!expanded && currentContent && currentContent.trim().length > 0) {
-      console.log('[UnifiedTaskCard Effect] Auto-expanding card!');
       setIsExpanded(true);
     }
   });
@@ -239,25 +229,21 @@ const UnifiedTaskCard = (props) => {
             <Show when={isEditing()} fallback={
               <div
                 ref={contentRef}
-                class="prose prose-sm max-w-none dark:prose-invert rounded-lg p-2 -m-2 cursor-pointer hover:bg-base-200/30 transition-colors relative"
+                class="prose prose-base max-w-none dark:prose-invert rounded-lg p-2 -m-2 cursor-pointer hover:bg-base-200/30 transition-colors relative"
                 onClick={() => {
                   if (props.setEditingTaskId) props.setEditingTaskId(taskId);
                   if (props.setEditContent) props.setEditContent(content() || '');
                 }}
-              >
+                >
                 <Show when={!content() || content().trim().length === 0}>
-                  {console.log('[UnifiedTaskCard] Showing loading state, content length:', content()?.length || 0)}
                   <div class="flex items-center gap-2 text-base-content/60">
                     <div class="loading loading-dots loading-sm"></div>
                     <span class="text-sm">Generating response...</span>
                   </div>
                 </Show>
                 <Show when={content() && content().trim().length > 0}>
-                  {console.log('[UnifiedTaskCard] Raw content:', content().substring(0, 100))}
                   {(() => {
                     const rendered = marked.parse(renderFilledTemplate(content()) || '', { breaks: true, gfm: true });
-                    console.log('[UnifiedTaskCard] Rendered HTML length:', rendered.length);
-                    console.log('[UnifiedTaskCard] Rendered HTML preview:', rendered.substring(0, 100));
                     return <div innerHTML={rendered} />;
                   })()}
                 </Show>

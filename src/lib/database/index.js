@@ -80,15 +80,18 @@ export const deleteProject = async (id) => {
   return await _deleteProject({ id });
 };
 
-export const deleteAllProjects = async () => {
-  // Get current user
-  const { authAPI } = await import('../auth/data.js');
-  const user = await authAPI.getCurrentUser();
-  if (!user) {
-    throw new Error('User not authenticated');
+export const deleteAllProjects = async (userId = null) => {
+  if (!userId) {
+    const { authAPI } = await import('../auth/data.js');
+    const user = await authAPI.getCurrentUser();
+    if (!user) {
+      throw new Error('User not authenticated');
+    }
+    userId = user.id;
   }
+  if (!userId) throw new Error('User ID required');
   const { _deleteAllProjects } = await import('./projects.js');
-  return await _deleteAllProjects({ userId: user.id });
+  return await _deleteAllProjects({ userId });
 };
 
 export const exportAllProjects = async (userId = null) => {
@@ -370,9 +373,19 @@ export const respondToInvitation = async (invitationId, status) => {
 };
 
 export const addTask = async (task, projectId, userId = null) => {
-  const { _addTask } = await import('./operations.js');
-  const result = await _addTask({ task, projectId, userId });
-  return result.id;
+  try {
+    const { _addTask } = await import('./operations.js');
+    const result = await _addTask({ task, projectId, userId });
+    if (result && typeof result === 'object' && 'id' in result) {
+      return result.id;
+    } else {
+      console.error('[addTask] Unexpected result structure:', result);
+      return undefined;
+    }
+  } catch (error) {
+    console.error('[addTask] Error:', error);
+    throw error;
+  }
 };
 
 export const clearAllTasks = async () => {

@@ -939,7 +939,7 @@ export async function getTasks({ projectId }) {
   }
 }
 
-export async function _addTask({ task, userId }) {
+export async function _addTask({ task, projectId, userId }) {
   try {
     const id = uuidv4();
     await _query(`
@@ -947,7 +947,7 @@ export async function _addTask({ task, userId }) {
       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)
     `, [
       id,
-      task.projectId,
+      projectId,
       userId || task.userId || null,
       task.title || null,
       task.content || null,
@@ -963,7 +963,7 @@ export async function _addTask({ task, userId }) {
       null,
       1
     ]);
-    return { success: true };
+    return { success: true, id };
   } catch (err) {
     console.error('Error adding task:', err);
     throw err;

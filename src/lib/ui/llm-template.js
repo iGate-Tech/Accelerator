@@ -126,7 +126,6 @@ function safeParseValue(valueStr) {
 }
 
 function extractTemplateData(templateText, options = {}) {
-  logger.trace('extractTemplateData: Starting with template length:', templateText?.length, 'options:', options);
   const { expandNestedKeys = false, duplicateHandling = 'lastWins' } = options;
   const text = templateText;
   const len = text.length;
@@ -134,7 +133,6 @@ function extractTemplateData(templateText, options = {}) {
   let pos = 0;
 
   function _assignNestedKey(obj, keyPath, value, duplicateHandling) {
-    logger.trace('_assignNestedKey: Starting with keyPath:', keyPath, 'value type:', typeof value);
     const keys = keyPath.split('.');
     let current = obj;
 
@@ -201,63 +199,49 @@ function extractTemplateData(templateText, options = {}) {
     let escaped = false;
     let braceCount = 0;
     let found = false;
+    let loopPos = pos;
 
-    while (pos < len - 1) {
-      const char = text[pos];
+    while (loopPos < len - 1) {
+      const char = text[loopPos];
 
       if (inString) {
         if (escaped) escaped = false;
         else if (char === "\\") escaped = true;
-        else if (char === '"') inString = false;
+        else if (char === '"') {
+          inString = false;
+        }
       } else {
-        if (char === '"') inString = true;
-        else if (char === '{') braceCount++;
-        else if (char === '}') {
+        if (char === '"') {
+          inString = true;
+        } else if (char === '{') {
+          braceCount++;
+        } else if (char === '}') {
           braceCount--;
-          if (braceCount === 0 && text[pos + 1] === '}') {
+          if (braceCount <= 0 && text[loopPos + 1] === '}') {
             found = true;
             break;
           }
         }
       }
 
-      pos++;
+      loopPos++;
     }
 
     if (!found) {
       pos = start + 2;
     } else {
-      const valueStr = text.slice(valueStart, pos).trim();
-      pos += 2;
+      const valueStr = text.slice(valueStart, loopPos).trim();
+      pos = loopPos + 2;
 
       const { value } = safeParseValue(valueStr);
 
       if (value !== undefined) {
         extractCount++;
-        if (expandNestedKeys && key.includes('.')) {
-          _assignNestedKey(obj, key, value, duplicateHandling);
-        } else {
-          if (key in obj) {
-            if (duplicateHandling === 'error') {
-              throw new Error(`Duplicate key '${key}'`);
-            } else if (duplicateHandling === 'array') {
-              if (!Array.isArray(obj[key])) {
-                obj[key] = [obj[key]];
-              }
-              obj[key].push(value);
-            } else {
-              obj[key] = value;
-            }
-          } else {
-            obj[key] = value;
-          }
-        }
+        obj[key] = value;
       }
     }
   }
 
-  logger.debug('extractTemplateData: Completed, extracted', extractCount, 'keys from', placeholderCount, 'placeholders');
-  logger.trace('extractTemplateData: Final extracted object:', obj);
   return obj;
 }
 

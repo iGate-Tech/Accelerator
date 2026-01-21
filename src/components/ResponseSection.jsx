@@ -1,16 +1,19 @@
-import { createMemo, createSignal, Show } from "solid-js";
+import { createMemo, createSignal, Show, createEffect } from "solid-js";
 import UnifiedTaskCard from "./UnifiedTaskCard";
 
 const ResponseSection = (props) => {
 
-  const startPressedCondition = props.startPressed && props.startPressed();
-  const tasksCondition = props.tasksList && props.tasksList().length > 0;
-
-  const tasksListValue = () => props.tasksList?.() || [];
+  const tasksListValue = createMemo(() => props.tasksList?.() || []);
+  
+  createEffect(() => {
+    console.log('[ResponseSection] startPressed:', props.startPressed?.());
+    console.log('[ResponseSection] tasksList:', tasksListValue());
+    console.log('[ResponseSection] tasksList.length:', tasksListValue().length);
+  });
 
   return (
     <div class="flex-1 max-w-full max-w-3xl w-full mx-auto">
-      {startPressedCondition || tasksCondition ? (
+      {(props.startPressed?.() || tasksListValue().length > 0) ? (
         <div id="contentDiv" class="pb-40 pt-10 max-w-full lg:max-w-6xl mx-auto min-h-[200px]">
           {props.projectName && (
             <div class="mb-6">

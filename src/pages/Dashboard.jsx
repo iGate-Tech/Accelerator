@@ -8,6 +8,7 @@ import { dashboardTranslations } from "../assets/translations/translations-index
 import { formatRelativeTime } from "../lib/utils/general.js";
 import ProjectCard from "../components/ProjectCard.jsx";
 import { logger } from '../lib/core';
+import { setPendingProjectId } from "../stores/projectsStore";
 
 
 
@@ -116,7 +117,7 @@ const Dashboard = () => {
   });
 
   const handleProjectClick = (project) => {
-    window.dispatchEvent(new CustomEvent('openProject', { detail: project.id }));
+    setPendingProjectId(project.id);
     navigate('/');
   };
 

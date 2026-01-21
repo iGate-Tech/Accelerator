@@ -22,6 +22,7 @@ import { translations } from "../assets/translations/translations-index.js";
 import { ProjectCard } from "../components";
 import { toastManager } from "../lib/ui/feedback";
 import { useLucideIcons } from "../hooks/useLucideIcons";
+import { setPendingProjectId } from "../stores/projectsStore";
 
 const Portfolio = () => {
   logger.trace('Portfolio: Starting');
@@ -142,7 +143,7 @@ const Portfolio = () => {
   };
 
    const handleProjectClick = (project) => {
-     window.dispatchEvent(new CustomEvent('openProject', { detail: project.id }));
+     setPendingProjectId(project.id);
      navigate('/');
    };
 

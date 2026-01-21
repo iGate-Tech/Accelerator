@@ -6,4 +6,13 @@ export const [projectsStore, setProjectsStore] = createStore({
   count: 0,
   searchQuery: '',
   currentProjectId: null,
+  pendingProjectId: null,
 });
+
+export const setPendingProjectId = (projectId) => {
+  setProjectsStore('pendingProjectId', projectId);
+};
+
+export const clearPendingProjectId = () => {
+  setProjectsStore('pendingProjectId', null);
+};

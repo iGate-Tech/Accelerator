@@ -43,7 +43,7 @@ import { useContext } from "solid-js";
 import { useLocation, useNavigate } from "@solidjs/router";
 import { LangContext } from "../context/LangContext";
 import { translations } from "../assets/translations/translations-index.js";
-import { projectsStore, setProjectsStore } from "../stores/projectsStore";
+import { projectsStore, setProjectsStore, clearPendingProjectId } from "../stores/projectsStore";
 
 const getStepName = (task) => {
   return task.step_name || "Unknown Step";
@@ -708,13 +708,17 @@ Return your response as a JSON array of objects, each with "title" and "descript
     });
 
     const handleStart = async () => {
+        console.log('[handleStart] FUNCTION ENTERED');
         const problemText = prompt();
+        console.log('[handleStart] prompt text:', problemText ? problemText.substring(0, 30) + '...' : 'EMPTY');
         if (!problemText || !problemText.trim()) {
             toastManager.error('Please enter a problem statement first');
             return;
         }
 
+        console.log('[handleStart] 1. Starting project creation with problem:', problemText.substring(0, 50) + '...');
         setStartPressed(true);
+        setLoading(true);
 
         try {
             // Create a new project with the problem statement
@@ -722,24 +726,113 @@ Return your response as a JSON array of objects, each with "title" and "descript
                 name: problemText.trim().substring(0, 50) + (problemText.length > 50 ? '...' : ''),
                 description: problemText.trim()
             };
+            console.log('[handleStart] 2. Creating project with data:', projectData);
+            
             const projectId = await addProject(projectData, user()?.id);
+            console.log('[handleStart] 3. Project created with ID:', projectId);
 
             // Set the current project
             _setCurrentProjectId(projectId);
+            console.log('[handleStart] 4. currentProjectId set to:', currentProjectId());
+            setPrompt(problemText);
 
             // Create step hook for the new project
             const newStepHook = createStepHook(projectId, () => {
                 // onStepChange callback
             });
             stepHook = newStepHook;
+            console.log('[handleStart] 5. Step hook created');
 
-            // Load project state
-            await loadProjectState(projectId);
+            const step = getStepHook();
+            if (step && currentProjectId() && user()?.id) {
+                console.log('[handleStart] 6. Creating initial task for first step...');
+                
+                // Create task first with empty content (same as createProjectWithSetup)
+                const taskId = await addTask({
+                    projectId: currentProjectId(),
+                    title: step.stepName(),
+                    content: '',
+                    prompt: buildPrompt(step.currentStep(), {}, problemText),
+                    llm_response: '',
+                    model: step.currentStep()?.model || 'System',
+                    section: step.currentStep()?.section || 'Initialization',
+                    stepName: step.stepName()
+                }, currentProjectId(), user()?.id);
+                
+                console.log('[handleStart] 7. Task created with ID:', taskId);
 
-            // Now regenerate the system step
-            await newStepHook.regenerate(callLLMForStep, { problem: problemText });
+                // Update tasks list to show the new task
+                await setTasksList(await getTasks(currentProjectId()));
+                console.log('[handleStart] 8. Tasks list updated:', tasksList());
+
+                // Now start the streaming process that updates the task progressively
+                let accumulatedResponse = '';
+                const streamingPrompt = buildPrompt(step.currentStep(), {}, problemText);
+                console.log('[handleStart] 9. Starting streaming with prompt length:', streamingPrompt.length);
+
+                try {
+                    const response = await callLLMForStep(streamingPrompt, (chunk) => {
+                        accumulatedResponse += chunk;
+                        console.log('[handleStart] Streaming chunk received, length:', accumulatedResponse.length);
+
+                        // Update the task content in the UI progressively
+                        setTasksList(currentTasks => {
+                            const updatedTasks = currentTasks.map(task => {
+                                if (task.id === taskId) {
+                                    return { ...task, content: accumulatedResponse, llm_response: accumulatedResponse, last_modified: new Date().toISOString() };
+                                }
+                                return task;
+                            });
+                            return [...updatedTasks]; // Ensure new array reference
+                        });
+                    });
+
+                    console.log('[handleStart] 10. Streaming completed, total length:', accumulatedResponse.length);
+
+                    if (response && typeof response === 'string' && response.trim().length > 0) {
+                        // Update the existing task in DB with the final response
+                        console.log('[handleStart] 11. Updating task in DB with final response...');
+                        await updateTask(taskId, {
+                            content: response,
+                            llm_response: response
+                        });
+
+                        // Refresh tasks list from DB
+                        await setTasksList(await getTasks(currentProjectId()));
+                        console.log('[handleStart] 12. Final tasks list:', tasksList());
+                        toastManager.success('First step completed!');
+                    } else {
+                        console.error('[handleStart] Invalid response:', response);
+                        toastManager.error('Failed to generate response');
+                    }
+                } catch (streamError) {
+                    console.error('[handleStart] Streaming failed:', streamError);
+                    // Still save whatever we got
+                    if (accumulatedResponse.trim().length > 0) {
+                        console.log('[handleStart] Saving partial response to task...');
+                        await updateTask(taskId, {
+                            content: accumulatedResponse,
+                            llm_response: accumulatedResponse
+                        });
+                        await setTasksList(await getTasks(currentProjectId()));
+                        toastManager.warning('Saved partial response due to streaming error');
+                    } else {
+                        toastManager.error('Streaming failed: ' + streamError.message);
+                    }
+                }
+            } else {
+                console.warn('[handleStart] No step hook available, falling back to regenerate');
+                // Fallback to original regenerate logic if something went wrong
+                await newStepHook.regenerate(callLLMForStep, { problem: problemText });
+            }
+            
+            console.log('[handleStart] 13. Final tasksList:', tasksList());
+            console.log('[handleStart] 14. Final startPressed:', startPressed());
+            setLoading(false);
         } catch (error) {
-            logger.error('Failed to start project:', error);
+            setLoading(false);
+            console.error('[handleStart] Failed to start project:', error);
+            logger.error('[handleStart] Failed to start project:', error);
             toastManager.error('Failed to start project: ' + error.message);
             setStartPressed(false);
         }
@@ -811,9 +904,20 @@ Return your response as a JSON array of objects, each with "title" and "descript
     };
 
     const loadProjectState = async (projectId) => {
+      console.log('[loadProjectState] 1. Starting to load project state for:', projectId);
       try {
-        const projectsList = await getProjects(user().id);
+        const currentUser = user();
+        if (!currentUser?.id) {
+          console.log('[loadProjectState] User not authenticated, skipping');
+          return;
+        }
+        
+        console.log('[loadProjectState] 2. Fetching projects for user:', currentUser.id);
+        const projectsList = await getProjects(currentUser.id);
+        console.log('[loadProjectState] 3. Projects fetched:', projectsList?.length || 0);
+        
         const project = projectsList.find(p => p.id === projectId);
+        console.log('[loadProjectState] 4. Found project:', !!project);
 
         if (!project) {
           logger.warn('Project not found:', projectId);
@@ -823,17 +927,23 @@ Return your response as a JSON array of objects, each with "title" and "descript
         setProjectData(project);
         setPrompt(project.description || '');
         setStartPressed((project.current_step || 0) > 0);
+        console.log('[loadProjectState] 5. setStartPressed to:', (project.current_step || 0) > 0);
 
+        console.log('[loadProjectState] 6. Fetching tasks for project:', projectId);
         const tasks = await getTasks(projectId);
+        console.log('[loadProjectState] 7. Tasks fetched:', tasks?.length || 0);
         setTasksList(tasks);
 
         const step = getStepHook();
         if (step && project.current_step) {
           step.loadFromProject(project);
+          console.log('[loadProjectState] 8. Loaded step from project');
         }
 
         logger.debug('Project state restored for:', projectId);
+        console.log('[loadProjectState] 9. Project state fully restored');
       } catch (error) {
+        console.error('[loadProjectState] Error loading project state:', error);
         logger.error('Failed to load project state:', error);
       }
     };
@@ -868,6 +978,12 @@ Return your response as a JSON array of objects, each with "title" and "descript
         window.addEventListener('projectDeleted', onProjectDeleted);
         window.addEventListener('openProject', onOpenProject);
         window.addEventListener('projectAdded', () => refetchProjects());
+
+        if (projectsStore.pendingProjectId) {
+          const pendingId = projectsStore.pendingProjectId;
+          clearPendingProjectId();
+          onOpenProject({ detail: pendingId });
+        }
 
         setTimeout(() => {
             if (window.lucide) window.lucide.createIcons();
@@ -959,9 +1075,11 @@ Return your response as a JSON array of objects, each with "title" and "descript
         />
 
        <div class="flex flex-col items-center mx-auto" style='max-width:760px;'>
-                <Show when={
-                    !!currentProjectId() && (startPressed() || (tasksList && tasksList().length > 0))
-                }>
+                 <Show when={
+                     !!currentProjectId() && (startPressed() || (tasksList && tasksList().length > 0))
+                  } fallback={
+                      <div style={{"display": "none"}}></div>
+                  }>
                        <ResponseSection
                          tasksList={tasksList}
                          startPressed={startPressed}
@@ -981,7 +1099,14 @@ Return your response as a JSON array of objects, each with "title" and "descript
                         handleConfirm={handleConfirm}
                       />
                 </Show>
-
+                 <div style={{display: 'none'}} data-debug-show={(() => {
+                     console.log('[DEBUG-UI] shouldShowResponseSection:', !!(currentProjectId() && (startPressed() || (tasksList && tasksList().length > 0))));
+                     console.log('[DEBUG-UI] currentProjectId:', currentProjectId());
+                     console.log('[DEBUG-UI] startPressed:', startPressed());
+                     console.log('[DEBUG-UI] tasksList:', tasksList());
+                     console.log('[DEBUG-UI] tasksList.length:', tasksList ? tasksList().length : 'N/A');
+                     return '';
+                 })()}></div>
 
 
               {/* Project Creation Modal */}

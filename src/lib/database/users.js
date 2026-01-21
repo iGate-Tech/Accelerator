@@ -153,7 +153,7 @@ export async function _getUserProfile({ userId }) {
 export async function _updateUserProfile({ userId, updates }) {
   if (!dbInstance) return null;
   try {
-    const allowedFields = ['avatar', 'bio', 'name', 'email', 'preferences', 'location', 'website'];
+    const allowedFields = ['avatar', 'bio', 'name', 'email', 'preferences'];
     const setClauses = [];
     const values = [];
     let paramIndex = 1;

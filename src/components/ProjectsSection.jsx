@@ -18,7 +18,7 @@ import { addProject } from "../lib/db";
 import { toastManager } from "../lib/ui/feedback";
 import { logger } from "../lib/core";
 import { useActivityLogger } from "../lib/business/activity";
-import { projectsStore, setProjectsStore } from "../stores/projectsStore";
+import { projectsStore, setProjectsStore, setPendingProjectId } from "../stores/projectsStore";
 
 const ProjectsSection = (props) => {
     const { lang } = useContext(LangContext);
@@ -72,7 +72,17 @@ const ProjectsSection = (props) => {
         try {
             setProjectsStore('loading', true);
             logger.debug('Loading projects...');
-            const userProjects = await getProjects(user()?.id);
+            
+            // Check if user is authenticated before loading projects
+            const currentUser = user();
+            if (!currentUser?.id) {
+                logger.debug('No authenticated user, skipping project load');
+                setProjectsStore('projects', []);
+                setProjectsStore('count', 0);
+                return;
+            }
+            
+            const userProjects = await getProjects(currentUser.id);
             logger.debug('getProjects returned:', userProjects);
 
             // Ensure we always set an array, even if getProjects returns undefined or null
@@ -136,7 +146,7 @@ const ProjectsSection = (props) => {
                 break;
             }
             case 'open':
-                window.dispatchEvent(new CustomEvent('openProject', { detail: projectId }));
+                setPendingProjectId(projectId);
                 break;
             default:
                 logger.debug('Unknown action:', action);
@@ -187,7 +197,7 @@ const ProjectsSection = (props) => {
 
             // Automatically open the newly created project
             if (projectId) {
-                window.dispatchEvent(new CustomEvent('openProject', { detail: projectId }));
+                setPendingProjectId(projectId);
             }
         } catch (error) {
             logger.error('Failed to create project:', error);
@@ -309,7 +319,7 @@ const ProjectsSection = (props) => {
                                         <div class={`flex justify-between ltr:justify-between rtl:justify-between items-center px-4 py-2 rounded-lg transition-colors cursor-pointer group ${project.id === projectsStore.currentProjectId ? '' : ''}`}>
                                             <span onclick={() => {
                                                 logger.debug('Opening project:', project.id);
-                                                window.dispatchEvent(new CustomEvent('openProject', { detail: project.id }));
+                                                setPendingProjectId(project.id);
                                             }} class="flex items-center w-full gap-2">
                                                 <div class="rounded flex-shrink-0">
                                                     <i data-lucide="folder" class={`w-4 h-4 ${project.id === projectsStore.currentProjectId ? 'text-primary' : 'text-base-content/60'}`}></i>

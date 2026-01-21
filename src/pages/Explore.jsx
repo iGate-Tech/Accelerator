@@ -7,6 +7,7 @@ import { useUser } from "../context/UserContext";
 import { translations } from "../assets/translations/translations-index.js";
 import ProjectCard from "../components/ProjectCard";
 import { logger } from '../lib/core';
+import { setPendingProjectId } from "../stores/projectsStore";
 
 
 const Explore = () => {
@@ -69,12 +70,10 @@ const Explore = () => {
     return filtered;
   });
 
-  const handleProjectClick = (project) => {
-    // Dispatch event to open project in main interface
-    window.dispatchEvent(new CustomEvent('openProject', { detail: project.id }));
-    // Navigate to home page
-    navigate('/');
-  };
+   const handleProjectClick = (project) => {
+     setPendingProjectId(project.id);
+     navigate('/');
+   };
 
   const handleVote = (projectId, result) => {
     // Refetch projects to update vote counts

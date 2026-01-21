@@ -45,10 +45,11 @@ const AuthLayout = (props) => {
 
         // Initialize database
         try {
-            await getPg();
-            logger.debug('Worker initialized');
+            const { ensureDatabaseReady } = await import('../lib/database/core.js');
+            await ensureDatabaseReady();
+            logger.debug('Database initialized');
         } catch (error) {
-            logger.error('Failed to initialize worker:', error);
+            logger.error('Failed to initialize database:', error);
         }
     });
 

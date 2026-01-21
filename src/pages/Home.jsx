@@ -4,7 +4,7 @@ import {
     createResource,
     onMount,
     onCleanup,
-    createEffect,
+    createEffect, 
     Show,
     createMemo
 } from "solid-js";
@@ -65,6 +65,18 @@ const TasksContent = () => {
     });
 
     const [currentProjectId, setCurrentProjectId] = createSignal(null);
+
+    // Debug wrapper for setCurrentProjectId - ensures we store only the ID string
+    const _setCurrentProjectId = (value) => {
+        let idValue = value;
+        if (typeof value === 'object' && value !== null && value.id) {
+            idValue = value.id;
+        }
+        if (idValue !== null && typeof idValue !== 'string') {
+            return;
+        }
+        return setCurrentProjectId(idValue);
+    };
     const [prompt, setPrompt] = createSignal("");
     const [startPressed, setStartPressed] = createSignal(false);
     const [streamingContent, setStreamingContent] = createSignal("");
@@ -136,7 +148,7 @@ const TasksContent = () => {
         const hasProject = currentProjectId() !== null;
         const step = getStepHook();
         const isActive = hasProject && (startPressed() || (tasksList() && tasksList().length > 0 && step?.stepIndex() >= steps.length - 1));
-        const base = hasProject ? "w-full max-w-6xl " : "w-full max-w-4xl flex flex-col items-center justify-center min-h-[calc(100vh-4rem)]";
+        const base = hasProject ? "w-full max-w-3xl " : "w-full max-w-4xl flex flex-col items-center justify-center min-h-[calc(100vh-4rem)]";
         const expanded = "";
         return `${base} ${expanded}`.trim();
     });
@@ -232,7 +244,7 @@ const TasksContent = () => {
           createdAt: new Date()
         });
         await activityLogger.logProject('created', projectId, name, { source: 'ai_suggestion' });
-        setCurrentProjectId(projectId);
+        _setCurrentProjectId(projectId);
         
         setLoading(false);
         setActiveCardId(null);
@@ -249,27 +261,7 @@ const TasksContent = () => {
       }
     };
 
-    const handleResetStep = async () => {
-      const step = getStepHook();
-      if (step) {
-        await step.resetStep();
-        setStreamingContent('');
-        toastManager.success('Step reset');
-      }
-    };
 
-    const handleResetProject = async () => {
-      const step = getStepHook();
-      if (step) {
-        await step.resetProject();
-      }
-      setCurrentProjectId(null);
-      setPrompt('');
-      setTasksList([]);
-      setStreamingContent("");
-      setStartPressed(false);
-      toastManager.success(t().resetSuccessful);
-    };
 
     const handleRegenerate = async () => {
       const step = getStepHook();
@@ -296,24 +288,34 @@ const TasksContent = () => {
       if (!step) return;
       
       try {
-        const response = step.currentResponse();
-        if (response) {
+        // Get response from streaming content or step hook
+        const response = streamingContent() || step.currentResponse();
+        
+        if (response && response.trim().length > 0) {
           await addTask({
             projectId: currentProjectId(),
+            title: step.stepName(),
             content: response,
             prompt: buildPrompt(step.currentStep(), {}, prompt()),
             llmResponse: response,
             model: 'System',
             section: 'Initialization',
             stepName: step.stepName()
-          });
+          }, currentProjectId(), user()?.id);
+          // Clear streaming content after task is saved
+          setStreamingContent("");
+          // Also clear step's current response
+          step.setCurrentResponse?.(null);
         }
         
-        await step.confirm();
-        
-        if (step.isComplete()) {
-          toastManager.success('All steps completed successfully!');
-        }
+         await step.confirm();
+
+         if (step.isComplete()) {
+           toastManager.success('All steps completed successfully!');
+         } else {
+           // Auto-start the next step
+           await step.regenerate(callLLMForStep, prompt());
+         }
       } catch (error) {
         logger.error('Confirm accept error:', error);
         toastManager.error('Confirmation failed');
@@ -527,7 +529,7 @@ const TasksContent = () => {
               model: task.model,
               section: task.section,
               stepName: task.step_name
-            });
+            }, projectData.id, user()?.id);
           }
         }
 
@@ -630,7 +632,7 @@ Return your response as a JSON array of objects, each with "title" and "descript
         }, user().id);
 
         await activityLogger.logProject('created', String(projectId), name, { source: 'manual' });
-        setCurrentProjectId(projectId);
+        _setCurrentProjectId(projectId);
         setPrompt(description);
 
         setShowProjectModal(false);
@@ -723,16 +725,14 @@ Return your response as a JSON array of objects, each with "title" and "descript
 
     const onProjectDeleted = (e) => {
       if (currentProjectId() === e.detail.projectId) {
-        setCurrentProjectId(null);
+        _setCurrentProjectId(null);
         setPrompt('');
         setTasksList([]);
         stepHook = null;
       }
     };
     
-    const onResetAgent = () => {
-      handleResetProject();
-    };
+
     
     const onOpenProject = async (e) => {
       const pid = e.detail;
@@ -749,7 +749,7 @@ Return your response as a JSON array of objects, each with "title" and "descript
           if (step) step.persist();
         }
 
-        setCurrentProjectId(pid);
+        _setCurrentProjectId(pid);
         stepHook = null;
 
         await updateEntity({
@@ -831,7 +831,6 @@ Return your response as a JSON array of objects, each with "title" and "descript
 
     onMount(() => {
         window.addEventListener('projectDeleted', onProjectDeleted);
-        window.addEventListener('resetAgent', onResetAgent);
         window.addEventListener('openProject', onOpenProject);
 
         setTimeout(() => {
@@ -841,32 +840,10 @@ Return your response as a JSON array of objects, each with "title" and "descript
 
     onCleanup(() => {
         window.removeEventListener('projectDeleted', onProjectDeleted);
-        window.removeEventListener('resetAgent', onResetAgent);
         window.removeEventListener('openProject', onOpenProject);
-
-        // Automatically reset project state when navigating away from this page
-        if (currentProjectId()) {
-            setCurrentProjectId(null);
-            setPrompt('');
-            setTasksList([]);
-            setStreamingContent("");
-            setStartPressed(false);
-            stepHook = null;
-        }
     });
 
-    createEffect(() => {
-        const currentUser = user();
-        if (currentUser?.id) {
-            getUserProfile(currentUser.id).then(profile => {
-                if (profile?.current_project_id) {
-                    setCurrentProjectId(profile.current_project_id);
-                }
-            }).catch(error => {
-                logger.debug('Failed to load user profile:', error);
-            });
-        }
-    });
+
 
     createEffect(() => {
         currentProjectId();
@@ -958,7 +935,8 @@ Return your response as a JSON array of objects, each with "title" and "descript
                       setEditContent={setEditContent}
                       editingTaskId={editingTaskId}
                       setEditingTaskId={setEditingTaskId}
-                      handleReset={handleResetProject}
+                      selectedTaskId={activeCardId}
+
                       handleInstruct={handleInstruct}
                       handleRegenerate={handleRegenerate}
                       handleConfirm={handleConfirm}
@@ -1116,19 +1094,16 @@ Return your response as a JSON array of objects, each with "title" and "descript
                  setPrompt={setPrompt}
                  tasksList={tasksList}
                  startPressed={startPressed}
-                 handleImprove={handleImprove}
-                 handleSuggest={handleSuggest}
-                 handleInstruct={handleInstruct}
-                 handleConfirm={handleConfirm}
-                 handleReset={handleResetProject}
-                 handleResetStep={handleResetStep}
-                 handleStart={handleStart}
+                  handleImprove={handleImprove}
+                  handleSuggest={handleSuggest}
+                  handleInstruct={handleInstruct}
+                  handleConfirm={handleConfirm}
+                  handleStart={handleStart}
                  handleRegenerate={handleRegenerate}
-                 handleConfirmAccept={handleConfirmAccept}
-                 handleConfirmRetry={handleConfirmRetry}
-                 handleConfirmEdit={handleConfirmEdit}
-                 handleConfirmReset={handleConfirmReset}
-                 streamingContent={streamingContent}
+                  handleConfirmAccept={handleConfirmAccept}
+                  handleConfirmRetry={handleConfirmRetry}
+                  handleConfirmEdit={handleConfirmEdit}
+                  streamingContent={streamingContent}
                  streamingError={streamingError}
                  steps={steps}
                  stepNames={stepNames}

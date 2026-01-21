@@ -1,6 +1,6 @@
 import {
     Show,
-    For,
+    For, 
     createSignal,
     createEffect,
     createMemo,
@@ -114,6 +114,8 @@ const AgentInterface = (props) => {
         'General Mode': 'gray'
     };
 
+
+
     const t = createMemo(() => {
         const langKey = currentLang();
         const translations = agentTranslations[langKey] || agentTranslations.en;
@@ -183,10 +185,10 @@ const AgentInterface = (props) => {
                     props.agentContentClass ? props.agentContentClass() : ""
             }>
 
-                <div class="flex flex-col gap-4  px-12">
-                    <Show when={
-                        isAuthenticated() && !(props.startPressed && props.startPressed()) && !(props.tasksList && props.tasksList().length > 0) && !(props.currentProjectId && props.currentProjectId())
-                    }>
+                <div class="flex flex-col gap-4">
+                     <Show when={
+                         isAuthenticated() && !(props.startPressed && props.startPressed()) && !(props.tasksList && props.tasksList().length > 0) && !(props.currentProjectId && props.currentProjectId())
+                     }>
                         <div ref={greetingRef}
                             id="greetingDiv"
                             class="text-center fade-in">
@@ -221,7 +223,6 @@ const AgentInterface = (props) => {
                                             value={
                                                 new Date().toLocaleString()
                                             }/>
-                                        <input type="hidden" name="taskModel" value="Llama-3.2-3B-Free"/>
                                          <Show when={props.selectedTaskId && props.selectedTaskId()}>
                                              <div class="mb-2">
                                                  <span class="badge badge-info">Selected Task: {(() => {
@@ -269,44 +270,44 @@ const AgentInterface = (props) => {
 
                                     <div class="flex justify-between items-center mt-2 overflow-visible">
 
-                                        <div class="flex gap-2 overflow-visible">
-                                            <div class="flex gap-2 overflow-visible">
-                                                <button type="button" class="select text-base-content/50 pr-8 py-1 rounded-full flex items-center gap-1 flex gap-3 transition h-6 cursor-pointer border-0" popovertarget="mode-popover-1" style="anchor-name:--mode-anchor-1">
-                                                    <LogoIcon fillColor={
-                                                        () => modeColors[selectedMode()] || 'gray'
-                                                    }/> {
-                                                    selectedMode()
-                                                } </button>
-                                                <ul class="dropdown menu w-52 rounded-box bg-base-100 shadow-sm" popover id="mode-popover-1" style="position-anchor:--mode-anchor-1">
-                                                     <For each={
-                                                         [
-                                                             'General Mode',
-                                                             'Accelerator Mode',
-                                                             'Services Mode',
-                                                             'Venture Mode',
-                                                             'Studio Mode'
-                                                         ]
-                                                     }>
-                                                         {(mode) => (
-                                                             <li>
-                                                                 <button type="button" class="flex items-center flex gap-3 gap-2 px-3 py-2 hover:bg-base-200 w-full text-left text-base-content/50 cursor-pointer"
-                                                                     onClick={
-                                                                         (e) => {
-                                                                             e.preventDefault();
-                                                                             setSelectedMode(mode);
-                                                                         }
-                                                                 }>
-                                                                     <LogoIcon fillColor={
-                                                                         modeColors[mode]
-                                                                     }/> {mode} </button>
-                                                             </li>
-                                                         )}
-                                                     </For>
-                                                </ul>
-                                            </div>
+                                         <div class="flex gap-2 overflow-visible">
+                                             <div class="flex gap-2 overflow-visible">
+                                                 <button type="button" class="select text-base-content/50 pr-8 py-1 rounded-full flex items-center gap-1 flex gap-3 transition h-6 cursor-pointer border-0" popovertarget="mode-popover-1" style="anchor-name:--mode-anchor-1">
+                                                     <LogoIcon fillColor={
+                                                         () => modeColors[selectedMode()] || 'gray'
+                                                     }/> {
+                                                     selectedMode()
+                                                 } </button>
+                                                 <ul class="dropdown menu w-52 rounded-box bg-base-100 shadow-sm" popover id="mode-popover-1" style="position-anchor:--mode-anchor-1">
+                                                      <For each={
+                                                          [
+                                                              'General Mode',
+                                                              'Accelerator Mode',
+                                                              'Services Mode',
+                                                              'Venture Mode',
+                                                              'Studio Mode'
+                                                          ]
+                                                      }>
+                                                          {(mode) => (
+                                                              <li>
+                                                                  <button type="button" class="flex items-center flex gap-3 gap-2 px-3 py-2 hover:bg-base-200 w-full text-left text-base-content/50 cursor-pointer"
+                                                                      onClick={
+                                                                          (e) => {
+                                                                              e.preventDefault();
+                                                                              setSelectedMode(mode);
+                                                                          }
+                                                                  }>
+                                                                      <LogoIcon fillColor={
+                                                                          modeColors[mode]
+                                                                      }/> {mode} </button>
+                                                              </li>
+                                                          )}
+                                                      </For>
+                                                 </ul>
+                                             </div>
 
 
-                                        </div>
+                                         </div>
 
                                         <div class="flex gap-2">
                                             {/* <button type="button" style="background-color: #9e28b5;" class="text-white px-2 py-1 rounded-full flex items-center text-xs transition group" onClick={() => props.handleResetStep && props.handleResetStep()}>
@@ -367,18 +368,7 @@ const AgentInterface = (props) => {
                                                 </div>
                                             </Show>
 
-                                            <Show when={
-                                                isComplete()
-                                            }>
-                                                <button type="button"
-                                                    onClick={
-                                                        (e) => props.handleReset && props.handleReset()
-                                                    }
-                                                    class="bg-primary/10 text-primary px-3 py-1 rounded-full flex items-center gap-1 text-xs hover:bg-primary/20 transition cursor-pointer">
-                                                    <i data-lucide="rotate-ccw" class="w-3 h-4"></i>
-                                                    <span class="hidden sm:inline">New Project</span>
-                                                </button>
-                                            </Show>
+
                                         </div>
                                     </div>
                                 </form>

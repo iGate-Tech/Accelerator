@@ -108,10 +108,31 @@ export async function _updateProject({ id, updates }) {
     for (const [key, value] of Object.entries(updates)) {
       const dbField = key.replace(/([A-Z])/g, '_$1').toLowerCase();
       if (allowedFields.includes(dbField)) {
+        // Ensure value is a primitive JavaScript type (string, number, boolean, null)
+        let primitiveValue = value;
+        
+        // Handle functions/signals by calling them if they're functions
+        if (typeof value === 'function') {
+          primitiveValue = value();
+        }
+        
+        // Convert to appropriate type based on field
+        if (dbField === 'completed_steps' || dbField === 'ui_progress' || 
+            dbField === 'total_credits' || dbField === 'consumed_credits' ||
+            dbField === 'total_time' || dbField === 'consumed_time') {
+          // Integer fields
+          primitiveValue = parseInt(primitiveValue, 10) || 0;
+        } else if (typeof primitiveValue === 'object' && primitiveValue !== null) {
+          // If it's still an object, stringify it or skip
+          continue;
+        } else {
+          // String fields - ensure it's a string
+          primitiveValue = String(primitiveValue ?? '');
+        }
+        
         // Validate and sanitize the value
-        const validation = validateAndSanitizeDbInput(value, `project ${key}`);
+        const validation = validateAndSanitizeDbInput(primitiveValue, `project ${key}`);
         if (!validation.valid) {
-          console.warn(`Project update validation failed for ${key}: ${validation.reason}`);
           // Skip invalid values instead of failing the entire update
           continue;
         }

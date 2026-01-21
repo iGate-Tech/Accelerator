@@ -65,7 +65,9 @@ export const addProject = async (project, userId = null) => {
     throw new Error('User ID is required');
   }
   project.public = 0; // Ensure private by default
-  return await _createProject({ project, userId });
+  const result = await _createProject({ project, userId });
+  // Return just the ID, not the full object
+  return result?.id;
 };
 
 export const updateProject = async (id, project) => {

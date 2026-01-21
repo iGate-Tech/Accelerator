@@ -16,20 +16,40 @@ export function createStepHook(projectId, onStepChange) {
 
   const persist = async (state = uiState()) => {
     if (!projectId) return;
+    
+    // Ensure projectId is a string
+    const projectIdString = typeof projectId === 'string' ? projectId : String(projectId);
+    
+    if (!projectIdString) return;
+    
+    // Ensure all values are plain JavaScript values, not signals or derived values
+    const currentStepValue = currentStep();
+    const stepIndexValue = Number(stepIndex()) || 0;
+    const progressValue = Number(progress()) || 0;
+    const stepNameValue = String(stepName()) || 'Unknown Step';
+    const uiStateValue = typeof state === 'function' ? String(state()) : String(state);
+    
+    const completeValue = Boolean(isComplete());
+    const lastValue = Boolean(isLast());
+    
+    const uiMessageValue = completeValue 
+      ? 'Completed' 
+      : lastValue 
+        ? 'Final Step' 
+        : `Step ${stepIndexValue + 1} of ${steps.length}`;
+
+    const updates = {
+      currentStep: String(currentStepValue?.id || 'system'),
+      completedSteps: stepIndexValue,
+      stepName: stepNameValue,
+      uiProgress: progressValue,
+      uiStatus: uiStateValue,
+      uiMessage: uiMessageValue
+    };
+
     await _updateProject({
-      id: projectId,
-      updates: {
-        currentStep: currentStep()?.id || 'system',
-        completedSteps: stepIndex(),
-        stepName: stepName(),
-        uiProgress: progress(),
-        uiStatus: state,
-        uiMessage: isComplete() 
-          ? 'Completed' 
-          : isLast() 
-            ? 'Final Step' 
-            : `Step ${stepIndex() + 1} of ${steps.length}`
-      }
+      id: projectIdString,
+      updates
     });
   };
 
@@ -98,6 +118,7 @@ export function createStepHook(projectId, onStepChange) {
     stepIndex,
     uiState,
     currentResponse,
+    setCurrentResponse,
     currentStep,
     isFirst,
     isLast,

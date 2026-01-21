@@ -81,9 +81,13 @@ export default defineConfig({
   ],
   build: {
     target: 'esnext',
+    commonjsOptions: {
+      transformMixedEsModules: true,
+    },
   },
    optimizeDeps: {
-     exclude: ['@electric-sql/pglite']
+     exclude: ['@electric-sql/pglite'],
+     include: ['@electric-sql/pglite/dist/*.js', '@electric-sql/pglite/dist/*.wasm']
    },
    test: {
      globals: true,

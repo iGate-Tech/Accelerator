@@ -194,9 +194,14 @@ const Sidebar = () => {
     const handleDeleteAllProjects = async () => {
         const confirmed = await confirmDelete(t().allProjects, "All projects will be permanently deleted.");
         if (confirmed) {
-            await deleteAllProjects();
-            toastManager.success(t().deleteAllProjects + ' ' + t().successful);
-            await loadProjects();
+            try {
+                await deleteAllProjects();
+                toastManager.success(t().deleteAllProjects + ' ' + t().successful);
+                await loadProjects();
+            } catch (error) {
+                console.log('Caught error in delete all projects:', error.message);
+                toastManager.error('Failed to delete all projects: ' + error.message);
+            }
         }
     };
     const handleExportAllProjects = async () => {
@@ -339,9 +344,6 @@ const Sidebar = () => {
                             }
                         }>
                             <A href="/"
-                                onClick={
-                                    () => window.dispatchEvent(new CustomEvent('resetAgent'))
-                                }
                                 class="flex items-center justify-center ltr:justify-center rtl:justify-center p-3 hover:bg-base-300 transition-colors rounded-lg relative group"
                                 aria-label={
                                     `Create new project - ${
@@ -516,9 +518,6 @@ const Sidebar = () => {
                                     <div class="dropdown menu rounded-box bg-base-100 shadow-lg border border-base-200 mt-1" popover id="popover-all-projects" style="position-anchor:--anchor-all-projects">
                                         <li>
                                             <A href="/"
-                                                onClick={
-                                                    () => window.dispatchEvent(new CustomEvent('resetAgent'))
-                                                }
                                                 class="flex items-center gap-2">
                                                 <i data-lucide="plus" class="w-4 h-4"></i>
                                                 {

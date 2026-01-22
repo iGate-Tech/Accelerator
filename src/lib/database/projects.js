@@ -170,6 +170,9 @@ export async function _deleteProject({ id }) {
     // Delete all tasks associated with the project
     await dbInstance.query('DELETE FROM tasks WHERE project_id = $1', [id]);
 
+    // Delete step_data associated with the project
+    await dbInstance.query('DELETE FROM step_data WHERE project_id = $1', [id]);
+
     // Delete the project itself
     await dbInstance.query('DELETE FROM projects WHERE id = $1', [id]);
 
@@ -347,9 +350,21 @@ export async function _updateTask({ id, content, llm_response }) {
 
 export async function _getProjects({ userId }) {
   if (!dbInstance) {
-    console.debug('Database not initialized, returning empty projects');
+    // Try to ensure database is ready
+    try {
+      const { ensureDatabaseReady } = await import('./core.js');
+      await ensureDatabaseReady();
+    } catch (e) {
+      console.debug('Database not initialized, returning empty projects');
+      return [];
+    }
+  }
+  
+  if (!dbInstance) {
+    console.debug('Database still not initialized, returning empty projects');
     return [];
   }
+  
   try {
     const result = await dbInstance.query('SELECT * FROM projects WHERE user_id = $1 AND archived = 0 ORDER BY created_at DESC', [userId]);
     

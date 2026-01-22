@@ -1,4 +1,6 @@
-// AI Model Fallback System
+// AI Model Fallback System - Reserved for future use
+// These functions are not currently used but kept for potential future implementation
+
 export const AI_MODELS = {
   PRIMARY: 'meta-llama/llama-3.2-3b-instruct:free',
   FALLBACK_1: 'microsoft/wizardlm-2-8x22b:free',
@@ -66,81 +68,3 @@ class ModelFallbackManager {
 }
 
 export const modelFallbackManager = new ModelFallbackManager();
-
-// Enhanced AI call function with fallback support
-export const callAIWithFallback = async (prompt, options = {}) => {
-  const maxRetries = options.maxRetries || 2;
-  let lastError = null;
-
-  for (let attempt = 0; attempt <= maxRetries; attempt++) {
-    const model = modelFallbackManager.getCurrentModel();
-
-    try {
-      console.log(`Attempting AI call with model: ${model} (attempt ${attempt + 1}/${maxRetries + 1})`);
-
-      // Make the API call (this would be your actual API call)
-      const response = await fetch('/api/llm/stream', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ prompt, model }),
-      });
-
-      if (!response.ok) {
-        throw new Error(`API call failed: ${response.status}`);
-      }
-
-      // On success, record it and return
-      modelFallbackManager.recordSuccess(model);
-      return response;
-
-    } catch (error) {
-      console.error(`AI call failed with model ${model}:`, error);
-      lastError = error;
-
-      // Record failure and try next model
-      modelFallbackManager.recordFailure(model);
-
-      if (attempt < maxRetries) {
-        console.log(`Retrying with next available model...`);
-        await new Promise(resolve => setTimeout(resolve, 1000)); // Brief delay
-      }
-    }
-  }
-
-  // All models failed
-  throw new Error(`All AI models failed. Last error: ${lastError?.message}`);
-};
-
-// Health check for AI models
-export const checkModelHealth = async (model) => {
-  try {
-    const response = await fetch('/api/llm/stream', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        prompt: 'Hello',
-        model,
-        timeout: 5000 // Short timeout for health check
-      }),
-    });
-
-    return response.ok;
-  } catch (error) {
-    console.warn(`Health check failed for model ${model}:`, error);
-    return false;
-  }
-};
-
-// Auto-recovery: periodically check and recover failed models
-export const startModelHealthMonitoring = () => {
-  setInterval(async () => {
-    for (const model of MODEL_PRIORITIES) {
-      const isHealthy = await checkModelHealth(model);
-      if (isHealthy) {
-        modelFallbackManager.recordSuccess(model);
-      }
-    }
-  }, 10 * 60 * 1000); // Check every 10 minutes
-};

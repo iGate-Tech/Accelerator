@@ -21,11 +21,14 @@ const UnifiedTaskCard = (props) => {
   const isStreaming = () => props.isStreaming ?? (content() && content().trim().length > 0 && !llmResponse());
   const isStreamingComplete = () => props.isStreamingComplete ?? true;
 
-  // Auto-expand when content first appears (for streaming visibility)
+  // Only auto-expand if this is the currently streaming task
+  // All other tasks stay collapsed by default
   createEffect(() => {
     const currentContent = content();
-    const expanded = isExpanded();
-    if (!expanded && currentContent && currentContent.trim().length > 0) {
+    const streamingTaskId = props.streamingTaskId?.();
+    const shouldAutoExpand = streamingTaskId === taskId;
+    
+    if (shouldAutoExpand && !isExpanded() && currentContent && currentContent.trim().length > 0) {
       setIsExpanded(true);
     }
   });
@@ -167,7 +170,7 @@ const UnifiedTaskCard = (props) => {
     >
         {/* Card Header */}
         <div class={`card-header bg-base-200/50 px-4 py-3 border-b border-base-300 flex flex-wrap items-center justify-between gap-2 ${
-          content() && content().trim().length > 0 && !isExpanded() ? 'ring-1 ring-primary/30' : ''
+          props.streamingTaskId?.() === taskId && content() && content().trim().length > 0 && !isExpanded() ? 'ring-1 ring-primary/30' : ''
         }`}>
         <div class="flex items-center gap-2 min-w-0">
            <button
@@ -211,16 +214,16 @@ const UnifiedTaskCard = (props) => {
           </div>
         </div>
            <div class="flex items-center gap-2">
-             <Show when={isSelected()}>
-               <span class="badge badge-info badge-sm">Selected</span>
-             </Show>
-              <Show when={content() && content().trim().length > 0 && !isExpanded()}>
-                <span class="badge badge-primary badge-sm animate-pulse">Streaming</span>
+              <Show when={isSelected()}>
+                <span class="badge badge-info badge-sm">Selected</span>
               </Show>
-            <Show when={showActionButtons()}>
-              <ActionButtons />
-            </Show>
-           </div>
+               <Show when={props.streamingTaskId?.() === taskId && content() && content().trim().length > 0 && !isExpanded()}>
+                 <span class="badge badge-primary badge-sm animate-pulse">Streaming</span>
+               </Show>
+             <Show when={showActionButtons()}>
+               <ActionButtons />
+             </Show>
+            </div>
       </div>
 
       {/* Card Body */}

@@ -10,6 +10,16 @@ export const getProjects = async (userId = null) => {
     userId = user?.id;
   }
   if (!userId) return [];
+  
+  // Ensure database is initialized before querying
+  try {
+    const { ensureDatabaseReady } = await import('./core.js');
+    await ensureDatabaseReady();
+  } catch (e) {
+    console.warn('Failed to initialize database:', e);
+    return [];
+  }
+  
   const { _getProjects } = await import('./projects.js');
   return await _getProjects({ userId });
 };

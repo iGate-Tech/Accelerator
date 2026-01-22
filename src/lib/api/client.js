@@ -4,54 +4,11 @@
 // Easily replaceable with Supabase or other backends
 
 import { toastManager } from '../ui/feedback.js';
-import { getCreditBalance, consumeCredits } from '../database';
-import { activityLogger } from '../business/activity.js';
 import { logger } from '../core';
 
 const API_BASE_URL = '';
 
 export const apiClient = {
-  // LLM API calls
-  llm: {
-    stream: async (prompt, options = {}) => {
-      const { userId, creditsCost = 5, skipCreditCheck = false } = options;
-
-      try {
-        // Consume credits if userId provided and not skipping
-        if (userId && !skipCreditCheck) {
-          const balance = await getCreditBalance(userId);
-          if (balance < creditsCost) {
-            throw new Error('Insufficient credits. You need at least ' + creditsCost + ' credits to use AI features.');
-          }
-          await consumeCredits(userId, creditsCost, `AI Processing: ${prompt.substring(0, 50)}...`);
-
-          // Log activity
-          if (activityLogger.user) {
-            activityLogger.logAI('used', null, 'LLM Stream', { creditsUsed: creditsCost, promptLength: prompt.length });
-          }
-        }
-
-        const response = await fetch(`${API_BASE_URL}/api/llm/stream`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ prompt })
-        });
-
-        if (!response.ok) {
-          throw new Error(`LLM API error: ${response.status}`);
-        }
-
-        return await response.text();
-       } catch (error) {
-         logger.error('LLM API error:', error);
-         toastManager.error(`Failed to get LLM response for prompt (${prompt.length} chars) from /api/llm/stream: ${error.message}`);
-         throw error;
-       }
-    }
-  },
-
   // Generic API call wrapper with error handling
   call: async (endpoint, options = {}) => {
     try {
@@ -83,8 +40,8 @@ export const apiClient = {
   // Check server connectivity
   checkConnectivity: async () => {
     try {
-      const response = await fetch(`${API_BASE_URL}/api/llm/stream`, {
-        method: 'HEAD',
+      const response = await fetch('/api/health', {
+        method: 'GET',
         signal: AbortSignal.timeout(5000)
       });
       return response.ok;

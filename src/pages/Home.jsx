@@ -37,8 +37,7 @@ import {
 import { useUser } from "../context/UserContext";
 import { toastManager } from "../lib/ui/feedback";
 import { useActivityLogger } from "../lib/business/activity.js";
-import { streamQuickLLMCall } from "../lib/utils/general.js";
-import {renderFilledTemplate, extractTemplateData} from '../lib/ui/llm-template.js';
+import { renderFilledTemplate, extractTemplateData} from '../lib/ui/llm-template.js';
 import { updateStepData } from '../lib/ui/stepDataStore.js';
 import { ResponseSection, RouteGuard, ProtectedRoute } from '../components';
 import { useContext } from "solid-js";
@@ -90,13 +89,10 @@ const TasksContent = () => {
     const [loading, setLoading] = createSignal(false);
 
     const [showProjectModal, setShowProjectModal] = createSignal(false);
-    const [projectName, setProjectName] = createSignal('');
-    const [projectDescription, setProjectDescription] = createSignal('');
-    const [aiSuggestions, setAiSuggestions] = createSignal([]);
-    const [gettingSuggestions, setGettingSuggestions] = createSignal(false);
     const [switchingProject, setSwitchingProject] = createSignal(false);
     const [selectedTaskId, setSelectedTaskId] = createSignal(null);
     const [projectData, setProjectData] = createSignal(null);
+    const [streamingTaskId, setStreamingTaskId] = createSignal(null);
 
     let stepHook = null;
 
@@ -109,13 +105,6 @@ const TasksContent = () => {
         }
         return stepHook;
     };
-
-    createEffect(() => {
-      const desc = projectDescription();
-      if (desc && desc.trim().length >= 10 && showProjectModal()) {
-        getProjectSuggestions(desc);
-      }
-    });
 
     const [tasks] = createResource(currentProjectId, async (projectId) => {
         if (!projectId) return [];
@@ -164,95 +153,6 @@ const TasksContent = () => {
     });
 
     let textareaRef;
-
-    const handleImprove = async () => {
-      if (!user()?.id) {
-        toastManager.error('Please log in to use AI features');
-        return;
-      }
-      
-      const improvedPrompt = `Improve this startup idea for better clarity, specificity, and market potential. Start with the improved idea name followed by ': ' and then provide a concise description in simple English, in only 3 lines. Do not generate in markdown: ${prompt()}`;
-      
-       setLoading(true);
-       setActiveCardId('streaming');
-
-       try {
-         const improvedText = await streamQuickLLMCall(
-           improvedPrompt,
-           user()?.id,
-           (chunk) => {
-             // Handle streaming chunks if needed
-           }
-        );
-        
-        setPrompt(improvedText);
-        
-        if (currentProjectId()) {
-          const colonIndex = improvedText.indexOf(': ');
-          let name = '', description = improvedText;
-          if (colonIndex !== -1) {
-            name = improvedText.substring(0, colonIndex).trim();
-            description = improvedText.substring(colonIndex + 2).trim();
-          }
-          await updateProject(currentProjectId(), { name, description });
-          window.dispatchEvent(new CustomEvent('projectUpdated'));
-        }
-        
-        setLoading(false);
-        setActiveCardId(null);
-        toastManager.success('Project improved successfully!');
-      } catch (error) {
-        setLoading(false);
-        setActiveCardId(null);
-        logger.error('Improve error:', error);
-        toastManager.error('Failed to improve project: ' + error.message);
-      }
-    };
-
-    const handleSuggest = async () => {
-      if (!user()?.id) {
-        toastManager.error('Please log in to use AI features');
-        return;
-      }
-      
-      logger.info('Starting AI suggestion process for prompt:', prompt().substring(0, 50) + '...');
-      const suggestPrompt = `Suggest a compelling startup idea in the legal tech space. Start with the idea name followed by ': ' and then provide a brief description, target market, and unique value proposition in simple English, in only 3 lines. Do not generate in markdown.`;
-      
-      setLoading(true);
-      setActiveCardId('streaming');
-
-      try {
-        const suggestedText = await streamQuickLLMCall(
-          suggestPrompt,
-          user()?.id,
-          (chunk) => {
-            // Handle streaming chunks if needed
-          }
-        );
-        
-        logger.info('AI suggestion received:', suggestedText.substring(0, 100) + '...');
-        setPrompt(suggestedText);
-        
-        const name = suggestedText.length > 50 ? suggestedText.substring(0, 50) + '...' : suggestedText;
-        const projectId = await addProject({
-          name: name,
-          description: suggestedText,
-          createdAt: new Date()
-        });
-        await activityLogger.logProject('created', projectId, name, { source: 'ai_suggestion' });
-        _setCurrentProjectId(projectId);
-        
-        setLoading(false);
-        setActiveCardId(null);
-        logger.info('Project created from AI suggestion, ID:', projectId);
-        toastManager.success('New project created with AI suggestion!');
-      } catch (error) {
-        setLoading(false);
-        setActiveCardId(null);
-        logger.error('AI suggestion process failed:', error.message);
-        toastManager.error('Failed to get AI suggestion: ' + error.message);
-      }
-    };
 
 
 
@@ -393,7 +293,24 @@ Please provide the modified content that follows the instruction.`;
             }, projectId, userId);
             console.log('[Journey] Task created:', newTaskId);
 
+            // Immediately add the new task to tasksList so streaming can update it
+            const newTask = {
+              id: newTaskId,
+              projectId: projectId,
+              title: stepName,
+              content: '',
+              prompt: buildPrompt(step.currentStep(), step.stepData(), prompt()),
+              llm_response: '',
+              model: currentStep?.model || 'System',
+              section: currentStep?.section || 'Processing',
+              stepName: stepName,
+              last_modified: new Date().toISOString()
+            };
+            setTasksList(currentTasks => [...currentTasks, newTask]);
+            console.log('[Journey] Added new task to tasksList for streaming');
+
             console.log('[Journey] Starting LLM streaming for step...');
+            setStreamingTaskId(newTaskId);
             let accumulatedResponse = '';
             try {
               const stepPrompt = buildPrompt(step.currentStep(), step.stepData(), prompt());
@@ -413,6 +330,7 @@ Please provide the modified content that follows the instruction.`;
               });
 
               console.log('[Journey] Streaming complete, length:', accumulatedResponse.length);
+              setStreamingTaskId(null);
               if (response && typeof response === 'string' && response.trim().length > 0) {
                 console.log('[Journey] Saving response to task...');
                 await updateTask(newTaskId, {
@@ -436,6 +354,7 @@ Please provide the modified content that follows the instruction.`;
               }
             } catch (streamError) {
               console.error('[Journey] Streaming failed:', streamError.message);
+              setStreamingTaskId(null);
               if (accumulatedResponse.trim().length > 0) {
                 await updateTask(newTaskId, {
                   content: accumulatedResponse,
@@ -461,43 +380,59 @@ Please provide the modified content that follows the instruction.`;
 
     const callLLMForStep = async (promptText, onChunk) => {
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 60000);
+      const timeoutMs = 120000; // 2 minutes for step processing
+      const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+
+      let reader = null;
+      let response = null;
 
       try {
-        const response = await fetch('/api/llm', {
+        response = await fetch('/api/llm', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: { 
+            'Content-Type': 'application/json',
+            'Connection': 'close' // Prevent connection pool reuse
+          },
           body: JSON.stringify({ prompt: promptText }),
           signal: controller.signal
         });
-
-        clearTimeout(timeoutId);
 
         if (!response.ok) {
           const errorText = await response.text().catch(() => 'Unknown error');
           throw new Error(errorText || `HTTP ${response.status}`);
         }
 
-        const reader = response.body.getReader();
+        reader = response.body.getReader();
         const decoder = new TextDecoder();
         let responseText = '';
 
         while (true) {
           const { done, value } = await reader.read();
           if (done) break;
-          const chunk = decoder.decode(value);
+          
+          const chunk = decoder.decode(value, { stream: true });
           responseText += chunk;
+          
           if (onChunk) {
             onChunk(chunk);
           }
         }
 
         clearTimeout(timeoutId);
-
         return responseText;
 
       } catch (fetchError) {
         clearTimeout(timeoutId);
+        
+        // Attempt to clean up reader if it exists
+        if (reader) {
+          try {
+            reader.cancel();
+          } catch (e) {
+            // Ignore cleanup errors
+          }
+        }
+        
         throw fetchError;
       }
     };
@@ -507,181 +442,6 @@ Please provide the modified content that follows the instruction.`;
 
 
 
-
-    const getProjectSuggestions = async (idea) => {
-      if (!idea || idea.trim().length < 5) return;
-
-      setAiSuggestions([]);
-      setGettingSuggestions(true);
-
-      const timeoutId = setTimeout(() => {
-        console.warn('AI suggestions timeout, using fallback');
-        setGettingSuggestions(false);
-        setAiSuggestions([
-          { title: "Market Research", description: "Conduct thorough market research to validate your target audience and competitive landscape." },
-          { title: "Value Proposition", description: "Clearly define what makes your solution unique and why customers will choose it." },
-          { title: "MVP Development", description: "Focus on building a minimum viable product to test your core assumptions quickly." }
-        ]);
-      }, 15000);
-
-      try {
-        const suggestionPrompt = `Analyze this startup idea and provide 3 specific suggestions to improve and refine it: "${idea}"
-
-Return your response as a JSON array of objects, each with "title" and "description" fields. Keep each suggestion concise but actionable.`;
-
-        const response = await fetch('/api/llm', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ prompt: suggestionPrompt })
-        });
-
-        if (!response.ok) {
-          throw new Error('Failed to get AI suggestions');
-        }
-
-        const reader = response.body.getReader();
-        let accumulatedText = '';
-
-        while (true) {
-          const { done, value } = await reader.read();
-          if (done) {
-            try {
-              const codeBlockMatch = accumulatedText.match(/```(?:json)?\s*(\[[\s\S]*?\])\s*```/);
-              let jsonText = null;
-
-              if (codeBlockMatch) {
-                jsonText = codeBlockMatch[1];
-              } else {
-                const arrayMatch = accumulatedText.match(/(\[[\s\S]*?\])/);
-                if (arrayMatch) jsonText = arrayMatch[1];
-              }
-
-              if (jsonText) {
-                const suggestions = JSON.parse(jsonText);
-                if (Array.isArray(suggestions) && suggestions.length > 0) {
-                  setAiSuggestions(suggestions.slice(0, 3));
-                }
-              }
-            } catch (e) {
-              console.warn('Could not parse AI suggestions:', e.message);
-            }
-            break;
-          }
-
-          const chunk = new TextDecoder().decode(value);
-          accumulatedText += chunk;
-        }
-
-      } catch (error) {
-        logger.error('Failed to get AI suggestions:', error);
-        setAiSuggestions([
-          { title: "Market Research", description: "Conduct thorough market research to validate your target audience and competitive landscape." },
-          { title: "Value Proposition", description: "Clearly define what makes your solution unique and why customers will choose it." },
-          { title: "MVP Development", description: "Focus on building a minimum viable product to test your core assumptions quickly." }
-        ]);
-      } finally {
-        clearTimeout(timeoutId);
-        setGettingSuggestions(false);
-      }
-    };
-
-    const createProjectWithSetup = async () => {
-      try {
-        const name = projectName().trim() || 'Untitled Project';
-        const description = projectDescription().trim() || 'No description provided';
-
-        const projectId = await addProject({
-          name: name,
-          description: description,
-          createdAt: new Date()
-        }, user().id);
-
-        await activityLogger.logProject('created', String(projectId), name, { source: 'manual' });
-        _setCurrentProjectId(projectId);
-        setPrompt(description);
-
-        setShowProjectModal(false);
-        setProjectName('');
-        setProjectDescription('');
-        setAiSuggestions([]);
-
-        toastManager.success(`Project "${name}" created successfully!`);
-        logger.info('Project created with setup, ID:', projectId);
-
-        setStartPressed(true);
-        setLoading(true);
-
-        const step = getStepHook();
-        if (step && currentProjectId() && user()?.id) {
-          // Create task first with empty content
-           const taskId = await addTask({
-             projectId: currentProjectId(),
-             title: step.stepName(),
-             content: '',
-             prompt: buildPrompt(step.currentStep(), {}, description),
-             llm_response: '',
-             model: step.currentStep()?.model || 'System',
-             section: step.currentStep()?.section || 'Initialization',
-             stepName: step.stepName()
-           }, currentProjectId(), user()?.id);
-
-          // Update tasks list to show the new task
-          setTasksList(await getTasks(currentProjectId()));
-
-            // Now start the streaming process that updates the task
-            let accumulatedResponse = '';
-            const prompt = buildPrompt(step.currentStep(), {}, description);
-
-            try {
-              const response = await callLLMForStep(prompt, (chunk) => {
-                accumulatedResponse += chunk;
-
-                // Update the task content in the UI progressively
-                setTasksList(currentTasks => {
-                  const updatedTasks = currentTasks.map(task => {
-                    if (task.id === taskId) {
-                      return { ...task, content: accumulatedResponse, last_modified: new Date().toISOString() };
-                    }
-                    return task;
-                  });
-                  return [...updatedTasks]; // Ensure new array reference
-                });
-              });
-
-              if (response && typeof response === 'string' && response.trim().length > 0) {
-               // Update the existing task in DB with the final response
-               await updateTask(taskId, {
-                 content: response,
-                 llm_response: response
-               });
-
-               // Refresh tasks list from DB
-               setTasksList(await getTasks(currentProjectId()));
-               toastManager.success('First step completed!');
-             } else {
-               console.error('Invalid response:', response);
-               toastManager.error('Failed to generate response');
-             }
-           } catch (streamError) {
-             console.error('Streaming failed:', streamError);
-             // Still save whatever we got
-             if (accumulatedResponse.trim().length > 0) {
-               console.log('Saving accumulated response due to error:', accumulatedResponse);
-               await updateTask(taskId, {
-                 content: accumulatedResponse,
-                 llm_response: accumulatedResponse
-               });
-               setTasksList(await getTasks(currentProjectId()));
-             }
-             throw streamError;
-           }
-        }
-
-      } catch (error) {
-        logger.error('Project creation failed:', error);
-        toastManager.error('Failed to create project');
-      }
-    };
 
     const handleBeforeUnload = (e) => {
       const step = getStepHook();
@@ -733,6 +493,7 @@ Return your response as a JSON array of objects, each with "title" and "descript
             const projectId = await addProject(projectData, user()?.id);
             console.log('[Journey] Project created:', projectId);
             _setCurrentProjectId(projectId);
+            setProjectData({ id: projectId, ...projectData });  // Set projectData so project name shows in ResponseSection
             setPrompt(problemText);
 
             console.log('[Journey] STEP 3: Creating task...');
@@ -755,6 +516,7 @@ Return your response as a JSON array of objects, each with "title" and "descript
                 await setTasksList(await getTasks(currentProjectId()));
 
                 console.log('[Journey] STEP 4: Starting LLM streaming...');
+                setStreamingTaskId(taskId);
                 let accumulatedResponse = '';
                 const streamingPrompt = buildPrompt(step.currentStep(), {}, { problem: problemText });
 
@@ -775,6 +537,7 @@ Return your response as a JSON array of objects, each with "title" and "descript
                     });
 
                     console.log('[Journey] STEP 5: Streaming complete, length:', accumulatedResponse.length);
+                    setStreamingTaskId(null);
                     console.log('[Journey] Raw response preview:', accumulatedResponse.substring(0, 150) + '...');
 
                     if (response && typeof response === 'string' && response.trim().length > 0) {
@@ -805,6 +568,7 @@ Return your response as a JSON array of objects, each with "title" and "descript
                     }
                 } catch (streamError) {
                     console.error('[Journey] Streaming failed:', streamError.message);
+                    setStreamingTaskId(null);
                     if (accumulatedResponse.trim().length > 0) {
                         console.log('[Journey] Saving partial response...');
                         await updateTask(taskId, {
@@ -834,23 +598,6 @@ Return your response as a JSON array of objects, each with "title" and "descript
             toastManager.error('Failed to start project: ' + error.message);
             setStartPressed(false);
         }
-    };
-
-    const handleStartConfirmed = async () => {
-      logger.info('Starting AI agent process with confirmed project');
-      setStartPressed(true);
-      setLoading(true);
-      setShowProjectModal(false);
-
-      try {
-        await createProjectWithSetup();
-        logger.info('Instructions set, starting AI process...');
-      } catch (error) {
-        logger.error('Start process error:', error);
-        toastManager.error('Failed to start process');
-        setStartPressed(false);
-        setLoading(false);
-      }
     };
 
     const onProjectDeleted = (e) => {
@@ -1030,16 +777,10 @@ Return your response as a JSON array of objects, each with "title" and "descript
       
       setProjectData(project);
       
-      console.log('[loadProjectState] project.description:', JSON.stringify(project.description));
-      console.log('[loadProjectState] prompt() current value:', JSON.stringify(prompt()));
-      
-      if (project.description && !prompt()) {
-        console.log('[loadProjectState] Setting prompt from project.description');
+      // Only log and set prompt if this is the first load (project just restored)
+      const currentPrompt = prompt();
+      if (!currentPrompt && project.description) {
         setPrompt(project.description);
-      } else if (!project.description) {
-        console.log('[loadProjectState] project.description is empty or missing');
-      } else if (prompt()) {
-        console.log('[loadProjectState] prompt() already has value, not overwriting');
       }
       
       if (project.current_step || project.completed_steps !== undefined) {
@@ -1100,151 +841,45 @@ Return your response as a JSON array of objects, each with "title" and "descript
                   } fallback={
                       <div style={{"display": "none"}}></div>
                   }>
-                       <ResponseSection
-                         tasksList={tasksList}
-                         startPressed={startPressed}
-                         isLoading={loading}
-                        updateTask={updateTask}
-                        setEditContent={setEditContent}
-                        editingTaskId={editingTaskId}
-                        setEditingTaskId={setEditingTaskId}
-                        selectedTaskId={selectedTaskId}
-                        setSelectedTaskId={setSelectedTaskId}
-                         stepName={stepHookMemo()?.stepName || (() => 'Unknown Step')}
-                        callLLMForStep={callLLMForStep}
-                        refreshTasks={async () => setTasksList(await getTasks(currentProjectId()))}
-                        projectName={projectData()?.name}
-                        handleInstruct={handleInstruct}
-                        handleRegenerate={handleRegenerate}
-                        handleConfirm={handleConfirm}
-                      />
+                        <ResponseSection
+                          tasksList={tasksList}
+                          startPressed={startPressed}
+                          isLoading={loading}
+                         updateTask={updateTask}
+                         setEditContent={setEditContent}
+                         editingTaskId={editingTaskId}
+                         setEditingTaskId={setEditingTaskId}
+                         selectedTaskId={selectedTaskId}
+                         setSelectedTaskId={setSelectedTaskId}
+                          stepName={stepHookMemo()?.stepName || (() => 'Unknown Step')}
+                         callLLMForStep={callLLMForStep}
+                         refreshTasks={async () => setTasksList(await getTasks(currentProjectId()))}
+                         projectName={projectData()?.name}
+                         handleInstruct={handleInstruct}
+                         handleRegenerate={handleRegenerate}
+                         handleConfirm={handleConfirm}
+                         streamingTaskId={streamingTaskId}
+                       />
                 </Show>
 
 
-              {/* Project Creation Modal */}
-              <Show when={showProjectModal()}>
-                <div class="modal modal-open">
-                  <div class="modal-box max-w-4xl">
-                    <h3 class="font-bold text-xl mb-4">Create Your Startup Project</h3>
-                    <p class="text-sm text-base-content/70 mb-6">
-                      Let's refine your startup idea and create a structured project. Our AI has analyzed your idea and provided suggestions below.
-                    </p>
-
-                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                      <div class="space-y-4">
-                        <div>
-                          <label class="label">
-                            <span class="label-text font-medium">Project Name</span>
-                          </label>
-                          <input
-                            type="text"
-                            class="input input-bordered w-full"
-                            placeholder="Enter a catchy name for your project"
-                            value={projectName()}
-                            onInput={(e) => setProjectName(e.target.value)}
-                          />
-                        </div>
-
-                        <div>
-                          <label class="label">
-                            <span class="label-text font-medium">Project Description</span>
-                          </label>
-                          <textarea
-                            class="textarea textarea-bordered w-full h-32 resize-none"
-                            placeholder="Describe your startup idea in detail..."
-                            value={projectDescription()}
-                            onInput={(e) => setProjectDescription(e.target.value)}
-                          ></textarea>
-                        </div>
-                      </div>
-
-                      <div class="space-y-4">
-                        <div class="flex items-center gap-2">
-                          <i data-lucide="sparkles" class="w-5 h-5 text-primary"></i>
-                          <h4 class="font-medium">AI Improvement Suggestions</h4>
-                          <Show when={gettingSuggestions()}>
-                            <span class="loading loading-spinner loading-sm"></span>
-                          </Show>
-                        </div>
-
-                        <div class="space-y-3 max-h-64 overflow-y-auto">
-                          <For each={aiSuggestions()}>
-                            {(suggestion, index) => (
-                              <div class="card bg-base-200 border border-base-300">
-                                <div class="card-body p-4">
-                                  <h5 class="card-title text-sm font-medium text-primary">
-                                    {index() + 1}. {suggestion.title}
-                                  </h5>
-                                  <p class="text-sm text-base-content/80">
-                                    {suggestion.description}
-                                  </p>
-                                  <button
-                                    class="btn btn-xs btn-outline mt-2"
-                                    onClick={() => {
-                                      setProjectDescription(prev =>
-                                        prev ? prev + '\n\nImprovement: ' + suggestion.description : suggestion.description
-                                      );
-                                    }}
-                                  >
-                                    Apply Suggestion
-                                  </button>
-                                </div>
-                              </div>
-                            )}
-                          </For>
-
-                          <Show when={aiSuggestions().length === 0 && !gettingSuggestions()}>
-                            <div class="text-center py-8 text-base-content/60">
-                              <i data-lucide="lightbulb" class="w-8 h-8 mx-auto mb-2 opacity-50"></i>
-                              <p>Enter your idea above to get AI-powered improvement suggestions</p>
-                            </div>
-                          </Show>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div class="modal-action mt-6">
-                      <button
-                        class="btn btn-ghost"
-                        onClick={() => {
-                          setShowProjectModal(false);
-                          setAiSuggestions([]);
-                        }}
-                      >
-                        Cancel
-                      </button>
-                      <button
-                        class="btn btn-primary"
-                        onClick={handleStartConfirmed}
-                        disabled={!projectName().trim() || !projectDescription().trim()}
-                      >
-                        Create Project & Start Accelerator
-                      </button>
-                    </div>
-                  </div>
-                  <div class="modal-backdrop bg-black/50" onClick={() => setShowProjectModal(false)}></div>
-                </div>
-              </Show>
-
-               <AgentInterface
-                 key={currentProjectId() || 'no-project'}
-                 agentBoxClass={agentBoxClass}
-                 currentProjectId={currentProjectId}
-                 agentContentClass={agentContentClass}
-                 greetingClass={greetingClass}
-                 projectData={projectData}
-                  agentStore={stepHookMemo()}
-                 textareaRef={textareaRef}
-                 prompt={prompt}
-                 setPrompt={setPrompt}
-                 tasksList={tasksList}
-                 startPressed={startPressed}
-                  handleImprove={handleImprove}
-                  handleSuggest={handleSuggest}
-                  handleInstruct={handleInstruct}
-                  handleConfirm={handleConfirm}
-                  handleStart={handleStart}
-                 handleRegenerate={handleRegenerate}
+                <AgentInterface
+                  key={currentProjectId() || 'no-project'}
+                  agentBoxClass={agentBoxClass}
+                  currentProjectId={currentProjectId}
+                  agentContentClass={agentContentClass}
+                  greetingClass={greetingClass}
+                  projectData={projectData}
+                   agentStore={stepHookMemo()}
+                  textareaRef={textareaRef}
+                  prompt={prompt}
+                  setPrompt={setPrompt}
+                  tasksList={tasksList}
+                  startPressed={startPressed}
+                   handleInstruct={handleInstruct}
+                   handleConfirm={handleConfirm}
+                   handleStart={handleStart}
+                  handleRegenerate={handleRegenerate}
 
                   steps={steps}
                   stepNames={stepNames}

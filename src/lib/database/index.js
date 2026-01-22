@@ -134,17 +134,30 @@ export const exportAllData = async (userId = null) => {
     const { ensureDatabaseReady } = await import('./core.js');
     await ensureDatabaseReady();
 
+    // Get user credentials (email and password hash)
+    const { _getUserById } = await import('./users.js');
+    const userData = await _getUserById({ id: userId });
+    
     const projects = await exportAllProjects(userId);
     const profile = await getUserProfile(userId);
     const { getUserActivities } = await import('./index.js');
     const activities = await getUserActivities(userId);
 
-    // GDPR-compliant data export with full profile including avatar
+    // Full data export with credentials and profile including avatar
     return {
+      // Login credentials - email and password hash
+      credentials: {
+        email: userData?.email || '',
+        // Password hash cannot be used for login but is included for backup completeness
+        // The plaintext password is not stored anywhere
+        passwordHash: userData?.password_hash || '',
+        note: 'Password hash is stored but cannot be used to login. Use your current password to restore access.'
+      },
+
       // Personal data - include avatar with base64 image
       profile: {
         id: profile?.user_id || profile?.id,
-        email: profile?.email,
+        email: userData?.email,
         name: profile?.name,
         bio: profile?.bio,
         location: profile?.location,
@@ -224,35 +237,61 @@ export const getUserSubscription = async (userId) => {
 };
 
 export const exportProject = async (projectId) => {
-  const { _getProjectById } = await import('./projects.js');
-  const project = await _getProjectById({ id: projectId });
-  if (!project) throw new Error('Project not found');
-  const { getTasks } = await import('./projects.js');
-  const tasks = await getTasks({ projectId });
-  return { project, tasks, exportedAt: new Date().toISOString() };
+  try {
+    // Ensure database is initialized
+    const { ensureDatabaseReady } = await import('./core.js');
+    await ensureDatabaseReady();
+
+    const { _getProjectById } = await import('./projects.js');
+    const project = await _getProjectById({ id: projectId });
+    if (!project) throw new Error('Project not found');
+    
+    const { getTasks } = await import('./projects.js');
+    const tasks = await getTasks({ projectId });
+    
+    return { 
+      project, 
+      tasks, 
+      exportedAt: new Date().toISOString() 
+    };
+  } catch (error) {
+    console.error('Error exporting project:', error);
+    throw error;
+  }
 };
 
 export const exportReports = async (projectId) => {
-  const { _getProjectById } = await import('./projects.js');
-  const project = await _getProjectById({ id: projectId });
-  if (!project) throw new Error('Project not found');
-  const { getTasks } = await import('./projects.js');
-  const tasks = await getTasks({ projectId });
-  const completedTasks = tasks.filter(t => t.status === 'completed').length;
-  const totalTasks = tasks.length;
-  const progress = totalTasks > 0 ? (completedTasks / totalTasks) * 100 : 0;
-  return {
-    projectName: project.name,
-    description: project.description,
-    status: project.ui_status,
-    progress: `${progress.toFixed(1)}%`,
-    totalTasks,
-    completedTasks,
-    creditsUsed: project.consumedCredits || 0,
-    timeSpent: project.consumedTime || 0,
-    createdAt: project.createdAt,
-    exportedAt: new Date().toISOString()
-  };
+  try {
+    // Ensure database is initialized
+    const { ensureDatabaseReady } = await import('./core.js');
+    await ensureDatabaseReady();
+
+    const { _getProjectById } = await import('./projects.js');
+    const project = await _getProjectById({ id: projectId });
+    if (!project) throw new Error('Project not found');
+    
+    const { getTasks } = await import('./projects.js');
+    const tasks = await getTasks({ projectId });
+    const completedTasks = tasks.filter(t => t.status === 'completed').length;
+    const totalTasks = tasks.length;
+    const progress = totalTasks > 0 ? (completedTasks / totalTasks) * 100 : 0;
+    
+    return {
+      projectName: project.name,
+      description: project.description,
+      status: project.ui_status,
+      progress: `${progress.toFixed(1)}%`,
+      totalTasks,
+      completedTasks,
+      creditsUsed: project.consumedCredits || 0,
+      timeSpent: project.consumedTime || 0,
+      createdAt: project.created_at,
+      exportedAt: new Date().toISOString()
+    };
+  } catch (error) {
+    console.error('Error exporting report:', error);
+    throw error;
+  }
 };
 
 export const initDb = async () => {
@@ -429,4 +468,130 @@ export const getTasks = async (projectId) => {
 export const updateTask = async (id, updates) => {
   const { _updateTask } = await import('./projects.js');
   return await _updateTask({ id, ...updates });
+};
+
+// ============================================================================
+// IMPORT FUNCTIONS
+// ============================================================================
+
+/**
+ * Import user profile data
+ * @param {string} userId - User ID
+ * @param {Object} profileData - Profile data to import
+ * @returns {Promise<Object>}
+ */
+export const importUserProfile = async (userId, profileData) => {
+  try {
+    const { ensureDatabaseReady } = await import('./core.js');
+    await ensureDatabaseReady();
+
+    const { _createUserProfile } = await import('./users.js');
+    return await _createUserProfile({ userId, profileData });
+  } catch (error) {
+    console.error('Error importing user profile:', error);
+    throw error;
+  }
+};
+
+/**
+ * Import a single project
+ * @param {Object} projectData - Project data to import
+ * @param {string} userId - User ID
+ * @returns {Promise<string>} - Project ID
+ */
+export const importProject = async (projectData, userId) => {
+  try {
+    const { ensureDatabaseReady } = await import('./core.js');
+    await ensureDatabaseReady();
+
+    const { addProject: _addProject } = await import('./projects.js');
+    return await _addProject({ project: projectData, userId });
+  } catch (error) {
+    console.error('Error importing project:', error);
+    throw error;
+  }
+};
+
+/**
+ * Import a single task
+ * @param {Object} taskData - Task data to import
+ * @param {string} projectId - Project ID
+ * @param {string} userId - User ID
+ * @returns {Promise<string>} - Task ID
+ */
+export const importTask = async (taskData, projectId, userId) => {
+  try {
+    const { ensureDatabaseReady } = await import('./core.js');
+    await ensureDatabaseReady();
+
+    const { addTask: _addTask } = await import('./projects.js');
+    return await _addTask({ task: taskData, projectId, userId });
+  } catch (error) {
+    console.error('Error importing task:', error);
+    throw error;
+  }
+};
+
+/**
+ * Import all data from a backup file
+ * @param {Object} backupData - Backup data object
+ * @param {string} userId - User ID
+ * @returns {Promise<Object>} - Import summary
+ */
+export const importAllData = async (backupData, userId) => {
+  const summary = {
+    profileImported: false,
+    projectsImported: 0,
+    tasksImported: 0,
+    errors: []
+  };
+
+  try {
+    const { ensureDatabaseReady } = await import('./core.js');
+    await ensureDatabaseReady();
+
+    // Import profile
+    if (backupData.profile) {
+      try {
+        await importUserProfile(userId, {
+          name: backupData.profile.name,
+          bio: backupData.profile.bio,
+          avatar: backupData.profile.avatar,
+          preferences: typeof backupData.profile.preferences === 'string' 
+            ? JSON.parse(backupData.profile.preferences) 
+            : backupData.profile.preferences
+        });
+        summary.profileImported = true;
+      } catch (error) {
+        summary.errors.push(`Profile import failed: ${error.message}`);
+      }
+    }
+
+    // Import projects
+    const projects = backupData.projects || backupData.data || [];
+    for (const project of projects) {
+      try {
+        const projectId = await importProject(project, userId);
+        summary.projectsImported++;
+
+        // Import tasks for this project
+        const tasks = project.tasks || [];
+        for (const task of tasks) {
+          try {
+            await importTask(task, projectId, userId);
+            summary.tasksImported++;
+          } catch (error) {
+            summary.errors.push(`Task import failed: ${error.message}`);
+          }
+        }
+      } catch (error) {
+        summary.errors.push(`Project import failed: ${error.message}`);
+      }
+    }
+
+    return summary;
+  } catch (error) {
+    console.error('Error importing all data:', error);
+    throw error;
+  }
 };

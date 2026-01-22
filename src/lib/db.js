@@ -307,16 +307,29 @@ export const exportAllData = async (userId = null) => {
     const { ensureDatabaseReady } = await import('./database/core.js');
     await ensureDatabaseReady();
 
+    // Get user credentials (email and password hash)
+    const { _getUserById } = await import('./database/users.js');
+    const userData = await _getUserById({ id: userId });
+
     const projects = await exportAllProjects(userId);
     const profile = await getUserProfile(userId);
     const activities = await getUserActivities(userId);
 
-    // GDPR-compliant data export with full profile including avatar
+    // Full data export with credentials and profile including avatar
     return {
+      // Login credentials - email and password hash
+      credentials: {
+        email: userData?.email || '',
+        // Password hash cannot be used for login but is included for backup completeness
+        // The plaintext password is not stored anywhere
+        passwordHash: userData?.password_hash || '',
+        note: 'Password hash is stored but cannot be used to login. Use your current password to restore access.'
+      },
+
       // Personal data - include avatar with base64 image
       profile: {
         id: profile?.user_id || profile?.id,
-        email: profile?.email,
+        email: userData?.email,
         name: profile?.name,
         bio: profile?.bio,
         location: profile?.location,

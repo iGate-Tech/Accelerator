@@ -28,6 +28,7 @@ const ResponseSection = (props) => {
                 updateTask={props.updateTask}
                 refreshTasks={props.refreshTasks}
                 streamingTaskId={props.streamingTaskId}
+                setStreamingTaskId={props.setStreamingTaskId}
               />
               );
             })}

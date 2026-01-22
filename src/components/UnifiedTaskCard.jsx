@@ -118,12 +118,30 @@ const UnifiedTaskCard = (props) => {
                 toastManager.error('No prompt available for this task');
                 return;
               }
-              const newResponse = await props.callLLMForStep(taskPrompt);
+              
+              // Set this task as streaming for UI feedback
+              if (props.setStreamingTaskId) {
+                props.setStreamingTaskId(taskId);
+              }
+              
+              let newResponse = '';
+              await props.callLLMForStep(taskPrompt, (chunk) => {
+                newResponse += chunk;
+              });
+              
               await updateTask(taskId, { llm_response: newResponse, content: newResponse });
               await props.refreshTasks();
+              
+              if (props.setStreamingTaskId) {
+                props.setStreamingTaskId(null);
+              }
+              
               setIsExpanded(true);
               toastManager.success('Task regenerated successfully');
             } catch (error) {
+              if (props.setStreamingTaskId) {
+                props.setStreamingTaskId(null);
+              }
               logger.error('Error regenerating task:', error);
               toastManager.error('Failed to regenerate: ' + error.message);
             }

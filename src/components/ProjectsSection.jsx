@@ -31,6 +31,12 @@ const ProjectsSection = (props) => {
     const [editingProjectId, setEditingProjectId] = createSignal(null);
     const navbarT = t;
     const downloadJSON = (data, filename) => {
+        // Ensure data is not null or undefined
+        if (data === null || data === undefined) {
+          console.error('downloadJSON: data is null or undefined');
+          toastManager.error('Export failed: No data to export');
+          return;
+        }
         const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
@@ -332,6 +338,51 @@ const ProjectsSection = (props) => {
                                     <i data-lucide="archive" class="w-4 h-4"></i>
                                     {t().backupAllData}
                                 </a>
+                            </li>
+                            <li>
+                                <input 
+                                    type="file" 
+                                    id="importFileInput" 
+                                    accept=".json" 
+                                    style="display: none"
+                                    onChange={async (e) => {
+                                        const file = e.target.files?.[0];
+                                        if (!file) return;
+                                        
+                                        try {
+                                            const text = await file.text();
+                                            const data = JSON.parse(text);
+                                            
+                                            if (!user()?.id) {
+                                                toastManager.error('Please log in to import data');
+                                                return;
+                                            }
+                                            
+                                            const { importAllData } = await import('../lib/database');
+                                            const result = await importAllData(data, user()?.id);
+                                            
+                                            let message = `Imported ${result.projectsImported} projects, ${result.tasksImported} tasks`;
+                                            if (result.profileImported) {
+                                                message += ', profile imported';
+                                            }
+                                            if (result.errors.length > 0) {
+                                                message += ` (${result.errors.length} errors)`;
+                                            }
+                                            
+                                            toastManager.success(message);
+                                            await loadProjects();
+                                        } catch (error) {
+                                            console.error('Import error:', error);
+                                            toastManager.error('Import failed: ' + error.message);
+                                        }
+                                        
+                                        e.target.value = '';
+                                    }}
+                                />
+                                <button onclick={() => document.getElementById('importFileInput')?.click()} class="flex items-center gap-2 w-full text-left">
+                                    <i data-lucide="upload" class="w-4 h-4"></i>
+                                    Import Data
+                                </button>
                             </li>
                             <div class="divider my-1"></div>
                             <li>

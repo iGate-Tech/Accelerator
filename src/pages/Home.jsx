@@ -32,7 +32,7 @@ import { useUser } from "../context/UserContext";
 import { toastManager } from "../lib/ui/feedback";
 import { useActivityLogger } from "../lib/business/activity.js";
 import { extractTemplateData} from '../lib/ui/llm-template.js';
-import { updateStepData } from '../lib/ui/stepDataStore.js';
+import { updateStepData, getStepData } from '../lib/ui/stepDataStore.js';
 import { ResponseSection, RouteGuard, ProtectedRoute } from '../components';
 import { useContext } from "solid-js";
 import { LangContext } from "../context/LangContext";

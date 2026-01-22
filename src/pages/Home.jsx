@@ -393,13 +393,34 @@ Please provide the modified content that follows the instruction.`;
           return;
         }
 
+        const currentStepIndex = step.stepIndex();
+        const totalSteps = steps.length;
+        const isLastStep = currentStepIndex >= totalSteps - 1;
+        
+        console.log('[Journey] Step index after confirm:', currentStepIndex);
+        console.log('[Journey] Total steps:', totalSteps);
+        console.log('[Journey] Is last step:', isLastStep);
+        
+        // Double-check using the step hook's isLast() method
+        const stepHookIsLast = step.isLast();
+        console.log('[Journey] Step hook isLast():', stepHookIsLast);
+        
+        if (isLastStep || stepHookIsLast) {
+          console.log('[Journey] Last step confirmed (index: ' + currentStepIndex + '), no more steps to create');
+          toastManager.success('Project completed!');
+          // Ensure step stays at current index and doesn't reset
+          if (step.isComplete()) {
+            console.log('[Journey] Step is complete, marking final state');
+          }
+          return;
+        }
+
         if (!step.isComplete()) {
           console.log('[Journey] Checking for existing next task...');
           const projectId = currentProjectId();
           const allTasks = tasksList();
           
           // Find if there's already a task for a later step
-          const currentStepIndex = step.stepIndex();
           const existingNextTask = allTasks.find(t => {
             const taskStepIndex = steps.findIndex(s => s.name === t.stepName);
             return taskStepIndex > currentStepIndex && t.content && t.content.trim().length > 0;
@@ -918,55 +939,7 @@ Please provide the modified content that follows the instruction.`;
 
 
 
-    createEffect(() => {
-        currentProjectId();
-        tasks();
-        if (Array.isArray(tasks())) {
-            setTasksList(filteredTasks());
-        }
-    });
-
-    createEffect(() => {
-      const pid = currentProjectId();
-      const projectsList = projects();
-       
-      if (!pid || !projectsList) return;
-      
-      const project = projectsList.find(p => p.id === pid);
-      
-      if (!project) return;
-      
-      setProjectData(project);
-      
-      // Only set prompt from project description if:
-      // 1. No prompt currently exists
-      // 2. No task is selected for instruct
-      const currentPrompt = prompt();
-      const hasSelectedTask = selectedTaskId() !== null;
-      if (!currentPrompt && project.description && !hasSelectedTask) {
-        setPrompt(project.description);
-      }
-      
-      if (project.current_step || project.completed_steps !== undefined) {
-        if ((project.completed_steps !== undefined && project.completed_steps > 0) || (project.current_step && project.current_step !== 'system')) {
-          const step = getStepHook();
-          if (step) step.loadFromProject(project);
-        }
-      }
-     });
-
-    const isLoading = () => {
-        try {
-            if (!currentProjectId()) return false;
-            const stepHook = getStepHook();
-            if (!stepHook) return true;
-            return !tasksList || currentLang() === undefined;
-        } catch {
-            return false;
-        }
-    };
-
-    const stepHookMemo = createMemo(() => getStepHook());
+     const stepHookMemo = createMemo(() => getStepHook());
 
     createEffect(() => {
         if (isLoading()) {

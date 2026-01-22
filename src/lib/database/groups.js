@@ -141,6 +141,21 @@ export async function _getGroupsWithProjects({ userId = null }) {
 }
 
 export async function _exportAllProjects({ userId = null }) {
+  // Ensure database is initialized
+  if (!dbInstance) {
+    try {
+      const { ensureDatabaseReady } = await import('./core.js');
+      await ensureDatabaseReady();
+    } catch (e) {
+      console.error('Failed to initialize database:', e);
+      return { projects: [], tasks: [], exportedAt: new Date().toISOString() };
+    }
+  }
+  
+  if (!dbInstance) {
+    return { projects: [], tasks: [], exportedAt: new Date().toISOString() };
+  }
+  
   try {
     // Get all projects for the user
     const projects = await dbInstance.query(

@@ -20,6 +20,7 @@ const UnifiedTaskCard = (props) => {
 
   const isStreaming = () => props.isStreaming ?? (content() && content().trim().length > 0 && !llmResponse());
   const isStreamingComplete = () => props.isStreamingComplete ?? true;
+  const isCurrentlyStreaming = () => props.streamingTaskId?.() === taskId;
 
   // Only auto-expand if this is the currently streaming task
   // All other tasks stay collapsed by default
@@ -51,7 +52,8 @@ const UnifiedTaskCard = (props) => {
   };
 
   const ActionButtons = () => {
-    if (isStreaming() && !isStreamingComplete()) {
+    // Hide buttons only during active streaming for this specific task
+    if (isCurrentlyStreaming()) {
       return null;
     }
 
@@ -64,12 +66,13 @@ const UnifiedTaskCard = (props) => {
           onClick={async (e) => {
             e.stopPropagation();
             try {
-              await updateTask(taskId, { llm_response: '' });
+              await updateTask(taskId, { llm_response: '', content: '' });
               await props.refreshTasks();
+              setIsExpanded(false);
               toastManager.success('Task reset successfully');
             } catch (error) {
               logger.error('Error resetting task:', error);
-              toastManager.error('Failed to reset task');
+              toastManager.error('Failed to reset task: ' + error.message);
             }
           }}
           title="Reset this step"
@@ -92,12 +95,12 @@ const UnifiedTaskCard = (props) => {
               props.setSelectedTaskId(taskId);
             }
           }}
-          title={task.id === 'streaming' ? 'Cannot instruct on streaming task' : 'Add instructions'}
-          disabled={task.id === 'streaming'}
+          title={isCurrentlyStreaming() ? 'Cannot instruct on streaming task' : 'Add instructions'}
+          disabled={isCurrentlyStreaming()}
         >
           <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="flex-shrink-0">
             <path d="M12 7v14"></path>
-            <path d="M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z"></path>
+            <path d="M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 0 0 0-3-3z"></path>
           </svg>
           <span class="max-w-0 overflow-hidden transition-all duration-300 group-hover:max-w-[60px] whitespace-nowrap opacity-0 group-hover:opacity-100">
             Instruct
@@ -110,13 +113,19 @@ const UnifiedTaskCard = (props) => {
           onClick={async (e) => {
             e.stopPropagation();
             try {
-              const newResponse = await props.callLLMForStep(task.prompt);
-              await updateTask(taskId, { llm_response: newResponse });
+              const taskPrompt = task.prompt || '';
+              if (!taskPrompt) {
+                toastManager.error('No prompt available for this task');
+                return;
+              }
+              const newResponse = await props.callLLMForStep(taskPrompt);
+              await updateTask(taskId, { llm_response: newResponse, content: newResponse });
               await props.refreshTasks();
+              setIsExpanded(true);
               toastManager.success('Task regenerated successfully');
             } catch (error) {
               logger.error('Error regenerating task:', error);
-              toastManager.error('Failed to regenerate task');
+              toastManager.error('Failed to regenerate: ' + error.message);
             }
           }}
           title="Regenerate response"

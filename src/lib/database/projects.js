@@ -72,6 +72,19 @@ export async function _createProject({ project, userId }) {
 }
 
 export async function _getProjectById({ id }) {
+  // Ensure database is initialized
+  if (!dbInstance) {
+    try {
+      const { ensureDatabaseReady } = await import('./core.js');
+      await ensureDatabaseReady();
+    } catch (e) {
+      console.warn('Database not initialized, skipping project fetch');
+      return null;
+    }
+  }
+  
+  if (!dbInstance) return null;
+  
   try {
     console.log('Getting project by id:', id);
     const result = await dbInstance.query('SELECT * FROM projects WHERE id = $1', [id]);
@@ -269,6 +282,19 @@ export async function _getArchivedProjects(db, { userId }) {
 }
 
 export async function _getTasks({ projectId }) {
+  // Ensure database is initialized
+  if (!dbInstance) {
+    try {
+      const { ensureDatabaseReady } = await import('./core.js');
+      await ensureDatabaseReady();
+    } catch (e) {
+      console.warn('Database not initialized, skipping tasks fetch');
+      return [];
+    }
+  }
+  
+  if (!dbInstance) return [];
+  
   try {
     const result = await dbInstance.query('SELECT * FROM tasks WHERE project_id = $1 AND deleted_at IS NULL ORDER BY created_at ASC', [projectId]);
     return result.rows;

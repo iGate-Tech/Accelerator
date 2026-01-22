@@ -301,28 +301,37 @@ export const exportAllData = async (userId = null) => {
     }
   }
   if (!userId) return null;
+  
   try {
+    // Ensure database is initialized
+    const { ensureDatabaseReady } = await import('./database/core.js');
+    await ensureDatabaseReady();
+
     const projects = await exportAllProjects(userId);
     const profile = await getUserProfile(userId);
     const activities = await getUserActivities(userId);
 
-    // GDPR-compliant data export
+    // GDPR-compliant data export with full profile including avatar
     return {
-      // Personal data
+      // Personal data - include avatar with base64 image
       profile: {
-        id: profile?.id,
+        id: profile?.user_id || profile?.id,
         email: profile?.email,
         name: profile?.name,
         bio: profile?.bio,
         location: profile?.location,
         website: profile?.website,
+        avatar: profile?.avatar, // Base64 encoded image
         preferences: profile?.preferences,
         createdAt: profile?.created_at,
         lastModified: profile?.last_modified
       },
 
       // Projects and content
-      projects: projects?.data || [],
+      projects: projects?.projects || projects?.data || [],
+
+      // Tasks from all projects
+      tasks: projects?.tasks || [],
 
       // Activity history (for transparency)
       activities: activities?.map(activity => ({

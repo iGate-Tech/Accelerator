@@ -1,12 +1,17 @@
-import { standardPromptTemplate } from '../../templates.js';
+import { standardPromptTemplateWithProblem } from '../../templates.js';
 
 export const step20 = {
   id: "step20",
   name: "Security Architecture",
   model: "Technical Model",
-  promptTemplate: standardPromptTemplate,
+  promptTemplate: standardPromptTemplateWithProblem,
   variables: ["solution", "persona"],
   detailedPrompt: `
+The problem being solved is: {{problem}}
+
+Your response MUST be about {{problem}}. Do not discuss unrelated topics.
+
+
 Design security architecture for {{solution}} serving {{persona}}. Include authentication, encryption, compliance requirements, and security measures.
 
 Provide:

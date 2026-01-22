@@ -1,12 +1,17 @@
-import { standardPromptTemplate } from '../../templates.js';
+import { standardPromptTemplateWithProblem } from '../../templates.js';
 
 export const step19 = {
   id: "step19",
   name: "Infrastructure & Hosting",
   model: "Technical Model",
-  promptTemplate: standardPromptTemplate,
+  promptTemplate: standardPromptTemplateWithProblem,
   variables: ["solution", "scalability"],
   detailedPrompt: `
+The problem being solved is: {{problem}}
+
+Your response MUST be about {{problem}}. Do not discuss unrelated topics.
+
+
 Plan infrastructure and hosting for {{solution}} considering {{scalability}}. Recommend cloud provider, hosting strategy, and CDN approach.
 
 Provide:

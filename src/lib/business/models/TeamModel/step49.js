@@ -1,11 +1,15 @@
-import { standardPromptTemplate } from '../../templates.js';
+import { standardPromptTemplateWithProblem } from '../../templates.js';
 
 export const step49 = {
   id: "step49",
   name: "Founding Team",
-  model: "Team Model",
-  promptTemplate: standardPromptTemplate,
+  model: "TeamModel Model",
+  promptTemplate: standardPromptTemplateWithProblem,
   variables: ["solution"],
-  instructions: "List founding team members for {{solution}} and their roles.",
+  instructions: `The problem being solved is: {{problem}}
+
+Your response MUST be about {{problem}}. Do not discuss unrelated topics.
+
+List founding team members for {{solution}} and their roles.`,
   validate: (context) => ({ valid: true, issues: [] }),
 };

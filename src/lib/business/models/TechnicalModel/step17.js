@@ -1,12 +1,17 @@
-import { standardPromptTemplate } from '../../templates.js';
+import { standardPromptTemplateWithProblem } from '../../templates.js';
 
 export const step17 = {
   id: "step17",
   name: "Technical Architecture",
   model: "Technical Model",
-  promptTemplate: standardPromptTemplate,
+  promptTemplate: standardPromptTemplateWithProblem,
   variables: ["solution", "modelType"],
   detailedPrompt: `
+The problem being solved is: {{problem}}
+
+Your response MUST be about {{problem}}. Do not discuss unrelated topics.
+
+
 Design the technical architecture for the solution {{solution}} in the business model {{modelType}}.
 Recommend:
 - {{techStack: "Technology stack, including frontend, backend, database, and cloud services"}}

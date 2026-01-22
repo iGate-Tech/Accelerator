@@ -1,12 +1,17 @@
-import { standardPromptTemplate } from '../../templates.js';
+import { standardPromptTemplateWithProblem } from '../../templates.js';
 
 export const step23 = {
   id: "step23",
   name: "Development Workflow",
   model: "Technical Model",
-  promptTemplate: standardPromptTemplate,
+  promptTemplate: standardPromptTemplateWithProblem,
   variables: ["solution", "timeline"],
   detailedPrompt: `
+The problem being solved is: {{problem}}
+
+Your response MUST be about {{problem}}. Do not discuss unrelated topics.
+
+
 Establish development workflow for {{solution}} within {{timeline}}. Define CI/CD pipeline, testing strategy, deployment process, and monitoring.
 
 Provide:

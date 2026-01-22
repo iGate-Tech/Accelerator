@@ -1,12 +1,17 @@
-import { standardPromptTemplate } from '../../templates.js';
+import { standardPromptTemplateWithProblem } from '../../templates.js';
 
 export const step6 = {
   id: "step6",
   name: "User Persona",
   model: "Idea Model",
-  promptTemplate: standardPromptTemplate,
+  promptTemplate: standardPromptTemplateWithProblem,
   variables: ["problem"],
   detailedPrompt: `
+The problem being solved is: {{problem}}
+
+Your response MUST be about {{problem}}. Do not discuss unrelated topics.
+
+
 Develop a detailed user persona for someone directly suffering from the problem: {{problem}}.
 Include:
 - {{persona: "Comprehensive persona description covering demographics (age, gender, location), professional details (job title, industry, income), psychographics (pain points, motivations), and background"}}

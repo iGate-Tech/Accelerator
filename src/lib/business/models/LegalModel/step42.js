@@ -1,15 +1,15 @@
 import { standardPromptTemplateWithProblem } from '../../templates.js';
 
-export const step33 = {
-  id: "step33",
-  name: "Sales Strategy",
-  model: "Marketing Model",
+export const step42 = {
+  id: "step42",
+  name: "Valuation Analysis",
+  model: "Legal Model",
   promptTemplate: standardPromptTemplateWithProblem,
-  variables: ["market"],
+  variables: ["inputs"],
   instructions: `The problem being solved is: {{problem}}
 
 Your response MUST be about {{problem}}. Do not discuss unrelated topics.
 
-Describe the sales motion for {{market}}: self-serve, inside sales, or enterprise.`,
+Calculate the valuation for {{solution}} using Scorecard, Berkus, VC, and DCF-light methods with {{inputs}}.`,
   validate: (context) => ({ valid: true, issues: [] }),
 };

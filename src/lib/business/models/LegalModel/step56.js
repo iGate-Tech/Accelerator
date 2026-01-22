@@ -1,11 +1,15 @@
-import { standardPromptTemplate } from '../../templates.js';
+import { standardPromptTemplateWithProblem } from '../../templates.js';
 
 export const step56 = {
   id: "step56",
-  name: "Legal Risks",
-  model: "Legal Model",
-  promptTemplate: standardPromptTemplate,
+  name: "Risk Assessment",
+  model: "LegalModel Model",
+  promptTemplate: standardPromptTemplateWithProblem,
   variables: ["solution"],
-  instructions: "Identify legal and regulatory risks for AI-powered legal document review.",
+  instructions: `The problem being solved is: {{problem}}
+
+Your response MUST be about {{problem}}. Do not discuss unrelated topics.
+
+Identify legal and regulatory risks for {{solution}}.`,
   validate: (context) => ({ valid: true, issues: [] }),
 };

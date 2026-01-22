@@ -1,12 +1,17 @@
-import { standardPromptTemplate } from '../../templates.js';
+import { standardPromptTemplateWithProblem } from '../../templates.js';
 
 export const step3 = {
   id: "step3",
   name: "Severity Assessment",
   model: "Idea Model",
-  promptTemplate: standardPromptTemplate,
+  promptTemplate: standardPromptTemplateWithProblem,
   variables: ["problem"],
   detailedPrompt: `
+The problem being solved is: {{problem}}
+
+Your response MUST be about {{problem}}. Do not discuss unrelated topics.
+
+
 Evaluate the severity and frequency of the problem: {{problem}}.
 Provide a detailed assessment with:
 - {{severity: "Severity level (e.g., high, medium, low) with justification based on impact and urgency"}}

@@ -1,10 +1,10 @@
-import { validationPromptTemplate } from '../../templates.js';
+import { validationPromptTemplateWithProblem } from '../../templates.js';
 
 export const validate_deck_ask = {
   id: "validate_deck_ask",
   name: "Funding Validation",
   model: "Funding Model",
-  promptTemplate: validationPromptTemplate,
+  promptTemplate: validationPromptTemplateWithProblem,
   variables: ["valuation", "ask"],
   instructions: "Check if {{valuation}} aligns with {{ask}}.",
   validate: (context) => {

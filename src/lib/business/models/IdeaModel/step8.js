@@ -1,12 +1,17 @@
-import { standardPromptTemplate } from '../../templates.js';
+import { standardPromptTemplateWithProblem } from '../../templates.js';
 
 export const step8 = {
   id: "step8",
   name: "Problem Validation",
   model: "Idea Model",
-  promptTemplate: standardPromptTemplate,
+  promptTemplate: standardPromptTemplateWithProblem,
   variables: ["problem"],
   detailedPrompt: `
+The problem being solved is: {{problem}}
+
+Your response MUST be about {{problem}}. Do not discuss unrelated topics.
+
+
 Gather and validate comprehensive evidence for the problem: {{problem}}.
 Provide:
 - {{evidence: "Quantitative data (e.g., statistics, surveys) and qualitative insights (e.g., testimonials) proving the problem's existence"}}

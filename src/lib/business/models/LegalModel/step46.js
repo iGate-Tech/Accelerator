@@ -1,15 +1,15 @@
 import { standardPromptTemplateWithProblem } from '../../templates.js';
 
-export const step33 = {
-  id: "step33",
-  name: "Sales Strategy",
-  model: "Marketing Model",
+export const step46 = {
+  id: "step46",
+  name: "Pre-money Valuation",
+  model: "Legal Model",
   promptTemplate: standardPromptTemplateWithProblem,
-  variables: ["market"],
+  variables: ["valuation"],
   instructions: `The problem being solved is: {{problem}}
 
 Your response MUST be about {{problem}}. Do not discuss unrelated topics.
 
-Describe the sales motion for {{market}}: self-serve, inside sales, or enterprise.`,
+Calculate the expected pre-money valuation for {{solution}}, ensuring alignment with {{valuation}}.`,
   validate: (context) => ({ valid: true, issues: [] }),
 };

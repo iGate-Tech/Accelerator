@@ -1,12 +1,17 @@
-import { standardPromptTemplate } from '../../templates.js';
+import { standardPromptTemplateWithProblem } from '../../templates.js';
 
 export const step16 = {
   id: "step16",
   name: "Risk Analysis",
   model: "Business Model",
-  promptTemplate: standardPromptTemplate,
+  promptTemplate: standardPromptTemplateWithProblem,
   variables: ["solution"],
   detailedPrompt: `
+The problem being solved is: {{problem}}
+
+Your response MUST be about {{problem}}. Do not discuss unrelated topics.
+
+
 Conduct a thorough risk analysis for the solution {{solution}}.
 Identify:
 - {{assumptions: "Key assumptions that must hold true for success, with validation methods"}}

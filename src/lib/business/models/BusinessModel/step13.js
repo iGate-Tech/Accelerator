@@ -1,12 +1,17 @@
-import { standardPromptTemplate } from '../../templates.js';
+import { standardPromptTemplateWithProblem } from '../../templates.js';
 
 export const step13 = {
   id: "step13",
   name: "Revenue Streams",
   model: "Business Model",
-  promptTemplate: standardPromptTemplate,
+  promptTemplate: standardPromptTemplateWithProblem,
   variables: ["modelType"],
   detailedPrompt: `
+The problem being solved is: {{problem}}
+
+Your response MUST be about {{problem}}. Do not discuss unrelated topics.
+
+
 Design revenue streams for the solution using the business model {{modelType}}.
 Identify:
 - {{revenue: "Primary and secondary revenue streams, with descriptions and examples"}}

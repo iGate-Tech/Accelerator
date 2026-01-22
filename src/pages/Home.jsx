@@ -233,6 +233,9 @@ const TasksContent = () => {
           };
           const projectId = await addProject(projectData, user()?.id);
           _setCurrentProjectId(projectId);
+          // Dispatch events to notify sidebar to refresh
+          window.dispatchEvent(new CustomEvent('projectAdded', { detail: projectId }));
+          window.dispatchEvent(new CustomEvent('refreshProjects'));
           setPrompt(userPrompt);
           
           // Create initial task and stream
@@ -627,7 +630,23 @@ Please provide the modified content that follows the instruction.`;
             const newStepHook = createStepHook(projectId, () => {});
             stepHook = newStepHook;
 
+            // Save problem statement immediately to step data store
+            console.log('[Journey] Saving problem to step_data store...');
+            await updateStepData(projectId, { 
+              problem: problemText.trim(),
+              originalProblem: problemText.trim() 
+            });
+            console.log('[Journey] Problem saved to step_data store');
+            console.log('[Journey] Original problem:', problemText.trim().substring(0, 50) + '...');
+
+            // Force refresh stepData to ensure the hook has the latest data
             const step = getStepHook();
+            if (step) {
+              const freshData = await getStepData(projectId);
+              console.log('[Journey] Fresh step data after saving problem:', Object.keys(freshData));
+              step.setStepData(freshData);
+            }
+
             if (step && currentProjectId() && user()?.id) {
                 const taskId = await addTask({
                     projectId: currentProjectId(),

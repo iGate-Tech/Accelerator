@@ -1,20 +1,34 @@
-import { standardPromptTemplate } from '../../templates.js';
+import { standardPromptTemplateWithProblem } from '../../templates.js';
 
 export const step9 = {
   id: "step9",
   name: "Solution Design",
   model: "Business Model",
-  promptTemplate: standardPromptTemplate,
+  promptTemplate: standardPromptTemplateWithProblem,
   variables: ["gaps", "persona"],
   detailedPrompt: `
-Design a comprehensive solution addressing the gaps {{gaps}} for the persona {{persona}}.
-Detail:
-- {{solution: "High-level solution description, including technology approach, delivery method, and core value proposition"}}
-- {{coreFeatures: "List of 3-5 core features that solve {{gaps}}, with brief descriptions of functionality"}}
-- {{addressedGaps: "How each feature specifically addresses the identified {{gaps}}, with expected outcomes"}}
-- {{differentiation: "Key differentiators from existing solutions, including unique benefits and competitive advantages"}}
-- {{modelType: "Business model type such as SaaS, Marketplace, B2B, B2C, or Hybrid, with justification for the choice"}}
-Ensure alignment with {{persona}}'s needs and present in professional Markdown with sections and bullet points.
+The problem being solved is: {{problem}}
+
+Your response MUST be about {{problem}}. Do not discuss unrelated topics.
+
+The gaps identified are: {{gaps}}
+
+You MUST design a solution that directly addresses {{problem}}.
+Your solution MUST:
+- Be directly related to {{problem}}
+- Address the specific gaps mentioned above
+- Be suitable for the persona: {{persona}}
+
+If the gaps {{gaps}} seem unrelated to {{problem}}, IGNORE the gaps and design a solution that directly addresses {{problem}} instead.
+
+Provide:
+- {{solution: "High-level solution description directly related to {{problem}}"}}
+- {{coreFeatures: "List of 3-5 core features that solve {{problem}}, with brief descriptions"}}
+- {{addressedGaps: "How each feature addresses {{problem}} and the identified gaps"}}
+- {{differentiation: "Key differentiators from existing solutions for {{problem}}"}}
+- {{modelType: "Business model type such as SaaS, Marketplace, B2B, B2C, or Hybrid"}}
+
+IMPORTANT: Your solution MUST be about {{problem}}. Do not generate solutions for unrelated topics.
 `,
   validate: (context) => ({ valid: true, issues: [] }),
 };

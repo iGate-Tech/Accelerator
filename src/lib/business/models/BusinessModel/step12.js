@@ -1,12 +1,17 @@
-import { standardPromptTemplate } from '../../templates.js';
+import { standardPromptTemplateWithProblem } from '../../templates.js';
 
 export const step12 = {
   id: "step12",
   name: "Business Model",
   model: "Business Model",
-  promptTemplate: standardPromptTemplate,
+  promptTemplate: standardPromptTemplateWithProblem,
   variables: ["persona"],
   detailedPrompt: `
+The problem being solved is: {{problem}}
+
+Your response MUST be about {{problem}}. Do not discuss unrelated topics.
+
+
 Determine the optimal business model for the solution based on the persona {{persona}}.
 Select and justify:
 - {{modelType: "Chosen business model type (e.g., SaaS, marketplace, subscription), with rationale tied to {{persona}} needs"}}

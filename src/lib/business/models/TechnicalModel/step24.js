@@ -1,12 +1,17 @@
-import { standardPromptTemplate } from '../../templates.js';
+import { standardPromptTemplateWithProblem } from '../../templates.js';
 
 export const step24 = {
   id: "step24",
   name: "Technical Roadmap",
   model: "Technical Model",
-  promptTemplate: standardPromptTemplate,
+  promptTemplate: standardPromptTemplateWithProblem,
   variables: ["solution", "mvpFeatures", "timeline"],
   detailedPrompt: `
+The problem being solved is: {{problem}}
+
+Your response MUST be about {{problem}}. Do not discuss unrelated topics.
+
+
 Create technical roadmap for {{solution}} with {{mvpFeatures}} in {{timeline}}. Define milestones, resources needed, technical risks, and timeline phases.
 
 Provide:

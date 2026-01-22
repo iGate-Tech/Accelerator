@@ -1,12 +1,17 @@
-import { standardPromptTemplate } from '../../templates.js';
+import { standardPromptTemplateWithProblem } from '../../templates.js';
 
 export const step14 = {
   id: "step14",
   name: "Pricing Strategy",
   model: "Business Model",
-  promptTemplate: standardPromptTemplate,
+  promptTemplate: standardPromptTemplateWithProblem,
   variables: ["modelType", "persona", "market"],
   detailedPrompt: `
+The problem being solved is: {{problem}}
+
+Your response MUST be about {{problem}}. Do not discuss unrelated topics.
+
+
 Develop a comprehensive pricing strategy for the solution in the business model {{modelType}}.
 Factor in {{persona}} and {{market}} to provide:
 - {{pricing: "Overall pricing approach (e.g., cost-plus, value-based), with justification"}}

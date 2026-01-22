@@ -1,10 +1,10 @@
-import { validationPromptTemplate } from '../../templates.js';
+import { validationPromptTemplateWithProblem } from '../../templates.js';
 
 export const validate_tam_sam_som = {
   id: "validate_tam_sam_som",
   name: "Market Validation",
   model: "Marketing Model",
-  promptTemplate: validationPromptTemplate,
+  promptTemplate: validationPromptTemplateWithProblem,
   variables: ["tam", "sam", "som"],
   detailedPrompt: `
 Validate the market sizes: Check if Total Addressable Market {{tam}} >= Serviceable Available Market {{sam}} >= Serviceable Obtainable Market {{som}}.

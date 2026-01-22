@@ -1,11 +1,15 @@
-import { standardPromptTemplate } from '../../templates.js';
+import { standardPromptTemplateWithProblem } from '../../templates.js';
 
 export const step37 = {
   id: "step37",
   name: "Cost Structure",
-  model: "Financial Model",
-  promptTemplate: standardPromptTemplate,
+  model: "FinancialModel Model",
+  promptTemplate: standardPromptTemplateWithProblem,
   variables: ["solution"],
-  instructions: "List major fixed and variable costs for {{solution}}.",
+  instructions: `The problem being solved is: {{problem}}
+
+Your response MUST be about {{problem}}. Do not discuss unrelated topics.
+
+List major fixed and variable costs for {{solution}}.`,
   validate: (context) => ({ valid: true, issues: [] }),
 };

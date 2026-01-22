@@ -248,6 +248,11 @@ const ProjectsSection = (props) => {
     const onProjectAdded = async () => {
         await loadProjects();
     };
+    
+    // Also trigger store update directly for immediate reactivity
+    const refreshProjectsStore = () => {
+        loadProjects();
+    };
     const onProjectUpdated = async () => {
         await loadProjects();
     };
@@ -262,9 +267,15 @@ const ProjectsSection = (props) => {
 
         setProjectsStore('loading', true);
         await loadProjects();
+        
+        // Set up event listeners with multiple handlers for reliability
         window.addEventListener('projectAdded', onProjectAdded);
         window.addEventListener('projectUpdated', onProjectUpdated);
         window.addEventListener('projectDeleted', onProjectUpdated);
+        
+        // Also listen for custom store refresh events
+        window.addEventListener('refreshProjects', refreshProjectsStore);
+        
         if (window.lucide) {
             window.lucide.createIcons();
         }
@@ -273,6 +284,7 @@ const ProjectsSection = (props) => {
         window.removeEventListener('projectAdded', onProjectAdded);
         window.removeEventListener('projectUpdated', onProjectUpdated);
         window.removeEventListener('projectDeleted', onProjectUpdated);
+        window.removeEventListener('refreshProjects', refreshProjectsStore);
     });
     createEffect(() => {
         const newLang = lang();

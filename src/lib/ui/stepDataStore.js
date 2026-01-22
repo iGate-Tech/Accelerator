@@ -49,10 +49,16 @@ async function ensureTableExists(db) {
 async function loadFromStorage(projectId) {
   try {
     const db = await getDb();
-    if (!db) return {};
+    if (!db) {
+      console.warn('loadFromStorage: No database available');
+      return {};
+    }
     
     const tableExists = await ensureTableExists(db);
-    if (!tableExists) return {};
+    if (!tableExists) {
+      console.warn('loadFromStorage: Table does not exist');
+      return {};
+    }
     
     const result = await db.query(
       'SELECT key, value FROM step_data WHERE project_id = $1 ORDER BY updated_at DESC',
@@ -66,6 +72,7 @@ async function loadFromStorage(projectId) {
         data[row.key] = row.value;
       }
     }
+    console.log('loadFromStorage: Loaded', Object.keys(data).length, 'items for project', projectId, '- keys:', Object.keys(data));
     return data;
   } catch (e) {
     console.warn('Failed to load step data from PGLite:', e);
@@ -76,7 +83,10 @@ async function loadFromStorage(projectId) {
 async function saveToStorage(data, projectId) {
   try {
     const db = await getDb();
-    if (!db) return;
+    if (!db) {
+      console.warn('saveToStorage: No database available');
+      return;
+    }
     
     const tableExists = await ensureTableExists(db);
     if (!tableExists) {
@@ -95,6 +105,7 @@ async function saveToStorage(data, projectId) {
         [id, projectId, key, jsonValue, now]
       );
     }
+    console.log('saveToStorage: Saved', Object.keys(data).length, 'items for project', projectId);
   } catch (e) {
     console.warn('Failed to save step data to PGLite:', e);
   }
@@ -125,9 +136,27 @@ async function getStore(projectId) {
 }
 
 async function updateStepData(projectId, newData) {
-  const { setStore } = await getStore(projectId);
+  console.log('updateStepData: Called with projectId:', projectId, 'data:', newData);
+  const { store, setStore } = await getStore(projectId);
+  
+  // Preserve the original problem statement if it exists and newData doesn't have it
+  const existingProblem = store?.problem;
+  const dataWithProblem = { ...newData };
+  
+  if (existingProblem && !dataWithProblem.problem) {
+    console.log('updateStepData: Preserving existing problem statement');
+    dataWithProblem.problem = existingProblem;
+  }
+  
+  // Also preserve originalProblem if it exists
+  if (store?.originalProblem && !dataWithProblem.originalProblem) {
+    console.log('updateStepData: Preserving original problem statement');
+    dataWithProblem.originalProblem = store.originalProblem;
+  }
+  
   setStore(prev => {
-    const merged = deepMerge(prev, newData);
+    const merged = deepMerge(prev, dataWithProblem);
+    console.log('updateStepData: Merged result:', merged);
     saveToStorage(merged, projectId);
     return merged;
   });
@@ -141,6 +170,7 @@ async function resetStepData(projectId) {
 
 async function getStepData(projectId) {
   const { store } = await getStore(projectId);
+  console.log('getStepData: Returning store for project', projectId, ':', store);
   return store;
 }
 

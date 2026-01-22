@@ -108,8 +108,9 @@ export const addProject = async (project) => {
     const newProject = await _createProject({ project, userId: user.id });
     logger.debug('Added project:', newProject);
 
-    // Dispatch event to notify UI components
-    window.dispatchEvent(new CustomEvent('projectAdded'));
+    // Dispatch events to notify UI components
+    window.dispatchEvent(new CustomEvent('projectAdded', { detail: newProject.id }));
+    window.dispatchEvent(new CustomEvent('refreshProjects'));
 
     // TODO: Add activity logging when implemented
     // await logActivity(user.id, 'project_created', 'project', newProject.id, `Created project "${project.name}"`);

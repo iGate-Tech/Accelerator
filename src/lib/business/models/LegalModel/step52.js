@@ -1,11 +1,15 @@
-import { standardPromptTemplate } from '../../templates.js';
+import { standardPromptTemplateWithProblem } from '../../templates.js';
 
 export const step52 = {
   id: "step52",
-  name: "Advisors & Board",
-  model: "Legal Model",
-  promptTemplate: standardPromptTemplate,
+  name: "Governance Structure",
+  model: "LegalModel Model",
+  promptTemplate: standardPromptTemplateWithProblem,
   variables: ["solution"],
-  instructions: "List advisors, board members, and governance structure for {{solution}}.",
+  instructions: `The problem being solved is: {{problem}}
+
+Your response MUST be about {{problem}}. Do not discuss unrelated topics.
+
+List advisors, board members, and governance structure for {{solution}}.`,
   validate: (context) => ({ valid: true, issues: [] }),
 };

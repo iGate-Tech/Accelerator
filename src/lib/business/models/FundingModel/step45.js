@@ -1,11 +1,15 @@
-import { standardPromptTemplate } from '../../templates.js';
+import { standardPromptTemplateWithProblem } from '../../templates.js';
 
 export const step45 = {
   id: "step45",
-  name: "Fund Allocation",
-  model: "Funding Model",
-  promptTemplate: standardPromptTemplate,
+  name: "Use of Funds",
+  model: "FundingModel Model",
+  promptTemplate: standardPromptTemplateWithProblem,
   variables: ["solution"],
-  instructions: "Plan the allocation of raised funds for {{solution}}.",
+  instructions: `The problem being solved is: {{problem}}
+
+Your response MUST be about {{problem}}. Do not discuss unrelated topics.
+
+Plan the allocation of raised funds for {{solution}}.`,
   validate: (context) => ({ valid: true, issues: [] }),
 };

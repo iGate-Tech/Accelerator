@@ -1,12 +1,17 @@
-import { standardPromptTemplate } from '../../templates.js';
+import { standardPromptTemplateWithProblem } from '../../templates.js';
 
 export const step4 = {
   id: "step4",
   name: "Current Solutions",
   model: "Idea Model",
-  promptTemplate: standardPromptTemplate,
+  promptTemplate: standardPromptTemplateWithProblem,
   variables: ["problem"],
   detailedPrompt: `
+The problem being solved is: {{problem}}
+
+Your response MUST be about {{problem}}. Do not discuss unrelated topics.
+
+
 Identify and analyze current solutions for the problem: {{problem}}.
 Provide:
 - {{alternatives: "List of existing solutions, categorized by type (e.g., software, manual processes, competitors), with specific examples"}}

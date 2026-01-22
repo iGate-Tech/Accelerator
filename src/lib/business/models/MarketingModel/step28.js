@@ -1,12 +1,17 @@
-import { standardPromptTemplate } from '../../templates.js';
+import { standardPromptTemplateWithProblem } from '../../templates.js';
 
 export const step28 = {
   id: "step28",
   name: "Serviceable Obtainable Market",
   model: "Marketing Model",
-  promptTemplate: standardPromptTemplate,
+  promptTemplate: standardPromptTemplateWithProblem,
   variables: ["market"],
   detailedPrompt: `
+The problem being solved is: {{problem}}
+
+Your response MUST be about {{problem}}. Do not discuss unrelated topics.
+
+
 Estimate the Serviceable Obtainable Market (SOM) for {{market}}. Explain initial capture share rationale.
 
 Provide:

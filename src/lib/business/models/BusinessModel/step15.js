@@ -1,12 +1,17 @@
-import { standardPromptTemplate } from '../../templates.js';
+import { standardPromptTemplateWithProblem } from '../../templates.js';
 
 export const step15 = {
   id: "step15",
   name: "Competitive Moats",
   model: "Business Model",
-  promptTemplate: standardPromptTemplate,
+  promptTemplate: standardPromptTemplateWithProblem,
   variables: ["solution"],
   detailedPrompt: `
+The problem being solved is: {{problem}}
+
+Your response MUST be about {{problem}}. Do not discuss unrelated topics.
+
+
 Build and analyze competitive moats for the solution {{solution}}.
 Focus on barriers to entry and provide:
 - {{moat: "Key moats (e.g., technology, network effects, data), prioritized by strength"}}

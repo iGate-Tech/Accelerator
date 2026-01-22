@@ -1,0 +1,37 @@
+{
+  "version": 1,
+  "notifications": [
+    {
+      "id": "5d7bb5c8-b401-4a93-9936-a9c419560d0d",
+      "type": "feature_waiting_approval",
+      "title": "Feature Ready for Review",
+      "message": "\"feature-1769079096983-04z4c12wc\" is ready for your review and approval.",
+      "createdAt": "2026-01-22T10:52:08.203Z",
+      "read": false,
+      "dismissed": false,
+      "featureId": "feature-1769079096983-04z4c12wc",
+      "projectPath": "/home/ranag/Documents/Accelerator-exp"
+    },
+    {
+      "id": "e40c4a99-6d2c-403d-99fc-ad3a2062709d",
+      "type": "feature_waiting_approval",
+      "title": "Feature Ready for Review",
+      "message": "\"feature-1769079096983-04z4c12wc\" is ready for your review and approval.",
+      "createdAt": "2026-01-22T10:53:05.861Z",
+      "read": false,
+      "dismissed": false,
+      "featureId": "feature-1769079096983-04z4c12wc",
+      "projectPath": "/home/ranag/Documents/Accelerator-exp"
+    },
+    {
+      "id": "dd6255be-a5df-4435-8cde-e8909a60bc34",
+      "type": "spec_regeneration_complete",
+      "title": "Spec Sync Complete",
+      "message": "Added 7 technologies, Removed 2 technologies",
+      "createdAt": "2026-01-22T11:04:39.875Z",
+      "read": false,
+      "dismissed": false,
+      "projectPath": "/home/ranag/Documents/Accelerator-exp"
+    }
+  ]
+}

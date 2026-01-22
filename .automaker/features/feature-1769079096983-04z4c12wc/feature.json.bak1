@@ -1,0 +1,30 @@
+{
+  "category": "Uncategorized",
+  "description": "can you check the codebase for any linting issues",
+  "title": "",
+  "images": [],
+  "imagePaths": [],
+  "textFilePaths": [],
+  "skipTests": true,
+  "model": "opencode-grok-code",
+  "thinkingLevel": "none",
+  "reasoningEffort": "none",
+  "branchName": "local",
+  "priority": 1,
+  "planningMode": "skip",
+  "requirePlanApproval": false,
+  "dependencies": [],
+  "workMode": "current",
+  "titleGenerating": false,
+  "status": "in_progress",
+  "id": "feature-1769079096983-04z4c12wc",
+  "descriptionHistory": [
+    {
+      "description": "can you check the codebase for any linting issues",
+      "timestamp": "2026-01-22T10:51:37.857Z",
+      "source": "initial"
+    }
+  ],
+  "startedAt": "2026-01-22T10:52:17.801Z",
+  "updatedAt": "2026-01-22T10:52:18.978Z"
+}

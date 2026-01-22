@@ -1,0 +1,11 @@
+{
+  "id": "evt-1769079128254-30960bb5",
+  "trigger": "feature_success",
+  "timestamp": "2026-01-22T10:52:08.254Z",
+  "projectPath": "/home/ranag/Documents/Accelerator-exp",
+  "projectName": "Accelerator-exp",
+  "featureId": "feature-1769079096983-04z4c12wc",
+  "featureName": "",
+  "error": "Feature completed in 27s",
+  "passes": true
+}

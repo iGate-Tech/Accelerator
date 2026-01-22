@@ -172,49 +172,49 @@ const AgentInterface = (props) => {
             class={
                 `${
                     props.agentBoxClass()
-                }`
+                } w-full max-w-md sm:max-w-lg md:max-w-xl lg:max-w-2xl mx-auto`
             }
             style={
                 (props.startPressed && props.startPressed()) || (props.tasksList && props.tasksList().length > 0) || (props.currentProjectId && props.currentProjectId()) ? "position: fixed !important; bottom: 10px !important; z-index: 50 !important;" : ""
-        }>
+            }>
 
             <div id="agentContent"
                 class={
                     props.agentContentClass ? props.agentContentClass() : ""
             }>
 
-                <div class="flex flex-col gap-4">
+                <div class="flex flex-col gap-3 sm:gap-4">
                      <Show when={
                          isAuthenticated() && !(props.startPressed && props.startPressed()) && !(props.tasksList && props.tasksList().length > 0) && !(props.currentProjectId && props.currentProjectId())
                      }>
                         <div ref={greetingRef}
                             id="greetingDiv"
-                            class="text-center fade-in">
-                            <h1 class="text-lg sm:text-2xl md:text-3xl font-sans font-light mb-2 sm:mb-2">
+                            class="text-center fade-in px-2">
+                            <h1 class="text-base sm:text-xl md:text-2xl font-sans font-light mb-2 sm:mb-2 truncate">
+                                 <span class="text-base-content">
+                                      {
+                                      t().greetingPrefix
+                                  }</span>
+                                  <span class="ms-1" style="color:#00a7e0">
+                                      {
+                                      userName()
+                                  }</span>
                                  <span class="text-base-content">
                                      {
-                                     t().greetingPrefix
+                                     t().greetingSuffix
                                  }</span>
-                                 <span class="ms-1" style="color:#00a7e0">
-                                     {
-                                     userName()
-                                 }</span>
-                                <span class="text-base-content">
-                                    {
-                                    t().greetingSuffix
-                                }</span>
                             </h1>
                         </div>
                     </Show>
 
                     <div class="">
-                        <div class=" card overflow-visible">
+                        <div class="card overflow-visible">
                             <div class="card-body relative p-0 !gap-0 overflow-visible">
 
 
 
                                 <div class="btnshadow p-[1px] overflow-visible">
-                                    <form id="taskForm" class="p-4  bg-base-100 border border-base-200 rounded-box overflow-visible">
+                                    <form id="taskForm" class="p-3 sm:p-4 bg-base-100 border border-base-200 rounded-box overflow-visible">
                                         <input type="hidden" name="action" id="action" value="send"/>
                                         <input type="hidden" name="taskContent" value=""/>
                                         <input type="hidden" name="taskTimestamp"
@@ -222,14 +222,14 @@ const AgentInterface = (props) => {
                                                 new Date().toLocaleString()
                                             }/>
                                           <Show when={selectedTaskIdValue()}>
-                                              <div class="mb-2 flex items-center gap-2">
-                                                  <span class="badge badge-info">Selected Task: {(() => {
+                                              <div class="mb-2 flex items-center gap-2 flex-wrap">
+                                                  <span class="badge badge-info break-words">Selected Task: {(() => {
                                                       const task = props.tasksList?.().find(t => t.id === selectedTaskIdValue());
                                                       return task?.title || 'Unknown';
                                                   })()}</span>
                                                    <button
                                                        type="button"
-                                                       class="btn btn-xs btn-ghost btn-circle"
+                                                       class="btn btn-xs btn-ghost btn-circle min-h-[32px] w-8"
                                                        onClick={() => {
                                                            props.setSelectedTaskId && props.setSelectedTaskId(null);
                                                            props.setInstructPrompt && props.setInstructPrompt('');
@@ -241,16 +241,16 @@ const AgentInterface = (props) => {
                                               </div>
                                           </Show>
                                            <textarea ref={textareaRef}
-                                               rows="1"
-                                               name="prompt"
-                                               id="promptTextarea"
-                                               class={
-                                                   `text-base-content text-lg w-full focus:ring-0 active:ring-0 ${
-                                                       uiState() === 'processing' ? 'opacity-50 cursor-not-allowed' : ''
-                                                   }`
-                                               }
-                                               style="resize: none; overflow: hidden; box-sizing: border-box;"
-                                                placeholder={placeholderText()}
+                                                rows="1"
+                                                name="prompt"
+                                                id="promptTextarea"
+                                                class={
+                                                    `text-base sm:text-lg text-base-content w-full focus:ring-0 active:ring-0 ${
+                                                        uiState() === 'processing' ? 'opacity-50 cursor-not-allowed' : ''
+                                                    }`
+                                                }
+                                                style="resize: none; overflow: hidden; box-sizing: border-box;"
+                                                 placeholder={placeholderText()}
                                                value={
                                                    selectedTaskIdValue() ? (props.instructPrompt?.() ?? '') : (props.prompt ? props.prompt() : "")
                                                }
@@ -284,17 +284,14 @@ const AgentInterface = (props) => {
                                                  uiState() === 'processing'
                                          }></textarea>
 
-                                      <div class="flex justify-between items-center mt-2 overflow-visible">
+                                      <div class="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-2 mt-2 overflow-visible">
 
                                           <div class="flex gap-2 overflow-visible">
                                               <div class="flex gap-2 overflow-visible">
-                                                  <button type="button" class="select text-base-content/50 pr-8 py-1 rounded-full flex items-center gap-1 flex gap-3 transition h-6 cursor-pointer border-0" popovertarget="mode-popover-1" style="anchor-name:--mode-anchor-1">
-                                                      <LogoIcon fillColor={
-                                                          () => modeColors[selectedMode()] || 'gray'
-                                                      }/> {
-                                                      selectedMode()
-                                                  } </button>
-                                                  <ul class="dropdown menu w-52 rounded-box bg-base-100 shadow-sm" popover id="mode-popover-1" style="position-anchor:--mode-anchor-1">
+                                                  <button type="button" class="select text-base-content/50 pr-4 sm:pr-8 py-1 rounded-full flex items-center gap-1 flex gap-3 transition h-8 sm:h-6 cursor-pointer border-0 text-sm" popovertarget="mode-popover-1" style="anchor-name:--mode-anchor-1">
+                                                      <LogoIcon fillColor={() => modeColors[selectedMode()] || 'gray'}/> {selectedMode()}
+                                                  </button>
+                                                  <ul class="dropdown menu w-full sm:w-52 rounded-box bg-base-100 shadow-sm max-w-[90vw]" popover id="mode-popover-1" style="position-anchor:--mode-anchor-1">
                                                        <For each={
                                                            [
                                                                'General Mode',
@@ -325,9 +322,9 @@ const AgentInterface = (props) => {
 
                                           </div>
 
-                                            <button
+                                              <button
                                                   type="button"
-                                                  class="btn btn-ghost btn-sm btn-circle"
+                                                  class="btn btn-ghost btn-md sm:btn-sm btn-circle min-h-[44px] sm:min-h-auto"
                                                   onClick={() => {
                                                       const hasProject = props.currentProjectId && props.currentProjectId();
                                                       if (selectedTaskIdValue() && hasProject) {
@@ -343,7 +340,7 @@ const AgentInterface = (props) => {
                                                   disabled={uiState() === 'processing' || (props.currentProjectId && props.currentProjectId() && !selectedTaskIdValue())}
                                                   title={selectedTaskIdValue() ? 'Send Instructions' : (props.currentProjectId && props.currentProjectId()) ? 'Select a task first' : 'Start'}
                                               >
-                                              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                                   <line x1="12" y1="19" x2="12" y2="5"></line>
                                                   <polyline points="5,12 12,5 19,12"></polyline>
                                               </svg>

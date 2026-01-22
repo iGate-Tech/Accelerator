@@ -1,0 +1,14 @@
+{
+  "category": "enhancement",
+  "description": "Add appropriate input types for mobile keyboards (email, tel, number), implement auto-complete support, add floating labels, and create custom date/number pickers that use native mobile interfaces.\n\n**Rationale:** Poor form experiences cause 21% mobile form abandonment. Native keyboard types and pickers reduce typing effort and validation errors.",
+  "title": "Mobile-Optimized Form Inputs",
+  "status": "backlog",
+  "id": "feature-1769079342430-mt8gfxak5",
+  "descriptionHistory": [
+    {
+      "description": "Add appropriate input types for mobile keyboards (email, tel, number), implement auto-complete support, add floating labels, and create custom date/number pickers that use native mobile interfaces.\n\n**Rationale:** Poor form experiences cause 21% mobile form abandonment. Native keyboard types and pickers reduce typing effort and validation errors.",
+      "timestamp": "2026-01-22T10:55:42.432Z",
+      "source": "initial"
+    }
+  ]
+}

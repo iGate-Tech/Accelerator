@@ -1,0 +1,14 @@
+{
+  "category": "enhancement",
+  "description": "Split large feature modules into separate chunks loaded on-demand using dynamic imports. Configure webpack or bundler to create separate JS bundles for routes and heavy components.\n\n**Rationale:** Reduces initial bundle size by 40-60%, allowing faster initial page loads. Users only download code they actually use, improving Time to Interactive.",
+  "title": "Implement Dynamic Import Code Splitting",
+  "status": "backlog",
+  "id": "feature-1769079440646-e89divkho",
+  "descriptionHistory": [
+    {
+      "description": "Split large feature modules into separate chunks loaded on-demand using dynamic imports. Configure webpack or bundler to create separate JS bundles for routes and heavy components.\n\n**Rationale:** Reduces initial bundle size by 40-60%, allowing faster initial page loads. Users only download code they actually use, improving Time to Interactive.",
+      "timestamp": "2026-01-22T10:57:20.647Z",
+      "source": "initial"
+    }
+  ]
+}

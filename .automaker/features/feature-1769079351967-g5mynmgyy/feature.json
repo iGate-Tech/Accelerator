@@ -1,0 +1,14 @@
+{
+  "category": "enhancement",
+  "description": "Implement fluid typography that scales based on screen width using CSS clamp() or equivalent. Create mobile-specific font sizes that improve readability without horizontal scrolling.\n\n**Rationale:** Small screens require larger text and tighter line heights. Dynamic scaling ensures comfortable reading across all device sizes while maintaining visual hierarchy.",
+  "title": "Responsive Typography Scale",
+  "status": "backlog",
+  "id": "feature-1769079351967-g5mynmgyy",
+  "descriptionHistory": [
+    {
+      "description": "Implement fluid typography that scales based on screen width using CSS clamp() or equivalent. Create mobile-specific font sizes that improve readability without horizontal scrolling.\n\n**Rationale:** Small screens require larger text and tighter line heights. Dynamic scaling ensures comfortable reading across all device sizes while maintaining visual hierarchy.",
+      "timestamp": "2026-01-22T10:55:51.968Z",
+      "source": "initial"
+    }
+  ]
+}

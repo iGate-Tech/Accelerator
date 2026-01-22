@@ -38,7 +38,7 @@ import { useUser } from "../context/UserContext";
 import { toastManager } from "../lib/ui/feedback";
 import { useActivityLogger } from "../lib/business/activity.js";
 import { renderFilledTemplate, extractTemplateData} from '../lib/ui/llm-template.js';
-import { updateStepData } from '../lib/ui/stepDataStore.js';
+import { updateStepData, getStepData } from '../lib/ui/stepDataStore.js';
 import { ResponseSection, RouteGuard, ProtectedRoute } from '../components';
 import { useContext } from "solid-js";
 import { useLocation, useNavigate } from "@solidjs/router";
@@ -397,25 +397,53 @@ Please provide the modified content that follows the instruction.`;
         try {
           await step.confirm();
           console.log('[Journey] Step confirmed');
+          
+          // Force refresh step data to ensure we have fresh data
+          console.log('[Journey] Refreshing step data...');
+          const freshStepData = await step.refreshStepData();
+          console.log('[Journey] Fresh step data keys:', Object.keys(freshStepData));
         } catch (error) {
           console.error('[Journey] Error in step.confirm():', error.message);
           return;
         }
 
         if (!step.isComplete()) {
-          console.log('[Journey] Creating new task for next step...');
+          console.log('[Journey] Checking for existing next task...');
+          const projectId = currentProjectId();
+          const allTasks = tasksList();
+          
+          // Find if there's already a task for a later step
+          const currentStepIndex = step.stepIndex();
+          const existingNextTask = allTasks.find(t => {
+            const taskStepIndex = steps.findIndex(s => s.name === t.stepName);
+            return taskStepIndex > currentStepIndex && t.content && t.content.trim().length > 0;
+          });
+
+          if (existingNextTask) {
+            console.log('[Journey] Found existing next task:', existingNextTask.id, '- showing it instead of creating new one');
+            // Select the existing task instead of creating a new one
+            setSelectedTaskId(existingNextTask.id);
+            return;
+          }
+
+          console.log('[Journey] No existing next task found, creating new task...');
           try {
-            const projectId = currentProjectId();
             const userId = user()?.id;
             const currentStep = step.currentStep();
             const stepName = step.stepName();
+            const currentStepData = step.stepData();
+            
             console.log('[Journey] Next step:', currentStep?.name || stepName);
+            console.log('[Journey] Step data for prompt:', Object.keys(currentStepData));
+            
+            const promptForStep = buildPrompt(currentStep, currentStepData, prompt());
+            console.log('[Journey] Prompt length:', promptForStep.length);
 
             const newTaskId = await addTask({
               projectId: projectId,
               title: stepName,
               content: '',
-              prompt: buildPrompt(step.currentStep(), step.stepData(), prompt()),
+              prompt: promptForStep,
               llm_response: '',
               model: currentStep?.model || 'System',
               section: currentStep?.section || 'Processing',
@@ -429,7 +457,7 @@ Please provide the modified content that follows the instruction.`;
               projectId: projectId,
               title: stepName,
               content: '',
-              prompt: buildPrompt(step.currentStep(), step.stepData(), prompt()),
+              prompt: promptForStep,
               llm_response: '',
               model: currentStep?.model || 'System',
               section: currentStep?.section || 'Processing',

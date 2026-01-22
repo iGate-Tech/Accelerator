@@ -178,6 +178,11 @@ export function createStepHook(projectId, onStepChange) {
     if (project?.current_step) {
       const idx = steps.findIndex(s => s.id === project.current_step);
       if (idx >= 0) setStepIndex(idx);
+    } else if (project?.completedSteps !== undefined) {
+      // Set to the next step after completed ones (don't restart from beginning)
+      const nextStepIndex = Math.min(project.completedSteps, steps.length - 1);
+      console.log('loadFromProject: Setting step index to next step after completed:', nextStepIndex);
+      setStepIndex(nextStepIndex);
     }
     if (project?.ui_status) {
       setUiState(project.ui_status);

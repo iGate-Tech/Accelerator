@@ -93,6 +93,7 @@ const TasksContent = () => {
     const [selectedTaskId, setSelectedTaskId] = createSignal(null);
     const [projectData, setProjectData] = createSignal(null);
     const [streamingTaskId, setStreamingTaskId] = createSignal(null);
+    const [instructPrompt, setInstructPrompt] = createSignal('');
 
     let stepHook = null;
 
@@ -216,7 +217,8 @@ const TasksContent = () => {
 
     const handleInstructSubmit = async () => {
       const taskId = selectedTaskId();
-      const userPrompt = prompt();
+      // Use instructPrompt when task is selected, otherwise use prompt
+      const userPrompt = taskId ? instructPrompt() : prompt();
       
       // Only create new project if no project is open AND no task is selected
       const hasOpenProject = currentProjectId() && currentProjectId() !== null;
@@ -356,6 +358,7 @@ Please provide the modified content that follows the instruction.`;
             
             console.log('[Journey] Streaming complete, length:', accumulatedResponse.length);
             setStreamingTaskId(null);
+            setInstructPrompt('');
             
             console.log('[Journey] Saving updated task...');
             await updateTask(taskId, {
@@ -892,7 +895,7 @@ Please provide the modified content that follows the instruction.`;
     createEffect(() => {
       const pid = currentProjectId();
       const projectsList = projects();
-      
+       
       if (!pid || !projectsList) return;
       
       const project = projectsList.find(p => p.id === pid);
@@ -901,9 +904,12 @@ Please provide the modified content that follows the instruction.`;
       
       setProjectData(project);
       
-      // Only log and set prompt if this is the first load (project just restored)
+      // Only set prompt from project description if:
+      // 1. No prompt currently exists
+      // 2. No task is selected for instruct
       const currentPrompt = prompt();
-      if (!currentPrompt && project.description) {
+      const hasSelectedTask = selectedTaskId() !== null;
+      if (!currentPrompt && project.description && !hasSelectedTask) {
         setPrompt(project.description);
       }
       
@@ -999,6 +1005,8 @@ Please provide the modified content that follows the instruction.`;
                   textareaRef={textareaRef}
                   prompt={prompt}
                   setPrompt={setPrompt}
+                  instructPrompt={instructPrompt}
+                  setInstructPrompt={setInstructPrompt}
                   tasksList={tasksList}
                   startPressed={startPressed}
                    handleInstruct={handleInstruct}

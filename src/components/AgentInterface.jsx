@@ -217,50 +217,59 @@ const AgentInterface = (props) => {
                                                       const task = props.tasksList?.().find(t => t.id === selectedTaskIdValue());
                                                       return task?.title || 'Unknown';
                                                   })()}</span>
-                                                  <button
-                                                      type="button"
-                                                      class="btn btn-xs btn-ghost btn-circle"
-                                                      onClick={() => props.setSelectedTaskId && props.setSelectedTaskId(null)}
-                                                      title="Deselect task"
-                                                  >
+                                                   <button
+                                                       type="button"
+                                                       class="btn btn-xs btn-ghost btn-circle"
+                                                       onClick={() => {
+                                                           props.setSelectedTaskId && props.setSelectedTaskId(null);
+                                                           props.setInstructPrompt && props.setInstructPrompt('');
+                                                       }}
+                                                       title="Deselect task"
+                                                   >
                                                       ×
                                                   </button>
                                               </div>
                                           </Show>
-                                          <textarea ref={textareaRef}
-                                              rows="1"
-                                              name="prompt"
-                                              id="promptTextarea"
-                                              class={
-                                                  `text-base-content text-lg w-full focus:ring-0 active:ring-0 ${
-                                                      uiState() === 'processing' ? 'opacity-50 cursor-not-allowed' : ''
-                                                  }`
-                                              }
-                                              style="resize: none; overflow: hidden; box-sizing: border-box;"
-                                              placeholder={
-                                                  props.selectedTaskId && props.selectedTaskId() ? 'Enter instructions for selected task...' : t().agentPlaceholder
-                                              }
-                                              value={
-                                                  props.prompt ? props.prompt() : ""
-                                              }
-                                              onInput={
-                                                  (e) => props.setPrompt(e.target.value)
-                                              }
-                                                onKeyDown={
-                                                    (e) => {
-                                                        if (e.key === "Enter" && !e.shiftKey) {
-                                                            e.preventDefault();
-                                                            if (selectedTaskIdValue()) {
-                                                                props.handleInstructSubmit && props.handleInstructSubmit();
-                                                            } else {
-                                                                props.handleStart && props.handleStart();
-                                                            }
-                                                        }
-                                                    }
-                                                }
-                                            disabled={
-                                                uiState() === 'processing'
-                                        }></textarea>
+                                           <textarea ref={textareaRef}
+                                               rows="1"
+                                               name="prompt"
+                                               id="promptTextarea"
+                                               class={
+                                                   `text-base-content text-lg w-full focus:ring-0 active:ring-0 ${
+                                                       uiState() === 'processing' ? 'opacity-50 cursor-not-allowed' : ''
+                                                   }`
+                                               }
+                                               style="resize: none; overflow: hidden; box-sizing: border-box;"
+                                               placeholder={
+                                                   props.selectedTaskId && props.selectedTaskId() ? 'Enter instructions for selected task...' : t().agentPlaceholder
+                                               }
+                                               value={
+                                                   selectedTaskIdValue() ? (props.instructPrompt?.() ?? '') : (props.prompt ? props.prompt() : "")
+                                               }
+                                               onInput={
+                                                   (e) => {
+                                                       if (selectedTaskIdValue() && props.setInstructPrompt) {
+                                                           props.setInstructPrompt(e.target.value);
+                                                       } else {
+                                                           props.setPrompt(e.target.value);
+                                                       }
+                                                   }
+                                               }
+                                                 onKeyDown={
+                                                     (e) => {
+                                                         if (e.key === "Enter" && !e.shiftKey) {
+                                                             e.preventDefault();
+                                                             if (selectedTaskIdValue()) {
+                                                                 props.handleInstructSubmit && props.handleInstructSubmit();
+                                                             } else {
+                                                                 props.handleStart && props.handleStart();
+                                                             }
+                                                         }
+                                                     }
+                                                 }
+                                             disabled={
+                                                 uiState() === 'processing'
+                                         }></textarea>
 
                                       <div class="flex justify-between items-center mt-2 overflow-visible">
 

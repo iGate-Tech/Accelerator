@@ -156,6 +156,16 @@ const AgentInterface = (props) => {
     };
 
     const uiState = () => props.agentStore ?. uiState ?. () || 'idle';
+    
+    const placeholderText = createMemo(() => {
+        const hasProject = props.currentProjectId && props.currentProjectId();
+        if (selectedTaskIdValue()) {
+            return 'Enter instructions for selected task...';
+        } else if (hasProject) {
+            return 'Select a task above to give instructions';
+        }
+        return t().agentPlaceholder;
+    });
 
     return (
         <div id="agentBox"
@@ -240,17 +250,7 @@ const AgentInterface = (props) => {
                                                    }`
                                                }
                                                style="resize: none; overflow: hidden; box-sizing: border-box;"
-                                                placeholder={
-                                                    () => {
-                                                        const hasProject = props.currentProjectId && props.currentProjectId();
-                                                        if (selectedTaskIdValue()) {
-                                                            return 'Enter instructions for selected task...';
-                                                        } else if (hasProject) {
-                                                            return 'Select a task above to give instructions';
-                                                        }
-                                                        return t().agentPlaceholder;
-                                                    }
-                                                }
+                                                placeholder={placeholderText()}
                                                value={
                                                    selectedTaskIdValue() ? (props.instructPrompt?.() ?? '') : (props.prompt ? props.prompt() : "")
                                                }

@@ -397,11 +397,6 @@ Please provide the modified content that follows the instruction.`;
         try {
           await step.confirm();
           console.log('[Journey] Step confirmed');
-          
-          // Force refresh step data to ensure we have fresh data
-          console.log('[Journey] Refreshing step data...');
-          const freshStepData = await step.refreshStepData();
-          console.log('[Journey] Fresh step data keys:', Object.keys(freshStepData));
         } catch (error) {
           console.error('[Journey] Error in step.confirm():', error.message);
           return;

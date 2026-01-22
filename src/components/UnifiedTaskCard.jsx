@@ -94,6 +94,10 @@ const UnifiedTaskCard = (props) => {
             if (props.setSelectedTaskId) {
               props.setSelectedTaskId(taskId);
             }
+            // Also clear streaming state when selecting for instruct
+            if (props.setStreamingTaskId) {
+              props.setStreamingTaskId(null);
+            }
           }}
           title={isCurrentlyStreaming() ? 'Cannot instruct on streaming task' : 'Add instructions'}
           disabled={isCurrentlyStreaming()}

@@ -216,28 +216,151 @@ const TasksContent = () => {
 
     const handleInstructSubmit = async () => {
       const taskId = selectedTaskId();
+      const userPrompt = prompt();
+      
+      // Only create new project if no project is open AND no task is selected
+      const hasOpenProject = currentProjectId() && currentProjectId() !== null;
+      const hasSelectedTask = taskId && taskId !== null;
+      
+      if (!hasOpenProject && !hasSelectedTask) {
+        // Create new project for the instruction
+        try {
+          const projectData = {
+            name: userPrompt.trim().substring(0, 50) + (userPrompt.length > 50 ? '...' : ''),
+            description: userPrompt.trim()
+          };
+          const projectId = await addProject(projectData, user()?.id);
+          _setCurrentProjectId(projectId);
+          setPrompt(userPrompt);
+          
+          // Create initial task and stream
+          const newStepHook = createStepHook(projectId, () => {});
+          stepHook = newStepHook;
+          const step = getStepHook();
+          
+          if (step && currentProjectId() && user()?.id) {
+            const taskId = await addTask({
+              projectId: currentProjectId(),
+              title: step.stepName(),
+              content: '',
+              prompt: buildPrompt(step.currentStep(), {}, { problem: userPrompt }),
+              llm_response: '',
+              model: step.currentStep()?.model || 'System',
+              section: step.currentStep()?.section || 'Initialization',
+              stepName: step.stepName()
+            }, currentProjectId(), user()?.id);
+            
+            setTasksList(currentTasks => [...currentTasks, {
+              id: taskId,
+              projectId: currentProjectId(),
+              title: step.stepName(),
+              content: '',
+              prompt: buildPrompt(step.currentStep(), {}, { problem: userPrompt }),
+              llm_response: '',
+              model: step.currentStep()?.model || 'System',
+              section: step.currentStep()?.section || 'Initialization',
+              stepName: step.stepName(),
+              last_modified: new Date().toISOString()
+            }]);
+            
+            setStreamingTaskId(taskId);
+            let accumulatedResponse = '';
+            const streamingPrompt = buildPrompt(step.currentStep(), {}, { problem: userPrompt });
+            
+            try {
+              await callLLMForStep(streamingPrompt, (chunk) => {
+                accumulatedResponse += chunk;
+                batch(() => {
+                  setTasksList(currentTasks => {
+                    const updatedTasks = currentTasks.map(t => {
+                      if (t.id === taskId) {
+                        return { ...t, content: accumulatedResponse, llm_response: accumulatedResponse, last_modified: new Date().toISOString() };
+                      }
+                      return t;
+                    });
+                    return [...updatedTasks];
+                  });
+                });
+              });
+              
+              setStreamingTaskId(null);
+              await updateTask(taskId, {
+                content: accumulatedResponse,
+                llm_response: accumulatedResponse
+              });
+              
+              const extractedData = extractTemplateData(accumulatedResponse);
+              if (Object.keys(extractedData).length > 0 && currentProjectId()) {
+                await updateStepData(currentProjectId(), extractedData);
+              }
+              
+              setTasksList(await getTasks(currentProjectId()));
+              toastManager.success('First step completed!');
+            } catch (streamError) {
+              setStreamingTaskId(null);
+              if (accumulatedResponse.trim().length > 0) {
+                await updateTask(taskId, {
+                  content: accumulatedResponse,
+                  llm_response: accumulatedResponse
+                });
+                setTasksList(await getTasks(currentProjectId()));
+                toastManager.warning('Saved partial response');
+              } else {
+                toastManager.error('Streaming failed: ' + streamError.message);
+              }
+            }
+          }
+          
+          setSelectedTaskId(null);
+          return;
+        } catch (error) {
+          logger.error('Error creating project for instruction:', error);
+          toastManager.error('Failed to create project');
+          return;
+        }
+      }
+      
+      // Update existing task if task is selected
       if (taskId) {
         const task = tasksList().find(t => t.id === taskId);
         if (task) {
           console.log('[Journey] ============================================');
           console.log('[Journey] INSTRUCT: Modifying task based on user instruction');
           
-          const instructionPrompt = `Take this existing content and apply the following instruction: "${prompt()}"
+          const instructionPrompt = `Take this existing content and apply the following instruction: "${userPrompt}"
 
 Existing content:
 ${task.content || task.llm_response || ''}
 
 Please provide the modified content that follows the instruction.`;
 
+          setStreamingTaskId(taskId);
+          let accumulatedResponse = '';
+          
           try {
-            console.log('[Journey] Calling LLM to apply instruction...');
-            const modifiedContent = await callLLMForStep(instructionPrompt);
-            console.log('[Journey] Modified content received, length:', modifiedContent.length);
+            console.log('[Journey] Calling LLM to apply instruction with streaming...');
+            await callLLMForStep(instructionPrompt, (chunk) => {
+              accumulatedResponse += chunk;
+              batch(() => {
+                setTasksList(currentTasks => {
+                  const updatedTasks = currentTasks.map(t => {
+                    if (t.id === taskId) {
+                      return { ...t, content: accumulatedResponse, llm_response: accumulatedResponse, last_modified: new Date().toISOString() };
+                    }
+                    return t;
+                  });
+                  return [...updatedTasks];
+                });
+              });
+            });
+            
+            console.log('[Journey] Streaming complete, length:', accumulatedResponse.length);
+            setStreamingTaskId(null);
             
             console.log('[Journey] Saving updated task...');
             await updateTask(taskId, {
-              content: modifiedContent,
-              llm_response: modifiedContent,
+              content: accumulatedResponse,
+              llm_response: accumulatedResponse,
               prompt: instructionPrompt,
               last_modified: new Date().toISOString()
             });
@@ -249,9 +372,10 @@ Please provide the modified content that follows the instruction.`;
             console.log('[Journey] ============================================');
             toastManager.success('Task modified successfully');
           } catch (error) {
+            setStreamingTaskId(null);
             console.error('[Journey] Error modifying task:', error.message);
             logger.error('Error modifying task:', error);
-            toastManager.error('Failed to modify task');
+            toastManager.error('Failed to modify task: ' + error.message);
           }
         }
       }
@@ -859,7 +983,8 @@ Please provide the modified content that follows the instruction.`;
                          handleRegenerate={handleRegenerate}
                          handleConfirm={handleConfirm}
                          streamingTaskId={streamingTaskId}
-                       />
+                         setStreamingTaskId={setStreamingTaskId}
+                        />
                 </Show>
 
 

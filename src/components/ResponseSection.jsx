@@ -43,6 +43,12 @@ const ResponseSection = (props) => {
     });
   };
 
+  const allTasks = () => props.tasksList?.() || [];
+  const lastTaskId = () => {
+    const tasks = allTasks();
+    return tasks.length > 0 ? tasks[tasks.length - 1].id : null;
+  };
+
   return (
     <div class="flex-1 max-w-full max-w-3xl w-full mx-auto">
       {(props.startPressed?.() || (props.tasksList && props.tasksList().length > 0)) ? (
@@ -81,6 +87,7 @@ const ResponseSection = (props) => {
                           refreshTasks={props.refreshTasks}
                           streamingTaskId={props.streamingTaskId}
                           setStreamingTaskId={props.setStreamingTaskId}
+                          isLastTask={task.id === lastTaskId()}
                         />
                       )}
                     </For>

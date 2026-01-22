@@ -22,6 +22,14 @@ const UnifiedTaskCard = (props) => {
   const isStreaming = () => props.isStreaming ?? (content() && content().trim().length > 0 && !llmResponse());
   const isStreamingComplete = () => props.isStreamingComplete ?? true;
   const isCurrentlyStreaming = () => props.streamingTaskId?.() === taskId;
+  const isLastTask = () => props.isLastTask ?? false;
+
+  // Auto-expand if this is the last task
+  createEffect(() => {
+    if (isLastTask() && !isExpanded()) {
+      setIsExpanded(true);
+    }
+  });
 
   // Auto-scroll to this card when streaming content updates
   createEffect(() => {
@@ -35,7 +43,7 @@ const UnifiedTaskCard = (props) => {
     }
   });
 
-  // Only auto-expand if this is the currently streaming task
+  // Only auto-expand if this is the currently streaming task (for non-last tasks)
   // All other tasks stay collapsed by default
   createEffect(() => {
     const currentContent = content();

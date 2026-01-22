@@ -1,24 +1,21 @@
 import {
     createSignal,
-    For,
     createResource,
     onMount,
     onCleanup,
-    createEffect, 
+    createEffect,
     Show,
     createMemo,
     batch
 } from "solid-js";
 import { logger } from "../lib/core";
-import { errorHandler, LoadingOverlay, AgentInterface } from "../components";
+import { LoadingOverlay, AgentInterface } from "../components";
 import {
     steps,
     stepNames
 } from "../lib/business/steps.js";
 import {
-    buildPrompt,
-    fillPrompt,
-    extractData
+    buildPrompt
 } from "../lib/business/machine.js";
 import { createStepHook } from "../lib/business/useStep.js";
 import {
@@ -28,20 +25,16 @@ import {
     updateTask,
     addProject,
     updateProject,
-    getProjectByName,
-    getProjectById,
     getProjects,
-    updateEntity,
-    getUserProfile
+    updateEntity
 } from "../lib/database";
 import { useUser } from "../context/UserContext";
 import { toastManager } from "../lib/ui/feedback";
 import { useActivityLogger } from "../lib/business/activity.js";
-import { renderFilledTemplate, extractTemplateData} from '../lib/ui/llm-template.js';
-import { updateStepData, getStepData } from '../lib/ui/stepDataStore.js';
+import { extractTemplateData} from '../lib/ui/llm-template.js';
+import { updateStepData } from '../lib/ui/stepDataStore.js';
 import { ResponseSection, RouteGuard, ProtectedRoute } from '../components';
 import { useContext } from "solid-js";
-import { useLocation, useNavigate } from "@solidjs/router";
 import { LangContext } from "../context/LangContext";
 import { translations } from "../assets/translations/translations-index.js";
 import { projectsStore, setProjectsStore, clearPendingProjectId } from "../stores/projectsStore";
@@ -54,8 +47,6 @@ const TasksContent = () => {
     const { lang } = useContext(LangContext);
     const { user } = useUser();
     const activityLogger = useActivityLogger();
-    const location = useLocation();
-    const navigate = useNavigate();
 
     const [currentLang, setCurrentLang] = createSignal(lang());
     const t = createMemo(() => translations[currentLang()]);
@@ -889,11 +880,13 @@ Please provide the modified content that follows the instruction.`;
     };
 
     const [processedPendingId, setProcessedPendingId] = createSignal(null);
-    
+
+    const onProjectAdded = () => refetchProjects();
+
     onMount(() => {
         window.addEventListener('projectDeleted', onProjectDeleted);
         window.addEventListener('openProject', onOpenProject);
-        window.addEventListener('projectAdded', () => refetchProjects());
+        window.addEventListener('projectAdded', onProjectAdded);
 
         if (projectsStore.pendingProjectId && projectsStore.pendingProjectId !== processedPendingId()) {
           const pendingId = projectsStore.pendingProjectId;
@@ -902,7 +895,6 @@ Please provide the modified content that follows the instruction.`;
           onOpenProject({ detail: pendingId });
         }
 
-        // Watch for pending project changes while component is mounted
         createEffect(() => {
           const pendingId = projectsStore.pendingProjectId;
           if (pendingId && pendingId !== processedPendingId()) {
@@ -921,7 +913,7 @@ Please provide the modified content that follows the instruction.`;
     onCleanup(() => {
         window.removeEventListener('projectDeleted', onProjectDeleted);
         window.removeEventListener('openProject', onOpenProject);
-        window.removeEventListener('projectAdded', () => refetchProjects());
+        window.removeEventListener('projectAdded', onProjectAdded);
     });
 
 
@@ -963,16 +955,16 @@ Please provide the modified content that follows the instruction.`;
       }
      });
 
-      const isLoading = () => {
-         try {
-             if (!currentProjectId()) return false;
-             const stepHook = getStepHook();
-             if (!stepHook) return true;
-             return !tasksList || currentLang() === undefined;
-         } catch {
-             return false;
-         }
-     };
+    const isLoading = () => {
+        try {
+            if (!currentProjectId()) return false;
+            const stepHook = getStepHook();
+            if (!stepHook) return true;
+            return !tasksList || currentLang() === undefined;
+        } catch {
+            return false;
+        }
+    };
 
     const stepHookMemo = createMemo(() => getStepHook());
 
@@ -1007,24 +999,24 @@ Please provide the modified content that follows the instruction.`;
           }}
         />
 
-       <div class="flex flex-col items-center mx-auto" style='max-width:760px;'>
-                 <Show when={
-                     !!currentProjectId() && (startPressed() || (tasksList && tasksList().length > 0))
-                  } fallback={
-                      <div style={{"display": "none"}}></div>
-                  }>
-                        <ResponseSection
-                          tasksList={tasksList}
-                          startPressed={startPressed}
-                          isLoading={loading}
-                         updateTask={updateTask}
-                         setEditContent={setEditContent}
-                         editingTaskId={editingTaskId}
-                         setEditingTaskId={setEditingTaskId}
-                         selectedTaskId={selectedTaskId}
-                         setSelectedTaskId={setSelectedTaskId}
-                          stepName={stepHookMemo()?.stepName || (() => 'Unknown Step')}
-                         callLLMForStep={callLLMForStep}
+        <div class="flex flex-col items-center mx-auto" style='max-width:760px;'>
+                  <Show when={
+                      !!currentProjectId() && (startPressed() || (tasksList() && tasksList().length > 0))
+                   } fallback={
+                       <div style={{"display": "none"}}></div>
+                   }>
+                         <ResponseSection
+                           tasksList={tasksList}
+                           startPressed={startPressed}
+                           isLoading={loading}
+                          updateTask={updateTask}
+                          setEditContent={setEditContent}
+                          editingTaskId={editingTaskId}
+                          setEditingTaskId={setEditingTaskId}
+                          selectedTaskId={selectedTaskId}
+                          setSelectedTaskId={setSelectedTaskId}
+                           stepName={stepHookMemo()?.stepName?.() || 'Unknown Step'}
+                          callLLMForStep={callLLMForStep}
                          refreshTasks={async () => setTasksList(await getTasks(currentProjectId()))}
                          projectName={projectData()?.name}
                          handleInstruct={handleInstruct}

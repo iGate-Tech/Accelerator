@@ -17,10 +17,23 @@ const UnifiedTaskCard = (props) => {
   const isSelected = () => props.selectedTaskId && props.selectedTaskId() === taskId;
   const [isExpanded, setIsExpanded] = createSignal(false);
   let contentRef;
+  let cardRef;
 
   const isStreaming = () => props.isStreaming ?? (content() && content().trim().length > 0 && !llmResponse());
   const isStreamingComplete = () => props.isStreamingComplete ?? true;
   const isCurrentlyStreaming = () => props.streamingTaskId?.() === taskId;
+
+  // Auto-scroll to this card when streaming content updates
+  createEffect(() => {
+    const streamingId = props.streamingTaskId?.();
+    const currentContent = content();
+
+    if (streamingId === taskId && currentContent?.trim().length > 0 && cardRef) {
+      requestAnimationFrame(() => {
+        cardRef.scrollIntoView({ behavior: 'smooth', block: 'end' });
+      });
+    }
+  });
 
   // Only auto-expand if this is the currently streaming task
   // All other tasks stay collapsed by default
@@ -194,6 +207,7 @@ const UnifiedTaskCard = (props) => {
 
   return (
     <div
+      ref={cardRef}
       class={`card bg-base-100 shadow-sm border border-base-300 transition-all duration-200 hover:shadow-md ${
         isSelected() ? 'ring-2 ring-info' : ''
       } mb-4 overflow-hidden`}

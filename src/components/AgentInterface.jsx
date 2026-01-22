@@ -240,9 +240,17 @@ const AgentInterface = (props) => {
                                                    }`
                                                }
                                                style="resize: none; overflow: hidden; box-sizing: border-box;"
-                                               placeholder={
-                                                   props.selectedTaskId && props.selectedTaskId() ? 'Enter instructions for selected task...' : t().agentPlaceholder
-                                               }
+                                                placeholder={
+                                                    () => {
+                                                        const hasProject = props.currentProjectId && props.currentProjectId();
+                                                        if (selectedTaskIdValue()) {
+                                                            return 'Enter instructions for selected task...';
+                                                        } else if (hasProject) {
+                                                            return 'Select a task above to give instructions';
+                                                        }
+                                                        return t().agentPlaceholder;
+                                                    }
+                                                }
                                                value={
                                                    selectedTaskIdValue() ? (props.instructPrompt?.() ?? '') : (props.prompt ? props.prompt() : "")
                                                }
@@ -255,18 +263,23 @@ const AgentInterface = (props) => {
                                                        }
                                                    }
                                                }
-                                                 onKeyDown={
-                                                     (e) => {
-                                                         if (e.key === "Enter" && !e.shiftKey) {
-                                                             e.preventDefault();
-                                                             if (selectedTaskIdValue()) {
-                                                                 props.handleInstructSubmit && props.handleInstructSubmit();
-                                                             } else {
-                                                                 props.handleStart && props.handleStart();
-                                                             }
-                                                         }
-                                                     }
-                                                 }
+                                              onKeyDown={
+                                                  (e) => {
+                                                      if (e.key === "Enter" && !e.shiftKey) {
+                                                          e.preventDefault();
+                                                          const hasProject = props.currentProjectId && props.currentProjectId();
+                                                          if (selectedTaskIdValue() && hasProject) {
+                                                              props.handleInstructSubmit && props.handleInstructSubmit();
+                                                          } else if (hasProject) {
+                                                              // Project open but no task selected - do nothing
+                                                              console.log('[AgentInterface] Project open, please select a task first');
+                                                          } else {
+                                                              // No project - create new one
+                                                              props.handleStart && props.handleStart();
+                                                          }
+                                                      }
+                                                  }
+                                              }
                                              disabled={
                                                  uiState() === 'processing'
                                          }></textarea>
@@ -313,18 +326,23 @@ const AgentInterface = (props) => {
                                           </div>
 
                                             <button
-                                                 type="button"
-                                                 class="btn btn-ghost btn-sm btn-circle"
-                                                 onClick={() => {
-                                                     if (selectedTaskIdValue()) {
-                                                         props.handleInstructSubmit && props.handleInstructSubmit();
-                                                     } else {
-                                                         props.handleStart && props.handleStart();
-                                                     }
-                                                 }}
-                                                 disabled={uiState() === 'processing'}
-                                                 title={selectedTaskIdValue() ? 'Send Instructions' : 'Start'}
-                                             >
+                                                  type="button"
+                                                  class="btn btn-ghost btn-sm btn-circle"
+                                                  onClick={() => {
+                                                      const hasProject = props.currentProjectId && props.currentProjectId();
+                                                      if (selectedTaskIdValue() && hasProject) {
+                                                          props.handleInstructSubmit && props.handleInstructSubmit();
+                                                      } else if (hasProject) {
+                                                          // Project open but no task selected - do nothing
+                                                          console.log('[AgentInterface] Project open, please select a task first');
+                                                      } else {
+                                                          // No project - create new one
+                                                          props.handleStart && props.handleStart();
+                                                      }
+                                                  }}
+                                                  disabled={uiState() === 'processing' || (props.currentProjectId && props.currentProjectId() && !selectedTaskIdValue())}
+                                                  title={selectedTaskIdValue() ? 'Send Instructions' : (props.currentProjectId && props.currentProjectId()) ? 'Select a task first' : 'Start'}
+                                              >
                                               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                                   <line x1="12" y1="19" x2="12" y2="5"></line>
                                                   <polyline points="5,12 12,5 19,12"></polyline>

@@ -941,16 +941,27 @@ Please provide the modified content that follows the instruction.`;
 
      const stepHookMemo = createMemo(() => getStepHook());
 
-    createEffect(() => {
-        if (isLoading()) {
-           setActiveCardId('streaming');
-        } else {
-           const currentStep = stepHookMemo()?.currentStep();
-           const currentStepName = currentStep?.name;
-           const matchingTask = [...tasksList()].reverse().find(task => getStepName(task) === currentStepName);
-           setActiveCardId(matchingTask ? matchingTask.id : null);
-       }
-    });
+     const isLoading = () => {
+         try {
+             if (!currentProjectId()) return false;
+             const stepHook = getStepHook();
+             if (!stepHook) return true;
+             return !tasksList || currentLang() === undefined;
+         } catch {
+             return false;
+         }
+     };
+
+     createEffect(() => {
+         if (isLoading()) {
+            setActiveCardId('streaming');
+         } else {
+            const currentStep = stepHookMemo()?.currentStep();
+            const currentStepName = currentStep?.name;
+            const matchingTask = [...tasksList()].reverse().find(task => getStepName(task) === currentStepName);
+            setActiveCardId(matchingTask ? matchingTask.id : null);
+        }
+     });
 
     const isUserReady = () => !!user()?.id;
 

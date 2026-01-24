@@ -131,15 +131,9 @@ async function getStore(projectId) {
     const initialData = await loadFromStorage(projectId);
     const [store, setStore] = createStore(initialData);
     stores.set(projectId, { store, setStore });
+    return { store, setStore };
   }
-  const storeData = stores.get(projectId);
-  // Ensure store has latest data by refreshing if needed
-  const freshData = await loadFromStorage(projectId);
-  if (Object.keys(freshData).length > Object.keys(storeData.store).length) {
-    // No console logs for normal operations to improve performance
-    storeData.setStore(freshData);
-  }
-  return storeData;
+  return stores.get(projectId);
 }
 
 async function updateStepData(projectId, newData) {

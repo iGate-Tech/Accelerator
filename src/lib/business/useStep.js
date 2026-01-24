@@ -28,7 +28,25 @@ export function createStepHook(projectId, onStepChange) {
   const currentStepId = () => currentStep()?.id || 'unknown';
   const isFirst = () => stepIndex() === 0;
   const isLast = () => stepIndex() >= steps.length - 1;
-  const isComplete = () => uiState() === 'completed';
+  const isComplete = async () => {
+  const currentState = uiState();
+  if (currentState === 'completed') return true;
+
+  // Additional check: verify if current step task is populated
+  if (projectId) {
+    try {
+      const { getTasks } = await import('../database');
+      const tasks = await getTasks(projectId);
+      const currentStepName = stepName();
+      const currentTask = tasks.find(t => t.stepName === currentStepName);
+      return !!(currentTask && currentTask.content && currentTask.content.trim().length > 0);
+    } catch (e) {
+      console.warn('isComplete: Failed to check tasks:', e);
+      return currentState === 'completed';
+    }
+  }
+  return false;
+};
   const progress = () => Math.round((stepIndex() / steps.length) * 100);
   const stepName = () => stepNames[currentStep()?.id] || currentStep()?.name || 'Unknown';
 
@@ -213,17 +231,7 @@ const persist = async (state = uiState()) => {
     if (!isLast()) {
       setStepIndex(s => s + 1);
       await persist('idle');
-      const freshData = await getStepData(projectId);
-      const dataWithProblem = {
-        ...freshData,
-        problem: freshData.problem || freshData.originalProblem,
-        originalProblem: freshData.originalProblem
-      };
-      console.log('confirm: Reloaded step data for new step, keys:', Object.keys(dataWithProblem));
-      console.log('confirm: problem in fresh data:', dataWithProblem.problem?.substring(0, 50) + '...');
-      console.log('confirm: All data keys:', Object.keys(dataWithProblem).length);
-      setStepData(dataWithProblem);
-      checkMissingVariables(dataWithProblem);
+      await refreshStepData(); // Refresh data and validate for next step
       if (onStepChange) onStepChange();
     } else {
       setUiState('completed');
@@ -250,26 +258,63 @@ const persist = async (state = uiState()) => {
     
     let stepIndexToSet = 0; // Default to first step
     
+    const normalizeIndex = (value) => {
+      const numeric = Number.isFinite(value) ? value : Number(value) || 0;
+      return Math.min(Math.max(numeric, 0), Math.max(steps.length - 1, 0));
+    };
+
+    const taskKey = (value) => (value || '').toString().trim().toLowerCase();
+
+    const resolveTaskForStep = (stepInfo, resolvedName, tasks = []) => {
+      const targetName = taskKey(resolvedName);
+      const targetId = taskKey(stepInfo.id);
+
+      const match = tasks.find((task) => {
+        if (!task) return false;
+        const taskNames = [task.stepName, task.step_name, task.title].map(taskKey);
+        const taskIdMatch = taskKey(task.step) === targetId;
+        const nameMatch = taskNames.some((name) => name.length > 0 && name === targetName);
+        return taskIdMatch || nameMatch;
+      });
+
+      return match;
+    };
+
+    const tasks = project?.tasks || [];
+
+    const findFirstIncompleteStepIndex = () => {
+      for (let i = 0; i < steps.length; i++) {
+        const stepInfo = steps[i];
+        const stepNameValue = stepNames[stepInfo.id] || stepInfo.name || `Step ${i + 1}`;
+        const taskForStep = resolveTaskForStep(stepInfo, stepNameValue, tasks);
+        if (!taskForStep) {
+          return i;
+        }
+        const contentOk = typeof taskForStep.content === 'string' && taskForStep.content.trim().length > 0;
+        const llmOk = typeof taskForStep.llm_response === 'string' && taskForStep.llm_response.trim().length > 0;
+        if (!(contentOk && llmOk)) {
+          return i;
+        }
+      }
+      return steps.length - 1;
+    };
+
     if (project?.currentStep) {
       const idx = steps.findIndex(s => s.id === project.currentStep);
       console.log('loadFromProject: Found currentStep in project:', project.currentStep, 'mapped to index:', idx);
       if (idx >= 0) {
-        console.log('loadFromProject: Setting step index to:', idx);
-        stepIndexToSet = idx;
-      } else {
-        // Invalid step ID, fallback to using completedSteps
-        console.log('loadFromProject: Invalid step ID, falling back to completedSteps');
-        if (project?.completedSteps !== undefined) {
-          const nextStepIndex = Math.min(project.completedSteps, steps.length - 1);
-          console.log('loadFromProject: Setting step index to next step after completed:', nextStepIndex);
-          stepIndexToSet = nextStepIndex;
-        }
+        stepIndexToSet = normalizeIndex(idx);
       }
-    } else if (project?.completedSteps !== undefined) {
-      const nextStepIndex = Math.min(project.completedSteps, steps.length - 1);
-      console.log('loadFromProject: Setting step index to next step after completed:', nextStepIndex);
-      stepIndexToSet = nextStepIndex;
     }
+
+    if (project?.completedSteps !== undefined) {
+      const completedIndex = normalizeIndex(project.completedSteps);
+      stepIndexToSet = Math.max(stepIndexToSet, completedIndex);
+    }
+
+    const firstIncomplete = findFirstIncompleteStepIndex();
+    stepIndexToSet = Math.min(stepIndexToSet, firstIncomplete);
+    console.log('loadFromProject: First incomplete step index:', firstIncomplete, 'final index to set:', stepIndexToSet);
     
     setStepIndex(stepIndexToSet);
     
@@ -347,7 +392,7 @@ return {
   };
 }
 
-function buildPrompt(step, context, instructions) {
+export function buildPrompt(step, context, instructions) {
   if (!step) return '';
 
   const mergedContext = {

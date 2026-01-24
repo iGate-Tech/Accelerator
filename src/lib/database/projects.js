@@ -416,3 +416,118 @@ export async function _getProjects({ userId }) {
     return [];
   }
 }
+
+/**
+ * Check project completion status and display remaining steps
+ * @param {string} projectId - The project ID to check
+ * @returns {Object} Completion status information
+ */
+export async function checkProjectCompletion(projectId) {
+  try {
+    // Import steps from business models
+    let steps = [];
+    try {
+      const stepsModule = await import('../business/steps.js');
+      steps = stepsModule.steps || [];
+    } catch (importError) {
+      console.warn('Could not import steps, using empty array:', importError.message);
+      steps = [];
+    }
+    
+    // Get all tasks for the project
+    const tasks = await _getTasks({ projectId });
+    
+    // Total steps in the application
+    const totalSteps = steps.length;
+    
+    // If we can't get steps, we can't check completion
+    if (totalSteps === 0) {
+      console.warn('[Project Completion Check] Could not determine total steps');
+      return {
+        totalSteps: 0,
+        completedSteps: 0,
+        remainingSteps: 0,
+        isComplete: false,
+        error: 'Could not determine total steps'
+      };
+    }
+    
+    // Count completed steps (tasks with content)
+    const completedSteps = tasks.filter(task => 
+      task.content && task.content.trim().length > 0
+    ).length;
+    
+    // Calculate remaining steps
+    const remainingSteps = totalSteps - completedSteps;
+    
+    // Get step names for completed tasks
+    const completedStepNames = tasks
+      .filter(task => task.content && task.content.trim().length > 0)
+      .map(task => task.step_name || 'Unknown Step');
+    
+    // Get step names for all steps
+    const allStepNames = steps.map(step => step.name);
+    
+    // Find remaining step names
+    const remainingStepNames = allStepNames.filter(
+      stepName => !completedStepNames.includes(stepName)
+    );
+    
+    // Create result object
+    const result = {
+      totalSteps,
+      completedSteps,
+      remainingSteps,
+      isComplete: remainingSteps === 0,
+      completedStepNames,
+      remainingStepNames
+    };
+    
+    // Update project status in database
+    try {
+      if (dbInstance) {
+        const now = new Date().toISOString();
+        await dbInstance.query(
+          `UPDATE projects SET 
+            completed_steps = $1, 
+            ui_status = $2, 
+            ui_message = $3, 
+            last_modified = $4 
+          WHERE id = $5`,
+          [
+            completedSteps,  // Use actual completed steps count, not step index
+            result.isComplete ? 'completed' : 'in_progress',
+            result.isComplete ? 'Project completed! 🎉' : `Step ${completedSteps} of ${totalSteps}`,
+            now,
+            projectId
+          ]
+        );
+      }
+    } catch (updateError) {
+      console.warn('Could not update project status:', updateError.message);
+    }
+    
+    // Display information in console
+    console.log('[Project Completion Check]');
+    console.log(`Total Steps: ${totalSteps}`);
+    console.log(`Completed Steps: ${completedSteps}`);
+    console.log(`Remaining Steps: ${remainingSteps}`);
+    
+    if (result.isComplete) {
+      console.log('🎉 Project is complete!');
+    } else {
+      console.log('Remaining Steps:');
+      remainingStepNames.forEach((stepName, index) => {
+        console.log(`  ${index + 1}. ${stepName}`);
+      });
+    }
+    
+    return result;
+  } catch (error) {
+    console.error('Error checking project completion:', error);
+    return {
+      error: true,
+      message: error.message
+    };
+  }
+}

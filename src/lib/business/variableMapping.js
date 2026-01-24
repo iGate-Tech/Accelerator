@@ -23,6 +23,7 @@ export const variableAliases = {
 
   // ask: defined in Funding Model step44 -> new step56
   ask: ['askAmount', 'fundingAsk', 'amount', 'fundingAmount', 'raiseAmount'],
+  askAmount: ['ask', 'fundingAsk', 'amount', 'fundingAmount', 'raiseAmount'],
 
   // allocation: defined in Funding Model step45 -> new step58
   allocation: ['useOfFunds', 'fundingAllocation', 'fundsAllocation', 'allocationPlan', 'fundsUse'],
@@ -78,7 +79,9 @@ export const variableAliases = {
   milestones: ['keyMilestones', 'projectMilestones', 'achievements', 'progress'],
   fixedCosts: ['fixedExpenses', 'overhead', 'monthlyFixedCosts', 'fixedOperatingCosts'],
   variableCosts: ['variableExpenses', 'perUnitCosts', 'variableOperatingCosts'],
+  expenses: ['fixedCosts', 'variableCosts', 'costStructure', 'operatingExpenses', 'totalExpenses', 'expenseStructure'],
   monthlyBurn: ['burnRate', 'monthlyBurnRate', 'cashBurn', 'burn'],
+  burnRate: ['monthlyBurn', 'monthlyBurnRate', 'cashBurn', 'burn'],
   runway: ['runwayMonths', 'cashRunway', 'monthsOfRunway'],
   revenueStreams: ['revenue', 'incomeStreams', 'monetizationStreams', 'revenueSources'],
   cac: ['customerAcquisitionCost', 'acquisitionCost', 'costToAcquire'],
@@ -89,6 +92,9 @@ export const variableAliases = {
   ipOwnership: ['ip', 'intellectualProperty', 'patents', 'trademarks', 'ipAssets'],
   compliance: ['complianceRequirements', 'regulatoryCompliance', 'legalCompliance', 'requirements'],
   retentionStrategy: ['retention', 'customerRetention', 'churnPrevention', 'retentionPlan'],
+  preMoney: ['premoney', 'preMoneyValuation', 'preMoneyValue', 'preMoneyRange', 'valuationPreMoney'],
+  valuation: ['valuation', 'postMoneyValuation', 'postMoney', 'valuationRange', 'estimatedValuation', 'currentValuation'],
+  inputs: ['financialInputs', 'valuationInputs', 'metrics', 'financialMetrics', 'revenue', 'expenses', 'growthRate', 'cashFlow', 'burnRate', 'runway', 'traction', 'marketSize', 'team', 'riskFactors'],
 };
 
 // ============================================================================
@@ -407,6 +413,172 @@ export const generateAlternativesFromContext = (context) => {
   return 'Current solutions analysis pending - manual processes, software tools, and competitor offerings to be identified';
 };
 
+export const generateExpensesFromContext = (context) => {
+  if (!context || typeof context !== 'object') {
+    return 'Operating expenses to be determined based on cost structure analysis';
+  }
+
+  if (context.expenses) return context.expenses;
+  if (context.operatingExpenses) return context.operatingExpenses;
+  if (context.totalExpenses) return context.totalExpenses;
+  if (context.expenseStructure) return context.expenseStructure;
+  if (context.costStructure) return context.costStructure;
+
+  // Combine fixed and variable costs if available
+  const fixedCosts = context.fixedCosts || context.fixedExpenses || context.monthlyFixedCosts || context.fixedOperatingCosts;
+  const variableCosts = context.variableCosts || context.variableExpenses || context.perUnitCosts || context.variableOperatingCosts;
+
+  if (fixedCosts || variableCosts) {
+    const parts = [];
+    if (fixedCosts) parts.push(`Fixed Costs: ${fixedCosts}`);
+    if (variableCosts) parts.push(`Variable Costs: ${variableCosts}`);
+    return parts.length > 0 ? parts.join(' | ') : 'Operating expenses to be determined';
+  }
+
+  return 'Operating expenses to be determined based on cost structure analysis';
+};
+
+export const generateInputsFromContext = (context) => {
+  if (!context || typeof context !== 'object') {
+    return 'Financial inputs for valuation to be determined based on available metrics';
+  }
+
+  if (context.inputs) return context.inputs;
+  if (context.financialInputs) return context.financialInputs;
+  if (context.valuationInputs) return context.valuationInputs;
+  if (context.metrics) return context.metrics;
+  if (context.financialMetrics) return context.financialMetrics;
+
+  // Compile available financial data for valuation
+  const parts = [];
+
+  if (context.revenue) {
+    parts.push(`Revenue: ${context.revenue}`);
+  }
+  if (context.expenses) {
+    parts.push(`Expenses: ${context.expenses}`);
+  }
+  if (context.growthRate) {
+    parts.push(`Growth Rate: ${context.growthRate}`);
+  }
+  if (context.cashFlow) {
+    parts.push(`Cash Flow: ${context.cashFlow}`);
+  }
+  if (context.burnRate) {
+    parts.push(`Burn Rate: ${context.burnRate}`);
+  }
+  if (context.runway) {
+    parts.push(`Runway: ${context.runway}`);
+  }
+  if (context.traction) {
+    parts.push(`Traction: ${context.traction}`);
+  }
+  if (context.marketSize) {
+    parts.push(`Market Size: ${context.marketSize}`);
+  }
+  if (context.team) {
+    parts.push(`Team: ${context.team}`);
+  }
+  if (context.riskFactors) {
+    parts.push(`Risk Factors: ${context.riskFactors}`);
+  }
+
+  return parts.length > 0
+    ? `Valuation Inputs: ${parts.join(' | ')}`
+    : 'Financial inputs for valuation to be determined based on available metrics';
+};
+
+export const generatePreMoneyFromContext = (context) => {
+  if (!context || typeof context !== 'object') {
+    return 'Pre-money valuation to be determined based on market analysis and comparable valuations';
+  }
+
+  if (context.preMoney) return context.preMoney;
+  if (context.premoney) return context.premoney;
+  if (context.preMoneyValuation) return context.preMoneyValuation;
+  if (context.preMoneyValue) return context.preMoneyValue;
+  if (context.preMoneyRange) return context.preMoneyRange;
+  if (context.valuationPreMoney) return context.valuationPreMoney;
+
+  // Calculate from valuation and askAmount if available
+  const valuation = context.valuation ? parseFloat(context.valuation.replace(/[^\d.-]/g, '')) : null;
+  const askAmount = context.askAmount ? parseFloat(context.askAmount.replace(/[^\d.-]/g, '')) : null;
+
+  if (valuation && askAmount) {
+    const preMoney = valuation - askAmount;
+    return `$${preMoney.toLocaleString()} (calculated from valuation minus funding ask)`;
+  }
+
+  // Use valuation as a fallback if available
+  if (context.valuation) {
+    return `${context.valuation} (using valuation as pre-money estimate)`;
+  }
+
+  return 'Pre-money valuation to be determined based on market analysis and comparable valuations';
+};
+
+export const generateValuationFromContext = (context) => {
+  if (!context || typeof context !== 'object') {
+    return 'Company valuation to be determined based on market analysis and comparable valuations';
+  }
+
+  if (context.valuation) return context.valuation;
+  if (context.postMoneyValuation) return context.postMoneyValuation;
+  if (context.postMoney) return context.postMoney;
+  if (context.valuationRange) return context.valuationRange;
+  if (context.estimatedValuation) return context.estimatedValuation;
+  if (context.currentValuation) return context.currentValuation;
+
+  // Calculate from preMoney and askAmount if available
+  const preMoney = context.preMoney ? parseFloat(context.preMoney.replace(/[^\d.-]/g, '')) : null;
+  const askAmount = context.askAmount ? parseFloat(context.askAmount.replace(/[^\d.-]/g, '')) : null;
+
+  if (preMoney && askAmount) {
+    const postMoney = preMoney + askAmount;
+    return `$${postMoney.toLocaleString()} (calculated from pre-money plus funding ask)`;
+  }
+
+  // Use inputs if available
+  if (context.inputs) {
+    return `${context.inputs} (using financial inputs as valuation basis)`;
+  }
+
+  // Use revenue if available
+  if (context.revenue) {
+    return `${context.revenue} (using revenue as valuation indicator)`;
+  }
+
+  return 'Company valuation to be determined based on market analysis and comparable valuations';
+};
+
+export const generateBurnRateFromContext = (context) => {
+  if (!context || typeof context !== 'object') {
+    return 'Monthly burn rate to be determined based on expense analysis';
+  }
+
+  if (context.burnRate) return context.burnRate;
+  if (context.monthlyBurn) return context.monthlyBurn;
+  if (context.monthlyBurnRate) return context.monthlyBurnRate;
+  if (context.cashBurn) return context.cashBurn;
+  if (context.burn) return context.burn;
+
+  // Calculate from expenses if available
+  const fixedCosts = context.fixedCosts ? parseFloat(context.fixedCosts.replace(/[^\d.-]/g, '')) : null;
+  const variableCosts = context.variableCosts ? parseFloat(context.variableCosts.replace(/[^\d.-]/g, '')) : null;
+
+  if (fixedCosts || variableCosts) {
+    const totalMonthly = (fixedCosts || 0) + (variableCosts || 0);
+    return `$${totalMonthly.toLocaleString()} per month (estimated from fixed and variable costs)`;
+  }
+
+  // Use expenses if available
+  if (context.expenses) {
+    return `${context.expenses} (using expenses as burn rate estimate)`;
+  }
+
+  return 'Monthly burn rate to be determined based on expense analysis';
+};
+
 // ============================================================================
 // COMPREHENSIVE CONTEXT ENRICHMENT
 // ============================================================================
@@ -423,6 +595,7 @@ export const enrichContext = (context) => {
     competitors: generateCompetitorsFromContext,
     team: generateTeamFromContext,
     ask: generateAskFromContext,
+    askAmount: generateAskFromContext,
     allocation: generateAllocationFromContext,
     year1: (ctx) => generateYearlyProjections(ctx).year1,
     year2: (ctx) => generateYearlyProjections(ctx).year2,
@@ -432,6 +605,7 @@ export const enrichContext = (context) => {
     stage: generateStageFromContext,
     breakevenPoint: (ctx) => generateBreakevenFromContext(ctx).breakevenPoint,
     breakevenTimeline: (ctx) => generateBreakevenFromContext(ctx).breakevenTimeline,
+    breakeven: generateBreakevenFromContext,
     pricing: generatePricingFromContext,
     revenue: generateRevenueFromContext,
     risk: generateRiskFromContext,
@@ -439,6 +613,11 @@ export const enrichContext = (context) => {
     differentiation: generateDifferentiationFromContext,
     trends: generateTrendsFromContext,
     alternatives: generateAlternativesFromContext,
+    expenses: generateExpensesFromContext,
+    inputs: generateInputsFromContext,
+    preMoney: generatePreMoneyFromContext,
+    valuation: generateValuationFromContext,
+    burnRate: generateBurnRateFromContext,
   };
 
   for (const [key, generator] of Object.entries(generators)) {

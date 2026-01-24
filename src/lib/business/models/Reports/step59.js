@@ -236,5 +236,9 @@ Format with professional H1/H2/H3 headings, tables for data comparison, clear ca
 
 Embed the complete valuation report as {{valuationReport: "full markdown content here"}}.
 `,
-  validate: (context) => ({ valid: true, issues: [] }),
+  validate: (context) => {
+    const issues = [];
+    if (!context.valuationReport) issues.push('Missing valuation report');
+    return { valid: issues.length === 0, issues };
+  },
 };

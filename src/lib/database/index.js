@@ -246,14 +246,14 @@ export const exportProject = async (projectId) => {
     const { _getProjectById } = await import('./projects.js');
     const project = await _getProjectById({ id: projectId });
     if (!project) throw new Error('Project not found');
-    
-    const { getTasks } = await import('./projects.js');
+
+    const { getTasks } = await import('./operations.js');
     const tasks = await getTasks({ projectId });
-    
-    return { 
-      project, 
-      tasks, 
-      exportedAt: new Date().toISOString() 
+
+    return {
+      project,
+      tasks,
+      exportedAt: new Date().toISOString()
     };
   } catch (error) {
     console.error('Error exporting project:', error);
@@ -270,13 +270,13 @@ export const exportReports = async (projectId) => {
     const { _getProjectById } = await import('./projects.js');
     const project = await _getProjectById({ id: projectId });
     if (!project) throw new Error('Project not found');
-    
-    const { getTasks } = await import('./projects.js');
+
+    const { getTasks } = await import('./operations.js');
     const tasks = await getTasks({ projectId });
     const completedTasks = tasks.filter(t => t.status === 'completed').length;
     const totalTasks = tasks.length;
     const progress = totalTasks > 0 ? (completedTasks / totalTasks) * 100 : 0;
-    
+
     return {
       projectName: project.name,
       description: project.description,
@@ -462,8 +462,8 @@ export const getProjectByName = async (name) => {
 };
 
 export const getTasks = async (projectId) => {
-  const { getTasks: _getTasks } = await import('./operations.js');
-  return await _getTasks({ projectId });
+  const { getTasks } = await import('./operations.js');
+  return await getTasks({ projectId });
 };
 
 export const updateTask = async (id, updates) => {

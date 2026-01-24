@@ -458,7 +458,7 @@ function renderFilledTemplate(templateText) {
     pos = nextOpen;
 
     const start = pos;
-    pos += 2;
+    pos += 2; // Skip "{{"
 
     // Skip whitespace
     while (pos < len && /\s/.test(text[pos])) pos++;
@@ -469,6 +469,31 @@ function renderFilledTemplate(templateText) {
     const key = text.slice(keyStart, pos);
 
     if (!key) {
+      // Skip invalid template
+      pos = start + 2;
+      continue;
+    }
+
+    // Skip whitespace
+    while (pos < len && /\s/.test(text[pos])) pos++;
+
+    // Check if colon (filled placeholder)
+    if (text[pos] !== ":") {
+      // Skip incomplete template instead of outputting raw {{
+      pos = start + 2;
+      continue;
+    }
+    pos++;
+
+    // Skip whitespace
+    while (pos < len && /\s/.test(text[pos])) pos++;
+
+    // Parse key (for filled placeholders)
+    const filledKeyStart = pos;
+    while (pos < len && /[\w.-]/.test(text[pos])) pos++;
+    const filledKey = text.slice(filledKeyStart, pos);
+
+    if (!filledKey) {
       pos = start + 2;
       result += text.slice(start, pos);
       continue;
@@ -524,18 +549,18 @@ function renderFilledTemplate(templateText) {
       const valueStr = text.slice(valueStart, pos).trim();
       pos += 2;
 
-      logger.trace('renderFilledTemplate: Processing filled placeholder for key:', key);
+      logger.trace('renderFilledTemplate: Processing filled placeholder for key:', filledKey);
       try {
         const value = JSON.parse(valueStr);
         if (typeof value === 'string') {
-          logger.trace('renderFilledTemplate: Returning string value for key:', key);
+          logger.trace('renderFilledTemplate: Returning string value for key:', filledKey);
           result += value;
         } else {
-          logger.trace('renderFilledTemplate: Returning JSON stringified value for key:', key);
+          logger.trace('renderFilledTemplate: Returning JSON stringified value for key:', filledKey);
           result += JSON.stringify(value, null, 2);
         }
       } catch (error) {
-        // logger.warn('renderFilledTemplate: Failed to parse value for key:', key, error.message);
+        // logger.warn('renderFilledTemplate: Failed to parse value for key:', filledKey, error.message);
         // Treat as plain string if not valid JSON
         result += valueStr;
       }

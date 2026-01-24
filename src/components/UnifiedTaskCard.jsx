@@ -23,6 +23,16 @@ const UnifiedTaskCard = (props) => {
   const isStreamingComplete = () => props.isStreamingComplete ?? true;
   const isCurrentlyStreaming = () => props.streamingTaskId?.() === taskId;
   const isLastTask = () => props.isLastTask ?? false;
+  const projectIsComplete = () =>
+    typeof props.isProjectComplete === 'function'
+      ? props.isProjectComplete() ?? false
+      : !!props.isProjectComplete;
+
+  // Memoize expensive rendering operations
+  const renderedContent = createMemo(() => {
+    if (!content() || content().trim().length === 0) return '';
+    return marked.parse(renderFilledTemplate(content()) || '', { breaks: true, gfm: true });
+  });
 
   // Auto-expand if this is the last task
   createEffect(() => {
@@ -185,24 +195,42 @@ const UnifiedTaskCard = (props) => {
             Regenerate
           </span>
         </button>
-        <button
-          type="button"
-          class="btn btn-sm text-white rounded-full transition-all hover:scale-105 group flex items-center gap-1 p-2 hover:pr-3"
-          style="background-color:#6cd14d"
-          onClick={(e) => {
-            e.stopPropagation();
-            if (props.handleConfirm) props.handleConfirm(taskId);
-          }}
-          title="Confirm and proceed to next step"
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="flex-shrink-0">
-            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
-            <polyline points="22 4 12 14.01 9 11.01"></polyline>
-          </svg>
-          <span class="max-w-0 overflow-hidden transition-all duration-300 group-hover:max-w-[70px] whitespace-nowrap opacity-0 group-hover:opacity-100">
-            Confirm
-          </span>
-        </button>
+        <Show when={!projectIsComplete()}>
+          <button
+            type="button"
+            class="btn btn-sm text-white rounded-full flex items-center gap-1 p-2 group hover:scale-105 transition-transform"
+            style="background-color:#6cd14d"
+            onClick={(e) => {
+              e.stopPropagation();
+              if (props.handleConfirm) props.handleConfirm(taskId);
+            }}
+            title="Confirm and proceed to next step"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="flex-shrink-0">
+              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+              <polyline points="22 4 12 14.01 9 11.01"></polyline>
+            </svg>
+            <span class="max-w-0 overflow-hidden transition-all duration-300 group-hover:max-w-[70px] whitespace-nowrap opacity-0 group-hover:opacity-100">
+              Confirm
+            </span>
+          </button>
+        </Show>
+        <Show when={projectIsComplete()}>
+          <button
+            type="button"
+            class="btn btn-sm text-white rounded-full flex items-center gap-1 p-2 opacity-50 cursor-not-allowed"
+            style="background-color:#6cd14d"
+            title="All steps completed"
+            disabled
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="flex-shrink-0">
+              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+              <polyline points="22 4 12 14.01 9 11.01"></polyline>
+            </svg>
+            <span>Completed</span>
+          </button>
+        </Show>
+
       </div>
     );
   };
@@ -211,7 +239,7 @@ const UnifiedTaskCard = (props) => {
     return getStepName(task);
   };
 
-  const showActionButtons = () => true;
+  const showActionButtons = () => isExpanded();
 
 
 
@@ -224,7 +252,7 @@ const UnifiedTaskCard = (props) => {
       data-task-id={taskId}
     >
         {/* Card Header */}
-        <div class={`card-header bg-base-200/50 px-4 py-3 border-b border-base-300 flex flex-wrap items-center justify-between gap-2 ${
+        <div class={`card-header px-4 py-3 border-b border-base-300 flex flex-wrap items-center justify-between gap-2 ${
           props.streamingTaskId?.() === taskId && content() && content().trim().length > 0 && !isExpanded() ? 'ring-1 ring-primary/30' : ''
         }`}>
         <div class="flex items-center gap-2 min-w-0">
@@ -300,10 +328,7 @@ const UnifiedTaskCard = (props) => {
                   </div>
                 </Show>
                 <Show when={content() && content().trim().length > 0}>
-                  {(() => {
-                    const rendered = marked.parse(renderFilledTemplate(content()) || '', { breaks: true, gfm: true });
-                    return <div innerHTML={rendered} />;
-                  })()}
+                  <div innerHTML={renderedContent()} />
                 </Show>
               </div>
             }>

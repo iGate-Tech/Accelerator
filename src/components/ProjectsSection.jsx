@@ -183,8 +183,9 @@ const ProjectsSection = (props) => {
         if (!currentUser) return;
 
         try {
-            const blob = await exportAllProjects(currentUser.id);
-            if (blob) {
+            const data = await exportAllProjects(currentUser.id);
+            if (data) {
+                const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
                 const url = URL.createObjectURL(blob);
                 const a = document.createElement('a');
                 a.href = url;

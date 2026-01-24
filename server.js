@@ -341,6 +341,13 @@ app.post('/api/llm', async (req, res) => {
             lastError = error;
             const duration = Date.now() - startTime;
             console.log(`[${new Date().toISOString()}] SERVER: Attempt ${retries + 1}/${maxRetries + 1} failed: ${error.message}`);
+            console.error(`[${new Date().toISOString()}] SERVER: Error detail`, {
+                name: error?.name,
+                code: error?.code,
+                status: error?.status || error?.response?.status,
+                data: error?.response?.data || error?.data || null,
+                stack: error?.stack
+            });
 
             const isRetryable = error.message.includes('429') ||
                                 error.message.includes('500') ||
@@ -378,7 +385,18 @@ app.post('/api/llm', async (req, res) => {
             statusCode = 503;
         }
 
-        res.status(statusCode).end(userMessage);
+        const errorPayload = {
+            error: userMessage.trim(),
+            details: {
+                name: lastError?.name,
+                code: lastError?.code,
+                status: lastError?.status || lastError?.response?.status,
+                message: lastError?.message,
+                data: lastError?.response?.data || lastError?.data || null
+            }
+        };
+
+        res.status(statusCode).json(errorPayload);
     }
 });
 

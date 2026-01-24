@@ -8,21 +8,17 @@ import {
     createMemo,
     batch
 } from "solid-js";
+import { steps, stepNames } from "../lib/business/steps.js";
+import { buildPrompt } from "../lib/business/useStep.js";
 import { logger } from "../lib/core";
 import { LoadingOverlay, AgentInterface } from "../components";
-import {
-    steps,
-    stepNames
-} from "../lib/business/steps.js";
-import {
-    buildPrompt
-} from "../lib/business/machine.js";
 import { createStepHook } from "../lib/business/useStep.js";
 import {
     getTasks,
     addTask,
     clearAllTasks,
     updateTask,
+    deleteTask,
     addProject,
     updateProject,
     getProjects,
@@ -383,169 +379,260 @@ Please provide the modified content that follows the instruction.`;
 
     const handleConfirm = async (taskId) => {
       const step = getStepHook();
-      if (step && !step.isComplete()) {
-        console.log('[Journey] ============================================');
-        console.log('[Journey] STEP CONFIRM: User confirmed task, advancing to next step');
-        toastManager.info('Advancing to next step...');
-        try {
+      if (!step) return;
+
+      console.log('[Journey] ============================================');
+      console.log('[Journey] STEP CONFIRM: User confirmed task, starting auto-completion if needed');
+
+      try {
+        // Always attempt to confirm current step first
+        if (!(await step.isComplete())) {
+          toastManager.info('Advancing to next step...');
           await step.confirm();
-          console.log('[Journey] Step confirmed');
-        } catch (error) {
-          console.error('[Journey] Error in step.confirm():', error.message);
-          toastManager.error(error.message || 'Cannot proceed: Missing required data');
-          const warnings = step.validationWarnings();
-          if (warnings && warnings.length > 0) {
-            toastManager.warning(warnings.join('. '));
-          }
-          return;
+          console.log('[Journey] Current step confirmed');
         }
 
-        const currentStepIndex = step.stepIndex();
+        // Now auto-complete all remaining incomplete steps
+        const projectId = currentProjectId();
+        if (!projectId) return;
+
+        const allTasks = await getTasks(projectId);
+        const taskKey = (value) => (value || '').toString().trim().toLowerCase();
+        const parseLlmError = (error) => {
+          if (!error) return null;
+          try {
+            const parsed = JSON.parse(error.message);
+            return parsed && typeof parsed === 'object' ? parsed : null;
+          } catch (parseErr) {
+            console.debug('[Journey] Unable to parse LLM error message as JSON:', parseErr.message);
+          }
+          return null;
+        };
         const totalSteps = steps.length;
-        const isLastStep = currentStepIndex >= totalSteps - 1;
-        
-        console.log('[Journey] Step index after confirm:', currentStepIndex);
-        console.log('[Journey] Total steps:', totalSteps);
-        console.log('[Journey] Is last step:', isLastStep);
-        
-        // Double-check using the step hook's isLast() method
-        const stepHookIsLast = step.isLast();
-        console.log('[Journey] Step hook isLast():', stepHookIsLast);
-        
-        if (isLastStep || stepHookIsLast) {
-          console.log('[Journey] Last step confirmed (index: ' + currentStepIndex + '), no more steps to create');
-          toastManager.success('Project completed!');
-          // Ensure step stays at current index and doesn't reset
-          if (step.isComplete()) {
-            console.log('[Journey] Step is complete, marking final state');
-          }
-          return;
-        }
 
-        if (!step.isComplete()) {
-          console.log('[Journey] Checking for existing next task...');
-          const projectId = currentProjectId();
-          const allTasks = tasksList();
-          
-          // Find if there's already a task for a later step
-          const existingNextTask = allTasks.find(t => {
-            const taskStepIndex = steps.findIndex(s => s.name === t.stepName);
-            return taskStepIndex > currentStepIndex && t.content && t.content.trim().length > 0;
+        const normalizeIndex = (value) => {
+          const numeric = Number.isFinite(value) ? value : Number(value) || 0;
+          return Math.min(Math.max(numeric, 0), Math.max(totalSteps - 1, 0));
+        };
+
+        let currentStepIndex = normalizeIndex(step.stepIndex?.() ?? 0);
+
+        const isTaskIncomplete = (task) => {
+          if (!task) return true;
+          const contentOk = typeof task.content === 'string' && task.content.trim().length > 0;
+          const llmOk = typeof task.llm_response === 'string' && task.llm_response.trim().length > 0;
+          return !(contentOk && llmOk);
+        };
+
+        const findTaskForStep = (stepInfo, resolvedName) => {
+          const targetName = taskKey(resolvedName);
+          const targetId = taskKey(stepInfo.id);
+
+          const match = allTasks.find((task) => {
+            if (!task) return false;
+            const taskNames = [task.stepName, task.step_name, task.title].map(taskKey);
+            const taskIdMatch = taskKey(task.step) === targetId;
+            const nameMatch = taskNames.some((name) => name.length > 0 && name === targetName);
+            return taskIdMatch || nameMatch;
           });
 
-          if (existingNextTask) {
-            console.log('[Journey] Found existing next task:', existingNextTask.id, '- showing it instead of creating new one');
-            // Select the existing task instead of creating a new one
-            setSelectedTaskId(existingNextTask.id);
-            return;
+          if (!match) {
+            console.log('[Journey] No task match for step', stepInfo.id, '(', resolvedName, ')');
           }
 
-          console.log('[Journey] No existing next task found, creating new task...');
-          try {
-            const userId = user()?.id;
-            const currentStep = step.currentStep();
-            const stepName = step.stepName();
-            const currentStepData = step.stepData();
-            
-            console.log('[Journey] Next step:', currentStep?.name || stepName);
-            console.log('[Journey] Step data for prompt:', Object.keys(currentStepData));
-            
-            const promptForStep = buildPrompt(currentStep, currentStepData, prompt());
-            console.log('[Journey] Prompt length:', promptForStep.length);
+          return match;
+        };
 
-            const newTaskId = await addTask({
+        let firstIncompleteIndex = -1;
+        for (let i = 0; i < totalSteps; i++) {
+          const stepInfo = steps[i];
+          const stepName = stepNames[stepInfo.id] || stepInfo.name || `Step ${i + 1}`;
+          const taskForStep = findTaskForStep(stepInfo, stepName);
+          if (isTaskIncomplete(taskForStep)) {
+            firstIncompleteIndex = i;
+            break;
+          }
+        }
+
+        let loopStartIndex = currentStepIndex;
+        if (firstIncompleteIndex >= 0) {
+          loopStartIndex = Math.min(currentStepIndex, firstIncompleteIndex);
+        }
+
+        console.log('[Journey] Current step index (raw):', currentStepIndex);
+        console.log('[Journey] First incomplete step index:', firstIncompleteIndex);
+        console.log('[Journey] Total steps:', totalSteps);
+
+        if (loopStartIndex !== currentStepIndex) {
+          console.log('[Journey] Adjusting auto-complete start index to:', loopStartIndex);
+          currentStepIndex = loopStartIndex;
+          step.setStepIndex?.(loopStartIndex);
+          await step.persist?.('auto-adjust');
+        }
+
+        console.log('[Journey] Checking for remaining incomplete tasks...');
+
+        let hasAutoCompleted = false;
+
+        for (let i = loopStartIndex; i < totalSteps; i++) {
+          const stepInfo = steps[i];
+          const stepName = stepNames[stepInfo.id] || stepInfo.name || `Step ${i + 1}`;
+          const expectedTask = findTaskForStep(stepInfo, stepName);
+
+          // Check if task is incomplete (empty content or llm_response)
+          const isIncomplete = !expectedTask || (!expectedTask.content || expectedTask.content.trim().length === 0) ||
+                              (!expectedTask.llm_response || expectedTask.llm_response.trim().length === 0);
+
+          if (!isIncomplete) {
+            console.log('[Journey] Step', stepName, 'is already complete, skipping');
+            step.setStepIndex(i + 1); // Advance step index
+            continue;
+          }
+
+          console.log('[Journey] Auto-completing incomplete step:', stepName);
+          console.log('[Journey] Step info:', {
+            id: stepInfo.id,
+            model: stepInfo.model,
+            section: stepInfo.section,
+            variables: stepInfo.variables,
+          });
+          toastManager.info(`Auto-completing ${stepName}...`);
+
+          let taskIdToStream;
+          let taskPrompt;
+
+          if (!expectedTask) {
+            // Create new task
+            const userId = user()?.id;
+            taskPrompt = buildPrompt(stepInfo, step.stepData(), prompt());
+            taskIdToStream = await addTask({
               projectId: projectId,
               title: stepName,
               content: '',
-              prompt: promptForStep,
+              prompt: taskPrompt,
               llm_response: '',
-              model: currentStep?.model || 'System',
-              section: currentStep?.section || 'Processing',
+              model: stepInfo.model || 'System',
+              section: stepInfo.section || 'Processing',
               stepName: stepName
             }, projectId, userId);
-            console.log('[Journey] Task created:', newTaskId);
 
-            // Immediately add the new task to tasksList so streaming can update it
+            console.log('[Journey] Created new task', taskIdToStream, 'with prompt length:', taskPrompt?.length || 0);
+
+            // Add to local state immediately
             const newTask = {
-              id: newTaskId,
-              projectId: projectId,
+              id: taskIdToStream,
+              projectId,
               title: stepName,
               content: '',
-              prompt: promptForStep,
+              prompt: taskPrompt,
               llm_response: '',
-              model: currentStep?.model || 'System',
-              section: currentStep?.section || 'Processing',
-              stepName: stepName,
+              model: stepInfo.model || 'System',
+              section: stepInfo.section || 'Processing',
+              stepName,
               last_modified: new Date().toISOString()
             };
-            setTasksList(currentTasks => [...currentTasks, newTask]);
-            console.log('[Journey] Added new task to tasksList for streaming');
+            setTasksList(prev => [...prev, newTask]);
+            allTasks.push(newTask); // Update local allTasks for next iterations
+          } else {
+            taskIdToStream = expectedTask.id;
+            taskPrompt = expectedTask.prompt || buildPrompt(stepInfo, step.stepData(), prompt());
+            console.log('[Journey] Using existing task', taskIdToStream, 'with prompt length:', taskPrompt?.length || 0);
+          }
 
-            console.log('[Journey] Starting LLM streaming for step...');
-            setStreamingTaskId(newTaskId);
-            let accumulatedResponse = '';
-            try {
-              const stepPrompt = buildPrompt(step.currentStep(), step.stepData(), prompt());
-              const response = await callLLMForStep(stepPrompt, (chunk) => {
-                accumulatedResponse += chunk;
-                batch(() => {
-                  setTasksList(currentTasks => {
-                    const updatedTasks = currentTasks.map(task => {
-                      if (task.id === newTaskId) {
-                        return { ...task, content: accumulatedResponse, last_modified: new Date().toISOString() };
-                      }
-                      return task;
-                    });
-                    return [...updatedTasks];
-                  });
-                });
+          // Stream the task
+          setStreamingTaskId(taskIdToStream);
+          let accumulatedResponse = '';
+          try {
+            let chunkCount = 0;
+            console.log('[Journey] Starting LLM stream for', stepName, 'taskId:', taskIdToStream, 'prompt length:', taskPrompt?.length || 0);
+            await callLLMForStep(taskPrompt, (chunk) => {
+              accumulatedResponse += chunk;
+              chunkCount += 1;
+              batch(() => {
+                setTasksList(prev => prev.map(t => 
+                  t.id === taskIdToStream 
+                    ? { ...t, content: accumulatedResponse, llm_response: accumulatedResponse, last_modified: new Date().toISOString() }
+                    : t
+                ));
               });
+            });
 
-              console.log('[Journey] Streaming complete, length:', accumulatedResponse.length);
-              setStreamingTaskId(null);
-              if (response && typeof response === 'string' && response.trim().length > 0) {
-                console.log('[Journey] Saving response to task...');
-                await updateTask(newTaskId, {
-                  content: response,
-                  llm_response: response
-                });
+            console.log('[Journey] LLM stream complete for', stepName, 'chunks:', chunkCount, 'response length:', accumulatedResponse.length);
 
-                console.log('[Journey] Extracting template data...');
-                const extractedData = extractTemplateData(response);
-                console.log('[Journey] Extracted data:', JSON.stringify(extractedData));
-                
-                if (Object.keys(extractedData).length > 0 && currentProjectId()) {
-                  await updateStepData(currentProjectId(), extractedData);
-                  console.log('[Journey] Data saved to step_data');
-                }
+            if (!accumulatedResponse || accumulatedResponse.trim().length === 0) {
+              throw new Error('LLM returned empty response');
+            }
 
-                console.log('[Journey] Refreshing task list...');
-                setTasksList(await getTasks(currentProjectId()));
-                console.log('[Journey] Task ID in list:', newTaskId);
-                console.log('[Journey] ============================================');
-              }
-            } catch (streamError) {
-              console.error('[Journey] Streaming failed:', streamError.message);
-              setStreamingTaskId(null);
-              if (accumulatedResponse.trim().length > 0) {
-                await updateTask(newTaskId, {
-                  content: accumulatedResponse,
-                  llm_response: accumulatedResponse
-                });
-                const extractedData = extractTemplateData(accumulatedResponse);
-                if (Object.keys(extractedData).length > 0 && currentProjectId()) {
-                  await updateStepData(currentProjectId(), extractedData);
-                }
-                setTasksList(await getTasks(currentProjectId()));
-                toastManager.warning('Saved partial response due to streaming error');
-              } else {
-                toastManager.error('Streaming failed: ' + streamError.message);
+            // Save final response
+            await updateTask(taskIdToStream, {
+              content: accumulatedResponse,
+              llm_response: accumulatedResponse,
+              last_modified: new Date().toISOString()
+            });
+            console.log('[Journey] Saved response for', stepName, 'taskId:', taskIdToStream);
+
+            // Extract and save step data
+            const extractedData = extractTemplateData(accumulatedResponse);
+            console.log('[Journey] Extracted data keys for', stepName, ':', Object.keys(extractedData));
+            if (Object.keys(extractedData).length > 0) {
+              await updateStepData(projectId, extractedData);
+              // Refresh step data for next iteration
+              step.refreshStepData();
+            }
+
+            setTasksList(await getTasks(projectId)); // Refresh full list
+            console.log('[Journey] Auto-completed step:', stepName);
+            toastManager.success(`${stepName} auto-completed!`);
+            hasAutoCompleted = true;
+
+            // Advance step
+            step.setStepIndex(i + 1);
+            await step.persist('confirm');
+
+          } catch (streamError) {
+            console.error('[Journey] Auto-completion failed for', stepName, ':', streamError.message);
+            const llmErrorDetails = parseLlmError(streamError);
+            if (llmErrorDetails) {
+              console.error('[Journey] LLM error details:', llmErrorDetails);
+            }
+            setStreamingTaskId(null);
+            if (llmErrorDetails?.status) {
+              toastManager.error(`Failed to auto-complete ${stepName}: HTTP ${llmErrorDetails.status} - ${llmErrorDetails.message || 'Unknown error'}. Manual completion needed.`);
+            } else {
+              toastManager.error(`Failed to auto-complete ${stepName}: ${streamError.message}. Manual completion needed.`);
+            }
+            if (stepInfo.id === 'step44' && taskIdToStream) {
+              try {
+                await deleteTask(taskIdToStream);
+                setTasksList(await getTasks(projectId));
+                console.log('[Journey] Removed failed Funding Amount task', taskIdToStream);
+              } catch (cleanupError) {
+                console.error('[Journey] Cleanup failed for Funding Amount task:', cleanupError.message);
               }
             }
-          } catch (taskError) {
-            console.error('[Journey] Error creating task:', taskError.message);
-            toastManager.error('Failed to advance to next step');
+            break; // Stop auto-completion on error
           }
+        }
+
+        setStreamingTaskId(null);
+
+        if (!hasAutoCompleted) {
+          console.log('[Journey] All steps already complete, nothing to auto-complete');
+          if (step.isLast()) {
+            toastManager.success('Project fully completed!');
+          }
+        } else {
+          console.log('[Journey] Auto-completion finished');
+          toastManager.success('All remaining steps auto-completed!');
+        }
+
+      } catch (error) {
+        console.error('[Journey] handleConfirm error:', error);
+        setStreamingTaskId(null);
+        toastManager.error('Auto-completion interrupted: ' + error.message);
+        const warnings = step?.validationWarnings();
+        if (warnings && warnings.length > 0) {
+          toastManager.warning(warnings.join('. '));
         }
       }
     };
@@ -559,22 +646,39 @@ Please provide the modified content that follows the instruction.`;
       let response = null;
 
       try {
-        response = await fetch('/api/llm', {
-          method: 'POST',
-          headers: { 
-            'Content-Type': 'application/json',
-            'Connection': 'close' // Prevent connection pool reuse
-          },
-          body: JSON.stringify({ prompt: promptText }),
-          signal: controller.signal
-        });
+          let attempt = 0;
+          const maxAttempts = 3;
+          let lastError = null;
 
-        if (!response.ok) {
-          const errorText = await response.text().catch(() => 'Unknown error');
-          throw new Error(errorText || `HTTP ${response.status}`);
-        }
+        while (attempt < maxAttempts) {
+          attempt += 1;
+          console.log('[Journey] LLM request attempt', attempt, 'prompt length:', promptText?.length || 0);
+          try {
+            response = await fetch('/api/llm', {
+              method: 'POST',
+              headers: { 
+                'Content-Type': 'application/json',
+                'Connection': 'close'
+              },
+              body: JSON.stringify({ prompt: promptText }),
+              signal: controller.signal
+            });
+            if (!response.ok) {
+             const errorText = await response.text().catch(() => 'Unknown error');
+             throw new Error(JSON.stringify({ status: response.status, message: errorText }));
+            }
+            break;
+          } catch (attemptError) {
+            lastError = attemptError;
+            console.error('[Journey] LLM request attempt', attempt, 'failed with stack:', attemptError.stack || attemptError.message);
+              if (attempt >= maxAttempts) {
+                throw attemptError;
+              }
+              await new Promise(resolve => setTimeout(resolve, 2000 * attempt));
+            }
+          }
 
-        reader = response.body.getReader();
+          reader = response.body.getReader();
         const decoder = new TextDecoder();
         let responseText = '';
 
@@ -889,6 +993,23 @@ Please provide the modified content that follows the instruction.`;
 
         logger.debug('Project state restored for:', projectId);
         console.log('[loadProjectState] 11. Project state fully restored');
+        
+        // Check project completion status
+        try {
+          const { checkProjectCompletion } = await import('../lib/database/projects.js');
+          const completionStatus = await checkProjectCompletion(projectId);
+          
+          // Show notification to user if project is not complete
+          if (completionStatus.error) {
+            console.warn('Project completion check error:', completionStatus.error);
+          } else if (!completionStatus.isComplete) {
+            toastManager.info(`Project has ${completionStatus.remainingSteps} steps remaining`);
+          } else {
+            toastManager.success('Project is complete! 🎉');
+          }
+        } catch (checkError) {
+          console.warn('Failed to check project completion:', checkError);
+        }
       } catch (error) {
         console.error('[loadProjectState] Error loading project state:', error);
         logger.error('Failed to load project state:', error);
@@ -952,21 +1073,29 @@ Please provide the modified content that follows the instruction.`;
         }, 100);
     });
 
-    const refreshExportContext = async () => {
-      const pid = currentProjectId();
-      if (pid) {
-        const stepData = await getStepData(pid);
-        const project = projectData();
-        setExportContext({
-          ...stepData,
-          companyName: project?.name || 'My Startup',
-          projectId: pid
-        });
-      }
+    const refreshExportContext = () => {
+      // Run in background without blocking UI
+      setTimeout(async () => {
+        const pid = currentProjectId();
+        if (pid) {
+          try {
+            const stepData = await getStepData(pid);
+            const project = projectData();
+            setExportContext({
+              ...stepData,
+              companyName: project?.name || 'My Startup',
+              projectId: pid
+            });
+          } catch (error) {
+            console.warn('Failed to refresh export context:', error);
+          }
+        }
+      }, 0);
     };
 
     createEffect(() => {
       tasksList();
+      // Fire and forget - don't block UI updates
       refreshExportContext();
     });
 
@@ -1044,29 +1173,33 @@ Please provide the modified content that follows the instruction.`;
                           projectName={projectData()?.name}
                           handleInstruct={handleInstruct}
                           handleRegenerate={handleRegenerate}
-                          handleConfirm={handleConfirm}
-                           streamingTaskId={streamingTaskId}
+handleConfirm={handleConfirm}
+                            isProjectComplete={createMemo(() => {
+                              const allTasks = tasksList();
+                              return allTasks.every(t => t.content && t.content.trim().length > 0) && stepHookMemo()?.isLast() && stepHookMemo()?.isComplete();
+                            })}
+                            streamingTaskId={streamingTaskId}
                            setStreamingTaskId={setStreamingTaskId}
                           onDelete={(taskId) => {
                             const stepHook = getStepHook();
                             if (stepHook) {
                               const currentIndex = stepHook.stepIndex();
-                              stepHook.setStepIndex(Math.max(0, currentIndex() - 1));
+                              stepHook.setStepIndex(Math.max(0, currentIndex - 1));
                             }
                           }}
                           />
                          
-                          <div class="flex justify-end px-4 mt-4">
-                            <Show when={tasksList() && tasksList().length > 0}>
-                              <ReportExportMenu
-                                context={exportContext()}
-                                companyName={projectData()?.name || 'My Startup'}
-                                onExportStart={() => toastManager.info('Preparing PDF export...')}
-                                onExportComplete={(type) => toastManager.success(`${type} exported successfully`)}
-                                onExportError={(error) => toastManager.error('Export failed: ' + error.message)}
-                              />
-                            </Show>
-                          </div>
+<div class="flex justify-end px-4 mt-4">
+                             <Show when={tasksList() && tasksList().length > 0}>
+                               <ReportExportMenu
+                                 context={exportContext()}
+                                 companyName={projectData()?.name || 'My Startup'}
+                                 onExportStart={() => toastManager.info('Preparing PDF export...')}
+                                 onExportComplete={(type) => toastManager.success(`${type} exported successfully`)}
+                                 onExportError={(error) => toastManager.error('Export failed: ' + error.message)}
+                               />
+                             </Show>
+                           </div>
                  </Show>
 
 
@@ -1086,8 +1219,12 @@ Please provide the modified content that follows the instruction.`;
                   tasksList={tasksList}
                   startPressed={startPressed}
                    handleInstruct={handleInstruct}
-                   handleConfirm={handleConfirm}
-                   handleStart={handleStart}
+handleConfirm={handleConfirm}
+                            isProjectComplete={createMemo(() => {
+                              const allTasks = tasksList();
+                              return allTasks.every(t => t.content && t.content.trim().length > 0) && stepHookMemo()?.isLast() && stepHookMemo()?.isComplete();
+                            })}
+                    handleStart={handleStart}
                   handleRegenerate={handleRegenerate}
 
                   steps={steps}

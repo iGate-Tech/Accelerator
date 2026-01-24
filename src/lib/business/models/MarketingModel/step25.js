@@ -5,7 +5,7 @@ export const step25 = {
   name: "Target Market",
   model: "Marketing Model",
   promptTemplate: standardPromptTemplateWithProblem,
-  variables: ["solution"],
+  variables: ["solution", "industry", "customerType", "marketSize", "idealCustomer"],
   detailedPrompt: `
 The problem being solved is: {{problem}}
 
@@ -21,6 +21,14 @@ Provide:
 - {{idealCustomer: "Detailed profile of the ideal first customer for {{solution}}"}}
 
 Structure in professional Markdown with clear segments, market maps, and customer profiles.
+
+Also embed {{market: "Combined market description combining industry and target segments for use in subsequent steps"}}.
   `,
-  validate: (context) => ({ valid: true, issues: [] }),
+  validate: (context) => {
+    const issues = [];
+    if (!context.industry) issues.push('Missing target industry');
+    if (!context.customerType) issues.push('Missing customer segments');
+    if (!context.marketSize) issues.push('Missing market size estimate');
+    return { valid: issues.length === 0, issues };
+  },
 };

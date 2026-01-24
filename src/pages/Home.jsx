@@ -34,6 +34,7 @@ import { useActivityLogger } from "../lib/business/activity.js";
 import { extractTemplateData} from '../lib/ui/llm-template.js';
 import { updateStepData, getStepData } from '../lib/ui/stepDataStore.js';
 import { ResponseSection, RouteGuard, ProtectedRoute } from '../components';
+import ReportExportMenu from '../components/ReportExportMenu.jsx';
 import { useContext } from "solid-js";
 import { LangContext } from "../context/LangContext";
 import { translations } from "../assets/translations/translations-index.js";
@@ -85,6 +86,7 @@ const TasksContent = () => {
     const [projectData, setProjectData] = createSignal(null);
     const [streamingTaskId, setStreamingTaskId] = createSignal(null);
     const [instructPrompt, setInstructPrompt] = createSignal('');
+    const [exportContext, setExportContext] = createSignal({});
 
     let stepHook = null;
 
@@ -390,6 +392,11 @@ Please provide the modified content that follows the instruction.`;
           console.log('[Journey] Step confirmed');
         } catch (error) {
           console.error('[Journey] Error in step.confirm():', error.message);
+          toastManager.error(error.message || 'Cannot proceed: Missing required data');
+          const warnings = step.validationWarnings();
+          if (warnings && warnings.length > 0) {
+            toastManager.warning(warnings.join('. '));
+          }
           return;
         }
 
@@ -843,7 +850,12 @@ Please provide the modified content that follows the instruction.`;
         console.log('[loadProjectState] 3. Projects fetched:', projectsList?.length || 0);
         
         const project = projectsList.find(p => p.id === projectId);
-        console.log('[loadProjectState] 4. Found project:', !!project);
+        console.log('[loadProjectState] 4. Found project:', !!project, 'Project data:', {
+        completedSteps: project?.completedSteps,
+        currentStep: project?.currentStep,
+        stepName: project?.stepName,
+        uiStatus: project?.uiStatus
+      });
 
         if (!project) {
           logger.warn('Project not found:', projectId);
@@ -852,8 +864,8 @@ Please provide the modified content that follows the instruction.`;
 
         setProjectData(project);
         setPrompt(project.description || '');
-        setStartPressed((project.current_step || 0) > 0);
-        console.log('[loadProjectState] 5. setStartPressed to:', (project.current_step || 0) > 0);
+        setStartPressed((project.completedSteps || 0) > 0);
+        console.log('[loadProjectState] 5. setStartPressed to:', (project.completedSteps || 0) > 0);
 
         console.log('[loadProjectState] 6. Fetching tasks for project:', projectId);
         const tasks = await getTasks(projectId);
@@ -861,13 +873,22 @@ Please provide the modified content that follows the instruction.`;
         setTasksList(tasks);
 
         const step = getStepHook();
-        if (step && project.current_step) {
+        if (step && project.currentStep) {
           step.loadFromProject(project);
           console.log('[loadProjectState] 8. Loaded step from project');
         }
 
+        console.log('[loadProjectState] 9. Loading step data for export...');
+        const stepData = await getStepData(projectId);
+        console.log('[loadProjectState] 10. Step data loaded:', Object.keys(stepData).length, 'keys');
+        setExportContext({
+          ...stepData,
+          companyName: project.name,
+          projectId: projectId
+        });
+
         logger.debug('Project state restored for:', projectId);
-        console.log('[loadProjectState] 9. Project state fully restored');
+        console.log('[loadProjectState] 11. Project state fully restored');
       } catch (error) {
         console.error('[loadProjectState] Error loading project state:', error);
         logger.error('Failed to load project state:', error);
@@ -931,6 +952,24 @@ Please provide the modified content that follows the instruction.`;
         }, 100);
     });
 
+    const refreshExportContext = async () => {
+      const pid = currentProjectId();
+      if (pid) {
+        const stepData = await getStepData(pid);
+        const project = projectData();
+        setExportContext({
+          ...stepData,
+          companyName: project?.name || 'My Startup',
+          projectId: pid
+        });
+      }
+    };
+
+    createEffect(() => {
+      tasksList();
+      refreshExportContext();
+    });
+
     onCleanup(() => {
         window.removeEventListener('projectDeleted', onProjectDeleted);
         window.removeEventListener('openProject', onOpenProject);
@@ -989,27 +1028,46 @@ Please provide the modified content that follows the instruction.`;
                    } fallback={
                        <div style={{"display": "none"}}></div>
                    }>
-                         <ResponseSection
-                           tasksList={tasksList}
-                           startPressed={startPressed}
-                           isLoading={loading}
-                          updateTask={updateTask}
-                          setEditContent={setEditContent}
-                          editingTaskId={editingTaskId}
-                          setEditingTaskId={setEditingTaskId}
-                          selectedTaskId={selectedTaskId}
-                          setSelectedTaskId={setSelectedTaskId}
-                           stepName={stepHookMemo()?.stepName?.() || 'Unknown Step'}
-                          callLLMForStep={callLLMForStep}
-                         refreshTasks={async () => setTasksList(await getTasks(currentProjectId()))}
-                         projectName={projectData()?.name}
-                         handleInstruct={handleInstruct}
-                         handleRegenerate={handleRegenerate}
-                         handleConfirm={handleConfirm}
-                         streamingTaskId={streamingTaskId}
-                         setStreamingTaskId={setStreamingTaskId}
-                        />
-                </Show>
+                          <ResponseSection
+                            tasksList={tasksList}
+                            startPressed={startPressed}
+                            isLoading={loading}
+                           updateTask={updateTask}
+                           setEditContent={setEditContent}
+                           editingTaskId={editingTaskId}
+                           setEditingTaskId={setEditingTaskId}
+                           selectedTaskId={selectedTaskId}
+                           setSelectedTaskId={setSelectedTaskId}
+                            stepName={stepHookMemo()?.stepName?.() || 'Unknown Step'}
+                           callLLMForStep={callLLMForStep}
+                          refreshTasks={async () => setTasksList(await getTasks(currentProjectId()))}
+                          projectName={projectData()?.name}
+                          handleInstruct={handleInstruct}
+                          handleRegenerate={handleRegenerate}
+                          handleConfirm={handleConfirm}
+                           streamingTaskId={streamingTaskId}
+                           setStreamingTaskId={setStreamingTaskId}
+                          onDelete={(taskId) => {
+                            const stepHook = getStepHook();
+                            if (stepHook) {
+                              const currentIndex = stepHook.stepIndex();
+                              stepHook.setStepIndex(Math.max(0, currentIndex() - 1));
+                            }
+                          }}
+                          />
+                         
+                          <div class="flex justify-end px-4 mt-4">
+                            <Show when={tasksList() && tasksList().length > 0}>
+                              <ReportExportMenu
+                                context={exportContext()}
+                                companyName={projectData()?.name || 'My Startup'}
+                                onExportStart={() => toastManager.info('Preparing PDF export...')}
+                                onExportComplete={(type) => toastManager.success(`${type} exported successfully`)}
+                                onExportError={(error) => toastManager.error('Export failed: ' + error.message)}
+                              />
+                            </Show>
+                          </div>
+                 </Show>
 
 
                 <AgentInterface

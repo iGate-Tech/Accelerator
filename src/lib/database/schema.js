@@ -83,7 +83,7 @@ export async function createSchema() {
         current_prompt TEXT,
         llm_response TEXT,
         total_credits INTEGER DEFAULT 600,
-        total_steps INTEGER DEFAULT 60,
+        total_steps INTEGER DEFAULT 59,
         FOREIGN KEY (user_id) REFERENCES users(id)
       );
     `);
@@ -391,7 +391,7 @@ export async function migrateSchema() {
       "ALTER TABLE projects ADD COLUMN IF NOT EXISTS current_prompt TEXT",
       "ALTER TABLE projects ADD COLUMN IF NOT EXISTS llm_response TEXT",
       "ALTER TABLE projects ADD COLUMN IF NOT EXISTS total_credits INTEGER DEFAULT 600",
-      "ALTER TABLE projects ADD COLUMN IF NOT EXISTS total_steps INTEGER DEFAULT 60",
+      "ALTER TABLE projects ADD COLUMN IF NOT EXISTS total_steps INTEGER DEFAULT 59",
 
       // Add missing created_at column to users table
       "ALTER TABLE users ADD COLUMN IF NOT EXISTS created_at TEXT",

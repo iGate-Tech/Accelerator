@@ -15,9 +15,9 @@ export const addToast = (type, message, duration = 3000) => {
     }, duration);
   }
 };
-  logger.trace('removeToast: Starting');
 
 export const removeToast = (id) => {
+  logger.trace('removeToast: Starting');
   setToasts(toasts => toasts.filter(t => t.id !== id));
 };
 

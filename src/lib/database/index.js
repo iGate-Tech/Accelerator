@@ -1,6 +1,7 @@
 // Database module exports
 export { dbInstance, dbReady, initDatabase, query, exec, close, getPg, ensureDatabaseReady, safeQuery, getDbStatus } from './core.js';
 export { updateEntity, getEntities, createSchema } from './operations.js';
+import { dbInstance } from './core.js';
 
 // Simple exports for commonly used functions
 export const getProjects = async (userId = null) => {
@@ -468,6 +469,10 @@ export const getTasks = async (projectId) => {
 export const updateTask = async (id, updates) => {
   const { _updateTask } = await import('./projects.js');
   return await _updateTask({ id, ...updates });
+};
+
+export const deleteTask = async (id) => {
+  await dbInstance.query(`DELETE FROM tasks WHERE id = $1`, [id]);
 };
 
 // ============================================================================

@@ -408,7 +408,8 @@ export async function _getProjects({ userId }) {
       currentModel: row.current_model,
       uiStatus: row.ui_status,
       uiProgress: row.ui_progress,
-      public: row.public
+      public: row.public,
+      completedSteps: row.completed_steps
     }));
   } catch (err) {
     console.error('Error getting projects:', err);

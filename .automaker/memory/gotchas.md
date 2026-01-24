@@ -5,7 +5,7 @@ relevantTo: [gotchas]
 importance: 0.7
 relatedFiles: []
 usageStats:
-  loaded: 4
+  loaded: 6
   referenced: 0
   successfulFeatures: 0
 ---

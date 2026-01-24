@@ -27,7 +27,7 @@
   </technology_stack>
 
   <core_capabilities>
-    <capability>AI-powered startup accelerator workflow (51+ steps)</capability>
+    <capability>AI-powered startup accelerator workflow (59+ steps)</capability>
     <capability>Project creation and management</capability>
     <capability>Task tracking within projects</capability>
     <capability>AI-driven simulations and guidance via LLM</capability>

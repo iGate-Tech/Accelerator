@@ -5,6 +5,15 @@ import { getStepData, updateStepData } from '../ui/stepDataStore.js';
 import { extractTemplateData, injectTemplateData } from '../ui/llm-template.js';
 import { standardPromptTemplateWithProblem } from './templates.js';
 import { logger } from '../core';
+import {
+  enrichContext,
+  enrichContextForStep,
+  validateRequiredVariables,
+  getMappedValue,
+  stepRequiredVariables,
+  stepDependencies,
+  getMissingVariablesReport
+} from './variableMapping.js';
 
 export function createStepHook(projectId, onStepChange) {
   const [stepIndex, setStepIndex] = createSignal(0);
@@ -12,8 +21,11 @@ export function createStepHook(projectId, onStepChange) {
   const [currentResponse, setCurrentResponse] = createSignal(null);
   const [stepData, setStepData] = createSignal({});
   const [isSaving, setIsSaving] = createSignal(false);
-  
+  const [validationWarnings, setValidationWarnings] = createSignal([]);
+  const [missingVariables, setMissingVariables] = createSignal([]);
+
   const currentStep = () => steps[stepIndex()];
+  const currentStepId = () => currentStep()?.id || 'unknown';
   const isFirst = () => stepIndex() === 0;
   const isLast = () => stepIndex() >= steps.length - 1;
   const isComplete = () => uiState() === 'completed';
@@ -22,40 +34,68 @@ export function createStepHook(projectId, onStepChange) {
 
   const initializeData = async () => {
     try {
+      // Add a small delay to ensure the store is properly initialized
+      await new Promise(resolve => setTimeout(resolve, 100));
       const data = await getStepData(projectId);
       const dataWithProblem = {
         ...data,
         problem: data.problem || data.originalProblem,
         originalProblem: data.originalProblem
       };
-      console.log('createStepHook: Initial data loaded for project', projectId, ':', Object.keys(dataWithProblem));
-      console.log('createStepHook: problem in initial data:', dataWithProblem.problem?.substring(0, 50) + '...');
+      // Reduced logging for performance
+      // Reduced logging for performance
       setStepData(dataWithProblem);
+      checkMissingVariables(dataWithProblem);
     } catch (e) {
       console.warn('createStepHook: Failed to load initial data:', e);
     }
   };
   initializeData();
 
-  const persist = async (state = uiState()) => {
+  const checkMissingVariables = (context) => {
+    const stepId = currentStepId();
+    const requiredVars = stepRequiredVariables[stepId] || [];
+    const validation = validateRequiredVariables(context, requiredVars);
+
+    setMissingVariables(validation.issues);
+    setValidationWarnings([]);
+
+    if (validation.issues.length > 0) {
+      const warningMessages = validation.issues.map(i => `${i.variable}: ${i.message}`);
+      setValidationWarnings(warningMessages);
+      console.warn('checkMissingVariables: Missing variables for step', stepId, ':', warningMessages);
+    }
+
+    return validation;
+  };
+
+const persist = async (state = uiState()) => {
     if (!projectId) return;
     const projectIdString = typeof projectId === 'string' ? projectId : String(projectId);
     if (!projectIdString) return;
     const currentStepValue = currentStep();
     const stepIndexValue = Number(stepIndex()) || 0;
     const progressValue = Number(progress()) || 0;
-    const stepNameValue = String(stepName()) || 'Unknown Step';
+    const stepNameValue = String(stepName()) || 'Unknown';
     const uiStateValue = typeof state === 'function' ? String(state()) : String(state);
     const completeValue = Boolean(isComplete());
     const lastValue = Boolean(isLast());
-    const uiMessageValue = completeValue ? 'Completed' : lastValue ? 'Final Step' : `Step ${stepIndexValue + 1} of ${steps.length}`;
+ 
+    const missing = missingVariables();
+    const uiMessageValue = completeValue
+      ? 'Completed'
+      : lastValue
+        ? 'Final Step'
+        : `Step ${stepIndexValue + 1} of ${steps.length}${missing.length > 0 ? ' (⚠️ ' + missing.length + ' missing)' : ''}`;
+ 
     const updates = {
       currentStep: String(currentStepValue?.id || 'system'),
       completedSteps: stepIndexValue,
       stepName: stepNameValue,
       uiProgress: progressValue,
       uiStatus: uiStateValue,
-      uiMessage: uiMessageValue
+      uiMessage: uiMessageValue,
+      validationWarnings: missing.length > 0 ? JSON.stringify(missing) : null
     };
     await _updateProject({ id: projectIdString, updates });
   };
@@ -63,6 +103,8 @@ export function createStepHook(projectId, onStepChange) {
   const resetStep = async () => {
     setUiState('idle');
     setCurrentResponse(null);
+    setValidationWarnings([]);
+    setMissingVariables([]);
     await persist('idle');
   };
 
@@ -70,6 +112,8 @@ export function createStepHook(projectId, onStepChange) {
     setStepIndex(0);
     setUiState('idle');
     setCurrentResponse(null);
+    setValidationWarnings([]);
+    setMissingVariables([]);
     await persist('idle');
   };
 
@@ -82,50 +126,60 @@ export function createStepHook(projectId, onStepChange) {
     setUiState('processing');
     setIsSaving(true);
     try {
-      const context = stepData();
-      console.log('regenerate: Current stepData keys:', Object.keys(context));
+      let context = stepData();
+      console.log('regenerate: Current stepData keys:', Object.keys(context).length);
       console.log('regenerate: problem in context:', context?.problem?.substring(0, 50) + '...');
-      
+
       const contextWithProblem = {
         ...context,
         problem: context?.problem || context?.originalProblem || instructions?.problem || ''
       };
-      
-      logger.debug('regenerate: stepData context keys:', Object.keys(contextWithProblem));
-      logger.debug('regenerate: problem in context:', contextWithProblem?.problem);
-      console.log('regenerate: Current stepData:', JSON.stringify(contextWithProblem, null, 2));
-      
-      const prompt = buildPrompt(currentStep(), contextWithProblem, instructions);
+
+      const currentStepValue = currentStep();
+      const stepId = currentStepId();
+
+      // EXTENDED ENRICHMENT: Enrich context for ALL steps with fallbacks
+      const enrichedContext = enrichContextForStep(contextWithProblem, stepId, currentStepValue?.variables);
+      console.log('regenerate: Enriched context for step', stepId, '- missing vars now:', enrichedContext._missingVariables);
+
+      logger.debug('regenerate: stepData context keys:', Object.keys(enrichedContext).length);
+      logger.debug('regenerate: problem in context:', enrichedContext?.problem?.substring(0, 50) + '...');
+      console.log('regenerate: Current stepData keys:', Object.keys(enrichedContext).length);
+
+      const prompt = buildPrompt(currentStep(), enrichedContext, instructions);
       logger.debug('regenerate: Built prompt, length:', prompt?.length);
-      
+
       const response = await callLLM(prompt);
       setCurrentResponse(response);
 
       const extracted = extractTemplateData(response);
-      console.log('regenerate: Extracted data from response:', JSON.stringify(extracted, null, 2));
+      console.log('regenerate: Extracted data from response:', Object.keys(extracted).length, 'keys');
       logger.debug('regenerate: Extracted', Object.keys(extracted).length, 'keys from response');
 
       if (Object.keys(extracted).length > 0) {
-        const problem = contextWithProblem.problem || contextWithProblem.originalProblem || '';
+        const problem = enrichedContext.problem || enrichedContext.originalProblem || '';
         const validatedExtracted = validateExtractedData(extracted, problem);
-        
+
         if (Object.keys(validatedExtracted).length === 0) {
           console.warn('regenerate: All extracted data was off-topic, preserving existing data');
         }
-        
+
         const dataToSave = {
           ...validatedExtracted,
-          problem: validatedExtracted.problem || contextWithProblem.problem,
-          originalProblem: contextWithProblem.originalProblem || contextWithProblem.problem
+          problem: validatedExtracted.problem || enrichedContext.problem,
+          originalProblem: enrichedContext.originalProblem || enrichedContext.problem
         };
         const newData = { ...stepData(), ...dataToSave };
-        console.log('regenerate: Merged data to save:', JSON.stringify(newData, null, 2));
+        console.log('regenerate: Merged data to save:', Object.keys(newData).length, 'keys');
         setStepData(newData);
         await updateStepData(projectId, dataToSave);
         logger.debug('regenerate: Saved extracted data to storage');
       } else {
         console.log('regenerate: No data extracted from response, preserving existing stepData');
       }
+
+      // Check for missing variables AFTER regeneration
+      checkMissingVariables(stepData());
 
       setUiState('confirm');
       await persist('confirm');
@@ -141,7 +195,18 @@ export function createStepHook(projectId, onStepChange) {
       logger.warn('confirm: Blocked - still saving data');
       throw new Error('Please wait while data is being saved');
     }
-    
+
+    const enrichedData = enrichContext(stepData());
+    const currentValidation = validateRequiredVariables(enrichedData, stepRequiredVariables[currentStepId()] || []);
+
+    const errors = currentValidation.issues.filter(i => i.severity === 'error');
+    if (errors.length > 0) {
+      const errorMsg = 'Cannot proceed: Missing required data: ' + errors.map(e => e.variable).join(', ');
+      console.error('confirm: Blocked - validation errors:', errors);
+      setValidationWarnings(errors.map(e => `${e.variable}: ${e.message}`));
+      throw new Error(errorMsg);
+    }
+
     setUiState('idle');
     setCurrentResponse(null);
 
@@ -156,8 +221,9 @@ export function createStepHook(projectId, onStepChange) {
       };
       console.log('confirm: Reloaded step data for new step, keys:', Object.keys(dataWithProblem));
       console.log('confirm: problem in fresh data:', dataWithProblem.problem?.substring(0, 50) + '...');
-      console.log('confirm: All data:', JSON.stringify(dataWithProblem, null, 2));
+      console.log('confirm: All data keys:', Object.keys(dataWithProblem).length);
       setStepData(dataWithProblem);
+      checkMissingVariables(dataWithProblem);
       if (onStepChange) onStepChange();
     } else {
       setUiState('completed');
@@ -171,21 +237,44 @@ export function createStepHook(projectId, onStepChange) {
       setUiState('idle');
       setCurrentResponse(null);
       await persist('idle');
+      checkMissingVariables(stepData());
     }
   };
 
   const loadFromProject = async (project) => {
-    if (project?.current_step) {
-      const idx = steps.findIndex(s => s.id === project.current_step);
-      if (idx >= 0) setStepIndex(idx);
+    console.log('loadFromProject: Project data:', {
+      currentStep: project?.currentStep,
+      completedSteps: project?.completedSteps,
+      uiStatus: project?.uiStatus
+    });
+    
+    let stepIndexToSet = 0; // Default to first step
+    
+    if (project?.currentStep) {
+      const idx = steps.findIndex(s => s.id === project.currentStep);
+      console.log('loadFromProject: Found currentStep in project:', project.currentStep, 'mapped to index:', idx);
+      if (idx >= 0) {
+        console.log('loadFromProject: Setting step index to:', idx);
+        stepIndexToSet = idx;
+      } else {
+        // Invalid step ID, fallback to using completedSteps
+        console.log('loadFromProject: Invalid step ID, falling back to completedSteps');
+        if (project?.completedSteps !== undefined) {
+          const nextStepIndex = Math.min(project.completedSteps, steps.length - 1);
+          console.log('loadFromProject: Setting step index to next step after completed:', nextStepIndex);
+          stepIndexToSet = nextStepIndex;
+        }
+      }
     } else if (project?.completedSteps !== undefined) {
-      // Set to the next step after completed ones (don't restart from beginning)
       const nextStepIndex = Math.min(project.completedSteps, steps.length - 1);
       console.log('loadFromProject: Setting step index to next step after completed:', nextStepIndex);
-      setStepIndex(nextStepIndex);
+      stepIndexToSet = nextStepIndex;
     }
-    if (project?.ui_status) {
-      setUiState(project.ui_status);
+    
+    setStepIndex(stepIndexToSet);
+    
+    if (project?.uiStatus) {
+      setUiState(project.uiStatus);
     }
     logger.debug('loadFromProject: Loading step data for projectId:', projectId);
     const data = await getStepData(projectId);
@@ -194,10 +283,11 @@ export function createStepHook(projectId, onStepChange) {
       problem: data.problem || data.originalProblem || project.description,
       originalProblem: data.originalProblem || project.description
     };
-    console.log('loadFromProject: Loaded step data for project', projectId, ':', JSON.stringify(dataWithProblem, null, 2));
-    logger.debug('loadFromProject: Loaded step data keys:', Object.keys(dataWithProblem));
-    logger.debug('loadFromProject: problem value:', dataWithProblem?.problem?.substring(0, 50) + '...');
+console.log('loadFromProject: Loaded step data for project', projectId, ':', Object.keys(dataWithProblem).length, 'keys');
+      logger.debug('loadFromProject: Loaded step data keys:', Object.keys(dataWithProblem).length);
+      logger.debug('loadFromProject: problem value:', dataWithProblem?.problem?.substring(0, 50) + '...');
     setStepData(dataWithProblem);
+    checkMissingVariables(dataWithProblem);
   };
 
   const refreshStepData = async () => {
@@ -208,27 +298,43 @@ export function createStepHook(projectId, onStepChange) {
       problem: data.problem || data.originalProblem,
       originalProblem: data.originalProblem
     };
-    console.log('refreshStepData: Fresh data:', JSON.stringify(dataWithProblem, null, 2));
+    console.log('refreshStepData: Fresh data:', Object.keys(dataWithProblem).length, 'keys');
     setStepData(dataWithProblem);
+    checkMissingVariables(dataWithProblem);
     return dataWithProblem;
   };
 
-  return {
+  const getValidationStatus = () => {
+    return validateRequiredVariables(stepData(), stepRequiredVariables[currentStepId()] || []);
+  };
+
+  const getFullDataReport = () => {
+    return getMissingVariablesReport(stepData(), stepRequiredVariables);
+  };
+
+return {
     stepIndex,
+    setStepIndex,
     uiState,
+    setUiState,
     currentResponse,
     setCurrentResponse,
     stepData,
     setStepData,
-    refreshStepData,
+    isSaving,
+    validationWarnings,
+    missingVariables,
     currentStep,
+    currentStepId,
     isFirst,
     isLast,
     isComplete,
     progress,
     stepName,
-    steps,
-    stepNames,
+    initializeData,
+    checkMissingVariables,
+    getValidationStatus,
+    getFullDataReport,
     resetStep,
     resetProject,
     setInstructions,
@@ -237,42 +343,50 @@ export function createStepHook(projectId, onStepChange) {
     goToStep,
     loadFromProject,
     persist,
-    isSaving
+    refreshStepData
   };
 }
 
 function buildPrompt(step, context, instructions) {
   if (!step) return '';
-  
-  const mergedContext = { 
-    ...context, 
+
+  const mergedContext = {
+    ...context,
     ...instructions,
     problem: instructions?.problem || context?.problem || context?.originalProblem || ''
   };
-  
+
+  // Check for missing variables with enhanced logging
   if (step.variables && step.variables.length > 0) {
     const missingVars = step.variables.filter(v => {
-      const value = mergedContext[v];
+      const value = getMappedValue(mergedContext, v);
       return value === undefined || value === null || value === '';
     });
-    
+
     if (missingVars.length > 0) {
       logger.warn('buildPrompt: Missing required variables for step', step.id, ':', missingVars);
       console.warn('buildPrompt: Missing variables for step', step.id, ':', missingVars);
       console.warn('buildPrompt: Available context keys:', Object.keys(mergedContext));
       console.warn('buildPrompt: context.problem:', mergedContext.problem?.substring(0, 50) + '...');
+
+      // Log what fallback values will be used
+      const fallbacks = missingVars.map(v => {
+        const fallback = getMappedValue(mergedContext, v);
+        return `${v}: ${fallback ? 'will use fallback' : 'no fallback'}`;
+      });
+      console.log('buildPrompt: Fallback status:', fallbacks.join(', '));
     }
   }
-  
+
   const problemStatement = mergedContext.problem || mergedContext.originalProblem || '';
   const promptContent = step.detailedPrompt || step.instructions || '';
   const baseTemplate = step.promptTemplate(promptContent, step.variables, problemStatement);
   const result = injectTemplateData(baseTemplate, mergedContext);
-  
+
   if (step.variables?.includes('problem')) {
     console.log('buildPrompt: Step', step.id, 'needs problem, context has:', mergedContext.problem?.substring(0, 50) + '...');
   }
-  
+
   return result;
 }
 
@@ -281,31 +395,31 @@ function validateExtractedData(extracted, problemStatement) {
     console.log('validateExtractedData: No problem statement to validate against');
     return extracted;
   }
-  
+
   const validated = {};
   const problemLower = problemStatement.toLowerCase();
-  
+
   const problemWords = problemLower
     .replace(/[^\w\s]/g, ' ')
     .split(/\s+/)
     .filter(word => word.length > 3);
-  
+
   console.log('validateExtractedData: Problem keywords:', problemWords.slice(0, 10));
-  
+
   for (const [key, value] of Object.entries(extracted)) {
     if (typeof value === 'string' && value.trim() !== '') {
       const valueLower = value.toLowerCase();
       const hasRelevantContent = problemWords.some(word => valueLower.includes(word));
-      
+
       const genericOffTopicPatterns = [
         'http://', 'https://', 'www.',
         '{{', '}}',
         'null', 'undefined',
       ];
-      
+
       const hasOffTopicPattern = genericOffTopicPatterns.some(pattern => valueLower.includes(pattern));
       const isLikelyPlaceholder = value.length < 10 && !hasRelevantContent;
-      
+
       if (!hasRelevantContent && !isLikelyPlaceholder) {
         console.warn(`validateExtractedData: Key "${key}" may be off-topic:`, value.substring(0, 80));
         console.warn(`validateExtractedData: Problem keywords found:`, problemWords.slice(0, 5));
@@ -316,10 +430,10 @@ function validateExtractedData(extracted, problemStatement) {
       }
     }
   }
-  
+
   const inputKeys = Object.keys(extracted);
   const outputKeys = Object.keys(validated).filter(k => !k.endsWith('_needsReview'));
   console.log(`validateExtractedData: Input: ${inputKeys.length} keys, Output: ${outputKeys.length} keys`);
-  
+
   return validated;
 }

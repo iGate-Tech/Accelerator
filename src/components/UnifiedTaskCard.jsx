@@ -1,7 +1,7 @@
 import { Show, For, createEffect, createSignal, createMemo } from "solid-js";
 import { marked } from "marked";
 import { renderFilledTemplate } from "../lib/ui/llm-template";
-import { updateTask } from "../lib/database";
+import { updateTask, deleteTask } from "../lib/database";
 import { logger } from "../lib/core";
 import { toastManager } from "../lib/ui/feedback";
 import { stepNames } from "../lib/business/steps";
@@ -87,16 +87,18 @@ const UnifiedTaskCard = (props) => {
           onClick={async (e) => {
             e.stopPropagation();
             try {
-              await updateTask(taskId, { llm_response: '', content: '' });
+              await deleteTask(taskId);
               await props.refreshTasks();
-              setIsExpanded(false);
-              toastManager.success('Task reset successfully');
+              if (props.onDelete) {
+                props.onDelete(taskId);
+              }
+              toastManager.success('Step deleted successfully');
             } catch (error) {
-              logger.error('Error resetting task:', error);
-              toastManager.error('Failed to reset task: ' + error.message);
+              logger.error('Error deleting task:', error);
+              toastManager.error('Failed to delete step: ' + error.message);
             }
           }}
-          title="Reset this step"
+          title="Delete this step"
         >
           <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="flex-shrink-0">
             <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path>

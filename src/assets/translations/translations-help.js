@@ -25,7 +25,7 @@ export const helpTranslations = {
     createFirstProject: 'Create Your First Task',
     createProjectDescGettingStarted: 'Go to the home page and describe your startup idea. Be specific about the problem you\'re solving and your target market.',
     followProcess: 'Follow the Accelerator Process',
-    followProcessDesc: 'The AI will guide you through 51 structured steps covering problem validation, market analysis, business modeling, and funding strategy.',
+    followProcessDesc: 'The AI will guide you through 59 structured steps covering problem validation, market analysis, business modeling, and funding strategy.',
     monitorProgress: 'Monitor Progress',
     monitorProgressDesc: 'Use the Dashboard to track your overall progress, view completed projects, and monitor resource usage.',
     organizePortfolio: 'Organize Your Portfolio',
@@ -35,7 +35,7 @@ export const helpTranslations = {
 
     // Advanced Guides
     effectiveDescriptions: 'Writing Effective Startup Descriptions',
-    understandingProcess: 'Understanding the 51-Step Process',
+    understandingProcess: 'Understanding the 59-Step Process',
     resourceManagement: 'Resource Management Best Practices',
     portfolioStrategies: 'Portfolio Organization Strategies',
 
@@ -43,7 +43,7 @@ export const helpTranslations = {
     aiPoweredAnalysis: 'AI-Powered Analysis',
     aiAnalysisDesc: 'Leverage advanced AI to analyze your startup idea from multiple angles, providing comprehensive insights and recommendations.',
     structuredMethodology: 'Structured Methodology',
-    structuredDesc: 'Follow a proven 51-step framework that covers all aspects of startup development, from ideation to funding.',
+    structuredDesc: 'Follow a proven 59-step framework that covers all aspects of startup development, from ideation to funding.',
     progressTracking: 'Progress Tracking',
     progressDesc: 'Monitor your advancement through detailed progress indicators, completion percentages, and resource usage metrics.',
     portfolioOrganization: 'Portfolio Organization',
@@ -67,18 +67,18 @@ export const helpTranslations = {
     privacy: 'Privacy',
 
     whatIsAccelerator: "What is the Startup Accelerator?",
-    acceleratorDesc: "The Startup Accelerator is an AI-powered tool that guides entrepreneurs through a comprehensive 60-step process to validate and develop their startup ideas. It covers everything from problem analysis to funding strategy.",
+    acceleratorDesc: "The Startup Accelerator is an AI-powered tool that guides entrepreneurs through a comprehensive 59-step process to validate and develop their startup ideas. It covers everything from problem analysis to funding strategy.",
     createProject: "How do I create a new project?",
     createProjectDescHowTo: "Navigate to the home page and enter your startup idea in the text area. Click 'Start' to begin the accelerator process. Your project will be automatically saved and appear in your project list.",
     projectStatuses: "What are the different project statuses?",
-    projectStatusesDesc: "Projects can be in several states: Idle (not started), Processing (actively being worked on), Completed (all 60 steps finished), or Paused (temporarily stopped).",
+    projectStatusesDesc: "Projects can be in several states: Idle (not started), Processing (actively being worked on), Completed (all 59 steps finished), or Paused (temporarily stopped).",
     portfolioFeature: "How does the portfolio feature work?",
     portfolioFeatureDesc: "The Portfolio page allows you to organize your projects into custom groups. You can drag and drop projects between groups, create new groups, and manage your project organization visually.",
 
     // Video Tutorials
     gettingStarted5Min: 'Getting Started in 5 Minutes',
     gettingStartedDesc: 'Quick overview of creating your first project',
-    understanding51Step: 'Understanding the 51-Step Process',
+    understanding51Step: 'Understanding the 59-Step Process',
     understandingDesc: 'Deep dive into the accelerator methodology',
     portfolioMasterclass: 'Portfolio Management Masterclass',
     portfolioMasterDesc: 'Advanced organization and grouping techniques',
@@ -211,7 +211,7 @@ export const helpTranslations = {
     createFirstProject: 'إنشاء أول مشروع لك',
     createProjectDescGettingStarted: 'اذهب إلى الصفحة الرئيسية وصف فكرة عملك. كن محدداً حول المشكلة التي تحلها وسوقك المستهدف.',
     followProcess: 'اتبع عملية المسرع',
-    followProcessDesc: 'سيرشدك الذكاء الاصطناعي من خلال 51 خطوة منظمة تغطي التحقق من المشكلة وتحليل السوق ونمذجة الأعمال واستراتيجية التمويل.',
+    followProcessDesc: 'سيرشدك الذكاء الاصطناعي من خلال 59 خطوة منظمة تغطي التحقق من المشكلة وتحليل السوق ونمذجة الأعمال واستراتيجية التمويل.',
     monitorProgress: 'راقب التقدم',
     monitorProgressDesc: 'استخدم لوحة التحكم لتتبع تقدمك العام وعرض المشاريع المكتملة ومراقبة استخدام الموارد.',
     organizePortfolio: 'نظم محفظتك',
@@ -221,7 +221,7 @@ export const helpTranslations = {
 
     // Advanced Guides
     effectiveDescriptions: 'كتابة وصف فعال للشركات الناشئة',
-    understandingProcess: 'فهم عملية الـ51 خطوة',
+    understandingProcess: 'فهم عملية الـ59 خطوة',
     resourceManagement: 'أفضل الممارسات في إدارة الموارد',
     portfolioStrategies: 'استراتيجيات تنظيم المحفظة',
 
@@ -229,7 +229,7 @@ export const helpTranslations = {
     aiPoweredAnalysis: 'تحليل مدعوم بالذكاء الاصطناعي',
     aiAnalysisDesc: 'استفد من الذكاء الاصطناعي المتقدم لتحليل فكرة عملك من زوايا متعددة، مع تقديم رؤى شاملة وتوصيات.',
     structuredMethodology: 'منهجية منظمة',
-    structuredDesc: 'اتبع إطار عمل مثبت من 51 خطوة يغطي جميع جوانب تطوير الشركات الناشئة، من التفكير إلى التمويل.',
+    structuredDesc: 'اتبع إطار عمل مثبت من 59 خطوة يغطي جميع جوانب تطوير الشركات الناشئة، من التفكير إلى التمويل.',
     progressTracking: 'تتبع التقدم',
     progressDesc: 'راقب تقدمك من خلال مؤشرات تقدم مفصلة ونسب الإنجاز ومقاييس استخدام الموارد.',
     portfolioOrganization: 'تنظيم المحفظة',
@@ -253,18 +253,18 @@ export const helpTranslations = {
     privacy: 'الخصوصية',
 
     whatIsAccelerator: "ما هو مسرع بدء الأعمال؟",
-    acceleratorDesc: "مسرع بدء الأعمال هو أداة مدعومة بالذكاء الاصطناعي ترشد رواد الأعمال من خلال عملية شاملة من 51 خطوة للتحقق من تطوير أفكار الشركات الناشئة. يغطي كل شيء من تحليل المشكلة إلى استراتيجية التمويل.",
+    acceleratorDesc: "مسرع بدء الأعمال هو أداة مدعومة بالذكاء الاصطناعي ترشد رواد الأعمال من خلال عملية شاملة من 59 خطوة للتحقق من تطوير أفكار الشركات الناشئة. يغطي كل شيء من تحليل المشكلة إلى استراتيجية التمويل.",
     createProject: "كيف أنشئ مشروعاً جديداً؟",
     createProjectDescHowTo: "انتقل إلى الصفحة الرئيسية وأدخل فكرة عملك في منطقة النص. انقر 'ابدأ' لبدء عملية المسرع. سيتم حفظ مشروعك تلقائياً وسيظهر في قائمة مشاريعك.",
     projectStatuses: "ما هي حالات المشاريع المختلفة؟",
-    projectStatusesDesc: "يمكن أن تكون المشاريع في عدة حالات: خامل (لم يبدأ)، قيد المعالجة (يتم العمل عليه بنشاط)، مكتمل (انتهت جميع الخطوات الـ51)، أو متوقف مؤقتاً (متوقف مؤقتاً).",
+    projectStatusesDesc: "يمكن أن تكون المشاريع في عدة حالات: خامل (لم يبدأ)، قيد المعالجة (يتم العمل عليه بنشاط)، مكتمل (انتهت جميع الخطوات الـ59)، أو متوقف مؤقتاً (متوقف مؤقتاً).",
     portfolioFeature: "كيف تعمل ميزة المحفظة؟",
     portfolioFeatureDesc: "تسمح صفحة المحفظة بتنظيم مشاريعك في مجموعات مخصصة. يمكنك سحب وإفلات المشاريع بين المجموعات وإنشاء مجموعات جديدة وإدارة تنظيم مشاريعك بشكل مرئي.",
 
     // Video Tutorials
     gettingStarted5Min: 'البدء في 5 دقائق',
     gettingStartedDesc: 'نظرة سريعة على إنشاء مشروعك الأول',
-    understanding51Step: 'فهم عملية الـ51 خطوة',
+    understanding51Step: 'فهم عملية الـ59 خطوة',
     understandingDesc: 'غوص عميق في منهجية المسرع',
     portfolioMasterclass: 'ورشة عمل إدارة المحفظة',
     portfolioMasterDesc: 'تقنيات التنظيم والتجميع المتقدمة',

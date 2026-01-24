@@ -77,7 +77,7 @@ export const commonTranslations = {
     initializationComplete: 'Initialization complete. Starting step 1...',
     improvePrompt: 'Improve this startup idea for better clarity, specificity, and market potential. Start with the improved idea name followed by \': \' and then provide a concise description in simple English, in only 3 lines. Do not generate in markdown:',
     suggestPrompt: 'Suggest a compelling startup idea in the legal tech space. Start with the idea name followed by \': \' and then provide a brief description, target market, and unique value proposition in simple English, in only 3 lines. Do not generate in markdown.',
-    uiMessage: 'Ready to start the 48-step accelerator process',
+    uiMessage: 'Ready to start the 59-step accelerator process',
 
     // Agent interface
     agentPaused: 'Agent is paused. Click Resume to continue.',

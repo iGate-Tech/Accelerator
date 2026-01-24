@@ -1,4 +1,4 @@
-import { toastManager } from '../ui/feedback';
+// import { toastManager } from '../ui/feedback';
 
 import { PGlite } from '@electric-sql/pglite';
 import { v4 as uuidv4 } from 'uuid';
@@ -862,7 +862,7 @@ export async function _createProject({ project, userId }) {
          isNaN(totalCredits) ? 100 : totalCredits,
          project.ui_status || 'idle'
        ];
-      console.log('Insert values:', values);
+      console.log('Insert values count:', values.length);
         const res = await _query(`
           INSERT INTO projects (id, name, description, user_id, created_at, last_modified, synced_at, sync_status, deleted_at, version, public, current_model, total_steps, completed_steps, consumed_credits, total_credits, ui_status)
           VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17)

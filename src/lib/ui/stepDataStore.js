@@ -72,7 +72,7 @@ async function loadFromStorage(projectId) {
         data[row.key] = row.value;
       }
     }
-    console.log('loadFromStorage: Loaded', Object.keys(data).length, 'items for project', projectId, '- keys:', Object.keys(data));
+    // No console logs for normal operations to improve performance
     return data;
   } catch (e) {
     console.warn('Failed to load step data from PGLite:', e);
@@ -105,7 +105,7 @@ async function saveToStorage(data, projectId) {
         [id, projectId, key, jsonValue, now]
       );
     }
-    console.log('saveToStorage: Saved', Object.keys(data).length, 'items for project', projectId);
+    // No console logs for normal operations to improve performance
   } catch (e) {
     console.warn('Failed to save step data to PGLite:', e);
   }
@@ -132,11 +132,18 @@ async function getStore(projectId) {
     const [store, setStore] = createStore(initialData);
     stores.set(projectId, { store, setStore });
   }
-  return stores.get(projectId);
+  const storeData = stores.get(projectId);
+  // Ensure store has latest data by refreshing if needed
+  const freshData = await loadFromStorage(projectId);
+  if (Object.keys(freshData).length > Object.keys(storeData.store).length) {
+    // No console logs for normal operations to improve performance
+    storeData.setStore(freshData);
+  }
+  return storeData;
 }
 
 async function updateStepData(projectId, newData) {
-  console.log('updateStepData: Called with projectId:', projectId, 'data:', newData);
+  // No console logs for normal operations to improve performance
   const { store, setStore } = await getStore(projectId);
   
   // Preserve the original problem statement if it exists and newData doesn't have it
@@ -154,12 +161,16 @@ async function updateStepData(projectId, newData) {
     dataWithProblem.originalProblem = store.originalProblem;
   }
   
-  setStore(prev => {
-    const merged = deepMerge(prev, dataWithProblem);
-    console.log('updateStepData: Merged result:', merged);
-    saveToStorage(merged, projectId);
-    return merged;
-  });
+  const merged = deepMerge(store, dataWithProblem);
+  // No console logs for normal operations to improve performance
+  
+  // Update store synchronously
+  setStore(merged);
+  
+  // Save to storage asynchronously
+  await saveToStorage(merged, projectId);
+  
+  return merged;
 }
 
 async function resetStepData(projectId) {
@@ -170,7 +181,7 @@ async function resetStepData(projectId) {
 
 async function getStepData(projectId) {
   const { store } = await getStore(projectId);
-  console.log('getStepData: Returning store for project', projectId, ':', store);
+  // No console logs for normal operations to improve performance
   return store;
 }
 

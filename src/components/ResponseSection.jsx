@@ -88,6 +88,7 @@ const ResponseSection = (props) => {
                           streamingTaskId={props.streamingTaskId}
                           setStreamingTaskId={props.setStreamingTaskId}
                           isLastTask={task.id === lastTaskId()}
+                          onDelete={props.onDelete}
                         />
                       )}
                     </For>

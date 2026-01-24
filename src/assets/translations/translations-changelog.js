@@ -29,7 +29,7 @@ export const changelogTranslations = {
     v150Fix1: 'Fixed issue with project state persistence',
     // Version 1.0.0 changes
     v100Feature1: 'Initial release of Startup Accelerator',
-    v100Feature2: '51-step structured business plan methodology',
+    v100Feature2: '59-step structured business plan methodology',
     v100Feature3: 'AI-powered analysis and recommendations',
     v100Feature4: 'Local data storage with IndexedDB',
   },

@@ -246,7 +246,7 @@ const UnifiedTaskCard = (props) => {
   return (
     <div
       ref={cardRef}
-      class={`card bg-base-100 shadow-sm border border-base-300 transition-all duration-200 hover:shadow-md ${
+      class={`card bg-base-100 border border-base-300 transition-all duration-200  ${
         isSelected() ? 'ring-2 ring-info' : ''
       } mb-4 overflow-hidden`}
       data-task-id={taskId}
@@ -278,7 +278,7 @@ const UnifiedTaskCard = (props) => {
           </button>
           <div class="flex flex-col">
             <span class="font-semibold text-sm truncate flex items-center gap-1.5">
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-primary flex-shrink-0">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-base-content flex-shrink-0">
                 <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"></path>
                 <polyline points="14 2 14 8 20 8"></polyline>
                 <line x1="16" x2="8" y1="13" y2="13"></line>

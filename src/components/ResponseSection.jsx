@@ -1,19 +1,19 @@
-import { createSignal, Show, For } from "solid-js";
+import { createSignal, Show, For, createEffect, onCleanup } from "solid-js";
 import UnifiedTaskCard from "./UnifiedTaskCard";
 
 const ResponseSection = (props) => {
   const groupedTasks = () => {
     const tasks = props.tasksList?.() || [];
     const groups = {};
-    
-    tasks.forEach(task => {
+
+    tasks.forEach((task) => {
       const modelName = task.model || 'General';
       if (!groups[modelName]) {
         groups[modelName] = [];
       }
       groups[modelName].push(task);
     });
-    
+
     return groups;
   };
 
@@ -49,6 +49,44 @@ const ResponseSection = (props) => {
     return tasks.length > 0 ? tasks[tasks.length - 1].id : null;
   };
 
+  const [collapsedGroups, setCollapsedGroups] = createSignal({});
+
+  const isGroupCollapsed = (modelName) => !!collapsedGroups()[modelName];
+
+  const toggleGroup = (modelName) => {
+    setCollapsedGroups((prev) => ({
+      ...prev,
+      [modelName]: !prev[modelName]
+    }));
+  };
+
+  const modelIconMap = {
+    'System': 'settings',
+    'Idea Model': 'lightbulb',
+    'Business Model': 'briefcase',
+    'Technical Model': 'cpu',
+    'Marketing Model': 'megaphone',
+    'Financial Model': 'coins',
+    'Funding Model': 'piggy-bank',
+    'Team Model': 'users',
+    'Legal Model': 'scale',
+    'Reports': 'file-text',
+    'General': 'layers'
+  };
+
+  const getModelIcon = (modelName) => modelIconMap[modelName] || 'layers';
+
+  createEffect(() => {
+    groupedTasks();
+    collapsedGroups();
+    const rafId = requestAnimationFrame(() => {
+      if (window?.lucide) {
+        window.lucide.createIcons();
+      }
+    });
+    onCleanup(() => cancelAnimationFrame(rafId));
+  });
+
   return (
     <div class="flex-1 max-w-full max-w-3xl w-full mx-auto">
       {(props.startPressed?.() || (props.tasksList && props.tasksList().length > 0)) ? (
@@ -61,42 +99,49 @@ const ResponseSection = (props) => {
           <Show when={props.tasksList && props.tasksList().length > 0}>
             <For each={sortedModelNames()}>
               {(modelName) => {
-                const tasksForModel = groupedTasks()[modelName] || [];
-                const taskCount = tasksForModel.length;
-                const taskCountLabel = `${taskCount} ${taskCount === 1 ? 'step' : 'steps'}`;
+                const tasksForModel = () => groupedTasks()[modelName] || [];
+                const taskCount = () => tasksForModel().length;
+                const taskCountLabel = () => `${taskCount()} ${taskCount() === 1 ? 'step' : 'steps'}`;
+                const isCollapsed = () => isGroupCollapsed(modelName);
+                const regionId = `model-group-${modelName.replace(/\s+/g, '-').toLowerCase()}`;
 
                 return (
                   <section class="mb-8">
                     <div class="card bg-base-100 border border-base-300 shadow-sm overflow-hidden">
-                      <div class="card-header bg-base-200/60 px-4 py-3 border-b border-base-300 flex items-center justify-between gap-2">
-                        <div class="flex items-center gap-3">
-                          <span class="inline-flex h-9 w-9 items-center justify-center rounded-full bg-primary/10 text-primary">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                              <path d="M4 19.5A2.5 2.5 0 0 0 6.5 22H20"></path>
-                              <path d="M20 6H10"></path>
-                              <path d="M6.5 2A2.5 2.5 0 0 0 4 4.5V19.5"></path>
-                              <path d="m10 2-1.42 1.42"></path>
-                              <path d="M18 2l-1.42 1.42"></path>
-                              <path d="m10 6-1.42-1.42"></path>
-                              <path d="M18 6l-1.42-1.42"></path>
-                            </svg>
+                      <button
+                        type="button"
+                        class={`card-header bg-base-200/60 px-4 py-3 border-b border-base-300 w-full flex items-center justify-between gap-2 transition-colors text-left ${isCollapsed() ? '' : 'hover:bg-base-200/80'}`}
+                        onClick={(event) => {
+                          event.preventDefault();
+                          toggleGroup(modelName);
+                        }}
+                        aria-expanded={!isCollapsed()}
+                        aria-controls={regionId}
+                      >
+                        <div class="flex items-center gap-3 min-w-0">
+                          <span class="inline-flex h-9 w-9 items-center justify-center rounded-full  text-base-content">
+                            <i data-lucide={getModelIcon(modelName)} class="w-4 h-4"></i>
                           </span>
-                          <div class="flex flex-col">
-                            <span class="text-sm font-semibold text-base-content">
+                          <div class="flex flex-col min-w-0">
+                            <span class="text-lg font-semibold text-base-content truncate">
                               {modelName}
                             </span>
-                            <span class="text-xs text-base-content/60 uppercase tracking-wide">
-                              Model Group
-                            </span>
+                       
                           </div>
                         </div>
-                        <span class="badge badge-outline badge-sm">
-                          {taskCountLabel}
-                        </span>
-                      </div>
+                        <div class="flex items-center gap-2 text-base-content/70">
+                          <span class="badge badge-outline badge-sm">
+                            {taskCountLabel()}
+                          </span>
+                          <i data-lucide={isCollapsed() ? 'chevron-right' : 'chevron-down'} class="w-4 h-4"></i>
+                        </div>
+                      </button>
 
-                      <div class="card-body p-4 space-y-4">
-                        <For each={tasksForModel}>
+                      <div
+                        id={regionId}
+                        class={`card-body p-4 space-y-4 ${isCollapsed() ? 'hidden' : 'block'}`}
+                      >
+                        <For each={tasksForModel()}>
                           {(task) => (
                             <UnifiedTaskCard
                               task={task}
@@ -122,17 +167,12 @@ const ResponseSection = (props) => {
 
                       <div class="card-footer bg-base-200/40 px-4 py-2 border-t border-base-300 text-xs text-base-content/70 flex items-center justify-between">
                         <span class="flex items-center gap-1">
-                          <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M3 5h12"></path>
-                            <path d="M9 3v2"></path>
-                            <path d="M7 11h2"></path>
-                            <path d="M17 9l3 3-3 3"></path>
-                            <path d="M3 19h12"></path>
-                          </svg>
-                          {taskCount > 0 ? `${modelName} tasks are listed below.` : 'No tasks generated yet.'}
+                          <i data-lucide="info" class="w-3 h-3"></i>
+                          {taskCount() > 0 ? `${modelName} tasks are listed above.` : 'No tasks generated yet.'}
                         </span>
-                        <span class="text-base-content/50">
-                          {taskCountLabel}
+                        <span class="flex items-center gap-1 text-base-content/50">
+                          <i data-lucide="layers" class="w-3 h-3"></i>
+                          {taskCountLabel()}
                         </span>
                       </div>
                     </div>

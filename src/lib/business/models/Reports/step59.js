@@ -234,7 +234,6 @@ Team verification details.
 ---
 Format with professional H1/H2/H3 headings, tables for data comparison, clear calculations, and comprehensive analysis. The valuation report should be thorough (10-15 pages equivalent) and suitable for investment committee review.
 
-Embed the complete valuation report as {{valuationReport: "full markdown content here"}}.
 `,
   validate: (context) => {
     const issues = [];

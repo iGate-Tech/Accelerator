@@ -172,7 +172,7 @@ const AgentInterface = (props) => {
             class={
                 `${
                     props.agentBoxClass()
-                } w-full max-w-md sm:max-w-lg md:max-w-xl lg:max-w-2xl mx-auto`
+                } w-full max-w-md sm:max-w-lg md:max-w-xl lg:max-w-3xl mx-auto`
             }
             style={
                 (props.startPressed && props.startPressed()) || (props.tasksList && props.tasksList().length > 0) || (props.currentProjectId && props.currentProjectId()) ? "position: fixed !important; bottom: 10px !important; z-index: 50 !important;" : ""
@@ -208,7 +208,7 @@ const AgentInterface = (props) => {
                     </Show>
 
                     <div class="">
-                        <div class="card overflow-visible">
+                        <div class="card overflow-visible shadow">
                             <div class="card-body relative p-0 !gap-0 overflow-visible">
 
 

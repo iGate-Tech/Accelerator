@@ -7,7 +7,8 @@ const ResponseSection = (props) => {
     const groups = {};
 
     tasks.forEach((task) => {
-      const modelName = task.model || 'General';
+      let modelName = task.model || 'General';
+      if (modelName === 'System') modelName = 'Welcome to iGate';
       if (!groups[modelName]) {
         groups[modelName] = [];
       }
@@ -18,7 +19,7 @@ const ResponseSection = (props) => {
   };
 
   const modelOrder = [
-    'System',
+     'Welcome to iGate',
     'Idea Model',
     'Business Model',
     'Technical Model',
@@ -49,19 +50,31 @@ const ResponseSection = (props) => {
     return tasks.length > 0 ? tasks[tasks.length - 1].id : null;
   };
 
-  const [collapsedGroups, setCollapsedGroups] = createSignal({});
+  const [collapsedGroups, setCollapsedGroups] = createSignal(
+    modelOrder.reduce((acc, modelName) => ({ ...acc, [modelName]: true }), {})
+  );
 
+  const [expandedTaskId, setExpandedTaskId] = createSignal(null);
   const isGroupCollapsed = (modelName) => !!collapsedGroups()[modelName];
 
   const toggleGroup = (modelName) => {
-    setCollapsedGroups((prev) => ({
-      ...prev,
-      [modelName]: !prev[modelName]
-    }));
+    setCollapsedGroups((prev) => {
+      const isCurrentlyCollapsed = prev[modelName];
+      const newState = {};
+      // Collapse all groups first
+      sortedModelNames().forEach(name => {
+        newState[name] = true;
+      });
+      // Then toggle the clicked group
+      if (isCurrentlyCollapsed) {
+        newState[modelName] = false; // Open if it was collapsed
+      }
+      return newState;
+    });
   };
 
   const modelIconMap = {
-    'System': 'settings',
+    'Welcome to iGate': 'settings',
     'Idea Model': 'lightbulb',
     'Business Model': 'briefcase',
     'Technical Model': 'cpu',
@@ -84,13 +97,16 @@ const ResponseSection = (props) => {
         window.lucide.createIcons();
       }
     });
-    onCleanup(() => cancelAnimationFrame(rafId));
+    onCleanup(() => {
+      cancelAnimationFrame(rafId);
+      setExpandedTaskId(null);
+    });
   });
 
   return (
     <div class="flex-1 max-w-full max-w-3xl w-full mx-auto">
       {(props.startPressed?.() || (props.tasksList && props.tasksList().length > 0)) ? (
-        <div id="contentDiv" class="pb-40 pt-10 px-4 max-w-full lg:max-w-6xl mx-auto min-h-[200px]">
+        <div id="contentDiv" class="pb-40 pt-10 max-w-full lg:max-w-6xl mx-auto min-h-[200px]">
           {props.projectName && (
             <div class="mb-6">
               <h1 class="text-2xl font-bold text-base-content">{props.projectName}</h1>
@@ -106,11 +122,15 @@ const ResponseSection = (props) => {
                 const regionId = `model-group-${modelName.replace(/\s+/g, '-').toLowerCase()}`;
 
                 return (
-                  <section class="mb-8">
-                    <div class="card bg-base-100 border border-base-300 shadow-sm overflow-hidden">
+                  <section class="mb-8"
+                          
+                  >
+                    <div class="card bg-base-100 border border-base-300 shadow-sm overflow-hidden"
+                  
+                    >
                       <button
                         type="button"
-                        class={`card-header bg-base-200/60 px-4 py-3 border-b border-base-300 w-full flex items-center justify-between gap-2 transition-colors text-left ${isCollapsed() ? '' : 'hover:bg-base-200/80'}`}
+                        class={`card-header  px-4 py-3 border-b border-base-300 w-full flex items-center justify-between gap-2 transition-colors text-left ${isCollapsed() ? '' : 'hover:bg-base-200/80'}`}
                         onClick={(event) => {
                           event.preventDefault();
                           toggleGroup(modelName);
@@ -124,15 +144,12 @@ const ResponseSection = (props) => {
                           </span>
                           <div class="flex flex-col min-w-0">
                             <span class="text-lg font-semibold text-base-content truncate">
-                              {modelName}
+                              {modelName} 
                             </span>
-                       
                           </div>
                         </div>
                         <div class="flex items-center gap-2 text-base-content/70">
-                          <span class="badge badge-outline badge-sm">
-                            {taskCountLabel()}
-                          </span>
+                      
                           <i data-lucide={isCollapsed() ? 'chevron-right' : 'chevron-down'} class="w-4 h-4"></i>
                         </div>
                       </button>
@@ -160,17 +177,25 @@ const ResponseSection = (props) => {
                               setStreamingTaskId={props.setStreamingTaskId}
                               isLastTask={task.id === lastTaskId()}
                               onDelete={props.onDelete}
+                              isExpanded={task.id === expandedTaskId()}
+                              onToggle={() => setExpandedTaskId(task.id === expandedTaskId() ? null : task.id)}
                             />
                           )}
                         </For>
                       </div>
 
-                      <div class="card-footer bg-base-200/40 px-4 py-2 border-t border-base-300 text-xs text-base-content/70 flex items-center justify-between">
-                        <span class="flex items-center gap-1">
+                      <div class="card-footer bg-base-300 text-base-content px-4 py-2 border-t border-base-300 text-xs flex items-center justify-between" 
+                          classList={{
+                              "bg-green-400 text-white": modelName === "Business Plan Report",
+                              "bg-blue-400 text-white": modelName === "Pitch Deck Report",
+                              "bg-yellow-400 text-white": modelName === "Valuation Report",
+                            }}
+                      >
+                        <span class="flex items-center  gap-1">
                           <i data-lucide="info" class="w-3 h-3"></i>
                           {taskCount() > 0 ? `${modelName} tasks are listed above.` : 'No tasks generated yet.'}
                         </span>
-                        <span class="flex items-center gap-1 text-base-content/50">
+                        <span class="flex items-center gap-1 ">
                           <i data-lucide="layers" class="w-3 h-3"></i>
                           {taskCountLabel()}
                         </span>

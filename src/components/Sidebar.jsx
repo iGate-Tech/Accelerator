@@ -83,7 +83,7 @@ const Sidebar = () => {
     });
     return (
         <aside class={
-                `sidebar h-screen bg-base-100 border-e border-base-300 flex flex-col z-[55] transition-all duration-300 ease-in-out overflow-hidden ${
+                `sidebar h-screen shadow-md bg-base-100 border-e border-base-300 flex flex-col z-[55] transition-all duration-300 ease-in-out overflow-hidden ${
                     currentLang() === 'ar' ? 'rtl' : ''
                 }`
             }

@@ -1,4 +1,5 @@
-import { Show, For, createEffect, createSignal, createMemo } from "solid-js";
+
+import { createMemo, createEffect, Show } from "solid-js";
 import { marked } from "marked";
 import { renderFilledTemplate } from "../lib/ui/llm-template";
 import { updateTask, deleteTask } from "../lib/database";
@@ -15,8 +16,7 @@ const UnifiedTaskCard = (props) => {
 
   const isEditing = () => props.editingTaskId && props.editingTaskId() === taskId;
   const isSelected = () => props.selectedTaskId && props.selectedTaskId() === taskId;
-  const [isExpanded, setIsExpanded] = createSignal(false);
-  let contentRef;
+  const isExpanded = () => props.isExpanded;  let contentRef;
   let cardRef;
 
   const isStreaming = () => props.isStreaming ?? (content() && content().trim().length > 0 && !llmResponse());
@@ -35,11 +35,7 @@ const UnifiedTaskCard = (props) => {
   });
 
   // Auto-expand if this is the last task
-  createEffect(() => {
-    if (isLastTask() && !isExpanded()) {
-      setIsExpanded(true);
-    }
-  });
+
 
   // Auto-scroll to this card when streaming content updates
   createEffect(() => {
@@ -55,19 +51,13 @@ const UnifiedTaskCard = (props) => {
 
   // Only auto-expand if this is the currently streaming task (for non-last tasks)
   // All other tasks stay collapsed by default
-  createEffect(() => {
-    const currentContent = content();
-    const streamingTaskId = props.streamingTaskId?.();
-    const shouldAutoExpand = streamingTaskId === taskId;
-    
-    if (shouldAutoExpand && !isExpanded() && currentContent && currentContent.trim().length > 0) {
-      setIsExpanded(true);
-    }
-  });
+
 
   const toggleCollapse = (e) => {
     e.stopPropagation();
-    setIsExpanded(!isExpanded());
+    if (props.onToggle) {
+      props.onToggle();
+    }
   };
 
   const getStepName = (task) =>
@@ -173,7 +163,6 @@ const UnifiedTaskCard = (props) => {
                 props.setStreamingTaskId(null);
               }
               
-              setIsExpanded(true);
               toastManager.success('Task regenerated successfully');
             } catch (error) {
               if (props.setStreamingTaskId) {
@@ -303,7 +292,7 @@ const UnifiedTaskCard = (props) => {
                <Show when={props.streamingTaskId?.() === taskId && content() && content().trim().length > 0 && !isExpanded()}>
                  <span class="badge badge-primary badge-sm animate-pulse">Streaming</span>
                </Show>
-             <Show when={showActionButtons()}>
+             <Show when={isExpanded()}>
                <ActionButtons />
              </Show>
             </div>

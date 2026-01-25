@@ -200,7 +200,6 @@ Key performance indicators.
 ---
 Format with professional H1/H2/H3 headings, tables for financial data, bullet points for readability, and comprehensive detail. The business plan should be comprehensive (15-25 pages equivalent) and investor-ready.
 
-Embed the complete business plan as {{businessPlan: "full markdown content here"}}.
 `,
   validate: (context) => ({ valid: true, issues: [] }),
 };

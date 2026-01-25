@@ -208,7 +208,7 @@ const AgentInterface = (props) => {
                     </Show>
 
                     <div class="">
-                        <div class="card overflow-visible shadow">
+                        <div class="card overflow-visible shadow-lg border border-base-300">
                             <div class="card-body relative p-0 !gap-0 overflow-visible">
 
 

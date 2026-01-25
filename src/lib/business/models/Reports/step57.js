@@ -312,6 +312,8 @@ Show next 12-18 months milestones and future funding path.
 ---
 Format with clear H2/H3 headings, professional bullet points, tables where appropriate, and a compelling narrative flow. The deck should be 10-15 slides worth of content condensed into a comprehensive document.
 
+Return plain markdown without wrapping the entire response in code fences or triple backticks.
+
 `,
   validate: (context) => ({ valid: true, issues: [] }),
 };

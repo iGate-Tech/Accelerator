@@ -99,7 +99,7 @@ ${detailedPrompt}
 
 Ensure the output is professional, comprehensive, and investor-ready. Embed the full content as {{${outputKeys[0]}: "complete markdown content"}}.
 
-OUTPUT FORMAT: Generate in markdown format with proper sections, tables, and formatting.
+OUTPUT FORMAT: Generate in markdown format with proper sections, tables, and formatting. Do not wrap the entire response in triple backticks or any code fence; return plain markdown content.
 `;
 };
 
@@ -121,6 +121,6 @@ ${detailedPrompt}
 
 Ensure the output is professional, comprehensive, and investor-ready. Embed the full content as {{${outputKeys[0]}: "complete markdown content"}}.
 
-OUTPUT FORMAT: Generate in markdown format with proper sections, tables, and formatting.
+OUTPUT FORMAT: Generate in markdown format with proper sections, tables, and formatting. Do not wrap the entire response in triple backticks or any code fence; return plain markdown content.
 `;
 };

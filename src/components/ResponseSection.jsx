@@ -61,13 +61,11 @@ const ResponseSection = (props) => {
     setCollapsedGroups((prev) => {
       const isCurrentlyCollapsed = prev[modelName];
       const newState = {};
-      // Collapse all groups first
-      sortedModelNames().forEach(name => {
+      sortedModelNames().forEach((name) => {
         newState[name] = true;
       });
-      // Then toggle the clicked group
       if (isCurrentlyCollapsed) {
-        newState[modelName] = false; // Open if it was collapsed
+        newState[modelName] = false;
       }
       return newState;
     });
@@ -126,7 +124,7 @@ const ResponseSection = (props) => {
                           
                   >
                     <div class="card bg-base-100 border border-base-300 shadow-sm overflow-hidden"
-                  
+                    
                     >
                       <button
                         type="button"
@@ -168,9 +166,10 @@ const ResponseSection = (props) => {
                               setEditingTaskId={props.setEditingTaskId}
                               setEditContent={props.setEditContent}
                               selectedTaskId={props.selectedTaskId}
-                              callLLMForStep={props.callLLMForStep}
-                              setSelectedTaskId={props.setSelectedTaskId}
-                              handleConfirm={props.handleConfirm}
+                             callLLMForStep={props.callLLMForStep}
+                             setTasksList={props.setTasksList}
+                             setSelectedTaskId={props.setSelectedTaskId}
+                             handleConfirm={props.handleConfirm}
                               updateTask={props.updateTask}
                               refreshTasks={props.refreshTasks}
                               streamingTaskId={props.streamingTaskId}
@@ -184,12 +183,29 @@ const ResponseSection = (props) => {
                         </For>
                       </div>
 
-                      <div class="card-footer bg-base-300 text-base-content px-4 py-2 border-t border-base-300 text-xs flex items-center justify-between" 
-                          classList={{
-                              "bg-green-400 text-white": modelName === "Business Plan Report",
-                              "bg-blue-400 text-white": modelName === "Pitch Deck Report",
-                              "bg-yellow-400 text-white": modelName === "Valuation Report",
-                            }}
+                      <div   class="card-footer  text-base-content px-4 py-2 text-xs flex items-center justify-between"
+  style={{
+    "background-color":
+      modelName === "Business Plan Report"
+        ? "#6cd14d"
+        : modelName === "Pitch Deck Report"
+        ? "#60a5fa"
+        : modelName === "Valuation Report"
+        ? "#facc15"
+        : "#e6ebf4",
+
+    "border-top": "1px solid",
+    "border-color":
+      modelName === "Business Plan Report"
+        ? "#5bbf45"
+        : modelName === "Pitch Deck Report"
+        ? "#4f8fd9"
+        : modelName === "Valuation Report"
+        ? "#e0b814"
+        : "#e6ebf4",
+
+    color: modelName?.includes("Report") ? "white" : "inherit",
+  }}
                       >
                         <span class="flex items-center  gap-1">
                           <i data-lucide="info" class="w-3 h-3"></i>

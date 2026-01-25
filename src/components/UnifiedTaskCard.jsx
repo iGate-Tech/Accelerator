@@ -6,13 +6,14 @@ import { updateTask, deleteTask } from "../lib/database";
 import { logger } from "../lib/core";
 import { toastManager } from "../lib/ui/feedback";
 import { stepNames } from "../lib/business/steps";
+import { normalizeLLMResponse } from "../lib/ui/response-normalizer";
 
 const UnifiedTaskCard = (props) => {
   const task = props.task;
   const taskId = task?.id || 'unknown';
   
-  const content = () => props.taskContent ?? task?.content ?? '';
-  const llmResponse = () => task?.llm_response ?? '';
+   const content = () => normalizeLLMResponse(props.taskContent ?? task?.content ?? '');
+   const llmResponse = () => normalizeLLMResponse(task?.llm_response ?? '');
 
   const isEditing = () => props.editingTaskId && props.editingTaskId() === taskId;
   const isSelected = () => props.selectedTaskId && props.selectedTaskId() === taskId;
@@ -82,7 +83,7 @@ const UnifiedTaskCard = (props) => {
       <div class="flex gap-1.5 flex-wrap">
         <button
           type="button"
-          class="btn btn-sm text-white rounded-full transition-all hover:scale-105 group flex items-center gap-1 p-2 hover:pr-3"
+          class="btn btn-sm text-white rounded-full transition-all hover:scale-105 group flex items-center p-2 gap-0"
           style="background-color:#9e28b5"
           onClick={async (e) => {
             e.stopPropagation();
@@ -110,7 +111,7 @@ const UnifiedTaskCard = (props) => {
         </button>
         <button
           type="button"
-          class="btn btn-sm text-white rounded-full transition-all hover:scale-105 group flex items-center gap-1 p-2 hover:pr-3"
+          class="btn btn-sm text-white rounded-full transition-all hover:scale-105 group flex items-center p-2 gap-0"
           style="background-color:#00a7e0"
           onClick={(e) => {
             e.stopPropagation();
@@ -135,7 +136,7 @@ const UnifiedTaskCard = (props) => {
         </button>
         <button
           type="button"
-          class="btn btn-sm text-white rounded-full transition-all hover:scale-105 group flex items-center gap-1 p-2 hover:pr-3"
+          class="btn btn-sm text-white rounded-full transition-all hover:scale-105 group flex items-center p-2 gap-0"
           style="background-color:#ffc600"
           onClick={async (e) => {
             e.stopPropagation();
@@ -151,17 +152,33 @@ const UnifiedTaskCard = (props) => {
                 props.setStreamingTaskId(taskId);
               }
               
-              let newResponse = '';
-              await props.callLLMForStep(taskPrompt, (chunk) => {
-                newResponse += chunk;
-              });
-              
-              await updateTask(taskId, { llm_response: newResponse, content: newResponse });
-              await props.refreshTasks();
-              
-              if (props.setStreamingTaskId) {
-                props.setStreamingTaskId(null);
-              }
+               let accumulatedResponse = '';
+               await props.callLLMForStep(taskPrompt, (chunk) => {
+                 accumulatedResponse += chunk;
+                 const normalized = normalizeLLMResponse(accumulatedResponse);
+                 if (props.setTasksList) {
+                   props.setTasksList((currentTasks) =>
+                     currentTasks.map((t) =>
+                       t.id === taskId
+                         ? {
+                             ...t,
+                             content: normalized,
+                             llm_response: normalized,
+                             last_modified: new Date().toISOString()
+                           }
+                         : t
+                     )
+                   );
+                 }
+               });
+
+               const finalResponse = normalizeLLMResponse(accumulatedResponse);
+               await updateTask(taskId, { llm_response: finalResponse, content: finalResponse, last_modified: new Date().toISOString() });
+               await props.refreshTasks();
+
+               if (props.setStreamingTaskId) {
+                 props.setStreamingTaskId(null);
+               }
               
               toastManager.success('Task regenerated successfully');
             } catch (error) {
@@ -187,7 +204,7 @@ const UnifiedTaskCard = (props) => {
         <Show when={!projectIsComplete()}>
           <button
             type="button"
-            class="btn btn-sm text-white rounded-full flex items-center gap-1 p-2 group hover:scale-105 transition-transform"
+            class="btn btn-sm text-white rounded-full flex items-center p-2 group hover:scale-105 transition-transform gap-0"
             style="background-color:#6cd14d"
             onClick={(e) => {
               e.stopPropagation();
@@ -207,7 +224,7 @@ const UnifiedTaskCard = (props) => {
         <Show when={projectIsComplete()}>
           <button
             type="button"
-            class="btn btn-sm text-white rounded-full flex items-center gap-1 p-2 opacity-50 cursor-not-allowed"
+            class="btn btn-sm text-white rounded-full flex items-center p-2 opacity-50 cursor-not-allowed gap-0"
             style="background-color:#6cd14d"
             title="All steps completed"
             disabled

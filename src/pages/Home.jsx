@@ -28,6 +28,7 @@ import { useUser } from "../context/UserContext";
 import { toastManager } from "../lib/ui/feedback";
 import { useActivityLogger } from "../lib/business/activity.js";
 import { extractTemplateData} from '../lib/ui/llm-template.js';
+import { normalizeLLMResponse } from '../lib/ui/response-normalizer.js';
 import { updateStepData, getStepData } from '../lib/ui/stepDataStore.js';
 import { ResponseSection, RouteGuard, ProtectedRoute } from '../components';
 import ReportExportMenu from '../components/ReportExportMenu.jsx';
@@ -152,8 +153,10 @@ const TasksContent = () => {
         const task = tasksList().find(t => t.id === taskId);
         if (task) {
           try {
-            const newResponse = await callLLMForStep(task.prompt);
-            await updateTask(taskId, { llm_response: newResponse, last_modified: new Date().toISOString() });
+            const rawResponse = await callLLMForStep(task.prompt);
+            const newResponse = normalizeLLMResponse(rawResponse);
+            await updateTask(taskId, { llm_response: newResponse, content: newResponse, last_modified: new Date().toISOString() });
+            setTasksList(await getTasks(currentProjectId()));
             setTasksList(await getTasks(currentProjectId()));
             toastManager.success('Task regenerated successfully');
           } catch (error) {
@@ -262,13 +265,14 @@ const TasksContent = () => {
             const streamingPrompt = buildPrompt(step.currentStep(), {}, { problem: userPrompt });
             
             try {
-              await callLLMForStep(streamingPrompt, (chunk) => {
+            await callLLMForStep(streamingPrompt, (chunk) => {
                 accumulatedResponse += chunk;
+                const normalized = normalizeLLMResponse(accumulatedResponse);
                 batch(() => {
                   setTasksList(currentTasks => {
                     const updatedTasks = currentTasks.map(t => {
                       if (t.id === taskId) {
-                        return { ...t, content: accumulatedResponse, llm_response: accumulatedResponse, last_modified: new Date().toISOString() };
+                        return { ...t, content: normalized, llm_response: normalized, last_modified: new Date().toISOString() };
                       }
                       return t;
                     });
@@ -276,14 +280,15 @@ const TasksContent = () => {
                   });
                 });
               });
-              
+
               setStreamingTaskId(null);
+              const normalizedFinal = normalizeLLMResponse(accumulatedResponse);
               await updateTask(taskId, {
-                content: accumulatedResponse,
-                llm_response: accumulatedResponse
+                content: normalizedFinal,
+                llm_response: normalizedFinal
               });
-              
-              const extractedData = extractTemplateData(accumulatedResponse);
+
+              const extractedData = extractTemplateData(normalizedFinal);
               if (Object.keys(extractedData).length > 0 && currentProjectId()) {
                 await updateStepData(currentProjectId(), extractedData);
               }
@@ -293,9 +298,10 @@ const TasksContent = () => {
             } catch (streamError) {
               setStreamingTaskId(null);
               if (accumulatedResponse.trim().length > 0) {
+                const normalized = normalizeLLMResponse(accumulatedResponse);
                 await updateTask(taskId, {
-                  content: accumulatedResponse,
-                  llm_response: accumulatedResponse
+                  content: normalized,
+                  llm_response: normalized
                 });
                 setTasksList(await getTasks(currentProjectId()));
                 toastManager.warning('Saved partial response');
@@ -335,11 +341,12 @@ Please provide the modified content that follows the instruction.`;
             console.log('[Journey] Calling LLM to apply instruction with streaming...');
             await callLLMForStep(instructionPrompt, (chunk) => {
               accumulatedResponse += chunk;
+              const normalized = normalizeLLMResponse(accumulatedResponse);
               batch(() => {
                 setTasksList(currentTasks => {
                   const updatedTasks = currentTasks.map(t => {
                     if (t.id === taskId) {
-                      return { ...t, content: accumulatedResponse, llm_response: accumulatedResponse, last_modified: new Date().toISOString() };
+                      return { ...t, content: normalized, llm_response: normalized, last_modified: new Date().toISOString() };
                     }
                     return t;
                   });
@@ -354,8 +361,8 @@ Please provide the modified content that follows the instruction.`;
             
             console.log('[Journey] Saving updated task...');
             await updateTask(taskId, {
-              content: accumulatedResponse,
-              llm_response: accumulatedResponse,
+              content: normalizeLLMResponse(accumulatedResponse),
+              llm_response: normalizeLLMResponse(accumulatedResponse),
               prompt: instructionPrompt,
               last_modified: new Date().toISOString()
             });
@@ -547,11 +554,12 @@ Please provide the modified content that follows the instruction.`;
             console.log('[Journey] Starting LLM stream for', stepName, 'taskId:', taskIdToStream, 'prompt length:', taskPrompt?.length || 0);
             await callLLMForStep(taskPrompt, (chunk) => {
               accumulatedResponse += chunk;
+              const normalized = normalizeLLMResponse(accumulatedResponse);
               chunkCount += 1;
               batch(() => {
                 setTasksList(prev => prev.map(t => 
                   t.id === taskIdToStream 
-                    ? { ...t, content: accumulatedResponse, llm_response: accumulatedResponse, last_modified: new Date().toISOString() }
+                    ? { ...t, content: normalized, llm_response: normalized, last_modified: new Date().toISOString() }
                     : t
                 ));
               });
@@ -559,20 +567,21 @@ Please provide the modified content that follows the instruction.`;
 
             console.log('[Journey] LLM stream complete for', stepName, 'chunks:', chunkCount, 'response length:', accumulatedResponse.length);
 
-            if (!accumulatedResponse || accumulatedResponse.trim().length === 0) {
+            const normalizedFinal = normalizeLLMResponse(accumulatedResponse);
+            if (!normalizedFinal || normalizedFinal.trim().length === 0) {
               throw new Error('LLM returned empty response');
             }
 
             // Save final response
             await updateTask(taskIdToStream, {
-              content: accumulatedResponse,
-              llm_response: accumulatedResponse,
+              content: normalizedFinal,
+              llm_response: normalizedFinal,
               last_modified: new Date().toISOString()
             });
             console.log('[Journey] Saved response for', stepName, 'taskId:', taskIdToStream);
 
             // Extract and save step data
-            const extractedData = extractTemplateData(accumulatedResponse);
+            const extractedData = extractTemplateData(normalizedFinal);
             console.log('[Journey] Extracted data keys for', stepName, ':', Object.keys(extractedData));
             if (Object.keys(extractedData).length > 0) {
               await updateStepData(projectId, extractedData);
@@ -815,11 +824,12 @@ Please provide the modified content that follows the instruction.`;
                 try {
                     const response = await callLLMForStep(streamingPrompt, (chunk) => {
                         accumulatedResponse += chunk;
+                        const normalized = normalizeLLMResponse(accumulatedResponse);
                         batch(() => {
                             setTasksList(currentTasks => {
                                 const updatedTasks = currentTasks.map(task => {
                                     if (task.id === taskId) {
-                                        return { ...task, content: accumulatedResponse, llm_response: accumulatedResponse, last_modified: new Date().toISOString() };
+                                        return { ...task, content: normalized, llm_response: normalized, last_modified: new Date().toISOString() };
                                     }
                                     return task;
                                 });
@@ -834,13 +844,14 @@ Please provide the modified content that follows the instruction.`;
 
                     if (response && typeof response === 'string' && response.trim().length > 0) {
                         console.log('[Journey] STEP 6: Saving final response to task...');
+                        const normalizedFinal = normalizeLLMResponse(accumulatedResponse);
                         await updateTask(taskId, {
-                            content: accumulatedResponse,
-                            llm_response: accumulatedResponse
+                            content: normalizedFinal,
+                            llm_response: normalizedFinal
                         });
 
                         console.log('[Journey] STEP 7: Extracting template data...');
-                        const extractedData = extractTemplateData(response);
+                        const extractedData = extractTemplateData(normalizedFinal);
                         console.log('[Journey] Extracted data:', JSON.stringify(extractedData));
                         
                         if (Object.keys(extractedData).length > 0 && currentProjectId()) {
@@ -862,12 +873,13 @@ Please provide the modified content that follows the instruction.`;
                     console.error('[Journey] Streaming failed:', streamError.message);
                     setStreamingTaskId(null);
                     if (accumulatedResponse.trim().length > 0) {
+                        const normalizedPartial = normalizeLLMResponse(accumulatedResponse);
                         console.log('[Journey] Saving partial response...');
                         await updateTask(taskId, {
-                            content: accumulatedResponse,
-                            llm_response: accumulatedResponse
+                            content: normalizedPartial,
+                            llm_response: normalizedPartial
                         });
-                        const extractedData = extractTemplateData(accumulatedResponse);
+                        const extractedData = extractTemplateData(normalizedPartial);
                         if (Object.keys(extractedData).length > 0 && currentProjectId()) {
                             await updateStepData(currentProjectId(), extractedData);
                         }
@@ -1152,11 +1164,7 @@ Please provide the modified content that follows the instruction.`;
         />
 
         <div class="flex flex-col items-center mx-auto" style='max-width:760px;'>
-                  <Show when={
-                      !!currentProjectId() && (startPressed() || (tasksList() && tasksList().length > 0))
-                   } fallback={
-                       <div style={{"display": "none"}}></div>
-                   }>
+                  <Show when={!!currentProjectId()}>
                           <ResponseSection
                             tasksList={tasksList}
                             startPressed={startPressed}
@@ -1168,12 +1176,13 @@ Please provide the modified content that follows the instruction.`;
                            selectedTaskId={selectedTaskId}
                            setSelectedTaskId={setSelectedTaskId}
                             stepName={stepHookMemo()?.stepName?.() || 'Unknown Step'}
-                           callLLMForStep={callLLMForStep}
-                          refreshTasks={async () => setTasksList(await getTasks(currentProjectId()))}
+                            callLLMForStep={callLLMForStep}
+                           setTasksList={setTasksList}
+                           refreshTasks={async () => setTasksList(await getTasks(currentProjectId()))}
                           projectName={projectData()?.name}
                           handleInstruct={handleInstruct}
                           handleRegenerate={handleRegenerate}
-handleConfirm={handleConfirm}
+ handleConfirm={handleConfirm}
                             isProjectComplete={createMemo(() => {
                               const allTasks = tasksList();
                               return allTasks.every(t => t.content && t.content.trim().length > 0) && stepHookMemo()?.isLast() && stepHookMemo()?.isComplete();
@@ -1188,19 +1197,8 @@ handleConfirm={handleConfirm}
                             }
                           }}
                           />
-                         
-<div class="flex justify-end px-4 mt-4">
-                             <Show when={tasksList() && tasksList().length > 0}>
-                               <ReportExportMenu
-                                 context={exportContext()}
-                                 companyName={projectData()?.name || 'My Startup'}
-                                 onExportStart={() => toastManager.info('Preparing PDF export...')}
-                                 onExportComplete={(type) => toastManager.success(`${type} exported successfully`)}
-                                 onExportError={(error) => toastManager.error('Export failed: ' + error.message)}
-                               />
-                             </Show>
-                           </div>
-                 </Show>
+                  </Show>
+
 
 
                 <AgentInterface
@@ -1219,7 +1217,7 @@ handleConfirm={handleConfirm}
                   tasksList={tasksList}
                   startPressed={startPressed}
                    handleInstruct={handleInstruct}
-handleConfirm={handleConfirm}
+ handleConfirm={handleConfirm}
                             isProjectComplete={createMemo(() => {
                               const allTasks = tasksList();
                               return allTasks.every(t => t.content && t.content.trim().length > 0) && stepHookMemo()?.isLast() && stepHookMemo()?.isComplete();
@@ -1235,10 +1233,10 @@ handleConfirm={handleConfirm}
                   callLLMForStep={callLLMForStep}
                   refreshTasks={async () => setTasksList(await getTasks(currentProjectId()))}
                 />
-      </div>
-        </Show>
-          </RouteGuard>
-      );
+        </div>
+      </Show>
+    </RouteGuard>
+       );
 };
 
 

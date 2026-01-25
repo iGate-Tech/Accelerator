@@ -555,13 +555,15 @@ function renderFilledTemplate(templateText) {
         if (typeof value === 'string') {
           logger.trace('renderFilledTemplate: Returning string value for key:', filledKey);
           result += value;
+        } else if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
+          logger.trace('renderFilledTemplate: Object value for key:', filledKey, 'converting to string');
+          result += String(value);
         } else {
           logger.trace('renderFilledTemplate: Returning JSON stringified value for key:', filledKey);
           result += JSON.stringify(value, null, 2);
         }
       } catch (error) {
-        // logger.warn('renderFilledTemplate: Failed to parse value for key:', filledKey, error.message);
-        // Treat as plain string if not valid JSON
+        logger.trace('renderFilledTemplate: Failed to parse value for key:', filledKey, 'treating as plain string');
         result += valueStr;
       }
     }

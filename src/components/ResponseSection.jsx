@@ -183,7 +183,7 @@ const ResponseSection = (props) => {
                         </For>
                       </div>
 
-                      <div   class="card-footer  text-base-content px-4 py-2 text-xs flex items-center justify-between"
+                      <div   class="card-footer bg-base-300 border-t border-base-100 text-base-content px-4 py-2 text-xs flex items-center justify-between"
   style={{
     "background-color":
       modelName === "Business Plan Report"
@@ -192,7 +192,7 @@ const ResponseSection = (props) => {
         ? "#60a5fa"
         : modelName === "Valuation Report"
         ? "#facc15"
-        : "#e6ebf4",
+        : "",
 
     "border-top": "1px solid",
     "border-color":
@@ -202,7 +202,7 @@ const ResponseSection = (props) => {
         ? "#4f8fd9"
         : modelName === "Valuation Report"
         ? "#e0b814"
-        : "#e6ebf4",
+        : "",
 
     color: modelName?.includes("Report") ? "white" : "inherit",
   }}

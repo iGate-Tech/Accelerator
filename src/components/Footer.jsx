@@ -22,7 +22,7 @@ const Footer = ({isCollapsed, notifications}) => {
                             }}>
                                 {/* Avatar */}
                                 <div class="avatar relative flex-shrink-0">
-                                    <div class="w-8 h-8 rounded-full bg-base-300 dark:bg-gray-100/40">
+                                    <div class="w-8 h-8 rounded-full bg-base-300 dark:bg-base-300">
                                         {user()?.avatar && !user()?.avatar.startsWith('/default') ? (
                                             <img src={user()?.avatar} alt="User avatar" class="w-full h-full object-cover rounded-full" onError={(e) => { e.target.style.display = 'none'; e.target.nextElementSibling?.style?.removeProperty('display'); }}/>
                                         ) : null}

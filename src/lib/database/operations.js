@@ -970,6 +970,48 @@ export async function _addTask({ task, projectId, userId }) {
   }
 }
 
+export async function _updateTask({ id, updates = {} }) {
+  if (!id) {
+    throw new Error('Task ID is required');
+  }
+
+  const setClauses = [];
+  const values = [];
+
+  for (const [key, value] of Object.entries(updates)) {
+    if (value === undefined) continue;
+    const idx = values.length + 1;
+    setClauses.push(`${key} = $${idx}`);
+    values.push(value);
+  }
+
+  if (setClauses.length === 0) {
+    throw new Error('No fields to update');
+  }
+
+  const lastModifiedIdx = values.length + 1;
+  setClauses.push(`last_modified = $${lastModifiedIdx}`);
+  values.push(new Date().toISOString());
+
+  const idIdx = values.length + 1;
+  values.push(id);
+
+  const query = `
+    UPDATE tasks
+    SET ${setClauses.join(', ')}
+    WHERE id = $${idIdx}
+    RETURNING *
+  `;
+
+  try {
+    const result = await _query(query, values);
+    return result.rows[0];
+  } catch (err) {
+    console.error('Error updating task:', err);
+    throw err;
+  }
+}
+
 export async function getGroups({ userId = null }) {
   const whereClause = userId ? 'WHERE user_id = $1' : '';
   const params = userId ? [userId] : [];
@@ -1842,8 +1884,8 @@ class DatabaseWorker {
      return await this.sendMessage('clearAllTasks', {});
    }
 
-   async updateTask(id, content) {
-     return await this.sendMessage('updateTask', { id, content });
+   async updateTask(id, updates) {
+     return await this.sendMessage('updateTask', { id, updates });
    }
 
    async getProjects(userId = null) {
@@ -2182,6 +2224,4 @@ const safeDbCall = async (operation, fallbackValue = null, operationName = 'data
     return fallbackValue;
   }
 };
-
-
 

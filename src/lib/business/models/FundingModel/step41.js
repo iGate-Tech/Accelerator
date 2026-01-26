@@ -2,11 +2,18 @@ import { standardPromptTemplateWithProblem } from '../../templates.js';
 
 export const step41 = {
   id: "step41",
-  name: "Funding Readiness",
-  model: "Funding Model",
+  name: {
+    en: "Funding Readiness",
+    ar: "جاهزية التمويل"
+  },
+  model: {
+    en: "Funding Model",
+    ar: "نموذج التمويل"
+  },
   promptTemplate: standardPromptTemplateWithProblem,
   variables: ["tam", "team", "solution", "traction", "riskLevel"],
-  detailedPrompt: `
+  detailedPrompt: {
+    en: `
 The problem being solved is: {{problem}}
 
 Your response MUST be about {{problem}}. Do not discuss unrelated topics.
@@ -21,6 +28,21 @@ Provide:
 
 Structure in professional Markdown with readiness scorecard.
   `,
+    ar: `
+المشكلة التي يتم حلها هي: {{problem}}
+
+يجب أن يكون ردك متعلقًا بـ {{problem}}. لا تناقش مواضيع غير مرتبطة.
+
+قدم التقدم الحالي، قوة الفريق، حجم السوق ({{tam}})، ومستوى المخاطر لـ {{solution}}.
+
+قدم:
+- {{traction: "مقاييس التقدم الحالية، الإنجازات المحققة، والأدلة على التحقق"}}
+- {{team: "تكوين الفريق والخبرة ذات الصلة"}}
+- {{riskLevel: "مستوى المخاطر العام (منخفض/متوسط/مرتفع) مع التبرير"}}
+
+هيكلة في Markdown احترافي مع بطاقة الاستعداد.
+  `
+  },
   validate: (context) => {
     const issues = [];
     if (!context.traction) issues.push('Missing traction details');

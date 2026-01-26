@@ -2,11 +2,18 @@ import { standardPromptTemplateWithProblem } from '../../templates.js';
 
 export const step8b = {
   id: "step8b",
-  name: "Traction Definition",
-  model: "Idea Model",
+  name: {
+    en: "Traction Definition",
+    ar: "تعريف التقدم"
+  },
+  model: {
+    en: "Idea Model",
+    ar: "نموذج الفكرة"
+  },
   promptTemplate: standardPromptTemplateWithProblem,
   variables: ["problem", "evidence", "persona"],
-  detailedPrompt: `
+  detailedPrompt: {
+    en: `
 The problem being solved is: {{problem}}
 
 Your response MUST be about {{problem}}. Do not discuss unrelated topics.
@@ -23,6 +30,23 @@ Structure in professional Markdown with traction scorecard, validation metrics, 
 
 Also embed {{traction: "Full traction data for use in Funding Model steps"}}.
   `,
+    ar: `
+المشكلة التي يتم حلها هي: {{problem}}
+
+يجب أن يكون ردك متعلقًا بـ {{problem}}. لا تناقش مواضيع غير مرتبطة.
+
+عرّف مقاييس التقدم والأدلة على التحقق من المشكلة التي تؤثر على {{persona}}.
+
+قدم:
+- {{traction: "مقاييس التقدم الحالية، الأدلة على التحقق، ومؤشرات الأداء الأساسية"}}
+- {{validationMetrics: "المقاييس الكمية والنوعية التي تثبت صحة التحقق من المشكلة"}}
+- {{keyMilestones: "الإنجازات الأساسية التي تحققت في التحقق من المشكلة واكتشاف العملاء"}}
+
+هيكلة في Markdown احترافي مع بطاقة تقييم التقدم، مقاييس التحقق، ومتتبع الإنجازات.
+
+ضمّن أيضًا {{traction: "بيانات التقدم الكاملة للاستخدام في خطوات نموذج التمويل"}}.
+  `
+  },
   validate: (context) => {
     const issues = [];
     if (!context.traction) issues.push('Missing traction data');

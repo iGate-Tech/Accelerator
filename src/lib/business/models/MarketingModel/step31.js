@@ -2,11 +2,18 @@ import { standardPromptTemplateWithProblem } from '../../templates.js';
 
 export const step31 = {
   id: "step31",
-  name: "Market Entry",
-  model: "Marketing Model",
+  name: {
+    en: "Market Entry",
+    ar: "دخول السوق"
+  },
+  model: {
+    en: "Marketing Model",
+    ar: "نموذج التسويق"
+  },
   promptTemplate: standardPromptTemplateWithProblem,
   variables: ["industry", "solution", "marketEntryStrategy"],
-  detailedPrompt: `
+  detailedPrompt: {
+    en: `
 The problem being solved is: {{problem}}
 
 Your response MUST be about {{problem}}. Do not discuss unrelated topics.
@@ -19,6 +26,19 @@ Provide:
 
 Structure in professional Markdown with entry timeline, channel strategy, and customer acquisition plan.
   `,
+    ar: `
+المشكلة التي يتم حلها هي: {{problem}}
+
+يجب أن يكون ردك متعلقًا بـ {{problem}}. لا تناقش مواضيع غير مرتبطة.
+
+طور استراتيجية للدخول إلى {{industry}} وتحقيق أول عملاء لـ {{solution}}.
+
+قدم:
+- {{marketEntryStrategy: "نهج شامل للدخول إلى السوق يتضمن التوقيت، القنوات، وشرائح الهدف الأولية"}}
+
+هيكلة في Markdown احترافي مع جدول الدخول، استراتيجية القناة، و خطة اقتناء العملاء.
+  `
+  },
   validate: (context) => {
     const issues = [];
     if (!context.marketEntryStrategy) issues.push('Missing market entry strategy');

@@ -2,11 +2,18 @@ import { standardPromptTemplateWithProblem } from '../../templates.js';
 
 export const step33 = {
   id: "step33",
-  name: "Sales Strategy",
-  model: "Marketing Model",
+  name: {
+    en: "Sales Strategy",
+    ar: "استراتيجية المبيعات"
+  },
+  model: {
+    en: "Marketing Model",
+    ar: "نموذج التسويق"
+  },
   promptTemplate: standardPromptTemplateWithProblem,
   variables: ["industry", "solution", "salesMotion", "salesStrategy"],
-  detailedPrompt: `
+  detailedPrompt: {
+    en: `
 The problem being solved is: {{problem}}
 
 Your response MUST be about {{problem}}. Do not discuss unrelated topics.
@@ -20,6 +27,20 @@ Provide:
 
 Structure in professional Markdown with sales model analysis, cycle timeline, and resource requirements.
   `,
+    ar: `
+المشكلة التي يتم حلها هي: {{problem}}
+
+يجب أن يكون ردك متعلقًا بـ {{problem}}. لا تناقش مواضيع غير مرتبطة.
+
+وصف حركة المبيعات لـ {{industry}} تستهدف {{solution}}: بيع ذاتي، مبيعات داخلية، أو مبيعات مؤسسية.
+
+قدم:
+- {{salesMotion: "نوع نهج المبيعات (بيع ذاتي، مبيعات داخلية، مبيعات ميدانية، مؤسسي) مع التبرير"}}
+- {{salesStrategy: "استراتيجية المبيعات التفصيلية بما في ذلك العملية، مدة الدورة، والأنشطة الأساسية"}}
+
+هيكلة في Markdown احترافي مع تحليل نموذج المبيعات، جدول الدورة، ومتطلبات الموارد.
+  `
+  },
   validate: (context) => {
     const issues = [];
     if (!context.salesMotion) issues.push('Missing sales motion definition');

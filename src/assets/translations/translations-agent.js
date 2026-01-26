@@ -37,6 +37,10 @@ export const agentTranslations = {
     // Placeholder
     agentPlaceholder: "Enter your problem statement here...",
 
+    // Additional placeholders
+    enterInstructionsForTask: "Enter instructions for selected task...",
+    selectTaskToGiveInstructions: "Select a task above to give instructions",
+
     // Button labels
     chatButton: 'Chat with AI',
   },
@@ -76,6 +80,10 @@ export const agentTranslations = {
 
     // Placeholder
     agentPlaceholder: "أدخل بيان المشكلة هنا...",
+
+    // Additional placeholders
+    enterInstructionsForTask: "أدخل تعليمات للمهمة المحددة...",
+    selectTaskToGiveInstructions: "حدد مهمة أعلاه لتقديم تعليمات",
 
     // Button labels
     chatButton: 'دردش مع الذكاء الاصطناعي',

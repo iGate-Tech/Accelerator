@@ -2,11 +2,18 @@ import { standardPromptTemplateWithProblem } from '../../templates.js';
 
 export const step36 = {
   id: "step36",
-  name: "Unit Economics",
-  model: "Financial Model",
+  name: {
+    en: "Unit Economics",
+    ar: "اقتصاد الوحدة"
+  },
+  model: {
+    en: "Financial Model",
+    ar: "النموذج المالي"
+  },
   promptTemplate: standardPromptTemplateWithProblem,
   variables: ["modelType", "cac", "ltv", "grossMargin"],
-  detailedPrompt: `
+  detailedPrompt: {
+    en: `
 The problem being solved is: {{problem}}
 
 Your response MUST be about {{problem}}. Do not discuss unrelated topics.
@@ -21,6 +28,21 @@ Provide:
 
 Structure in professional Markdown with unit economics table and LTV:CAC ratio analysis.
   `,
+    ar: `
+المشكلة التي يتم حلها هي: {{problem}}
+
+يجب أن يكون ردك متعلقًا بـ {{problem}}. لا تناقش مواضيع غير مرتبطة.
+
+قدم تكلفة اقتناء العميل (CAC)، قيمة العميل مدى الحياة (LTV)، وافتراضات هامش الربح الإجمالي لـ {{modelType}}.
+
+قدم:
+- {{cac: "تكلفة اقتناء العميل بالدولار مع التفكيك (المبيعات، التسويق، التكنولوجيا")}}
+- {{ltv: "حساب قيمة مدى الحياة مع إيرادات العميل والطول المتوقع"}}
+- {{grossMargin: "نسبة هامش الربح الإجمالي مع تفكيك تكلفة البضائع المباعة"}}
+
+هيكلة في Markdown احترافي مع جدول اقتصاد الوحدة وتحليل نسبة LTV:CAC.
+  `
+  },
   validate: (context) => {
     const issues = [];
     if (!context.cac) issues.push('Missing CAC');

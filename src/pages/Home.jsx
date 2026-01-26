@@ -75,6 +75,7 @@ const TasksContent = () => {
     const [editingTaskId, setEditingTaskId] = createSignal(null);
     const [editContent, setEditContent] = createSignal("");
     const [activeCardId, setActiveCardId] = createSignal(null);
+    const [expandedTaskId, setExpandedTaskId] = createSignal(null);
     const [loading, setLoading] = createSignal(false);
 
     const [showProjectModal, setShowProjectModal] = createSignal(false);
@@ -143,6 +144,12 @@ const TasksContent = () => {
         return "text-center mb-8 fade-in";
     });
 
+    const pageContainerClass = createMemo(() => {
+        return currentProjectId()
+            ? "flex flex-col items-center mx-auto"
+            : "flex flex-col items-center justify-center mx-auto min-h-[calc(100vh-4rem)]";
+    });
+
     let textareaRef;
 
 
@@ -167,7 +174,7 @@ const TasksContent = () => {
       } else {
         const hook = getStepHook();
         if (hook) {
-          await hook.regenerate(callLLMForStep, { problem: prompt() });
+          await hook.regenerate(callLLMForStep, { problem: prompt() }, currentLang());
         } else {
           logger.warn('handleRegenerate: No step hook available');
           toastManager.error('No active step to regenerate');
@@ -238,31 +245,31 @@ const TasksContent = () => {
           if (step && currentProjectId() && user()?.id) {
             const taskId = await addTask({
               projectId: currentProjectId(),
-              title: step.stepName(),
+              title: step.stepName(currentLang()),
               content: '',
-              prompt: buildPrompt(step.currentStep(), {}, { problem: userPrompt }),
+              prompt: buildPrompt(step.currentStep(), {}, { problem: userPrompt }, currentLang()),
               llm_response: '',
               model: step.currentStep()?.model || 'System',
               section: step.currentStep()?.section || 'Initialization',
-              stepName: step.stepName()
+              stepName: step.stepName('en') // Use English for database consistency
             }, currentProjectId(), user()?.id);
-            
+
             setTasksList(currentTasks => [...currentTasks, {
               id: taskId,
               projectId: currentProjectId(),
-              title: step.stepName(),
+              title: step.stepName(currentLang()), // Use current language for UI display
               content: '',
-              prompt: buildPrompt(step.currentStep(), {}, { problem: userPrompt }),
+              prompt: buildPrompt(step.currentStep(), {}, { problem: userPrompt }, currentLang()),
               llm_response: '',
               model: step.currentStep()?.model || 'System',
               section: step.currentStep()?.section || 'Initialization',
-              stepName: step.stepName(),
+              stepName: step.stepName('en'), // Use English for database consistency
               last_modified: new Date().toISOString()
             }]);
             
             setStreamingTaskId(taskId);
             let accumulatedResponse = '';
-            const streamingPrompt = buildPrompt(step.currentStep(), {}, { problem: userPrompt });
+            const streamingPrompt = buildPrompt(step.currentStep(), {}, { problem: userPrompt }, currentLang());
             
             try {
             await callLLMForStep(streamingPrompt, (chunk) => {
@@ -453,7 +460,7 @@ Please provide the modified content that follows the instruction.`;
         let firstIncompleteIndex = -1;
         for (let i = 0; i < totalSteps; i++) {
           const stepInfo = steps[i];
-          const stepName = stepNames[stepInfo.id] || stepInfo.name || `Step ${i + 1}`;
+          const stepName = stepNames(currentLang())[stepInfo.id] || stepInfo.name || `Step ${i + 1}`;
           const taskForStep = findTaskForStep(stepInfo, stepName);
           if (isTaskIncomplete(taskForStep)) {
             firstIncompleteIndex = i;
@@ -483,7 +490,7 @@ Please provide the modified content that follows the instruction.`;
 
         for (let i = loopStartIndex; i < totalSteps; i++) {
           const stepInfo = steps[i];
-          const stepName = stepNames[stepInfo.id] || stepInfo.name || `Step ${i + 1}`;
+          const stepName = stepNames(currentLang())[stepInfo.id] || stepInfo.name || `Step ${i + 1}`;
           const expectedTask = findTaskForStep(stepInfo, stepName);
 
           // Check if task is incomplete (empty content or llm_response)
@@ -511,7 +518,7 @@ Please provide the modified content that follows the instruction.`;
           if (!expectedTask) {
             // Create new task
             const userId = user()?.id;
-            taskPrompt = buildPrompt(stepInfo, step.stepData(), prompt());
+            taskPrompt = buildPrompt(stepInfo, step.stepData(), prompt(), currentLang());
             taskIdToStream = await addTask({
               projectId: projectId,
               title: stepName,
@@ -542,7 +549,7 @@ Please provide the modified content that follows the instruction.`;
             allTasks.push(newTask); // Update local allTasks for next iterations
           } else {
             taskIdToStream = expectedTask.id;
-            taskPrompt = expectedTask.prompt || buildPrompt(stepInfo, step.stepData(), prompt());
+            taskPrompt = expectedTask.prompt || buildPrompt(stepInfo, step.stepData(), prompt(), currentLang());
             console.log('[Journey] Using existing task', taskIdToStream, 'with prompt length:', taskPrompt?.length || 0);
           }
 
@@ -646,79 +653,90 @@ Please provide the modified content that follows the instruction.`;
       }
     };
 
-    const callLLMForStep = async (promptText, onChunk) => {
+    const callLLMForStep = async (promptText, onChunk, options = {}) => {
       const controller = new AbortController();
-      const timeoutMs = 120000; // 2 minutes for step processing
-      const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+      const { timeoutMs = 180000 } = options; // default 3 minutes, refreshed on each chunk
+
+      let timeoutId;
+      const resetTimeout = () => {
+        if (timeoutId) clearTimeout(timeoutId);
+        timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+      };
 
       let reader = null;
       let response = null;
 
       try {
-          let attempt = 0;
-          const maxAttempts = 3;
-          let lastError = null;
+        let attempt = 0;
+        const maxAttempts = 3;
+        let lastError = null;
 
         while (attempt < maxAttempts) {
           attempt += 1;
           console.log('[Journey] LLM request attempt', attempt, 'prompt length:', promptText?.length || 0);
           try {
+            resetTimeout();
             response = await fetch('/api/llm', {
               method: 'POST',
-              headers: { 
+              headers: {
                 'Content-Type': 'application/json',
                 'Connection': 'close'
               },
-              body: JSON.stringify({ prompt: promptText }),
+              body: JSON.stringify({ prompt: promptText, language: currentLang() }),
               signal: controller.signal
             });
             if (!response.ok) {
-             const errorText = await response.text().catch(() => 'Unknown error');
-             throw new Error(JSON.stringify({ status: response.status, message: errorText }));
+              const errorText = await response.text().catch(() => 'Unknown error');
+              throw new Error(JSON.stringify({ status: response.status, message: errorText }));
             }
             break;
           } catch (attemptError) {
             lastError = attemptError;
             console.error('[Journey] LLM request attempt', attempt, 'failed with stack:', attemptError.stack || attemptError.message);
-              if (attempt >= maxAttempts) {
-                throw attemptError;
-              }
-              await new Promise(resolve => setTimeout(resolve, 2000 * attempt));
+            if (attempt >= maxAttempts) {
+              throw attemptError;
             }
+            await new Promise(resolve => setTimeout(resolve, 2000 * attempt));
           }
+        }
 
-          reader = response.body.getReader();
+        if (!response?.body) {
+          throw new Error('LLM response stream unavailable');
+        }
+
+        reader = response.body.getReader();
         const decoder = new TextDecoder();
         let responseText = '';
 
         while (true) {
+          resetTimeout(); // Refresh timeout on every chunk received
           const { done, value } = await reader.read();
           if (done) break;
-          
+
           const chunk = decoder.decode(value, { stream: true });
           responseText += chunk;
-          
+
           if (onChunk) {
             onChunk(chunk);
           }
         }
 
-        clearTimeout(timeoutId);
         return responseText;
 
       } catch (fetchError) {
-        clearTimeout(timeoutId);
-        
-        // Attempt to clean up reader if it exists
+        if (fetchError.name === 'AbortError') {
+          throw new Error('LLM streaming timed out after 3 minutes. The response may be taking longer than expected.');
+        }
+        throw fetchError;
+      } finally {
+        if (timeoutId) clearTimeout(timeoutId);
         if (reader) {
           try {
-            reader.cancel();
+            await reader.cancel();
           } catch (e) {
             // Ignore cleanup errors
           }
         }
-        
-        throw fetchError;
       }
     };
 
@@ -805,13 +823,13 @@ Please provide the modified content that follows the instruction.`;
             if (step && currentProjectId() && user()?.id) {
                 const taskId = await addTask({
                     projectId: currentProjectId(),
-                    title: step.stepName(),
+                    title: step.stepName(currentLang()), // Use current language for UI display
                     content: '',
-                    prompt: buildPrompt(step.currentStep(), {}, { problem: problemText }),
+                    prompt: buildPrompt(step.currentStep(), {}, { problem: problemText }, currentLang()),
                     llm_response: '',
                     model: step.currentStep()?.model || 'System',
                     section: step.currentStep()?.section || 'Initialization',
-                    stepName: step.stepName()
+                    stepName: step.stepName('en') // Use English for database consistency
                 }, currentProjectId(), user()?.id);
                 console.log('[Journey] Task created:', taskId);
                 await setTasksList(await getTasks(currentProjectId()));
@@ -819,7 +837,7 @@ Please provide the modified content that follows the instruction.`;
                 console.log('[Journey] STEP 4: Starting LLM streaming...');
                 setStreamingTaskId(taskId);
                 let accumulatedResponse = '';
-                const streamingPrompt = buildPrompt(step.currentStep(), {}, { problem: problemText });
+                const streamingPrompt = buildPrompt(step.currentStep(), {}, { problem: problemText }, currentLang());
 
                 try {
                     const response = await callLLMForStep(streamingPrompt, (chunk) => {
@@ -891,7 +909,7 @@ Please provide the modified content that follows the instruction.`;
                 }
             } else {
                 console.warn('[Journey] No step hook available, using fallback');
-                await newStepHook.regenerate(callLLMForStep, { problem: problemText });
+                await newStepHook.regenerate(callLLMForStep, { problem: problemText }, currentLang());
             }
             
             setLoading(false);
@@ -1143,6 +1161,14 @@ Please provide the modified content that follows the instruction.`;
         }
      });
 
+     // Effect to handle auto-expanding task when streaming starts
+     createEffect(() => {
+         const currentStreamingTaskId = streamingTaskId();
+         if (currentStreamingTaskId && currentStreamingTaskId !== expandedTaskId()) {
+             setExpandedTaskId(currentStreamingTaskId);
+         }
+     });
+
     const isUserReady = () => !!user()?.id;
 
     return (
@@ -1163,17 +1189,18 @@ Please provide the modified content that follows the instruction.`;
           }}
         />
 
-        <div class="flex flex-col items-center mx-auto" style='max-width:760px;'>
+        <div class={pageContainerClass()} style='max-width:760px;'>
                   <Show when={!!currentProjectId()}>
                           <ResponseSection
                             tasksList={tasksList}
                             startPressed={startPressed}
                             isLoading={loading}
-                           updateTask={updateTask}
-                           setEditContent={setEditContent}
-                           editingTaskId={editingTaskId}
-                           setEditingTaskId={setEditingTaskId}
-                           selectedTaskId={selectedTaskId}
+                            currentProjectId={currentProjectId}
+                            updateTask={updateTask}
+                            setEditContent={setEditContent}
+                            editingTaskId={editingTaskId}
+                            setEditingTaskId={setEditingTaskId}
+                            selectedTaskId={selectedTaskId}
                            setSelectedTaskId={setSelectedTaskId}
                             stepName={stepHookMemo()?.stepName?.() || 'Unknown Step'}
                             callLLMForStep={callLLMForStep}
@@ -1189,6 +1216,8 @@ Please provide the modified content that follows the instruction.`;
                             })}
                             streamingTaskId={streamingTaskId}
                            setStreamingTaskId={setStreamingTaskId}
+                           expandedTaskId={expandedTaskId}
+                           setExpandedTaskId={setExpandedTaskId}
                           onDelete={(taskId) => {
                             const stepHook = getStepHook();
                             if (stepHook) {

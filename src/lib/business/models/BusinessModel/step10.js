@@ -2,11 +2,18 @@ import { standardPromptTemplateWithProblem } from '../../templates.js';
 
 export const step10 = {
   id: "step10",
-  name: "Value Proposition",
-  model: "Business Model",
+  name: {
+    en: "Value Proposition",
+    ar: "قيمة الاقتراح"
+  },
+  model: {
+    en: "Business Model",
+    ar: "نموذج العمل"
+  },
   promptTemplate: standardPromptTemplateWithProblem,
   variables: ["solution", "alternatives", "evidence"],
-  detailedPrompt: `
+  detailedPrompt: {
+    en: `
 The original problem is: {{problem}}
 
 Based on the solution {{solution}} designed to solve this problem:
@@ -23,5 +30,23 @@ Highlight:
 - {{targetCustomers: "Target customers who have {{problem}}"}}
 Use professional Markdown with persuasive language tied to {{problem}}.
 `,
+    ar: `
+المشكلة الأصلية هي: {{problem}}
+
+بناءً على الحل {{solution}} المصمم لحل هذه المشكلة:
+
+صيغ اقتراح قيمة مقنع يعالج {{problem}} مباشرة.
+قارن مع البدائل {{alternatives}} واستخدم الأدلة {{evidence}}.
+
+يجب أن يكون ردك متعلقًا بـ {{problem}}. لا تولّد محتوى لموضوعات غير مرتبطة.
+
+برز:
+- {{valueProp: "بيان اقتراح القيمة الواضح والمقتضب مباشرة مرتبط بـ {{problem}}"}}
+- {{uniqueBenefits: "الفوائد المحددة التي تحل {{problem}}، مرتبطة بـ {{evidence}}"}}
+- {{quantifiedValue: "القيمة الكمية لحل {{problem}}، مثل توفير التكاليف، تقليل الوقت، أو العائد على الاستثمار"}}
+- {{targetCustomers: "عملاء الهدف الذين يعانون من {{problem}}"}}
+استخدم Markdown احترافي مع لغة إقناعية مرتبطة بـ {{problem}}.
+`
+  },
   validate: (context) => ({ valid: true, issues: [] }),
 };

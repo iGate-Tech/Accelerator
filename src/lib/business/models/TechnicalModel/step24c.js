@@ -2,11 +2,18 @@ import { standardPromptTemplateWithProblem } from '../../templates.js';
 
 export const step24c = {
   id: "step24c",
-  name: "Integrations Definition",
-  model: "Technical Model",
+  name: {
+    en: "Integrations Definition",
+    ar: "تعريف التكاملات"
+  },
+  model: {
+    en: "Technical Model",
+    ar: "النموذج الفني"
+  },
   promptTemplate: standardPromptTemplateWithProblem,
   variables: ["solution", "architecture", "apiDesign"],
-  detailedPrompt: `
+  detailedPrompt: {
+    en: `
 The problem being solved is: {{problem}}
 
 Your response MUST be about {{problem}}. Do not discuss unrelated topics.
@@ -23,6 +30,23 @@ Structure in professional Markdown with integration matrix, priority matrix, and
 
 Also embed {{integrations: "Full integrations list for use in subsequent steps"}}.
   `,
+    ar: `
+المشكلة التي يتم حلها هي: {{problem}}
+
+يجب أن يكون ردك متعلقًا بـ {{problem}}. لا تناقش مواضيع غير مرتبطة.
+
+عرّف استراتيجية التكامل لـ {{solution}} بناءً على البنية {{architecture}} وتصميم API {{apiDesign}}.
+
+قدم:
+- {{integrations: "استراتيجية التكامل الشاملة تغطي التكاملات الأساسية والاختيارية"}}
+- {{integrationPlan: "خطة تنفيذ التكامل التفصيلية مع الأولويات والجداول الزمنية"}}
+- {{partnershipOpportunities: "فرص الشراكات من خلال كشف API وسوق التكامل"}}
+
+هيكلة في Markdown احترافي مع مصفوفة التكامل، مصفوفة الأولويات، واستراتيجية الشراكة.
+
+ضمّن أيضًا {{integrations: "قائمة التكامل الكاملة للاستخدام في الخطوات اللاحقة"}}.
+  `
+  },
   validate: (context) => {
     const issues = [];
     if (!context.integrations) issues.push('Missing integrations strategy');

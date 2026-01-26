@@ -2,11 +2,18 @@ import { standardPromptTemplateWithProblem } from '../../templates.js';
 
 export const step27 = {
   id: "step27",
-  name: "Serviceable Available Market",
-  model: "Marketing Model",
+  name: {
+    en: "Serviceable Available Market",
+    ar: "السوق المتاح القابل للخدمة"
+  },
+  model: {
+    en: "Marketing Model",
+    ar: "نموذج التسويق"
+  },
   promptTemplate: standardPromptTemplateWithProblem,
   variables: ["tam", "sam", "reachRationale", "segmentation", "geographicScope"],
-  detailedPrompt: `
+  detailedPrompt: {
+    en: `
 The problem being solved is: {{problem}}
 
 Your response MUST be about {{problem}}. Do not discuss unrelated topics.
@@ -22,6 +29,22 @@ Provide:
 
 Structure in professional Markdown with market segmentation, reach assumptions, and expansion timeline.
   `,
+    ar: `
+المشكلة التي يتم حلها هي: {{problem}}
+
+يجب أن يكون ردك متعلقًا بـ {{problem}}. لا تناقش مواضيع غير مرتبطة.
+
+قدّر السوق المتاح القابل للخدمة (SAM) لسوقك المستهدف ({{tam}}). وصف مدى الوصول الواقعي.
+
+قدم:
+- {{sam: "قيمة السوق المتاح القابل للخدمة بالدولار تمثل مدى الوصول الواقعي للسوق"}}
+- {{reachRationale: "السبب لنسبة الوصول إلى السوق بناءً على عوامل ملاءمة المنتج للسوق"}}
+- {{segmentation: "تقسيم السوق يظهر أي أجزاء من السوق قابلة للخدمة"}}
+- {{geographicScope: "الوصول الجغرافي وإمكانية التوسعة بمرور الوقت"}}
+
+هيكلة في Markdown احترافي مع تقسيم السوق، افتراضات الوصول، وجدول التوسعة.
+  `
+  },
   validate: (context) => {
     const issues = [];
     if (!context.sam) issues.push('Missing SAM value');

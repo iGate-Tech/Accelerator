@@ -2,11 +2,18 @@ import { standardPromptTemplateWithProblem } from '../../templates.js';
 
 export const step28 = {
   id: "step28",
-  name: "Serviceable Obtainable Market",
-  model: "Marketing Model",
+  name: {
+    en: "Serviceable Obtainable Market",
+    ar: "السوق القابل للحصول"
+  },
+  model: {
+    en: "Marketing Model",
+    ar: "نموذج التسويق"
+  },
   promptTemplate: standardPromptTemplateWithProblem,
   variables: ["sam", "som", "captureShare", "captureRationale", "growthProjection"],
-  detailedPrompt: `
+  detailedPrompt: {
+    en: `
 The problem being solved is: {{problem}}
 
 Your response MUST be about {{problem}}. Do not discuss unrelated topics.
@@ -22,6 +29,22 @@ Provide:
 
 Structure in professional Markdown with market share calculations, growth projections, and competitive positioning.
   `,
+    ar: `
+المشكلة التي يتم حلها هي: {{problem}}
+
+يجب أن يكون ردك متعلقًا بـ {{problem}}. لا تناقش مواضيع غير مرتبطة.
+
+قدّر السوق القابل للحصول (SOM) لسوقك المستهدف ({{sam}}). اشرح سبب حصة الالتقاط الأولية.
+
+قدم:
+- {{som: "قيمة السوق القابل للحصول تمثل التقاط واقعي على مدى 3-5 سنوات"}}
+- {{captureShare: "نسبة حصة السوق المبدئية مع التبرير التفصيلي"}}
+- {{captureRationale: "السبب لالتقاط السوق بناءً على المزايا التنافسية والموارد"}}
+- {{growthProjection: "مسار نمو التقاط السوق على مدى 5 سنوات"}}
+
+هيكلة في Markdown احترافي مع حسابات حصة السوق، توقعات النمو، وموضع التنافس.
+  `
+  },
   validate: (context) => {
     const issues = [];
     if (!context.som) issues.push('Missing SOM value');

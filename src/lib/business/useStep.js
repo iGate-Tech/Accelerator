@@ -37,7 +37,7 @@ export function createStepHook(projectId, onStepChange) {
     try {
       const { getTasks } = await import('../database');
       const tasks = await getTasks(projectId);
-      const currentStepName = stepName();
+      const currentStepName = stepName('en'); // Default to English for task matching
       const currentTask = tasks.find(t => t.stepName === currentStepName);
       return !!(currentTask && currentTask.content && currentTask.content.trim().length > 0);
     } catch (e) {
@@ -48,7 +48,32 @@ export function createStepHook(projectId, onStepChange) {
   return false;
 };
   const progress = () => Math.round((stepIndex() / steps.length) * 100);
-  const stepName = () => stepNames[currentStep()?.id] || currentStep()?.name || 'Unknown';
+  const stepName = (lang = 'en') => {
+    const current = currentStep();
+    if (!current) return 'Unknown';
+
+    // Try to get the localized name from stepNames first
+    try {
+      const localizedStepNames = stepNames(lang);
+      const nameFromMap = localizedStepNames[current.id];
+
+      if (nameFromMap) return nameFromMap;
+    } catch (e) {
+      console.warn('stepName: Error getting localized step names:', e);
+      // Fallback to English if there's an error
+      const englishStepNames = stepNames('en');
+      const nameFromMap = englishStepNames[current.id];
+      if (nameFromMap) return nameFromMap;
+    }
+
+    // If not found in map, try to get localized name directly from step
+    if (typeof current.name === 'object' && current.name !== null) {
+      return current.name[lang] || current.name['en'] || 'Unknown';
+    }
+
+    // Fallback to original name
+    return current.name || 'Unknown';
+  };
 
   const initializeData = async () => {
     try {
@@ -94,7 +119,7 @@ const persist = async (state = uiState()) => {
     const currentStepValue = currentStep();
     const stepIndexValue = Number(stepIndex()) || 0;
     const progressValue = Number(progress()) || 0;
-    const stepNameValue = String(stepName()) || 'Unknown';
+    const stepNameValue = String(stepName('en')) || 'Unknown'; // Use English for persistence
     const uiStateValue = typeof state === 'function' ? String(state()) : String(state);
     const completeValue = Boolean(isComplete());
     const lastValue = Boolean(isLast());
@@ -140,7 +165,7 @@ const persist = async (state = uiState()) => {
     return instructions;
   };
 
-  const regenerate = async (callLLM, instructions) => {
+  const regenerate = async (callLLM, instructions, lang = 'en') => {
     setUiState('processing');
     setIsSaving(true);
     try {
@@ -164,7 +189,7 @@ const persist = async (state = uiState()) => {
       logger.debug('regenerate: problem in context:', enrichedContext?.problem?.substring(0, 50) + '...');
       console.log('regenerate: Current stepData keys:', Object.keys(enrichedContext).length);
 
-      const prompt = buildPrompt(currentStep(), enrichedContext, instructions);
+      const prompt = buildPrompt(currentStep(), enrichedContext, instructions, lang);
       logger.debug('regenerate: Built prompt, length:', prompt?.length);
 
       const response = await callLLM(prompt);
@@ -285,7 +310,7 @@ const persist = async (state = uiState()) => {
     const findFirstIncompleteStepIndex = () => {
       for (let i = 0; i < steps.length; i++) {
         const stepInfo = steps[i];
-        const stepNameValue = stepNames[stepInfo.id] || stepInfo.name || `Step ${i + 1}`;
+        const stepNameValue = stepNames('en')[stepInfo.id] || stepInfo.name || `Step ${i + 1}`;
         const taskForStep = resolveTaskForStep(stepInfo, stepNameValue, tasks);
         if (!taskForStep) {
           return i;
@@ -392,7 +417,7 @@ return {
   };
 }
 
-export function buildPrompt(step, context, instructions) {
+export function buildPrompt(step, context, instructions, lang = 'en') {
   if (!step) return '';
 
   const mergedContext = {
@@ -424,8 +449,18 @@ export function buildPrompt(step, context, instructions) {
   }
 
   const problemStatement = mergedContext.problem || mergedContext.originalProblem || '';
-  const promptContent = step.detailedPrompt || step.instructions || '';
-  const baseTemplate = step.promptTemplate(promptContent, step.variables, problemStatement);
+
+  // Determine which prompt to use based on language
+  let promptContent;
+  if (step.detailedPrompt && typeof step.detailedPrompt === 'object') {
+    // Use bilingual prompt structure
+    promptContent = step.detailedPrompt[lang] || step.detailedPrompt['en'] || step.instructions || '';
+  } else {
+    // Use original prompt structure
+    promptContent = step.detailedPrompt || step.instructions || '';
+  }
+
+  const baseTemplate = step.promptTemplate(promptContent, step.variables, problemStatement, lang);
   const result = injectTemplateData(baseTemplate, mergedContext);
 
   if (step.variables?.includes('problem')) {

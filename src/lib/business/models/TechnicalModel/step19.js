@@ -2,11 +2,18 @@ import { standardPromptTemplateWithProblem } from '../../templates.js';
 
 export const step19 = {
   id: "step19",
-  name: "Infrastructure & Hosting",
-  model: "Technical Model",
+  name: {
+    en: "Infrastructure & Hosting",
+    ar: "البنية التحتية والاستضافة"
+  },
+  model: {
+    en: "Technical Model",
+    ar: "النموذج الفني"
+  },
   promptTemplate: standardPromptTemplateWithProblem,
   variables: ["solution", "scalability"],
-  detailedPrompt: `
+  detailedPrompt: {
+    en: `
 The problem being solved is: {{problem}}
 
 Your response MUST be about {{problem}}. Do not discuss unrelated topics.
@@ -22,5 +29,21 @@ Provide:
 
 Structure in professional Markdown with clear sections, diagrams descriptions, and practical recommendations.
   `,
+    ar: `
+المشكلة التي يتم حلها هي: {{problem}}
+
+يجب أن يكون ردك متعلقًا بـ {{problem}}. لا تناقش مواضيع غير مرتبطة.
+
+خطط للبنية التحتية والاستضافة لـ {{solution}} مع الأخذ في الاعتبار {{scalability}}. أوصي بموفر السحابة، استراتيجية الاستضافة، ونهج CDN.
+
+قدم:
+- {{cloudProvider: "موفر السحابة الموصى به (مثلاً، AWS، GCP، Azure) مع التبرير بناءً على متطلبات {{scalability}}"}}
+- {{hostingStrategy: "نهج الاستضافة بما في ذلك الحوسبة، التخزين، وبنية الشبكة"}}
+- {{cdnApproach: "استراتيجية CDN لتسليم المحتوى وتحسين الأداء"}}
+- {{infrastructureCost: "نطاق التكلفة التقديرية للبنية التحتية شهريًا للنشر الأولي"}}
+
+هيكلة في Markdown احترافي مع أقسام واضحة، أوصاف المخططات، و التوصيات العملية.
+  `
+  },
   validate: (context) => ({ valid: true, issues: [] }),
 };

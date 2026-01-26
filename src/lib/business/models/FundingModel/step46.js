@@ -2,11 +2,18 @@ import { standardPromptTemplateWithProblem } from '../../templates.js';
 
 export const step46 = {
   id: "step46",
-  name: "Pre-money Valuation",
-  model: "Funding Model",
+  name: {
+    en: "Pre-money Valuation",
+    ar: "التقييم قبل المال"
+  },
+  model: {
+    en: "Funding Model",
+    ar: "نموذج التمويل"
+  },
   promptTemplate: standardPromptTemplateWithProblem,
   variables: ["valuation", "askAmount", "preMoney"],
-  detailedPrompt: `
+  detailedPrompt: {
+    en: `
 The problem being solved is: {{problem}}
 
 Your response MUST be about {{problem}}. Do not discuss unrelated topics.
@@ -19,6 +26,19 @@ Provide:
 
 Structure in professional Markdown with valuation breakdown and terms analysis.
   `,
+    ar: `
+المشكلة التي يتم حلها هي: {{problem}}
+
+يجب أن يكون ردك متعلقًا بـ {{problem}}. لا تناقش مواضيع غير مرتبطة.
+
+احسب التقييم المتوقع قبل المال لشركتك الناشئة، مع التأكد من التوافق مع {{valuation}} بعد المال.
+
+قدم:
+- {{preMoney: "تقييم قبل المال مع الحساب"}}
+
+هيكلة في Markdown احترافي مع تفكيك التقييم وتحليل الشروط.
+  `
+  },
   validate: (context) => {
     const issues = [];
     if (!context.preMoney) issues.push('Missing pre-money valuation');

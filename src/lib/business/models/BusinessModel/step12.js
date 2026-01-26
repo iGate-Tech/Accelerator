@@ -2,11 +2,18 @@ import { standardPromptTemplateWithProblem } from '../../templates.js';
 
 export const step12 = {
   id: "step12",
-  name: "Business Model",
-  model: "Business Model",
+  name: {
+    en: "Business Model",
+    ar: "نموذج العمل"
+  },
+  model: {
+    en: "Business Model",
+    ar: "نموذج العمل"
+  },
   promptTemplate: standardPromptTemplateWithProblem,
   variables: ["persona"],
-  detailedPrompt: `
+  detailedPrompt: {
+    en: `
 The problem being solved is: {{problem}}
 
 Your response MUST be about {{problem}}. Do not discuss unrelated topics.
@@ -20,5 +27,19 @@ Select and justify:
 - {{feasibility: "Feasibility assessment, including market fit, implementation challenges, and resource requirements"}}
 Present in professional Markdown with analysis and recommendations.
 `,
+    ar: `
+المشكلة التي يتم حلها هي: {{problem}}
+
+يجب أن يكون ردك متعلقًا بـ {{problem}}. لا تناقش مواضيع غير مرتبطة.
+
+حدد نموذج العمل الأمثل للحل بناءً على الشخصية {{persona}}.
+اختر وبرر:
+- {{modelType: "نوع نموذج العمل المختار (مثلاً، SaaS، سوق، اشتراك)، مع التبرير المرتبط باحتياجات {{persona}}"}}
+- {{prosCons: "الإيجابيات والسلبيات للنموذج المختار بالمقارنة مع البدائل"}}
+- {{scalability: "كيف ي(scale) النموذج مع نمو المستخدم، بما في ذلك الجوانب التقنية والتشغيلية"}}
+- {{feasibility: "تقييم الجدوى، بما في ذلك توافق السوق، تحديات التنفيذ، ومتطلبات الموارد"}}
+قدّم في Markdown احترافي مع تحليل و توصيات.
+`
+  },
   validate: (context) => ({ valid: true, issues: [] }),
 };

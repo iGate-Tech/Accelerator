@@ -17,7 +17,8 @@ const UnifiedTaskCard = (props) => {
 
   const isEditing = () => props.editingTaskId && props.editingTaskId() === taskId;
   const isSelected = () => props.selectedTaskId && props.selectedTaskId() === taskId;
-  const isExpanded = () => props.isExpanded;  let contentRef;
+  const isExpanded = () => props.isExpanded;
+  let contentRef;
   let cardRef;
 
   const isStreaming = () => props.isStreaming ?? (content() && content().trim().length > 0 && !llmResponse());
@@ -28,6 +29,12 @@ const UnifiedTaskCard = (props) => {
     typeof props.isProjectComplete === 'function'
       ? props.isProjectComplete() ?? false
       : !!props.isProjectComplete;
+
+  createEffect(() => {
+    if (isCurrentlyStreaming() && typeof props.onForceExpand === 'function') {
+      props.onForceExpand(taskId);
+    }
+  });
 
   // Memoize expensive rendering operations
   const renderedContent = createMemo(() => {
@@ -63,7 +70,7 @@ const UnifiedTaskCard = (props) => {
 
   const getStepName = (task) =>
     task.step_name ||
-    (task.step ? stepNames[task.step] : null) ||
+    (task.step ? stepNames('en')[task.step] : null) || // Use English for task matching
     task.step ||
     "Unknown Step";
 
@@ -260,7 +267,7 @@ const UnifiedTaskCard = (props) => {
         {/* Card Header */}
         <div class={`card-header px-4 py-3 border-b border-base-300 flex flex-wrap items-center justify-between gap-2 ${
           props.streamingTaskId?.() === taskId && content() && content().trim().length > 0 && !isExpanded() ? 'ring-1 ring-primary/30' : ''
-        }`}>
+        } ${isCurrentlyStreaming() ? 'bg-blue-50 dark:bg-blue-900/20' : ''}`}>
         <div class="flex items-center gap-2 min-w-0">
            <button
              onClick={toggleCollapse}
@@ -309,6 +316,12 @@ const UnifiedTaskCard = (props) => {
                <Show when={props.streamingTaskId?.() === taskId && content() && content().trim().length > 0 && !isExpanded()}>
                  <span class="badge badge-primary badge-sm animate-pulse">Streaming</span>
                </Show>
+               <Show when={isCurrentlyStreaming() && isExpanded()}>
+                 <span class="badge badge-info badge-sm animate-pulse flex items-center gap-1">
+                   <span class="loading loading-spinner loading-xs"></span>
+                   Generating
+                 </span>
+               </Show>
              <Show when={isExpanded()}>
                <ActionButtons />
              </Show>
@@ -331,6 +344,12 @@ const UnifiedTaskCard = (props) => {
                   <div class="flex items-center gap-2 text-base-content/60">
                     <div class="loading loading-dots loading-sm"></div>
                     <span class="text-sm">Generating response...</span>
+                  </div>
+                </Show>
+                <Show when={isCurrentlyStreaming() && content() && content().trim().length > 0}>
+                  <div class="flex items-center gap-2 text-blue-600 dark:text-blue-300 mb-2">
+                    <div class="loading loading-dots loading-sm"></div>
+                    <span class="text-sm font-medium">Generating response...</span>
                   </div>
                 </Show>
                 <Show when={content() && content().trim().length > 0}>

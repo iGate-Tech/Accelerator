@@ -2,11 +2,18 @@ import { standardPromptTemplateWithProblem } from '../../templates.js';
 
 export const step51 = {
   id: "step51",
-  name: "Hiring Plan",
-  model: "Team Model",
+  name: {
+    en: "Hiring Plan",
+    ar: "خطة التوظيف"
+  },
+  model: {
+    en: "Team Model",
+    ar: "نموذج الفريق"
+  },
   promptTemplate: standardPromptTemplateWithProblem,
   variables: ["solution", "missingSkills", "hiringPlan", "hiringTimeline"],
-  detailedPrompt: `
+  detailedPrompt: {
+    en: `
 The problem being solved is: {{problem}}
 
 Your response MUST be about {{problem}}. Do not discuss unrelated topics.
@@ -20,6 +27,20 @@ Provide:
 
 Structure in professional Markdown with hiring roadmap and cost projections.
   `,
+    ar: `
+المشكلة التي يتم حلها هي: {{problem}}
+
+يجب أن يكون ردك متعلقًا بـ {{problem}}. لا تناقش مواضيع غير مرتبطة.
+
+طور خطة توظيف لـ {{solution}} لـ 12-24 شهر القادمة.
+
+قدم:
+- {{hiringPlan: "خطة التوظيف لـ 12-24 شهر مع الأدوار، التوقيت، والأولويات"}}
+- {{hiringTimeline: "جدول التوظيف ربع سنوي"}}
+
+هيكلة في Markdown احترافي مع خارطة طريق التوظيف وتقديرات التكلفة.
+  `
+  },
   validate: (context) => {
     const issues = [];
     if (!context.hiringPlan) issues.push('Missing hiring plan');

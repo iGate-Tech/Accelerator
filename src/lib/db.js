@@ -192,9 +192,9 @@ export const addTask = async (task) => {
   return { ...result, task: taskWithIds };
 };
 
-export const updateTask = async (id, content) => {
+export const updateTask = async (id, updates) => {
   const { _updateTask } = await import('./database/projects.js');
-  return await _updateTask({ id, content });
+  return await _updateTask({ id, ...updates });
 };
 
 export const deleteTask = async (id) => {

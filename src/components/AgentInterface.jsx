@@ -160,9 +160,9 @@ const AgentInterface = (props) => {
     const placeholderText = createMemo(() => {
         const hasProject = props.currentProjectId && props.currentProjectId();
         if (selectedTaskIdValue()) {
-            return 'Enter instructions for selected task...';
+            return t().enterInstructionsForTask || 'Enter instructions for selected task...';
         } else if (hasProject) {
-            return 'Select a task above to give instructions';
+            return t().selectTaskToGiveInstructions || 'Select a task above to give instructions';
         }
         return t().agentPlaceholder;
     });
@@ -175,7 +175,19 @@ const AgentInterface = (props) => {
                 } w-full max-w-md sm:max-w-lg md:max-w-xl lg:max-w-3xl mx-auto`
             }
             style={
-                (props.startPressed && props.startPressed()) || (props.tasksList && props.tasksList().length > 0) || (props.currentProjectId && props.currentProjectId()) ? "position: fixed !important; bottom: 10px !important; z-index: 50 !important;" : ""
+                (props.startPressed && props.startPressed()) || (props.tasksList && props.tasksList().length > 0) || (props.currentProjectId && props.currentProjectId())
+                    ? {
+                        position: 'sticky',
+                        bottom: '12px',
+                        'z-index': 50,
+                        margin: '0 auto'
+                    }
+                    : {
+                        display: 'flex',
+                        'flex-direction': 'column',
+                        'justify-content': 'center',
+                        'min-height': 'calc(100vh - 8rem)'
+                    }
             }>
 
             <div id="agentContent"

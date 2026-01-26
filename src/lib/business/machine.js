@@ -27,10 +27,21 @@ export const extractData = (response) => {
 
 export const fillPrompt = (template, ctx) => injectTemplateData(template, ctx);
 
-export const buildPrompt = (step, context, instructions) => {
+export const buildPrompt = (step, context, instructions, lang = 'en') => {
   if (!step) return '';
+
+  // Determine which prompt to use based on language
+  let promptContent;
+  if (step.detailedPrompt && typeof step.detailedPrompt === 'object') {
+    // Use bilingual prompt structure
+    promptContent = step.detailedPrompt[lang] || step.detailedPrompt['en'] || '';
+  } else {
+    // Use original prompt structure
+    promptContent = step.detailedPrompt || '';
+  }
+
   const template = typeof step.promptTemplate === 'function'
-    ? step.promptTemplate(step.detailedPrompt, step.variables)
-    : step.detailedPrompt || '';
+    ? step.promptTemplate(promptContent, step.variables, lang)
+    : promptContent || '';
   return fillPrompt(template, { ...context, ...instructions });
 };

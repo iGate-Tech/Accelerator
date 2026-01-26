@@ -2,11 +2,18 @@ import { standardPromptTemplateWithProblem } from '../../templates.js';
 
 export const step22 = {
   id: "step22",
-  name: "API & Integrations",
-  model: "Technical Model",
+  name: {
+    en: "API & Integrations",
+    ar: "API والتكاملات"
+  },
+  model: {
+    en: "Technical Model",
+    ar: "النموذج الفني"
+  },
   promptTemplate: standardPromptTemplateWithProblem,
   variables: ["solution", "integrations"],
-  detailedPrompt: `
+  detailedPrompt: {
+    en: `
 The problem being solved is: {{problem}}
 
 Your response MUST be about {{problem}}. Do not discuss unrelated topics.
@@ -22,5 +29,21 @@ Provide:
 
 Structure in professional Markdown with clear sections, endpoint designs, and integration priorities.
   `,
+    ar: `
+المشكلة التي يتم حلها هي: {{problem}}
+
+يجب أن يكون ردك متعلقًا بـ {{problem}}. لا تناقش مواضيع غير مرتبطة.
+
+صمم استراتيجية API لـ {{solution}}. خطط لتصميم REST/GraphQL، {{integrations}} من الأطراف الثالثة، webhooks، وفرص الشراكات.
+
+قدم:
+- {{apiDesign: "اختيار بنية API (REST، GraphQL، gRPC) مع التبرير"}}
+- {{integrations: "استراتيجية التكامل مع الأطراف الثالثة بما في ذلك الخدمات الأساسية والاختيارية"}}
+- {{webhooks: "تصميم Webhook لبناءة المعمارية القائمة على الأحداث والتكاملات الشريكة"}}
+- {{partnerships: "فرص الشراكات من خلال كشف API وسوق التكامل"}}
+
+هيكلة في Markdown احترافي مع أقسام واضحة، تصاميم النقطة النهائية، وأولويات التكامل.
+  `
+  },
   validate: (context) => ({ valid: true, issues: [] }),
 };

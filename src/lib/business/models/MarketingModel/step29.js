@@ -2,11 +2,18 @@ import { standardPromptTemplateWithProblem } from '../../templates.js';
 
 export const step29 = {
   id: "step29",
-  name: "Market Trends",
-  model: "Marketing Model",
+  name: {
+    en: "Market Trends",
+    ar: "اتجاهات السوق"
+  },
+  model: {
+    en: "Marketing Model",
+    ar: "نموذج التسويق"
+  },
   promptTemplate: standardPromptTemplateWithProblem,
   variables: ["industry", "trends", "tailwinds", "disruption", "futureProjection"],
-  detailedPrompt: `
+  detailedPrompt: {
+    en: `
 The problem being solved is: {{problem}}
 
 Your response MUST be about {{problem}}. Do not discuss unrelated topics.
@@ -22,6 +29,22 @@ Provide:
 
 Structure in professional Markdown with trend analysis, growth metrics, and strategic implications.
   `,
+    ar: `
+المشكلة التي يتم حلها هي: {{problem}}
+
+يجب أن يكون ردك متعلقًا بـ {{problem}}. لا تناقش مواضيع غير مرتبطة.
+
+حدد الاتجاهات أو العوامل الداعمة لنمو {{industry}}. ضمّن المعدلات إن كانت معروفة.
+
+قدم:
+- {{trends: "الاتجاهات السوقية الأساسية التي تدفع النمو مع إحصائيات معدلات النمو المحددة"}}
+- {{tailwinds: "العوامل الداعمة لتوسع السوق بما في ذلك التكنولوجيا، التنظيم، والعوامل الاجتماعية"}}
+- {{disruption: "فرص اضطراب السوق والتوقيت للمبتدئين الجدد"}}
+- {{futureProjection: "توقع السوق لـ 5 سنوات مع افتراضات معدل النمو المركب"}}
+
+هيكلة في Markdown احترافي مع تحليل الاتجاهات، مقاييس النمو، والآثار الاستراتيجية.
+  `
+  },
   validate: (context) => {
     const issues = [];
     if (!context.trends) issues.push('Missing market trends analysis');

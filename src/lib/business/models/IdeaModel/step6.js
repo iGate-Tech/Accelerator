@@ -2,11 +2,18 @@ import { standardPromptTemplateWithProblem } from '../../templates.js';
 
 export const step6 = {
   id: "step6",
-  name: "User Persona",
-  model: "Idea Model",
+  name: {
+    en: "User Persona",
+    ar: "شخصية المستخدم"
+  },
+  model: {
+    en: "Idea Model",
+    ar: "نموذج الفكرة"
+  },
   promptTemplate: standardPromptTemplateWithProblem,
   variables: ["problem"],
-  detailedPrompt: `
+  detailedPrompt: {
+    en: `
 The problem being solved is: {{problem}}
 
 Your response MUST be about {{problem}}. Do not discuss unrelated topics.
@@ -19,5 +26,18 @@ Include:
 - {{decisionProcess: "Step-by-step decision-making process for addressing {{problem}}, including triggers, research methods, and barriers to adoption"}}
 Present in professional Markdown with a persona profile format, bullet points, and practical insights for product development.
 `,
+    ar: `
+المشكلة التي يتم حلها هي: {{problem}}
+
+يجب أن يكون ردك متعلقًا بـ {{problem}}. لا تناقش مواضيع غير مرتبطة.
+
+طور شخصية مستخدم مفصلة لشخص يعاني مباشرة من المشكلة: {{problem}}.
+ضمّن:
+- {{persona: "وصف شامل للشخصية يغطي الخصائص الديموغرافية (العمر، الجنس، الموقع)، التفاصيل المهنية (المسمى الوظيفي، الصناعة، الدخل)، المعلومات النفسية (نقاط الألم، الدوافع)، والخلفية"}}
+- {{workflow: "وصف مفصل لسير عمل المستخدم اليومي، بما في ذلك نقاط الألم المتعلقة بـ {{problem}} وآليات التعامل الحالية"}}
+- {{decisionProcess: "عملية اتخاذ القرار خطوة بخطوة لمعالجة {{problem}}، بما في ذلك المحفزات، طرق البحث، وحواجز التبني"}}
+قدّم في Markdown احترافي بتنسيق ملف تعريف الشخصية، نقاط محددة، ورؤى عملية لتطوير المنتج.
+`
+  },
   validate: (context) => ({ valid: true, issues: [] }),
 };

@@ -338,15 +338,25 @@ export async function _addTask({ task }) {
 export async function _updateTask({ id, content, llm_response }) {
   try {
     const { validateAndSanitizeDbInput } = await import('../auth/security.js');
+    const { ensureDatabaseReady } = await import('./core.js');
 
-    const updates = {};
+    if (!id) {
+      throw new Error('Task ID is required');
+    }
+
+    const db = await ensureDatabaseReady();
+
+    const setClauses = [];
+    const values = [];
 
     if (content !== undefined) {
       const validation = validateAndSanitizeDbInput(content, 'task content');
       if (!validation.valid) {
         throw new Error(`Task validation failed: ${validation.reason}`);
       }
-      updates.content = validation.sanitized;
+      const idx = values.length + 1;
+      setClauses.push(`content = $${idx}`);
+      values.push(validation.sanitized);
     }
 
     if (llm_response !== undefined) {
@@ -354,20 +364,32 @@ export async function _updateTask({ id, content, llm_response }) {
       if (!validation.valid) {
         throw new Error(`LLM response validation failed: ${validation.reason}`);
       }
-      updates.llm_response = validation.sanitized;
+      const idx = values.length + 1;
+      setClauses.push(`llm_response = $${idx}`);
+      values.push(validation.sanitized);
     }
 
-    if (Object.keys(updates).length === 0) {
+    if (setClauses.length === 0) {
       throw new Error('No fields to update');
     }
 
-    const result = await updateEntity({
-      table: 'tasks',
-      idField: 'id',
-      id,
-      updates
-    });
-    return result;
+    const lastModifiedIdx = values.length + 1;
+    setClauses.push(`last_modified = $${lastModifiedIdx}`);
+    values.push(new Date().toISOString());
+
+    const idIdx = values.length + 1;
+    const query = `
+      UPDATE tasks
+      SET ${setClauses.join(', ')}
+      WHERE id = $${idIdx}
+      RETURNING *
+    `;
+
+    values.push(id);
+
+    const result = await db.query(query, values);
+
+    return { success: true, data: result.rows[0] };
   } catch (err) {
     console.error('[_updateTask] Error updating task:', err);
     throw err;
@@ -466,8 +488,13 @@ export async function checkProjectCompletion(projectId) {
       .map(task => task.step_name || 'Unknown Step');
     
     // Get step names for all steps
-    const allStepNames = steps.map(step => step.name);
-    
+    const allStepNames = steps.map(step => {
+      if (typeof step.name === 'object' && step.name !== null) {
+        return step.name['en'] || step.name['ar'] || 'Unknown Step';
+      }
+      return step.name || 'Unknown Step';
+    });
+
     // Find remaining step names
     const remainingStepNames = allStepNames.filter(
       stepName => !completedStepNames.includes(stepName)

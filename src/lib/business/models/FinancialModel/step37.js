@@ -2,11 +2,18 @@ import { standardPromptTemplateWithProblem } from '../../templates.js';
 
 export const step37 = {
   id: "step37",
-  name: "Cost Structure",
-  model: "Financial Model",
+  name: {
+    en: "Cost Structure",
+    ar: "هيكل التكاليف"
+  },
+  model: {
+    en: "Financial Model",
+    ar: "النموذج المالي"
+  },
   promptTemplate: standardPromptTemplateWithProblem,
   variables: ["solution", "fixedCosts", "variableCosts", "costBreakdown"],
-  detailedPrompt: `
+  detailedPrompt: {
+    en: `
 The problem being solved is: {{problem}}
 
 Your response MUST be about {{problem}}. Do not discuss unrelated topics.
@@ -21,6 +28,21 @@ Provide:
 
 Structure in professional Markdown with cost table and percentage breakdown.
   `,
+    ar: `
+المشكلة التي يتم حلها هي: {{problem}}
+
+يجب أن يكون ردك متعلقًا بـ {{problem}}. لا تناقش مواضيع غير مرتبطة.
+
+سرد التكاليف الثابتة والمتغيرة الرئيسية لـ {{solution}}.
+
+قدم:
+- {{fixedCosts: "التكاليف الثابتة الشهرية (الإيجار، الرواتب، البنية التحتية) مع المبالغ"}}
+- {{variableCosts: "التكاليف المتغيرة لكل وحدة أو عميل مع المبالغ"}}
+- {{costBreakdown: "تفكيك هيكل التكلفة الكامل حسب الفئة"}}
+
+هيكلة في Markdown احترافي مع جدول التكلفة وتفكيك النسبة المئوية.
+  `
+  },
   validate: (context) => {
     const issues = [];
     if (!context.fixedCosts) issues.push('Missing fixed costs');

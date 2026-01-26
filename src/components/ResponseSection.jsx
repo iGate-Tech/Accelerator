@@ -103,7 +103,7 @@ const ResponseSection = (props) => {
 
   return (
     <div class="flex-1 max-w-full max-w-3xl w-full mx-auto">
-      {(props.startPressed?.() || (props.tasksList && props.tasksList().length > 0)) ? (
+      {(props.startPressed?.() || (props.currentProjectId && props.currentProjectId()) || (props.tasksList && props.tasksList().length > 0)) ? (
         <div id="contentDiv" class="pb-40 pt-10 max-w-full lg:max-w-6xl mx-auto min-h-[200px]">
           {props.projectName && (
             <div class="mb-6">
@@ -121,10 +121,10 @@ const ResponseSection = (props) => {
 
                 return (
                   <section class="mb-8"
-                          
+
                   >
                     <div class="card bg-base-100 border border-base-300 shadow-sm overflow-hidden"
-                    
+
                     >
                       <button
                         type="button"
@@ -142,12 +142,12 @@ const ResponseSection = (props) => {
                           </span>
                           <div class="flex flex-col min-w-0">
                             <span class="text-lg font-semibold text-base-content truncate">
-                              {modelName} 
+                              {modelName}
                             </span>
                           </div>
                         </div>
                         <div class="flex items-center gap-2 text-base-content/70">
-                      
+
                           <i data-lucide={isCollapsed() ? 'chevron-right' : 'chevron-down'} class="w-4 h-4"></i>
                         </div>
                       </button>
@@ -176,8 +176,24 @@ const ResponseSection = (props) => {
                               setStreamingTaskId={props.setStreamingTaskId}
                               isLastTask={task.id === lastTaskId()}
                               onDelete={props.onDelete}
-                              isExpanded={task.id === expandedTaskId()}
-                              onToggle={() => setExpandedTaskId(task.id === expandedTaskId() ? null : task.id)}
+                              isExpanded={task.id === (props.expandedTaskId ? props.expandedTaskId() : expandedTaskId())}
+                              onToggle={() => {
+                                if (props.setExpandedTaskId) {
+                                  props.setExpandedTaskId(task.id === (props.expandedTaskId ? props.expandedTaskId() : expandedTaskId()) ? null : task.id);
+                                } else {
+                                  setExpandedTaskId(task.id === expandedTaskId() ? null : task.id);
+                                }
+                              }}
+                              onForceExpand={(forcedId) => {
+                                if (forcedId === task.id) {
+                                  if (props.setExpandedTaskId) {
+                                    props.setExpandedTaskId(forcedId);
+                                  } else {
+                                    setExpandedTaskId(forcedId);
+                                  }
+                                  setCollapsedGroups(prev => ({ ...prev, [modelName]: false }));
+                                }
+                              }}
                             />
                           )}
                         </For>
@@ -221,6 +237,13 @@ const ResponseSection = (props) => {
                 );
               }}
             </For>
+          </Show>
+          {/* Show message when project is loaded but no tasks exist */}
+          <Show when={!(props.tasksList && props.tasksList().length > 0)}>
+            <div class="text-center py-10 text-base-content/70">
+              <p>No tasks generated yet for this project.</p>
+              <p class="text-sm mt-2">Use the Agent Interface below to start working on your project.</p>
+            </div>
           </Show>
         </div>
       ) : null}

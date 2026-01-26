@@ -2,11 +2,18 @@ import { standardPromptTemplateWithProblem } from '../../templates.js';
 
 export const step24b = {
   id: "step24b",
-  name: "Timeline Definition",
-  model: "Technical Model",
+  name: {
+    en: "Timeline Definition",
+    ar: "تعريف الجدول الزمني"
+  },
+  model: {
+    en: "Technical Model",
+    ar: "النموذج الفني"
+  },
   promptTemplate: standardPromptTemplateWithProblem,
   variables: ["solution", "mvpFeatures", "milestones"],
-  detailedPrompt: `
+  detailedPrompt: {
+    en: `
 The problem being solved is: {{problem}}
 
 Your response MUST be about {{problem}}. Do not discuss unrelated topics.
@@ -23,6 +30,23 @@ Structure in professional Markdown with Gantt-style timeline, phase descriptions
 
 Also embed {{timeline: "Full timeline for use in subsequent steps"}}.
   `,
+    ar: `
+المشكلة التي يتم حلها هي: {{problem}}
+
+يجب أن يكون ردك متعلقًا بـ {{problem}}. لا تناقش مواضيع غير مرتبطة.
+
+عرّف الجدول الزمني للمشروع لـ {{solution}} بناءً على ميزات MVP {{mvpFeatures}} والإنجازات {{milestones}}.
+
+قدم:
+- {{timeline: "الجدول الزمني الشامل للمشروع مع المراحل، الإنجازات، والمواعيد النهائية"}}
+- {{projectPlan: "خطة المشروع التفصيلية مع المهام، الاعتماديات، والموارد"}}
+- {{developmentPhases: "تقسيم مراحل التطوير مع المدد والتسليمات"}}
+
+هيكلة في Markdown احترافي مع جدول زمني على نمط Gantt، أوصاف المراحل، والإنجازات الأساسية.
+
+ضمّن أيضًا {{timeline: "الجدول الزمني الكامل للاستخدام في الخطوات اللاحقة"}}.
+  `
+  },
   validate: (context) => {
     const issues = [];
     if (!context.timeline) issues.push('Missing timeline');

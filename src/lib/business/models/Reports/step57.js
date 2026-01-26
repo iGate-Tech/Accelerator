@@ -2,8 +2,14 @@ import { generationPromptTemplateWithProblem } from '../../templates.js';
 
 export const step57 = {
   id: "step57",
-  name: "Pitch Deck Generation",
-  model: "Pitch Deck Report",
+  name: {
+    en: "Pitch Deck Generation",
+    ar: "توليد عرض التقديم"
+  },
+  model: {
+    en: "Pitch Deck Report",
+    ar: "تقرير عرض التقديم"
+  },
   promptTemplate: generationPromptTemplateWithProblem,
   variables: ["problem", "solution", "tam", "sam", "som", "coreFeatures", "traction", "modelType", "competitors", "year1", "year2", "year3", "team", "ask", "allocation"],
   detailedPitchDeck: `
@@ -231,7 +237,8 @@ ${'{{allocation}}'}
 
 **Note to Founder:** Customize this template with your specific data, add your company logo, use consistent fonts and colors, include high-quality visuals, and practice your delivery to ensure a polished presentation.
 `,
-  detailedPrompt: `
+  detailedPrompt: {
+    en: `
 The problem being solved is: {{problem}}
 
 Your response MUST be about {{problem}}. Do not discuss unrelated topics.
@@ -315,5 +322,88 @@ Format with clear H2/H3 headings, professional bullet points, tables where appro
 Return plain markdown without wrapping the entire response in code fences or triple backticks.
 
 `,
+    ar: `
+المشكلة التي يتم حلها هي: {{problem}}
+
+يجب أن يكون ردك متعلقًا بـ {{problem}}. لا تناقش مواضيع غير مرتبطة.
+
+أنشئ عرضًا شاملاً جاهزًا للمستثمر PITCH DECK بتنسيق markdown احترافي يروي قصة مقنعة لشركتك الناشئة. استخدم الهيكل والإرشادات التالية:
+
+## ملخص تنفيذي
+اكتب نظرة عامة من 2-3 جمل تغطي المشكلة، الحل، السوق، والتحقيق.
+
+## المشكلة (1-2 شريحة)
+صِف ${'{{problem}}'} بالتفصيل. اشرح:
+- لماذا توجد هذه المشكلة
+- من يعاني منها
+- تكلفة عدم حلها
+- لماذا تفشل الحلول الحالية
+
+## الحل (2-3 شرائح)
+قدّم ${'{{solution}}'} مع:
+- كيف يعمل حلّك
+- الميزات الأساسية: ${'{{coreFeatures}}'}
+- ما الذي يجعله مختلفًا
+- القيمة التي تُنشأها للعملاء
+
+## فرصة السوق (1-2 شرائح)
+قدّم حجم السوق:
+- TAM: ${'{{tam}}'}
+- SAM: ${'{{sam}}'}
+- SOM: ${'{{som}}'}
+- اتجاهات نمو السوق
+- لماذا الآن لهذه الفرصة
+
+## التقدم (1 شريحة)
+أظهر التحقق من ${'{{traction}}'} بما في ذلك:
+- المقاييس الأساسية المحققة
+- أدلة العميل
+- مسار النمو
+- الإنجازات الأساسية
+
+## نموذج العمل (1 شريحة)
+اشرح ${'{{modelType}}'} بما يغطي:
+- كيف تربح المال
+- اقتصاد الوحدة
+- استراتيجية التسعير
+- قابلية التوسع
+
+## المنافسة (1 شريحة)
+حلّل ${'{{competitors}}'} مع:
+- وضعية المنافسة
+- مزاياك
+- استراتيجية الدفاع
+
+## توقعات المالية (1-2 شرائح)
+أظهر توقعات 3 سنوات:
+- السنة 1: ${'{{year1}}'}
+- السنة 2: ${'{{year2}}'}
+- السنة 3: ${'{{year3}}'}
+- الافتراضات الأساسية
+- مسار الربحية
+
+## الفريق (1 شريحة)
+قدّم ${'{{team}}'} مع:
+- خلفيات فريق المؤسسين
+- التعيينات الأساسية المطلوبة
+- الخبرة ذات الصلة
+- مجلس المستشارين
+
+## الطلب (1 شريحة)
+قدّم تفاصيل التمويل:
+- الطلب: ${'{{ask}}'}
+- استخدام الأموال: ${'{{allocation}}'}
+- مدة التشغيل المُنشأة
+- الإنجازات الأساسية
+
+## خارطة الطريق
+أظهر إنجازات الأشهر 12-18 القادمة ومسار التمويل المستقبلي.
+
+---
+التنسيق مع عناوين H2/H3 واضحة، نقاط بULLET احترافية، جداول عند الحاجة، و تدفق سردي مقنع. يجب أن يكون العرض 10-15 شريحة من المحتوى مكثفًا في وثيقة شاملة.
+
+أعد markdown العادي دون لف الرد بالكامل في أطر أو علامات triple backticks.
+`
+  },
   validate: (context) => ({ valid: true, issues: [] }),
 };

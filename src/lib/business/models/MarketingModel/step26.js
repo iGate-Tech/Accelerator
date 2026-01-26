@@ -2,11 +2,18 @@ import { standardPromptTemplateWithProblem } from '../../templates.js';
 
 export const step26 = {
   id: "step26",
-  name: "Total Addressable Market",
-  model: "Marketing Model",
+  name: {
+    en: "Total Addressable Market",
+    ar: "السوق الكلي القابل للعنونة"
+  },
+  model: {
+    en: "Marketing Model",
+    ar: "نموذج التسويق"
+  },
   promptTemplate: standardPromptTemplateWithProblem,
   variables: ["industry", "tam", "calculationMethod", "dataSources", "tamRationale"],
-  detailedPrompt: `
+  detailedPrompt: {
+    en: `
 The problem being solved is: {{problem}}
 
 Your response MUST be about {{problem}}. Do not discuss unrelated topics.
@@ -22,6 +29,22 @@ Provide:
 
 Structure in professional Markdown with calculation breakdowns, assumptions, and source citations.
   `,
+    ar: `
+المشكلة التي يتم حلها هي: {{problem}}
+
+يجب أن يكون ردك متعلقًا بـ {{problem}}. لا تناقش مواضيع غير مرتبطة.
+
+قدّر السوق الكلي القابل للعنونة (TAM) لـ {{industry}}. اشرح طريقة الحساب.
+
+قدم:
+- {{tam: "قيمة السوق الكلي القابل للعنونة بالدولار مع منهجية الحساب الواضحة"}}
+- {{calculationMethod: "نهج حساب TAM (من الأعلى إلى الأسفل، من الأسفل إلى الأعلى، أو مختلط) مع الافتراضات"}}
+- {{dataSources: "مصادر البيانات والمراجع التي تدعم تقدير حجم السوق"}}
+- {{tamRationale: "السبب في أن {{industry}} يمثل فرصة السوق الكاملة"}}
+
+هيكلة في Markdown احترافي مع تفكيك الحسابات، الافتراضات، واقتباسات المصدر.
+  `
+  },
   validate: (context) => {
     const issues = [];
     if (!context.tam) issues.push('Missing TAM value');

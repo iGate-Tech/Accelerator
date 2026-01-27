@@ -3,6 +3,20 @@ import { defineConfig } from 'vite';
 import solidPlugin from 'vite-plugin-solid';
 import { VitePWA } from 'vite-plugin-pwa';
 
+// Plugin to set proper headers for WASM files required by PGLite
+const wasmHeadersPlugin = {
+  name: 'wasm-headers',
+  configureServer(server) {
+    server.middlewares.use((req, res, next) => {
+      if (req.url.endsWith('.wasm')) {
+        res.setHeader('Cross-Origin-Embedder-Policy', 'require-corp');
+        res.setHeader('Cross-Origin-Opener-Policy', 'same-origin');
+      }
+      next();
+    });
+  }
+};
+
 export default defineConfig({
   resolve: {
     alias: {

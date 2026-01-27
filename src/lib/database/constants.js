@@ -10,14 +10,16 @@ export const DATABASE_CONFIG = {
 
   // Pglite configuration
   pglite: {
-    // Use relaxedDurability for performance, but with proper write-through
-    relaxedDurability: false,  // Changed to false for consistency
+    // Use relaxedDurability for better performance with IndexedDB
+    relaxedDurability: true,
     // Operation timeout to prevent hangs
     timeout: 30000,
     // Max concurrent operations (1 for deterministic behavior)
     maxConcurrent: 1,
     // Enable WAL mode for better crash recovery
-    wal: true
+    wal: true,
+    // Additional recommended settings for browser environments
+    debug: 0  // Set to 1-5 for debugging if needed
   },
 
   // Storage limits
@@ -42,7 +44,6 @@ export const DATABASE_CONFIG = {
 };
 
 // Derived constants for convenience
-export const IDB_URL = `idb://${DATABASE_CONFIG.name}`;
 export const MEMORY_URL = 'memory://';
 
 // Schema tables (single source of truth for expected tables)

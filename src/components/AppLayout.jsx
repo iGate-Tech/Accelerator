@@ -3,8 +3,10 @@ import {LangContext} from "../context/LangContext";
 import { getPg } from "@lib/database/core.js";
 
 import Sidebar from "./Sidebar";
+import { ToastContainer } from "./GlobalUI";
 import favicon from "../assets/images/favicon.svg";
 import { logger } from '@lib/core';
+import { initializeTheme } from '../lib/theme';
 
 
 
@@ -34,13 +36,7 @@ const AppLayout = (props) => {
             window.lucide.createIcons();
 
         // Initialize theme
-        const savedTheme = localStorage.getItem('theme') || 'light';
-        document.documentElement.setAttribute('data-theme', savedTheme);
-        const themeController = document.getElementById('theme-controller');
-        if (themeController)
-            themeController.checked = savedTheme === 'dark';
-
-
+        initializeTheme();
 
         // Initialize database
         try {

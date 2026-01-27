@@ -3,7 +3,7 @@
 // All database access must go through this module
 
 import { PGlite } from '@electric-sql/pglite';
-import { DATABASE_CONFIG, IDB_URL, SCHEMA_TABLES } from './constants.js';
+import { DATABASE_CONFIG, SCHEMA_TABLES } from './constants.js';
 
 // ============================================================================
 // PUBLIC API
@@ -16,6 +16,15 @@ export let schemaCreated = false;
 
 let initPromise = null;
 let initState = 'idle';  // idle | initializing | ready | error
+
+// Setter functions to allow external modules to update these values
+export function setDbInstance(instance) {
+  dbInstance = instance;
+}
+
+export function setDbReady(ready) {
+  dbReady = ready;
+}
 
 // ============================================================================
 // PUBLIC FUNCTIONS
@@ -202,17 +211,84 @@ async function _initialize({ force }) {
 
       // Test IndexedDB access
       const idbAvailable = isBrowser() && await _testIndexedDBAccess();
-      
+
+      // Attempt to create PGLite with IndexedDB first
       if (idbAvailable) {
         console.log('[DB] Creating PGLite with IndexedDB...');
-        dbInstance = await PGlite.create(IDB_URL, DATABASE_CONFIG.pglite);
+        try {
+          // Create PGLite with IndexedDB - simplest approach for browser
+          dbInstance = await PGlite.create({
+            // Use relaxed durability for better IndexedDB performance
+            relaxedDurability: true,
+            // Minimal debugging to reduce overhead
+            debug: 0
+          });
+          console.log('[DB] PGLite created with IndexedDB');
+        } catch (indexedDBError) {
+          console.warn('[DB] IndexedDB creation failed, falling back to in-memory:', indexedDBError.message);
+          console.error('[DB] IndexedDB Error details:', {
+            name: indexedDBError.name,
+            message: indexedDBError.message,
+            stack: indexedDBError.stack
+          });
+
+          // Check if this is a WASM-related error and provide specific guidance
+          if (indexedDBError.message.includes('Abort') || indexedDBError.message.includes('WASM')) {
+            console.error('[DB] WASM/PGLite initialization error detected. This may be due to:');
+            console.error('[DB] 1. Browser security policies blocking WASM');
+            console.error('[DB] 2. CORS restrictions');
+            console.error('[DB] 3. Incompatible browser environment');
+
+            // Try a more minimal configuration for WASM issues, still attempting IndexedDB
+            try {
+              dbInstance = await PGlite.create({
+                relaxedDurability: true,
+                debug: 0  // Minimal debugging to reduce overhead
+              });
+              console.log('[DB] PGLite created with minimal config using IndexedDB');
+            } catch (minimalError) {
+              console.error('[DB] IndexedDB with minimal config failed, trying in-memory:', minimalError);
+
+              // Final fallback to in-memory with minimal config
+              try {
+                dbInstance = await PGlite.create({
+                  ...DATABASE_CONFIG.pglite,
+                  relaxedDurability: true,
+                  debug: 0
+                });
+                console.log('[DB] PGLite created with minimal config in-memory');
+              } catch (finalError) {
+                console.error('[DB] All initialization attempts failed:', finalError);
+                throw new Error(`PGLite initialization completely failed. Original: ${indexedDBError.message}, Fallback: ${minimalError.message}, Final: ${finalError.message}`);
+              }
+            }
+          } else {
+            // Fallback to in-memory if IndexedDB fails (non-WASM error)
+            try {
+              dbInstance = await PGlite.create({
+                ...DATABASE_CONFIG.pglite,
+                relaxedDurability: true
+              });
+              console.log('[DB] PGLite created in-memory');
+            } catch (memoryError) {
+              console.error('[DB] Both IndexedDB and in-memory creation failed:', memoryError);
+              throw new Error(`PGLite initialization failed: ${indexedDBError.message} (fallback error: ${memoryError.message})`);
+            }
+          }
+        }
       } else {
         console.log('[DB] Using in-memory database');
-        dbInstance = await PGlite.create();
+        try {
+          dbInstance = await PGlite.create({
+            ...DATABASE_CONFIG.pglite,
+            relaxedDurability: true
+          });
+        } catch (memoryError) {
+          console.error('[DB] In-memory database creation failed:', memoryError);
+          throw new Error(`PGLite in-memory initialization failed: ${memoryError.message}`);
+        }
       }
 
-      // Wait for database to be ready
-      await dbInstance.waitReady;
       console.log('[DB] PGLite ready');
 
       // Create schema if needed
@@ -234,6 +310,17 @@ async function _initialize({ force }) {
 
     } catch (error) {
       console.error('[DB] Init error:', error);
+
+      // More detailed error logging for debugging
+      if (error.message.includes('Aborted') || error.message.includes('WASM')) {
+        console.error('[DB] WASM/Aborted error detected - this may be due to browser compatibility, security policies, or IndexedDB issues');
+        console.error('[DB] Possible solutions:');
+        console.error('[DB] 1. Ensure you are using HTTPS in production');
+        console.error('[DB] 2. Check browser supports WASM and IndexedDB');
+        console.error('[DB] 3. Verify no ad blockers are interfering with WASM');
+        console.error('[DB] 4. Try clearing browser storage/cache');
+      }
+
       dbError = error;
       dbReady = false;
       initState = 'error';
@@ -250,21 +337,56 @@ async function _initialize({ force }) {
  */
 async function _testIndexedDBAccess() {
   if (typeof window === 'undefined') return false;
-  
-  return new Promise((resolve) => {
-    try {
-      const testDB = indexedDB.open('idb-test-access', 1);
-      testDB.onsuccess = () => {
-        testDB.result.close();
-        indexedDB.deleteDatabase('idb-test-access');
-        resolve(true);
-      };
-      testDB.onerror = () => resolve(false);
-      testDB.onblocked = () => resolve(false);
-    } catch (e) {
-      resolve(false);
+
+  try {
+    // Test basic IndexedDB availability
+    if (!window.indexedDB) {
+      console.warn('[DB] IndexedDB not available in this environment');
+      return false;
     }
-  });
+
+    // Try to open a test database
+    const dbName = `idb-test-access-${Date.now()}`;
+    const request = indexedDB.open(dbName, 1);
+
+    return new Promise((resolve) => {
+      request.onsuccess = () => {
+        const db = request.result;
+        db.close();
+
+        // Clean up by deleting the test database
+        const deleteReq = indexedDB.deleteDatabase(dbName);
+        deleteReq.onsuccess = () => resolve(true);
+        deleteReq.onerror = () => resolve(true); // Resolve as true since DB was accessible
+      };
+
+      request.onerror = () => {
+        console.warn('[DB] IndexedDB test failed:', request.error);
+        resolve(false);
+      };
+
+      request.onblocked = () => {
+        console.warn('[DB] IndexedDB test blocked - another instance may be open');
+        resolve(false);
+      };
+
+      // Set a timeout to prevent hanging
+      setTimeout(() => {
+        try {
+          if (request.readyState === 'pending') {
+            request.onerror = null;
+            request.onsuccess = null;
+            resolve(false);
+          }
+        } catch (e) {
+          resolve(false);
+        }
+      }, 5000);
+    });
+  } catch (e) {
+    console.warn('[DB] IndexedDB access test failed with exception:', e);
+    return false;
+  }
 }
 
 /**

@@ -96,9 +96,11 @@ const Footer = ({isCollapsed, notifications}) => {
                         </A>
                         <button class="flex items-center justify-center p-3 hover:bg-base-300 transition-colors rounded-lg relative group normal-case"
                             onClick={() => {
-                                const next = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
-                                document.documentElement.setAttribute('data-theme', next);
-                                localStorage.setItem('theme', next);
+                                import('../lib/theme').then(({ applyTheme }) => {
+                                  const currentTheme = localStorage.getItem('theme') || 'light';
+                                  const next = currentTheme === 'dark' || (currentTheme === 'auto' && window.matchMedia('(prefers-color-scheme: dark)').matches) ? 'light' : 'dark';
+                                  applyTheme(next);
+                                });
                             }}
                             aria-label="Toggle theme">
                             <i data-lucide="sun-moon" class="w-5 h-5 text-base-content/40"></i>

@@ -3,84 +3,26 @@
 import { PGlite } from '@electric-sql/pglite';
 import { v4 as uuidv4 } from 'uuid';
 import { logger } from '../core';
-import { dbInstance, dbReady, ensureDatabaseReady } from './core';
+import { dbInstance, dbReady, ensureDatabaseReady, setDbInstance, setDbReady, getPg } from './core';
 
 const getCurrentUser = async () => {
   return { id: 1 };
 };
 
 async function _query(sql, params = []) {
-  await ensureDatabaseReady();
-  return dbInstance.query(sql, params);
+  const db = await getPg();
+  return db.query(sql, params);
 }
 
 async function _exec(sql) {
-  await ensureDatabaseReady();
-  return dbInstance.exec(sql);
+  const db = await getPg();
+  return db.exec(sql);
 }
 
-// Initialize PGLite database
+// Initialize PGLite database - DEPRECATED: Use initDatabase from core.js instead
 async function initDatabaseOld() {
-  if (dbReady) return dbInstance;
-
-  const options = { dataDir: 'idb://accelerator-db-v22' };
-
-  // Test IndexedDB access before attempting PGLite
-  let indexedDBAvailable = false;
-  try {
-    console.log('Testing IndexedDB access...');
-    const testDB = indexedDB.open('test-db-access', 1);
-    await new Promise((resolve, reject) => {
-      testDB.onsuccess = () => {
-        testDB.result.close();
-        indexedDB.deleteDatabase('test-db-access');
-        console.log('IndexedDB access test: PASSED');
-        indexedDBAvailable = true;
-        resolve();
-      };
-      testDB.onerror = () => {
-        console.log('IndexedDB access test: FAILED');
-        reject(new Error('IndexedDB not accessible'));
-      };
-      testDB.onblocked = () => {
-        console.log('IndexedDB access test: BLOCKED');
-        reject(new Error('IndexedDB blocked'));
-      };
-    });
-  } catch (testError) {
-    console.warn('IndexedDB test failed:', testError.message);
-  }
-
-  try {
-    if (indexedDBAvailable) {
-      console.log('Creating PGLite database instance with persistence...');
-      dbInstance = new PGlite(options.dataDir, { relaxedDurability: true });
-      console.log('PGLite database instance created successfully');
-      await createSchema();
-    } else {
-      throw new Error('IndexedDB not available');
-    }
-  } catch (error) {
-    console.error('Failed to initialize database with persistence:', {
-      name: error.name,
-      message: error.message,
-      stack: error.stack
-    });
-    console.warn('IndexedDB not available, falling back to in-memory database');
-    try {
-      console.log('Creating PGLite database instance in-memory...');
-      dbInstance = new PGlite();
-      console.log('PGLite in-memory database instance created successfully');
-      await createSchema();
-    } catch (fallbackError) {
-      console.error('Failed to initialize in-memory database:', fallbackError);
-      throw fallbackError;
-    }
-  }
-
-  dbReady = true;
-  console.log(`Database initialized successfully (${indexedDBAvailable ? 'persistent' : 'in-memory'})`);
-  return dbInstance;
+  console.warn('Using deprecated initDatabaseOld function. Use initDatabase from core.js instead.');
+  return await initDatabase({ dataDir: 'idb://accelerator-db-v22' });
 }
 
 // Create database schema
@@ -378,8 +320,8 @@ export async function transaction(operations) {
 export async function close() {
   if (dbInstance) {
     await dbInstance.close();
-    dbInstance = null;
-    dbReady = false;
+    setDbInstance(null);
+    setDbReady(false);
   }
   return { success: true };
 }
@@ -704,69 +646,11 @@ CREATE TABLE IF NOT EXISTS project_votes (
 
 export async function initDatabase(options = {}) {
   console.log('initDatabase called with options:', options);
+  console.warn('Using deprecated initDatabase function in operations.js. Use initDatabase from core.js instead.');
 
-  // Always ensure schema exists (CREATE IF NOT EXISTS will handle duplicates)
-  console.debug('[DB Worker] Ensuring database schema exists...');
-
-  let usePersistence = true;
-
-  // Test IndexedDB access before attempting PGLite
-  let indexedDBAvailable = false;
-  try {
-    console.log('Testing IndexedDB access...');
-    const testDB = indexedDB.open('test-db-access', 1);
-    await new Promise((resolve, reject) => {
-      testDB.onsuccess = () => {
-        testDB.result.close();
-        indexedDB.deleteDatabase('test-db-access');
-        console.log('IndexedDB access test: PASSED');
-        indexedDBAvailable = true;
-        resolve();
-      };
-      testDB.onerror = () => {
-        console.log('IndexedDB access test: FAILED');
-        reject(new Error('IndexedDB not accessible'));
-      };
-      testDB.onblocked = () => {
-        console.log('IndexedDB access test: BLOCKED');
-        reject(new Error('IndexedDB blocked'));
-      };
-    });
-  } catch (testError) {
-    console.warn('IndexedDB test failed:', testError.message);
-  }
-
-  try {
-    if (indexedDBAvailable) {
-      console.log('Creating PGLite database instance with persistence...');
-      dbInstance = new PGlite(options.dataDir, { relaxedDurability: true });
-      console.log('PGLite database instance created successfully');
-      await createSchema();
-      usePersistence = true;
-    } else {
-      throw new Error('IndexedDB not available');
-    }
-  } catch (error) {
-    console.error('Failed to initialize database with persistence:', {
-      name: error.name,
-      message: error.message,
-      stack: error.stack
-    });
-    console.warn('IndexedDB not available, falling back to in-memory database');
-    usePersistence = false;
-    try {
-      console.log('Creating PGLite database instance in-memory...');
-      dbInstance = new PGlite();
-      console.log('PGLite in-memory database instance created successfully');
-      await createSchema();
-    } catch (fallbackError) {
-      console.error('Failed to initialize in-memory database:', fallbackError);
-      throw fallbackError;
-    }
-  }
-
-  console.log(`Database initialized successfully (${usePersistence ? 'persistent' : 'in-memory'})`);
-  return { success: true, persistent: usePersistence };
+  // Redirect to the centralized initialization in core.js
+  const db = await import('./core.js');
+  return await db.initDatabase(options);
 }
 
 export async function createUser({ email, passwordHash, profile = {}, userId = null }) {
@@ -1717,40 +1601,16 @@ class DatabaseWorker {
     if (this.initialized) return;
 
     try {
-      logger.debug('Creating database worker instance');
-      this.worker = new PgliteWorker();
+      logger.debug('Using centralized database instance from core');
+      // Use the centralized database instance instead of a separate worker
+      // The database is already initialized via the core module
+      const { ensureDatabaseReady } = await import('./core.js');
+      await ensureDatabaseReady();
 
-  this.worker.onmessage = (e) => {
-    const { id, success, result, error, type } = e.data;
-    const resolver = pendingRequests.get(id);
-    if (resolver) {
-      pendingRequests.delete(id);
-      if (success) {
-        resolver.resolve(result);
-      } else {
-        resolver.reject(new Error(error));
-      }
-    }
-  };
-
-      this.worker.onerror = (error) => {
-        logger.error('Worker error:', error);
-        // Reject all pending requests on worker error
-        for (const [id, resolver] of pendingRequests) {
-          resolver.reject(new Error('Database worker error'));
-        }
-        pendingRequests.clear();
-      };
-
-      // Initialize the database with timeout
-      logger.debug('Initializing database...');
-       await Promise.race([
-          this.sendMessage('init', { dataDir: 'idb://accelerator-db-v22' }),
-         new Promise((_, reject) => setTimeout(() => reject(new Error('Database init timeout')), 30000))
-       ]);
+      logger.debug('Database instance ready via core module');
       this.initialized = true;
 
-      logger.debug('Database worker initialized successfully');
+      logger.debug('Database ready via core module');
        // Check if database is already seeded
        const alreadySeeded = await isSeeded();
        if (!alreadySeeded) {
@@ -1760,7 +1620,7 @@ class DatabaseWorker {
          logger.debug('Database already seeded, skipping seeding');
        }
      } catch (error) {
-       logger.error('Failed to initialize database worker:', error);
+       logger.error('Failed to initialize database via core:', error);
        // Set a flag to indicate database is unavailable
        this.dbUnavailable = true;
        logger.warn('Database unavailable, app will work in limited mode');
@@ -1770,17 +1630,47 @@ class DatabaseWorker {
 
   async sendMessage(type, data) {
     logger.trace('DatabaseWorker: sendMessage called - type:', type, 'data keys:', Object.keys(data || {}));
-    return new Promise((resolve, reject) => {
-      const id = nextRequestId++;
-      logger.debug('DatabaseWorker: sending message id:', id, 'type:', type);
-      pendingRequests.set(id, { resolve, reject });
 
-      // Deep clone data to ensure it's cloneable, handling circular references and non-serializable objects
-      const serializableData = this.deepCloneSerializable(data);
-      logger.trace('DatabaseWorker: data serialized, posting message');
-      this.worker.postMessage({ id, type, payload: serializableData });
-      logger.trace('DatabaseWorker: message posted to worker');
-    });
+    // Use centralized database functions instead of worker
+    const { getDbInstance, query, exec, initDatabase } = await import('./core.js');
+
+    try {
+      switch (type) {
+        case 'init':
+          const initDb = await initDatabase(data);
+          return initDb;
+        case 'query':
+          return await query(data.sql, data.params || []);
+        case 'exec':
+          return await exec(data.sql);
+        case 'isSeeded':
+          // Check if database has been seeded by checking for existence of data
+          const seedDb = await getDbInstance();
+          const result = await seedDb.query("SELECT COUNT(*) as count FROM users LIMIT 1");
+          return result.rows[0].count > 0;
+        case 'transaction':
+          // Use direct database access for transactions
+          const txDb = await getDbInstance();
+          const results = [];
+          await txDb.transaction(async (tx) => {
+            for (const op of data.operations) {
+              const res = await tx.query(op.sql, op.params || []);
+              results.push({ rows: res.rows, rowCount: res.rowCount });
+            }
+          });
+          return { results };
+        case 'close':
+          // Close database connection
+          const closeDb = await getDbInstance();
+          await closeDb.close();
+          return { success: true };
+        default:
+          throw new Error(`Unknown message type: ${type}`);
+      }
+    } catch (error) {
+      logger.error(`Error executing ${type}:`, error);
+      throw error;
+    }
   }
 
   // Helper method to deep clone data while filtering out non-serializable objects
@@ -2182,14 +2072,6 @@ class DatabaseWorker {
   }
 }
 
-let pgInstance = null;
-
-export const getPg = async () => {
-  if (!dbReady) {
-    await initDatabaseOld();
-  }
-  return dbInstance;
-};
 
 // Fallback implementations for when database is unavailable
 const createFallbackResponse = (message) => ({

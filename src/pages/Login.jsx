@@ -91,13 +91,14 @@ const Login = () => {
             <p class="text-base-content/60">{t().signInToAccount}</p>
           </div>
 
-          <form onSubmit={handleLogin} class="space-y-4">
+          <form onSubmit={handleLogin} class="space-y-4" id="login-form">
             <div>
                <label class="label">
                  <span class="label-text">{t().email}</span>
                </label>
                 <input
                   type="email"
+                  id="login-email"
                   placeholder={t().emailPlaceholderLogin}
                   class="input input-bordered w-full"
                   value={email()}
@@ -114,6 +115,7 @@ const Login = () => {
               <div class="relative">
                  <input
                    type={showPassword() ? "text" : "password"}
+                   id="login-password"
                    placeholder={t().passwordPlaceholder}
                    class="input input-bordered w-full pr-10"
                    value={password()}
@@ -141,6 +143,7 @@ const Login = () => {
                     class="checkbox checkbox-primary checkbox-xs"
                     checked={rememberMe()}
                     onChange={(e) => setRememberMe(e.target.checked)}
+                    autocomplete="off"
                   />
                  <span class="text-sm">{t().rememberMe || 'Remember me'}</span>
                </label>

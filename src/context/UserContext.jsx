@@ -25,24 +25,33 @@ export const UserProvider = (props) => {
       const token = await secureLocalStorage.getItem('userToken');
       if (!token) return false;
 
-      const { getSessionByToken } = await import('../lib/database');
-      const sessionData = await getSessionByToken(token);
+      // Try to verify session in database, but don't fail if DB isn't ready
+      try {
+        const { getSessionByToken } = await import('../lib/database');
+        const sessionData = await getSessionByToken(token);
 
-      if (!sessionData) {
-        // Session doesn't exist, clear local auth
-        await logout();
-        return false;
+        if (!sessionData) {
+          // Session doesn't exist, clear local auth
+          await logout();
+          return false;
+        }
+
+        // Check if session is expired
+        const expiresAt = new Date(sessionData.expires_at);
+        if (expiresAt < new Date()) {
+          // Session expired, clear it
+          await logout();
+          return false;
+        }
+
+        setSession(sessionData);
+      } catch (sessionError) {
+        // If database isn't ready, just verify the token exists in localStorage
+        logger.debug('Database not ready for session check, using token existence:', sessionError.message);
+        // Since we have a token in localStorage, assume session is valid for now
+        // Full validation will happen later when DB is ready
       }
 
-      // Check if session is expired
-      const expiresAt = new Date(sessionData.expires_at);
-      if (expiresAt < new Date()) {
-        // Session expired, clear it
-        await logout();
-        return false;
-      }
-
-      setSession(sessionData);
       return true;
     } catch (error) {
       logger.error('Session check failed:', error);
@@ -256,10 +265,15 @@ export const UserProvider = (props) => {
       // Invalidate JWT token and delete session
       const token = await secureLocalStorage.getItem('userToken');
       if (token) {
-        const { deleteSession } = await import('../lib/database');
-        await deleteSession(token);
+        try {
+          const { deleteSession } = await import('../lib/database');
+          await deleteSession(token);
+          logger.info('JWT token invalidated and session deleted');
+        } catch (sessionError) {
+          logger.debug('Session cleanup failed (database may not be ready):', sessionError.message);
+          // Continue with logout even if session cleanup fails
+        }
         secureLocalStorage.removeItem('userToken');
-        logger.info('JWT token invalidated and session deleted');
       }
 
       if (user()) {
@@ -269,7 +283,7 @@ export const UserProvider = (props) => {
       setUser(null);
       setIsAuthenticated(false);
       setSession(null);
-      localStorage.removeItem('userData');
+      secureLocalStorage.removeItem('userData');
       logger.info('User logout successful');
       toastManager.success('Logged out successfully');
     } catch (error) {
@@ -540,29 +554,39 @@ export const UserProvider = (props) => {
         if (parsedUser && parsedUser.id) {
 
           const userId = parsedUser.id;
-          let profileData = await getUserProfile(userId);
+          let profileData = {};
 
-          // Check if user exists in database
-          if (!profileData) {
-            logger.warn('User data found but user not in database - creating user in database');
-            try {
-              const { createUser, createUserProfile } = await import('../lib/database');
-              await createUser(parsedUser.email, 'dummy', parsedUser.profile || {}, parsedUser.id);
-              await createUserProfile(parsedUser.id, parsedUser.profile || {});
-              profileData = await getUserProfile(parsedUser.id); // Refresh profileData
-            } catch (error) {
-              logger.error('Failed to create user in database:', error);
-              await secureLocalStorage.removeItem('userData');
-              await secureLocalStorage.removeItem('userToken');
-              setUser(null);
-              await setCurrentUser(null);
-              setIsAuthenticated(false);
-               return false;
+          // Attempt to get profile data from database, but don't fail if DB isn't ready
+          try {
+            profileData = await getUserProfile(userId);
+
+            // Check if user exists in database
+            if (!profileData) {
+              logger.warn('User data found but user not in database - creating user in database');
+              try {
+                const { createUser, createUserProfile } = await import('../lib/database');
+                await createUser(parsedUser.email, 'dummy', parsedUser.profile || {}, parsedUser.id);
+                await createUserProfile(parsedUser.id, parsedUser.profile || {});
+                profileData = await getUserProfile(parsedUser.id); // Refresh profileData
+              } catch (error) {
+                logger.error('Failed to create user in database:', error);
+                await secureLocalStorage.removeItem('userData');
+                await secureLocalStorage.removeItem('userToken');
+                setUser(null);
+                await setCurrentUser(null);
+                setIsAuthenticated(false);
+                 return false;
+               }
              }
+           } catch (profileError) {
+             // If database isn't ready, use the parsed user data as-is
+             logger.debug('Database not ready for profile lookup, using cached data:', profileError.message);
+             profileData = parsedUser.profile || {};
            }
 
            let subscriptionData = { plan: 'free', status: 'active', price: 0, renewalDate: null, maxCredits: 100 };
            let creditBalance = 50;
+
            try {
              const userSubscription = await getUserSubscription(userId);
              if (userSubscription) {
@@ -583,8 +607,8 @@ export const UserProvider = (props) => {
 
             const userData = {
               ...parsedUser,
-              avatar: (profileData?.avatar && !profileData?.avatar.startsWith('/default')) 
-                ? profileData?.avatar 
+              avatar: (profileData?.avatar && !profileData?.avatar.startsWith('/default'))
+                ? profileData?.avatar
                 : (parsedUser.avatar && !parsedUser.avatar.startsWith('/default'))
                   ? parsedUser.avatar
                   : DEFAULT_AVATAR,
@@ -624,35 +648,37 @@ export const UserProvider = (props) => {
   onMount(async () => {
     logger.info('UserProvider initialization started');
 
+    // Perform immediate authentication check using localStorage without waiting for database
+    // Just check if user token exists to enable fast authentication
+    try {
+      const token = await secureLocalStorage.getItem('userToken');
+      const savedUserData = await secureLocalStorage.getItem('userData');
+
+      if (token && savedUserData && savedUserData.id) {
+        // User appears to be authenticated, set immediately for fast UX
+        setUser(savedUserData);
+        await setCurrentUser(savedUserData);
+        setIsAuthenticated(true);
+        logger.debug('Immediate authentication enabled from localStorage');
+      }
+    } catch (error) {
+      logger.debug('Immediate auth check failed (expected during startup):', error.message);
+    }
+
+    // Initialize database in the background without blocking authentication
     try {
       await initDatabase();
     } catch (error) {
       logger.debug('Database init in background failed:', error.message);
     }
 
+    // Perform full authentication check after database is potentially ready
     try {
-      const savedUserData = await secureLocalStorage.getItem('userData');
-      if (savedUserData) {
-        try {
-          if (savedUserData && savedUserData.id) {
-            setUser(savedUserData);
-            await setCurrentUser(savedUserData);
-            setIsAuthenticated(true);
-            logger.debug('User loaded from secure localStorage');
-          } else {
-            secureLocalStorage.removeItem('userData');
-          }
-        } catch (parseError) {
-          logger.error('Error parsing saved user data:', parseError);
-          secureLocalStorage.removeItem('userData');
-        }
-      }
-
-      logger.debug('Starting checkAuth...');
+      logger.debug('Starting full checkAuth...');
       await checkAuth();
-      logger.debug('checkAuth completed');
+      logger.debug('Full checkAuth completed');
     } catch (error) {
-      logger.error('checkAuth failed:', error);
+      logger.error('Full checkAuth failed:', error);
       setUser(null);
       setIsAuthenticated(false);
     }

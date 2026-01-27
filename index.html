@@ -13,6 +13,35 @@
     <link rel="icon" type="image/svg+xml" href="/favicon.svg">
     <!-- <link rel="apple-touch-icon" href="/avatar.png"> -->
 
+    <script>
+      // Apply theme as early as possible to prevent flash of unstyled content
+      (function() {
+        // Get saved theme from localStorage or default to light
+        const savedTheme = localStorage.getItem('theme') || 'light';
+
+        // Determine actual theme based on user preference
+        let actualTheme = savedTheme;
+        if (savedTheme === 'auto') {
+          // Check system preference
+          actualTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        }
+
+        // Apply the theme to the document element
+        document.documentElement.setAttribute('data-theme', actualTheme);
+
+        // Listen for system theme changes if using auto theme
+        if (savedTheme === 'auto' && window.matchMedia) {
+          const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+          mediaQuery.addEventListener('change', function(e) {
+            if (localStorage.getItem('theme') === 'auto') {
+              const newTheme = e.matches ? 'dark' : 'light';
+              document.documentElement.setAttribute('data-theme', newTheme);
+            }
+          });
+        }
+      })();
+    </script>
+
   </head>
 <body>
   <div id="root"></div>

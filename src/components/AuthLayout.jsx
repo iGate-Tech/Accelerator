@@ -5,6 +5,7 @@ import {getPg} from "@lib/database";
 import { ToastContainer } from "./GlobalUI";
 import favicon from "../assets/images/favicon.svg";
 import { logger } from '@lib/core';
+import { initializeTheme, applyTheme } from '../lib/theme';
 
 
 
@@ -34,12 +35,11 @@ const AuthLayout = (props) => {
             window.lucide.createIcons();
 
         // Initialize theme
+        initializeTheme();
+
+        // Update local state to reflect current theme
         const savedTheme = localStorage.getItem('theme') || 'light';
-        document.documentElement.setAttribute('data-theme', savedTheme);
         setTheme(savedTheme);
-        const themeController = document.getElementById('theme-controller');
-        if (themeController)
-            themeController.checked = savedTheme === 'dark';
 
 
 
@@ -85,8 +85,7 @@ const AuthLayout = (props) => {
                             onChange={(e) => {
                                 const newTheme = e.target.checked ? 'dark' : 'light';
                                 setTheme(newTheme);
-                                document.documentElement.setAttribute('data-theme', newTheme);
-                                localStorage.setItem('theme', newTheme);
+                                applyTheme(newTheme); // Use the new theme utility
                             }}
                         />
                         <i data-lucide="sun" class="swap-off h-5 w-5"></i>

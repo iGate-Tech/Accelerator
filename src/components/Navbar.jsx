@@ -125,8 +125,9 @@ const Navbar = () => {
               value="dark"
               onChange={(e) => {
                 const theme = e.target.checked ? 'dark' : 'light';
-                document.documentElement.setAttribute('data-theme', theme);
-                localStorage.setItem('theme', theme);
+                import('../lib/theme').then(({ applyTheme }) => {
+                  applyTheme(theme);
+                });
               }}
             />
             <i data-lucide="sun" class="swap-off h-5 w-5"></i>

@@ -187,13 +187,14 @@ const Signup = () => {
              <p class="text-base-content/60">{t().joinJourney}</p>
           </div>
 
-          <form onSubmit={handleSignup} class="space-y-4">
+          <form onSubmit={handleSignup} class="space-y-4" autocomplete="on" id="signup-form">
             <div>
                <label class="label">
                  <span class="label-text">{t().fullName}</span>
                </label>
                <input
                  type="text"
+                 id="signup-name"
                  placeholder={t().fullNamePlaceholder}
                  class="input input-bordered w-full"
                  value={formData().name}
@@ -209,6 +210,7 @@ const Signup = () => {
                </label>
                 <input
                   type="email"
+                  id="signup-email"
                   placeholder={t().emailPlaceholderSignup}
                   class="input input-bordered w-full"
                   value={formData().email}
@@ -225,6 +227,7 @@ const Signup = () => {
               <div class="relative">
                  <input
                    type={showPassword() ? "text" : "password"}
+                   id="signup-password"
                    placeholder={t().createPasswordPlaceholder}
                     class="input input-bordered w-full pe-10"
                    value={formData().password}
@@ -252,6 +255,7 @@ const Signup = () => {
                <div class="relative">
                   <input
                     type={showConfirmPassword() ? "text" : "password"}
+                    id="signup-confirm-password"
                     placeholder={t().confirmPasswordPlaceholder}
                     class="input input-bordered w-full pe-10"
                     value={formData().confirmPassword}
@@ -289,6 +293,7 @@ const Signup = () => {
                    class="checkbox checkbox-primary mt-0.5"
                    checked={agreeToTerms()}
                    onChange={(e) => setAgreeToTerms(e.target.checked)}
+                   autocomplete="off"
                  />
                  <div class="text-sm">
                    I agree to the <a href="/terms-of-service" class="link link-primary" target="_blank">Terms of Service</a>
@@ -301,6 +306,7 @@ const Signup = () => {
                    class="checkbox checkbox-primary mt-0.5"
                    checked={agreeToPrivacy()}
                    onChange={(e) => setAgreeToPrivacy(e.target.checked)}
+                   autocomplete="off"
                  />
                  <div class="text-sm">
                    I agree to the <a href="/privacy-policy" class="link link-primary" target="_blank">Privacy Policy</a> and consent to data processing

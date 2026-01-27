@@ -342,11 +342,19 @@ const Settings = () => {
                     class="select select-bordered w-full"
                     value={preferencesForm().theme}
                     onChange={(e) => {
+                      const newTheme = e.target.value;
                       setPreferencesForm({
                         ...preferencesForm(),
-                        theme: e.target.value
+                        theme: newTheme
                       });
-                      document.documentElement.setAttribute('data-theme', e.target.value);
+                      document.documentElement.setAttribute('data-theme', newTheme);
+                      localStorage.setItem('theme', newTheme);
+
+                      // Also update the theme controller checkboxes if they exist
+                      const themeControllers = document.querySelectorAll('.theme-controller');
+                      themeControllers.forEach(controller => {
+                        controller.checked = newTheme === 'dark';
+                      });
                     }}
                   >
                     <option value="light">{t().lightTheme}</option>

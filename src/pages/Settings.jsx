@@ -2,11 +2,11 @@ import { createSignal, onMount, For, Show, createEffect } from "solid-js";
 import { useNavigate } from "@solidjs/router";
 import { useUser } from "../context/UserContext";
 import { useLanguage } from "../hooks/useLanguage";
-import { getProjects, getUserCredits, getUserCreditBalance, updateUserProfile, updateEntity, exportAllData } from "../lib/database";
+import { getProjects, getUserCredits, getUserCreditBalance, updateUserProfile, updateEntity, exportAllData } from "@lib/database";
 import { confirmReset, confirmDanger } from "../components";
-import { consentManager } from "../lib/auth/security.js";
-import { toastManager } from "../lib/ui/feedback";
-import { logger } from "../lib/core";
+import { consentManager } from "@lib/auth/security.js";
+import { toastManager } from "@lib/ui/feedback";
+import { logger } from "@lib/core";
 
 
 const Settings = () => {

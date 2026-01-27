@@ -5,6 +5,12 @@ import { _seedPackages } from './packages.js';
 // Seeding and session management functions
 export async function _seedSampleNotifications({ userId }) {
   try {
+    // Ensure database is initialized before querying
+    if (!dbInstance) {
+      const { ensureDatabaseReady } = await import('./core.js');
+      await ensureDatabaseReady();
+    }
+
     const existingNotifications = await dbInstance.query('SELECT COUNT(*) as count FROM notifications WHERE user_id = $1', [userId]);
     if (existingNotifications.rows[0].count > 0) {
       return { message: 'User already has notifications' };
@@ -70,6 +76,12 @@ export async function _seedInitialData() {
 
 export async function _isSeeded() {
   try {
+    // Ensure database is initialized before querying
+    if (!dbInstance) {
+      const { ensureDatabaseReady } = await import('./core.js');
+      await ensureDatabaseReady();
+    }
+
     const packages = await dbInstance.query('SELECT COUNT(*) as count FROM packages');
     return packages.rows[0].count > 0;
   } catch (err) {
@@ -80,6 +92,12 @@ export async function _isSeeded() {
 
 export async function _createSession({ userId, token, expiresAt }) {
   try {
+    // Ensure database is initialized before querying
+    if (!dbInstance) {
+      const { ensureDatabaseReady } = await import('./core.js');
+      await ensureDatabaseReady();
+    }
+
     const id = uuidv4();
     const res = await dbInstance.query(
       'INSERT INTO sessions (id, user_id, token, expires_at, created_at, synced_at, last_modified, sync_status, deleted_at, version) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING *',
@@ -94,6 +112,12 @@ export async function _createSession({ userId, token, expiresAt }) {
 
 export async function _getSessionByToken({ token }) {
   try {
+    // Ensure database is initialized before querying
+    if (!dbInstance) {
+      const { ensureDatabaseReady } = await import('./core.js');
+      await ensureDatabaseReady();
+    }
+
     const res = await dbInstance.query('SELECT * FROM sessions WHERE token = $1', [token]);
     return res.rows[0];
   } catch (err) {
@@ -103,9 +127,21 @@ export async function _getSessionByToken({ token }) {
 }
 
 export async function _deleteSession({ token }) {
+  // Ensure database is initialized before querying
+  if (!dbInstance) {
+    const { ensureDatabaseReady } = await import('./core.js');
+    await ensureDatabaseReady();
+  }
+
   await dbInstance.query('DELETE FROM sessions WHERE token = $1', [token]);
 }
 
 export async function _deleteExpiredSessions() {
+  // Ensure database is initialized before querying
+  if (!dbInstance) {
+    const { ensureDatabaseReady } = await import('./core.js');
+    await ensureDatabaseReady();
+  }
+
   await dbInstance.query('DELETE FROM sessions WHERE expires_at < $1', [new Date().toISOString()]);
 }

@@ -6,12 +6,13 @@
   "main": "server.js",
   "type": "module",
   "scripts": {
-    "start": "npm run build && node server.js",
-    "dev": "concurrently \"vite\" \"nodemon server.js\"",
-    "dev:vite": "vite",
-    "dev:server": "nodemon server.js",
-    "build": "vite build",
-    "preview": "vite preview",
+    "start": "bun run build && bun server.js",
+    "dev": "concurrently \"bun --hot vite\" \"bun --hot server.js\"",
+    "dev:vite": "bun --hot vite",
+    "dev:server": "bun --hot server.js",
+    "build": "bun run vite build",
+    "build:exe": "bun build --compile server.js --outfile accelerator-server",
+    "preview": "bun run vite preview",
     "push": "git add . && git commit -m 'Update' && git push origin local",
     "docker:dev": "docker compose -f docker/docker-compose.yml --env-file docker/.env.development up",
     "docker:dev:build": "docker compose -f docker/docker-compose.yml --env-file docker/.env.development up --build",
@@ -21,12 +22,21 @@
     "docker:prod:build": "docker compose -f docker/docker-compose.yml --env-file docker/.env.production up --build -d",
     "docker:down": "docker compose -f docker/docker-compose.yml down",
     "docker:logs": "docker compose -f docker/docker-compose.yml logs -f",
-    "lint": "eslint src/ server.js --ext .js,.jsx || echo 'ESLint not configured yet'",
+    "lint": "bunx eslint src/ server.js --ext .js,.jsx || echo 'ESLint not configured yet'",
     "typecheck": "echo 'Typecheck skipped - project uses JavaScript'"
   },
-  "keywords": [],
+  "keywords": [
+    "bun",
+    "ai",
+    "startup",
+    "accelerator",
+    "solidjs"
+  ],
   "author": "",
   "license": "ISC",
+  "engines": {
+    "bun": ">=1.0.0"
+  },
   "dependencies": {
     "@electric-sql/pglite": "^0.3.15",
     "@solidjs/router": "^0.15.4",

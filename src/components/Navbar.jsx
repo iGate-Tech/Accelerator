@@ -1,6 +1,6 @@
 import { A, useLocation, useNavigate } from "@solidjs/router";
 import { createSignal, onMount, Show, For } from "solid-js";
-import { logger } from '../lib/core';
+import { logger } from '@lib/core';
 import { useUser } from "../context/UserContext";
 import { useLanguage } from "../hooks/useLanguage";
 import { useLucideIcons } from "../hooks/useLucideIcons";

@@ -2,8 +2,8 @@ import { createSignal, createResource, createMemo, onMount, createEffect, useCon
 import { LangContext } from "../context/LangContext";
 import { translations } from "../assets/translations/translations-index.js";
 import { useUser } from "../context/UserContext";
-import { getUserNotifications, markNotificationRead } from "../lib/database";
-import { logger } from '../lib/core';
+import { getUserNotifications, markNotificationRead } from "@lib/database";
+import { logger } from '@lib/core';
 
 
 

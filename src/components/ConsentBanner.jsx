@@ -1,6 +1,6 @@
 import { createSignal, createEffect, onMount } from "solid-js";
-import { consentManager } from "../lib/auth/security.js";
-import { logger } from "../lib/core";
+import { consentManager } from "@lib/auth/security.js";
+import { logger } from "@lib/core";
 
 const ConsentBanner = () => {
   const [showBanner, setShowBanner] = createSignal(false);

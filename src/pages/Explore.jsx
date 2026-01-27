@@ -6,7 +6,7 @@ import { LangContext } from "../context/LangContext";
 import { useUser } from "../context/UserContext";
 import { translations } from "../assets/translations/translations-index.js";
 import ProjectCard from "../components/ProjectCard";
-import { logger } from '../lib/core';
+import { logger } from '@lib/core';
 import { setPendingProjectId } from "../stores/projectsStore";
 
 
@@ -80,17 +80,12 @@ const Explore = () => {
     refetch();
   };
 
-  const onProjectAdded = () => refetch();
-  const onProjectUpdated = () => refetch();
-
   onMount(() => {
-    window.addEventListener('projectAdded', onProjectAdded);
-    window.addEventListener('projectUpdated', onProjectUpdated);
+    // Mount any necessary initialization here
   });
 
   onCleanup(() => {
-    window.removeEventListener('projectAdded', onProjectAdded);
-    window.removeEventListener('projectUpdated', onProjectUpdated);
+    // Cleanup any resources if needed
   });
 
    const statusOptions = [

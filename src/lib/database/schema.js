@@ -60,30 +60,10 @@ export async function createSchema() {
         name TEXT NOT NULL,
         description TEXT,
         status TEXT DEFAULT 'active',
-        ui_status TEXT DEFAULT 'idle',
-        icon TEXT DEFAULT 'folder',
-        color TEXT DEFAULT '#9E28B5',
-        last_opened TEXT,
         created_at TEXT,
-        synced_at TEXT,
         last_modified TEXT,
-        sync_status TEXT DEFAULT 'local',
-        deleted_at TEXT,
-        version INTEGER DEFAULT 1,
-        consumed_credits INTEGER DEFAULT 0,
-        consumed_time INTEGER DEFAULT 0,
         public INTEGER DEFAULT 0,
-        current_step TEXT DEFAULT 'system',
-        completed_steps INTEGER DEFAULT 0,
-        step_name TEXT DEFAULT 'System Initialization',
-        current_model TEXT DEFAULT 'System',
-        current_section TEXT DEFAULT 'Initialization',
-        ui_progress INTEGER DEFAULT 0,
-        ui_message TEXT DEFAULT 'Ready to start',
-        current_prompt TEXT,
-        llm_response TEXT,
-        total_credits INTEGER DEFAULT 600,
-        total_steps INTEGER DEFAULT 59,
+        context TEXT DEFAULT '',
         FOREIGN KEY (user_id) REFERENCES users(id)
       );
     `);
@@ -411,6 +391,32 @@ export async function migrateSchema() {
 
       // Add current_project_id to profiles table for tracking user's current project
       "ALTER TABLE profiles ADD COLUMN IF NOT EXISTS current_project_id TEXT",
+
+      // Add context column to projects table for storing aggregated context
+      "ALTER TABLE projects ADD COLUMN IF NOT EXISTS context TEXT DEFAULT ''",
+
+      // Drop legacy columns that are no longer needed
+      "ALTER TABLE projects DROP COLUMN IF EXISTS ui_status",
+      "ALTER TABLE projects DROP COLUMN IF EXISTS icon",
+      "ALTER TABLE projects DROP COLUMN IF EXISTS color",
+      "ALTER TABLE projects DROP COLUMN IF EXISTS last_opened",
+      "ALTER TABLE projects DROP COLUMN IF EXISTS synced_at",
+      "ALTER TABLE projects DROP COLUMN IF EXISTS sync_status",
+      "ALTER TABLE projects DROP COLUMN IF EXISTS deleted_at",
+      "ALTER TABLE projects DROP COLUMN IF EXISTS version",
+      "ALTER TABLE projects DROP COLUMN IF EXISTS consumed_credits",
+      "ALTER TABLE projects DROP COLUMN IF EXISTS consumed_time",
+      "ALTER TABLE projects DROP COLUMN IF EXISTS current_step",
+      "ALTER TABLE projects DROP COLUMN IF EXISTS completed_steps",
+      "ALTER TABLE projects DROP COLUMN IF EXISTS step_name",
+      "ALTER TABLE projects DROP COLUMN IF EXISTS current_model",
+      "ALTER TABLE projects DROP COLUMN IF EXISTS current_section",
+      "ALTER TABLE projects DROP COLUMN IF EXISTS ui_progress",
+      "ALTER TABLE projects DROP COLUMN IF EXISTS ui_message",
+      "ALTER TABLE projects DROP COLUMN IF EXISTS current_prompt",
+      "ALTER TABLE projects DROP COLUMN IF EXISTS llm_response",
+      "ALTER TABLE projects DROP COLUMN IF EXISTS total_credits",
+      "ALTER TABLE projects DROP COLUMN IF EXISTS total_steps",
     ];
 
     for (const migration of migrations) {

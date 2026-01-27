@@ -108,10 +108,6 @@ export const addProject = async (project) => {
     const newProject = await _createProject({ project, userId: user.id });
     logger.debug('Added project:', newProject);
 
-    // Dispatch events to notify UI components
-    window.dispatchEvent(new CustomEvent('projectAdded', { detail: newProject.id }));
-    window.dispatchEvent(new CustomEvent('refreshProjects'));
-
     // TODO: Add activity logging when implemented
     // await logActivity(user.id, 'project_created', 'project', newProject.id, `Created project "${project.name}"`);
 
@@ -751,8 +747,9 @@ export const createSession = async (userId, token, expiresAt) => {
 };
 
 const _getSessionByToken = async ({ token }) => {
-  // TODO: Implement getting session by token
-  return null;
+  // Use the implementation from seeding.js
+  const { _getSessionByToken: getSessionImpl } = await import('./database/seeding.js');
+  return await getSessionImpl({ token });
 };
 
 export const getSessionByToken = async (token) => {

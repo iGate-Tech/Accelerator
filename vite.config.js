@@ -4,6 +4,18 @@ import solidPlugin from 'vite-plugin-solid';
 import { VitePWA } from 'vite-plugin-pwa';
 
 export default defineConfig({
+  resolve: {
+    alias: {
+      '@src': '/src',
+      '@lib': '/src/lib',
+      '@components': '/src/components',
+      '@pages': '/src/pages',
+      '@assets': '/src/assets',
+      '@context': '/src/context',
+      '@hooks': '/src/hooks',
+      '@stores': '/src/stores',
+    },
+  },
   define: {
     global: 'globalThis',
     process: { env: {}, browser: true }

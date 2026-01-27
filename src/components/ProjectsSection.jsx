@@ -1,5 +1,5 @@
 import { useContext, createSignal, createEffect, createMemo, onMount, onCleanup, For, Show } from "solid-js";
-import { useNavigate } from "@solidjs/router";
+import { useNavigate, useLocation } from "@solidjs/router";
 import { LangContext } from "../context/LangContext";
 import { useUser } from "../context/UserContext";
 import { useLanguage } from "../hooks/useLanguage";
@@ -14,11 +14,11 @@ import {
     exportAllData,
     exportProject,
     exportReports,
-} from "../lib/database";
-import { addProject } from "../lib/db";
-import { toastManager } from "../lib/ui/feedback";
-import { logger } from "../lib/core";
-import { useActivityLogger } from "../lib/business/activity";
+} from "@lib/database";
+import { addProject } from "@lib/db";
+import { toastManager } from "@lib/ui/feedback";
+import { logger } from "@lib/core";
+import { useActivityLogger } from "@lib/business.js";
 import { projectsStore, setProjectsStore, setPendingProjectId } from "../stores/projectsStore";
 
 const ProjectsSection = (props) => {
@@ -27,6 +27,14 @@ const ProjectsSection = (props) => {
     const activityLogger = useActivityLogger();
     const { t, setLang } = useLanguage();
     const navigate = useNavigate();
+    const location = useLocation();
+
+    // Determine if a project is active based on URL path
+    const isProjectActive = (projectId) => {
+        // Check if the current path matches the opened-project route with this project ID
+        return location.pathname === `/opened-project/${projectId}`;
+    };
+
     const [projectsOpen, setProjectsOpen] = createSignal(true);
     const [editingProjectId, setEditingProjectId] = createSignal(null);
     const navbarT = t;
@@ -121,40 +129,69 @@ const ProjectsSection = (props) => {
         switch (action) {
             case 'rename':
                 if (newName && newName.trim()) {
-                    await updateProject(projectId, { name: newName.trim() });
-                    window.dispatchEvent(new CustomEvent('projectUpdated'));
-                    toastManager.success(t().rename + ' ' + t().successful);
-                    await loadProjects();
+                    try {
+                        // Update the project in the database
+                        await updateProject(projectId, { name: newName.trim() });
+
+                        // Update the store directly for better performance
+                        setProjectsStore('projects', projects =>
+                            projects.map(p =>
+                                p.id === projectId ? { ...p, name: newName.trim() } : p
+                            )
+                        );
+
+                        toastManager.success(t().rename + ' ' + t().successful);
+                    } catch (error) {
+                        logger.error('Failed to rename project:', error);
+                        toastManager.error('Failed to rename project');
+                        // Reload projects if direct update failed
+                        await loadProjects();
+                    }
                 }
                 break;
             case 'delete': {
                 const confirmed = await confirmDelete(project.name);
-                if (confirmed) { // Audit logging before deletion
-                    logger.info('Project deletion initiated', {
-                        projectId,
-                        projectName: project.name,
-                        userId: user()?.id,
-                        timestamp: new Date().toISOString()
-                    });
+                if (confirmed) {
+                    try {
+                        // Audit logging before deletion
+                        logger.info('Project deletion initiated', {
+                            projectId,
+                            projectName: project.name,
+                            userId: user()?.id,
+                            timestamp: new Date().toISOString()
+                        });
 
-                    await deleteProject(projectId);
+                        await deleteProject(projectId);
 
-                    // Additional audit logging after successful deletion
-                    logger.info('Project deletion completed', {
-                        projectId,
-                        projectName: project.name,
-                        userId: user()?.id,
-                        timestamp: new Date().toISOString()
-                    });
+                        // Remove the project from the store directly for better performance
+                        setProjectsStore('projects', projects =>
+                            projects.filter(p => p.id !== projectId)
+                        );
 
-                    window.dispatchEvent(new CustomEvent('projectDeleted', { detail: { projectId } }));
-                    toastManager.success(t().delete + ' ' + t().successful);
-                    await loadProjects();
+                        // Update the count
+                        setProjectsStore('count', prevCount => Math.max(0, prevCount - 1));
+
+                        // Additional audit logging after successful deletion
+                        logger.info('Project deletion completed', {
+                            projectId,
+                            projectName: project.name,
+                            userId: user()?.id,
+                            timestamp: new Date().toISOString()
+                        });
+
+                        toastManager.success(t().delete + ' ' + t().successful);
+                    } catch (error) {
+                        logger.error('Failed to delete project:', error);
+                        toastManager.error('Failed to delete project');
+                        // Reload projects if direct update failed
+                        await loadProjects();
+                    }
                 }
                 break;
             }
             case 'open':
-                setPendingProjectId(projectId);
+                setProjectsStore('currentProjectId', projectId);
+                navigate(`/opened-project/${projectId}`);
                 break;
             default:
                 logger.debug('Unknown action:', action);
@@ -169,12 +206,19 @@ const ProjectsSection = (props) => {
                     toastManager.error('User not authenticated');
                     return;
                 }
+
                 await deleteAllProjects(currentUser.id);
+
+                // Update the store directly for better performance
+                setProjectsStore('projects', []);
+                setProjectsStore('count', 0);
+
                 toastManager.success(t().deleteAllProjects + ' ' + t().successful);
-                await loadProjects();
             } catch (error) {
                 console.log('Caught error in delete all projects:', error.message);
                 toastManager.error('Failed to delete all projects: ' + error.message);
+                // Reload projects if direct update failed
+                await loadProjects();
             }
         }
     };
@@ -232,10 +276,23 @@ const ProjectsSection = (props) => {
             const { initDb } = await import("../lib/database");
             await initDb();
 
+            // Create the project in the database
             const projectId = await addProject({ name: 'New Project' }, currentUser.id);
-            window.dispatchEvent(new CustomEvent('projectAdded'));
+
+            // Create a new project object to add to the store
+            const newProject = {
+                id: projectId,
+                name: 'New Project',
+                userId: currentUser.id,
+                createdAt: new Date().toISOString(),
+                updatedAt: new Date().toISOString()
+            };
+
+            // Add the new project directly to the store for better performance
+            setProjectsStore('projects', projects => [newProject, ...projects]);
+            setProjectsStore('count', prevCount => prevCount + 1);
+
             toastManager.success(t().newProject + ' ' + t().successful);
-            await loadProjects(); // Also reload directly
 
             // Automatically open the newly created project
             if (projectId) {
@@ -244,19 +301,11 @@ const ProjectsSection = (props) => {
         } catch (error) {
             logger.error('Failed to create project:', error);
             toastManager.error(t().newProject + ' ' + t().failed);
+            // Reload projects if direct update failed
+            await loadProjects();
         }
     };
-    const onProjectAdded = async () => {
-        await loadProjects();
-    };
-    
-    // Also trigger store update directly for immediate reactivity
-    const refreshProjectsStore = () => {
-        loadProjects();
-    };
-    const onProjectUpdated = async () => {
-        await loadProjects();
-    };
+
     onMount(async () => {
         // Initialize database first before loading any data
         try {
@@ -266,37 +315,40 @@ const ProjectsSection = (props) => {
             logger.warn('Failed to initialize database:', error.message);
         }
 
-        setProjectsStore('loading', true);
-        await loadProjects();
-        
-        // Set up event listeners with multiple handlers for reliability
-        window.addEventListener('projectAdded', onProjectAdded);
-        window.addEventListener('projectUpdated', onProjectUpdated);
-        window.addEventListener('projectDeleted', onProjectUpdated);
-        
-        // Also listen for custom store refresh events
-        window.addEventListener('refreshProjects', refreshProjectsStore);
-        
+        // Load projects if user is authenticated
+        const currentUser = user();
+        if (currentUser?.id) {
+            setProjectsStore('loading', true);
+            await loadProjects();
+        }
+
         if (window.lucide) {
             window.lucide.createIcons();
         }
     });
+
     onCleanup(() => {
-        window.removeEventListener('projectAdded', onProjectAdded);
-        window.removeEventListener('projectUpdated', onProjectUpdated);
-        window.removeEventListener('projectDeleted', onProjectUpdated);
-        window.removeEventListener('refreshProjects', refreshProjectsStore);
+        // Cleanup any resources if needed
     });
     createEffect(() => {
         const newLang = lang();
         setLang(newLang);
     });
-    let lastLoadTime = 0;
+
+    // Track the user ID to only reload when it actually changes
+    const [trackedUserId, setTrackedUserId] = createSignal(user()?.id || null);
+
     createEffect(() => {
         const currentUser = user();
-        const now = Date.now();
-        if (currentUser && currentUser.id && (now - lastLoadTime > 1000)) {
-            lastLoadTime = now;
+        const currentUserId = currentUser?.id;
+
+        // Update the tracked user ID
+        const previousUserId = trackedUserId();
+        setTrackedUserId(currentUserId);
+
+        // Only reload if the user ID has changed and is valid
+        if (currentUserId && currentUserId !== previousUserId) {
+            setProjectsStore('loading', true);
             loadProjects();
         }
     });
@@ -415,14 +467,13 @@ const ProjectsSection = (props) => {
                              <Show when={!projectsStore.loading}>
                                  <For each={filteredProjects()} key={(project) => project.id}>{(project) => (
                                     <li>
-                                        <div class={`flex justify-between ltr:justify-between rtl:justify-between items-center px-4 py-2 rounded-lg transition-colors cursor-pointer group ${project.id === projectsStore.currentProjectId ? '' : ''}`}>
+                                        <div class={`flex justify-between ltr:justify-between rtl:justify-between items-center px-4 py-2 rounded-lg transition-colors cursor-pointer group ${isProjectActive(project.id) ? 'menu-active' : ''}`}>
                                              <span onclick={() => {
                                                 logger.debug('Opening project:', project.id);
-                                                setPendingProjectId(project.id);
-                                                navigate('/');
+                                                navigate(`/opened-project/${project.id}`);
                                             }} class="flex items-center w-full gap-2">
                                                 <div class="rounded flex-shrink-0">
-                                                    <i data-lucide="folder" class={`w-4 h-4 ${project.id === projectsStore.currentProjectId ? 'text-primary' : 'text-base-content/60'}`}></i>
+                                                    <i data-lucide="folder" class={`w-4 h-4 ${isProjectActive(project.id) ? 'text-primary' : 'text-base-content/60'}`}></i>
                                                 </div>
                                                 <span class="ltr:ms-2 rtl:me-2 truncate flex-1 min-w-0" data-project-id={project.id} contentEditable={editingProjectId() === project.id} onBlur={(e) => {
                                                     if (editingProjectId() === project.id) {
@@ -468,7 +519,7 @@ const ProjectsSection = (props) => {
                                                     }, 0);
                                                 }}>
                                                     <i data-lucide="edit" class="w-4 h-4"></i>
-                                                    {t().rename}
+                                                    {t().rename || 'Rename'}
                                                 </a>
                                             </li>
                                             <li>

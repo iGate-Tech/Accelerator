@@ -1,10 +1,10 @@
 import {onMount, createEffect, createSignal, useContext} from "solid-js";
 import {LangContext} from "../context/LangContext";
-import {getPg} from "../lib/database";
+import {getPg} from "@lib/database";
 
 import { ToastContainer } from "./GlobalUI";
 import favicon from "../assets/images/favicon.svg";
-import { logger } from '../lib/core';
+import { logger } from '@lib/core';
 
 
 

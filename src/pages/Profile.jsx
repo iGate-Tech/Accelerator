@@ -2,12 +2,12 @@ import { createSignal, onMount, createEffect } from "solid-js";
 import { useNavigate } from "@solidjs/router";
 import { useUser } from "../context/UserContext";
 import { useLanguage } from "../hooks/useLanguage";
-import { getUserCredits, getUserCreditBalance, getProjects, getUserById, updateUserProfile } from "../lib/database";
-import { formatLocaleDate } from "../lib/utils/general";
-import { toastManager } from "../lib/ui/feedback";
+import { getUserCredits, getUserCreditBalance, getProjects, getUserById, updateUserProfile } from "@lib/database";
+import { formatLocaleDate } from "@lib/generalUtils";
+import { toastManager } from "@lib/ui/feedback";
 import { confirmDelete } from "../components";
 import { profileTranslations } from "../assets/translations/translations-index.js";
-import { logger } from "../lib/core";
+import { logger } from "@lib/core";
 
 
 const Profile = () => {

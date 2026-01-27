@@ -1,5 +1,6 @@
 import { createSignal, createEffect, onMount } from "solid-js";
-import { activityLogger } from "../lib/business/activity";
+import { activityLogger } from "@lib/business.js";
+import { openSupportModal } from "./SupportModal";
 
 // Enhanced error handling system
 class ErrorHandler {
@@ -53,9 +54,7 @@ class ErrorHandler {
         action: recoverable ? {
           label: 'Get Help',
           onClick: () => {
-            window.dispatchEvent(new CustomEvent('openSupportModal', {
-              detail: { errorId, context }
-            }));
+            openSupportModal(errorId, context);
           }
         } : undefined
       });
@@ -286,9 +285,7 @@ export const GlobalErrorDisplay = () => {
               <button
                 class="btn btn-xs btn-primary"
                 onClick={() => {
-                  window.dispatchEvent(new CustomEvent('openSupportModal', {
-                    detail: { errorId: error.id, context: error.context }
-                  }));
+                  openSupportModal(error.id, error.context);
                 }}
               >
                 Help

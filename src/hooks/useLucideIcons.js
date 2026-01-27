@@ -1,5 +1,5 @@
 import { onMount } from "solid-js";
-import { logger } from '../lib/core';
+import { logger } from '@lib/core';
 
 
 export const useLucideIcons = () => {

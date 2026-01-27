@@ -1,4 +1,4 @@
-import { addProject } from '../database';
+import { addProject } from './db';
 
 export const extractProjectName = (text) => {
   const lines = text.split('\n').filter(line => line.trim());

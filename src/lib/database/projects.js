@@ -1,6 +1,7 @@
 import { v4 as uuidv4 } from 'uuid';
 import { dbInstance } from './core.js';
 import { updateEntity } from './operations.js';
+import { extractHighlightedText, generateContextString } from '../ui/llm-template.js';
 
 // Project management functions
 export async function _createProject({ project, userId }) {
@@ -31,36 +32,18 @@ export async function _createProject({ project, userId }) {
       nameValidation.sanitized,
       descValidation.sanitized,
       userId,
+      project.status || 'active',
       now,
       now,
-      now,
-      'local',
-      null,
-      1,
       project.public ? 1 : 0,
-      project.currentModel || 'System',
-      totalSteps,
-      completedSteps,
-      consumedCredits,
-      totalCredits,
-      project.ui_status || 'idle',
-      project.currentStep || 'system',
-      project.stepName || 'System Initialization',
-      project.currentSection || 'Initialization',
-      project.uiProgress || 0,
-      project.uiMessage || 'Ready to start',
-      project.currentPrompt || '',
-      project.llmResponse || ''
+      project.context || ''
     ];
     
     const res = await dbInstance.query(`
       INSERT INTO projects (
-        id, name, description, user_id, created_at, last_modified, synced_at, 
-        sync_status, deleted_at, version, public, current_model, total_steps, 
-        completed_steps, consumed_credits, total_credits, ui_status, current_step,
-        step_name, current_section, ui_progress, ui_message, current_prompt, llm_response
+        id, name, description, user_id, status, created_at, last_modified, public, context
       )
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
       RETURNING *
     `, values);
     
@@ -107,42 +90,73 @@ export async function _updateProject({ id, updates }) {
     const { validateAndSanitizeDbInput } = await import('../auth/security.js');
 
     const allowedFields = [
-      'current_step', 'completed_steps', 'step_name', 'current_model',
-      'current_section', 'ui_progress', 'ui_message', 'ui_status',
-      'current_prompt', 'llm_response', 'total_credits', 'consumed_credits',
-      'total_time', 'consumed_time', 'name', 'description', 'status',
-      'last_opened', 'last_modified', 'sync_status'
+      'name', 'description', 'status', 'last_modified', 'public', 'context', 'content'
     ];
 
     const setClauses = [];
     const values = [];
     let paramIndex = 1;
 
+    // Get current project to access existing context
+    let currentProject = null;
+    if (updates.content || updates.context) {
+      try {
+        const result = await dbInstance.query('SELECT context FROM projects WHERE id = $1', [id]);
+        currentProject = result.rows[0];
+      } catch (err) {
+        console.warn('Could not fetch current project for context update:', err.message);
+      }
+    }
+
     for (const [key, value] of Object.entries(updates)) {
       const dbField = key.replace(/([A-Z])/g, '_$1').toLowerCase();
       if (allowedFields.includes(dbField)) {
         // Ensure value is a primitive JavaScript type (string, number, boolean, null)
         let primitiveValue = value;
-        
+
         // Handle functions/signals by calling them if they're functions
         if (typeof value === 'function') {
           primitiveValue = value();
         }
-        
+
         // Convert to appropriate type based on field
-        if (dbField === 'completed_steps' || dbField === 'ui_progress' || 
-            dbField === 'total_credits' || dbField === 'consumed_credits' ||
-            dbField === 'total_time' || dbField === 'consumed_time') {
-          // Integer fields
-          primitiveValue = parseInt(primitiveValue, 10) || 0;
-        } else if (typeof primitiveValue === 'object' && primitiveValue !== null) {
+        if (typeof primitiveValue === 'object' && primitiveValue !== null) {
           // If it's still an object, stringify it or skip
           continue;
         } else {
           // String fields - ensure it's a string
           primitiveValue = String(primitiveValue ?? '');
         }
-        
+
+        // Special handling for context aggregation
+        if (dbField === 'context' || dbField === 'content') {
+          // Extract highlighted text from the response/content
+          const highlights = extractHighlightedText(primitiveValue);
+
+          if (highlights.length > 0) {
+            // Get existing context if available
+            let existingContext = currentProject?.context || '';
+
+            // Generate new context string from highlights
+            const newHighlightsStr = generateContextString(highlights);
+
+            // Combine existing context with new highlights
+            let combinedContext = existingContext;
+            if (combinedContext && newHighlightsStr) {
+              combinedContext = `${combinedContext}; ${newHighlightsStr}`;
+            } else if (newHighlightsStr) {
+              combinedContext = newHighlightsStr;
+            }
+
+            // Add context to update if it's different from current
+            if (combinedContext !== currentProject?.context) {
+              setClauses.push(`context = $${paramIndex}`);
+              values.push(combinedContext);
+              paramIndex++;
+            }
+          }
+        }
+
         // Validate and sanitize the value
         const validation = validateAndSanitizeDbInput(primitiveValue, `project ${key}`);
         if (!validation.valid) {
@@ -414,10 +428,10 @@ export async function _getProjects({ userId }) {
   }
   
   try {
-    const result = await dbInstance.query('SELECT * FROM projects WHERE user_id = $1 AND archived = 0 ORDER BY created_at DESC', [userId]);
-    
+    const result = await dbInstance.query('SELECT * FROM projects WHERE user_id = $1 ORDER BY created_at DESC', [userId]);
+
     const projects = result.rows || [];
-    
+
     return projects.map(row => ({
       id: row.id,
       name: row.name,
@@ -425,13 +439,8 @@ export async function _getProjects({ userId }) {
       userId: row.user_id,
       createdAt: row.created_at,
       lastModified: row.last_modified,
-      currentStep: row.current_step,
-      stepName: row.step_name,
-      currentModel: row.current_model,
-      uiStatus: row.ui_status,
-      uiProgress: row.ui_progress,
       public: row.public,
-      completedSteps: row.completed_steps
+      context: row.context
     }));
   } catch (err) {
     console.error('Error getting projects:', err);
@@ -449,7 +458,7 @@ export async function checkProjectCompletion(projectId) {
     // Import steps from business models
     let steps = [];
     try {
-      const stepsModule = await import('../business/steps.js');
+      const stepsModule = await import('../business.js');
       steps = stepsModule.steps || [];
     } catch (importError) {
       console.warn('Could not import steps, using empty array:', importError.message);
@@ -515,16 +524,10 @@ export async function checkProjectCompletion(projectId) {
       if (dbInstance) {
         const now = new Date().toISOString();
         await dbInstance.query(
-          `UPDATE projects SET 
-            completed_steps = $1, 
-            ui_status = $2, 
-            ui_message = $3, 
-            last_modified = $4 
-          WHERE id = $5`,
+          `UPDATE projects SET
+            last_modified = $1
+          WHERE id = $2`,
           [
-            completedSteps,  // Use actual completed steps count, not step index
-            result.isComplete ? 'completed' : 'in_progress',
-            result.isComplete ? 'Project completed! 🎉' : `Step ${completedSteps} of ${totalSteps}`,
             now,
             projectId
           ]

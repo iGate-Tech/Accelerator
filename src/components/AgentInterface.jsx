@@ -7,7 +7,7 @@ import {
     onMount,
     useContext
 } from "solid-js";
-import { logger } from '../lib/core';
+import { logger } from '@lib/core';
 import { LangContext } from "../context/LangContext";
 import { useUser } from "../context/UserContext";
 import { agentTranslations } from "../assets/translations/translations-index.js";
@@ -138,11 +138,12 @@ const AgentInterface = (props) => {
     let textareaRef;
 
     onMount(() => {
-        const greetingText = greetingRef.querySelector("h1");
-        if (greetingText) {
-          // TODO: Handle greeting text
+        if (greetingRef) {
+            const greetingText = greetingRef.querySelector("h1");
+            if (greetingText) {
+              // TODO: Handle greeting text
+            }
         }
-
     });
 
     const userName = () => {
@@ -169,35 +170,14 @@ const AgentInterface = (props) => {
 
     return (
         <div id="agentBox"
-            class={
-                `${
-                    props.agentBoxClass()
-                } w-full max-w-md sm:max-w-lg md:max-w-xl lg:max-w-3xl mx-auto`
-            }
-            style={
-                (props.startPressed && props.startPressed()) || (props.tasksList && props.tasksList().length > 0) || (props.currentProjectId && props.currentProjectId())
-                    ? {
-                        position: 'sticky',
-                        bottom: '12px',
-                        'z-index': 50,
-                        margin: '0 auto'
-                    }
-                    : {
-                        display: 'flex',
-                        'flex-direction': 'column',
-                        'justify-content': 'center',
-                        'min-height': 'calc(100vh - 8rem)'
-                    }
-            }>
+            class="w-full ">
 
             <div id="agentContent"
-                class={
-                    props.agentContentClass ? props.agentContentClass() : ""
-            }>
+                class="flex flex-col gap-4 w-full">
 
                 <div class="flex flex-col gap-3 sm:gap-4">
                      <Show when={
-                         isAuthenticated() && !(props.startPressed && props.startPressed()) && !(props.tasksList && props.tasksList().length > 0) && !(props.currentProjectId && props.currentProjectId())
+                         props.showGreeting !== undefined ? props.showGreeting : (isAuthenticated() && !(props.startPressed && props.startPressed()) && !(props.tasksList && props.tasksList() && props.tasksList().length > 0) && !(props.currentProjectId && props.currentProjectId()))
                      }>
                         <div ref={greetingRef}
                             id="greetingDiv"

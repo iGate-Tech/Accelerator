@@ -114,3 +114,10 @@ dist
 .yarn/build-state.yml
 .yarn/install-state.gz
 .pnp.*
+
+# Bun executable directory
+bin/
+
+# Bun-specific files
+bun.lock
+*.tsbuildinfo

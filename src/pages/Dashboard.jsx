@@ -1,13 +1,13 @@
 import { createSignal, createResource, createMemo, onMount, onCleanup, For, Show, useContext, createEffect } from "solid-js";
 import { A, useNavigate } from "@solidjs/router";
-import { _getProjects } from "../lib/database/projects.js";
-import { _getUserActivities } from "../lib/database/activities.js";
+import { _getProjects } from "@lib/database/projects.js";
+import { _getUserActivities } from "@lib/database/activities.js";
 import { useUser } from "../context/UserContext";
 import { useLanguage } from "../hooks/useLanguage";
 import { dashboardTranslations } from "../assets/translations/translations-index.js";
-import { formatRelativeTime } from "../lib/utils/general.js";
+import { formatRelativeTime } from "@lib/generalUtils.js";
 import ProjectCard from "../components/ProjectCard.jsx";
-import { logger } from '../lib/core';
+import { logger } from '@lib/core';
 import { setPendingProjectId } from "../stores/projectsStore";
 
 
@@ -130,19 +130,12 @@ const Dashboard = () => {
 
   const formatDate = (dateString) => formatRelativeTime(dateString, t());
   
-  const onProjectAdded = () => refetch();
-  const onProjectUpdated = () => refetch();
-
    onMount(async () => {
      if (window.lucide) window.lucide.createIcons();
-
-     window.addEventListener('projectAdded', onProjectAdded);
-     window.addEventListener('projectUpdated', onProjectUpdated);
    });
 
    onCleanup(() => {
-     window.removeEventListener('projectAdded', onProjectAdded);
-     window.removeEventListener('projectUpdated', onProjectUpdated);
+     // Cleanup any resources if needed
    });
 
       return (

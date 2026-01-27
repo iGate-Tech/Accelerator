@@ -1,8 +1,8 @@
 import { createSignal, onMount } from "solid-js";
-import { voteOnProject, toggleProjectPublic } from "../lib/database";
+import { voteOnProject, toggleProjectPublic } from "@lib/database";
 // Removed supabase import
-import { toastManager } from "../lib/ui/feedback";
-import { logger } from '../lib/core';
+import { toastManager } from "@lib/ui/feedback";
+import { logger } from '@lib/core';
 
 
 

@@ -1,36 +1,44 @@
 import { createSignal, createEffect, Show } from "solid-js";
 import { errorHandler } from "./ErrorHandler";
 
+// Global state for support modal
+const [supportModalState, setSupportModalState] = createSignal({
+  isOpen: false,
+  errorReport: null
+});
+
+// Export function to open the modal from anywhere
+export const openSupportModal = (errorId, context = null) => {
+  if (errorId) {
+    const errors = errorHandler.getRecentErrors();
+    const error = errors.find(e => e.id === errorId);
+    if (error) {
+      setSupportModalState({
+        isOpen: true,
+        errorReport: error
+      });
+    }
+  } else {
+    setSupportModalState({
+      isOpen: true,
+      errorReport: null
+    });
+  }
+};
+
 const SupportModal = () => {
-  const [isOpen, setIsOpen] = createSignal(false);
-  const [errorReport, setErrorReport] = createSignal(null);
   const [message, setMessage] = createSignal('');
   const [isSubmitting, setIsSubmitting] = createSignal(false);
 
-  // Listen for support requests
-  createEffect(() => {
-    const handleSupportRequest = (event) => {
-      const { errorId, context } = event.detail || {};
-      if (errorId) {
-        const errors = errorHandler.getRecentErrors();
-        const error = errors.find(e => e.id === errorId);
-        if (error) {
-          setErrorReport(error);
-        }
-      }
-      setIsOpen(true);
-    };
-
-    window.addEventListener('openSupportModal', handleSupportRequest);
-    return () => window.removeEventListener('openSupportModal', handleSupportRequest);
-  });
+  // Access the global state
+  const state = supportModalState();
 
   const handleSubmit = async () => {
     setIsSubmitting(true);
     try {
       const supportData = {
         message: message(),
-        errorReport: errorReport(),
+        errorReport: state.errorReport,
         userAgent: navigator.userAgent,
         url: window.location.href,
         timestamp: new Date().toISOString(),
@@ -45,7 +53,7 @@ Support Request Details:
 
 Message: ${message()}
 
-Error Report: ${errorReport() ? JSON.stringify(errorReport(), null, 2) : 'No error report'}
+Error Report: ${state.errorReport ? JSON.stringify(state.errorReport, null, 2) : 'No error report'}
 
 Technical Information:
 - URL: ${window.location.href}
@@ -58,9 +66,13 @@ Please help resolve this issue.
       const mailto = `mailto:support@accelerator.app?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
       window.open(mailto);
 
-      setIsOpen(false);
+      // Close the modal
+      setSupportModalState({
+        isOpen: false,
+        errorReport: null
+      });
+
       setMessage('');
-      setErrorReport(null);
 
       // Show success message
       if (window.toastManager) {
@@ -78,14 +90,14 @@ Please help resolve this issue.
   };
 
   return (
-    <div class={`modal ${isOpen() ? 'modal-open' : ''}`}>
+    <div class={`modal ${state.isOpen ? 'modal-open' : ''}`}>
       <div class="modal-box max-w-lg">
         <h3 class="font-bold text-lg mb-4">
           <i data-lucide="help-circle" class="w-5 h-5 inline mr-2"></i>
           Contact Support
         </h3>
 
-        <Show when={errorReport()}>
+        <Show when={state.errorReport}>
           <div class="alert alert-info mb-4">
             <i data-lucide="info" class="w-4 h-4"></i>
             <div>
@@ -110,7 +122,10 @@ Please help resolve this issue.
         <div class="modal-action">
           <button
             class="btn btn-ghost"
-            onClick={() => setIsOpen(false)}
+            onClick={() => setSupportModalState({
+              isOpen: false,
+              errorReport: null
+            })}
             disabled={isSubmitting()}
           >
             Cancel

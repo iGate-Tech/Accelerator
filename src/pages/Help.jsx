@@ -2,8 +2,8 @@ import { createSignal, createEffect, onMount, onCleanup, For, Show, createResour
 import { useNavigate, A } from "@solidjs/router";
 import { LangContext } from "../context/LangContext";
 import { translations } from "../assets/translations/translations-index.js";
-import { toastManager } from "../lib/ui/feedback";
-import { logger } from '../lib/core';
+import { toastManager } from "@lib/ui/feedback";
+import { logger } from '@lib/core';
 
 
 const Help = () => {

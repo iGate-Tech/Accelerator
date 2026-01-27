@@ -839,36 +839,24 @@ export async function _getUserProfile({ userId }) {
 export async function _createProject({ project, userId }) {
   try {
     const id = uuidv4();
-      const totalSteps = parseInt(project.totalSteps, 10);
-      const completedSteps = parseInt(project.completedSteps, 10);
-      const consumedCredits = parseInt(project.consumedCredits, 10);
-      const totalCredits = parseInt(project.totalCredits, 10);
-       const values = [
-         id,
-         project.name,
-         project.description,
-         userId,
-         new Date().toISOString(),
-         new Date().toISOString(),
-         new Date().toISOString(),
-         'local',
-         null,
-         1,
-         project.public ? 1 : 0,
-         project.currentModel || null,
-         isNaN(totalSteps) ? 51 : totalSteps,
-         isNaN(completedSteps) ? 0 : completedSteps,
-         isNaN(consumedCredits) ? 0 : consumedCredits,
-         isNaN(totalCredits) ? 100 : totalCredits,
-         project.ui_status || 'idle'
-       ];
-      console.log('Insert values count:', values.length);
-        const res = await _query(`
-          INSERT INTO projects (id, name, description, user_id, created_at, last_modified, synced_at, sync_status, deleted_at, version, public, current_model, total_steps, completed_steps, consumed_credits, total_credits, ui_status)
-          VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17)
-          RETURNING *
-        `, values);
-     return res.rows[0];
+    const values = [
+      id,
+      project.name,
+      project.description,
+      userId,
+      project.status || 'active',
+      new Date().toISOString(),
+      new Date().toISOString(),
+      project.public ? 1 : 0,
+      project.context || ''
+    ];
+    console.log('Insert values count:', values.length);
+      const res = await _query(`
+        INSERT INTO projects (id, name, description, user_id, status, created_at, last_modified, public, context)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+        RETURNING *
+      `, values);
+   return res.rows[0];
   } catch (err) {
     console.error('DB error in addTask:', err);
     throw err;

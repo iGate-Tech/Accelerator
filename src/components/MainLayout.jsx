@@ -4,7 +4,7 @@ import { useUser } from "../context/UserContext";
 import { GlobalLoading, GlobalError, ToastContainer } from "./GlobalUI";
 import OfflineIndicator from "./OfflineIndicator";
 import Sidebar from "./Sidebar";
-import { logger } from "../lib/core";
+import { logger } from "@lib/core";
 
 
 const MainLayout = (props) => {

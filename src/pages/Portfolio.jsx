@@ -1,6 +1,6 @@
 import { createSignal, createResource, createMemo, onMount, onCleanup, For, Show, createEffect, useContext } from "solid-js";
 import { useNavigate } from "@solidjs/router";
-import { logger } from '../lib/core';
+import { logger } from '@lib/core';
 import {
   getGroups,
   getGroupsWithProjects,
@@ -15,12 +15,12 @@ import {
   getPortfolioCollaborators,
   removeCollaborator,
   updateCollaboratorRole
-} from "../lib/database";
+} from "@lib/database";
 import { LangContext } from "../context/LangContext";
 import { useUser } from "../context/UserContext";
 import { translations } from "../assets/translations/translations-index.js";
 import { ProjectCard } from "../components";
-import { toastManager } from "../lib/ui/feedback";
+import { toastManager } from "@lib/ui/feedback";
 import { useLucideIcons } from "../hooks/useLucideIcons";
 import { setPendingProjectId } from "../stores/projectsStore";
 
@@ -197,20 +197,13 @@ const Portfolio = () => {
       }
     };
 
-    const onProjectAdded = () => refreshData();
-    const onProjectUpdated = () => refreshData();
-
     onMount(async () => {
       if (window.lucide) window.lucide.createIcons();
       await refreshData();
-
-      window.addEventListener('projectAdded', onProjectAdded);
-      window.addEventListener('projectUpdated', onProjectUpdated);
     });
 
     onCleanup(() => {
-      window.removeEventListener('projectAdded', onProjectAdded);
-      window.removeEventListener('projectUpdated', onProjectUpdated);
+      // Cleanup any resources if needed
     });
 
    createEffect(() => {

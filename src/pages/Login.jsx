@@ -2,11 +2,11 @@ import { createSignal, onMount, useContext, createEffect } from "solid-js";
 import { useNavigate } from "@solidjs/router";
 import { useUser } from "../context/UserContext";
 import { useLanguage } from "../hooks/useLanguage";
-import { sanitizeInput, isValidEmail } from "../lib/auth/security";
-import { toastManager } from "../lib/ui/feedback";
+import { sanitizeInput, isValidEmail } from "@lib/auth/security";
+import { toastManager } from "@lib/ui/feedback";
 import { RouteGuard } from "../components";
 import logo from "../assets/images/iGate-tech-logo.svg";
-import { logger } from '../lib/core';
+import { logger } from '@lib/core';
 
 
 

@@ -11,6 +11,7 @@ services:
       - "${APP_PORT:-3001}:3000"
     environment:
       - NODE_ENV=${NODE_ENV:-production}
+      - BUN_ENV=${NODE_ENV:-production}
       - PORT=3000
       - ENVIRONMENT=${ENVIRONMENT:-prod}
       - CONTAINER_NAME_SUFFIX=${CONTAINER_NAME_SUFFIX:-prod}

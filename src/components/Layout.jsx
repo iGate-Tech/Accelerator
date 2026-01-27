@@ -1,11 +1,11 @@
 import {onMount, createEffect, createSignal, useContext} from "solid-js";
 import {useNavigate} from "@solidjs/router";
 import {LangContext} from "../context/LangContext";
-import {getPg} from "../lib/database";
+import {getPg} from "@lib/database";
 
 import Sidebar from "./Sidebar";
 import favicon from "../assets/images/favicon.svg";
-import { logger } from '../lib/core';
+import { logger } from '@lib/core';
 
 
 const Layout = (props) => {

@@ -2,11 +2,11 @@ import { createSignal, onMount, createEffect } from "solid-js";
 import { useNavigate, useParams } from "@solidjs/router";
 import { useUser } from "../context/UserContext";
 import { useLanguage } from "../hooks/useLanguage";
-import { sanitizeInput, isValidEmail, isValidPassword } from "../lib/auth/security";
-import { toastManager } from "../lib/ui/feedback";
+import { sanitizeInput, isValidEmail, isValidPassword } from "@lib/auth/security";
+import { toastManager } from "@lib/ui/feedback";
 import { RouteGuard } from "../components";
 import logo from "../assets/images/iGate-tech-logo.svg";
-import { logger } from '../lib/core';
+import { logger } from '@lib/core';
 
 const ResetPassword = () => {
   logger.trace('ResetPassword: Starting');

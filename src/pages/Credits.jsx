@@ -2,10 +2,10 @@ import { createSignal, onMount, createEffect, For, Show, createResource } from "
 import { useNavigate } from "@solidjs/router";
 import { useUser } from "../context/UserContext";
 import { useLanguage } from "../hooks/useLanguage";
-import { getUserCredits, getUserCreditBalance, addCreditTransaction, consumeCredits } from "../lib/database";
-import { initDatabase } from "../lib/database/core";
-import { toastManager } from "../lib/ui/feedback";
-import { logger } from "../lib/core";
+import { getUserCredits, getUserCreditBalance, addCreditTransaction, consumeCredits } from "@lib/database";
+import { initDatabase } from "@lib/database/core";
+import { toastManager } from "@lib/ui/feedback";
+import { logger } from "@lib/core";
 
 const Credits = () => {
   logger.trace('Credits: Starting');

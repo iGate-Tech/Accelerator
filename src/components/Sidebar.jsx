@@ -13,8 +13,8 @@ import {useUser} from "../context/UserContext";
 import {useLanguage} from "../hooks/useLanguage";
 import {
     getUserNotifications
-} from "../lib/database";
-import { logger } from "../lib/core";
+} from "@lib/database";
+import { logger } from "@lib/core";
 // eslint-disable-next-line no-unused-vars
 import ProjectsSection from './ProjectsSection';
 // eslint-disable-next-line no-unused-vars
@@ -97,10 +97,9 @@ const Sidebar = () => {
         }>
             <div class="flex flex-col h-full min-h-0 transition-all duration-300">
                 <div class="flex-shrink-0 relative p-5 flex items-center justify-between rtl:justify-between gap-2">
-                    <A href="/"
+                    <A href="/home"
                         onClick={
                             (e) => {
-                                e.preventDefault();
                                 setIsCollapsed(!isCollapsed());
                             }
                         }
@@ -125,10 +124,9 @@ const Sidebar = () => {
                     <Show when={
                         !isCollapsed()
                     }>
-                        <A href="/"
+                        <A href="/home"
                             onClick={
                                 (e) => {
-                                    e.preventDefault();
                                     setIsCollapsed(!isCollapsed());
                                 }
                             }
@@ -142,10 +140,10 @@ const Sidebar = () => {
                     <ul class="menu w-full gap-1">
                         <li classList={
                             {
-                                "menu-active": location.pathname === "/"
+                                "menu-active": location.pathname === "/home"
                             }
                         }>
-                            <A href="/"
+                            <A href="/home"
                                 class="flex items-center justify-center ltr:justify-center rtl:justify-center p-3 hover:bg-base-300 transition-colors rounded-lg relative group"
                                 aria-label={
                                     `Create new project - ${

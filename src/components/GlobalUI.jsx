@@ -1,6 +1,6 @@
 import { createSignal, Show, For, createEffect } from "solid-js";
-import { toastManager, removeToast } from "../lib/ui/feedback";
-import { logger } from '../lib/core';
+import { toastManager, removeToast } from "@lib/ui/feedback";
+import { logger } from '@lib/core';
 
 
 const [globalLoading, setGlobalLoading] = createSignal(false);

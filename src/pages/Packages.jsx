@@ -2,11 +2,11 @@ import { createSignal, onMount, createEffect, For } from "solid-js";
 import { useNavigate } from "@solidjs/router";
 import { useUser } from "../context/UserContext";
 import { useLanguage } from "../hooks/useLanguage";
-import { createUserSubscription, getUserSubscription, seedPackages } from "../lib/database";
-import { initDatabase } from "../lib/database/core";
-import { toastManager } from "../lib/ui/feedback";
+import { createUserSubscription, getUserSubscription, seedPackages } from "@lib/database";
+import { initDatabase } from "@lib/database/core";
+import { toastManager } from "@lib/ui/feedback";
 import { packagesTranslations } from "../assets/translations/translations-index.js";
-import { logger } from "../lib/core";
+import { logger } from "@lib/core";
 
 const Packages = () => {
   logger.trace('Packages: Starting');

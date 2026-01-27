@@ -2,9 +2,9 @@ import { createSignal, onMount, createEffect, For, Show, createResource } from "
 import { useNavigate } from "@solidjs/router";
 import { useUser } from "../context/UserContext";
 import { useLanguage } from "../hooks/useLanguage";
-import { getUserNotifications, markNotificationRead, createNotification } from "../lib/database";
-import { toastManager } from "../lib/ui/feedback";
-import { logger } from '../lib/core';
+import { getUserNotifications, markNotificationRead, createNotification } from "@lib/database";
+import { toastManager } from "@lib/ui/feedback";
+import { logger } from '@lib/core';
 
 const Notifications = () => {
   logger.trace('Notifications: Starting');

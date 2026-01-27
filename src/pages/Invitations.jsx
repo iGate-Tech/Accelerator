@@ -1,11 +1,11 @@
 import { createSignal, createResource, createMemo, onMount, For, Show, useContext } from "solid-js";
 import { useNavigate } from "@solidjs/router";
 import { useUser } from "../context/UserContext";
-import { getUserInvitations, respondToInvitation } from "../lib/database";
-import { toastManager } from "../lib/ui/feedback";
+import { getUserInvitations, respondToInvitation } from "@lib/database";
+import { toastManager } from "@lib/ui/feedback";
 import { LangContext } from "../context/LangContext";
 import { translations } from "../assets/translations/translations-index.js";
-import { logger } from '../lib/core';
+import { logger } from '@lib/core';
 
 
 const Invitations = () => {

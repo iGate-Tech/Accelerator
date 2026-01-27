@@ -1,13 +1,13 @@
 import { createContext, createSignal, useContext, onMount } from "solid-js";
-import { dataAPI } from "../lib/auth/data.js";
-import { updateEntity, getUserProfile, createUserProfile, getUserById, createUser, getUserSubscription, setCurrentUser } from "../lib/database";
-import { initDatabase } from "../lib/database/core.js";
-import { toastManager } from "../lib/ui/feedback.js";
-import { activityLogger } from "../lib/business/activity.js";
-import { logger } from "../lib/core";
+import { dataAPI } from "@lib/auth/data.js";
+import { updateEntity, getUserProfile, createUserProfile, getUserById, createUser, getUserSubscription, setCurrentUser } from "@lib/database";
+import { initDatabase } from "@lib/database/core.js";
+import { toastManager } from "@lib/ui/feedback.js";
+import { activityLogger } from "@lib/business.js";
+import { logger } from "@lib/core";
 import { confirmLogout } from "../components";
-import { createAuthToken } from "../lib/auth/data.js";
-import { secureLocalStorage } from "../lib/auth/security.js";
+import { createAuthToken } from "@lib/auth/data.js";
+import { secureLocalStorage } from "@lib/auth/security.js";
 
 
 const UserContext = createContext();

@@ -1,7 +1,7 @@
 import { createSignal, onMount, Show, createResource } from "solid-js";
 import { useUser } from "../context/UserContext";
 import { useNavigate } from "@solidjs/router";
-import { logger } from "../lib/core";
+import { logger } from "@lib/core";
 
 
 const ProtectedRoute = (props) => {

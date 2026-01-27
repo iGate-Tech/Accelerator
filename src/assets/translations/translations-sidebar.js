@@ -39,6 +39,7 @@ export const sidebarTranslations = {
     // Context menu
     open: 'Open',
     rename: 'Rename',
+    delete: 'Delete',
     exportProject: 'Export Project',
 
     // Notifications
@@ -103,6 +104,7 @@ export const sidebarTranslations = {
     // Context menu
     open: 'فتح',
     rename: 'إعادة تسمية',
+    delete: 'حذف',
     exportProject: 'تصدير المشروع',
 
     // Notifications

@@ -1,5 +1,5 @@
 import { createSignal, onMount, onCleanup } from "solid-js";
-import { logger } from "../lib/core";
+import { logger } from "@lib/core";
 
 const LoadingOverlay = (props) => {
   const [show, setShow] = createSignal(false);

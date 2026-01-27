@@ -1,19 +1,39 @@
 
-import { createMemo, createEffect, Show } from "solid-js";
+import { createMemo, createEffect, Show, createSignal } from "solid-js";
 import { marked } from "marked";
-import { renderFilledTemplate } from "../lib/ui/llm-template";
-import { updateTask, deleteTask } from "../lib/database";
-import { logger } from "../lib/core";
-import { toastManager } from "../lib/ui/feedback";
-import { stepNames } from "../lib/business/steps";
-import { normalizeLLMResponse } from "../lib/ui/response-normalizer";
+import { renderFilledTemplate } from "@lib/ui/llm-template";
+import { updateTask, deleteTask } from "@lib/database";
+import { logger } from "@lib/core";
+import { toastManager } from "@lib/ui/feedback";
+import { stepNames } from "@lib/business.js";
+import { normalizeLLMResponse } from "@lib/ui/response-normalizer";
 
 const UnifiedTaskCard = (props) => {
   const task = props.task;
   const taskId = task?.id || 'unknown';
   
    const content = () => normalizeLLMResponse(props.taskContent ?? task?.content ?? '');
-   const llmResponse = () => normalizeLLMResponse(task?.llm_response ?? '');
+
+   // Make llmResponse reactive to changes in task
+   const llmResponse = () => {
+     // Access task.llm_response to track it reactively
+     const response = task?.llm_response;
+     return normalizeLLMResponse(response ?? '');
+   };
+
+   // During streaming, use llm_response if available, otherwise fall back to content
+   const displayContent = () => {
+     // Explicitly access both values to ensure reactivity
+     const llmResp = llmResponse();
+     const cont = content();
+
+     // During active streaming, prioritize the llm_response which gets updated in real-time
+     if (isCurrentlyStreaming()) {
+       return llmResp || cont;
+     }
+     // When not streaming, use the final llm_response if available, otherwise content
+     return llmResp || cont;
+   };
 
   const isEditing = () => props.editingTaskId && props.editingTaskId() === taskId;
   const isSelected = () => props.selectedTaskId && props.selectedTaskId() === taskId;
@@ -21,7 +41,7 @@ const UnifiedTaskCard = (props) => {
   let contentRef;
   let cardRef;
 
-  const isStreaming = () => props.isStreaming ?? (content() && content().trim().length > 0 && !llmResponse());
+  const isStreaming = () => props.isStreaming ?? false;
   const isStreamingComplete = () => props.isStreamingComplete ?? true;
   const isCurrentlyStreaming = () => props.streamingTaskId?.() === taskId;
   const isLastTask = () => props.isLastTask ?? false;
@@ -36,10 +56,43 @@ const UnifiedTaskCard = (props) => {
     }
   });
 
-  // Memoize expensive rendering operations
+  // Preprocess markdown to handle ==text== syntax (highlight)
+  const preprocessMarkdown = (markdown) => {
+    if (!markdown) return '';
+    // Convert ==text== to <mark>text</mark> for highlighting
+    return markdown.replace(/==(.*?)==/g, '<mark>$1</mark>');
+  };
+
+  // Create a signal to track the current content for reactivity
+  const [currentContent, setCurrentContent] = createSignal(displayContent());
+
+  // Effect to update current content when displayContent changes during streaming
+  createEffect(() => {
+    if (isCurrentlyStreaming()) {
+      setCurrentContent(displayContent());
+    }
+  });
+
+  // Subscribe to changes in task's content during streaming
+  createEffect(() => {
+    // Access both content and llm_response to track changes
+    const taskContent = task?.content;
+    const taskLlmResponse = task?.llm_response;
+    const taskTimestamp = task?.last_modified; // Use timestamp to detect changes
+
+    // Only update the current content if we're currently streaming this task
+    if (isCurrentlyStreaming()) {
+      const contentValue = displayContent();
+      setCurrentContent(contentValue);
+    }
+  });
+
+  // Memoize expensive rendering operations - based on currentContent signal
   const renderedContent = createMemo(() => {
-    if (!content() || content().trim().length === 0) return '';
-    return marked.parse(renderFilledTemplate(content()) || '', { breaks: true, gfm: true });
+    const displayText = currentContent();
+    if (!displayText || displayText.trim().length === 0) return '';
+    const processedContent = preprocessMarkdown(renderFilledTemplate(displayText) || '');
+    return marked.parse(processedContent, { breaks: true, gfm: true });
   });
 
   // Auto-expand if this is the last task
@@ -48,11 +101,23 @@ const UnifiedTaskCard = (props) => {
   // Auto-scroll to this card when streaming content updates
   createEffect(() => {
     const streamingId = props.streamingTaskId?.();
-    const currentContent = content();
+    const currentContent = displayContent();
 
     if (streamingId === taskId && currentContent?.trim().length > 0 && cardRef) {
       requestAnimationFrame(() => {
-        cardRef.scrollIntoView({ behavior: 'smooth', block: 'end' });
+        // Use the native scrollIntoView but adjust the scroll position afterwards
+        cardRef.scrollIntoView({ behavior: 'auto', block: 'end' });
+
+        // Then adjust the scroll position to account for 200px from the bottom
+        const rect = cardRef.getBoundingClientRect();
+        if (rect.bottom > window.innerHeight - 200) {
+          const currentScrollY = window.scrollY || window.pageYOffset;
+          const adjustment = rect.bottom - (window.innerHeight - 500);
+          window.scrollTo({
+            top: currentScrollY + adjustment,
+            behavior: 'smooth'
+          });
+        }
       });
     }
   });
@@ -153,12 +218,12 @@ const UnifiedTaskCard = (props) => {
                 toastManager.error('No prompt available for this task');
                 return;
               }
-              
+
               // Set this task as streaming for UI feedback
               if (props.setStreamingTaskId) {
                 props.setStreamingTaskId(taskId);
               }
-              
+
                let accumulatedResponse = '';
                await props.callLLMForStep(taskPrompt, (chunk) => {
                  accumulatedResponse += chunk;
@@ -169,24 +234,26 @@ const UnifiedTaskCard = (props) => {
                        t.id === taskId
                          ? {
                              ...t,
-                             content: normalized,
-                             llm_response: normalized,
+                             llm_response: normalized,  // Update llm_response during streaming
                              last_modified: new Date().toISOString()
                            }
                          : t
                      )
                    );
                  }
+
+                 // Also update the current content signal directly for immediate UI feedback
+                 setCurrentContent(normalized);
                });
 
                const finalResponse = normalizeLLMResponse(accumulatedResponse);
-               await updateTask(taskId, { llm_response: finalResponse, content: finalResponse, last_modified: new Date().toISOString() });
+               await updateTask(taskId, { llm_response: finalResponse, last_modified: new Date().toISOString() });
                await props.refreshTasks();
 
                if (props.setStreamingTaskId) {
                  props.setStreamingTaskId(null);
                }
-              
+
               toastManager.success('Task regenerated successfully');
             } catch (error) {
               if (props.setStreamingTaskId) {
@@ -266,7 +333,7 @@ const UnifiedTaskCard = (props) => {
     >
         {/* Card Header */}
         <div class={`card-header px-4 py-3 border-b border-base-300 flex flex-wrap items-center justify-between gap-2 ${
-          props.streamingTaskId?.() === taskId && content() && content().trim().length > 0 && !isExpanded() ? 'ring-1 ring-primary/30' : ''
+          props.streamingTaskId?.() === taskId && displayContent() && displayContent().trim().length > 0 && !isExpanded() ? 'ring-1 ring-primary/30' : ''
         } ${isCurrentlyStreaming() ? 'bg-blue-50 dark:bg-blue-900/20' : ''}`}>
         <div class="flex items-center gap-2 min-w-0">
            <button
@@ -313,7 +380,7 @@ const UnifiedTaskCard = (props) => {
               <Show when={isSelected()}>
                 <span class="badge badge-info badge-sm">Selected</span>
               </Show>
-               <Show when={props.streamingTaskId?.() === taskId && content() && content().trim().length > 0 && !isExpanded()}>
+               <Show when={props.streamingTaskId?.() === taskId && displayContent() && displayContent().trim().length > 0 && !isExpanded()}>
                  <span class="badge badge-primary badge-sm animate-pulse">Streaming</span>
                </Show>
                <Show when={isCurrentlyStreaming() && isExpanded()}>
@@ -337,23 +404,29 @@ const UnifiedTaskCard = (props) => {
                 class="prose prose-base max-w-none dark:prose-invert rounded-lg p-2 -m-2 cursor-pointer hover:bg-base-200/30 transition-colors relative"
                 onClick={() => {
                   if (props.setEditingTaskId) props.setEditingTaskId(taskId);
-                  if (props.setEditContent) props.setEditContent(content() || '');
+                  if (props.setEditContent) props.setEditContent(currentContent() || '');
                 }}
                 >
-                <Show when={!content() || content().trim().length === 0}>
+                <Show when={!currentContent() || currentContent().trim().length === 0}>
                   <div class="flex items-center gap-2 text-base-content/60">
                     <div class="loading loading-dots loading-sm"></div>
                     <span class="text-sm">Generating response...</span>
                   </div>
                 </Show>
-                <Show when={isCurrentlyStreaming() && content() && content().trim().length > 0}>
+                <Show when={isCurrentlyStreaming() && currentContent() && currentContent().trim().length > 0}>
                   <div class="flex items-center gap-2 text-blue-600 dark:text-blue-300 mb-2">
                     <div class="loading loading-dots loading-sm"></div>
                     <span class="text-sm font-medium">Generating response...</span>
                   </div>
                 </Show>
-                <Show when={content() && content().trim().length > 0}>
+                <Show when={currentContent() && currentContent().trim().length > 0}>
                   <div innerHTML={renderedContent()} />
+                </Show>
+                <Show when={isCurrentlyStreaming() && (!currentContent() || currentContent().trim().length === 0)}>
+                  <div class="flex items-center gap-2 text-base-content/60">
+                    <div class="loading loading-dots loading-sm"></div>
+                    <span class="text-sm">Waiting for response...</span>
+                  </div>
                 </Show>
               </div>
             }>

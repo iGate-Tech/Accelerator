@@ -1,11 +1,4 @@
 import 'dotenv/config';
-import express from 'express';
-import path from 'path';
-import fs from 'fs';
-import https from 'https';
-import http from 'http';
-import OpenAI from 'openai';
-import { fileURLToPath } from 'url';
 
 // Simple console wrapper to replace logger
 const logger = {
@@ -48,9 +41,6 @@ class RateLimiter {
 
 const llmRateLimiter = new RateLimiter(60000, 5); // 5 requests per minute for LLM endpoints
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
 // Environment variable validation
 function validateEnvironment() {
   const required = ['OPENROUTER_API_KEY'];
@@ -72,41 +62,8 @@ function validateEnvironment() {
 
 validateEnvironment();
 
-const port = process.env.PORT || 3000;
-logger.trace('server.js: Server initialization starting, port:', port);
-
-const app = express();
-logger.trace('server.js: Express app created');
-
-// Force HTTPS redirect in production - only if not behind Traefik/reverse proxy
-app.use((req, res, next) => {
-  logger.trace('server.js: HTTPS redirect middleware - method:', req.method, 'url:', req.url, 'proto:', req.header('x-forwarded-proto'), 'env:', process.env.NODE_ENV);
-  // Skip redirect if x-forwarded-proto is set (Traefik sets this)
-  const proto = req.header('x-forwarded-proto');
-  if (proto && proto !== 'https' && process.env.NODE_ENV === 'production') {
-    logger.info('server.js: Redirecting to HTTPS:', `https://${req.header('host')}${req.url}`);
-    res.redirect(301, `https://${req.header('host')}${req.url}`);
-  } else {
-    logger.trace('server.js: No redirect needed (Traefik handles SSL or already HTTPS)');
-    next();
-  }
-});
-
-// Middleware
-app.use((req, res, next) => {
-  logger.trace('server.js: CORS middleware - method:', req.method, 'origin:', req.header('origin'));
-  res.header('Access-Control-Allow-Origin', '*');
-  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-  if (req.method === 'OPTIONS') {
-    logger.debug('server.js: Handling OPTIONS preflight request');
-    res.sendStatus(200);
-  } else {
-    next();
-  }
-});
-app.use(express.urlencoded({ extended: true }));
-app.use(express.json());
+// Import OpenAI dynamically to avoid issues during build
+const { default: OpenAI } = await import('openai');
 
 // OpenAI client for OpenRouter
 let openai = null;
@@ -128,229 +85,95 @@ try {
 }
 
 // Model configuration
-const AI_MODEL = 'google/gemma-3-27b-it:free';
+const AI_MODEL = 'google/gemma-3n-e2b-it:free';
 logger.debug('server.js: AI model configured as:', AI_MODEL);
 
-// Static files
-logger.trace('server.js: Setting up static file serving');
-app.use(express.static(path.join(__dirname, 'public')));
-app.use(express.static(path.join(__dirname, 'dist'))); // For built files
-logger.debug('server.js: Static file directories configured:', path.join(__dirname, 'public'), path.join(__dirname, 'dist'));
+// Determine port
+const port = process.env.PORT || 3000;
 
-
-// Health check and root route
-app.get('/test', (req, res) => {
-    const fs = require('fs');
-    const distPath = path.join(__dirname, 'dist');
-    res.json({
-        __dirname,
-        distPath,
-        distExists: fs.existsSync(distPath),
-        distContents: fs.existsSync(distPath) ? fs.readdirSync(distPath) : [],
-        indexHtmlExists: fs.existsSync(path.join(distPath, 'index.html'))
-    });
-});
-
-app.get('/', (req, res) => {
-    const fs = require('fs');
-    const distPath = path.join(__dirname, 'dist');
-    logger.debug('server.js: Root route requested');
-    logger.debug('server.js: __dirname:', __dirname);
-    logger.debug('server.js: distPath:', distPath);
-    logger.debug('server.js: dist exists:', fs.existsSync(distPath));
-    if (fs.existsSync(distPath)) {
-        logger.debug('server.js: dist contents:', fs.readdirSync(distPath));
-    }
-    logger.debug('server.js: index.html exists:', fs.existsSync(path.join(distPath, 'index.html')));
-    res.sendFile(path.join(__dirname, 'dist', 'index.html'));
-});
-
-// Health check endpoint with detailed status
-app.get('/api/health', async (req, res) => {
-    console.log(`[${new Date().toISOString()}] SERVER: Health check requested from IP: ${req.ip}`);
+// Define routes
+const routes = {
+  '/api/health': async (request) => {
+    console.log(`[${new Date().toISOString()}] SERVER: Health check requested from IP: ${request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'unknown'}`);
 
     const health = {
-        status: 'ok',
-        timestamp: new Date().toISOString(),
-        uptime: process.uptime(),
-        version: '1.0.0',
-        services: {}
+      status: 'ok',
+      timestamp: new Date().toISOString(),
+      uptime: process.uptime(),
+      version: '1.0.0',
+      services: {}
     };
 
     try {
-        // Check OpenRouter API key
-        if (process.env.OPENROUTER_API_KEY) {
-            health.services.openrouter = 'configured';
-        } else {
-            health.services.openrouter = 'missing_api_key';
-            health.status = 'degraded';
-        }
+      // Check OpenRouter API key
+      if (process.env.OPENROUTER_API_KEY) {
+        health.services.openrouter = 'configured';
+      } else {
+        health.services.openrouter = 'missing_api_key';
+        health.status = 'degraded';
+      }
 
-        // Check PGLite database (basic connectivity)
-        // Since PGLite is client-side, we can't check it from server
-        health.services.database = 'client_side_pglite';
+      // Check PGLite database (basic connectivity)
+      // Since PGLite is client-side, we can't check it from server
+      health.services.database = 'client_side_pglite';
 
-        // Check SSL status
-        const hasSSL = !!(process.env.SSL_KEY_PATH && process.env.SSL_CERT_PATH);
-        health.services.ssl = hasSSL ? 'enabled' : 'disabled';
+      // Check SSL status
+      const hasSSL = !!(process.env.SSL_KEY_PATH && process.env.SSL_CERT_PATH);
+      health.services.ssl = hasSSL ? 'enabled' : 'disabled';
 
-        // Memory usage
-        health.memory = process.memoryUsage();
+      // Memory usage
+      health.memory = process.memoryUsage ? process.memoryUsage() : {};
 
-        res.json(health);
+      return new Response(JSON.stringify(health), {
+        headers: { 'Content-Type': 'application/json' }
+      });
     } catch (error) {
-        logger.error('Health check error:', error);
-        res.status(500).json({
-            status: 'error',
-            message: error.message,
-            timestamp: new Date().toISOString()
-        });
+      logger.error('Health check error:', error);
+      return new Response(JSON.stringify({
+        status: 'error',
+        message: error.message,
+        timestamp: new Date().toISOString()
+      }), {
+        status: 500,
+        headers: { 'Content-Type': 'application/json' }
+      });
     }
-});
+  },
 
-// LLM API Route - Unified endpoint for all LLM calls
-app.post('/api/llm', async (req, res) => {
-    const { prompt, stream = true, quick = false } = req.body || {};
+  '/api/llm': async (request) => {
+    if (request.method !== 'POST') {
+      return new Response('Method not allowed', { status: 405 });
+    }
+
+    const { prompt, stream = true, quick = false, language = 'en' } = await request.json() || {};
     const userPrompt = prompt || 'Hello';
     const startTime = Date.now();
 
     console.log(`[${new Date().toISOString()}] SERVER: === UNIFIED LLM API CALL ===`);
-    console.log(`[${new Date().toISOString()}] SERVER: Request from IP: ${req.ip}, stream: ${stream}, quick: ${quick}`);
-    console.log(`[${new Date().toISOString()}] SERVER: Prompt length: ${userPrompt.length}, first 100 chars: "${userPrompt.substring(0, 100)}..."`);
+    console.log(`[${new Date().toISOString()}] SERVER: Request from IP: ${request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'unknown'}, stream: ${stream}, quick: ${quick}`);
+    console.log(`[${new Date().toISOString()}] SERVER: Prompt length: ${userPrompt.length}, first 100 chars: "${userPrompt.substring(0, 1000)}..."`);
 
     // Rate limiting
-    const clientIP = req.ip || req.connection.remoteAddress || 'unknown';
+    const clientIP = request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'unknown';
     const rateLimitResult = llmRateLimiter.checkLimit(clientIP);
     if (!rateLimitResult.allowed) {
-        console.log(`[${new Date().toISOString()}] SERVER: RATE LIMIT EXCEEDED for IP: ${clientIP}`);
-        res.status(429).json({
-            error: 'Rate limit exceeded',
-            retryAfter: Math.ceil((rateLimitResult.resetTime - Date.now()) / 1000)
-        });
-        return;
+      console.log(`[${new Date().toISOString()}] SERVER: RATE LIMIT EXCEEDED for IP: ${clientIP}`);
+      return new Response(JSON.stringify({
+        error: 'Rate limit exceeded',
+        retryAfter: Math.ceil((rateLimitResult.resetTime - Date.now()) / 1000)
+      }), {
+        status: 429,
+        headers: { 'Content-Type': 'application/json' }
+      });
     }
 
     if (!openai) {
-        console.log(`[${new Date().toISOString()}] SERVER: ERROR - OpenAI client not initialized`);
-        res.status(500).end('OpenAI client not configured');
-        return;
+      console.log(`[${new Date().toISOString()}] SERVER: ERROR - OpenAI client not initialized`);
+      return new Response('OpenAI client not configured', { status: 500 });
     }
 
-    // Extract language from request body, default to 'en'
-    const language = req.body.language || 'en';
-
-    // System prompt based on quick mode and language
-    const getSystemPrompt = (quick, lang) => {
-        if (quick) {
-            if (lang === 'ar') {
-                return `أنت مساعد ذكاء اصطناعي لتوليد وتحسين أفكار المشاريع الناشئة. قدّم إجابات قصيرة ومختصرة بتنسيق الماركداون. كن مباشرًا ومفيدًا.`;
-            } else {
-                return `You are an AI assistant for startup idea generation and improvement. Provide short, concise responses in markdown format. Be direct and helpful.`;
-            }
-        } else {
-            if (lang === 'ar') {
-                return `أنت وكيل iGate Accelerator — خبير استشاري في المشاريع الناشئة يرشد المؤسسين خلال عملية التحقق والتسريع المكونة من 51 خطوة.
-
-                مسؤوليتك الأساسية هي إنتاج **ماركداون غني ومنظم**.
-
-                ───────────────────────────────────────────────────────────────────────────────
-                التنسيق الإلزامي
-
-                - أجب دائمًا بتنسيق ماركداون صالح
-                - استخدم العناوين (## ###)، وقوائم العناصر، والخطوات المرقمة، والجداول، والتغميق
-                - أولوية الوضوح والهرمية والعمق على الاختصار
-                - يجب أن تبدو الاستجابات كصفحة مصقولة من دليل المشروع الناشئ
-
-                ───────────────────────────────────────────────────────────────────────────────
-                البيانات المضمنة (القاعدة الثانوية)
-
-                - ضمّن فقط الحقائق الذرية المهمة باستخدام التنسيق التالي:
-                  {{key: "value"}}
-                - استخدم حقول استبدال للأرقام والإحصائيات والأدوار والأسواق والأدوات أو القرارات
-                - لا تضمّن حقول الاستبدال في العناوين أو تسميات القوائم أو الجداول
-                - لا تجبر حقول الاستبدال في كل فقرة
-
-                ───────────────────────────────────────────────────────────────────────────────
-                قواعد حقول الاستبدال
-
-                - تنسيق JSON فقط (سلسلة نصية، رقم، مصفوفة، كائن)
-                - لا تستخدم تنسيق الماركداون، ولا الجمل داخل حقول الاستبدال
-                - كحد أقصى حقلين استبدال لكل فقرة
-
-                ───────────────────────────────────────────────────────────────────────────────
-                قواعد المحتوى
-
-                - إذا طلب المستخدم تنسيق JSON بشكل خاص، أعد JSON صالح
-                - وإلا، أجب بالكامل عن المهمة مع ماركداون مفصل
-                - قسّم الأفكار إلى خطوات وأقسام
-                - استخدم أمثلة وافتراضات
-                - جودة الماركداون أهم من تغطية حقول الاستبدال
-
-                ───────────────────────────────────────────────────────────────────────────────
-                النمط
-
-                - احترافي
-                - عملي
-                - مبني على الأدلة
-                - بدون مبالغة
-
-                لا تكرر المطالبة. عامل إدخال المستخدم كمهمة وقدم إجابة كاملة بتنسيق ماركداون.
-                `;
-            } else {
-                return `You are the iGate Accelerator Agent — an expert startup advisor guiding founders through a 51-step validation and acceleration process.
-
-                Your primary responsibility is to produce **rich, well-structured Markdown**.
-
-                ───────────────────────────────────────────────────────────────────────────────
-                MANDATORY FORMAT
-
-                - ALWAYS respond in valid Markdown
-                - Use headings (## ###), bullet lists, numbered steps, tables, and emphasis
-                - Prefer clarity, hierarchy, and depth over brevity
-                - Responses MUST look like a polished startup playbook page
-
-                ───────────────────────────────────────────────────────────────────────────────
-                EMBEDDED DATA (SECONDARY RULE)
-
-                - Embed ONLY important, atomic facts using this format:
-                  {{key: "value"}}
-                - Use placeholders for numbers, metrics, roles, markets, tools, or decisions
-                - NEVER embed placeholders in headings, lists labels, or tables
-                - Do NOT force placeholders into every paragraph
-
-                ───────────────────────────────────────────────────────────────────────────────
-                PLACEHOLDER RULES
-
-                - JSON only (string, number, array, object)
-                - No markdown, no sentences inside placeholders
-                - Max 2 placeholders per paragraph
-
-                ───────────────────────────────────────────────────────────────────────────────
-                CONTENT RULES
-
-                - If the user specifically requests JSON format, return valid JSON
-                - Otherwise, fully answer the task with detailed Markdown
-                - Break ideas into steps and sections
-                - Use examples and assumptions
-                - Markdown quality is more important than placeholder coverage
-
-                ───────────────────────────────────────────────────────────────────────────────
-                STYLE
-
-                - Professional
-                - Practical
-                - Evidence-based
-                - No hype
-
-                Do NOT repeat the prompt. Treat the user input as a task and deliver a complete Markdown response.
-                `;
-            }
-        }
-    };
-
-    const systemPrompt = getSystemPrompt(quick, language);
-
-    console.log(`[${new Date().toISOString()}] SERVER: System prompt length: ${systemPrompt.length}`);
+    // Use the user's prompt directly without system prompt
+    console.log(`[${new Date().toISOString()}] SERVER: Processing user prompt, length: ${userPrompt.length}`);
 
     // Retry logic with exponential backoff
     const maxRetries = 3;
@@ -358,157 +181,163 @@ app.post('/api/llm', async (req, res) => {
     let lastError = null;
 
     while (retries <= maxRetries) {
-        try {
-            console.log(`[${new Date().toISOString()}] SERVER: Creating OpenAI stream (attempt ${retries + 1}/${maxRetries + 1})`);
+      try {
+        console.log(`[${new Date().toISOString()}] SERVER: Creating OpenAI stream (attempt ${retries + 1}/${maxRetries + 1})`);
 
-            const openaiStartTime = Date.now();
-            const stream = await openai.chat.completions.create({
-                model: AI_MODEL,
-                messages: [
-                    { role: 'system', content: systemPrompt },
-                    { role: 'user', content: userPrompt }
-                ],
-                stream: true,
-            });
-            const openaiInitTime = Date.now() - openaiStartTime;
-            console.log(`[${new Date().toISOString()}] SERVER: OpenAI stream created in ${openaiInitTime}ms`);
+        const openaiStartTime = Date.now();
+        const stream = await openai.chat.completions.create({
+          model: AI_MODEL,
+          messages: [
+            { role: 'user', content: userPrompt }
+          ],
+          stream: true,
+        });
+        const openaiInitTime = Date.now() - openaiStartTime;
+        console.log(`[${new Date().toISOString()}] SERVER: OpenAI stream created in ${openaiInitTime}ms`);
 
-            // Set response headers for streaming
-            res.setHeader('Content-Type', 'text/plain');
-            res.setHeader('Cache-Control', 'no-cache');
-            res.setHeader('Connection', 'close'); // Prevent connection pool reuse issues
-
+        // Create a readable stream for the response
+        const encoder = new TextEncoder();
+        const readableStream = new ReadableStream({
+          async start(controller) {
             let aiResponse = '';
             let chunkCount = 0;
             let totalBytesSent = 0;
 
-            // Stream the response
             for await (const chunk of stream) {
-                const content = chunk.choices[0]?.delta?.content || '';
-                if (content) {
-                    aiResponse += content;
-                    chunkCount++;
-                    totalBytesSent = Buffer.byteLength(aiResponse, 'utf8');
-                    res.write(content);
-                }
+              const content = chunk.choices[0]?.delta?.content || '';
+              if (content) {
+                aiResponse += content;
+                chunkCount++;
+                totalBytesSent = new Blob([aiResponse]).size;
+                controller.enqueue(encoder.encode(content));
+              }
             }
 
             const duration = Date.now() - startTime;
             console.log(`[${new Date().toISOString()}] SERVER: Stream complete - chunks: ${chunkCount}, bytes: ${totalBytesSent}, duration: ${duration}ms`);
-            res.end();
+            
+            controller.close();
+          }
+        });
 
-            // Success - break out of retry loop
-            break;
+        return new Response(readableStream, {
+          headers: {
+            'Content-Type': 'text/plain',
+            'Cache-Control': 'no-cache',
+            'Connection': 'close'
+          }
+        });
 
-        } catch (error) {
-            lastError = error;
-            const duration = Date.now() - startTime;
-            console.log(`[${new Date().toISOString()}] SERVER: Attempt ${retries + 1}/${maxRetries + 1} failed: ${error.message}`);
-            console.error(`[${new Date().toISOString()}] SERVER: Error detail`, {
-                name: error?.name,
-                code: error?.code,
-                status: error?.status || error?.response?.status,
-                data: error?.response?.data || error?.data || null,
-                stack: error?.stack
-            });
+      } catch (error) {
+        lastError = error;
+        const duration = Date.now() - startTime;
+        console.log(`[${new Date().toISOString()}] SERVER: Attempt ${retries + 1}/${maxRetries + 1} failed: ${error.message}`);
+        console.error(`[${new Date().toISOString()}] SERVER: Error detail`, {
+          name: error?.name,
+          code: error?.code,
+          status: error?.status || error?.response?.status,
+          data: error?.response?.data || error?.data || null,
+          stack: error?.stack
+        });
 
-            const isRetryable = error.message.includes('429') ||
-                                error.message.includes('500') ||
-                                error.message.includes('502') ||
-                                error.message.includes('503') ||
-                                error.message.includes('504') ||
-                                error.code === 'ECONNRESET' ||
-                                error.code === 'ETIMEDOUT';
+        const isRetryable = error.message.includes('429') ||
+                            error.message.includes('500') ||
+                            error.message.includes('502') ||
+                            error.message.includes('503') ||
+                            error.message.includes('504') ||
+                            error.code === 'ECONNRESET' ||
+                            error.code === 'ETIMEDOUT';
 
-            if (!isRetryable || retries >= maxRetries) {
-                break;
-            }
-
-            const waitTime = Math.pow(2, retries) * 1000;
-            console.log(`[${new Date().toISOString()}] SERVER: Retrying in ${waitTime}ms`);
-            await new Promise(resolve => setTimeout(resolve, waitTime));
-            retries++;
+        if (!isRetryable || retries >= maxRetries) {
+          break;
         }
+
+        const waitTime = Math.pow(2, retries) * 1000;
+        console.log(`[${new Date().toISOString()}] SERVER: Retrying in ${waitTime}ms`);
+        await new Promise(resolve => setTimeout(resolve, waitTime));
+        retries++;
+      }
     }
 
     if (retries > maxRetries && lastError) {
-        console.log(`[${new Date().toISOString()}] SERVER: All retries failed: ${lastError.message}`);
+      console.log(`[${new Date().toISOString()}] SERVER: All retries failed: ${lastError.message}`);
 
-        let userMessage = 'An error occurred while processing your request. ';
-        let statusCode = 500;
+      let userMessage = 'An error occurred while processing your request. ';
+      let statusCode = 500;
 
-        if (lastError.message.includes('429') || lastError.message.includes('rate limit')) {
-            userMessage += 'The AI service is currently busy. Please try again in a few moments.';
-            statusCode = 429;
-        } else if (lastError.message.includes('500') || lastError.message.includes('502') || lastError.message.includes('503') || lastError.message.includes('504')) {
-            userMessage += 'The AI service is temporarily unavailable. Please try again later.';
-            statusCode = 503;
-        } else if (lastError.code === 'ECONNRESET' || lastError.code === 'ETIMEDOUT') {
-            userMessage += 'Connection to the AI service was interrupted.';
-            statusCode = 503;
+      if (lastError.message.includes('429') || lastError.message.includes('rate limit')) {
+        userMessage += 'The AI service is currently busy. Please try again in a few moments.';
+        statusCode = 429;
+      } else if (lastError.message.includes('500') || lastError.message.includes('502') || lastError.message.includes('503') || lastError.message.includes('504')) {
+        userMessage += 'The AI service is temporarily unavailable. Please try again later.';
+        statusCode = 503;
+      } else if (lastError.code === 'ECONNRESET' || lastError.code === 'ETIMEDOUT') {
+        userMessage += 'Connection to the AI service was interrupted.';
+        statusCode = 503;
+      }
+
+      const errorPayload = {
+        error: userMessage.trim(),
+        details: {
+          name: lastError?.name,
+          code: lastError?.code,
+          status: lastError?.status || lastError?.response?.status,
+          message: lastError?.message,
+          data: lastError?.response?.data || lastError?.data || null
         }
+      };
 
-        const errorPayload = {
-            error: userMessage.trim(),
-            details: {
-                name: lastError?.name,
-                code: lastError?.code,
-                status: lastError?.status || lastError?.response?.status,
-                message: lastError?.message,
-                data: lastError?.response?.data || lastError?.data || null
-            }
-        };
-
-        res.status(statusCode).json(errorPayload);
+      return new Response(JSON.stringify(errorPayload), {
+        status: statusCode,
+        headers: { 'Content-Type': 'application/json' }
+      });
     }
-});
+  }
+};
 
-// Catch-all handler for SPA - serve index.html for any unmatched request
-app.use((req, res, next) => {
-    logger.trace('server.js: Catch-all middleware - method:', req.method, 'path:', req.path);
-    // Skip API routes and static files
-    if (req.path.startsWith('/api') || req.path.includes('.')) {
-        logger.debug('server.js: Skipping catch-all for API/static file:', req.path);
-        return next();
+// Bun.serve options
+const serveOptions = {
+  port,
+  fetch(request) {
+    const url = new URL(request.url);
+    
+    // Handle API routes
+    if (routes[url.pathname]) {
+      return routes[url.pathname](request);
     }
-
-    // Only serve index.html for GET requests (SPA routing)
-    if (req.method === 'GET') {
-        logger.debug('server.js: Serving SPA index.html for path:', req.path);
-        res.sendFile(path.join(__dirname, 'dist', 'index.html'));
-    } else {
-        logger.debug('server.js: Not serving index.html for non-GET method:', req.method);
-        next();
+    
+    // Handle static files (simplified)
+    if (url.pathname === '/' || url.pathname === '/index.html') {
+      // Return the main HTML file
+      return new Response(Bun.file('./dist/index.html'), {
+        headers: { 'Content-Type': 'text/html' }
+      });
     }
-});
+    
+    // Handle other static files
+    if (url.pathname.startsWith('/assets/') || url.pathname.endsWith('.js') || url.pathname.endsWith('.css')) {
+      return new Response(Bun.file(`.${url.pathname}`));
+    }
+    
+    // Catch-all handler for SPA - serve index.html for any unmatched request
+    if (!url.pathname.startsWith('/api')) {
+      return new Response(Bun.file('./dist/index.html'), {
+        headers: { 'Content-Type': 'text/html' }
+      });
+    }
+    
+    // 404 for unknown routes
+    return new Response('Not Found', { status: 404 });
+  }
+};
 
-// HTTPS configuration
-const sslKeyPath = process.env.SSL_KEY_PATH;
-const sslCertPath = process.env.SSL_CERT_PATH;
-logger.debug('server.js: SSL key path:', sslKeyPath, 'cert path:', sslCertPath);
+console.log(`[${new Date().toISOString()}] SERVER: === BUN SERVER STARTING ===`);
+console.log(`[${new Date().toISOString()}] SERVER: Listening on port ${port}`);
+console.log(`[${new Date().toISOString()}] SERVER: Environment: ${process.env.NODE_ENV || 'development'}`);
+console.log(`[${new Date().toISOString()}] SERVER: OpenRouter API configured: ${!!process.env.OPENROUTER_API_KEY}`);
 
-let server;
-if (sslKeyPath && sslCertPath && fs.existsSync(sslKeyPath) && fs.existsSync(sslCertPath)) {
-    logger.info('server.js: SSL certificates found, creating HTTPS server');
-    // HTTPS server
-    const sslOptions = {
-        key: fs.readFileSync(sslKeyPath),
-        cert: fs.readFileSync(sslCertPath)
-    };
-    server = https.createServer(sslOptions, app);
-    logger.info('server.js: HTTPS Server created and running at https://localhost:' + port);
-} else {
-    logger.info('server.js: SSL certificates not found or incomplete, creating HTTP server');
-    // HTTP server
-    server = http.createServer(app);
-    logger.info('server.js: HTTP Server created and running at http://localhost:' + port);
-}
+// Start the server
+const server = Bun.serve(serveOptions);
 
-server.listen(port, () => {
-    console.log(`[${new Date().toISOString()}] SERVER: === SERVER STARTED SUCCESSFULLY ===`);
-    console.log(`[${new Date().toISOString()}] SERVER: Listening on port ${port}, protocol: ${sslKeyPath ? 'HTTPS' : 'HTTP'}`);
-    console.log(`[${new Date().toISOString()}] SERVER: Server URL: ${sslKeyPath ? 'https' : 'http'}://localhost:${port}`);
-    console.log(`[${new Date().toISOString()}] SERVER: Environment: ${process.env.NODE_ENV || 'development'}`);
-    console.log(`[${new Date().toISOString()}] SERVER: OpenRouter API configured: ${!!process.env.OPENROUTER_API_KEY}`);
-    logger.info('server.js: Server listening on port', port, 'protocol:', sslKeyPath ? 'HTTPS' : 'HTTP');
-});
+console.log(`[${new Date().toISOString()}] SERVER: === BUN SERVER STARTED SUCCESSFULLY ===`);
+console.log(`[${new Date().toISOString()}] SERVER: Server URL: http://localhost:${port}`);

@@ -280,12 +280,10 @@ export const exportReports = async (projectId) => {
     return {
       projectName: project.name,
       description: project.description,
-      status: project.ui_status,
+      status: project.status,
       progress: `${progress.toFixed(1)}%`,
       totalTasks,
       completedTasks,
-      creditsUsed: project.consumedCredits || 0,
-      timeSpent: project.consumedTime || 0,
       createdAt: project.created_at,
       exportedAt: new Date().toISOString()
     };

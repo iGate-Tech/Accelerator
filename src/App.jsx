@@ -7,6 +7,7 @@ import { GlobalConfirm as ConfirmModal, ConsentBanner, GlobalErrorDisplay, Suppo
 
 
 const Home = lazy(() => import("./pages/Home"));
+const OpenedProject = lazy(() => import("./pages/OpenedProject"));
 const Dashboard = lazy(() => import("./pages/Dashboard"));
 const Explore = lazy(() => import("./pages/Explore"));
 const Portfolio = lazy(() => import("./pages/Portfolio"));
@@ -81,6 +82,10 @@ function InvitationsPage() {
   return <Invitations />;
 }
 
+function OpenedProjectPage() {
+  return <OpenedProject />;
+}
+
 function HomePage() {
   return <Home />;
 }
@@ -115,25 +120,57 @@ const AppContent = () => {
             <Route path="/forgot-password" component={ForgotPasswordPage} />
             <Route path="/auth/reset-password/:token" component={ResetPasswordPage} />
           </Route>
-          <Route path="/" component={MainLayout}>
+          <Route path="/" component={() => {
+            const { isAuthenticated } = useUser();
+            return isAuthenticated() ? <Navigate href="/home" /> : <Navigate href="/auth/login" />;
+          }} />
+          <Route path="/home" component={MainLayout}>
             <Route path="" component={HomePage} />
-            <Route path="dashboard" component={DashboardPage} />
-            <Route path="explore" component={ExplorePage} />
-            <Route path="portfolio" component={PortfolioPage} />
-            <Route path="help" component={Help} />
-            <Route path="profile" component={ProfilePage} />
-            <Route path="settings" component={SettingsPage} />
-            <Route path="packages" component={PackagesPage} />
-            <Route path="credits" component={CreditsPage} />
-            <Route path="billing" component={BillingPage} />
-            <Route path="invitations" component={InvitationsPage} />
-            <Route path="notifications" component={Notifications} />
+          </Route>
+          <Route path="/opened-project" component={MainLayout}>
+            <Route path="" component={OpenedProjectPage} />
+          </Route>
+          <Route path="/opened-project/:id" component={MainLayout}>
+            <Route path="" component={OpenedProjectPage} />
+          </Route>
+          <Route path="/dashboard" component={MainLayout}>
+            <Route path="" component={DashboardPage} />
+          </Route>
+          <Route path="/explore" component={MainLayout}>
+            <Route path="" component={ExplorePage} />
+          </Route>
+          <Route path="/portfolio" component={MainLayout}>
+            <Route path="" component={PortfolioPage} />
+          </Route>
+          <Route path="/help" component={MainLayout}>
+            <Route path="" component={Help} />
+          </Route>
+          <Route path="/profile" component={MainLayout}>
+            <Route path="" component={ProfilePage} />
+          </Route>
+          <Route path="/settings" component={MainLayout}>
+            <Route path="" component={SettingsPage} />
+          </Route>
+          <Route path="/packages" component={MainLayout}>
+            <Route path="" component={PackagesPage} />
+          </Route>
+          <Route path="/credits" component={MainLayout}>
+            <Route path="" component={CreditsPage} />
+          </Route>
+          <Route path="/billing" component={MainLayout}>
+            <Route path="" component={BillingPage} />
+          </Route>
+          <Route path="/invitations" component={MainLayout}>
+            <Route path="" component={InvitationsPage} />
+          </Route>
+          <Route path="/notifications" component={MainLayout}>
+            <Route path="" component={Notifications} />
           </Route>
           <Route path="/privacy-policy" component={PrivacyPolicy} />
           <Route path="/terms-of-service" component={TermsOfService} />
           <Route path="/status" component={StatusPage} />
           <Route path="/changelog" component={Changelog} />
-          <Route path="*" component={() => <Navigate href="/" replace />} />
+          <Route path="*" component={() => <Navigate href="/home" replace />} />
         </Router>
         <ConsentBanner />
         <GlobalErrorDisplay />

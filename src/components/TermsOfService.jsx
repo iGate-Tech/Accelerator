@@ -2,7 +2,7 @@ import { createSignal, createMemo, createEffect, onMount, useContext } from "sol
 import { useNavigate } from "@solidjs/router";
 import { LangContext } from "../context/LangContext";
 import { translations } from "../assets/translations/translations-index.js";
-import { logger } from '../lib/core';
+import { logger } from '@lib/core';
 
 
 const TermsOfService = () => {

@@ -1,6 +1,6 @@
 import { addProject } from './db';
 
-export const extractProjectName = (text) => {
+export const extractProjectName = text => {
   const lines = text.split('\n').filter(line => line.trim());
   return lines[0]?.trim() || 'New Project';
 };
@@ -27,6 +27,6 @@ export const formatLocaleDate = (dateString, lang = 'en') => {
   return date.toLocaleDateString(lang === 'ar' ? 'ar-SA' : 'en-US', {
     year: 'numeric',
     month: 'long',
-    day: 'numeric'
+    day: 'numeric',
   });
 };

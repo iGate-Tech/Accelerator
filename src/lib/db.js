@@ -6,7 +6,7 @@ export const getCurrentUser = async () => {
   return currentUser;
 };
 
-export const setCurrentUser = async (user) => {
+export const setCurrentUser = async user => {
   currentUser = user;
   if (user) {
     await secureLocalStorage.setItem('userData', user);
@@ -14,12 +14,17 @@ export const setCurrentUser = async (user) => {
 };
 
 // Exported API functions (wrappers for the internal functions)
-export const createUser = async (email, passwordHash, profile = {}, userId = null) => {
+export const createUser = async (
+  email,
+  passwordHash,
+  profile = {},
+  userId = null
+) => {
   const { _createUser } = await import('./database/users.js');
   return await _createUser({ email, passwordHash, profile, userId });
 };
 
-export const getUserById = async (id) => {
+export const getUserById = async id => {
   const { _getUserById } = await import('./database/users.js');
   return await _getUserById({ id });
 };
@@ -35,7 +40,9 @@ export const validateUserForDbOperation = async () => {
   // Check if user is a fallback user (corrupted data recovery)
   if (user._isFallback || user._fallbackReason === 'data_corruption') {
     logger.warn('Fallback user detected - cannot perform database operations');
-    throw new Error('Session expired due to data corruption. Please log in again.');
+    throw new Error(
+      'Session expired due to data corruption. Please log in again.'
+    );
   }
 
   // Validate user ID format
@@ -54,7 +61,7 @@ export const validateUserForDbOperation = async () => {
   return user;
 };
 
-export const getUserByEmail = async (email) => {
+export const getUserByEmail = async email => {
   const { _getUserByEmail } = await import('./database/users.js');
   return await _getUserByEmail({ email });
 };
@@ -64,7 +71,7 @@ export const updateUser = async (id, updates) => {
   return await _updateUser({ id, updates });
 };
 
-export const deleteUser = async (id) => {
+export const deleteUser = async id => {
   const { _deleteUser } = await import('./database/users.js');
   return await _deleteUser({ id });
 };
@@ -74,13 +81,15 @@ export const createUserProfile = async (userId, profileData = {}) => {
   return await _createUserProfile({ userId, profileData });
 };
 
-export const getUserProfile = async (userId) => {
+export const getUserProfile = async userId => {
   try {
     const { ensureDatabaseReady, getPg } = await import('./database/core.js');
     await ensureDatabaseReady();
     const db = await getPg();
     if (!db) return null;
-    const res = await db.query('SELECT * FROM profiles WHERE user_id = $1', [userId]);
+    const res = await db.query('SELECT * FROM profiles WHERE user_id = $1', [
+      userId,
+    ]);
     return res.rows[0] || null;
   } catch (err) {
     console.error('Error getting user profile:', err);
@@ -98,7 +107,7 @@ export const updateUserPassword = async (userId, newPasswordHash) => {
   return await _updateUserPassword({ userId, newPasswordHash });
 };
 
-export const addProject = async (project) => {
+export const addProject = async project => {
   try {
     const user = await validateUserForDbOperation();
 
@@ -118,7 +127,7 @@ export const addProject = async (project) => {
   }
 };
 
-export const getProjectById = async (id) => {
+export const getProjectById = async id => {
   const { _getProjectById } = await import('./database/projects.js');
   return await _getProjectById({ id });
 };
@@ -128,7 +137,7 @@ export const updateProject = async (id, project) => {
   return await _updateProject({ id, updates: project });
 };
 
-export const deleteProject = async (id) => {
+export const deleteProject = async id => {
   const { _deleteProject } = await import('./database/projects.js');
   return await _deleteProject({ id });
 };
@@ -144,17 +153,17 @@ export const toggleProjectPublic = async (projectId, isPublic) => {
   return await _toggleProjectPublic({ id: projectId });
 };
 
-export const archiveProject = async (projectId) => {
+export const archiveProject = async projectId => {
   const { _archiveProject } = await import('./database/projects.js');
   return await _archiveProject({ id: projectId });
 };
 
-export const unarchiveProject = async (projectId) => {
+export const unarchiveProject = async projectId => {
   const { _unarchiveProject } = await import('./database/projects.js');
   return await _unarchiveProject({ id: projectId });
 };
 
-export const getArchivedProjects = async (userId) => {
+export const getArchivedProjects = async userId => {
   const { _getArchivedProjects } = await import('./database/projects.js');
   const { getPg } = await import('./database/core.js');
   const db = await getPg();
@@ -167,7 +176,7 @@ export const getTasks = async (project_id = null, userId = null) => {
   return await _getTasks({ projectId: project_id });
 };
 
-export const addTask = async (task) => {
+export const addTask = async task => {
   const user = await getCurrentUser();
 
   // Extract title from the first markdown header in content
@@ -181,7 +190,7 @@ export const addTask = async (task) => {
     title: extractedTitle || task.title || 'Untitled Task',
     projectId: task.projectId,
     userId: user?.id,
-    id: uuidv4()
+    id: uuidv4(),
   };
   const { _addTask } = await import('./database/projects.js');
   const result = await _addTask({ task: taskWithIds });
@@ -193,9 +202,12 @@ export const updateTask = async (id, updates) => {
   return await _updateTask({ id, ...updates });
 };
 
-export const deleteTask = async (id) => {
+export const deleteTask = async id => {
   const db = await getPg();
-  await db.query(`UPDATE tasks SET deleted_at = ? WHERE id = ?`, [new Date().toISOString(), id]);
+  await db.query(`UPDATE tasks SET deleted_at = ? WHERE id = ?`, [
+    new Date().toISOString(),
+    id,
+  ]);
 };
 
 export const getProjects = async (userId = null) => {
@@ -214,7 +226,10 @@ export const initDb = async () => {
     const { initDatabase } = await import('./database/core.js');
     await initDatabase();
   } catch (error) {
-    console.warn('Database initialization failed, but continuing with limited functionality:', error.message);
+    console.warn(
+      'Database initialization failed, but continuing with limited functionality:',
+      error.message
+    );
   }
 };
 
@@ -234,7 +249,7 @@ export const getPublicProjects = async () => {
   return await _getPublicProjects();
 };
 
-export const getPublicProjectsWithVotes = async (currentUserId) => {
+export const getPublicProjectsWithVotes = async currentUserId => {
   const { _getPublicProjectsWithVotes } = await import('./database/votes.js');
   return await _getPublicProjectsWithVotes({ currentUserId });
 };
@@ -244,7 +259,7 @@ const _getProjectByName = async ({ name }) => {
   return null;
 };
 
-export const getProjectByName = async (name) => {
+export const getProjectByName = async name => {
   return await _getProjectByName({ name });
 };
 
@@ -253,12 +268,12 @@ export const getGroups = async (userId = null) => {
   return await _getGroups({ userId });
 };
 
-export const getGroupById = async (id) => {
+export const getGroupById = async id => {
   const { _getGroupById } = await import('./database/groups.js');
   return await _getGroupById({ id });
 };
 
-export const addGroup = async (group) => {
+export const addGroup = async group => {
   const user = await getCurrentUser();
   const { _addGroup } = await import('./database/groups.js');
   return await _addGroup({ group, userId: user.id });
@@ -269,7 +284,7 @@ export const updateGroup = async (id, group) => {
   return await _updateGroup({ id, group });
 };
 
-export const deleteGroup = async (id) => {
+export const deleteGroup = async id => {
   const { _deleteGroup } = await import('./database/groups.js');
   return await _deleteGroup({ id });
 };
@@ -298,7 +313,7 @@ export const exportAllData = async (userId = null) => {
     }
   }
   if (!userId) return null;
-  
+
   try {
     // Ensure database is initialized
     const { ensureDatabaseReady } = await import('./database/core.js');
@@ -320,7 +335,7 @@ export const exportAllData = async (userId = null) => {
         // Password hash cannot be used for login but is included for backup completeness
         // The plaintext password is not stored anywhere
         passwordHash: userData?.password_hash || '',
-        note: 'Password hash is stored but cannot be used to login. Use your current password to restore access.'
+        note: 'Password hash is stored but cannot be used to login. Use your current password to restore access.',
       },
 
       // Personal data - include avatar with base64 image
@@ -334,7 +349,7 @@ export const exportAllData = async (userId = null) => {
         avatar: profile?.avatar, // Base64 encoded image
         preferences: profile?.preferences,
         createdAt: profile?.created_at,
-        lastModified: profile?.last_modified
+        lastModified: profile?.last_modified,
       },
 
       // Projects and content
@@ -344,12 +359,13 @@ export const exportAllData = async (userId = null) => {
       tasks: projects?.tasks || [],
 
       // Activity history (for transparency)
-      activities: activities?.map(activity => ({
-        actionType: activity.action_type,
-        description: activity.description,
-        timestamp: activity.created_at,
-        metadata: activity.metadata
-      })) || [],
+      activities:
+        activities?.map(activity => ({
+          actionType: activity.action_type,
+          description: activity.description,
+          timestamp: activity.created_at,
+          metadata: activity.metadata,
+        })) || [],
 
       // Export metadata
       exportMetadata: {
@@ -360,9 +376,9 @@ export const exportAllData = async (userId = null) => {
           article20: 'Right to Data Portability',
           article17: 'Right to Erasure (Data Deletion)',
           exportFormat: 'JSON',
-          retentionPolicy: 'Data retained until account deletion'
-        }
-      }
+          retentionPolicy: 'Data retained until account deletion',
+        },
+      },
     };
   } catch (error) {
     console.error('Failed to export all data:', error);
@@ -393,8 +409,8 @@ export const deleteUserAccount = async (userId, reason = 'user_request') => {
         'activities',
         'notifications',
         'credits',
-        'sessions'
-      ]
+        'sessions',
+      ],
     };
 
     // Export data before deletion (for compliance records)
@@ -406,14 +422,21 @@ export const deleteUserAccount = async (userId, reason = 'user_request') => {
     try {
       // Delete in reverse dependency order
       await db.query('DELETE FROM project_votes WHERE user_id = $1', [userId]);
-      await db.query('DELETE FROM user_subscriptions WHERE user_id = $1', [userId]);
+      await db.query('DELETE FROM user_subscriptions WHERE user_id = $1', [
+        userId,
+      ]);
       await db.query('DELETE FROM credits WHERE user_id = $1', [userId]);
       await db.query('DELETE FROM notifications WHERE user_id = $1', [userId]);
-      await db.query('DELETE FROM user_activities WHERE user_id = $1', [userId]);
+      await db.query('DELETE FROM user_activities WHERE user_id = $1', [
+        userId,
+      ]);
       await db.query('DELETE FROM sessions WHERE user_id = $1', [userId]);
 
       // Delete tasks and projects (handle foreign keys)
-      await db.query('DELETE FROM tasks WHERE project_id IN (SELECT id FROM projects WHERE user_id = $1)', [userId]);
+      await db.query(
+        'DELETE FROM tasks WHERE project_id IN (SELECT id FROM projects WHERE user_id = $1)',
+        [userId]
+      );
       await db.query('DELETE FROM projects WHERE user_id = $1', [userId]);
 
       // Delete profile and user
@@ -423,7 +446,9 @@ export const deleteUserAccount = async (userId, reason = 'user_request') => {
       await db.query('COMMIT');
 
       // Log successful deletion (without storing personal data)
-      console.log(`GDPR-compliant account deletion completed for user ${userId}`);
+      console.log(
+        `GDPR-compliant account deletion completed for user ${userId}`
+      );
 
       return {
         success: true,
@@ -433,23 +458,21 @@ export const deleteUserAccount = async (userId, reason = 'user_request') => {
         gdprCompliance: {
           article17: 'Right to Erasure - Data permanently deleted',
           dataRetention: 'No data retained',
-          deletionMethod: 'Complete account removal'
-        }
+          deletionMethod: 'Complete account removal',
+        },
       };
-
     } catch (deleteError) {
       await db.query('ROLLBACK');
       throw deleteError;
     }
-
   } catch (error) {
     console.error('Account deletion failed:', error);
     return {
       success: false,
       error: error.message,
       gdprCompliance: {
-        article17: 'Deletion failed - data integrity maintained'
-      }
+        article17: 'Deletion failed - data integrity maintained',
+      },
     };
   }
 };
@@ -466,16 +489,20 @@ export const enforceDataRetention = async () => {
     const results = {
       sessionsCleaned: 0,
       oldActivitiesCleaned: 0,
-      expiredTokensCleaned: 0
+      expiredTokensCleaned: 0,
     };
 
     // Clean expired sessions (7 days for expired)
-    const sessionResult = await db.query('DELETE FROM sessions WHERE expires_at < $1', [now.toISOString()]);
+    const sessionResult = await db.query(
+      'DELETE FROM sessions WHERE expires_at < $1',
+      [now.toISOString()]
+    );
     results.sessionsCleaned = sessionResult.rowCount;
 
     // Clean old activities (keep last 2 years, archive older)
     const twoYearsAgo = new Date(now.getTime() - 2 * 365 * 24 * 60 * 60 * 1000);
-    const activityResult = await db.query(`
+    const activityResult = await db.query(
+      `
       UPDATE user_activities
       SET description = 'Archived for privacy - ' || description,
           metadata = CASE
@@ -483,11 +510,16 @@ export const enforceDataRetention = async () => {
             ELSE (metadata::jsonb || jsonb_build_object('archived', true))::json
           END
       WHERE created_at < $1
-    `, [twoYearsAgo.toISOString()]);
+    `,
+      [twoYearsAgo.toISOString()]
+    );
     results.oldActivitiesCleaned = activityResult.rowCount;
 
     // Clean expired password reset tokens (24 hours)
-    const tokenResult = await db.query('DELETE FROM password_reset_tokens WHERE expires_at < $1', [now.toISOString()]);
+    const tokenResult = await db.query(
+      'DELETE FROM password_reset_tokens WHERE expires_at < $1',
+      [now.toISOString()]
+    );
     results.expiredTokensCleaned = tokenResult.rowCount;
 
     console.log('Data retention enforcement completed:', results);
@@ -498,10 +530,9 @@ export const enforceDataRetention = async () => {
       retentionPolicy: {
         sessions: '30 days inactive retention',
         activities: '2 years with archiving',
-        tokens: '24 hours for reset tokens'
-      }
+        tokens: '24 hours for reset tokens',
+      },
     };
-
   } catch (error) {
     console.error('Data retention enforcement failed:', error);
     return { success: false, error: error.message };
@@ -518,14 +549,17 @@ export const scheduleDataRetention = () => {
   }
 
   // Run data retention check every 24 hours
-  retentionScheduler = setInterval(async () => {
-    try {
-      await enforceDataRetention();
-      console.log('Scheduled data retention enforcement completed');
-    } catch (error) {
-      console.error('Scheduled data retention failed:', error);
-    }
-  }, 24 * 60 * 60 * 1000); // 24 hours
+  retentionScheduler = setInterval(
+    async () => {
+      try {
+        await enforceDataRetention();
+        console.log('Scheduled data retention enforcement completed');
+      } catch (error) {
+        console.error('Scheduled data retention failed:', error);
+      }
+    },
+    24 * 60 * 60 * 1000
+  ); // 24 hours
 
   // Also run immediately on startup
   setTimeout(async () => {
@@ -538,7 +572,7 @@ export const scheduleDataRetention = () => {
   }, 5000); // Run 5 seconds after startup
 };
 
-export const exportProject = async (projectId) => {
+export const exportProject = async projectId => {
   try {
     const project = await getProjectById(projectId);
     if (!project) throw new Error('Project not found');
@@ -546,7 +580,7 @@ export const exportProject = async (projectId) => {
     return {
       project,
       tasks,
-      exportedAt: new Date().toISOString()
+      exportedAt: new Date().toISOString(),
     };
   } catch (error) {
     console.error('Export project failed:', error);
@@ -554,7 +588,7 @@ export const exportProject = async (projectId) => {
   }
 };
 
-export const exportReports = async (projectId) => {
+export const exportReports = async projectId => {
   try {
     const project = await getProjectById(projectId);
     if (!project) throw new Error('Project not found');
@@ -572,7 +606,7 @@ export const exportReports = async (projectId) => {
       creditsUsed: project.consumedCredits || 0,
       timeSpent: project.consumedTime || 0,
       createdAt: project.createdAt,
-      exportedAt: new Date().toISOString()
+      exportedAt: new Date().toISOString(),
     };
   } catch (error) {
     console.error('Export reports failed:', error);
@@ -591,7 +625,7 @@ export const removeProjectFromGroup = async (projectId, groupId) => {
   return await _removeProjectFromGroup({ projectId, groupId });
 };
 
-export const getProjectsInGroup = async (groupId) => {
+export const getProjectsInGroup = async groupId => {
   const { _getProjectsInGroup } = await import('./database/groups.js');
   return await _getProjectsInGroup({ groupId });
 };
@@ -610,27 +644,44 @@ export const getGroupsWithProjects = async (userId = null) => {
   return await _getGroupsWithProjects({ userId });
 };
 
-export const addCreditTransaction = async (userId, type, amount, description) => {
+export const addCreditTransaction = async (
+  userId,
+  type,
+  amount,
+  description
+) => {
   const { _addCreditTransaction } = await import('./database/credits.js');
   return await _addCreditTransaction({ userId, type, amount, description });
 };
 
-export const getUserCredits = async (userId) => {
+export const getUserCredits = async userId => {
   const { _getUserCredits } = await import('./database/credits.js');
   return await _getUserCredits({ userId });
 };
 
-export const getUserCreditBalance = async (userId) => {
+export const getUserCreditBalance = async userId => {
   const { _getUserCreditBalance } = await import('./database/credits.js');
   return await _getUserCreditBalance({ userId });
 };
 
-export const addBillingRecord = async (userId, type, amount, description, dueDate = null) => {
+export const addBillingRecord = async (
+  userId,
+  type,
+  amount,
+  description,
+  dueDate = null
+) => {
   const { _addBillingRecord } = await import('./database/credits.js');
-  return await _addBillingRecord({ userId, type, amount, description, dueDate });
+  return await _addBillingRecord({
+    userId,
+    type,
+    amount,
+    description,
+    dueDate,
+  });
 };
 
-export const getUserBilling = async (userId) => {
+export const getUserBilling = async userId => {
   const { _getUserBilling } = await import('./database/credits.js');
   return await _getUserBilling({ userId });
 };
@@ -640,19 +691,33 @@ export const consumeCredits = async (userId, amount, description) => {
   return await _consumeCredits({ userId, amount, description });
 };
 
-export const getCreditBalance = async (userId) => {
+export const getCreditBalance = async userId => {
   const { _getCreditBalance } = await import('./database/credits.js');
   return await _getCreditBalance({ userId });
 };
 
-export const getCreditTransactions = async (userId) => {
+export const getCreditTransactions = async userId => {
   const { _getCreditTransactions } = await import('./database/credits.js');
   return await _getCreditTransactions({ userId });
 };
 
-export const logActivity = async (userId, actionType, entityType, entityId, description, metadata = {}) => {
+export const logActivity = async (
+  userId,
+  actionType,
+  entityType,
+  entityId,
+  description,
+  metadata = {}
+) => {
   const { _logActivity } = await import('./database/activities.js');
-  return await _logActivity({ userId, actionType, entityType, entityId, description, metadata });
+  return await _logActivity({
+    userId,
+    actionType,
+    entityType,
+    entityId,
+    description,
+    metadata,
+  });
 };
 
 export const getUserActivities = async (userId, limit = 50, offset = 0) => {
@@ -660,12 +725,18 @@ export const getUserActivities = async (userId, limit = 50, offset = 0) => {
   return await _getUserActivities({ userId, limit, offset });
 };
 
-export const createNotification = async (userId, type, title, message, createdAt = null) => {
+export const createNotification = async (
+  userId,
+  type,
+  title,
+  message,
+  createdAt = null
+) => {
   const { _createNotification } = await import('./database/activities.js');
   return await _createNotification({ userId, type, title, message });
 };
 
-export const getUserNotifications = async (userId) => {
+export const getUserNotifications = async userId => {
   const { _getUserNotifications } = await import('./database/activities.js');
   return await _getUserNotifications({ userId });
 };
@@ -680,22 +751,38 @@ export const getPackages = async () => {
   return await _getPackages();
 };
 
-export const getUserSubscription = async (userId) => {
+export const getUserSubscription = async userId => {
   const { _getUserSubscription } = await import('./database/packages.js');
   return await _getUserSubscription({ userId });
 };
 
-export const createUserSubscription = async (userId, packageId, subscriptionData = {}) => {
+export const createUserSubscription = async (
+  userId,
+  packageId,
+  subscriptionData = {}
+) => {
   const { _createUserSubscription } = await import('./database/packages.js');
   return await _createUserSubscription({ userId, packageId, subscriptionData });
 };
 
-export const changeUserSubscription = async (userId, newPackageId, currentSubscription = null) => {
+export const changeUserSubscription = async (
+  userId,
+  newPackageId,
+  currentSubscription = null
+) => {
   const { _changeUserSubscription } = await import('./database/packages.js');
-  return await _changeUserSubscription({ userId, newPackageId, currentSubscription });
+  return await _changeUserSubscription({
+    userId,
+    newPackageId,
+    currentSubscription,
+  });
 };
 
-export const updateUserSubscription = async (userId, subscriptionId, updates) => {
+export const updateUserSubscription = async (
+  userId,
+  subscriptionId,
+  updates
+) => {
   const { _updateUserSubscription } = await import('./database/packages.js');
   return await _updateUserSubscription({ userId, subscriptionId, updates });
 };
@@ -724,7 +811,7 @@ export const seedInitialData = async () => {
   return await _seedInitialData();
 };
 
-export const seedSampleNotifications = async (userId) => {
+export const seedSampleNotifications = async userId => {
   return await _seedSampleNotifications({ userId });
 };
 
@@ -748,11 +835,12 @@ export const createSession = async (userId, token, expiresAt) => {
 
 const _getSessionByToken = async ({ token }) => {
   // Use the implementation from seeding.js
-  const { _getSessionByToken: getSessionImpl } = await import('./database/seeding.js');
+  const { _getSessionByToken: getSessionImpl } =
+    await import('./database/seeding.js');
   return await getSessionImpl({ token });
 };
 
-export const getSessionByToken = async (token) => {
+export const getSessionByToken = async token => {
   return await _getSessionByToken({ token });
 };
 
@@ -761,7 +849,7 @@ const _deleteSession = async ({ token }) => {
   return { success: true };
 };
 
-export const deleteSession = async (token) => {
+export const deleteSession = async token => {
   return await _deleteSession({ token });
 };
 
@@ -771,7 +859,14 @@ export const createPasswordResetToken = async (userId, token, expiresAt) => {
     const { query } = await import('./database/core.js');
     await query(
       'INSERT INTO password_reset_tokens (id, user_id, token, expires_at, created_at, used_at) VALUES ($1, $2, $3, $4, $5, $6)',
-      [crypto.randomUUID(), userId, token, expiresAt, new Date().toISOString(), null]
+      [
+        crypto.randomUUID(),
+        userId,
+        token,
+        expiresAt,
+        new Date().toISOString(),
+        null,
+      ]
     );
     return { success: true };
   } catch (error) {
@@ -780,7 +875,7 @@ export const createPasswordResetToken = async (userId, token, expiresAt) => {
   }
 };
 
-export const validatePasswordResetToken = async (token) => {
+export const validatePasswordResetToken = async token => {
   try {
     const { query } = await import('./database/core.js');
     const result = await query(
@@ -792,20 +887,24 @@ export const validatePasswordResetToken = async (token) => {
       return { valid: false, error: 'Invalid or expired token' };
     }
 
-    return { valid: true, userId: result.rows[0].user_id, tokenId: result.rows[0].id };
+    return {
+      valid: true,
+      userId: result.rows[0].user_id,
+      tokenId: result.rows[0].id,
+    };
   } catch (error) {
     console.error('Failed to validate password reset token:', error);
     throw error;
   }
 };
 
-export const usePasswordResetToken = async (tokenId) => {
+export const usePasswordResetToken = async tokenId => {
   try {
     const { query } = await import('./database/core.js');
-    await query(
-      'UPDATE password_reset_tokens SET used_at = $1 WHERE id = $2',
-      [new Date().toISOString(), tokenId]
-    );
+    await query('UPDATE password_reset_tokens SET used_at = $1 WHERE id = $2', [
+      new Date().toISOString(),
+      tokenId,
+    ]);
     return { success: true };
   } catch (error) {
     console.error('Failed to mark token as used:', error);
@@ -822,13 +921,28 @@ export const deleteExpiredSessions = async () => {
   return await _deleteExpiredSessions();
 };
 
-const _inviteCollaborator = async ({ portfolioId, inviteeEmail, role, message }) => {
+const _inviteCollaborator = async ({
+  portfolioId,
+  inviteeEmail,
+  role,
+  message,
+}) => {
   // TODO: Implement inviting collaborator
   return { success: true };
 };
 
-export const inviteCollaborator = async (portfolioId, inviteeEmail, role = 'editor', message = '') => {
-  return await _inviteCollaborator({ portfolioId, inviteeEmail, role, message });
+export const inviteCollaborator = async (
+  portfolioId,
+  inviteeEmail,
+  role = 'editor',
+  message = ''
+) => {
+  return await _inviteCollaborator({
+    portfolioId,
+    inviteeEmail,
+    role,
+    message,
+  });
 };
 
 const _getPortfolioInvitations = async ({ portfolioId }) => {
@@ -836,13 +950,19 @@ const _getPortfolioInvitations = async ({ portfolioId }) => {
   return [];
 };
 
-export const getPortfolioInvitations = async (portfolioId) => {
+export const getPortfolioInvitations = async portfolioId => {
   return await _getPortfolioInvitations({ portfolioId });
 };
 
-import { _getUserInvitations, _respondToInvitation, _getPortfolioCollaborators, _removeCollaborator, _updateCollaboratorRole } from './database/collaboration.js';
+import {
+  _getUserInvitations,
+  _respondToInvitation,
+  _getPortfolioCollaborators,
+  _removeCollaborator,
+  _updateCollaboratorRole,
+} from './database/collaboration.js';
 
-export const getUserInvitations = async (userEmail) => {
+export const getUserInvitations = async userEmail => {
   return await _getUserInvitations({ userEmail });
 };
 
@@ -850,7 +970,7 @@ export const respondToInvitation = async (invitationId, status) => {
   return await _respondToInvitation({ invitationId, status });
 };
 
-export const getPortfolioCollaborators = async (portfolioId) => {
+export const getPortfolioCollaborators = async portfolioId => {
   return await _getPortfolioCollaborators({ portfolioId });
 };
 

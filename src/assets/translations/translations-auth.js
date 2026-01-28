@@ -25,7 +25,8 @@ export const authTranslations = {
     confirmPasswordPlaceholder: 'Confirm your password',
     createAccountBtn: 'Create Account',
     alreadyHaveAccount: 'Already have an account? Sign In',
-    termsAgreement: 'By creating an account, you agree to our Terms of Service and Privacy Policy.',
+    termsAgreement:
+      'By creating an account, you agree to our Terms of Service and Privacy Policy.',
 
     // Forgot Password
     resetPassword: 'Reset Password',
@@ -45,13 +46,18 @@ export const authTranslations = {
     copyright: '© {year} iGate. {motto}',
 
     // Toast messages
-    passwordMismatch: 'Passwords do not match. Please ensure both password fields are identical.',
+    passwordMismatch:
+      'Passwords do not match. Please ensure both password fields are identical.',
     invalidEmail: 'Invalid email format. Please enter a valid email address.',
     registrationFailed: 'Registration failed for {email}.',
-    emailAlreadyExists: 'An account with this email already exists. Please try logging in or use a different email.',
-    accountCreated: 'Account created successfully for {email}! Please check your email and click the confirmation link to activate your account.',
-    accountCreatedLoggedIn: 'Account created successfully for {email} and logged in!',
-    accountCreatedManualLogin: 'Account created for {email} but automatic login failed. Please try logging in manually on the login page.',
+    emailAlreadyExists:
+      'An account with this email already exists. Please try logging in or use a different email.',
+    accountCreated:
+      'Account created successfully for {email}! Please check your email and click the confirmation link to activate your account.',
+    accountCreatedLoggedIn:
+      'Account created successfully for {email} and logged in!',
+    accountCreatedManualLogin:
+      'Account created for {email} but automatic login failed. Please try logging in manually on the login page.',
   },
   ar: {
     // Login
@@ -98,12 +104,17 @@ export const authTranslations = {
     copyright: '© {year} iGate. {motto}',
 
     // Toast messages
-    passwordMismatch: 'كلمتا المرور غير متطابقتين. يرجى التأكد من أن كلا الحقلين متطابقان.',
-    invalidEmail: 'تنسيق البريد الإلكتروني غير صالح. يرجى إدخال عنوان بريد إلكتروني صحيح.',
+    passwordMismatch:
+      'كلمتا المرور غير متطابقتين. يرجى التأكد من أن كلا الحقلين متطابقان.',
+    invalidEmail:
+      'تنسيق البريد الإلكتروني غير صالح. يرجى إدخال عنوان بريد إلكتروني صحيح.',
     registrationFailed: 'فشل التسجيل لـ {email}.',
-    emailAlreadyExists: 'يوجد حساب بالفعل مع هذا البريد الإلكتروني. يرجى محاولة تسجيل الدخول أو استخدام بريد إلكتروني مختلف.',
-    accountCreated: 'تم إنشاء الحساب بنجاح لـ {email}! يرجى التحقق من بريدك الإلكتروني والنقر على رابط التفعيل.',
+    emailAlreadyExists:
+      'يوجد حساب بالفعل مع هذا البريد الإلكتروني. يرجى محاولة تسجيل الدخول أو استخدام بريد إلكتروني مختلف.',
+    accountCreated:
+      'تم إنشاء الحساب بنجاح لـ {email}! يرجى التحقق من بريدك الإلكتروني والنقر على رابط التفعيل.',
     accountCreatedLoggedIn: 'تم إنشاء الحساب بنجاح لـ {email} وتسجيل الدخول!',
-    accountCreatedManualLogin: 'تم إنشاء الحساب لـ {email} لكن فشل تسجيل الدخول التلقائي. يرجى محاولة تسجيل الدخول يدوياً.',
-  }
+    accountCreatedManualLogin:
+      'تم إنشاء الحساب لـ {email} لكن فشل تسجيل الدخول التلقائي. يرجى محاولة تسجيل الدخول يدوياً.',
+  },
 };

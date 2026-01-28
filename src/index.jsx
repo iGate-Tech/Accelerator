@@ -9,8 +9,11 @@ import 'animate.css';
 // Clean up any corrupted localStorage data on startup
 dataEncryption.cleanupCorruptedData();
 
-render(() => (
-  <LoggerProvider>
-    <App />
-  </LoggerProvider>
-), document.getElementById('root'));
+render(
+  () => (
+    <LoggerProvider>
+      <App />
+    </LoggerProvider>
+  ),
+  document.getElementById('root')
+);

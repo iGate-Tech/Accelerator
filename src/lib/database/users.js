@@ -3,7 +3,12 @@ import { dbInstance } from './core.js';
 import { updateEntity } from './operations.js';
 
 // User management functions
-export async function _createUser({ email, passwordHash, profile = {}, userId = null }) {
+export async function _createUser({
+  email,
+  passwordHash,
+  profile = {},
+  userId = null,
+}) {
   if (!dbInstance) {
     return { id: userId || 'local-user', email };
   }
@@ -12,7 +17,8 @@ export async function _createUser({ email, passwordHash, profile = {}, userId = 
   }
   try {
     // Import security functions dynamically to avoid circular dependencies
-    const { validateAndSanitizeDbInput, isValidEmail } = await import('../auth/security.js');
+    const { validateAndSanitizeDbInput, isValidEmail } =
+      await import('../auth/security.js');
 
     // Validate email
     if (!isValidEmail(email)) {
@@ -26,7 +32,8 @@ export async function _createUser({ email, passwordHash, profile = {}, userId = 
     }
 
     const id = userId || uuidv4();
-    const query = "INSERT INTO users (id, email, password_hash, preferences, created_at, last_modified, synced_at, sync_status, deleted_at, version) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)";
+    const query =
+      'INSERT INTO users (id, email, password_hash, preferences, created_at, last_modified, synced_at, sync_status, deleted_at, version) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)';
     const params = [
       id,
       emailValidation.sanitized,
@@ -37,7 +44,7 @@ export async function _createUser({ email, passwordHash, profile = {}, userId = 
       new Date().toISOString(),
       'local',
       null,
-      1
+      1,
     ];
     const res = await dbInstance.query(query, params);
     return { id, email };
@@ -53,7 +60,9 @@ export async function _getUserById({ id }) {
     return null;
   }
   try {
-    const res = await dbInstance.query('SELECT * FROM users WHERE id = $1', [id]);
+    const res = await dbInstance.query('SELECT * FROM users WHERE id = $1', [
+      id,
+    ]);
     return res.rows[0];
   } catch (err) {
     console.debug('Error getting user by id:', err.message);
@@ -64,7 +73,9 @@ export async function _getUserById({ id }) {
 export async function _getUserByEmail({ email }) {
   if (!dbInstance) return null;
   try {
-    const res = await dbInstance.query('SELECT * FROM users WHERE email = $1', [email]);
+    const res = await dbInstance.query('SELECT * FROM users WHERE email = $1', [
+      email,
+    ]);
     return res.rows[0];
   } catch (err) {
     console.debug('Error getting user by email:', err.message);
@@ -79,9 +90,15 @@ export async function _updateUser({ id, updates }) {
     if (updates.profile !== undefined) {
       processedUpdates.profile = JSON.stringify(updates.profile);
     }
-    const result = await updateEntity({ table: 'users', idField: 'id', id, updates: processedUpdates, options: {
-      alwaysUpdate: { 'updated_at': 'CURRENT_TIMESTAMP' }
-    }});
+    const result = await updateEntity({
+      table: 'users',
+      idField: 'id',
+      id,
+      updates: processedUpdates,
+      options: {
+        alwaysUpdate: { updated_at: 'CURRENT_TIMESTAMP' },
+      },
+    });
     if (!result.success) {
       throw new Error(result.error);
     }
@@ -114,23 +131,29 @@ export async function _createUserProfile({ userId, profileData = {} }) {
       (id, user_id, name, email, avatar, bio, preferences, synced_at, last_modified, sync_status, deleted_at, version)
       VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)
       ON CONFLICT (user_id) DO NOTHING RETURNING *`,
-        [
-          id,
-          userId,
-          String(profileData.name || ''),
-          String(profileData.email || ''),
-          String(profileData.avatar || ''),
-          String(profileData.bio || ''),
-          JSON.stringify(profileData.preferences || {
-            notifications: { email: true, browser: false, projectUpdates: true },
-            privacy: { profileVisibility: 'private', dataSharing: false }
-          }),
-          new Date().toISOString(),
-          new Date().toISOString(),
-          'local',
-          null,
-          1
-        ]
+      [
+        id,
+        userId,
+        String(profileData.name || ''),
+        String(profileData.email || ''),
+        String(profileData.avatar || ''),
+        String(profileData.bio || ''),
+        JSON.stringify(
+          profileData.preferences || {
+            notifications: {
+              email: true,
+              browser: false,
+              projectUpdates: true,
+            },
+            privacy: { profileVisibility: 'private', dataSharing: false },
+          }
+        ),
+        new Date().toISOString(),
+        new Date().toISOString(),
+        'local',
+        null,
+        1,
+      ]
     );
     return res.rows[0] || { id, user_id: userId, ...profileData };
   } catch (err) {
@@ -142,7 +165,10 @@ export async function _createUserProfile({ userId, profileData = {} }) {
 export async function _getUserProfile({ userId }) {
   if (!dbInstance) return null;
   try {
-    const res = await dbInstance.query('SELECT * FROM profiles WHERE user_id = $1', [userId]);
+    const res = await dbInstance.query(
+      'SELECT * FROM profiles WHERE user_id = $1',
+      [userId]
+    );
     return res.rows[0] || null;
   } catch (err) {
     console.debug('Error getting user profile:', err.message);

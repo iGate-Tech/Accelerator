@@ -1,5 +1,3 @@
-
-
 // Packages page translations
 export const packagesTranslations = {
   en: {
@@ -15,50 +13,50 @@ export const packagesTranslations = {
     upgrade: 'Upgrade',
     downgrade: 'Downgrade',
     mostPopular: 'Most Popular',
-    
+
     // Feature comparison table
     featureComparison: 'Feature Comparison',
     feature: 'Feature',
     free: 'Free',
     pro: 'Pro',
     enterprise: 'Enterprise',
-    
+
     // Feature comparison rows
     aiAssistance: 'AI Assistance',
     aiAssistanceFree: 'Basic',
     aiAssistancePro: 'Advanced',
     aiAssistanceEnterprise: 'Advanced',
-    
+
     projectsPerMonth: 'Projects per Month',
     projectsFree: '3',
     projectsPro: 'Unlimited',
     projectsEnterprise: 'Unlimited',
-    
+
     creditsRow: 'Credits',
     creditsFree: '50',
     creditsPro: '500',
     creditsEnterprise: '2000',
-    
+
     supportRow: 'Support',
     supportFree: 'Community',
     supportPro: 'Priority',
     supportEnterprise: 'Dedicated',
-    
+
     templatesRow: 'Templates',
     templatesFree: 'Basic',
     templatesPro: 'Premium',
     templatesEnterprise: 'Premium',
-    
+
     collaborationRow: 'Collaboration',
     collaborationFree: '-',
     collaborationPro: '✓',
     collaborationEnterprise: '✓',
-    
+
     apiAccessRow: 'API Access',
     apiAccessFree: '-',
     apiAccessPro: '✓',
     apiAccessEnterprise: '✓',
-    
+
     customIntegrations: 'Custom Integrations',
     customIntegrationsFree: '-',
     customIntegrationsPro: '-',
@@ -73,7 +71,7 @@ export const packagesTranslations = {
     projectsMaximum: '3 projects maximum',
     communitySupport: 'Community support',
     basicExport: 'Basic export options',
-    
+
     // Package features - Pro
     proPlan: 'Pro',
     proPrice: 29,
@@ -87,7 +85,7 @@ export const packagesTranslations = {
     advancedExport: 'Advanced export formats',
     apiAccess: 'API access',
     customTemplates: 'Custom templates',
-    
+
     // Package features - Enterprise
     enterprisePlan: 'Enterprise',
     enterprisePrice: 99,
@@ -120,50 +118,50 @@ export const packagesTranslations = {
     upgrade: 'ترقية',
     downgrade: 'تخفيض',
     mostPopular: 'الأكثر شهرة',
-    
+
     // Feature comparison table
     featureComparison: 'مقارنة الميزات',
     feature: 'الميزة',
     free: 'مجاني',
     pro: 'احترافي',
     enterprise: 'مؤسسي',
-    
+
     // Feature comparison rows
     aiAssistance: 'مساعدة الذكاء الاصطناعي',
     aiAssistanceFree: 'أساسي',
     aiAssistancePro: 'متقدم',
     aiAssistanceEnterprise: 'متقدم',
-    
+
     projectsPerMonth: 'المشاريع شهرياً',
     projectsFree: '3',
     projectsPro: 'غير محدود',
     projectsEnterprise: 'غير محدود',
-    
+
     creditsRow: 'الاعتمادات',
     creditsFree: '50',
     creditsPro: '500',
     creditsEnterprise: '2000',
-    
+
     supportRow: 'الدعم',
     supportFree: 'مجتمع',
     supportPro: 'أولوية',
     supportEnterprise: 'مخصص',
-    
+
     templatesRow: 'القوالب',
     templatesFree: 'أساسية',
     templatesPro: 'مميزة',
     templatesEnterprise: 'مميزة',
-    
+
     collaborationRow: 'التعاون',
     collaborationFree: '-',
     collaborationPro: '✓',
     collaborationEnterprise: '✓',
-    
+
     apiAccessRow: 'وصول API',
     apiAccessFree: '-',
     apiAccessPro: '✓',
     apiAccessEnterprise: '✓',
-    
+
     customIntegrations: 'التكاملات المخصصة',
     customIntegrationsFree: '-',
     customIntegrationsPro: '-',
@@ -178,7 +176,7 @@ export const packagesTranslations = {
     projectsMaximum: '3 مشاريع كحد أقصى',
     communitySupport: 'دعم المجتمع',
     basicExport: 'خيارات التصدير الأساسية',
-    
+
     // Package features - Pro
     proPlan: 'احترافي',
     proPrice: 29,
@@ -192,7 +190,7 @@ export const packagesTranslations = {
     advancedExport: 'خيارات تصدير متقدمة',
     apiAccess: 'وصول API',
     customTemplates: 'قوالب مخصصة',
-    
+
     // Package features - Enterprise
     enterprisePlan: 'مؤسسي',
     enterprisePrice: 99,
@@ -211,5 +209,5 @@ export const packagesTranslations = {
     alreadySubscribed: 'لديك بالفعل خطة {plan}!',
     subscriptionSuccess: 'تم الاشتراك بنجاح في خطة {plan}',
     failedToSubscribe: 'فشل في الاشتراك. يرجى المحاولة مرة أخرى.',
-  }
+  },
 };

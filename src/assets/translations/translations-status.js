@@ -1,5 +1,3 @@
-
-
 // Status Page translations
 export const statusTranslations = {
   en: {
@@ -16,9 +14,11 @@ export const statusTranslations = {
     uptime: 'Uptime',
     recentIncidents: 'Recent Incidents',
     allSystemsOperational: 'All Systems Operational',
-    noRecentIncidents: 'No recent incidents. Subscribe to status updates for real-time notifications.',
+    noRecentIncidents:
+      'No recent incidents. Subscribe to status updates for real-time notifications.',
     subscribeToUpdates: 'Subscribe to Updates',
-    getNotifiedAboutSystemStatus: 'Get notified about system status changes and maintenance windows.',
+    getNotifiedAboutSystemStatus:
+      'Get notified about system status changes and maintenance windows.',
     enterYourEmail: 'Enter your email',
     subscribe: 'Subscribe',
   },
@@ -36,10 +36,12 @@ export const statusTranslations = {
     uptime: 'وقت التشغيل',
     recentIncidents: 'الحوادث الأخيرة',
     allSystemsOperational: 'جميع الأنظمة تعمل',
-    noRecentIncidents: 'لا توجد حوادث حديثة. اشترك في تحديثات الحالة للإشعارات في الوقت الفعلي.',
+    noRecentIncidents:
+      'لا توجد حوادث حديثة. اشترك في تحديثات الحالة للإشعارات في الوقت الفعلي.',
     subscribeToUpdates: 'الاشتراك في التحديثات',
-    getNotifiedAboutSystemStatus: 'احصل على إشعار بتغييرات حالة النظام ونوافذ الصيانة.',
+    getNotifiedAboutSystemStatus:
+      'احصل على إشعار بتغييرات حالة النظام ونوافذ الصيانة.',
     enterYourEmail: 'أدخل بريدك الإلكتروني',
     subscribe: 'اشتراك',
-  }
+  },
 };

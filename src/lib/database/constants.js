@@ -19,7 +19,7 @@ export const DATABASE_CONFIG = {
     // Enable WAL mode for better crash recovery
     wal: true,
     // Additional recommended settings for browser environments
-    debug: 0  // Set to 1-5 for debugging if needed
+    debug: 0, // Set to 1-5 for debugging if needed
   },
 
   // Storage limits
@@ -29,7 +29,7 @@ export const DATABASE_CONFIG = {
     // Max individual item size (2MB)
     maxItemBytes: 2 * 1024 * 1024,
     // IndexedDB quota buffer (keep 10% free)
-    quotaBufferPercent: 10
+    quotaBufferPercent: 10,
   },
 
   // Initialization settings
@@ -39,8 +39,8 @@ export const DATABASE_CONFIG = {
     // Number of retry attempts on failure
     maxRetries: 3,
     // Delay between retries (ms)
-    retryDelayMs: 1000
-  }
+    retryDelayMs: 1000,
+  },
 };
 
 // Derived constants for convenience
@@ -66,14 +66,14 @@ export const SCHEMA_TABLES = [
   'portfolio_invitations',
   'user_activities',
   'project_votes',
-  'password_reset_tokens'
+  'password_reset_tokens',
 ];
 
 // Sensitive keys that should be encrypted in localStorage
 export const SENSITIVE_STORAGE_KEYS = [
   'userToken',
   'userData',
-  'accelerator_backup_'
+  'accelerator_backup_',
 ];
 
 export default DATABASE_CONFIG;

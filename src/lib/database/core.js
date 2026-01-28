@@ -15,7 +15,7 @@ export let dbError = null;
 export let schemaCreated = false;
 
 let initPromise = null;
-let initState = 'idle';  // idle | initializing | ready | error
+let initState = 'idle'; // idle | initializing | ready | error
 
 // Setter functions to allow external modules to update these values
 export function setDbInstance(instance) {
@@ -57,7 +57,7 @@ export function getDbStatus() {
   return {
     ready: dbReady,
     schemaCreated,
-    error: dbError?.message || null
+    error: dbError?.message || null,
   };
 }
 
@@ -210,7 +210,7 @@ async function _initialize({ force }) {
       }
 
       // Test IndexedDB access
-      const idbAvailable = isBrowser() && await _testIndexedDBAccess();
+      const idbAvailable = isBrowser() && (await _testIndexedDBAccess());
 
       // Attempt to create PGLite with IndexedDB first
       if (idbAvailable) {
@@ -221,20 +221,28 @@ async function _initialize({ force }) {
             // Use relaxed durability for better IndexedDB performance
             relaxedDurability: true,
             // Minimal debugging to reduce overhead
-            debug: 0
+            debug: 0,
           });
           console.log('[DB] PGLite created with IndexedDB');
         } catch (indexedDBError) {
-          console.warn('[DB] IndexedDB creation failed, falling back to in-memory:', indexedDBError.message);
+          console.warn(
+            '[DB] IndexedDB creation failed, falling back to in-memory:',
+            indexedDBError.message
+          );
           console.error('[DB] IndexedDB Error details:', {
             name: indexedDBError.name,
             message: indexedDBError.message,
-            stack: indexedDBError.stack
+            stack: indexedDBError.stack,
           });
 
           // Check if this is a WASM-related error and provide specific guidance
-          if (indexedDBError.message.includes('Abort') || indexedDBError.message.includes('WASM')) {
-            console.error('[DB] WASM/PGLite initialization error detected. This may be due to:');
+          if (
+            indexedDBError.message.includes('Abort') ||
+            indexedDBError.message.includes('WASM')
+          ) {
+            console.error(
+              '[DB] WASM/PGLite initialization error detected. This may be due to:'
+            );
             console.error('[DB] 1. Browser security policies blocking WASM');
             console.error('[DB] 2. CORS restrictions');
             console.error('[DB] 3. Incompatible browser environment');
@@ -243,23 +251,35 @@ async function _initialize({ force }) {
             try {
               dbInstance = await PGlite.create({
                 relaxedDurability: true,
-                debug: 0  // Minimal debugging to reduce overhead
+                debug: 0, // Minimal debugging to reduce overhead
               });
-              console.log('[DB] PGLite created with minimal config using IndexedDB');
+              console.log(
+                '[DB] PGLite created with minimal config using IndexedDB'
+              );
             } catch (minimalError) {
-              console.error('[DB] IndexedDB with minimal config failed, trying in-memory:', minimalError);
+              console.error(
+                '[DB] IndexedDB with minimal config failed, trying in-memory:',
+                minimalError
+              );
 
               // Final fallback to in-memory with minimal config
               try {
                 dbInstance = await PGlite.create({
                   ...DATABASE_CONFIG.pglite,
                   relaxedDurability: true,
-                  debug: 0
+                  debug: 0,
                 });
-                console.log('[DB] PGLite created with minimal config in-memory');
+                console.log(
+                  '[DB] PGLite created with minimal config in-memory'
+                );
               } catch (finalError) {
-                console.error('[DB] All initialization attempts failed:', finalError);
-                throw new Error(`PGLite initialization completely failed. Original: ${indexedDBError.message}, Fallback: ${minimalError.message}, Final: ${finalError.message}`);
+                console.error(
+                  '[DB] All initialization attempts failed:',
+                  finalError
+                );
+                throw new Error(
+                  `PGLite initialization completely failed. Original: ${indexedDBError.message}, Fallback: ${minimalError.message}, Final: ${finalError.message}`
+                );
               }
             }
           } else {
@@ -267,12 +287,17 @@ async function _initialize({ force }) {
             try {
               dbInstance = await PGlite.create({
                 ...DATABASE_CONFIG.pglite,
-                relaxedDurability: true
+                relaxedDurability: true,
               });
               console.log('[DB] PGLite created in-memory');
             } catch (memoryError) {
-              console.error('[DB] Both IndexedDB and in-memory creation failed:', memoryError);
-              throw new Error(`PGLite initialization failed: ${indexedDBError.message} (fallback error: ${memoryError.message})`);
+              console.error(
+                '[DB] Both IndexedDB and in-memory creation failed:',
+                memoryError
+              );
+              throw new Error(
+                `PGLite initialization failed: ${indexedDBError.message} (fallback error: ${memoryError.message})`
+              );
             }
           }
         }
@@ -281,11 +306,16 @@ async function _initialize({ force }) {
         try {
           dbInstance = await PGlite.create({
             ...DATABASE_CONFIG.pglite,
-            relaxedDurability: true
+            relaxedDurability: true,
           });
         } catch (memoryError) {
-          console.error('[DB] In-memory database creation failed:', memoryError);
-          throw new Error(`PGLite in-memory initialization failed: ${memoryError.message}`);
+          console.error(
+            '[DB] In-memory database creation failed:',
+            memoryError
+          );
+          throw new Error(
+            `PGLite in-memory initialization failed: ${memoryError.message}`
+          );
         }
       }
 
@@ -307,17 +337,20 @@ async function _initialize({ force }) {
       initState = 'ready';
       console.log('[DB] Database ready');
       return dbInstance;
-
     } catch (error) {
       console.error('[DB] Init error:', error);
 
       // More detailed error logging for debugging
       if (error.message.includes('Aborted') || error.message.includes('WASM')) {
-        console.error('[DB] WASM/Aborted error detected - this may be due to browser compatibility, security policies, or IndexedDB issues');
+        console.error(
+          '[DB] WASM/Aborted error detected - this may be due to browser compatibility, security policies, or IndexedDB issues'
+        );
         console.error('[DB] Possible solutions:');
         console.error('[DB] 1. Ensure you are using HTTPS in production');
         console.error('[DB] 2. Check browser supports WASM and IndexedDB');
-        console.error('[DB] 3. Verify no ad blockers are interfering with WASM');
+        console.error(
+          '[DB] 3. Verify no ad blockers are interfering with WASM'
+        );
         console.error('[DB] 4. Try clearing browser storage/cache');
       }
 
@@ -349,7 +382,7 @@ async function _testIndexedDBAccess() {
     const dbName = `idb-test-access-${Date.now()}`;
     const request = indexedDB.open(dbName, 1);
 
-    return new Promise((resolve) => {
+    return new Promise(resolve => {
       request.onsuccess = () => {
         const db = request.result;
         db.close();
@@ -366,7 +399,9 @@ async function _testIndexedDBAccess() {
       };
 
       request.onblocked = () => {
-        console.warn('[DB] IndexedDB test blocked - another instance may be open');
+        console.warn(
+          '[DB] IndexedDB test blocked - another instance may be open'
+        );
         resolve(false);
       };
 
@@ -399,20 +434,23 @@ async function _validateConsistency() {
       SELECT table_name FROM information_schema.tables 
       WHERE table_schema = 'public'
     `);
-    
+
     const existingTables = result.rows.map(r => r.table_name);
-    const missingTables = SCHEMA_TABLES.filter(t => !existingTables.includes(t));
-    
+    const missingTables = SCHEMA_TABLES.filter(
+      t => !existingTables.includes(t)
+    );
+
     if (missingTables.length > 0) {
       console.warn('[DB] Missing tables:', missingTables);
     }
 
-    const versionCheck = await dbInstance.query(`SELECT * FROM db_version LIMIT 1`);
+    const versionCheck = await dbInstance.query(
+      `SELECT * FROM db_version LIMIT 1`
+    );
     if (versionCheck.rows.length === 0) {
       await dbInstance.exec(`INSERT INTO db_version (version) VALUES (1)`);
       console.log('[DB] Initialized db_version');
     }
-
   } catch (error) {
     console.warn('[DB] Validation warning:', error.message);
   }

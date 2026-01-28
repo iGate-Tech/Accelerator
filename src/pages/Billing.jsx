@@ -1,10 +1,17 @@
-import { createSignal, onMount, createEffect, For, Show, createResource } from "solid-js";
-import { useNavigate } from "@solidjs/router";
-import { useUser } from "../context/UserContext";
-import { useLanguage } from "../hooks/useLanguage";
-import { getUserBilling, getUserSubscription } from "@lib/database";
-import { toastManager } from "@lib/ui/feedback";
-import { logger } from "@lib/core";
+import {
+  createSignal,
+  onMount,
+  createEffect,
+  For,
+  Show,
+  createResource,
+} from 'solid-js';
+import { useNavigate } from '@solidjs/router';
+import { useUser } from '../context/UserContext';
+import { useLanguage } from '../hooks/useLanguage';
+import { getUserBilling, getUserSubscription } from '@lib/database';
+import { toastManager } from '@lib/ui/feedback';
+import { logger } from '@lib/core';
 
 const Billing = () => {
   logger.trace('Billing: Starting');
@@ -17,16 +24,16 @@ const Billing = () => {
     try {
       const [billingRecords, subscription] = await Promise.all([
         getUserBilling(user().id),
-        getUserSubscription(user().id)
+        getUserSubscription(user().id),
       ]);
-      
+
       const invoices = billingRecords.map(record => ({
         id: record.id,
         date: record.created_at || record.due_date,
         amount: record.amount,
         status: record.status || 'pending',
         description: record.description || record.type,
-        downloadUrl: '#'
+        downloadUrl: '#',
       }));
 
       return { invoices, paymentMethods: [], subscription };
@@ -58,7 +65,7 @@ const Billing = () => {
     }
   });
 
-  const handleDownloadInvoice = (invoice) => {
+  const handleDownloadInvoice = invoice => {
     const invoiceData = JSON.stringify(invoice, null, 2);
     const blob = new Blob([invoiceData], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
@@ -90,220 +97,258 @@ const Billing = () => {
     if (window.lucide) window.lucide.createIcons();
   });
 
-   createEffect(() => {
-     if (window.lucide) window.lucide.createIcons();
-   });
+  createEffect(() => {
+    if (window.lucide) window.lucide.createIcons();
+  });
 
   return (
-     <div class="max-w-6xl mx-auto space-y-8 px-4 sm:px-6 py-6 sm:py-8 overflow-visible">
-       {/* Header */}
-       <div class="py-6">
-         <div class="flex justify-start mb-4">
-           <button
-             onClick={() => navigate('/')}
-             class="btn btn-ghost btn-sm gap-2"
-           >
-             <svg class="w-4 h-4 rtl:transform rtl:scale-x-[-1]" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16" viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"/></svg>
-             <span class="hidden sm:inline">Back</span>
-           </button>
-         </div>
-
-         <div class="text-center">
-           <h1 class="text-2xl sm:text-3xl md:text-4xl font-bold text-base-content mb-3">{t().billingPayments}</h1>
-           <p class="text-sm sm:text-base text-base-content/70 max-w-2xl mx-auto mb-6">
-             {t().manageSubscription}
-           </p>
-         </div>
-       </div>
-
-       {/* Content */}
-       <div class="bg-base-100 rounded-box p-4 sm:p-6 md:p-8 shadow-sm border border-base-200">
-         {/* Current Billing Overview */}
-         <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-        <div class="card bg-gradient-to-br from-primary/5 via-base-100 to-secondary/5 border border-primary/20">
-          <div class="card-body text-center">
-            <h2 class="card-title justify-center text-2xl font-bold text-primary">
-              {currentPlan().toUpperCase()}
-            </h2>
-            <p class="text-base-content/70">{t().currentPlan}</p>
-            <p class="text-sm text-base-content/60 mt-2">
-              {billingCycle()} {t().billingCycle}
-            </p>
-          </div>
+    <div class="mx-auto max-w-6xl space-y-8 overflow-visible px-4 py-6 sm:px-6 sm:py-8">
+      {/* Header */}
+      <div class="py-6">
+        <div class="mb-4 flex justify-start">
+          <button
+            onClick={() => navigate('/')}
+            class="btn btn-ghost btn-sm gap-2"
+          >
+            <svg
+              class="h-4 w-4 rtl:scale-x-[-1] rtl:transform"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+            >
+              <path d="m15 18-6-6 6-6" />
+            </svg>
+            <span class="hidden sm:inline">Back</span>
+          </button>
         </div>
 
-        <div class="card bg-base-100 shadow-sm border border-base-200">
-          <div class="card-body text-center">
-            <h2 class="card-title justify-center text-2xl font-bold text-success">
-              ${user()?.subscription?.price || 0}
-            </h2>
-            <p class="text-base-content/70">{t().monthlyCost}</p>
-            <p class="text-sm text-base-content/60 mt-2">
-              {t().nextBilling}: {nextBillingDate()}
-            </p>
-          </div>
-        </div>
-
-        <div class="card bg-base-100 shadow-sm border border-base-200">
-          <div class="card-body text-center">
-            <h2 class="card-title justify-center text-2xl font-bold text-info">
-              {invoices().filter(inv => inv.status === 'paid').length}
-            </h2>
-            <p class="text-base-content/70">{t().paidInvoices}</p>
-            <p class="text-sm text-base-content/60 mt-2">
-              {t().allUpToDate}
-            </p>
-          </div>
+        <div class="text-center">
+          <h1 class="text-base-content mb-3 text-2xl font-bold sm:text-3xl md:text-4xl">
+            {t().billingPayments}
+          </h1>
+          <p class="text-base-content/70 mx-auto mb-6 max-w-2xl text-sm sm:text-base">
+            {t().manageSubscription}
+          </p>
         </div>
       </div>
 
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        {/* Payment Methods */}
-        <div class="card bg-base-100 shadow-sm border border-base-200">
-          <div class="card-body">
-            <div class="flex justify-between items-center mb-6">
-              <h3 class="card-title">
-                <i data-lucide="credit-card" class="w-5 h-5 me-2"></i>
-                {t().paymentMethods}
-              </h3>
-              <button
-                class="btn btn-outline btn-sm"
-                onClick={handleAddPaymentMethod}
-              >
-                <i data-lucide="plus" class="w-4 h-4 me-2"></i>
-                {t().addCard}
-              </button>
+      {/* Content */}
+      <div class="bg-base-100 rounded-box border-base-200 border p-4 shadow-sm sm:p-6 md:p-8">
+        {/* Current Billing Overview */}
+        <div class="grid grid-cols-1 gap-8 md:grid-cols-3">
+          <div class="card from-primary/5 via-base-100 to-secondary/5 border-primary/20 border bg-gradient-to-br">
+            <div class="card-body text-center">
+              <h2 class="card-title text-primary justify-center text-2xl font-bold">
+                {currentPlan().toUpperCase()}
+              </h2>
+              <p class="text-base-content/70">{t().currentPlan}</p>
+              <p class="text-base-content/60 mt-2 text-sm">
+                {billingCycle()} {t().billingCycle}
+              </p>
             </div>
-            <div class="space-y-4">
-              <For each={paymentMethods()}>
-                {(method) => (
-                  <div class="flex items-center justify-between p-4 border border-base-200 rounded-lg">
-                    <div class="flex items-center gap-4">
-                      <div class="p-3 bg-primary/10 rounded-lg">
-                        <i data-lucide="credit-card" class="w-6 h-6 text-primary"></i>
+          </div>
+
+          <div class="card bg-base-100 border-base-200 border shadow-sm">
+            <div class="card-body text-center">
+              <h2 class="card-title text-success justify-center text-2xl font-bold">
+                ${user()?.subscription?.price || 0}
+              </h2>
+              <p class="text-base-content/70">{t().monthlyCost}</p>
+              <p class="text-base-content/60 mt-2 text-sm">
+                {t().nextBilling}: {nextBillingDate()}
+              </p>
+            </div>
+          </div>
+
+          <div class="card bg-base-100 border-base-200 border shadow-sm">
+            <div class="card-body text-center">
+              <h2 class="card-title text-info justify-center text-2xl font-bold">
+                {invoices().filter(inv => inv.status === 'paid').length}
+              </h2>
+              <p class="text-base-content/70">{t().paidInvoices}</p>
+              <p class="text-base-content/60 mt-2 text-sm">{t().allUpToDate}</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 gap-8 lg:grid-cols-2">
+          {/* Payment Methods */}
+          <div class="card bg-base-100 border-base-200 border shadow-sm">
+            <div class="card-body">
+              <div class="mb-6 flex items-center justify-between">
+                <h3 class="card-title">
+                  <i data-lucide="credit-card" class="me-2 h-5 w-5" />
+                  {t().paymentMethods}
+                </h3>
+                <button
+                  class="btn btn-outline btn-sm"
+                  onClick={handleAddPaymentMethod}
+                >
+                  <i data-lucide="plus" class="me-2 h-4 w-4" />
+                  {t().addCard}
+                </button>
+              </div>
+              <div class="space-y-4">
+                <For each={paymentMethods()}>
+                  {method => (
+                    <div class="border-base-200 flex items-center justify-between rounded-lg border p-4">
+                      <div class="flex items-center gap-4">
+                        <div class="bg-primary/10 rounded-lg p-3">
+                          <i
+                            data-lucide="credit-card"
+                            class="text-primary h-6 w-6"
+                          />
+                        </div>
+                        <div>
+                          <p class="font-semibold">
+                            {method.brand} •••• {method.last4}
+                          </p>
+                          <p class="text-base-content/60 text-sm">
+                            {t().expiryDate}: {method.expiryMonth}/
+                            {method.expiryYear}
+                          </p>
+                          {method.isDefault && (
+                            <span class="badge badge-primary badge-sm">
+                              {t().setDefault}
+                            </span>
+                          )}
+                        </div>
                       </div>
-                      <div>
-                        <p class="font-semibold">
-                          {method.brand} •••• {method.last4}
-                        </p>
-                        <p class="text-sm text-base-content/60">
-                          {t().expiryDate}: {method.expiryMonth}/{method.expiryYear}
-                        </p>
-                        {method.isDefault && (
-                          <span class="badge badge-primary badge-sm">{t().setDefault}</span>
-                        )}
-                      </div>
+                      <button
+                        class="btn btn-ghost btn-sm"
+                        onClick={handleUpdatePaymentMethod}
+                      >
+                        <i data-lucide="edit" class="h-4 w-4" />
+                      </button>
                     </div>
+                  )}
+                </For>
+                {paymentMethods().length === 0 && (
+                  <div class="text-base-content/60 py-8 text-center">
+                    <i
+                      data-lucide="credit-card"
+                      class="mx-auto mb-2 h-12 w-12 opacity-50"
+                    />
+                    <p>{t().noPaymentMethods}</p>
                     <button
-                      class="btn btn-ghost btn-sm"
-                      onClick={handleUpdatePaymentMethod}
+                      class="btn btn-primary btn-sm mt-2"
+                      onClick={handleAddPaymentMethod}
                     >
-                      <i data-lucide="edit" class="w-4 h-4"></i>
+                      {t().addPaymentMethod}
                     </button>
                   </div>
                 )}
-              </For>
-              {paymentMethods().length === 0 && (
-                <div class="text-center py-8 text-base-content/60">
-                  <i data-lucide="credit-card" class="w-12 h-12 mx-auto mb-2 opacity-50"></i>
-                  <p>{t().noPaymentMethods}</p>
-                  <button
-                    class="btn btn-primary btn-sm mt-2"
-                    onClick={handleAddPaymentMethod}
-                  >
-                    {t().addPaymentMethod}
-                  </button>
-                </div>
-              )}
+              </div>
+            </div>
+          </div>
+
+          {/* Billing History */}
+          <div class="card bg-base-100 border-base-200 border shadow-sm">
+            <div class="card-body">
+              <h3 class="card-title">
+                <i data-lucide="receipt" class="me-2 h-5 w-5" />
+                {t().billingHistory}
+              </h3>
+              <div class="max-h-96 space-y-3 overflow-y-auto">
+                <For each={invoices()}>
+                  {invoice => (
+                    <div class="bg-base-200 flex items-center justify-between rounded-lg p-3">
+                      <div class="flex items-center gap-3">
+                        <div
+                          class={`rounded-full p-2 ${
+                            invoice.status === 'paid'
+                              ? 'bg-success/20 text-success'
+                              : 'bg-warning/20 text-warning'
+                          }`}
+                        >
+                          <i
+                            data-lucide={
+                              invoice.status === 'paid'
+                                ? 'check-circle'
+                                : 'clock'
+                            }
+                            class="h-4 w-4"
+                          />
+                        </div>
+                        <div>
+                          <p class="font-medium">{invoice.description}</p>
+                          <p class="text-base-content/60 text-xs">
+                            {new Date(invoice.date).toLocaleDateString()}
+                          </p>
+                        </div>
+                      </div>
+                      <div class="flex items-center gap-2">
+                        <span class="font-semibold">${invoice.amount}</span>
+                        <button
+                          class="btn btn-ghost btn-xs"
+                          onClick={() => handleDownloadInvoice(invoice)}
+                        >
+                          <i data-lucide="download" class="h-4 w-4" />
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </For>
+                {invoices().length === 0 && (
+                  <div class="text-base-content/60 py-8 text-center">
+                    <i
+                      data-lucide="inbox"
+                      class="mx-auto mb-2 h-8 w-8 opacity-50"
+                    />
+                    <p>{t().noBillingHistory}</p>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </div>
 
-        {/* Billing History */}
-        <div class="card bg-base-100 shadow-sm border border-base-200">
+        {/* Billing Settings */}
+        <div class="card bg-base-100 border-base-200 border shadow-sm">
           <div class="card-body">
             <h3 class="card-title">
-              <i data-lucide="receipt" class="w-5 h-5 me-2"></i>
-              {t().billingHistory}
+              <i data-lucide="settings" class="me-2 h-5 w-5" />
+              {t().billingSettings}
             </h3>
-            <div class="space-y-3 max-h-96 overflow-y-auto">
-              <For each={invoices()}>
-                {(invoice) => (
-                  <div class="flex items-center justify-between p-3 bg-base-200 rounded-lg">
-                    <div class="flex items-center gap-3">
-                      <div class={`p-2 rounded-full ${
-                        invoice.status === 'paid' ? 'bg-success/20 text-success' : 'bg-warning/20 text-warning'
-                      }`}>
-                        <i data-lucide={invoice.status === 'paid' ? 'check-circle' : 'clock'} class="w-4 h-4"></i>
-                      </div>
-                      <div>
-                        <p class="font-medium">{invoice.description}</p>
-                        <p class="text-xs text-base-content/60">
-                          {new Date(invoice.date).toLocaleDateString()}
-                        </p>
-                      </div>
-                    </div>
-                    <div class="flex items-center gap-2">
-                      <span class="font-semibold">${invoice.amount}</span>
-                      <button
-                        class="btn btn-ghost btn-xs"
-                        onClick={() => handleDownloadInvoice(invoice)}
-                      >
-                        <i data-lucide="download" class="w-4 h-4"></i>
-                      </button>
-                    </div>
-                  </div>
-                )}
-              </For>
-              {invoices().length === 0 && (
-                <div class="text-center py-8 text-base-content/60">
-                  <i data-lucide="inbox" class="w-8 h-8 mx-auto mb-2 opacity-50"></i>
-                  <p>{t().noBillingHistory}</p>
+            <div class="space-y-4">
+              <div class="flex items-center justify-between">
+                <div>
+                  <span class="font-medium">{t().billingCycle}</span>
+                  <p class="text-base-content/60 text-sm">
+                    How often you're billed
+                  </p>
                 </div>
-              )}
+                <span class="badge badge-primary">{billingCycle()}</span>
+              </div>
+              <div class="flex items-center justify-between">
+                <div>
+                  <span class="font-medium">{t().emailReceipts}</span>
+                  <p class="text-base-content/60 text-sm">
+                    Receive billing emails
+                  </p>
+                </div>
+                <input
+                  type="checkbox"
+                  class="toggle toggle-primary"
+                  checked={true}
+                  disabled
+                />
+              </div>
+              <div class="alert alert-info">
+                <i data-lucide="info" class="h-5 w-5" />
+                <span>{t().billingFeaturesSimulated}</span>
+              </div>
             </div>
           </div>
         </div>
       </div>
-
-      {/* Billing Settings */}
-      <div class="card bg-base-100 shadow-sm border border-base-200">
-        <div class="card-body">
-          <h3 class="card-title">
-            <i data-lucide="settings" class="w-5 h-5 me-2"></i>
-            {t().billingSettings}
-          </h3>
-          <div class="space-y-4">
-            <div class="flex justify-between items-center">
-              <div>
-                <span class="font-medium">{t().billingCycle}</span>
-                <p class="text-sm text-base-content/60">How often you're billed</p>
-              </div>
-              <span class="badge badge-primary">{billingCycle()}</span>
-            </div>
-            <div class="flex justify-between items-center">
-              <div>
-                <span class="font-medium">{t().emailReceipts}</span>
-                <p class="text-sm text-base-content/60">Receive billing emails</p>
-              </div>
-              <input
-                type="checkbox"
-                class="toggle toggle-primary"
-                checked={true}
-                disabled
-              />
-            </div>
-            <div class="alert alert-info">
-              <i data-lucide="info" class="w-5 h-5"></i>
-              <span>{t().billingFeaturesSimulated}</span>
-            </div>
-          </div>
-         </div>
-       </div>
-     </div>
-     </div>
-   );
- };
+    </div>
+  );
+};
 
 export default Billing;
-       

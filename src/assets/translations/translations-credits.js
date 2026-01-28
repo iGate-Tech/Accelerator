@@ -1,5 +1,3 @@
-
-
 // Credits page translations
 export const creditsTranslations = {
   en: {
@@ -35,8 +33,10 @@ export const creditsTranslations = {
     requiresChartingLibrary: 'Requires additional charting library',
     buy: 'Buy',
     perCredit: '¢ per credit',
-    creditsStoredLocally: 'Credits are stored locally in your browser. For production, integrate with a payment provider.',
-    successfullyPurchased: 'Successfully purchased {amount} credits for ${price}',
+    creditsStoredLocally:
+      'Credits are stored locally in your browser. For production, integrate with a payment provider.',
+    successfullyPurchased:
+      'Successfully purchased {amount} credits for ${price}',
     failedToPurchase: 'Failed to purchase credits. Please try again.',
     thisMonth: 'This month',
     total: 'Total',
@@ -77,7 +77,8 @@ export const creditsTranslations = {
     requiresChartingLibrary: 'يتطلب مكتبة رسوم بيانية إضافية',
     buy: 'شراء',
     perCredit: 'سنت للاعتماد',
-    creditsStoredLocally: 'الاعتمادات مخزنة محلياً في متصفحك. للإنتاج، يتم الدمج مع مزود الدفع.',
+    creditsStoredLocally:
+      'الاعتمادات مخزنة محلياً في متصفحك. للإنتاج، يتم الدمج مع مزود الدفع.',
     successfullyPurchased: 'تم شراء {amount} اعتمادات بنجاح مقابل ${price}',
     failedToPurchase: 'فشل في شراء الاعتمادات. يرجى المحاولة مرة أخرى.',
     thisMonth: 'هذا الشهر',
@@ -85,5 +86,5 @@ export const creditsTranslations = {
     aiGenerations: 'توليدات الذكاء الاصطناعي',
     analysisTasks: 'مهام التحليل',
     exportOperations: 'عمليات التصدير',
-  }
+  },
 };

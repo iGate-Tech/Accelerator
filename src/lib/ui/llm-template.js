@@ -44,7 +44,7 @@ function extractTemplateData(templateText, options = {}) {
   return {
     highlights: highlights,
     context: contextString,
-    extractedContent: contextString
+    extractedContent: contextString,
   };
 }
 
@@ -74,5 +74,5 @@ export {
   renderFilledTemplate,
   extractKeysFromPrompt,
   extractHighlightedText,
-  generateContextString
+  generateContextString,
 };

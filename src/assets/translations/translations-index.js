@@ -1,5 +1,3 @@
-
-
 // Main translations index
 import { navigationTranslations } from './translations-common.js';
 import { commonTranslations } from './translations-common.js';
@@ -88,5 +86,5 @@ export const translations = {
     ...termsTranslations.ar,
     ...statusTranslations.ar,
     ...changelogTranslations.ar,
-  }
+  },
 };

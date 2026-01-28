@@ -1,4 +1,4 @@
-import { createStore } from "solid-js/store";
+import { createStore } from 'solid-js/store';
 import { logger } from '../core';
 
 const [toasts, setToasts] = createStore([]);
@@ -16,7 +16,7 @@ export const addToast = (type, message, duration = 3000) => {
   }
 };
 
-export const removeToast = (id) => {
+export const removeToast = id => {
   logger.trace('removeToast: Starting');
   setToasts(toasts => toasts.filter(t => t.id !== id));
 };
@@ -26,5 +26,5 @@ export const toastManager = {
   error: (message, duration) => addToast('error', message, duration),
   warning: (message, duration) => addToast('warning', message, duration),
   info: (message, duration) => addToast('info', message, duration),
-  getToasts: toasts
+  getToasts: toasts,
 };

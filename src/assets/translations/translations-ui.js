@@ -54,7 +54,8 @@ export const uiTranslations = {
 
     // Confirmation dialogs
     confirmDeleteTitle: 'Confirm Delete',
-    confirmDeleteMessage: 'Are you sure you want to delete this? This action cannot be undone.',
+    confirmDeleteMessage:
+      'Are you sure you want to delete this? This action cannot be undone.',
     confirmAction: 'Confirm Action',
     confirmActionMessage: 'Are you sure you want to proceed with this action?',
 
@@ -126,7 +127,8 @@ export const uiTranslations = {
 
     // Confirmation dialogs
     confirmDeleteTitle: 'تأكيد الحذف',
-    confirmDeleteMessage: 'هل أنت متأكد من حذف هذا؟ لا يمكن التراجع عن هذا الإجراء.',
+    confirmDeleteMessage:
+      'هل أنت متأكد من حذف هذا؟ لا يمكن التراجع عن هذا الإجراء.',
     confirmAction: 'تأكيد الإجراء',
     confirmActionMessage: 'هل أنت متأكد من رغبتك في المتابعة مع هذا الإجراء؟',
 
@@ -143,5 +145,5 @@ export const uiTranslations = {
     time: 'الوقت',
     credits: 'الاعتمادات',
     consumedCredits: '{consumed} / {total}',
-  }
+  },
 };

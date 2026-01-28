@@ -6,7 +6,7 @@ export const agentTranslations = {
     initializingAgentInterface: 'Initializing agent interface...',
 
     // Greeting
-    greetingPrefix: "Hi",
+    greetingPrefix: 'Hi',
     greetingSuffix: ", what's your next amazing idea?",
 
     // Actions
@@ -35,11 +35,11 @@ export const agentTranslations = {
     unknownError: 'Unknown error occurred',
 
     // Placeholder
-    agentPlaceholder: "Enter your problem statement here...",
+    agentPlaceholder: 'Enter your problem statement here...',
 
     // Additional placeholders
-    enterInstructionsForTask: "Enter instructions for selected task...",
-    selectTaskToGiveInstructions: "Select a task above to give instructions",
+    enterInstructionsForTask: 'Enter instructions for selected task...',
+    selectTaskToGiveInstructions: 'Select a task above to give instructions',
 
     // Button labels
     chatButton: 'Chat with AI',
@@ -50,8 +50,8 @@ export const agentTranslations = {
     initializingAgentInterface: 'جاري تهيئة واجهة الوكيل...',
 
     // Greeting
-    greetingPrefix: "مرحباً",
-    greetingSuffix: "، ما هي فكرتك الرائعة التالية؟",
+    greetingPrefix: 'مرحباً',
+    greetingSuffix: '، ما هي فكرتك الرائعة التالية؟',
 
     // Actions
     start: 'ابدأ',
@@ -79,13 +79,13 @@ export const agentTranslations = {
     unknownError: 'حدث خطأ غير معروف',
 
     // Placeholder
-    agentPlaceholder: "أدخل بيان المشكلة هنا...",
+    agentPlaceholder: 'أدخل بيان المشكلة هنا...',
 
     // Additional placeholders
-    enterInstructionsForTask: "أدخل تعليمات للمهمة المحددة...",
-    selectTaskToGiveInstructions: "حدد مهمة أعلاه لتقديم تعليمات",
+    enterInstructionsForTask: 'أدخل تعليمات للمهمة المحددة...',
+    selectTaskToGiveInstructions: 'حدد مهمة أعلاه لتقديم تعليمات',
 
     // Button labels
     chatButton: 'دردش مع الذكاء الاصطناعي',
-  }
+  },
 };

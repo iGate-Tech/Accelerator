@@ -8,7 +8,9 @@
  */
 export function getSystemTheme() {
   if (typeof window !== 'undefined' && window.matchMedia) {
-    const darkModeMediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+    const darkModeMediaQuery = window.matchMedia(
+      '(prefers-color-scheme: dark)'
+    );
     return darkModeMediaQuery.matches ? 'dark' : 'light';
   }
   return 'light';
@@ -51,8 +53,14 @@ export function initializeTheme() {
   applyTheme(savedTheme);
 
   // Listen for system theme changes if using auto theme
-  if (savedTheme === 'auto' && typeof window !== 'undefined' && window.matchMedia) {
-    const darkModeMediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+  if (
+    savedTheme === 'auto' &&
+    typeof window !== 'undefined' &&
+    window.matchMedia
+  ) {
+    const darkModeMediaQuery = window.matchMedia(
+      '(prefers-color-scheme: dark)'
+    );
     darkModeMediaQuery.addEventListener('change', () => {
       if (localStorage.getItem('theme') === 'auto') {
         // When system theme changes, update the actual theme without changing the user's preference

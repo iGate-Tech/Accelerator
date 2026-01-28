@@ -22,7 +22,10 @@
     "docker:prod:build": "docker compose -f docker/docker-compose.yml --env-file docker/.env.production up --build -d",
     "docker:down": "docker compose -f docker/docker-compose.yml down",
     "docker:logs": "docker compose -f docker/docker-compose.yml logs -f",
-    "lint": "echo 'ESLint removed'",
+    "lint": "eslint src --ext .js,.jsx",
+    "lint:fix": "eslint src --ext .js,.jsx --fix",
+    "format": "prettier --write \"src/**/*.{js,jsx,json}\" --ignore-path .prettierignore",
+    "format:check": "prettier --check \"src/**/*.{js,jsx,json}\" --ignore-path .prettierignore",
     "typecheck": "echo 'Typecheck skipped - project uses JavaScript'"
   },
   "keywords": [
@@ -61,12 +64,21 @@
   },
   "devDependencies": {
     "@babel/preset-react": "^7.28.5",
+    "@eslint/eslintrc": "^3.3.3",
+    "@ianvs/prettier-plugin-sort-imports": "^4.7.0",
+    "@prettier/plugin-xml": "^3.4.2",
     "@tailwindcss/postcss": "^4.1.18",
     "@tailwindcss/typography": "^0.5.15",
     "autoprefixer": "^10.4.23",
     "concurrently": "^9.2.1",
-    "nodemon": "^3.1.11",
+    "eslint": "^9.39.2",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-import": "^2.32.0",
+    "eslint-plugin-jsx-a11y": "^6.10.2",
+    "eslint-plugin-solid": "^0.14.5",
     "postcss-preset-env": "^10.6.0",
+    "prettier": "^3.8.1",
+    "prettier-plugin-tailwindcss": "^0.7.2",
     "vite-plugin-pwa": "^1.2.0"
   }
 }

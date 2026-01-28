@@ -3,10 +3,18 @@ import { dbInstance } from './core.js';
 import { updateEntity } from './operations.js';
 
 // Collaboration and portfolio management functions
-export async function _inviteCollaborator({ portfolioId, inviteeEmail, role = 'editor', message = '' }) {
+export async function _inviteCollaborator({
+  portfolioId,
+  inviteeEmail,
+  role = 'editor',
+  message = '',
+}) {
   try {
     // Check if user exists
-    const existingUser = await dbInstance.query('SELECT id FROM users WHERE email = $1', [inviteeEmail]);
+    const existingUser = await dbInstance.query(
+      'SELECT id FROM users WHERE email = $1',
+      [inviteeEmail]
+    );
     if (existingUser.rows.length === 0) {
       throw new Error('User with this email does not exist');
     }
@@ -34,11 +42,26 @@ export async function _inviteCollaborator({ portfolioId, inviteeEmail, role = 'e
     }
 
     const id = uuidv4();
-    const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(); // 7 days
+    const expiresAt = new Date(
+      Date.now() + 7 * 24 * 60 * 60 * 1000
+    ).toISOString(); // 7 days
 
     await dbInstance.query(
       'INSERT INTO portfolio_invitations (id, portfolio_id, invitee_email, role, status, message, sent_at, synced_at, last_modified, sync_status, deleted_at, version) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)',
-      [id, portfolioId, inviteeEmail, role, 'pending', message, new Date().toISOString(), new Date().toISOString(), new Date().toISOString(), 'local', null, 1]
+      [
+        id,
+        portfolioId,
+        inviteeEmail,
+        role,
+        'pending',
+        message,
+        new Date().toISOString(),
+        new Date().toISOString(),
+        new Date().toISOString(),
+        'local',
+        null,
+        1,
+      ]
     );
 
     return { id, portfolioId, inviteeEmail, role, message, expiresAt };
@@ -104,10 +127,17 @@ export async function _respondToInvitation({ invitationId, status }) {
 
     // If accepted, add as collaborator
     if (status === 'accepted') {
-      const user = await dbInstance.query('SELECT id FROM users WHERE email = $1', [inv.invitee_email]);
+      const user = await dbInstance.query(
+        'SELECT id FROM users WHERE email = $1',
+        [inv.invitee_email]
+      );
       if (user.rows.length > 0) {
         const userId = user.rows[0].id;
-        await _addPortfolioCollaborator({ portfolioId: inv.portfolio_id, userId, role: inv.role });
+        await _addPortfolioCollaborator({
+          portfolioId: inv.portfolio_id,
+          userId,
+          role: inv.role,
+        });
       }
     }
 
@@ -120,13 +150,16 @@ export async function _respondToInvitation({ invitationId, status }) {
 
 export async function _getPortfolioCollaborators({ portfolioId }) {
   try {
-    const res = await dbInstance.query(`
+    const res = await dbInstance.query(
+      `
       SELECT pc.*, u.email, u.avatar
       FROM portfolio_collaborators pc
       JOIN users u ON pc.user_id = u.id
       WHERE pc.portfolio_id = $1
       ORDER BY pc.joined_at ASC
-    `, [portfolioId]);
+    `,
+      [portfolioId]
+    );
     return res.rows;
   } catch (err) {
     console.error('Error getting portfolio collaborators:', err);
@@ -153,7 +186,7 @@ export async function _updateCollaboratorRole({ portfolioId, userId, role }) {
       table: 'portfolio_collaborators',
       idField: ['portfolio_id', 'user_id'],
       id: [portfolioId, userId],
-      updates: { role }
+      updates: { role },
     });
     return result;
   } catch (err) {
@@ -162,7 +195,11 @@ export async function _updateCollaboratorRole({ portfolioId, userId, role }) {
   }
 }
 
-export async function _addPortfolioCollaborator({ portfolioId, userId, role = 'editor' }) {
+export async function _addPortfolioCollaborator({
+  portfolioId,
+  userId,
+  role = 'editor',
+}) {
   try {
     // Check if already exists
     const existing = await dbInstance.query(
@@ -183,7 +220,18 @@ export async function _addPortfolioCollaborator({ portfolioId, userId, role = 'e
     const id = uuidv4();
     await dbInstance.query(
       'INSERT INTO portfolio_collaborators (id, portfolio_id, user_id, role, joined_at, synced_at, last_modified, sync_status, deleted_at, version) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)',
-      [id, portfolioId, userId, role, new Date().toISOString(), new Date().toISOString(), new Date().toISOString(), 'local', null, 1]
+      [
+        id,
+        portfolioId,
+        userId,
+        role,
+        new Date().toISOString(),
+        new Date().toISOString(),
+        new Date().toISOString(),
+        'local',
+        null,
+        1,
+      ]
     );
 
     return { id, portfolioId, userId, role };

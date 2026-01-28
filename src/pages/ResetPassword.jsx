@@ -1,11 +1,15 @@
-import { createSignal, onMount, createEffect } from "solid-js";
-import { useNavigate, useParams } from "@solidjs/router";
-import { useUser } from "../context/UserContext";
-import { useLanguage } from "../hooks/useLanguage";
-import { sanitizeInput, isValidEmail, isValidPassword } from "@lib/auth/security";
-import { toastManager } from "@lib/ui/feedback";
-import { RouteGuard } from "../components";
-import logo from "../assets/images/iGate-tech-logo.svg";
+import { createSignal, onMount, createEffect } from 'solid-js';
+import { useNavigate, useParams } from '@solidjs/router';
+import { useUser } from '../context/UserContext';
+import { useLanguage } from '../hooks/useLanguage';
+import {
+  sanitizeInput,
+  isValidEmail,
+  isValidPassword,
+} from '@lib/auth/security';
+import { toastManager } from '@lib/ui/feedback';
+import { RouteGuard } from '../components';
+import logo from '../assets/images/iGate-tech-logo.svg';
 import { logger } from '@lib/core';
 
 const ResetPassword = () => {
@@ -44,7 +48,9 @@ const ResetPassword = () => {
         const validation = await validatePasswordResetToken(urlToken);
         setTokenValid(validation.valid);
         if (!validation.valid) {
-          toastManager.error('Invalid or expired reset link. Please request a new password reset.');
+          toastManager.error(
+            'Invalid or expired reset link. Please request a new password reset.'
+          );
         }
       } catch (error) {
         logger.error('Token validation error:', error);
@@ -59,7 +65,7 @@ const ResetPassword = () => {
 
   // Update eye icon when showPassword changes
   createEffect(() => {
-    const icon = showPassword() ? "eye-off" : "eye";
+    const icon = showPassword() ? 'eye-off' : 'eye';
     if (passwordButton) {
       const i = passwordButton.querySelector('i');
       if (i) i.setAttribute('data-lucide', icon);
@@ -69,7 +75,7 @@ const ResetPassword = () => {
 
   // Update eye icon when showConfirmPassword changes
   createEffect(() => {
-    const icon = showConfirmPassword() ? "eye-off" : "eye";
+    const icon = showConfirmPassword() ? 'eye-off' : 'eye';
     if (confirmButton) {
       const i = confirmButton.querySelector('i');
       if (i) i.setAttribute('data-lucide', icon);
@@ -77,7 +83,7 @@ const ResetPassword = () => {
     }
   });
 
-  const handleReset = async (e) => {
+  const handleReset = async e => {
     e.preventDefault();
     setLoading(true);
 
@@ -107,7 +113,9 @@ const ResetPassword = () => {
     try {
       const result = await resetPassword(token(), password);
       if (result.success) {
-        toastManager.success('Password reset successfully! You can now log in with your new password.');
+        toastManager.success(
+          'Password reset successfully! You can now log in with your new password.'
+        );
         setTimeout(() => {
           navigate('/auth/login');
         }, 2000);
@@ -124,36 +132,46 @@ const ResetPassword = () => {
 
   return (
     <RouteGuard requireGuest={true}>
-      <div class="w-full max-w-md px-4 sm:px-6 lg:px-8 py-4">
-        <div class="card w-full py-6 shadow-2xl bg-base-100 border border-base-300 backdrop-blur-sm">
+      <div class="w-full max-w-md px-4 py-4 sm:px-6 lg:px-8">
+        <div class="card bg-base-100 border-base-300 w-full border py-6 shadow-2xl backdrop-blur-sm">
           <div class="card-body">
-            <div class="text-center mb-8">
-              <img src={logo} alt="iGate Logo" class="h-12 w-auto block mx-auto mb-6" />
+            <div class="mb-8 text-center">
+              <img
+                src={logo}
+                alt="iGate Logo"
+                class="mx-auto mb-6 block h-12 w-auto"
+              />
 
-              <h2 class="text-2xl font-bold">{t().resetPassword || 'Reset Password'}</h2>
+              <h2 class="text-2xl font-bold">
+                {t().resetPassword || 'Reset Password'}
+              </h2>
               <p class="text-base-content/60">
-                {tokenValid() === null ? 'Validating reset link...' :
-                 tokenValid() ? 'Enter your new password' :
-                 'Invalid or expired reset link'}
+                {tokenValid() === null
+                  ? 'Validating reset link...'
+                  : tokenValid()
+                    ? 'Enter your new password'
+                    : 'Invalid or expired reset link'}
               </p>
             </div>
 
             {tokenValid() === false ? (
               <div class="text-center">
                 <div class="alert alert-error mb-4">
-                  <i data-lucide="alert-circle" class="w-4 h-4"></i>
-                  <span>This password reset link is invalid or has expired.</span>
+                  <i data-lucide="alert-circle" class="h-4 w-4" />
+                  <span>
+                    This password reset link is invalid or has expired.
+                  </span>
                 </div>
-                 <button
-                   class="btn btn-primary font-normal"
-                   onClick={() => navigate('/auth/forgot-password')}
-                 >
-                   Request New Reset Link
-                 </button>
+                <button
+                  class="btn btn-primary font-normal"
+                  onClick={() => navigate('/auth/forgot-password')}
+                >
+                  Request New Reset Link
+                </button>
               </div>
             ) : tokenValid() === null ? (
-              <div class="text-center py-8">
-                <div class="loading loading-spinner loading-lg"></div>
+              <div class="py-8 text-center">
+                <div class="loading loading-spinner loading-lg" />
                 <p class="mt-4">Validating your reset link...</p>
               </div>
             ) : (
@@ -161,81 +179,111 @@ const ResetPassword = () => {
                 {/* Password Strength Indicator */}
                 {newPassword() && (
                   <div class="text-sm">
-                    <div class={`badge ${isValidPassword(newPassword()).valid ? 'badge-success' : 'badge-error'} gap-1`}>
-                      {isValidPassword(newPassword()).valid ? '✓' : '✗'} {isValidPassword(newPassword()).message}
+                    <div
+                      class={`badge ${isValidPassword(newPassword()).valid ? 'badge-success' : 'badge-error'} gap-1`}
+                    >
+                      {isValidPassword(newPassword()).valid ? '✓' : '✗'}{' '}
+                      {isValidPassword(newPassword()).message}
                     </div>
                   </div>
                 )}
 
                 <div>
                   <label class="label">
-                    <span class="label-text">{t().newPassword || 'New Password'}</span>
+                    <span class="label-text">
+                      {t().newPassword || 'New Password'}
+                    </span>
                   </label>
                   <div class="relative">
                     <input
-                      type={showPassword() ? "text" : "password"}
-                      placeholder={t().createPasswordPlaceholder || 'Enter new password'}
+                      type={showPassword() ? 'text' : 'password'}
+                      placeholder={
+                        t().createPasswordPlaceholder || 'Enter new password'
+                      }
                       class="input input-bordered w-full pe-10"
                       value={newPassword()}
-                      onInput={(e) => setNewPassword(e.target.value)}
+                      onInput={e => setNewPassword(e.target.value)}
                       autocomplete="new-password"
                       required
                       minLength="8"
                     />
                     <button
                       type="button"
-                      class="absolute end-3 top-1/2 -translate-y-1/2 btn btn-ghost btn-sm btn-circle"
+                      class="btn btn-ghost btn-sm btn-circle absolute end-3 top-1/2 -translate-y-1/2"
                       onClick={() => setShowPassword(!showPassword())}
-                      aria-label={showPassword() ? "Hide password" : "Show password"}
+                      aria-label={
+                        showPassword() ? 'Hide password' : 'Show password'
+                      }
                       ref={passwordButton}
                     >
-                      <i data-lucide={showPassword() ? "eye-off" : "eye"} class="w-4 h-4"></i>
+                      <i
+                        data-lucide={showPassword() ? 'eye-off' : 'eye'}
+                        class="h-4 w-4"
+                      />
                     </button>
                   </div>
                 </div>
 
                 <div>
                   <label class="label">
-                    <span class="label-text">{t().confirmPassword || 'Confirm Password'}</span>
+                    <span class="label-text">
+                      {t().confirmPassword || 'Confirm Password'}
+                    </span>
                   </label>
                   <div class="relative">
                     <input
-                      type={showConfirmPassword() ? "text" : "password"}
-                      placeholder={t().confirmPasswordPlaceholder || 'Confirm new password'}
+                      type={showConfirmPassword() ? 'text' : 'password'}
+                      placeholder={
+                        t().confirmPasswordPlaceholder || 'Confirm new password'
+                      }
                       class="input input-bordered w-full pe-10"
                       value={confirmPassword()}
-                      onInput={(e) => setConfirmPassword(e.target.value)}
+                      onInput={e => setConfirmPassword(e.target.value)}
                       autocomplete="new-password"
                       required
                     />
                     <button
                       type="button"
-                      class="absolute end-3 top-1/2 -translate-y-1/2 btn btn-ghost btn-sm btn-circle"
-                      onClick={() => setShowConfirmPassword(!showConfirmPassword())}
-                      aria-label={showConfirmPassword() ? "Hide password" : "Show password"}
+                      class="btn btn-ghost btn-sm btn-circle absolute end-3 top-1/2 -translate-y-1/2"
+                      onClick={() =>
+                        setShowConfirmPassword(!showConfirmPassword())
+                      }
+                      aria-label={
+                        showConfirmPassword()
+                          ? 'Hide password'
+                          : 'Show password'
+                      }
                       ref={confirmButton}
                     >
-                      <i data-lucide={showConfirmPassword() ? "eye-off" : "eye"} class="w-4 h-4"></i>
+                      <i
+                        data-lucide={showConfirmPassword() ? 'eye-off' : 'eye'}
+                        class="h-4 w-4"
+                      />
                     </button>
                   </div>
                 </div>
 
-                 <button
-                   type="submit"
-                   class="btn btn-primary w-full font-normal"
-                   disabled={loading() || !isValidPassword(newPassword()).valid}
-                 >
-                   {loading() && <span class="loading loading-spinner loading-sm"></span>}
-                   {t().resetPassword || 'Reset Password'}
-                 </button>
+                <button
+                  type="submit"
+                  class="btn btn-primary w-full font-normal"
+                  disabled={loading() || !isValidPassword(newPassword()).valid}
+                >
+                  {loading() && (
+                    <span class="loading loading-spinner loading-sm" />
+                  )}
+                  {t().resetPassword || 'Reset Password'}
+                </button>
               </form>
             )}
 
             <div class="divider">OR</div>
 
-             <button class="btn btn-outline w-full font-normal" onClick={() => navigate('/auth/login')}>
-               {t().backToLogin || 'Back to Login'}
-             </button>
+            <button
+              class="btn btn-outline w-full font-normal"
+              onClick={() => navigate('/auth/login')}
+            >
+              {t().backToLogin || 'Back to Login'}
+            </button>
           </div>
         </div>
       </div>

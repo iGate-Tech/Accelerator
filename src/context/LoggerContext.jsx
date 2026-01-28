@@ -1,10 +1,9 @@
 import { createContext, useContext } from 'solid-js';
 import { logger } from '@lib/core';
 
-
 const LoggerContext = createContext();
 
-export const LoggerProvider = (props) => {
+export const LoggerProvider = props => {
   logger.trace('LoggerProvider: Starting');
   return (
     <LoggerContext.Provider value={logger}>

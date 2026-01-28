@@ -9,7 +9,7 @@ export const [projectsStore, setProjectsStore] = createStore({
   pendingProjectId: null,
 });
 
-export const setPendingProjectId = (projectId) => {
+export const setPendingProjectId = projectId => {
   setProjectsStore('pendingProjectId', projectId);
 };
 

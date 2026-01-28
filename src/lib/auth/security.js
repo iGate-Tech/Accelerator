@@ -32,7 +32,7 @@ class ConsentManager {
       version: '1.0',
       givenAt: null,
       updatedAt: new Date().toISOString(),
-      gdprVersion: '1.0'
+      gdprVersion: '1.0',
     };
   }
 
@@ -44,7 +44,7 @@ class ConsentManager {
         ...current,
         ...newConsents,
         updatedAt: new Date().toISOString(),
-        givenAt: current.givenAt || new Date().toISOString()
+        givenAt: current.givenAt || new Date().toISOString(),
       };
 
       localStorage.setItem('user-consents', JSON.stringify(updated));
@@ -77,7 +77,7 @@ class ConsentManager {
     const withdrawn = {
       ...this.getDefaultConsents(),
       withdrawnAt: new Date().toISOString(),
-      gdprArticle7: 'Right to Withdraw Consent'
+      gdprArticle7: 'Right to Withdraw Consent',
     };
 
     await this.updateConsents(withdrawn);
@@ -122,13 +122,15 @@ class AuthRateLimiter {
       record = {
         attempts: [],
         windowEnd: now + this.windowMs,
-        blockedUntil: null
+        blockedUntil: null,
       };
       this.attempts.set(identifier, record);
     }
 
     // Clean old attempts
-    record.attempts = record.attempts.filter(time => now - time < this.windowMs);
+    record.attempts = record.attempts.filter(
+      time => now - time < this.windowMs
+    );
 
     if (!success) {
       record.attempts.push(now);
@@ -136,7 +138,9 @@ class AuthRateLimiter {
       // Check if exceeded max attempts
       if (record.attempts.length >= this.maxAttempts) {
         record.blockedUntil = now + this.blockMs;
-        logger.warn(`Rate limit exceeded for ${identifier}, blocking until ${new Date(record.blockedUntil)}`);
+        logger.warn(
+          `Rate limit exceeded for ${identifier}, blocking until ${new Date(record.blockedUntil)}`
+        );
       }
     } else {
       // Successful login, reset attempts
@@ -197,7 +201,7 @@ class DataEncryption {
             const newKey = await crypto.subtle.generateKey(
               {
                 name: 'AES-GCM',
-                length: 256
+                length: 256,
               },
               true,
               ['encrypt', 'decrypt']
@@ -228,7 +232,7 @@ class DataEncryption {
       request.onerror = () => reject(request.error);
       request.onsuccess = () => resolve(request.result);
 
-      request.onupgradeneeded = (event) => {
+      request.onupgradeneeded = event => {
         const db = event.target.result;
         if (!db.objectStoreNames.contains('keys')) {
           db.createObjectStore('keys', { keyPath: 'id' });
@@ -247,7 +251,7 @@ class DataEncryption {
       const encrypted = await crypto.subtle.encrypt(
         {
           name: 'AES-GCM',
-          iv: iv
+          iv: iv,
         },
         key,
         encodedData
@@ -275,7 +279,9 @@ class DataEncryption {
     try {
       const key = await this.getEncryptionKey();
       const combined = new Uint8Array(
-        atob(encryptedData).split('').map(c => c.charCodeAt(0))
+        atob(encryptedData)
+          .split('')
+          .map(c => c.charCodeAt(0))
       );
 
       const iv = combined.slice(0, 12);
@@ -284,7 +290,7 @@ class DataEncryption {
       const decrypted = await crypto.subtle.decrypt(
         {
           name: 'AES-GCM',
-          iv: iv
+          iv: iv,
         },
         key,
         encrypted
@@ -336,7 +342,11 @@ class DataEncryption {
       });
 
       if (keysToRemove.length > 0) {
-        logger.info('Cleaned up', keysToRemove.length, 'corrupted localStorage entries');
+        logger.info(
+          'Cleaned up',
+          keysToRemove.length,
+          'corrupted localStorage entries'
+        );
       }
     } catch (error) {
       logger.warn('Error during localStorage cleanup:', error.message);
@@ -417,11 +427,7 @@ export const secureLocalStorage = {
   },
 
   _isSensitiveKey(key) {
-    const sensitiveKeys = [
-      'userToken',
-      'userData',
-      'accelerator_backup_'
-    ];
+    const sensitiveKeys = ['userToken', 'userData', 'accelerator_backup_'];
     return sensitiveKeys.some(sensitive => key.includes(sensitive));
   },
 
@@ -441,28 +447,37 @@ export const secureLocalStorage = {
       (data.startsWith('{') && !data.endsWith('}') && !data.includes(':')) ||
       (data.startsWith('[') && !data.endsWith(']'))
     );
-  }
+  },
 };
 
 // Comprehensive input sanitization utility
-export const sanitizeInput = (input) => {
+export const sanitizeInput = input => {
   logger.trace('sanitizeInput: Starting');
   if (typeof input !== 'string') return input;
 
   // Remove potentially dangerous HTML characters
-  let sanitized = input.replace(/[<>'"&]/g, (match) => {
+  let sanitized = input.replace(/[<>'"&]/g, match => {
     switch (match) {
-      case '<': return '&lt;';
-      case '>': return '&gt;';
-      case '"': return '&quot;';
-      case "'": return '&#x27;';
-      case '&': return '&amp;';
-      default: return match;
+      case '<':
+        return '&lt;';
+      case '>':
+        return '&gt;';
+      case '"':
+        return '&quot;';
+      case "'":
+        return '&#x27;';
+      case '&':
+        return '&amp;';
+      default:
+        return match;
     }
   });
 
   // Remove script tags and other dangerous patterns
-  sanitized = sanitized.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '');
+  sanitized = sanitized.replace(
+    /<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi,
+    ''
+  );
   sanitized = sanitized.replace(/javascript:/gi, '');
   sanitized = sanitized.replace(/on\w+\s*=/gi, '');
 
@@ -470,7 +485,7 @@ export const sanitizeInput = (input) => {
 };
 
 // Sanitize HTML content for safe rendering
-export const sanitizeHtml = (html) => {
+export const sanitizeHtml = html => {
   logger.trace('sanitizeHtml: Starting');
   if (typeof html !== 'string') return html;
 
@@ -485,14 +500,15 @@ export const sanitizeHtml = (html) => {
 };
 
 // Validate email with international domain support
-export const isValidEmail = (email) => {
+export const isValidEmail = email => {
   logger.trace('isValidEmail: Starting');
   if (!email || typeof email !== 'string') return false;
 
   // More comprehensive email regex that handles international domains
   // Prevents ReDoS by limiting quantifiers and avoiding nested quantifiers
   // Requires at least one dot in domain and proper TLD structure
-  const emailRegex = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*\.[a-zA-Z]{2,}$/;
+  const emailRegex =
+    /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*\.[a-zA-Z]{2,}$/;
 
   // Additional length check to prevent extremely long emails
   if (email.length > 254) return false;
@@ -501,39 +517,54 @@ export const isValidEmail = (email) => {
 };
 
 // Validate password strength
-export const isValidPassword = (password) => {
+export const isValidPassword = password => {
   logger.trace('isValidPassword: Starting');
 
   if (!password || password.length < 8) {
     // Note: We don't log individual validation failures for privacy
-    return { valid: false, message: 'Password must be at least 8 characters long' };
+    return {
+      valid: false,
+      message: 'Password must be at least 8 characters long',
+    };
   }
 
   // Check for at least one uppercase letter
   if (!/[A-Z]/.test(password)) {
-    return { valid: false, message: 'Password must contain at least one uppercase letter' };
+    return {
+      valid: false,
+      message: 'Password must contain at least one uppercase letter',
+    };
   }
 
   // Check for at least one lowercase letter
   if (!/[a-z]/.test(password)) {
-    return { valid: false, message: 'Password must contain at least one lowercase letter' };
+    return {
+      valid: false,
+      message: 'Password must contain at least one lowercase letter',
+    };
   }
 
   // Check for at least one number
   if (!/\d/.test(password)) {
-    return { valid: false, message: 'Password must contain at least one number' };
+    return {
+      valid: false,
+      message: 'Password must contain at least one number',
+    };
   }
 
   // Check for at least one special character
   if (!/[!@#$%^&*()_+\-={}";\\|,.<>?/]/.test(password)) {
-    return { valid: false, message: 'Password must contain at least one special character' };
+    return {
+      valid: false,
+      message: 'Password must contain at least one special character',
+    };
   }
 
   return { valid: true, message: 'Password is strong' };
 };
 
 // Secure password hashing using PBKDF2
-export const hashPassword = async (password) => {
+export const hashPassword = async password => {
   logger.trace('hashPassword: Starting');
   try {
     const encoder = new TextEncoder();
@@ -553,7 +584,7 @@ export const hashPassword = async (password) => {
         name: 'PBKDF2',
         salt: salt,
         iterations: 100000, // High iteration count for security
-        hash: 'SHA-256'
+        hash: 'SHA-256',
       },
       keyMaterial,
       { name: 'AES-GCM', length: 256 },
@@ -608,7 +639,7 @@ export const verifyPassword = async (password, storedHash) => {
         name: 'PBKDF2',
         salt: salt,
         iterations: 100000,
-        hash: 'SHA-256'
+        hash: 'SHA-256',
       },
       keyMaterial,
       { name: 'AES-GCM', length: 256 },
@@ -643,7 +674,7 @@ export const createSecureToken = async (userId, rememberMe = false) => {
       userId,
       issuedAt: Date.now(),
       expiresAt: Date.now() + (rememberMe ? 30 : 1) * 24 * 60 * 60 * 1000, // 30 days or 1 day
-      random: crypto.getRandomValues(new Uint8Array(16)) // 128-bit random
+      random: crypto.getRandomValues(new Uint8Array(16)), // 128-bit random
     };
 
     // Convert payload to string
@@ -659,11 +690,17 @@ export const createSecureToken = async (userId, rememberMe = false) => {
       ['sign']
     );
 
-    const signature = await crypto.subtle.sign('HMAC', keyMaterial, encoder.encode(payloadStr));
+    const signature = await crypto.subtle.sign(
+      'HMAC',
+      keyMaterial,
+      encoder.encode(payloadStr)
+    );
     const signatureArray = new Uint8Array(signature);
 
     // Combine payload and signature
-    const combined = new Uint8Array(encoder.encode(payloadStr).length + signatureArray.length);
+    const combined = new Uint8Array(
+      encoder.encode(payloadStr).length + signatureArray.length
+    );
     combined.set(encoder.encode(payloadStr));
     combined.set(signatureArray, encoder.encode(payloadStr).length);
 
@@ -683,7 +720,7 @@ export const createSecureToken = async (userId, rememberMe = false) => {
 };
 
 // Verify secure session token
-export const verifySecureToken = async (token) => {
+export const verifySecureToken = async token => {
   logger.trace('verifySecureToken: Starting');
   try {
     const combined = Uint8Array.from(atob(token), c => c.charCodeAt(0));
@@ -739,8 +776,15 @@ export const validateAndSanitizeDbInput = (input, fieldName = 'input') => {
     return { valid: true, sanitized: input };
   }
 
-  if (typeof input !== 'string' && typeof input !== 'number' && typeof input !== 'boolean') {
-    return { valid: false, reason: `${fieldName} must be a string, number, or boolean` };
+  if (
+    typeof input !== 'string' &&
+    typeof input !== 'number' &&
+    typeof input !== 'boolean'
+  ) {
+    return {
+      valid: false,
+      reason: `${fieldName} must be a string, number, or boolean`,
+    };
   }
 
   // Convert to string for validation
@@ -748,7 +792,10 @@ export const validateAndSanitizeDbInput = (input, fieldName = 'input') => {
 
   // Check length limits (reasonable limits for database fields)
   if (stringInput.length > 100000) {
-    return { valid: false, reason: `${fieldName} too long (max 100000 characters)` };
+    return {
+      valid: false,
+      reason: `${fieldName} too long (max 100000 characters)`,
+    };
   }
 
   // For database inputs, use basic sanitization to prevent SQL injection patterns
@@ -759,7 +806,7 @@ export const validateAndSanitizeDbInput = (input, fieldName = 'input') => {
 };
 
 // Enhanced LLM prompt security validation
-export const validateLLMPrompt = (prompt) => {
+export const validateLLMPrompt = prompt => {
   logger.trace('validateLLMPrompt: Starting validation');
 
   if (!prompt || typeof prompt !== 'string') {
@@ -784,29 +831,55 @@ export const validateLLMPrompt = (prompt) => {
     /forget.*your.*training/i,
     /you.*are.*now.*in.*mode/i,
     /disregard.*rules/i,
-    /break.*character/i
+    /break.*character/i,
   ];
 
   for (const pattern of jailbreakPatterns) {
     if (pattern.test(prompt)) {
       logger.warn('validateLLMPrompt: Potential jailbreak attempt detected');
-      return { valid: false, reason: 'Prompt contains potentially unsafe content' };
+      return {
+        valid: false,
+        reason: 'Prompt contains potentially unsafe content',
+      };
     }
   }
 
   // Check for harmful content keywords
   const harmfulKeywords = [
-    'bomb', 'explosive', 'weapon', 'kill', 'murder', 'harm', 'suicide',
-    'hack', 'exploit', 'virus', 'malware', 'ransomware',
-    'illegal', 'drugs', 'narcotics', 'fraud', 'scam',
-    'terrorism', 'extremism', 'hate', 'discrimination'
+    'bomb',
+    'explosive',
+    'weapon',
+    'kill',
+    'murder',
+    'harm',
+    'suicide',
+    'hack',
+    'exploit',
+    'virus',
+    'malware',
+    'ransomware',
+    'illegal',
+    'drugs',
+    'narcotics',
+    'fraud',
+    'scam',
+    'terrorism',
+    'extremism',
+    'hate',
+    'discrimination',
   ];
 
   const lowerPrompt = prompt.toLowerCase();
   for (const keyword of harmfulKeywords) {
     if (lowerPrompt.includes(keyword)) {
-      logger.warn('validateLLMPrompt: Harmful content keyword detected:', keyword);
-      return { valid: false, reason: 'Prompt contains potentially harmful content' };
+      logger.warn(
+        'validateLLMPrompt: Harmful content keyword detected:',
+        keyword
+      );
+      return {
+        valid: false,
+        reason: 'Prompt contains potentially harmful content',
+      };
     }
   }
 
@@ -817,13 +890,16 @@ export const validateLLMPrompt = (prompt) => {
     /data:text/i,
     /vbscript:/i,
     /onload=/i,
-    /onerror=/i
+    /onerror=/i,
   ];
 
   for (const pattern of injectionPatterns) {
     if (pattern.test(prompt)) {
       logger.warn('validateLLMPrompt: Potential injection pattern detected');
-      return { valid: false, reason: 'Prompt contains potentially dangerous patterns' };
+      return {
+        valid: false,
+        reason: 'Prompt contains potentially dangerous patterns',
+      };
     }
   }
 
@@ -836,18 +912,30 @@ export const validateLLMPrompt = (prompt) => {
 
 // General input validation for forms
 export const validateFormInput = (input, rules = {}) => {
-  const { required = false, minLength = 0, maxLength = 1000, pattern, fieldName = 'field' } = rules;
+  const {
+    required = false,
+    minLength = 0,
+    maxLength = 1000,
+    pattern,
+    fieldName = 'field',
+  } = rules;
 
   if (required && (!input || input.toString().trim() === '')) {
     return { valid: false, reason: `${fieldName} is required` };
   }
 
   if (input && input.toString().length < minLength) {
-    return { valid: false, reason: `${fieldName} must be at least ${minLength} characters` };
+    return {
+      valid: false,
+      reason: `${fieldName} must be at least ${minLength} characters`,
+    };
   }
 
   if (input && input.toString().length > maxLength) {
-    return { valid: false, reason: `${fieldName} must be no more than ${maxLength} characters` };
+    return {
+      valid: false,
+      reason: `${fieldName} must be no more than ${maxLength} characters`,
+    };
   }
 
   if (pattern && input && !pattern.test(input.toString())) {

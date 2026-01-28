@@ -132,5 +132,5 @@ export const sidebarTranslations = {
     dashboard: 'لوحة التحكم',
     portfolio: 'ملف الأعمال',
     help: 'المساعدة',
-  }
+  },
 };

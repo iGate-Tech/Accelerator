@@ -1,5 +1,3 @@
-
-
 // Navbar and dropdown translations
 export const navbarTranslations = {
   en: {
@@ -133,5 +131,5 @@ export const navbarTranslations = {
     minutesAgo: 'منذ {minutes} دقيقة',
     hoursAgo: 'منذ {hours} ساعة',
     daysAgo: 'منذ {days} يوم',
-  }
+  },
 };

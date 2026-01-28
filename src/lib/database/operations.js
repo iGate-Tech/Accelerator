@@ -3,7 +3,14 @@
 import { PGlite } from '@electric-sql/pglite';
 import { v4 as uuidv4 } from 'uuid';
 import { logger } from '../core';
-import { dbInstance, dbReady, ensureDatabaseReady, setDbInstance, setDbReady, getPg } from './core';
+import {
+  dbInstance,
+  dbReady,
+  ensureDatabaseReady,
+  setDbInstance,
+  setDbReady,
+  getPg,
+} from './core';
 
 const getCurrentUser = async () => {
   return { id: 1 };
@@ -21,7 +28,9 @@ async function _exec(sql) {
 
 // Initialize PGLite database - DEPRECATED: Use initDatabase from core.js instead
 async function initDatabaseOld() {
-  console.warn('Using deprecated initDatabaseOld function. Use initDatabase from core.js instead.');
+  console.warn(
+    'Using deprecated initDatabaseOld function. Use initDatabase from core.js instead.'
+  );
   return await initDatabase({ dataDir: 'idb://accelerator-db-v22' });
 }
 
@@ -36,7 +45,9 @@ async function createSchemaOld() {
   `);
   // Create tables one by one
   console.log('Creating users table...');
-  await _exec("CREATE TABLE IF NOT EXISTS users (id TEXT PRIMARY KEY, email TEXT UNIQUE NOT NULL, password_hash TEXT, avatar TEXT, bio TEXT, preferences TEXT, synced_at TEXT, last_modified TEXT, sync_status TEXT DEFAULT 'local', deleted_at TEXT, version INTEGER DEFAULT 1)");
+  await _exec(
+    "CREATE TABLE IF NOT EXISTS users (id TEXT PRIMARY KEY, email TEXT UNIQUE NOT NULL, password_hash TEXT, avatar TEXT, bio TEXT, preferences TEXT, synced_at TEXT, last_modified TEXT, sync_status TEXT DEFAULT 'local', deleted_at TEXT, version INTEGER DEFAULT 1)"
+  );
   console.log('Users table created');
   await _exec(`
 -- Projects table
@@ -308,7 +319,7 @@ export async function exec(sql) {
 export async function transaction(operations) {
   const db = await getPg();
   const results = [];
-  await db.transaction(async (tx) => {
+  await db.transaction(async tx => {
     for (const op of operations) {
       const res = await tx.query(op.sql, op.params || []);
       results.push({ rows: res.rows, rowCount: res.rowCount });
@@ -326,7 +337,13 @@ export async function close() {
   return { success: true };
 }
 
-export async function getEntities({ table, selectFields = '*', whereClause = '', orderBy = '', params = [] }) {
+export async function getEntities({
+  table,
+  selectFields = '*',
+  whereClause = '',
+  orderBy = '',
+  params = [],
+}) {
   try {
     const query = `SELECT ${selectFields} FROM ${table} ${whereClause} ${orderBy}`;
     const res = await _query(query, params);
@@ -337,7 +354,13 @@ export async function getEntities({ table, selectFields = '*', whereClause = '',
   }
 }
 
-export async function updateEntity({ table, idField, id, updates, options = {} }) {
+export async function updateEntity({
+  table,
+  idField,
+  id,
+  updates,
+  options = {},
+}) {
   const fields = [];
   const values = [];
   let paramIndex = 1;
@@ -347,7 +370,12 @@ export async function updateEntity({ table, idField, id, updates, options = {} }
   for (const [key, value] of Object.entries(updates)) {
     if (value !== undefined) {
       const dbField = options.fieldMappings?.[key] || key;
-      const processedValue = (typeof value === 'object' && value !== null && !(value instanceof Date)) ? JSON.stringify(value) : (value instanceof Date ? value.toISOString() : value);
+      const processedValue =
+        typeof value === 'object' && value !== null && !(value instanceof Date)
+          ? JSON.stringify(value)
+          : value instanceof Date
+            ? value.toISOString()
+            : value;
       fields.push(`${dbField} = $${paramIndex}`);
       values.push(processedValue);
       paramIndex++;
@@ -366,7 +394,7 @@ export async function updateEntity({ table, idField, id, updates, options = {} }
   if (!fields.length) return { success: false, error: 'No fields to update' };
 
   values.push(id);
-  const query = `UPDATE ${table} SET ${fields.join(', ')} WHERE ${Array.isArray(idField) ? idField.map((f,i)=>`${f}=$${paramIndex+i}`).join(' AND ') : `${idField}=$${paramIndex}`}`;
+  const query = `UPDATE ${table} SET ${fields.join(', ')} WHERE ${Array.isArray(idField) ? idField.map((f, i) => `${f}=$${paramIndex + i}`).join(' AND ') : `${idField}=$${paramIndex}`}`;
 
   try {
     const res = await _query(query, values);
@@ -388,7 +416,9 @@ export async function createSchema() {
   `);
   // Create tables one by one
   console.log('Creating users table...');
-  await _exec("CREATE TABLE IF NOT EXISTS users (id TEXT PRIMARY KEY, email TEXT UNIQUE NOT NULL, password_hash TEXT, avatar TEXT, bio TEXT, preferences TEXT, synced_at TEXT, last_modified TEXT, sync_status TEXT DEFAULT 'local', deleted_at TEXT, version INTEGER DEFAULT 1)");
+  await _exec(
+    "CREATE TABLE IF NOT EXISTS users (id TEXT PRIMARY KEY, email TEXT UNIQUE NOT NULL, password_hash TEXT, avatar TEXT, bio TEXT, preferences TEXT, synced_at TEXT, last_modified TEXT, sync_status TEXT DEFAULT 'local', deleted_at TEXT, version INTEGER DEFAULT 1)"
+  );
   console.log('Users table created');
   await _exec(`
 -- Projects table
@@ -646,20 +676,28 @@ CREATE TABLE IF NOT EXISTS project_votes (
 
 export async function initDatabase(options = {}) {
   console.log('initDatabase called with options:', options);
-  console.warn('Using deprecated initDatabase function in operations.js. Use initDatabase from core.js instead.');
+  console.warn(
+    'Using deprecated initDatabase function in operations.js. Use initDatabase from core.js instead.'
+  );
 
   // Redirect to the centralized initialization in core.js
   const db = await import('./core.js');
   return await db.initDatabase(options);
 }
 
-export async function createUser({ email, passwordHash, profile = {}, userId = null }) {
+export async function createUser({
+  email,
+  passwordHash,
+  profile = {},
+  userId = null,
+}) {
   if (!email) {
     throw new Error('Email is required for user creation');
   }
   try {
     const id = userId || uuidv4();
-    const query = "INSERT INTO users (id, email, password_hash, profile, created_at, last_modified, synced_at, sync_status, deleted_at, version) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)";
+    const query =
+      'INSERT INTO users (id, email, password_hash, profile, created_at, last_modified, synced_at, sync_status, deleted_at, version) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)';
     const params = [
       id,
       email,
@@ -670,7 +708,7 @@ export async function createUser({ email, passwordHash, profile = {}, userId = n
       new Date().toISOString(),
       'local',
       null,
-      1
+      1,
     ];
     console.debug('Executing createUser query:', query, 'params:', params);
     const res = await _query(query, params);
@@ -683,26 +721,32 @@ export async function createUser({ email, passwordHash, profile = {}, userId = n
 
 export async function _createUserProfile({ userId, profileData = {} }) {
   try {
-      const res = await _query(
-        `INSERT INTO profiles
+    const res = await _query(
+      `INSERT INTO profiles
         (user_id, avatar, bio, preferences, synced_at, last_modified, sync_status, deleted_at, version)
         VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9)
         ON CONFLICT (user_id) DO NOTHING RETURNING *`,
-          [
-            userId,
-            String(profileData.avatar || ''),
-            String(profileData.bio || ''),
-            JSON.stringify(profileData.preferences || {
-              notifications: { email: true, browser: false, projectUpdates: true },
-              privacy: { profileVisibility: 'private', dataSharing: false }
-            }),
-            new Date().toISOString(),
-            new Date().toISOString(),
-            'local',
-            null,
-            1
-          ]
-      );
+      [
+        userId,
+        String(profileData.avatar || ''),
+        String(profileData.bio || ''),
+        JSON.stringify(
+          profileData.preferences || {
+            notifications: {
+              email: true,
+              browser: false,
+              projectUpdates: true,
+            },
+            privacy: { profileVisibility: 'private', dataSharing: false },
+          }
+        ),
+        new Date().toISOString(),
+        new Date().toISOString(),
+        'local',
+        null,
+        1,
+      ]
+    );
     return res.rows[0];
   } catch (err) {
     console.error('Error creating user profile:', err);
@@ -712,7 +756,9 @@ export async function _createUserProfile({ userId, profileData = {} }) {
 
 export async function _getUserProfile({ userId }) {
   try {
-    const res = await _query('SELECT * FROM profiles WHERE user_id = $1', [userId]);
+    const res = await _query('SELECT * FROM profiles WHERE user_id = $1', [
+      userId,
+    ]);
     return res.rows[0] || null;
   } catch (err) {
     console.error('Error getting user profile:', err);
@@ -732,15 +778,18 @@ export async function _createProject({ project, userId }) {
       new Date().toISOString(),
       new Date().toISOString(),
       project.public ? 1 : 0,
-      project.context || ''
+      project.context || '',
     ];
     console.log('Insert values count:', values.length);
-      const res = await _query(`
+    const res = await _query(
+      `
         INSERT INTO projects (id, name, description, user_id, status, created_at, last_modified, public, context)
         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
         RETURNING *
-      `, values);
-   return res.rows[0];
+      `,
+      values
+    );
+    return res.rows[0];
   } catch (err) {
     console.error('DB error in addTask:', err);
     throw err;
@@ -761,9 +810,14 @@ export async function _updateProject({ id, updates }) {
   try {
     const fields = Object.keys(updates);
     const values = Object.values(updates);
-    const setClause = fields.map((field, index) => `${field} = $${index + 2}`).join(', ');
+    const setClause = fields
+      .map((field, index) => `${field} = $${index + 2}`)
+      .join(', ');
     values.push(id);
-    await _query(`UPDATE projects SET ${setClause}, last_modified = CURRENT_TIMESTAMP WHERE id = $${values.length}`, values);
+    await _query(
+      `UPDATE projects SET ${setClause}, last_modified = CURRENT_TIMESTAMP WHERE id = $${values.length}`,
+      values
+    );
     return { success: true };
   } catch (err) {
     console.error('Error updating project:', err);
@@ -803,7 +857,10 @@ export async function toggleProjectPublic({ id }) {
 
 export async function getTasks({ projectId }) {
   try {
-    const result = await _query('SELECT * FROM tasks WHERE project_id = $1 ORDER BY created_at ASC', [projectId]);
+    const result = await _query(
+      'SELECT * FROM tasks WHERE project_id = $1 ORDER BY created_at ASC',
+      [projectId]
+    );
     return result.rows;
   } catch (err) {
     console.error('Error getting tasks:', err);
@@ -814,27 +871,30 @@ export async function getTasks({ projectId }) {
 export async function _addTask({ task, projectId, userId }) {
   try {
     const id = uuidv4();
-    await _query(`
+    await _query(
+      `
       INSERT INTO tasks (id, project_id, user_id, title, content, prompt, llm_response, model, section, step_name, created_at, last_modified, synced_at, sync_status, deleted_at, version)
       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)
-    `, [
-      id,
-      projectId,
-      userId || task.userId || null,
-      task.title || null,
-      task.content || null,
-      task.prompt || null,
-      task.llmResponse || null,
-      task.model || null,
-      task.section || null,
-      task.stepName || null,
-      new Date().toISOString(),
-      new Date().toISOString(),
-      new Date().toISOString(),
-      'local',
-      null,
-      1
-    ]);
+    `,
+      [
+        id,
+        projectId,
+        userId || task.userId || null,
+        task.title || null,
+        task.content || null,
+        task.prompt || null,
+        task.llmResponse || null,
+        task.model || null,
+        task.section || null,
+        task.stepName || null,
+        new Date().toISOString(),
+        new Date().toISOString(),
+        new Date().toISOString(),
+        'local',
+        null,
+        1,
+      ]
+    );
     return { success: true, id };
   } catch (err) {
     console.error('Error adding task:', err);
@@ -904,11 +964,23 @@ export async function getGroupById({ id }) {
 
 export async function addGroup({ group, userId }) {
   try {
-      const id = uuidv4();
-      const res = await _query(
-        'INSERT INTO groups (id, user_id, name, description, color, created_at, synced_at, last_modified, sync_status, deleted_at, version) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11) RETURNING id',
-        [id, userId, group.name, group.description || '', group.color || '#6366f1', group.createdAt || new Date().toISOString(), new Date().toISOString(), new Date().toISOString(), 'local', null, 1]
-      );
+    const id = uuidv4();
+    const res = await _query(
+      'INSERT INTO groups (id, user_id, name, description, color, created_at, synced_at, last_modified, sync_status, deleted_at, version) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11) RETURNING id',
+      [
+        id,
+        userId,
+        group.name,
+        group.description || '',
+        group.color || '#6366f1',
+        group.createdAt || new Date().toISOString(),
+        new Date().toISOString(),
+        new Date().toISOString(),
+        'local',
+        null,
+        1,
+      ]
+    );
     return res.rows[0];
   } catch (err) {
     console.debug('Error adding group:', err);
@@ -918,7 +990,12 @@ export async function addGroup({ group, userId }) {
 
 export async function updateGroup({ id, group }) {
   try {
-    const result = await updateEntity({ table: 'groups', idField: 'id', id, updates: group });
+    const result = await updateEntity({
+      table: 'groups',
+      idField: 'id',
+      id,
+      updates: group,
+    });
     if (!result.success) {
       throw new Error(result.error);
     }
@@ -931,8 +1008,8 @@ export async function updateGroup({ id, group }) {
 
 export async function deleteGroup({ id }) {
   try {
-     await _query('DELETE FROM project_groups WHERE group_id = $1', [id]);
-     await _query('DELETE FROM groups WHERE id = $1', [id]);
+    await _query('DELETE FROM project_groups WHERE group_id = $1', [id]);
+    await _query('DELETE FROM groups WHERE id = $1', [id]);
     return { success: true };
   } catch (err) {
     console.debug('Error deleting group:', err);
@@ -942,10 +1019,10 @@ export async function deleteGroup({ id }) {
 
 export async function addProjectToGroup({ projectId, groupId }) {
   try {
-     await _query(
-       'INSERT INTO project_groups (project_id, group_id, added_at) VALUES ($1, $2, $3) ON CONFLICT (project_id, group_id) DO NOTHING',
-       [projectId, groupId, new Date().toISOString()]
-     );
+    await _query(
+      'INSERT INTO project_groups (project_id, group_id, added_at) VALUES ($1, $2, $3) ON CONFLICT (project_id, group_id) DO NOTHING',
+      [projectId, groupId, new Date().toISOString()]
+    );
     return { success: true };
   } catch (err) {
     console.debug('Error adding project to group:', err);
@@ -955,7 +1032,10 @@ export async function addProjectToGroup({ projectId, groupId }) {
 
 export async function removeProjectFromGroup({ projectId, groupId }) {
   try {
-     await _query('DELETE FROM project_groups WHERE project_id = $1 AND group_id = $2', [projectId, groupId]);
+    await _query(
+      'DELETE FROM project_groups WHERE project_id = $1 AND group_id = $2',
+      [projectId, groupId]
+    );
     return { success: true };
   } catch (err) {
     console.debug('Error removing project from group:', err);
@@ -965,13 +1045,16 @@ export async function removeProjectFromGroup({ projectId, groupId }) {
 
 export async function getProjectsInGroup({ groupId }) {
   try {
-     const res = await _query(`
+    const res = await _query(
+      `
        SELECT p.*, pg.added_at as addedToGroupAt
        FROM projects p
        JOIN project_groups pg ON p.id = pg.project_id
        WHERE pg.group_id = $1
        ORDER BY pg.added_at DESC
-     `, [groupId]);
+     `,
+      [groupId]
+    );
     return res.rows;
   } catch (err) {
     console.debug('Error getting projects in group:', err);
@@ -981,11 +1064,14 @@ export async function getProjectsInGroup({ groupId }) {
 
 export async function getUngroupedProjects({ userId = null }) {
   try {
-    const result = await _query(`
+    const result = await _query(
+      `
       SELECT p.* FROM projects p
       LEFT JOIN project_groups pg ON p.id = pg.project_id
       WHERE pg.group_id IS NULL AND p.user_id = $1::text
-    `, [userId]);
+    `,
+      [userId]
+    );
     return result.rows;
   } catch (err) {
     console.error('Error getting ungrouped projects:', err);
@@ -995,7 +1081,10 @@ export async function getUngroupedProjects({ userId = null }) {
 
 export async function getProjects({ userId }) {
   try {
-    const result = await _query('SELECT * FROM projects WHERE user_id = $1::text ORDER BY created_at DESC', [userId]);
+    const result = await _query(
+      'SELECT * FROM projects WHERE user_id = $1::text ORDER BY created_at DESC',
+      [userId]
+    );
     return result.rows;
   } catch (err) {
     console.error('Error getting projects:', err);
@@ -1007,9 +1096,9 @@ export async function getGroupsWithProjects({ userId = null }) {
   try {
     const groups = await getGroups({ userId });
     const groupsWithProjects = await Promise.all(
-      groups.map(async (group) => ({
+      groups.map(async group => ({
         ...group,
-        projects: await getProjectsInGroup({ groupId: group.id })
+        projects: await getProjectsInGroup({ groupId: group.id }),
       }))
     );
     return groupsWithProjects;
@@ -1021,7 +1110,13 @@ export async function getGroupsWithProjects({ userId = null }) {
 
 export async function getUserCredits({ userId }) {
   try {
-    const result = await getEntities({ table: 'credits', selectFields: '*', whereClause: 'WHERE user_id = $1', orderBy: 'ORDER BY created_at DESC', params: [userId] });
+    const result = await getEntities({
+      table: 'credits',
+      selectFields: '*',
+      whereClause: 'WHERE user_id = $1',
+      orderBy: 'ORDER BY created_at DESC',
+      params: [userId],
+    });
     return result.rows;
   } catch (err) {
     console.error('Error getting user credits:', err);
@@ -1031,7 +1126,13 @@ export async function getUserCredits({ userId }) {
 
 export async function getCreditTransactions({ userId }) {
   try {
-    const result = await getEntities({ table: 'credits', selectFields: '*', whereClause: 'WHERE user_id = $1', orderBy: 'ORDER BY created_at DESC', params: [userId] });
+    const result = await getEntities({
+      table: 'credits',
+      selectFields: '*',
+      whereClause: 'WHERE user_id = $1',
+      orderBy: 'ORDER BY created_at DESC',
+      params: [userId],
+    });
     return result.rows;
   } catch (err) {
     console.error('Error getting credit transactions:', err);
@@ -1065,18 +1166,47 @@ export async function getUserCreditBalance({ userId }) {
   }
 }
 
-export async function addCreditTransaction({ userId, type, amount, description }) {
+export async function addCreditTransaction({
+  userId,
+  type,
+  amount,
+  description,
+}) {
   try {
-     amount = parseFloat(amount);
-     const balanceResult = await _query('SELECT SUM(amount) as balance FROM credits WHERE user_id = $1', [userId]);
-     const currentBalance = parseFloat(balanceResult.rows[0]?.balance || 0);
-     const balance_after = currentBalance + amount;
-      const id = uuidv4();
-      await _query(
-        'INSERT INTO credits (id, user_id, type, amount, description, balance_after, created_at, synced_at, last_modified, sync_status, deleted_at, version) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)',
-        [id, userId, type, amount, description, balance_after, new Date().toISOString(), new Date().toISOString(), new Date().toISOString(), 'local', null, 1]
-      );
-    return { id, user_id: userId, type, amount, description, balance_after, date: new Date().toISOString() };
+    amount = parseFloat(amount);
+    const balanceResult = await _query(
+      'SELECT SUM(amount) as balance FROM credits WHERE user_id = $1',
+      [userId]
+    );
+    const currentBalance = parseFloat(balanceResult.rows[0]?.balance || 0);
+    const balance_after = currentBalance + amount;
+    const id = uuidv4();
+    await _query(
+      'INSERT INTO credits (id, user_id, type, amount, description, balance_after, created_at, synced_at, last_modified, sync_status, deleted_at, version) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)',
+      [
+        id,
+        userId,
+        type,
+        amount,
+        description,
+        balance_after,
+        new Date().toISOString(),
+        new Date().toISOString(),
+        new Date().toISOString(),
+        'local',
+        null,
+        1,
+      ]
+    );
+    return {
+      id,
+      user_id: userId,
+      type,
+      amount,
+      description,
+      balance_after,
+      date: new Date().toISOString(),
+    };
   } catch (err) {
     console.error('Error adding credit transaction:', err);
     throw err;
@@ -1085,7 +1215,12 @@ export async function addCreditTransaction({ userId, type, amount, description }
 
 export async function consumeCredits({ userId, amount, description }) {
   try {
-    await addCreditTransaction({ userId, type: 'usage', amount: -amount, description });
+    await addCreditTransaction({
+      userId,
+      type: 'usage',
+      amount: -amount,
+      description,
+    });
     return true;
   } catch (err) {
     console.error('Error consuming credits:', err);
@@ -1093,14 +1228,37 @@ export async function consumeCredits({ userId, amount, description }) {
   }
 }
 
-export async function logActivity({ userId, actionType, entityType, entityId, description, metadata = {} }) {
+export async function logActivity({
+  userId,
+  actionType,
+  entityType,
+  entityId,
+  description,
+  metadata = {},
+}) {
   try {
     const id = uuidv4();
-      const res = await _query(
-        'INSERT INTO user_activities (id, user_id, action_type, entity_type, entity_id, description, metadata, ip_address, user_agent, created_at, synced_at, last_modified, sync_status, deleted_at, version) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15) RETURNING *',
-        [id, userId, actionType, entityType, entityId, description, JSON.stringify(metadata), null, null, new Date().toISOString(), new Date().toISOString(), new Date().toISOString(), 'local', null, 1]
-      );
-     return res.rows[0];
+    const res = await _query(
+      'INSERT INTO user_activities (id, user_id, action_type, entity_type, entity_id, description, metadata, ip_address, user_agent, created_at, synced_at, last_modified, sync_status, deleted_at, version) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15) RETURNING *',
+      [
+        id,
+        userId,
+        actionType,
+        entityType,
+        entityId,
+        description,
+        JSON.stringify(metadata),
+        null,
+        null,
+        new Date().toISOString(),
+        new Date().toISOString(),
+        new Date().toISOString(),
+        'local',
+        null,
+        1,
+      ]
+    );
+    return res.rows[0];
   } catch (err) {
     console.error('Error logging activity:', err);
     throw err;
@@ -1109,10 +1267,10 @@ export async function logActivity({ userId, actionType, entityType, entityId, de
 
 export async function getUserActivities({ userId, limit = 50, offset = 0 }) {
   try {
-      const res = await _query(
-        'SELECT * FROM user_activities WHERE user_id = $1 ORDER BY created_at DESC LIMIT $2 OFFSET $3',
-        [userId, limit, offset]
-      );
+    const res = await _query(
+      'SELECT * FROM user_activities WHERE user_id = $1 ORDER BY created_at DESC LIMIT $2 OFFSET $3',
+      [userId, limit, offset]
+    );
     return res.rows;
   } catch (err) {
     console.error('Error getting user activities:', err);
@@ -1120,13 +1278,33 @@ export async function getUserActivities({ userId, limit = 50, offset = 0 }) {
   }
 }
 
-export async function addBillingRecord({ userId, type, amount, description, dueDate = null }) {
+export async function addBillingRecord({
+  userId,
+  type,
+  amount,
+  description,
+  dueDate = null,
+}) {
   try {
     const id = uuidv4();
-      const res = await _query(
-        'INSERT INTO billing (id, user_id, type, amount, status, description, due_date, created_at, synced_at, last_modified, sync_status, deleted_at, version) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13) RETURNING id',
-          [id, userId, type, amount, 'pending', description, dueDate, new Date().toISOString(), new Date().toISOString(), new Date().toISOString(), 'local', null, 1]
-      );
+    const res = await _query(
+      'INSERT INTO billing (id, user_id, type, amount, status, description, due_date, created_at, synced_at, last_modified, sync_status, deleted_at, version) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13) RETURNING id',
+      [
+        id,
+        userId,
+        type,
+        amount,
+        'pending',
+        description,
+        dueDate,
+        new Date().toISOString(),
+        new Date().toISOString(),
+        new Date().toISOString(),
+        'local',
+        null,
+        1,
+      ]
+    );
     return res.rows[0];
   } catch (err) {
     console.debug('Error adding billing record:', err);
@@ -1136,10 +1314,10 @@ export async function addBillingRecord({ userId, type, amount, description, dueD
 
 export async function getUserBilling({ userId }) {
   try {
-     const res = await _query(
-       'SELECT * FROM billing WHERE user_id = $1 ORDER BY last_modified DESC',
-       [userId]
-     );
+    const res = await _query(
+      'SELECT * FROM billing WHERE user_id = $1 ORDER BY last_modified DESC',
+      [userId]
+    );
     return res.rows;
   } catch (err) {
     console.debug('Error getting user billing:', err);
@@ -1149,7 +1327,10 @@ export async function getUserBilling({ userId }) {
 
 export async function updateBillingStatus({ id, status }) {
   try {
-     await _query('UPDATE billing SET status = $1, last_modified = $2 WHERE id = $3', [status, new Date().toISOString(), id]);
+    await _query(
+      'UPDATE billing SET status = $1, last_modified = $2 WHERE id = $3',
+      [status, new Date().toISOString(), id]
+    );
     return { success: true };
   } catch (err) {
     console.debug('Error updating billing status:', err);
@@ -1163,7 +1344,20 @@ export async function createNotification({ userId, type, title, message }) {
     await _query(
       `INSERT INTO notifications (id,user_id,type,title,message,read,created_at,synced_at,last_modified,sync_status,deleted_at,version)
       VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)`,
-      [id, userId, type, title, message, 0, new Date().toISOString(), new Date().toISOString(), new Date().toISOString(), 'local', null, 1]
+      [
+        id,
+        userId,
+        type,
+        title,
+        message,
+        0,
+        new Date().toISOString(),
+        new Date().toISOString(),
+        new Date().toISOString(),
+        'local',
+        null,
+        1,
+      ]
     );
     return { id };
   } catch (err) {
@@ -1173,17 +1367,32 @@ export async function createNotification({ userId, type, title, message }) {
 }
 
 export async function getUserNotifications({ userId }) {
-  const res = await _query('SELECT * FROM notifications WHERE user_id = $1 ORDER BY created_at DESC', [userId]);
+  const res = await _query(
+    'SELECT * FROM notifications WHERE user_id = $1 ORDER BY created_at DESC',
+    [userId]
+  );
   return res.rows;
 }
 
 export async function markNotificationRead({ notificationId, userId }) {
-  await _query('UPDATE notifications SET read = 1 WHERE id = $1 AND user_id = $2', [notificationId, userId]);
+  await _query(
+    'UPDATE notifications SET read = 1 WHERE id = $1 AND user_id = $2',
+    [notificationId, userId]
+  );
 }
 
-export async function updateUserSubscription({ userId, subscriptionId, updates }) {
+export async function updateUserSubscription({
+  userId,
+  subscriptionId,
+  updates,
+}) {
   try {
-     const result = await updateEntity({ table: 'user_subscriptions', idField: 'id', id: subscriptionId, updates });
+    const result = await updateEntity({
+      table: 'user_subscriptions',
+      idField: 'id',
+      id: subscriptionId,
+      updates,
+    });
     if (!result.success) {
       throw new Error(result.error);
     }
@@ -1194,14 +1403,23 @@ export async function updateUserSubscription({ userId, subscriptionId, updates }
   }
 }
 
-export async function changeUserSubscription({ userId, newPackageId, currentSubscription }) {
+export async function changeUserSubscription({
+  userId,
+  newPackageId,
+  currentSubscription,
+}) {
   try {
     // If there's a current subscription, update it or cancel it
     if (currentSubscription) {
-       await updateEntity({ table: 'user_subscriptions', idField: 'id', id: currentSubscription.id, updates: {
-         status: 'cancelled',
-         cancelled_at: new Date().toISOString()
-       } });
+      await updateEntity({
+        table: 'user_subscriptions',
+        idField: 'id',
+        id: currentSubscription.id,
+        updates: {
+          status: 'cancelled',
+          cancelled_at: new Date().toISOString(),
+        },
+      });
     }
 
     // Create new subscription
@@ -1212,10 +1430,14 @@ export async function changeUserSubscription({ userId, newPackageId, currentSubs
       subscribed_at: new Date().toISOString(),
       synced_at: new Date().toISOString(),
       last_modified: new Date().toISOString(),
-      sync_status: 'local'
+      sync_status: 'local',
     };
 
-    const result = await createUserSubscription({ userId, packageId: newPackageId, subscriptionData });
+    const result = await createUserSubscription({
+      userId,
+      packageId: newPackageId,
+      subscriptionData,
+    });
     return result;
   } catch (err) {
     console.error('Error changing user subscription:', err);
@@ -1225,26 +1447,31 @@ export async function changeUserSubscription({ userId, newPackageId, currentSubs
 
 export async function voteOnProject({ projectId, userId, voteType }) {
   try {
-     const existingVote = await _query(
-       'SELECT id, vote_type FROM project_votes WHERE project_id = $1 AND user_id = $2',
-       [projectId, userId]
-     );
-     if (existingVote.rows.length > 0) {
-       const currentVote = existingVote.rows[0];
-       if (currentVote.vote_type === voteType) {
-         await _query('DELETE FROM project_votes WHERE id = $1', [currentVote.id]);
-         return { action: 'removed', voteType: null };
-       } else {
-         await _query('UPDATE project_votes SET vote_type = $1 WHERE id = $2', [voteType, currentVote.id]);
-         return { action: 'changed', voteType };
-       }
-     } else {
-        await _query(
-          'INSERT INTO project_votes (project_id, user_id, vote_type, created_at) VALUES ($1, $2, $3, $4)',
-          [projectId, userId, voteType, new Date().toISOString()]
-        );
-       return { action: 'added', voteType };
-     }
+    const existingVote = await _query(
+      'SELECT id, vote_type FROM project_votes WHERE project_id = $1 AND user_id = $2',
+      [projectId, userId]
+    );
+    if (existingVote.rows.length > 0) {
+      const currentVote = existingVote.rows[0];
+      if (currentVote.vote_type === voteType) {
+        await _query('DELETE FROM project_votes WHERE id = $1', [
+          currentVote.id,
+        ]);
+        return { action: 'removed', voteType: null };
+      } else {
+        await _query('UPDATE project_votes SET vote_type = $1 WHERE id = $2', [
+          voteType,
+          currentVote.id,
+        ]);
+        return { action: 'changed', voteType };
+      }
+    } else {
+      await _query(
+        'INSERT INTO project_votes (project_id, user_id, vote_type, created_at) VALUES ($1, $2, $3, $4)',
+        [projectId, userId, voteType, new Date().toISOString()]
+      );
+      return { action: 'added', voteType };
+    }
   } catch (err) {
     console.debug('Error voting on project:', err);
     throw err;
@@ -1253,12 +1480,15 @@ export async function voteOnProject({ projectId, userId, voteType }) {
 
 export async function getProjectVotes({ projectId }) {
   try {
-     const res = await _query(`
+    const res = await _query(
+      `
        SELECT vote_type, COUNT(*) as count
        FROM project_votes
        WHERE project_id = $1
        GROUP BY vote_type
-     `, [projectId]);
+     `,
+      [projectId]
+    );
     return res.rows;
   } catch (err) {
     console.debug('Error getting project votes:', err);
@@ -1268,7 +1498,8 @@ export async function getProjectVotes({ projectId }) {
 
 export async function getPublicProjectsWithVotes({ currentUserId }) {
   try {
-    const res = await _query(`
+    const res = await _query(
+      `
       SELECT
         p.*,
         COALESCE(v.user_vote, null) as user_vote,
@@ -1290,7 +1521,9 @@ export async function getPublicProjectsWithVotes({ currentUserId }) {
       ) vs ON p.id = vs.project_id
       WHERE p.public = true
       ORDER BY (COALESCE(vs.upvotes, 0) - COALESCE(vs.downvotes, 0)) DESC, p.last_modified DESC
-    `, [currentUserId]);
+    `,
+      [currentUserId]
+    );
     return res.rows;
   } catch (err) {
     console.debug('Error getting public projects with votes:', err);
@@ -1300,7 +1533,10 @@ export async function getPublicProjectsWithVotes({ currentUserId }) {
 
 export async function seedSampleNotifications({ userId }) {
   try {
-    const existingNotifications = await _query('SELECT COUNT(*) as count FROM notifications WHERE user_id = $1', [userId]);
+    const existingNotifications = await _query(
+      'SELECT COUNT(*) as count FROM notifications WHERE user_id = $1',
+      [userId]
+    );
     if (existingNotifications.rows[0].count > 0) {
       return { message: 'User already has notifications' };
     }
@@ -1309,33 +1545,42 @@ export async function seedSampleNotifications({ userId }) {
       {
         type: 'system',
         title: 'Welcome to Accelerator Platform',
-        message: 'Your account has been successfully created. Complete your profile to unlock all features.',
-        created_at: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString()
+        message:
+          'Your account has been successfully created. Complete your profile to unlock all features.',
+        created_at: new Date(
+          Date.now() - 3 * 24 * 60 * 60 * 1000
+        ).toISOString(),
       },
       {
         type: 'credits',
         title: 'Welcome Credits Added',
-        message: 'You\'ve received 50 free AI credits to explore our platform.',
-        created_at: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString()
+        message: "You've received 50 free AI credits to explore our platform.",
+        created_at: new Date(
+          Date.now() - 3 * 24 * 60 * 60 * 1000
+        ).toISOString(),
       },
       {
         type: 'system',
         title: 'Account Verification Complete',
         message: 'Your email has been verified.',
-        created_at: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString()
+        created_at: new Date(
+          Date.now() - 2 * 24 * 60 * 60 * 1000
+        ).toISOString(),
       },
       {
         type: 'update',
         title: 'Platform Update',
         message: 'Enhanced AI models available.',
-        created_at: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString()
+        created_at: new Date(
+          Date.now() - 1 * 24 * 60 * 60 * 1000
+        ).toISOString(),
       },
       {
         type: 'system',
         title: 'Getting Started Guide',
         message: 'Check out our guide.',
-        created_at: new Date(Date.now() - 12 * 60 * 60 * 1000).toISOString()
-      }
+        created_at: new Date(Date.now() - 12 * 60 * 60 * 1000).toISOString(),
+      },
     ];
 
     for (const notification of sampleNotifications) {
@@ -1360,7 +1605,18 @@ export async function createSession({ userId, token, expiresAt }) {
     const id = uuidv4();
     const res = await _query(
       'INSERT INTO sessions (id, user_id, token, expires_at, created_at, synced_at, last_modified, sync_status, deleted_at, version) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING *',
-      [id, userId, token, expiresAt, new Date().toISOString(), new Date().toISOString(), new Date().toISOString(), 'local', null, 1]
+      [
+        id,
+        userId,
+        token,
+        expiresAt,
+        new Date().toISOString(),
+        new Date().toISOString(),
+        new Date().toISOString(),
+        'local',
+        null,
+        1,
+      ]
     );
     return res.rows[0];
   } catch (err) {
@@ -1371,7 +1627,9 @@ export async function createSession({ userId, token, expiresAt }) {
 
 export async function getSessionByToken({ token }) {
   try {
-    const res = await _query('SELECT * FROM sessions WHERE token = $1', [token]);
+    const res = await _query('SELECT * FROM sessions WHERE token = $1', [
+      token,
+    ]);
     return res.rows[0];
   } catch (err) {
     console.debug('Error getting session by token:', err);
@@ -1384,79 +1642,104 @@ export async function deleteSession({ token }) {
 }
 
 export async function deleteExpiredSessions() {
-  await _query('DELETE FROM sessions WHERE expires_at < $1', [new Date().toISOString()]);
+  await _query('DELETE FROM sessions WHERE expires_at < $1', [
+    new Date().toISOString(),
+  ]);
 }
 
 export async function updateBillingStatus2({ userId, status }) {
-  await _query('UPDATE users SET billing_status = $1 WHERE id = $2', [status, userId]);
+  await _query('UPDATE users SET billing_status = $1 WHERE id = $2', [
+    status,
+    userId,
+  ]);
 }
 
 export async function seedPackages() {
-   try {
-     console.log('Seeding packages...');
-     const packages = [
-       {
-         id: 'free',
-         name: 'Free',
-         description: 'Basic plan with limited credits',
-         price: 0,
-         credits_included: 100,
-         features: JSON.stringify(['Basic AI models', 'Limited credits', 'Community support']),
-         active: 1
-       },
-       {
-         id: 'pro',
-         name: 'Pro',
-         description: 'Professional plan with more credits',
-         price: 29.99,
-         credits_included: 1000,
-         features: JSON.stringify(['Advanced AI models', 'Higher credit limits', 'Priority support', 'API access']),
-         active: 1
-       },
-       {
-         id: 'enterprise',
-         name: 'Enterprise',
-         description: 'Enterprise plan for teams',
-         price: 99.99,
-         credits_included: 5000,
-         features: JSON.stringify(['All AI models', 'Unlimited credits', 'Dedicated support', 'Team collaboration', 'Custom integrations']),
-         active: 1
-       }
-     ];
+  try {
+    console.log('Seeding packages...');
+    const packages = [
+      {
+        id: 'free',
+        name: 'Free',
+        description: 'Basic plan with limited credits',
+        price: 0,
+        credits_included: 100,
+        features: JSON.stringify([
+          'Basic AI models',
+          'Limited credits',
+          'Community support',
+        ]),
+        active: 1,
+      },
+      {
+        id: 'pro',
+        name: 'Pro',
+        description: 'Professional plan with more credits',
+        price: 29.99,
+        credits_included: 1000,
+        features: JSON.stringify([
+          'Advanced AI models',
+          'Higher credit limits',
+          'Priority support',
+          'API access',
+        ]),
+        active: 1,
+      },
+      {
+        id: 'enterprise',
+        name: 'Enterprise',
+        description: 'Enterprise plan for teams',
+        price: 99.99,
+        credits_included: 5000,
+        features: JSON.stringify([
+          'All AI models',
+          'Unlimited credits',
+          'Dedicated support',
+          'Team collaboration',
+          'Custom integrations',
+        ]),
+        active: 1,
+      },
+    ];
 
-     for (const pkg of packages) {
-       await _query(`
+    for (const pkg of packages) {
+      await _query(
+        `
          INSERT INTO packages (id, name, description, price, credits_included, features, active, created_at, synced_at, last_modified, sync_status, deleted_at, version)
          VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
          ON CONFLICT (id) DO NOTHING
-       `, [
-         pkg.id,
-         pkg.name,
-         pkg.description,
-         pkg.price,
-         pkg.credits_included,
-         pkg.features,
-         pkg.active,
-         new Date().toISOString(),
-         new Date().toISOString(),
-         new Date().toISOString(),
-         'local',
-         null,
-         1
-       ]);
-     }
+       `,
+        [
+          pkg.id,
+          pkg.name,
+          pkg.description,
+          pkg.price,
+          pkg.credits_included,
+          pkg.features,
+          pkg.active,
+          new Date().toISOString(),
+          new Date().toISOString(),
+          new Date().toISOString(),
+          'local',
+          null,
+          1,
+        ]
+      );
+    }
 
-     console.log('Packages seeded successfully');
-     return { success: true };
-   } catch (error) {
-     console.error('Error seeding packages:', error);
-     throw error;
-   }
- }
+    console.log('Packages seeded successfully');
+    return { success: true };
+  } catch (error) {
+    console.error('Error seeding packages:', error);
+    throw error;
+  }
+}
 
 export async function getPackages() {
   try {
-    const res = await _query('SELECT * FROM packages WHERE active = 1 ORDER BY price ASC');
+    const res = await _query(
+      'SELECT * FROM packages WHERE active = 1 ORDER BY price ASC'
+    );
     return res.rows;
   } catch (error) {
     console.error('Error getting packages:', error);
@@ -1464,27 +1747,36 @@ export async function getPackages() {
   }
 }
 
-export async function createUserSubscription({ userId, packageId, subscriptionData = {} }) {
+export async function createUserSubscription({
+  userId,
+  packageId,
+  subscriptionData = {},
+}) {
   try {
     const id = uuidv4();
-    const res = await _query(`
+    const res = await _query(
+      `
       INSERT INTO user_subscriptions (id, user_id, package_id, status, start_date, end_date, auto_renew, synced_at, last_modified, sync_status, deleted_at, version)
       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
       RETURNING *
-    `, [
-      id,
-      userId,
-      packageId,
-      subscriptionData.status || 'active',
-      subscriptionData.start_date || new Date().toISOString(),
-      subscriptionData.end_date || null,
-      subscriptionData.auto_renew !== undefined ? subscriptionData.auto_renew : 1,
-      new Date().toISOString(),
-      new Date().toISOString(),
-      'local',
-      null,
-      1
-    ]);
+    `,
+      [
+        id,
+        userId,
+        packageId,
+        subscriptionData.status || 'active',
+        subscriptionData.start_date || new Date().toISOString(),
+        subscriptionData.end_date || null,
+        subscriptionData.auto_renew !== undefined
+          ? subscriptionData.auto_renew
+          : 1,
+        new Date().toISOString(),
+        new Date().toISOString(),
+        'local',
+        null,
+        1,
+      ]
+    );
     return res.rows[0];
   } catch (error) {
     console.error('Error creating user subscription:', error);
@@ -1494,7 +1786,10 @@ export async function createUserSubscription({ userId, packageId, subscriptionDa
 
 export async function getUserSubscription({ userId }) {
   try {
-    const res = await _query('SELECT * FROM user_subscriptions WHERE user_id = $1 AND status = \'active\' ORDER BY start_date DESC LIMIT 1', [userId]);
+    const res = await _query(
+      "SELECT * FROM user_subscriptions WHERE user_id = $1 AND status = 'active' ORDER BY start_date DESC LIMIT 1",
+      [userId]
+    );
     return res.rows[0];
   } catch (error) {
     console.error('Error getting user subscription:', error);
@@ -1503,13 +1798,19 @@ export async function getUserSubscription({ userId }) {
 }
 
 // User management functions
-export async function _createUser({ email, passwordHash, profile = {}, userId = null }) {
+export async function _createUser({
+  email,
+  passwordHash,
+  profile = {},
+  userId = null,
+}) {
   if (!email) {
     throw new Error('Email is required for user creation');
   }
   try {
     const id = userId || uuidv4();
-    const query = "INSERT INTO users (id, email, password_hash, preferences, created_at, last_modified, synced_at, sync_status, deleted_at, version) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)";
+    const query =
+      'INSERT INTO users (id, email, password_hash, preferences, created_at, last_modified, synced_at, sync_status, deleted_at, version) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)';
     const params = [
       id,
       email,
@@ -1520,7 +1821,7 @@ export async function _createUser({ email, passwordHash, profile = {}, userId = 
       new Date().toISOString(),
       'local',
       null,
-      1
+      1,
     ];
     console.debug('Executing createUser query:', query, 'params:', params);
     const res = await _query(query, params);
@@ -1537,7 +1838,10 @@ export async function _getUserById({ id }) {
     return null;
   }
   try {
-    const res = await _query("SELECT * FROM users WHERE id = $1 AND deleted_at IS NULL", [id]);
+    const res = await _query(
+      'SELECT * FROM users WHERE id = $1 AND deleted_at IS NULL',
+      [id]
+    );
     return res.rows[0] || null;
   } catch (err) {
     console.error('Error getting user by id:', err);
@@ -1551,7 +1855,10 @@ export async function _getUserByEmail({ email }) {
     return null;
   }
   try {
-    const res = await _query("SELECT * FROM users WHERE email = $1 AND deleted_at IS NULL", [email]);
+    const res = await _query(
+      'SELECT * FROM users WHERE email = $1 AND deleted_at IS NULL',
+      [email]
+    );
     return res.rows[0] || null;
   } catch (err) {
     console.error('Error getting user by email:', err);
@@ -1566,26 +1873,28 @@ export async function _updateUser({ id, updates }) {
     id,
     updates,
     options: {
-      beforeUpdate: (updates) => {
+      beforeUpdate: updates => {
         if (updates.profile) {
           updates.preferences = JSON.stringify(updates.profile);
           delete updates.profile;
         }
-      }
-    }
+      },
+    },
   });
 }
 
 export async function _deleteUser({ id }) {
   try {
-    const res = await _query("UPDATE users SET deleted_at = $1, sync_status = 'local' WHERE id = $2", [new Date().toISOString(), id]);
+    const res = await _query(
+      "UPDATE users SET deleted_at = $1, sync_status = 'local' WHERE id = $2",
+      [new Date().toISOString(), id]
+    );
     return { success: true };
   } catch (err) {
     console.error('Error deleting user:', err);
     return { success: false, error: err.message };
   }
 }
-
 
 let worker = null;
 let nextRequestId = 1;
@@ -1611,28 +1920,34 @@ class DatabaseWorker {
       this.initialized = true;
 
       logger.debug('Database ready via core module');
-       // Check if database is already seeded
-       const alreadySeeded = await isSeeded();
-       if (!alreadySeeded) {
-         // Seed initial data after database is ready
-         await seedInitialData();
-       } else {
-         logger.debug('Database already seeded, skipping seeding');
-       }
-     } catch (error) {
-       logger.error('Failed to initialize database via core:', error);
-       // Set a flag to indicate database is unavailable
-       this.dbUnavailable = true;
-       logger.warn('Database unavailable, app will work in limited mode');
-       // Don't throw error - let app continue with limited functionality
-     }
+      // Check if database is already seeded
+      const alreadySeeded = await isSeeded();
+      if (!alreadySeeded) {
+        // Seed initial data after database is ready
+        await seedInitialData();
+      } else {
+        logger.debug('Database already seeded, skipping seeding');
+      }
+    } catch (error) {
+      logger.error('Failed to initialize database via core:', error);
+      // Set a flag to indicate database is unavailable
+      this.dbUnavailable = true;
+      logger.warn('Database unavailable, app will work in limited mode');
+      // Don't throw error - let app continue with limited functionality
+    }
   }
 
   async sendMessage(type, data) {
-    logger.trace('DatabaseWorker: sendMessage called - type:', type, 'data keys:', Object.keys(data || {}));
+    logger.trace(
+      'DatabaseWorker: sendMessage called - type:',
+      type,
+      'data keys:',
+      Object.keys(data || {})
+    );
 
     // Use centralized database functions instead of worker
-    const { getDbInstance, query, exec, initDatabase } = await import('./core.js');
+    const { getDbInstance, query, exec, initDatabase } =
+      await import('./core.js');
 
     try {
       switch (type) {
@@ -1646,13 +1961,15 @@ class DatabaseWorker {
         case 'isSeeded':
           // Check if database has been seeded by checking for existence of data
           const seedDb = await getDbInstance();
-          const result = await seedDb.query("SELECT COUNT(*) as count FROM users LIMIT 1");
+          const result = await seedDb.query(
+            'SELECT COUNT(*) as count FROM users LIMIT 1'
+          );
           return result.rows[0].count > 0;
         case 'transaction':
           // Use direct database access for transactions
           const txDb = await getDbInstance();
           const results = [];
-          await txDb.transaction(async (tx) => {
+          await txDb.transaction(async tx => {
             for (const op of data.operations) {
               const res = await tx.query(op.sql, op.params || []);
               results.push({ rows: res.rows, rowCount: res.rowCount });
@@ -1704,16 +2021,19 @@ class DatabaseWorker {
         const value = obj[key];
 
         // Skip functions, DOM elements, and other non-serializable objects
-        if (typeof value === 'function' ||
-            (typeof value === 'object' && value !== null && (
-              value instanceof Element ||
+        if (
+          typeof value === 'function' ||
+          (typeof value === 'object' &&
+            value !== null &&
+            (value instanceof Element ||
               value instanceof Node ||
               value instanceof Window ||
               value instanceof Document ||
               value instanceof Event ||
               value instanceof EventTarget ||
-              value.constructor.name === 'Object' && !Object.getPrototypeOf(value)
-            ))) {
+              (value.constructor.name === 'Object' &&
+                !Object.getPrototypeOf(value))))
+        ) {
           continue; // Skip this property
         }
 
@@ -1740,323 +2060,440 @@ class DatabaseWorker {
     return await this.sendMessage('transaction', { operations });
   }
 
-   async close() {
-     if (this.worker) {
-       await this.sendMessage('close', {});
-       this.worker.terminate();
-       this.worker = null;
-       this.initialized = false;
-     }
-   }
-
-   // High-level operations
-   async getTasks(project_id = null, userId = null) {
-     return await this.sendMessage('getTasks', { project_id, userId });
-   }
-
-    async addTask(task, project_id, userId = null) {
-      return await this.sendMessage('addTask', { task, project_id, userId });
+  async close() {
+    if (this.worker) {
+      await this.sendMessage('close', {});
+      this.worker.terminate();
+      this.worker = null;
+      this.initialized = false;
     }
-
-   async clearAllTasks() {
-     return await this.sendMessage('clearAllTasks', {});
-   }
-
-   async updateTask(id, updates) {
-     return await this.sendMessage('updateTask', { id, updates });
-   }
-
-   async getProjects(userId = null) {
-     return await this.sendMessage('getProjects', { userId });
-   }
-
-   async getPublicProjects() {
-     return await this.sendMessage('getPublicProjects', {});
-   }
-
-   async getProjectById(id) {
-     return await this.sendMessage('getProjectById', { id });
-   }
-
-    async addProject(project, userId) {
-      return await this.sendMessage('createProject', { project, userId });
-    }
-
-   async updateProject(id, project) {
-     return await this.sendMessage('updateProject', { id, project });
-   }
-
-   async deleteProject(id) {
-     return await this.sendMessage('deleteProject', { id });
-   }
-
-   async getEntities(table, selectFields = '*', whereClause = '', orderBy = '', params = []) {
-     return await this.sendMessage('getEntities', { table, selectFields, whereClause, orderBy, params });
-   }
-
-   async updateEntity(table, idField, id, updates, options = {}) {
-     return await this.sendMessage('updateEntity', { table, idField, id, updates, options });
-   }
-
-   async createUser(email, passwordHash, profile = {}, userId = null) {
-     return await this.sendMessage('createUser', { email, passwordHash, profile, userId });
-   }
-
-   async getUserByEmail(email) {
-     return await this.sendMessage('getUserByEmail', { email });
-   }
-
-   async getUserById(id) {
-     return await this.sendMessage('getUserById', { id });
-   }
-
-   async updateUser(id, updates) {
-     return await this.sendMessage('updateUser', { id, updates });
-   }
-
-   async getUserCreditBalance(userId) {
-     return await this.sendMessage('getUserCreditBalance', { userId });
-   }
-
-   async addCreditTransaction(userId, type, amount, description) {
-     return await this.sendMessage('addCreditTransaction', { userId, type, amount, description });
-   }
-
-   // Groups operations
-   async getGroups(userId = null) {
-     return await this.sendMessage('getGroups', { userId });
-   }
-
-   async getGroupById(id) {
-     return await this.sendMessage('getGroupById', { id });
-   }
-
-   async addGroup(group, userId) {
-     return await this.sendMessage('addGroup', { group, userId });
-   }
-
-   async updateGroup(id, group) {
-     return await this.sendMessage('updateGroup', { id, group });
-   }
-
-   async deleteGroup(id) {
-     return await this.sendMessage('deleteGroup', { id });
-   }
-
-   // Session operations
-   async createSession(userId, token, expiresAt) {
-     return await this.sendMessage('createSession', { userId, token, expiresAt });
-   }
-
-   async getSessionByToken(token) {
-     return await this.sendMessage('getSessionByToken', { token });
-   }
-
-   async deleteSession(token) {
-     return await this.sendMessage('deleteSession', { token });
-   }
-
-   async deleteExpiredSessions() {
-     return await this.sendMessage('deleteExpiredSessions', {});
-   }
-
-   // User operations (additional)
-   async deleteUser(id) {
-     return await this.sendMessage('deleteUser', { id });
-   }
-
-   // Billing operations
-   async addBillingRecord(userId, type, amount, description, dueDate = null) {
-     return await this.sendMessage('addBillingRecord', { userId, type, amount, description, dueDate });
-   }
-
-   async getUserBilling(userId) {
-     return await this.sendMessage('getUserBilling', { userId });
-   }
-
-   async updateBillingStatus(id, status) {
-     return await this.sendMessage('updateBillingStatus', { id, status });
-   }
-
-   // Notification operations
-   async createNotification(userId, type, title, message, createdAt = null) {
-     return await this.sendMessage('createNotification', { userId, type, title, message, createdAt });
-   }
-
-   async getUserNotifications(userId) {
-     return await this.sendMessage('getUserNotifications', { userId });
-   }
-
-   async markNotificationRead(notificationId, userId) {
-     return await this.sendMessage('markNotificationRead', { notificationId, userId });
-   }
-
-   // Packages operations
-   async getPackages() {
-     return await this.sendMessage('getPackages', {});
-   }
-
-   async getUserSubscription(userId) {
-     return await this.sendMessage('getUserSubscription', { userId });
-   }
-
-   async createUserSubscription(userId, packageId, subscriptionData = {}) {
-     return await this.sendMessage('createUserSubscription', { userId, packageId, subscriptionData });
-   }
-
-   async updateUserSubscription(userId, subscriptionId, updates) {
-     return await this.sendMessage('updateUserSubscription', { userId, subscriptionId, updates });
-   }
-
-   // Project votes operations
-   async voteOnProject(projectId, userId, voteType) {
-     return await this.sendMessage('voteOnProject', { projectId, userId, voteType });
-   }
-
-   async getProjectVotes(projectId) {
-     return await this.sendMessage('getProjectVotes', { projectId });
-   }
-
-   // Project groups operations
-   async addProjectToGroup(projectId, groupId) {
-     return await this.sendMessage('addProjectToGroup', { projectId, groupId });
-   }
-
-   async removeProjectFromGroup(projectId, groupId) {
-     return await this.sendMessage('removeProjectFromGroup', { projectId, groupId });
-   }
-
-   async getProjectsInGroup(groupId) {
-     return await this.sendMessage('getProjectsInGroup', { groupId });
-   }
-
-   async getUngroupedProjects(userId = null) {
-     return await this.sendMessage('getUngroupedProjects', { userId });
-   }
-
-   // Complex queries
-   async getPublicProjectsWithVotes(currentUserId) {
-     return await this.sendMessage('getPublicProjectsWithVotes', { currentUserId });
-   }
-
-   async getGroupsWithProjects(userId = null) {
-     return await this.sendMessage('getGroupsWithProjects', { userId });
-   }
-
-   async getProjectByName(name) {
-     return await this.sendMessage('getProjectByName', { name });
-   }
-
-   async deleteAllProjects() {
-     return await this.sendMessage('deleteAllProjects', {});
-   }
-
-   async toggleProjectPublic(projectId, isPublic) {
-     return await this.sendMessage('toggleProjectPublic', { projectId, isPublic });
-   }
-
-   // Credits helper operations
-   async getUserCredits(userId) {
-     return await this.sendMessage('getUserCredits', { userId });
-   }
-
-   async getCreditTransactions(userId) {
-     return await this.sendMessage('getCreditTransactions', { userId });
-   }
-
-   async getCreditBalance(userId) {
-     return await this.sendMessage('getCreditBalance', { userId });
-   }
-
-   async consumeCredits(userId, amount, description) {
-     return await this.sendMessage('consumeCredits', { userId, amount, description });
-   }
-
-   // Profile operations
-   async getUserProfile(userId) {
-     return await this.sendMessage('getUserProfile', { userId });
-   }
-
-   async createUserProfile(userId, profileData = {}) {
-     return await this.sendMessage('createUserProfile', { userId, profileData });
-   }
-
-   // Subscription change operations
-   async changeUserSubscription(userId, newPackageId, currentSubscription = null) {
-     return await this.sendMessage('changeUserSubscription', { userId, newPackageId, currentSubscription });
-   }
-
-   // Seeding operations
-   async seedPackages() {
-     return await this.sendMessage('seedPackages', {});
-   }
-
-   async seedSampleNotifications(userId) {
-     return await this.sendMessage('seedSampleNotifications', { userId });
-   }
-
-   // Portfolio/Collaboration operations
-   async inviteCollaborator(portfolioId, inviteeEmail, role = 'editor', message = '', inviterId) {
-     return await this.sendMessage('inviteCollaborator', { portfolioId, inviteeEmail, role, message, inviterId });
-   }
-
-   async getPortfolioInvitations(portfolioId) {
-     return await this.sendMessage('getPortfolioInvitations', { portfolioId });
-   }
-
-   async getUserInvitations(userEmail) {
-     return await this.sendMessage('getUserInvitations', { userEmail });
-   }
-
-   async respondToInvitation(invitationId, status, userId) {
-     return await this.sendMessage('respondToInvitation', { invitationId, status, userId });
-   }
-
-   async getPortfolioCollaborators(portfolioId) {
-     return await this.sendMessage('getPortfolioCollaborators', { portfolioId });
-   }
-
-   async removeCollaborator(portfolioId, userId) {
-     return await this.sendMessage('removeCollaborator', { portfolioId, userId });
-   }
-
-   async updateCollaboratorRole(portfolioId, userId, role) {
-     return await this.sendMessage('updateCollaboratorRole', { portfolioId, userId, role });
-   }
-
-   // Helper functions
-   async getCurrentUserId() {
-     return await this.sendMessage('getCurrentUserId', {});
-   }
-
-   async getGroupName(groupId) {
-     return await this.sendMessage('getGroupName', { groupId });
-   }
-
-   // Sync operations
-   async getLocalChanges(tableName) {
-     return await this.sendMessage('getLocalChanges', { tableName });
-   }
-
-   async getLocalItem(tableName, id, idField) {
-     return await this.sendMessage('getLocalItem', { tableName, id, idField });
-   }
-
-   async insertLocalItem(tableName, data) {
-     return await this.sendMessage('insertLocalItem', { tableName, data });
-   }
-
-   async deleteLocalItem(tableName, idField, id) {
-     return await this.sendMessage('deleteLocalItem', { tableName, idField, id });
-   }
-
-   async markItemSynced(tableName, idField, id, version) {
-     return await this.sendMessage('markItemSynced', { tableName, idField, id, version });
-   }
-
-   async markItemConflict(tableName, idField, id, error, retryCount) {
-     return await this.sendMessage('markItemConflict', { tableName, idField, id, error, retryCount });
-   }
+  }
+
+  // High-level operations
+  async getTasks(project_id = null, userId = null) {
+    return await this.sendMessage('getTasks', { project_id, userId });
+  }
+
+  async addTask(task, project_id, userId = null) {
+    return await this.sendMessage('addTask', { task, project_id, userId });
+  }
+
+  async clearAllTasks() {
+    return await this.sendMessage('clearAllTasks', {});
+  }
+
+  async updateTask(id, updates) {
+    return await this.sendMessage('updateTask', { id, updates });
+  }
+
+  async getProjects(userId = null) {
+    return await this.sendMessage('getProjects', { userId });
+  }
+
+  async getPublicProjects() {
+    return await this.sendMessage('getPublicProjects', {});
+  }
+
+  async getProjectById(id) {
+    return await this.sendMessage('getProjectById', { id });
+  }
+
+  async addProject(project, userId) {
+    return await this.sendMessage('createProject', { project, userId });
+  }
+
+  async updateProject(id, project) {
+    return await this.sendMessage('updateProject', { id, project });
+  }
+
+  async deleteProject(id) {
+    return await this.sendMessage('deleteProject', { id });
+  }
+
+  async getEntities(
+    table,
+    selectFields = '*',
+    whereClause = '',
+    orderBy = '',
+    params = []
+  ) {
+    return await this.sendMessage('getEntities', {
+      table,
+      selectFields,
+      whereClause,
+      orderBy,
+      params,
+    });
+  }
+
+  async updateEntity(table, idField, id, updates, options = {}) {
+    return await this.sendMessage('updateEntity', {
+      table,
+      idField,
+      id,
+      updates,
+      options,
+    });
+  }
+
+  async createUser(email, passwordHash, profile = {}, userId = null) {
+    return await this.sendMessage('createUser', {
+      email,
+      passwordHash,
+      profile,
+      userId,
+    });
+  }
+
+  async getUserByEmail(email) {
+    return await this.sendMessage('getUserByEmail', { email });
+  }
+
+  async getUserById(id) {
+    return await this.sendMessage('getUserById', { id });
+  }
+
+  async updateUser(id, updates) {
+    return await this.sendMessage('updateUser', { id, updates });
+  }
+
+  async getUserCreditBalance(userId) {
+    return await this.sendMessage('getUserCreditBalance', { userId });
+  }
+
+  async addCreditTransaction(userId, type, amount, description) {
+    return await this.sendMessage('addCreditTransaction', {
+      userId,
+      type,
+      amount,
+      description,
+    });
+  }
+
+  // Groups operations
+  async getGroups(userId = null) {
+    return await this.sendMessage('getGroups', { userId });
+  }
+
+  async getGroupById(id) {
+    return await this.sendMessage('getGroupById', { id });
+  }
+
+  async addGroup(group, userId) {
+    return await this.sendMessage('addGroup', { group, userId });
+  }
+
+  async updateGroup(id, group) {
+    return await this.sendMessage('updateGroup', { id, group });
+  }
+
+  async deleteGroup(id) {
+    return await this.sendMessage('deleteGroup', { id });
+  }
+
+  // Session operations
+  async createSession(userId, token, expiresAt) {
+    return await this.sendMessage('createSession', {
+      userId,
+      token,
+      expiresAt,
+    });
+  }
+
+  async getSessionByToken(token) {
+    return await this.sendMessage('getSessionByToken', { token });
+  }
+
+  async deleteSession(token) {
+    return await this.sendMessage('deleteSession', { token });
+  }
+
+  async deleteExpiredSessions() {
+    return await this.sendMessage('deleteExpiredSessions', {});
+  }
+
+  // User operations (additional)
+  async deleteUser(id) {
+    return await this.sendMessage('deleteUser', { id });
+  }
+
+  // Billing operations
+  async addBillingRecord(userId, type, amount, description, dueDate = null) {
+    return await this.sendMessage('addBillingRecord', {
+      userId,
+      type,
+      amount,
+      description,
+      dueDate,
+    });
+  }
+
+  async getUserBilling(userId) {
+    return await this.sendMessage('getUserBilling', { userId });
+  }
+
+  async updateBillingStatus(id, status) {
+    return await this.sendMessage('updateBillingStatus', { id, status });
+  }
+
+  // Notification operations
+  async createNotification(userId, type, title, message, createdAt = null) {
+    return await this.sendMessage('createNotification', {
+      userId,
+      type,
+      title,
+      message,
+      createdAt,
+    });
+  }
+
+  async getUserNotifications(userId) {
+    return await this.sendMessage('getUserNotifications', { userId });
+  }
+
+  async markNotificationRead(notificationId, userId) {
+    return await this.sendMessage('markNotificationRead', {
+      notificationId,
+      userId,
+    });
+  }
+
+  // Packages operations
+  async getPackages() {
+    return await this.sendMessage('getPackages', {});
+  }
+
+  async getUserSubscription(userId) {
+    return await this.sendMessage('getUserSubscription', { userId });
+  }
+
+  async createUserSubscription(userId, packageId, subscriptionData = {}) {
+    return await this.sendMessage('createUserSubscription', {
+      userId,
+      packageId,
+      subscriptionData,
+    });
+  }
+
+  async updateUserSubscription(userId, subscriptionId, updates) {
+    return await this.sendMessage('updateUserSubscription', {
+      userId,
+      subscriptionId,
+      updates,
+    });
+  }
+
+  // Project votes operations
+  async voteOnProject(projectId, userId, voteType) {
+    return await this.sendMessage('voteOnProject', {
+      projectId,
+      userId,
+      voteType,
+    });
+  }
+
+  async getProjectVotes(projectId) {
+    return await this.sendMessage('getProjectVotes', { projectId });
+  }
+
+  // Project groups operations
+  async addProjectToGroup(projectId, groupId) {
+    return await this.sendMessage('addProjectToGroup', { projectId, groupId });
+  }
+
+  async removeProjectFromGroup(projectId, groupId) {
+    return await this.sendMessage('removeProjectFromGroup', {
+      projectId,
+      groupId,
+    });
+  }
+
+  async getProjectsInGroup(groupId) {
+    return await this.sendMessage('getProjectsInGroup', { groupId });
+  }
+
+  async getUngroupedProjects(userId = null) {
+    return await this.sendMessage('getUngroupedProjects', { userId });
+  }
+
+  // Complex queries
+  async getPublicProjectsWithVotes(currentUserId) {
+    return await this.sendMessage('getPublicProjectsWithVotes', {
+      currentUserId,
+    });
+  }
+
+  async getGroupsWithProjects(userId = null) {
+    return await this.sendMessage('getGroupsWithProjects', { userId });
+  }
+
+  async getProjectByName(name) {
+    return await this.sendMessage('getProjectByName', { name });
+  }
+
+  async deleteAllProjects() {
+    return await this.sendMessage('deleteAllProjects', {});
+  }
+
+  async toggleProjectPublic(projectId, isPublic) {
+    return await this.sendMessage('toggleProjectPublic', {
+      projectId,
+      isPublic,
+    });
+  }
+
+  // Credits helper operations
+  async getUserCredits(userId) {
+    return await this.sendMessage('getUserCredits', { userId });
+  }
+
+  async getCreditTransactions(userId) {
+    return await this.sendMessage('getCreditTransactions', { userId });
+  }
+
+  async getCreditBalance(userId) {
+    return await this.sendMessage('getCreditBalance', { userId });
+  }
+
+  async consumeCredits(userId, amount, description) {
+    return await this.sendMessage('consumeCredits', {
+      userId,
+      amount,
+      description,
+    });
+  }
+
+  // Profile operations
+  async getUserProfile(userId) {
+    return await this.sendMessage('getUserProfile', { userId });
+  }
+
+  async createUserProfile(userId, profileData = {}) {
+    return await this.sendMessage('createUserProfile', { userId, profileData });
+  }
+
+  // Subscription change operations
+  async changeUserSubscription(
+    userId,
+    newPackageId,
+    currentSubscription = null
+  ) {
+    return await this.sendMessage('changeUserSubscription', {
+      userId,
+      newPackageId,
+      currentSubscription,
+    });
+  }
+
+  // Seeding operations
+  async seedPackages() {
+    return await this.sendMessage('seedPackages', {});
+  }
+
+  async seedSampleNotifications(userId) {
+    return await this.sendMessage('seedSampleNotifications', { userId });
+  }
+
+  // Portfolio/Collaboration operations
+  async inviteCollaborator(
+    portfolioId,
+    inviteeEmail,
+    role = 'editor',
+    message = '',
+    inviterId
+  ) {
+    return await this.sendMessage('inviteCollaborator', {
+      portfolioId,
+      inviteeEmail,
+      role,
+      message,
+      inviterId,
+    });
+  }
+
+  async getPortfolioInvitations(portfolioId) {
+    return await this.sendMessage('getPortfolioInvitations', { portfolioId });
+  }
+
+  async getUserInvitations(userEmail) {
+    return await this.sendMessage('getUserInvitations', { userEmail });
+  }
+
+  async respondToInvitation(invitationId, status, userId) {
+    return await this.sendMessage('respondToInvitation', {
+      invitationId,
+      status,
+      userId,
+    });
+  }
+
+  async getPortfolioCollaborators(portfolioId) {
+    return await this.sendMessage('getPortfolioCollaborators', { portfolioId });
+  }
+
+  async removeCollaborator(portfolioId, userId) {
+    return await this.sendMessage('removeCollaborator', {
+      portfolioId,
+      userId,
+    });
+  }
+
+  async updateCollaboratorRole(portfolioId, userId, role) {
+    return await this.sendMessage('updateCollaboratorRole', {
+      portfolioId,
+      userId,
+      role,
+    });
+  }
+
+  // Helper functions
+  async getCurrentUserId() {
+    return await this.sendMessage('getCurrentUserId', {});
+  }
+
+  async getGroupName(groupId) {
+    return await this.sendMessage('getGroupName', { groupId });
+  }
+
+  // Sync operations
+  async getLocalChanges(tableName) {
+    return await this.sendMessage('getLocalChanges', { tableName });
+  }
+
+  async getLocalItem(tableName, id, idField) {
+    return await this.sendMessage('getLocalItem', { tableName, id, idField });
+  }
+
+  async insertLocalItem(tableName, data) {
+    return await this.sendMessage('insertLocalItem', { tableName, data });
+  }
+
+  async deleteLocalItem(tableName, idField, id) {
+    return await this.sendMessage('deleteLocalItem', {
+      tableName,
+      idField,
+      id,
+    });
+  }
+
+  async markItemSynced(tableName, idField, id, version) {
+    return await this.sendMessage('markItemSynced', {
+      tableName,
+      idField,
+      id,
+      version,
+    });
+  }
+
+  async markItemConflict(tableName, idField, id, error, retryCount) {
+    return await this.sendMessage('markItemConflict', {
+      tableName,
+      idField,
+      id,
+      error,
+      retryCount,
+    });
+  }
 
   async resolveConflict(localItem, remoteItem) {
     return await this.sendMessage('resolveConflict', { localItem, remoteItem });
@@ -2072,26 +2509,30 @@ class DatabaseWorker {
   }
 }
 
-
 // Fallback implementations for when database is unavailable
-const createFallbackResponse = (message) => ({
+const createFallbackResponse = message => ({
   error: 'Database unavailable',
   message,
-  fallback: true
+  fallback: true,
 });
 
 // Helper to safely call database operations with fallbacks
-const safeDbCall = async (operation, fallbackValue = null, operationName = 'database operation') => {
+const safeDbCall = async (
+  operation,
+  fallbackValue = null,
+  operationName = 'database operation'
+) => {
   try {
     const pg = await getPg();
     return await operation(pg);
   } catch (error) {
     if (error.message.includes('Database unavailable')) {
-      logger.warn(`Database unavailable, returning fallback for ${operationName}`);
+      logger.warn(
+        `Database unavailable, returning fallback for ${operationName}`
+      );
       return fallbackValue;
     }
     logger.error(`Error in ${operationName}:`, error);
     return fallbackValue;
   }
 };
-

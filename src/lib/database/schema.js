@@ -53,7 +53,7 @@ export async function createSchema() {
       );
     `);
 
-     await dbInstance.exec(`
+    await dbInstance.exec(`
       CREATE TABLE IF NOT EXISTS projects (
         id TEXT PRIMARY KEY,
         user_id TEXT NOT NULL,
@@ -68,7 +68,7 @@ export async function createSchema() {
       );
     `);
 
-     await dbInstance.exec(`
+    await dbInstance.exec(`
        CREATE TABLE IF NOT EXISTS tasks (
          id TEXT PRIMARY KEY,
          project_id TEXT NOT NULL,
@@ -95,7 +95,7 @@ export async function createSchema() {
        );
      `);
 
-      await dbInstance.exec(`
+    await dbInstance.exec(`
         CREATE TABLE IF NOT EXISTS step_data (
           id TEXT PRIMARY KEY,
           project_id TEXT NOT NULL,
@@ -353,77 +353,80 @@ export async function migrateSchema() {
 
   try {
     console.log('Running schema migrations...');
-    
+
     const migrations = [
       // Fix ui_status column name mismatch (rename uiStatus to ui_status)
       "ALTER TABLE projects ADD COLUMN IF NOT EXISTS ui_status TEXT DEFAULT 'idle'",
 
       // Add missing columns to projects table
-      "ALTER TABLE projects ADD COLUMN IF NOT EXISTS archived INTEGER DEFAULT 0",
-      "ALTER TABLE projects ADD COLUMN IF NOT EXISTS archived_at TEXT",
+      'ALTER TABLE projects ADD COLUMN IF NOT EXISTS archived INTEGER DEFAULT 0',
+      'ALTER TABLE projects ADD COLUMN IF NOT EXISTS archived_at TEXT',
       "ALTER TABLE projects ADD COLUMN IF NOT EXISTS current_step TEXT DEFAULT 'system'",
-      "ALTER TABLE projects ADD COLUMN IF NOT EXISTS completed_steps INTEGER DEFAULT 0",
+      'ALTER TABLE projects ADD COLUMN IF NOT EXISTS completed_steps INTEGER DEFAULT 0',
       "ALTER TABLE projects ADD COLUMN IF NOT EXISTS step_name TEXT DEFAULT 'System Initialization'",
       "ALTER TABLE projects ADD COLUMN IF NOT EXISTS current_model TEXT DEFAULT 'System'",
       "ALTER TABLE projects ADD COLUMN IF NOT EXISTS current_section TEXT DEFAULT 'Initialization'",
-      "ALTER TABLE projects ADD COLUMN IF NOT EXISTS ui_progress INTEGER DEFAULT 0",
+      'ALTER TABLE projects ADD COLUMN IF NOT EXISTS ui_progress INTEGER DEFAULT 0',
       "ALTER TABLE projects ADD COLUMN IF NOT EXISTS ui_message TEXT DEFAULT 'Ready to start'",
-      "ALTER TABLE projects ADD COLUMN IF NOT EXISTS current_prompt TEXT",
-      "ALTER TABLE projects ADD COLUMN IF NOT EXISTS llm_response TEXT",
-      "ALTER TABLE projects ADD COLUMN IF NOT EXISTS total_credits INTEGER DEFAULT 600",
-      "ALTER TABLE projects ADD COLUMN IF NOT EXISTS total_steps INTEGER DEFAULT 59",
+      'ALTER TABLE projects ADD COLUMN IF NOT EXISTS current_prompt TEXT',
+      'ALTER TABLE projects ADD COLUMN IF NOT EXISTS llm_response TEXT',
+      'ALTER TABLE projects ADD COLUMN IF NOT EXISTS total_credits INTEGER DEFAULT 600',
+      'ALTER TABLE projects ADD COLUMN IF NOT EXISTS total_steps INTEGER DEFAULT 59',
 
       // Add missing created_at column to users table
-      "ALTER TABLE users ADD COLUMN IF NOT EXISTS created_at TEXT",
+      'ALTER TABLE users ADD COLUMN IF NOT EXISTS created_at TEXT',
 
       // Add missing ip_address and user_agent columns to user_activities table
-      "ALTER TABLE user_activities ADD COLUMN IF NOT EXISTS ip_address TEXT",
-      "ALTER TABLE user_activities ADD COLUMN IF NOT EXISTS user_agent TEXT",
+      'ALTER TABLE user_activities ADD COLUMN IF NOT EXISTS ip_address TEXT',
+      'ALTER TABLE user_activities ADD COLUMN IF NOT EXISTS user_agent TEXT',
 
       // Add missing columns to tasks table
-      "ALTER TABLE tasks ADD COLUMN IF NOT EXISTS content TEXT",
-      "ALTER TABLE tasks ADD COLUMN IF NOT EXISTS prompt TEXT",
-      "ALTER TABLE tasks ADD COLUMN IF NOT EXISTS llm_response TEXT",
-      "ALTER TABLE tasks ADD COLUMN IF NOT EXISTS model TEXT",
-      "ALTER TABLE tasks ADD COLUMN IF NOT EXISTS section TEXT",
-      "ALTER TABLE tasks ADD COLUMN IF NOT EXISTS step_name TEXT",
+      'ALTER TABLE tasks ADD COLUMN IF NOT EXISTS content TEXT',
+      'ALTER TABLE tasks ADD COLUMN IF NOT EXISTS prompt TEXT',
+      'ALTER TABLE tasks ADD COLUMN IF NOT EXISTS llm_response TEXT',
+      'ALTER TABLE tasks ADD COLUMN IF NOT EXISTS model TEXT',
+      'ALTER TABLE tasks ADD COLUMN IF NOT EXISTS section TEXT',
+      'ALTER TABLE tasks ADD COLUMN IF NOT EXISTS step_name TEXT',
       "ALTER TABLE tasks ADD COLUMN IF NOT EXISTS priority TEXT DEFAULT 'medium'",
 
       // Add current_project_id to profiles table for tracking user's current project
-      "ALTER TABLE profiles ADD COLUMN IF NOT EXISTS current_project_id TEXT",
+      'ALTER TABLE profiles ADD COLUMN IF NOT EXISTS current_project_id TEXT',
 
       // Add context column to projects table for storing aggregated context
       "ALTER TABLE projects ADD COLUMN IF NOT EXISTS context TEXT DEFAULT ''",
 
       // Drop legacy columns that are no longer needed
-      "ALTER TABLE projects DROP COLUMN IF EXISTS ui_status",
-      "ALTER TABLE projects DROP COLUMN IF EXISTS icon",
-      "ALTER TABLE projects DROP COLUMN IF EXISTS color",
-      "ALTER TABLE projects DROP COLUMN IF EXISTS last_opened",
-      "ALTER TABLE projects DROP COLUMN IF EXISTS synced_at",
-      "ALTER TABLE projects DROP COLUMN IF EXISTS sync_status",
-      "ALTER TABLE projects DROP COLUMN IF EXISTS deleted_at",
-      "ALTER TABLE projects DROP COLUMN IF EXISTS version",
-      "ALTER TABLE projects DROP COLUMN IF EXISTS consumed_credits",
-      "ALTER TABLE projects DROP COLUMN IF EXISTS consumed_time",
-      "ALTER TABLE projects DROP COLUMN IF EXISTS current_step",
-      "ALTER TABLE projects DROP COLUMN IF EXISTS completed_steps",
-      "ALTER TABLE projects DROP COLUMN IF EXISTS step_name",
-      "ALTER TABLE projects DROP COLUMN IF EXISTS current_model",
-      "ALTER TABLE projects DROP COLUMN IF EXISTS current_section",
-      "ALTER TABLE projects DROP COLUMN IF EXISTS ui_progress",
-      "ALTER TABLE projects DROP COLUMN IF EXISTS ui_message",
-      "ALTER TABLE projects DROP COLUMN IF EXISTS current_prompt",
-      "ALTER TABLE projects DROP COLUMN IF EXISTS llm_response",
-      "ALTER TABLE projects DROP COLUMN IF EXISTS total_credits",
-      "ALTER TABLE projects DROP COLUMN IF EXISTS total_steps",
+      'ALTER TABLE projects DROP COLUMN IF EXISTS ui_status',
+      'ALTER TABLE projects DROP COLUMN IF EXISTS icon',
+      'ALTER TABLE projects DROP COLUMN IF EXISTS color',
+      'ALTER TABLE projects DROP COLUMN IF EXISTS last_opened',
+      'ALTER TABLE projects DROP COLUMN IF EXISTS synced_at',
+      'ALTER TABLE projects DROP COLUMN IF EXISTS sync_status',
+      'ALTER TABLE projects DROP COLUMN IF EXISTS deleted_at',
+      'ALTER TABLE projects DROP COLUMN IF EXISTS version',
+      'ALTER TABLE projects DROP COLUMN IF EXISTS consumed_credits',
+      'ALTER TABLE projects DROP COLUMN IF EXISTS consumed_time',
+      'ALTER TABLE projects DROP COLUMN IF EXISTS current_step',
+      'ALTER TABLE projects DROP COLUMN IF EXISTS completed_steps',
+      'ALTER TABLE projects DROP COLUMN IF EXISTS step_name',
+      'ALTER TABLE projects DROP COLUMN IF EXISTS current_model',
+      'ALTER TABLE projects DROP COLUMN IF EXISTS current_section',
+      'ALTER TABLE projects DROP COLUMN IF EXISTS ui_progress',
+      'ALTER TABLE projects DROP COLUMN IF EXISTS ui_message',
+      'ALTER TABLE projects DROP COLUMN IF EXISTS current_prompt',
+      'ALTER TABLE projects DROP COLUMN IF EXISTS llm_response',
+      'ALTER TABLE projects DROP COLUMN IF EXISTS total_credits',
+      'ALTER TABLE projects DROP COLUMN IF EXISTS total_steps',
     ];
 
     for (const migration of migrations) {
       try {
         await dbInstance.exec(migration);
       } catch (err) {
-        if (!err.message.includes('already exists') && !err.message.includes('no such column')) {
+        if (
+          !err.message.includes('already exists') &&
+          !err.message.includes('no such column')
+        ) {
           console.warn('Migration warning:', err.message);
         }
       }

@@ -53,13 +53,13 @@ async function loadFromStorage(projectId) {
       console.warn('loadFromStorage: No database available');
       return {};
     }
-    
+
     const tableExists = await ensureTableExists(db);
     if (!tableExists) {
       console.warn('loadFromStorage: Table does not exist');
       return {};
     }
-    
+
     const result = await db.query(
       'SELECT key, value FROM step_data WHERE project_id = $1 ORDER BY updated_at DESC',
       [projectId]
@@ -67,7 +67,8 @@ async function loadFromStorage(projectId) {
     const data = {};
     for (const row of result.rows) {
       try {
-        data[row.key] = typeof row.value === 'string' ? JSON.parse(row.value) : row.value;
+        data[row.key] =
+          typeof row.value === 'string' ? JSON.parse(row.value) : row.value;
       } catch (parseError) {
         data[row.key] = row.value;
       }
@@ -87,16 +88,16 @@ async function saveToStorage(data, projectId) {
       console.warn('saveToStorage: No database available');
       return;
     }
-    
+
     const tableExists = await ensureTableExists(db);
     if (!tableExists) {
       console.warn('step_data table does not exist, skipping save');
       return;
     }
-    
+
     await db.query('DELETE FROM step_data WHERE project_id = $1', [projectId]);
     const now = new Date().toISOString();
-    
+
     for (const [key, value] of Object.entries(data)) {
       const jsonValue = JSON.stringify(value);
       const id = `${projectId}_${key}`;
@@ -115,7 +116,11 @@ async function saveToStorage(data, projectId) {
 function deepMerge(target, source) {
   const result = { ...target };
   for (const key in source) {
-    if (source[key] && typeof source[key] === 'object' && !Array.isArray(source[key])) {
+    if (
+      source[key] &&
+      typeof source[key] === 'object' &&
+      !Array.isArray(source[key])
+    ) {
       result[key] = deepMerge(result[key] || {}, source[key]);
     } else {
       result[key] = source[key];
@@ -139,31 +144,31 @@ async function getStore(projectId) {
 async function updateStepData(projectId, newData) {
   // No console logs for normal operations to improve performance
   const { store, setStore } = await getStore(projectId);
-  
+
   // Preserve the original problem statement if it exists and newData doesn't have it
   const existingProblem = store?.problem;
   const dataWithProblem = { ...newData };
-  
+
   if (existingProblem && !dataWithProblem.problem) {
     console.log('updateStepData: Preserving existing problem statement');
     dataWithProblem.problem = existingProblem;
   }
-  
+
   // Also preserve originalProblem if it exists
   if (store?.originalProblem && !dataWithProblem.originalProblem) {
     console.log('updateStepData: Preserving original problem statement');
     dataWithProblem.originalProblem = store.originalProblem;
   }
-  
+
   const merged = deepMerge(store, dataWithProblem);
   // No console logs for normal operations to improve performance
-  
+
   // Update store synchronously
   setStore(merged);
-  
+
   // Save to storage asynchronously
   await saveToStorage(merged, projectId);
-  
+
   return merged;
 }
 

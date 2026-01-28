@@ -1,10 +1,9 @@
-
-
 // Explore page translations
 export const exploreTranslations = {
   en: {
     exploreProjects: 'Explore Projects',
-    discoverManageProjects: 'Discover and manage all your startup accelerator projects in one place.',
+    discoverManageProjects:
+      'Discover and manage all your startup accelerator projects in one place.',
     clickContinueProject: 'Click on any project to continue working on it.',
     searchProjects: 'Search projects...',
     allStatus: 'All Status',
@@ -17,7 +16,8 @@ export const exploreTranslations = {
     progress: 'Progress',
     loadingProjects: 'Loading projects...',
     noProjectsFound: 'No projects found',
-    tryAdjustingSearch: 'Try adjusting your search or filters to find what you\'re looking for.',
+    tryAdjustingSearch:
+      "Try adjusting your search or filters to find what you're looking for.",
     getStartedCreateProject: 'Get started by creating your first project!',
     createNewProject: 'Create New Project',
     totalProjects: 'total projects',
@@ -25,7 +25,8 @@ export const exploreTranslations = {
   },
   ar: {
     exploreProjects: 'استكشف المشاريع',
-    discoverManageProjects: 'اكتشف وأدر جميع مشاريع مسرع بدء الأعمال في مكان واحد.',
+    discoverManageProjects:
+      'اكتشف وأدر جميع مشاريع مسرع بدء الأعمال في مكان واحد.',
     clickContinueProject: 'انقر على أي مشروع للمتابعة العمل عليه.',
     searchProjects: 'البحث في المشاريع...',
     allStatus: 'جميع الحالات',
@@ -43,5 +44,5 @@ export const exploreTranslations = {
     createNewProject: 'إنشاء مشروع جديد',
     totalProjects: 'إجمالي المشاريع',
     inProgress: 'قيد التقدم',
-  }
+  },
 };

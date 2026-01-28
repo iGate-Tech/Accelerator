@@ -6,26 +6,31 @@ export async function _voteOnProject({ projectId, userId, voteType }) {
     return { action: 'mock', voteType };
   }
   try {
-     const existingVote = await dbInstance.query(
-       'SELECT id, vote_type FROM project_votes WHERE project_id = $1 AND user_id = $2',
-       [projectId, userId]
-     );
-     if (existingVote.rows.length > 0) {
-       const currentVote = existingVote.rows[0];
-       if (currentVote.vote_type === voteType) {
-         await dbInstance.query('DELETE FROM project_votes WHERE id = $1', [currentVote.id]);
-         return { action: 'removed', voteType: null };
-       } else {
-         await dbInstance.query('UPDATE project_votes SET vote_type = $1 WHERE id = $2', [voteType, currentVote.id]);
-         return { action: 'changed', voteType };
-       }
-     } else {
+    const existingVote = await dbInstance.query(
+      'SELECT id, vote_type FROM project_votes WHERE project_id = $1 AND user_id = $2',
+      [projectId, userId]
+    );
+    if (existingVote.rows.length > 0) {
+      const currentVote = existingVote.rows[0];
+      if (currentVote.vote_type === voteType) {
+        await dbInstance.query('DELETE FROM project_votes WHERE id = $1', [
+          currentVote.id,
+        ]);
+        return { action: 'removed', voteType: null };
+      } else {
         await dbInstance.query(
-          'INSERT INTO project_votes (project_id, user_id, vote_type, created_at) VALUES ($1, $2, $3, $4)',
-          [projectId, userId, voteType, new Date().toISOString()]
+          'UPDATE project_votes SET vote_type = $1 WHERE id = $2',
+          [voteType, currentVote.id]
         );
-       return { action: 'added', voteType };
-     }
+        return { action: 'changed', voteType };
+      }
+    } else {
+      await dbInstance.query(
+        'INSERT INTO project_votes (project_id, user_id, vote_type, created_at) VALUES ($1, $2, $3, $4)',
+        [projectId, userId, voteType, new Date().toISOString()]
+      );
+      return { action: 'added', voteType };
+    }
   } catch (err) {
     console.debug('Error voting on project:', err);
     throw err;
@@ -37,12 +42,15 @@ export async function _getProjectVotes({ projectId }) {
     return [];
   }
   try {
-     const res = await dbInstance.query(`
+    const res = await dbInstance.query(
+      `
        SELECT vote_type, COUNT(*) as count
        FROM project_votes
        WHERE project_id = $1
        GROUP BY vote_type
-     `, [projectId]);
+     `,
+      [projectId]
+    );
     return res.rows;
   } catch (err) {
     console.debug('Error getting project votes:', err);
@@ -55,7 +63,8 @@ export async function _getPublicProjectsWithVotes({ currentUserId }) {
     return [];
   }
   try {
-    const res = await dbInstance.query(`
+    const res = await dbInstance.query(
+      `
       SELECT
         p.*,
         COALESCE(v.user_vote, null) as user_vote,
@@ -77,7 +86,9 @@ export async function _getPublicProjectsWithVotes({ currentUserId }) {
       ) vs ON p.id = vs.project_id
       WHERE p.public = 1
       ORDER BY (COALESCE(vs.upvotes, 0) - COALESCE(vs.downvotes, 0)) DESC, p.last_modified DESC
-    `, [currentUserId]);
+    `,
+      [currentUserId]
+    );
     return res.rows;
   } catch (err) {
     console.debug('Error getting public projects with votes:', err);
@@ -90,7 +101,9 @@ export async function _getPublicProjects() {
     return [];
   }
   try {
-    const res = await dbInstance.query('SELECT * FROM projects WHERE public = 1 ORDER BY last_modified DESC');
+    const res = await dbInstance.query(
+      'SELECT * FROM projects WHERE public = 1 ORDER BY last_modified DESC'
+    );
     return res.rows;
   } catch (err) {
     console.debug('Error getting public projects:', err);
@@ -103,7 +116,10 @@ export async function _getProjectByName({ name }) {
     return null;
   }
   try {
-    const res = await dbInstance.query('SELECT * FROM projects WHERE name = $1', [name]);
+    const res = await dbInstance.query(
+      'SELECT * FROM projects WHERE name = $1',
+      [name]
+    );
     return res.rows[0] || null;
   } catch (err) {
     console.debug('Error getting project by name:', err);

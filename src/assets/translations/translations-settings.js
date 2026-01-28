@@ -41,7 +41,8 @@ export const settingsTranslations = {
     enable2FA: 'Enable 2FA',
     disable2FA: 'Disable 2FA',
     exportDataDesc: 'Download a copy of all your data',
-    exportDataFullDesc: 'Download a copy of all your data including projects, settings, and usage history.',
+    exportDataFullDesc:
+      'Download a copy of all your data including projects, settings, and usage history.',
     deleteAccountDesc: 'Irreversible and destructive actions',
     dangerZoneDesc: 'Irreversible and destructive actions',
     save: 'Save',
@@ -143,7 +144,8 @@ export const settingsTranslations = {
     enable2FA: 'تفعيل المصادقة الثنائية',
     disable2FA: 'تعطيل المصادقة الثنائية',
     exportDataDesc: 'تحميل نسخة من جميع بياناتك',
-    exportDataFullDesc: 'تحميل نسخة من جميع بياناتك بما في ذلك المشاريع والإعدادات وسجل الاستخدام.',
+    exportDataFullDesc:
+      'تحميل نسخة من جميع بياناتك بما في ذلك المشاريع والإعدادات وسجل الاستخدام.',
     deleteAccountDesc: 'إجراءات لا رجعة فيها ومدمرة',
     dangerZoneDesc: 'إجراءات لا رجعة فيها ومدمرة',
     save: 'حفظ',
@@ -204,5 +206,5 @@ export const settingsTranslations = {
     billingUpdate: 'تحديث الفوترة',
     creditsUpdate: 'تحديث الاعتمادات',
     notification: 'إشعار',
-  }
+  },
 };

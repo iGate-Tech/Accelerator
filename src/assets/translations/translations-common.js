@@ -23,17 +23,19 @@ export const navigationTranslations = {
     packages: 'الباقات',
     credits: 'الاعتمادات',
     billing: 'الفواتير',
-  }
+  },
 };
 
 // General/common translations
 export const commonTranslations = {
   en: {
     // Home page
-    title: "Hi <span class='text-primary'>Demo</span>, what's your next big idea?",
+    title:
+      "Hi <span class='text-primary'>Demo</span>, what's your next big idea?",
     placeholder: 'Enter prompt...',
     quickAccess: 'Quick Access',
-    acceleratorDesc: 'Comprehensive main dashboard with key metrics and insights',
+    acceleratorDesc:
+      'Comprehensive main dashboard with key metrics and insights',
     studioDesc: 'Advanced portfolio management tools for tracking investments',
     servicesDesc: 'Access to professional services and expert consultations',
     ventureDesc: 'Explore innovative business models and strategies',
@@ -75,17 +77,19 @@ export const commonTranslations = {
 
     // Home component
     initializationComplete: 'Initialization complete. Starting step 1...',
-    improvePrompt: 'Improve this startup idea for better clarity, specificity, and market potential. Start with the improved idea name followed by \': \' and then provide a concise description in simple English, in only 3 lines. Do not generate in markdown:',
-    suggestPrompt: 'Suggest a compelling startup idea in the legal tech space. Start with the idea name followed by \': \' and then provide a brief description, target market, and unique value proposition in simple English, in only 3 lines. Do not generate in markdown.',
+    improvePrompt:
+      "Improve this startup idea for better clarity, specificity, and market potential. Start with the improved idea name followed by ': ' and then provide a concise description in simple English, in only 3 lines. Do not generate in markdown:",
+    suggestPrompt:
+      "Suggest a compelling startup idea in the legal tech space. Start with the idea name followed by ': ' and then provide a brief description, target market, and unique value proposition in simple English, in only 3 lines. Do not generate in markdown.",
     uiMessage: 'Ready to start the 59-step accelerator process',
 
     // Agent interface
     agentPaused: 'Agent is paused. Click Resume to continue.',
     improveWithAI: 'Improve with AI',
     aiSuggestion: 'AI Suggestion',
-    greetingPrefix: "Hi",
+    greetingPrefix: 'Hi',
     greetingSuffix: ", what's your next amazing idea?",
-    agentPlaceholder: "Enter your problem statement here...",
+    agentPlaceholder: 'Enter your problem statement here...',
 
     // Notifications page
     browserNotificationsTitle: 'Browser Notifications',
@@ -97,7 +101,8 @@ export const commonTranslations = {
   },
   ar: {
     // Home page
-    title: 'مرحبا <span class="text-primary">Demo</span>، ما فكرتك التالية الكبيرة؟',
+    title:
+      'مرحبا <span class="text-primary">Demo</span>، ما فكرتك التالية الكبيرة؟',
     placeholder: 'أدخل الطلب...',
     quickAccess: 'وصول سريع',
     acceleratorDesc: 'لوحة تحكم رئيسية شاملة مع المقاييس والرؤى الرئيسية',
@@ -142,17 +147,19 @@ export const commonTranslations = {
 
     // Home component
     initializationComplete: 'اكتملت التهيئة. بدء الخطوة 1...',
-    improvePrompt: 'حسّن فكرة العمل هذه لتحسين الوضوح والتحديد وإمكانية السوق. ابدأ باسم الفكرة المحسنة متبوعاً بـ \': \' ثم قدم وصفاً موجزاً بالإنجليزية البسيطة، في 3 أسطر فقط. لا تنشئ بتنسيق markdown:',
-    suggestPrompt: 'اقترح فكرة عمل جذابة في مجال التكنولوجيا القانونية. ابدأ باسم الفكرة متبوعاً بـ \': \' ثم قدم وصفاً موجزاً، السوق المستهدف، والقيمة الفريدة بالإنجليزية البسيطة، في 3 أسطر فقط. لا تنشئ بتنسيق markdown.',
+    improvePrompt:
+      "حسّن فكرة العمل هذه لتحسين الوضوح والتحديد وإمكانية السوق. ابدأ باسم الفكرة المحسنة متبوعاً بـ ': ' ثم قدم وصفاً موجزاً بالإنجليزية البسيطة، في 3 أسطر فقط. لا تنشئ بتنسيق markdown:",
+    suggestPrompt:
+      "اقترح فكرة عمل جذابة في مجال التكنولوجيا القانونية. ابدأ باسم الفكرة متبوعاً بـ ': ' ثم قدم وصفاً موجزاً، السوق المستهدف، والقيمة الفريدة بالإنجليزية البسيطة، في 3 أسطر فقط. لا تنشئ بتنسيق markdown.",
     uiMessage: 'جاهز لبدء عملية المسرع المكونة من 59 خطوة',
 
     // Agent interface
     agentPaused: 'الوكيل متوقف مؤقتاً. انقر استئناف للمتابعة.',
     improveWithAI: 'تحسين بالذكاء الاصطناعي',
     aiSuggestion: 'اقتراح ذكاء اصطناعي',
-    greetingPrefix: "مرحباً",
-    greetingSuffix: "، ما هي فكرتك الرائعة التالية؟",
-    agentPlaceholder: "أدخل بيان المشكلة هنا...",
+    greetingPrefix: 'مرحباً',
+    greetingSuffix: '، ما هي فكرتك الرائعة التالية؟',
+    agentPlaceholder: 'أدخل بيان المشكلة هنا...',
 
     // Notifications page
     browserNotificationsTitle: 'إشعارات المتصفح',
@@ -161,5 +168,5 @@ export const commonTranslations = {
     // Sidebar navigation
     apps: 'التطبيقات',
     collaborate: 'التعاون',
-  }
+  },
 };

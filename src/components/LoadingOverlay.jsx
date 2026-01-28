@@ -1,7 +1,7 @@
-import { createSignal, onMount, onCleanup } from "solid-js";
-import { logger } from "@lib/core";
+import { createSignal, onMount, onCleanup, Show } from 'solid-js';
+import { logger } from '@lib/core';
 
-const LoadingOverlay = (props) => {
+const LoadingOverlay = props => {
   const [show, setShow] = createSignal(false);
   const [timedOut, setTimedOut] = createSignal(false);
 
@@ -38,10 +38,12 @@ const LoadingOverlay = (props) => {
   return (
     <Show when={show()}>
       <div class="loading-overlay">
-        <div class="loading-container rounded-lg p-6 shadow-lg max-w-sm mx-4">
+        <div class="loading-container mx-4 max-w-sm rounded-lg p-6 shadow-lg">
           <div class="flex flex-col items-center space-y-4">
-            <div class="loading loading-spinner loading-lg text-primary"></div>
-            <span class="text-lg text-center">{props.message || "Loading..."}</span>
+            <div class="loading loading-spinner loading-lg text-primary" />
+            <span class="text-center text-lg">
+              {props.message || 'Loading...'}
+            </span>
           </div>
         </div>
       </div>

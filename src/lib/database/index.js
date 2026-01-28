@@ -1,5 +1,16 @@
 // Database module exports
-export { dbInstance, dbReady, initDatabase, query, exec, close, getPg, ensureDatabaseReady, safeQuery, getDbStatus } from './core.js';
+export {
+  dbInstance,
+  dbReady,
+  initDatabase,
+  query,
+  exec,
+  close,
+  getPg,
+  ensureDatabaseReady,
+  safeQuery,
+  getDbStatus,
+} from './core.js';
 export { updateEntity, getEntities, createSchema } from './operations.js';
 import { dbInstance } from './core.js';
 
@@ -11,7 +22,7 @@ export const getProjects = async (userId = null) => {
     userId = user?.id;
   }
   if (!userId) return [];
-  
+
   // Ensure database is initialized before querying
   try {
     const { ensureDatabaseReady } = await import('./core.js');
@@ -20,7 +31,7 @@ export const getProjects = async (userId = null) => {
     console.warn('Failed to initialize database:', e);
     return [];
   }
-  
+
   const { _getProjects } = await import('./projects.js');
   return await _getProjects({ userId });
 };
@@ -30,12 +41,12 @@ export const getUserActivities = async (userId, limit = 50, offset = 0) => {
   return await _getUserActivities({ userId, limit, offset });
 };
 
-export const getPublicProjectsWithVotes = async (currentUserId) => {
+export const getPublicProjectsWithVotes = async currentUserId => {
   const { _getPublicProjectsWithVotes } = await import('./votes.js');
   return await _getPublicProjectsWithVotes({ currentUserId });
 };
 
-export const getSessionByToken = async (token) => {
+export const getSessionByToken = async token => {
   const { _getSessionByToken } = await import('./seeding.js');
   return await _getSessionByToken({ token });
 };
@@ -45,22 +56,27 @@ export const createSession = async (userId, token, expiresAt) => {
   return await _createSession({ userId, token, expiresAt });
 };
 
-export const deleteSession = async (token) => {
+export const deleteSession = async token => {
   const { _deleteSession } = await import('./seeding.js');
   return await _deleteSession({ token });
 };
 
-export const getUserById = async (id) => {
+export const getUserById = async id => {
   const { _getUserById } = await import('./users.js');
   return await _getUserById({ id });
 };
 
-export const getUserByEmail = async (email) => {
+export const getUserByEmail = async email => {
   const { _getUserByEmail } = await import('./users.js');
   return await _getUserByEmail({ email });
 };
 
-export const createUser = async (email, passwordHash, profile = {}, userId = null) => {
+export const createUser = async (
+  email,
+  passwordHash,
+  profile = {},
+  userId = null
+) => {
   const { _createUser } = await import('./users.js');
   return await _createUser({ email, passwordHash, profile, userId });
 };
@@ -86,7 +102,7 @@ export const updateProject = async (id, project) => {
   return await _updateProject({ id, updates: project });
 };
 
-export const deleteProject = async (id) => {
+export const deleteProject = async id => {
   const { _deleteProject } = await import('./projects.js');
   return await _deleteProject({ id });
 };
@@ -129,7 +145,7 @@ export const exportAllData = async (userId = null) => {
     userId = user.id;
   }
   if (!userId) return null;
-  
+
   try {
     // Ensure database is initialized
     const { ensureDatabaseReady } = await import('./core.js');
@@ -138,7 +154,7 @@ export const exportAllData = async (userId = null) => {
     // Get user credentials (email and password hash)
     const { _getUserById } = await import('./users.js');
     const userData = await _getUserById({ id: userId });
-    
+
     const projects = await exportAllProjects(userId);
     const profile = await getUserProfile(userId);
     const { getUserActivities } = await import('./index.js');
@@ -152,7 +168,7 @@ export const exportAllData = async (userId = null) => {
         // Password hash cannot be used for login but is included for backup completeness
         // The plaintext password is not stored anywhere
         passwordHash: userData?.password_hash || '',
-        note: 'Password hash is stored but cannot be used to login. Use your current password to restore access.'
+        note: 'Password hash is stored but cannot be used to login. Use your current password to restore access.',
       },
 
       // Personal data - include avatar with base64 image
@@ -166,7 +182,7 @@ export const exportAllData = async (userId = null) => {
         avatar: profile?.avatar, // Base64 encoded image
         preferences: profile?.preferences,
         createdAt: profile?.created_at,
-        lastModified: profile?.last_modified
+        lastModified: profile?.last_modified,
       },
 
       // Projects and content
@@ -176,12 +192,13 @@ export const exportAllData = async (userId = null) => {
       tasks: projects?.tasks || [],
 
       // Activity history (for transparency)
-      activities: activities?.map(activity => ({
-        actionType: activity.action_type,
-        description: activity.description,
-        timestamp: activity.created_at,
-        metadata: activity.metadata
-      })) || [],
+      activities:
+        activities?.map(activity => ({
+          actionType: activity.action_type,
+          description: activity.description,
+          timestamp: activity.created_at,
+          metadata: activity.metadata,
+        })) || [],
 
       // Export metadata
       exportMetadata: {
@@ -192,9 +209,9 @@ export const exportAllData = async (userId = null) => {
           article20: 'Right to Data Portability',
           article17: 'Right to Erasure (Data Deletion)',
           exportFormat: 'JSON',
-          retentionPolicy: 'Data retained until account deletion'
-        }
-      }
+          retentionPolicy: 'Data retained until account deletion',
+        },
+      },
     };
   } catch (error) {
     console.error('Failed to export all data:', error);
@@ -202,42 +219,61 @@ export const exportAllData = async (userId = null) => {
   }
 };
 
-export const getUserCredits = async (userId) => {
+export const getUserCredits = async userId => {
   const { _getUserCredits } = await import('./credits.js');
   return await _getUserCredits({ userId });
 };
 
-export const getUserCreditBalance = async (userId) => {
+export const getUserCreditBalance = async userId => {
   const { _getUserCreditBalance } = await import('./credits.js');
   return await _getUserCreditBalance({ userId });
 };
 
-export const addCreditTransaction = async (userId, type, amount, description) => {
+export const addCreditTransaction = async (
+  userId,
+  type,
+  amount,
+  description
+) => {
   const { _addCreditTransaction } = await import('./credits.js');
   return await _addCreditTransaction({ userId, type, amount, description });
 };
 
-export const logActivity = async (userId, actionType, entityType, entityId, description, metadata = {}) => {
+export const logActivity = async (
+  userId,
+  actionType,
+  entityType,
+  entityId,
+  description,
+  metadata = {}
+) => {
   const { _logActivity } = await import('./activities.js');
-  return await _logActivity({ userId, actionType, entityType, entityId, description, metadata });
+  return await _logActivity({
+    userId,
+    actionType,
+    entityType,
+    entityId,
+    description,
+    metadata,
+  });
 };
 
-export const getUserNotifications = async (userId) => {
+export const getUserNotifications = async userId => {
   const { _getUserNotifications } = await import('./activities.js');
   return await _getUserNotifications({ userId });
 };
 
-export const getCreditBalance = async (userId) => {
+export const getCreditBalance = async userId => {
   const { _getCreditBalance } = await import('./credits.js');
   return await _getCreditBalance({ userId });
 };
 
-export const getUserSubscription = async (userId) => {
+export const getUserSubscription = async userId => {
   const { _getUserSubscription } = await import('./packages.js');
   return await _getUserSubscription({ userId });
 };
 
-export const exportProject = async (projectId) => {
+export const exportProject = async projectId => {
   try {
     // Ensure database is initialized
     const { ensureDatabaseReady } = await import('./core.js');
@@ -253,7 +289,7 @@ export const exportProject = async (projectId) => {
     return {
       project,
       tasks,
-      exportedAt: new Date().toISOString()
+      exportedAt: new Date().toISOString(),
     };
   } catch (error) {
     console.error('Error exporting project:', error);
@@ -261,7 +297,7 @@ export const exportProject = async (projectId) => {
   }
 };
 
-export const exportReports = async (projectId) => {
+export const exportReports = async projectId => {
   try {
     // Ensure database is initialized
     const { ensureDatabaseReady } = await import('./core.js');
@@ -285,7 +321,7 @@ export const exportReports = async (projectId) => {
       totalTasks,
       completedTasks,
       createdAt: project.created_at,
-      exportedAt: new Date().toISOString()
+      exportedAt: new Date().toISOString(),
     };
   } catch (error) {
     console.error('Error exporting report:', error);
@@ -303,12 +339,13 @@ export const voteOnProject = async (projectId, userId, voteType) => {
   return await _voteOnProject({ projectId, userId, voteType });
 };
 
-export const toggleProjectPublic = async (id) => {
-  const { toggleProjectPublic: _toggleProjectPublic } = await import('./operations.js');
+export const toggleProjectPublic = async id => {
+  const { toggleProjectPublic: _toggleProjectPublic } =
+    await import('./operations.js');
   return await _toggleProjectPublic({ id });
 };
 
-export const getUserProfile = async (userId) => {
+export const getUserProfile = async userId => {
   const { _getUserProfile } = await import('./users.js');
   return await _getUserProfile({ userId });
 };
@@ -318,7 +355,7 @@ export const createUserProfile = async (userId, profileData = {}) => {
   return await _createUserProfile({ userId, profileData });
 };
 
-export const setCurrentUser = async (user) => {
+export const setCurrentUser = async user => {
   const { setCurrentUser: _setCurrentUser } = await import('../db.js');
   return await _setCurrentUser(user);
 };
@@ -329,12 +366,14 @@ export const consumeCredits = async (userId, amount, description) => {
 };
 
 export const getGroupsWithProjects = async (userId = null) => {
-  const { getGroupsWithProjects: _getGroupsWithProjects } = await import('./operations.js');
+  const { getGroupsWithProjects: _getGroupsWithProjects } =
+    await import('./operations.js');
   return await _getGroupsWithProjects({ userId });
 };
 
 export const getUngroupedProjects = async (userId = null) => {
-  const { getUngroupedProjects: _getUngroupedProjects } = await import('./operations.js');
+  const { getUngroupedProjects: _getUngroupedProjects } =
+    await import('./operations.js');
   return await _getUngroupedProjects({ userId });
 };
 
@@ -353,43 +392,62 @@ export const updateGroup = async (id, group) => {
   return await _updateGroup({ id, group });
 };
 
-export const deleteGroup = async (id) => {
+export const deleteGroup = async id => {
   const { deleteGroup: _deleteGroup } = await import('./operations.js');
   return await _deleteGroup({ id });
 };
 
 export const addProjectToGroup = async (projectId, groupId) => {
-  const { addProjectToGroup: _addProjectToGroup } = await import('./operations.js');
+  const { addProjectToGroup: _addProjectToGroup } =
+    await import('./operations.js');
   return await _addProjectToGroup({ projectId, groupId });
 };
 
 export const removeProjectFromGroup = async (projectId, groupId) => {
-  const { removeProjectFromGroup: _removeProjectFromGroup } = await import('./operations.js');
+  const { removeProjectFromGroup: _removeProjectFromGroup } =
+    await import('./operations.js');
   return await _removeProjectFromGroup({ projectId, groupId });
 };
 
-export const inviteCollaborator = async (portfolioId, inviteeEmail, role = 'editor', message = '', inviterId) => {
-  const { inviteCollaborator: _inviteCollaborator } = await import('./operations.js');
-  return await _inviteCollaborator({ portfolioId, inviteeEmail, role, message, inviterId });
+export const inviteCollaborator = async (
+  portfolioId,
+  inviteeEmail,
+  role = 'editor',
+  message = '',
+  inviterId
+) => {
+  const { inviteCollaborator: _inviteCollaborator } =
+    await import('./operations.js');
+  return await _inviteCollaborator({
+    portfolioId,
+    inviteeEmail,
+    role,
+    message,
+    inviterId,
+  });
 };
 
-export const getPortfolioInvitations = async (portfolioId) => {
-  const { getPortfolioInvitations: _getPortfolioInvitations } = await import('./operations.js');
+export const getPortfolioInvitations = async portfolioId => {
+  const { getPortfolioInvitations: _getPortfolioInvitations } =
+    await import('./operations.js');
   return await _getPortfolioInvitations({ portfolioId });
 };
 
-export const getPortfolioCollaborators = async (portfolioId) => {
-  const { getPortfolioCollaborators: _getPortfolioCollaborators } = await import('./operations.js');
+export const getPortfolioCollaborators = async portfolioId => {
+  const { getPortfolioCollaborators: _getPortfolioCollaborators } =
+    await import('./operations.js');
   return await _getPortfolioCollaborators({ portfolioId });
 };
 
 export const removeCollaborator = async (portfolioId, userId) => {
-  const { removeCollaborator: _removeCollaborator } = await import('./operations.js');
+  const { removeCollaborator: _removeCollaborator } =
+    await import('./operations.js');
   return await _removeCollaborator({ portfolioId, userId });
 };
 
 export const updateCollaboratorRole = async (portfolioId, userId, role) => {
-  const { updateCollaboratorRole: _updateCollaboratorRole } = await import('./operations.js');
+  const { updateCollaboratorRole: _updateCollaboratorRole } =
+    await import('./operations.js');
   return await _updateCollaboratorRole({ portfolioId, userId, role });
 };
 
@@ -403,22 +461,28 @@ export const seedPackages = async () => {
   return await _seedPackages();
 };
 
-export const createUserSubscription = async (userId, packageId, subscriptionData = {}) => {
-  const { createUserSubscription: _createUserSubscription } = await import('./operations.js');
+export const createUserSubscription = async (
+  userId,
+  packageId,
+  subscriptionData = {}
+) => {
+  const { createUserSubscription: _createUserSubscription } =
+    await import('./operations.js');
   return await _createUserSubscription({ userId, packageId, subscriptionData });
 };
 
-export const getUserBilling = async (userId) => {
+export const getUserBilling = async userId => {
   const { getUserBilling: _getUserBilling } = await import('./operations.js');
   return await _getUserBilling({ userId });
 };
 
 export const markNotificationRead = async (notificationId, userId) => {
-  const { markNotificationRead: _markNotificationRead } = await import('./operations.js');
+  const { markNotificationRead: _markNotificationRead } =
+    await import('./operations.js');
   return await _markNotificationRead({ notificationId, userId });
 };
 
-export const getUserInvitations = async (userEmail) => {
+export const getUserInvitations = async userEmail => {
   const { _getUserInvitations } = await import('./collaboration.js');
   return await _getUserInvitations({ userEmail });
 };
@@ -449,17 +513,17 @@ export const clearAllTasks = async () => {
   return await _clearAllTasks({});
 };
 
-export const getProjectById = async (id) => {
+export const getProjectById = async id => {
   const { _getProjectById } = await import('./operations.js');
   return await _getProjectById({ id });
 };
 
-export const getProjectByName = async (name) => {
+export const getProjectByName = async name => {
   const { _getProjectByName } = await import('./votes.js');
   return await _getProjectByName({ name });
 };
 
-export const getTasks = async (projectId) => {
+export const getTasks = async projectId => {
   const { getTasks } = await import('./operations.js');
   return await getTasks({ projectId });
 };
@@ -469,7 +533,7 @@ export const updateTask = async (id, updates) => {
   return await _updateTask({ id, ...updates });
 };
 
-export const deleteTask = async (id) => {
+export const deleteTask = async id => {
   await dbInstance.query(`DELETE FROM tasks WHERE id = $1`, [id]);
 };
 
@@ -546,7 +610,7 @@ export const importAllData = async (backupData, userId) => {
     profileImported: false,
     projectsImported: 0,
     tasksImported: 0,
-    errors: []
+    errors: [],
   };
 
   try {
@@ -560,9 +624,10 @@ export const importAllData = async (backupData, userId) => {
           name: backupData.profile.name,
           bio: backupData.profile.bio,
           avatar: backupData.profile.avatar,
-          preferences: typeof backupData.profile.preferences === 'string' 
-            ? JSON.parse(backupData.profile.preferences) 
-            : backupData.profile.preferences
+          preferences:
+            typeof backupData.profile.preferences === 'string'
+              ? JSON.parse(backupData.profile.preferences)
+              : backupData.profile.preferences,
         });
         summary.profileImported = true;
       } catch (error) {

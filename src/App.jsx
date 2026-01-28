@@ -1,34 +1,39 @@
-import { Router, Route, Navigate } from "@solidjs/router";
-import { lazy, Suspense, Show, useContext } from "solid-js";
-import { LangProvider, LangContext } from "./context/LangContext";
-import { UserProvider, useUser } from "./context/UserContext";
-import { GlobalConfirm as ConfirmModal, ConsentBanner, GlobalErrorDisplay, SupportModal, MainLayout, AuthLayout } from "./components";
+import { Router, Route, Navigate } from '@solidjs/router';
+import { lazy, Suspense, Show, useContext } from 'solid-js';
+import { LangProvider, LangContext } from './context/LangContext';
+import { UserProvider, useUser } from './context/UserContext';
+import {
+  GlobalConfirm as ConfirmModal,
+  ConsentBanner,
+  GlobalErrorDisplay,
+  SupportModal,
+  MainLayout,
+  AuthLayout,
+} from './components';
 
+const Home = lazy(() => import('./pages/Home'));
+const OpenedProject = lazy(() => import('./pages/OpenedProject'));
+const Dashboard = lazy(() => import('./pages/Dashboard'));
+const Explore = lazy(() => import('./pages/Explore'));
+const Portfolio = lazy(() => import('./pages/Portfolio'));
+const Help = lazy(() => import('./pages/Help'));
+const Settings = lazy(() => import('./pages/Settings'));
+const Profile = lazy(() => import('./pages/Profile'));
+const Packages = lazy(() => import('./pages/Packages'));
+const Credits = lazy(() => import('./pages/Credits'));
+const Billing = lazy(() => import('./pages/Billing'));
+const Login = lazy(() => import('./pages/Login'));
+const Signup = lazy(() => import('./pages/Signup'));
+const ForgotPassword = lazy(() => import('./pages/ForgotPassword'));
+const ResetPassword = lazy(() => import('./pages/ResetPassword'));
+const PrivacyPolicy = lazy(() => import('./components/PrivacyPolicy'));
+const TermsOfService = lazy(() => import('./components/TermsOfService'));
+const StatusPage = lazy(() => import('./components/StatusPage'));
+const Changelog = lazy(() => import('./components/Changelog'));
+const Notifications = lazy(() => import('./components/Notifications'));
+const Invitations = lazy(() => import('./pages/Invitations'));
 
-
-const Home = lazy(() => import("./pages/Home"));
-const OpenedProject = lazy(() => import("./pages/OpenedProject"));
-const Dashboard = lazy(() => import("./pages/Dashboard"));
-const Explore = lazy(() => import("./pages/Explore"));
-const Portfolio = lazy(() => import("./pages/Portfolio"));
-const Help = lazy(() => import("./pages/Help"));
-const Settings = lazy(() => import("./pages/Settings"));
-const Profile = lazy(() => import("./pages/Profile"));
-const Packages = lazy(() => import("./pages/Packages"));
-const Credits = lazy(() => import("./pages/Credits"));
-const Billing = lazy(() => import("./pages/Billing"));
-const Login = lazy(() => import("./pages/Login"));
-const Signup = lazy(() => import("./pages/Signup"));
-const ForgotPassword = lazy(() => import("./pages/ForgotPassword"));
-const ResetPassword = lazy(() => import("./pages/ResetPassword"));
-const PrivacyPolicy = lazy(() => import("./components/PrivacyPolicy"));
-const TermsOfService = lazy(() => import("./components/TermsOfService"));
-const StatusPage = lazy(() => import("./components/StatusPage"));
-const Changelog = lazy(() => import("./components/Changelog"));
-const Notifications = lazy(() => import("./components/Notifications"));
-const Invitations = lazy(() => import("./pages/Invitations"));
-
-const ProtectedRoute = (props) => {
+const ProtectedRoute = props => {
   const { isAuthenticated } = useUser();
   return (
     <Show when={isAuthenticated()} fallback={<Navigate href="/auth/login" />}>
@@ -37,7 +42,7 @@ const ProtectedRoute = (props) => {
   );
 };
 
-const AuthRoute = (props) => {
+const AuthRoute = props => {
   const { isAuthenticated } = useUser();
   return (
     <Show when={!isAuthenticated()} fallback={<Navigate href="/" />}>
@@ -108,22 +113,38 @@ function ResetPasswordPage() {
 
 const AppContent = () => {
   const { langKey } = useContext(LangContext);
-  
+
   return (
     <UserProvider>
       <ConfirmModal />
-      <Suspense fallback={<div class="flex items-center justify-center h-screen"><div class="loading loading-spinner loading-lg"></div></div>}>
+      <Suspense
+        fallback={
+          <div class="flex h-screen items-center justify-center">
+            <div class="loading loading-spinner loading-lg" />
+          </div>
+        }
+      >
         <Router key={langKey()}>
           <Route path="/auth" component={AuthLayout}>
             <Route path="/login" component={LoginPage} />
             <Route path="/signup" component={SignupPage} />
             <Route path="/forgot-password" component={ForgotPasswordPage} />
-            <Route path="/auth/reset-password/:token" component={ResetPasswordPage} />
+            <Route
+              path="/auth/reset-password/:token"
+              component={ResetPasswordPage}
+            />
           </Route>
-          <Route path="/" component={() => {
-            const { isAuthenticated } = useUser();
-            return isAuthenticated() ? <Navigate href="/home" /> : <Navigate href="/auth/login" />;
-          }} />
+          <Route
+            path="/"
+            component={() => {
+              const { isAuthenticated } = useUser();
+              return isAuthenticated() ? (
+                <Navigate href="/home" />
+              ) : (
+                <Navigate href="/auth/login" />
+              );
+            }}
+          />
           <Route path="/home" component={MainLayout}>
             <Route path="" component={HomePage} />
           </Route>

@@ -1,7 +1,10 @@
 import { v4 as uuidv4 } from 'uuid';
 import { dbInstance } from './core.js';
 import { updateEntity } from './operations.js';
-import { extractHighlightedText, generateContextString } from '../ui/llm-template.js';
+import {
+  extractHighlightedText,
+  generateContextString,
+} from '../ui/llm-template.js';
 
 // Project management functions
 export async function _createProject({ project, userId }) {
@@ -10,14 +13,24 @@ export async function _createProject({ project, userId }) {
     const { validateAndSanitizeDbInput } = await import('../auth/security.js');
 
     // Validate and sanitize project inputs
-    const nameValidation = validateAndSanitizeDbInput(project.name, 'project name');
+    const nameValidation = validateAndSanitizeDbInput(
+      project.name,
+      'project name'
+    );
     if (!nameValidation.valid) {
-      throw new Error(`Project name validation failed: ${nameValidation.reason}`);
+      throw new Error(
+        `Project name validation failed: ${nameValidation.reason}`
+      );
     }
 
-    const descValidation = validateAndSanitizeDbInput(project.description, 'project description');
+    const descValidation = validateAndSanitizeDbInput(
+      project.description,
+      'project description'
+    );
     if (!descValidation.valid) {
-      throw new Error(`Project description validation failed: ${descValidation.reason}`);
+      throw new Error(
+        `Project description validation failed: ${descValidation.reason}`
+      );
     }
 
     const id = uuidv4();
@@ -26,7 +39,7 @@ export async function _createProject({ project, userId }) {
     const completedSteps = parseInt(project.completedSteps, 10) || 0;
     const consumedCredits = parseInt(project.consumedCredits, 10) || 0;
     const totalCredits = parseInt(project.totalCredits, 10) || 600;
-    
+
     const values = [
       id,
       nameValidation.sanitized,
@@ -36,17 +49,20 @@ export async function _createProject({ project, userId }) {
       now,
       now,
       project.public ? 1 : 0,
-      project.context || ''
+      project.context || '',
     ];
-    
-    const res = await dbInstance.query(`
+
+    const res = await dbInstance.query(
+      `
       INSERT INTO projects (
         id, name, description, user_id, status, created_at, last_modified, public, context
       )
       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
       RETURNING *
-    `, values);
-    
+    `,
+      values
+    );
+
     return res.rows[0];
   } catch (err) {
     console.error('DB error in createProject:', err);
@@ -65,12 +81,15 @@ export async function _getProjectById({ id }) {
       return null;
     }
   }
-  
+
   if (!dbInstance) return null;
-  
+
   try {
     console.log('Getting project by id:', id);
-    const result = await dbInstance.query('SELECT * FROM projects WHERE id = $1', [id]);
+    const result = await dbInstance.query(
+      'SELECT * FROM projects WHERE id = $1',
+      [id]
+    );
     console.log('Project query result:', result.rows);
     return result.rows[0] || null;
   } catch (err) {
@@ -90,7 +109,13 @@ export async function _updateProject({ id, updates }) {
     const { validateAndSanitizeDbInput } = await import('../auth/security.js');
 
     const allowedFields = [
-      'name', 'description', 'status', 'last_modified', 'public', 'context', 'content'
+      'name',
+      'description',
+      'status',
+      'last_modified',
+      'public',
+      'context',
+      'content',
     ];
 
     const setClauses = [];
@@ -101,10 +126,16 @@ export async function _updateProject({ id, updates }) {
     let currentProject = null;
     if (updates.content || updates.context) {
       try {
-        const result = await dbInstance.query('SELECT context FROM projects WHERE id = $1', [id]);
+        const result = await dbInstance.query(
+          'SELECT context FROM projects WHERE id = $1',
+          [id]
+        );
         currentProject = result.rows[0];
       } catch (err) {
-        console.warn('Could not fetch current project for context update:', err.message);
+        console.warn(
+          'Could not fetch current project for context update:',
+          err.message
+        );
       }
     }
 
@@ -158,7 +189,10 @@ export async function _updateProject({ id, updates }) {
         }
 
         // Validate and sanitize the value
-        const validation = validateAndSanitizeDbInput(primitiveValue, `project ${key}`);
+        const validation = validateAndSanitizeDbInput(
+          primitiveValue,
+          `project ${key}`
+        );
         if (!validation.valid) {
           // Skip invalid values instead of failing the entire update
           continue;
@@ -168,7 +202,7 @@ export async function _updateProject({ id, updates }) {
         paramIndex++;
       }
     }
-    
+
     if (setClauses.length === 0) {
       return { success: true };
     }
@@ -181,7 +215,7 @@ export async function _updateProject({ id, updates }) {
       `UPDATE projects SET ${setClauses.join(', ')}, last_modified = $${paramIndex} WHERE id = $${paramIndex + 1}`,
       values
     );
-    
+
     return { success: true };
   } catch (err) {
     console.error('Error updating project:', err);
@@ -221,20 +255,26 @@ export async function _deleteProject({ id }) {
 export async function _deleteAllProjects({ userId }) {
   try {
     // First, delete all tasks associated with the user's projects
-    await dbInstance.query(`
+    await dbInstance.query(
+      `
       DELETE FROM tasks 
       WHERE project_id IN (SELECT id FROM projects WHERE user_id = $1)
-    `, [userId]);
-    
+    `,
+      [userId]
+    );
+
     // Delete step_data associated with the projects
-    await dbInstance.query(`
+    await dbInstance.query(
+      `
       DELETE FROM step_data 
       WHERE project_id IN (SELECT id FROM projects WHERE user_id = $1)
-    `, [userId]);
-    
+    `,
+      [userId]
+    );
+
     // Then delete all projects
     await dbInstance.query('DELETE FROM projects WHERE user_id = $1', [userId]);
-    
+
     return { success: true };
   } catch (err) {
     console.error('Error deleting all projects:', err);
@@ -306,11 +346,14 @@ export async function _getTasks({ projectId }) {
       return [];
     }
   }
-  
+
   if (!dbInstance) return [];
-  
+
   try {
-    const result = await dbInstance.query('SELECT * FROM tasks WHERE project_id = $1 AND deleted_at IS NULL ORDER BY created_at ASC', [projectId]);
+    const result = await dbInstance.query(
+      'SELECT * FROM tasks WHERE project_id = $1 AND deleted_at IS NULL ORDER BY created_at ASC',
+      [projectId]
+    );
     return result.rows;
   } catch (err) {
     console.error('Error getting tasks:', err);
@@ -321,27 +364,30 @@ export async function _getTasks({ projectId }) {
 export async function _addTask({ task }) {
   try {
     const id = uuidv4();
-    await dbInstance.query(`
+    await dbInstance.query(
+      `
       INSERT INTO tasks (id, user_id, project_id, title, content, prompt, llm_response, model, section, step_name, created_at, last_modified, synced_at, sync_status, deleted_at, version)
       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)
-    `, [
-      id,
-      task.userId,
-      task.projectId,
-      task.title || null,
-      task.content || null,
-      task.prompt || null,
-      task.llmResponse || null,
-      task.model || null,
-      task.section || null,
-      task.stepName || null,
-      new Date().toISOString(),
-      new Date().toISOString(),
-      new Date().toISOString(),
-      'local',
-      null,
-      1
-    ]);
+    `,
+      [
+        id,
+        task.userId,
+        task.projectId,
+        task.title || null,
+        task.content || null,
+        task.prompt || null,
+        task.llmResponse || null,
+        task.model || null,
+        task.section || null,
+        task.stepName || null,
+        new Date().toISOString(),
+        new Date().toISOString(),
+        new Date().toISOString(),
+        'local',
+        null,
+        1,
+      ]
+    );
     return { success: true, id };
   } catch (err) {
     console.error('Error adding task:', err);
@@ -374,7 +420,10 @@ export async function _updateTask({ id, content, llm_response }) {
     }
 
     if (llm_response !== undefined) {
-      const validation = validateAndSanitizeDbInput(llm_response, 'llm response');
+      const validation = validateAndSanitizeDbInput(
+        llm_response,
+        'llm response'
+      );
       if (!validation.valid) {
         throw new Error(`LLM response validation failed: ${validation.reason}`);
       }
@@ -421,14 +470,17 @@ export async function _getProjects({ userId }) {
       return [];
     }
   }
-  
+
   if (!dbInstance) {
     console.debug('Database still not initialized, returning empty projects');
     return [];
   }
-  
+
   try {
-    const result = await dbInstance.query('SELECT * FROM projects WHERE user_id = $1 ORDER BY created_at DESC', [userId]);
+    const result = await dbInstance.query(
+      'SELECT * FROM projects WHERE user_id = $1 ORDER BY created_at DESC',
+      [userId]
+    );
 
     const projects = result.rows || [];
 
@@ -440,7 +492,7 @@ export async function _getProjects({ userId }) {
       createdAt: row.created_at,
       lastModified: row.last_modified,
       public: row.public,
-      context: row.context
+      context: row.context,
     }));
   } catch (err) {
     console.error('Error getting projects:', err);
@@ -461,41 +513,46 @@ export async function checkProjectCompletion(projectId) {
       const stepsModule = await import('../business.js');
       steps = stepsModule.steps || [];
     } catch (importError) {
-      console.warn('Could not import steps, using empty array:', importError.message);
+      console.warn(
+        'Could not import steps, using empty array:',
+        importError.message
+      );
       steps = [];
     }
-    
+
     // Get all tasks for the project
     const tasks = await _getTasks({ projectId });
-    
+
     // Total steps in the application
     const totalSteps = steps.length;
-    
+
     // If we can't get steps, we can't check completion
     if (totalSteps === 0) {
-      console.warn('[Project Completion Check] Could not determine total steps');
+      console.warn(
+        '[Project Completion Check] Could not determine total steps'
+      );
       return {
         totalSteps: 0,
         completedSteps: 0,
         remainingSteps: 0,
         isComplete: false,
-        error: 'Could not determine total steps'
+        error: 'Could not determine total steps',
       };
     }
-    
+
     // Count completed steps (tasks with content)
-    const completedSteps = tasks.filter(task => 
-      task.content && task.content.trim().length > 0
+    const completedSteps = tasks.filter(
+      task => task.content && task.content.trim().length > 0
     ).length;
-    
+
     // Calculate remaining steps
     const remainingSteps = totalSteps - completedSteps;
-    
+
     // Get step names for completed tasks
     const completedStepNames = tasks
       .filter(task => task.content && task.content.trim().length > 0)
       .map(task => task.step_name || 'Unknown Step');
-    
+
     // Get step names for all steps
     const allStepNames = steps.map(step => {
       if (typeof step.name === 'object' && step.name !== null) {
@@ -508,7 +565,7 @@ export async function checkProjectCompletion(projectId) {
     const remainingStepNames = allStepNames.filter(
       stepName => !completedStepNames.includes(stepName)
     );
-    
+
     // Create result object
     const result = {
       totalSteps,
@@ -516,9 +573,9 @@ export async function checkProjectCompletion(projectId) {
       remainingSteps,
       isComplete: remainingSteps === 0,
       completedStepNames,
-      remainingStepNames
+      remainingStepNames,
     };
-    
+
     // Update project status in database
     try {
       if (dbInstance) {
@@ -527,22 +584,19 @@ export async function checkProjectCompletion(projectId) {
           `UPDATE projects SET
             last_modified = $1
           WHERE id = $2`,
-          [
-            now,
-            projectId
-          ]
+          [now, projectId]
         );
       }
     } catch (updateError) {
       console.warn('Could not update project status:', updateError.message);
     }
-    
+
     // Display information in console
     console.log('[Project Completion Check]');
     console.log(`Total Steps: ${totalSteps}`);
     console.log(`Completed Steps: ${completedSteps}`);
     console.log(`Remaining Steps: ${remainingSteps}`);
-    
+
     if (result.isComplete) {
       console.log('🎉 Project is complete!');
     } else {
@@ -551,13 +605,13 @@ export async function checkProjectCompletion(projectId) {
         console.log(`  ${index + 1}. ${stepName}`);
       });
     }
-    
+
     return result;
   } catch (error) {
     console.error('Error checking project completion:', error);
     return {
       error: true,
-      message: error.message
+      message: error.message,
     };
   }
 }

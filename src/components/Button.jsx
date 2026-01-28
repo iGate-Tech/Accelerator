@@ -1,10 +1,10 @@
-import { createSignal, For, Show, splitProps } from "solid-js";
-import { useLucideIcons } from "../hooks/useLucideIcons";
+import { createSignal, For, Show, splitProps } from 'solid-js';
+import { useLucideIcons } from '../hooks/useLucideIcons';
 
 /**
  * Reusable Button component for the Accelerator app
  * Supports multiple variants, sizes, and states with SolidJS reactivity
- * 
+ *
  * @param {Object} props - Component props
  * @param {string} props.variant - Button variant: 'primary', 'secondary', 'outline', 'ghost', 'success', 'warning', 'error', 'info'
  * @param {string} props.size - Button size: 'xs', 'sm', 'md', 'lg'
@@ -22,10 +22,10 @@ import { useLucideIcons } from "../hooks/useLucideIcons";
  * @param {boolean} props.noAnimation - Disable hover/focus animations
  * @returns {JSX.Element} Button component
  */
-const Button = (props) => {
+const Button = props => {
   const [local, rest] = splitProps(props, [
     'variant',
-    'size', 
+    'size',
     'loading',
     'disabled',
     'fullWidth',
@@ -37,7 +37,7 @@ const Button = (props) => {
     'children',
     'class',
     'type',
-    'noAnimation'
+    'noAnimation',
   ]);
 
   const [isPressed, setIsPressed] = createSignal(false);
@@ -62,9 +62,9 @@ const Button = (props) => {
       outline: 'btn-outline',
       ghost: 'btn-ghost',
       success: 'btn-success',
-      warning: 'btn-warning', 
+      warning: 'btn-warning',
       error: 'btn-error',
-      info: 'btn-info'
+      info: 'btn-info',
     };
     return variants[variant()] || variants.primary;
   };
@@ -73,9 +73,9 @@ const Button = (props) => {
   const getSizeClasses = () => {
     const sizes = {
       xs: 'btn-xs',
-      sm: 'btn-sm', 
+      sm: 'btn-sm',
       md: '',
-      lg: 'btn-lg'
+      lg: 'btn-lg',
     };
     return sizes[size()] || sizes.md;
   };
@@ -100,17 +100,17 @@ const Button = (props) => {
   };
 
   // Handle ripple effect
-  const handleClick = (e) => {
+  const handleClick = e => {
     if (loading() || disabled()) return;
 
     // Create ripple effect
     const rect = e.currentTarget.getBoundingClientRect();
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
-    
+
     setRipplePosition({ x, y });
     setShowRipple(true);
-    
+
     setTimeout(() => setShowRipple(false), 600);
 
     // Call original onClick if provided
@@ -143,7 +143,7 @@ const Button = (props) => {
       getShapeClasses(),
       getWidthClasses(),
       getAnimationClasses(),
-      local.class || ''
+      local.class || '',
     ];
 
     // Add state classes
@@ -170,13 +170,13 @@ const Button = (props) => {
       {/* Ripple effect */}
       <Show when={showRipple() && !local.noAnimation}>
         <span
-          class="absolute pointer-events-none rounded-full bg-white/30 animate-ping"
+          class="pointer-events-none absolute animate-ping rounded-full bg-white/30"
           style={{
             left: `${ripplePosition().x}px`,
             top: `${ripplePosition().y}px`,
             width: '20px',
             height: '20px',
-            transform: 'translate(-50%, -50%)'
+            transform: 'translate(-50%, -50%)',
           }}
         />
       </Show>
@@ -188,35 +188,31 @@ const Button = (props) => {
 
       {/* Left icon */}
       <Show when={local.leftIcon && !loading()}>
-        <i 
-          data-lucide={local.leftIcon} 
-          class="w-4 h-4" 
+        <i
+          data-lucide={local.leftIcon}
+          class="h-4 w-4"
           classList={{
             'w-3 h-3': size() === 'xs',
             'w-4 h-4': size() === 'sm' || size() === 'md',
-            'w-5 h-5': size() === 'lg'
+            'w-5 h-5': size() === 'lg',
           }}
         />
       </Show>
 
       {/* Button content */}
-      <Show when={!loading()}>
-        {local.children}
-      </Show>
-      
-      <Show when={loading()}>
-        {loadingText()}
-      </Show>
+      <Show when={!loading()}>{local.children}</Show>
+
+      <Show when={loading()}>{loadingText()}</Show>
 
       {/* Right icon */}
       <Show when={local.rightIcon && !loading()}>
-        <i 
-          data-lucide={local.rightIcon} 
-          class="w-4 h-4" 
+        <i
+          data-lucide={local.rightIcon}
+          class="h-4 w-4"
           classList={{
             'w-3 h-3': size() === 'xs',
-            'w-4 h-4': size() === 'sm' || size() === 'md', 
-            'w-5 h-5': size() === 'lg'
+            'w-4 h-4': size() === 'sm' || size() === 'md',
+            'w-5 h-5': size() === 'lg',
           }}
         />
       </Show>
@@ -225,32 +221,36 @@ const Button = (props) => {
 };
 
 // Button Group component for grouping related buttons
-export const ButtonGroup = (props) => {
-  const { children, class: className = '', direction = 'horizontal', gap = '2' } = props;
+export const ButtonGroup = props => {
+  const {
+    children,
+    class: className = '',
+    direction = 'horizontal',
+    gap = '2',
+  } = props;
 
   const getGroupClasses = () => {
     const baseClasses = 'btn-group';
-    const directionClasses = direction === 'vertical' ? 'btn-group-vertical' : '';
+    const directionClasses =
+      direction === 'vertical' ? 'btn-group-vertical' : '';
     const gapClasses = `gap-${gap}`;
-    
-    return [baseClasses, directionClasses, gapClasses, className].filter(Boolean).join(' ');
+
+    return [baseClasses, directionClasses, gapClasses, className]
+      .filter(Boolean)
+      .join(' ');
   };
 
-  return (
-    <div class={getGroupClasses()}>
-      {children}
-    </div>
-  );
+  return <div class={getGroupClasses()}>{children}</div>;
 };
 
 // Button with dropdown functionality
-export const ButtonDropdown = (props) => {
-  const { 
-    children, 
-    dropdownItems = [], 
+export const ButtonDropdown = props => {
+  const {
+    children,
+    dropdownItems = [],
     class: className = '',
     position = 'bottom',
-    align = 'left'
+    align = 'left',
   } = props;
 
   const [isOpen, setIsOpen] = createSignal(false);
@@ -259,18 +259,21 @@ export const ButtonDropdown = (props) => {
     const baseClasses = 'dropdown';
     const positionClasses = `dropdown-${position}`;
     const alignClasses = align === 'right' ? 'dropdown-end' : '';
-    
-    return [baseClasses, positionClasses, alignClasses].filter(Boolean).join(' ');
+
+    return [baseClasses, positionClasses, alignClasses]
+      .filter(Boolean)
+      .join(' ');
   };
 
   const getContentClasses = () => {
-    const baseClasses = 'dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-52';
+    const baseClasses =
+      'dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-52';
     return baseClasses;
   };
 
   return (
     <div class={`${getDropdownClasses()} ${className}`}>
-      <Button 
+      <Button
         {...props}
         onClick={() => setIsOpen(!isOpen())}
         aria-expanded={isOpen()}
@@ -278,22 +281,24 @@ export const ButtonDropdown = (props) => {
       >
         {children}
       </Button>
-      
+
       <Show when={isOpen() && dropdownItems.length > 0}>
         <ul class={getContentClasses()}>
           <For each={dropdownItems}>
-            {(item) => (
+            {item => (
               <li>
                 <a
                   href={item.href || '#'}
-                  onClick={(e) => {
+                  onClick={e => {
                     e.preventDefault();
                     setIsOpen(false);
                     if (item.onClick) item.onClick();
                   }}
-                  classList={{ 'active': item.active }}
+                  classList={{ active: item.active }}
                 >
-                  {item.icon && <i data-lucide={item.icon} class="w-4 h-4 mr-2" />}
+                  {item.icon && (
+                    <i data-lucide={item.icon} class="mr-2 h-4 w-4" />
+                  )}
                   {item.label}
                 </a>
               </li>
@@ -306,24 +311,18 @@ export const ButtonDropdown = (props) => {
 };
 
 // Icon-only button variant
-export const IconButton = (props) => {
+export const IconButton = props => {
   const { icon, size = 'md', variant = 'ghost', ...rest } = props;
 
   return (
-    <Button
-      {...rest}
-      variant={variant}
-      size={size}
-      circle
-      class={props.class}
-    >
-      <i 
-        data-lucide={icon} 
-        class="w-4 h-4" 
+    <Button {...rest} variant={variant} size={size} circle class={props.class}>
+      <i
+        data-lucide={icon}
+        class="h-4 w-4"
         classList={{
           'w-3 h-3': size === 'xs',
           'w-4 h-4': size === 'sm' || size === 'md',
-          'w-5 h-5': size === 'lg'
+          'w-5 h-5': size === 'lg',
         }}
       />
     </Button>
@@ -331,15 +330,20 @@ export const IconButton = (props) => {
 };
 
 // Floating Action Button
-export const FloatingActionButton = (props) => {
-  const { icon, position = 'bottom-right', class: className = '', ...rest } = props;
+export const FloatingActionButton = props => {
+  const {
+    icon,
+    position = 'bottom-right',
+    class: className = '',
+    ...rest
+  } = props;
 
   const getPositionClasses = () => {
     const positions = {
       'bottom-right': 'fixed bottom-4 right-4',
-      'bottom-left': 'fixed bottom-4 left-4', 
+      'bottom-left': 'fixed bottom-4 left-4',
       'top-right': 'fixed top-4 right-4',
-      'top-left': 'fixed top-4 left-4'
+      'top-left': 'fixed top-4 left-4',
     };
     return positions[position] || positions['bottom-right'];
   };
@@ -351,7 +355,7 @@ export const FloatingActionButton = (props) => {
       size="lg"
       class={`${getPositionClasses()} ${className}`}
     >
-      <i data-lucide={icon} class="w-6 h-6" />
+      <i data-lucide={icon} class="h-6 w-6" />
     </Button>
   );
 };

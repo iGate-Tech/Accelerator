@@ -1,6 +1,6 @@
-import { createSignal, createEffect, onMount } from "solid-js";
-import { activityLogger } from "@lib/business.js";
-import { openSupportModal } from "./SupportModal";
+import { createSignal, createEffect, onMount, For } from 'solid-js';
+import { activityLogger } from '@lib/business.js';
+import { openSupportModal } from './SupportModal';
 
 // Enhanced error handling system
 class ErrorHandler {
@@ -16,7 +16,7 @@ class ErrorHandler {
       logError = true,
       category = 'general',
       recoverable = false,
-      recoveryAction = null
+      recoveryAction = null,
     } = options;
 
     // Create error ID for tracking
@@ -32,7 +32,7 @@ class ErrorHandler {
         errorId,
         userAgent: navigator.userAgent,
         url: window.location.href,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       });
     }
 
@@ -43,20 +43,23 @@ class ErrorHandler {
       timestamp: new Date(),
       recoverable,
       recoveryAction,
-      category
+      category,
     });
 
     // Show toast notification
     if (showToast && window.toastManager) {
-      const toastType = enhancedError.severity === 'error' ? 'error' : 'warning';
+      const toastType =
+        enhancedError.severity === 'error' ? 'error' : 'warning';
       window.toastManager[toastType](enhancedError.userMessage, {
         duration: 5000,
-        action: recoverable ? {
-          label: 'Get Help',
-          onClick: () => {
-            openSupportModal(errorId, context);
-          }
-        } : undefined
+        action: recoverable
+          ? {
+              label: 'Get Help',
+              onClick: () => {
+                openSupportModal(errorId, context);
+              },
+            }
+          : undefined,
       });
 
       // Show recovery suggestion if available
@@ -75,18 +78,21 @@ class ErrorHandler {
 
   // Enhance error with user-friendly messages and recovery suggestions
   enhanceError(error, context, category) {
-    const errorMessage = error?.message || error?.toString() || 'Unknown error occurred';
+    const errorMessage =
+      error?.message || error?.toString() || 'Unknown error occurred';
     const errorCode = error?.code || error?.status;
 
     let userMessage = 'An unexpected error occurred. Please try again.';
-    let recoverySuggestion = 'Try refreshing the page or contact support if the problem persists.';
+    let recoverySuggestion =
+      'Try refreshing the page or contact support if the problem persists.';
     let severity = 'error';
 
     // Categorize errors and provide specific handling
     switch (category) {
       case 'network':
         if (errorMessage.includes('fetch')) {
-          userMessage = 'Connection failed. Please check your internet connection.';
+          userMessage =
+            'Connection failed. Please check your internet connection.';
           recoverySuggestion = 'Check your internet connection and try again.';
         } else if (errorCode === 429) {
           userMessage = 'Too many requests. Please wait a moment.';
@@ -125,12 +131,14 @@ class ErrorHandler {
 
       case 'storage':
         userMessage = 'Storage operation failed.';
-        recoverySuggestion = 'Try clearing your browser cache or use a different browser.';
+        recoverySuggestion =
+          'Try clearing your browser cache or use a different browser.';
         break;
 
       case 'permission':
         userMessage = 'Permission denied for this operation.';
-        recoverySuggestion = 'Check your account permissions or contact support.';
+        recoverySuggestion =
+          'Check your account permissions or contact support.';
         break;
 
       default:
@@ -138,9 +146,13 @@ class ErrorHandler {
         if (errorMessage.includes('timeout')) {
           userMessage = 'Operation timed out. Please try again.';
           recoverySuggestion = 'Try again or contact support if it persists.';
-        } else if (errorMessage.includes('quota') || errorMessage.includes('limit')) {
+        } else if (
+          errorMessage.includes('quota') ||
+          errorMessage.includes('limit')
+        ) {
           userMessage = 'Usage limit reached.';
-          recoverySuggestion = 'Check your account limits or upgrade your plan.';
+          recoverySuggestion =
+            'Check your account limits or upgrade your plan.';
           severity = 'warning';
         }
     }
@@ -153,7 +165,8 @@ class ErrorHandler {
       category,
       context,
       errorCode,
-      technicalDetails: process.env.NODE_ENV === 'development' ? errorMessage : undefined
+      technicalDetails:
+        process.env.NODE_ENV === 'development' ? errorMessage : undefined,
     };
   }
 
@@ -165,7 +178,8 @@ class ErrorHandler {
   }
 
   // Clear old errors
-  clearOldErrors(maxAge = 24 * 60 * 60 * 1000) { // 24 hours
+  clearOldErrors(maxAge = 24 * 60 * 60 * 1000) {
+    // 24 hours
     const cutoff = new Date(Date.now() - maxAge);
     for (const [id, error] of this.errors) {
       if (error.timestamp < cutoff) {
@@ -189,16 +203,20 @@ class ErrorHandler {
 export const errorHandler = new ErrorHandler();
 
 // Error boundary component for catching React-style errors
-export const ErrorBoundary = (props) => {
+export const ErrorBoundary = props => {
   const [hasError, setHasError] = createSignal(false);
   const [error, setError] = createSignal(null);
 
   const handleError = (error, errorInfo) => {
     console.error('Error boundary caught an error:', error, errorInfo);
-    errorHandler.handleError(error, { boundary: true, ...errorInfo }, {
-      category: 'boundary',
-      showToast: false
-    });
+    errorHandler.handleError(
+      error,
+      { boundary: true, ...errorInfo },
+      {
+        category: 'boundary',
+        showToast: false,
+      }
+    );
     setError(error);
     setHasError(true);
   };
@@ -209,10 +227,13 @@ export const ErrorBoundary = (props) => {
   return (
     <div>
       {hasError() ? (
-        <div class="error-boundary p-6 bg-error/10 border border-error rounded-lg">
-          <h3 class="text-lg font-semibold text-error mb-2">Something went wrong</h3>
+        <div class="error-boundary bg-error/10 border-error rounded-lg border p-6">
+          <h3 class="text-error mb-2 text-lg font-semibold">
+            Something went wrong
+          </h3>
           <p class="text-base-content/70 mb-4">
-            We encountered an unexpected error. Please refresh the page or contact support.
+            We encountered an unexpected error. Please refresh the page or
+            contact support.
           </p>
           <div class="flex gap-2">
             <button
@@ -236,8 +257,10 @@ export const ErrorBoundary = (props) => {
           </div>
           {process.env.NODE_ENV === 'development' && (
             <details class="mt-4">
-              <summary class="cursor-pointer text-sm">Technical Details</summary>
-              <pre class="text-xs mt-2 p-2 bg-base-200 rounded overflow-auto">
+              <summary class="cursor-pointer text-sm">
+                Technical Details
+              </summary>
+              <pre class="bg-base-200 mt-2 overflow-auto rounded p-2 text-xs">
                 {error()?.stack || error()?.message || 'No details available'}
               </pre>
             </details>
@@ -256,54 +279,59 @@ export const GlobalErrorDisplay = () => {
 
   onMount(() => {
     // Subscribe to error updates
-    const unsubscribe = errorHandler.subscribe((errorMap) => {
-      setErrors(Array.from(errorMap.values()).filter(e => e.severity === 'error'));
+    const unsubscribe = errorHandler.subscribe(errorMap => {
+      setErrors(
+        Array.from(errorMap.values()).filter(e => e.severity === 'error')
+      );
     });
 
     return unsubscribe;
   });
 
   return (
-    <div class="fixed top-4 right-4 z-50 space-y-2 max-w-sm">
-      {errors().map((error) => (
-        <div
-          key={error.id}
-          class={`alert alert-error shadow-lg transition-all duration-300 ${
-            errors().indexOf(error) > 2 ? 'opacity-0 translate-x-full' : ''
-          }`}
-        >
-          <i data-lucide="alert-triangle" class="w-4 h-4"></i>
-          <div class="flex-1">
-            <h4 class="font-medium">Error</h4>
-            <p class="text-sm">{error.userMessage}</p>
-            {error.recoverySuggestion && (
-              <p class="text-xs mt-1 opacity-75">{error.recoverySuggestion}</p>
-            )}
-          </div>
-          <div class="flex gap-1">
-            {error.recoverable && (
+    <div class="fixed top-4 right-4 z-50 max-w-sm space-y-2">
+      <For each={errors()}>
+        {error => (
+          <div
+            class={`alert alert-error shadow-lg transition-all duration-300 ${
+              errors().indexOf(error) > 2 ? 'translate-x-full opacity-0' : ''
+            }`}
+          >
+            <i data-lucide="alert-triangle" class="h-4 w-4" />
+            <div class="flex-1">
+              <h4 class="font-medium">Error</h4>
+              <p class="text-sm">{error.userMessage}</p>
+              {error.recoverySuggestion && (
+                <p class="mt-1 text-xs opacity-75">
+                  {error.recoverySuggestion}
+                </p>
+              )}
+            </div>
+            <div class="flex gap-1">
+              {error.recoverable && (
+                <button
+                  class="btn btn-xs btn-primary"
+                  onClick={() => {
+                    openSupportModal(error.id, error.context);
+                  }}
+                >
+                  Help
+                </button>
+              )}
               <button
-                class="btn btn-xs btn-primary"
+                class="btn btn-xs btn-ghost"
                 onClick={() => {
-                  openSupportModal(error.id, error.context);
+                  // Remove this error
+                  errorHandler.errors.delete(error.id);
+                  errorHandler.notifyListeners();
                 }}
               >
-                Help
+                ✕
               </button>
-            )}
-            <button
-              class="btn btn-xs btn-ghost"
-              onClick={() => {
-                // Remove this error
-                errorHandler.errors.delete(error.id);
-                errorHandler.notifyListeners();
-              }}
-            >
-              ✕
-            </button>
+            </div>
           </div>
-        </div>
-      ))}
+        )}
+      </For>
     </div>
   );
 };

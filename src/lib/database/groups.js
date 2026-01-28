@@ -17,7 +17,9 @@ export async function _getGroups({ userId = null }) {
 
 export async function _getGroupById({ id }) {
   try {
-    const res = await dbInstance.query('SELECT * FROM groups WHERE id = $1', [id]);
+    const res = await dbInstance.query('SELECT * FROM groups WHERE id = $1', [
+      id,
+    ]);
     return res.rows[0];
   } catch (err) {
     console.debug('Error loading group:', err);
@@ -27,11 +29,23 @@ export async function _getGroupById({ id }) {
 
 export async function _addGroup({ group, userId }) {
   try {
-      const id = uuidv4();
-      const res = await dbInstance.query(
-        'INSERT INTO groups (id, user_id, name, description, color, created_at, synced_at, last_modified, sync_status, deleted_at, version) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11) RETURNING id',
-        [id, userId, group.name, group.description || '', group.color || '#6366f1', group.createdAt || new Date().toISOString(), new Date().toISOString(), new Date().toISOString(), 'local', null, 1]
-      );
+    const id = uuidv4();
+    const res = await dbInstance.query(
+      'INSERT INTO groups (id, user_id, name, description, color, created_at, synced_at, last_modified, sync_status, deleted_at, version) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11) RETURNING id',
+      [
+        id,
+        userId,
+        group.name,
+        group.description || '',
+        group.color || '#6366f1',
+        group.createdAt || new Date().toISOString(),
+        new Date().toISOString(),
+        new Date().toISOString(),
+        'local',
+        null,
+        1,
+      ]
+    );
     return res.rows[0];
   } catch (err) {
     console.debug('Error adding group:', err);
@@ -41,7 +55,12 @@ export async function _addGroup({ group, userId }) {
 
 export async function _updateGroup({ id, group }) {
   try {
-    const result = await updateEntity({ table: 'groups', idField: 'id', id, updates: group });
+    const result = await updateEntity({
+      table: 'groups',
+      idField: 'id',
+      id,
+      updates: group,
+    });
     if (!result.success) {
       throw new Error(result.error);
     }
@@ -54,8 +73,10 @@ export async function _updateGroup({ id, group }) {
 
 export async function _deleteGroup({ id }) {
   try {
-     await dbInstance.query('DELETE FROM project_groups WHERE group_id = $1', [id]);
-     await dbInstance.query('DELETE FROM groups WHERE id = $1', [id]);
+    await dbInstance.query('DELETE FROM project_groups WHERE group_id = $1', [
+      id,
+    ]);
+    await dbInstance.query('DELETE FROM groups WHERE id = $1', [id]);
     return { success: true };
   } catch (err) {
     console.debug('Error deleting group:', err);
@@ -65,10 +86,10 @@ export async function _deleteGroup({ id }) {
 
 export async function _addProjectToGroup({ projectId, groupId, userId }) {
   try {
-     await dbInstance.query(
-       'INSERT INTO project_groups (project_id, group_id, user_id, added_at) VALUES ($1, $2, $3, $4) ON CONFLICT (project_id, group_id) DO NOTHING',
-       [projectId, groupId, userId, new Date().toISOString()]
-     );
+    await dbInstance.query(
+      'INSERT INTO project_groups (project_id, group_id, user_id, added_at) VALUES ($1, $2, $3, $4) ON CONFLICT (project_id, group_id) DO NOTHING',
+      [projectId, groupId, userId, new Date().toISOString()]
+    );
     return { success: true };
   } catch (err) {
     console.debug('Error adding project to group:', err);
@@ -78,7 +99,10 @@ export async function _addProjectToGroup({ projectId, groupId, userId }) {
 
 export async function _removeProjectFromGroup({ projectId, groupId }) {
   try {
-     await dbInstance.query('DELETE FROM project_groups WHERE project_id = $1 AND group_id = $2', [projectId, groupId]);
+    await dbInstance.query(
+      'DELETE FROM project_groups WHERE project_id = $1 AND group_id = $2',
+      [projectId, groupId]
+    );
     return { success: true };
   } catch (err) {
     console.debug('Error removing project from group:', err);
@@ -88,13 +112,16 @@ export async function _removeProjectFromGroup({ projectId, groupId }) {
 
 export async function _getProjectsInGroup({ groupId }) {
   try {
-     const res = await dbInstance.query(`
+    const res = await dbInstance.query(
+      `
        SELECT p.*, pg.added_at as addedToGroupAt
        FROM projects p
        JOIN project_groups pg ON p.id = pg.project_id
        WHERE pg.group_id = $1
        ORDER BY pg.added_at DESC
-     `, [groupId]);
+     `,
+      [groupId]
+    );
     return res.rows;
   } catch (err) {
     console.debug('Error getting projects in group:', err);
@@ -104,15 +131,20 @@ export async function _getProjectsInGroup({ groupId }) {
 
 export async function _getUngroupedProjects({ userId = null }) {
   if (!dbInstance) {
-    console.debug('Database not initialized, returning empty ungrouped projects');
+    console.debug(
+      'Database not initialized, returning empty ungrouped projects'
+    );
     return [];
   }
   try {
-    const result = await dbInstance.query(`
+    const result = await dbInstance.query(
+      `
       SELECT p.* FROM projects p
       LEFT JOIN project_groups pg ON p.id = pg.project_id
       WHERE pg.group_id IS NULL AND p.user_id = $1::text
-    `, [userId]);
+    `,
+      [userId]
+    );
     return result.rows;
   } catch (err) {
     console.error('Error getting ungrouped projects:', err);
@@ -122,15 +154,17 @@ export async function _getUngroupedProjects({ userId = null }) {
 
 export async function _getGroupsWithProjects({ userId = null }) {
   if (!dbInstance) {
-    console.debug('Database not initialized, returning empty groups with projects');
+    console.debug(
+      'Database not initialized, returning empty groups with projects'
+    );
     return [];
   }
   try {
     const groups = await _getGroups({ userId });
     const groupsWithProjects = await Promise.all(
-      groups.map(async (group) => ({
+      groups.map(async group => ({
         ...group,
-        projects: await _getProjectsInGroup({ groupId: group.id })
+        projects: await _getProjectsInGroup({ groupId: group.id }),
       }))
     );
     return groupsWithProjects;
@@ -151,11 +185,11 @@ export async function _exportAllProjects({ userId = null }) {
       return { projects: [], tasks: [], exportedAt: new Date().toISOString() };
     }
   }
-  
+
   if (!dbInstance) {
     return { projects: [], tasks: [], exportedAt: new Date().toISOString() };
   }
-  
+
   try {
     // Get all projects for the user
     const projects = await dbInstance.query(
@@ -177,7 +211,7 @@ export async function _exportAllProjects({ userId = null }) {
     return {
       projects: projects.rows,
       tasks: tasks,
-      exportedAt: new Date().toISOString()
+      exportedAt: new Date().toISOString(),
     };
   } catch (err) {
     console.error('Error exporting all projects:', err);

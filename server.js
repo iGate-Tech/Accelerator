@@ -298,34 +298,61 @@ const routes = {
 // Bun.serve options
 const serveOptions = {
   port,
-  fetch(request) {
+  async fetch(request) {
     const url = new URL(request.url);
-    
+
     // Handle API routes
     if (routes[url.pathname]) {
       return routes[url.pathname](request);
     }
-    
-    // Handle static files (simplified)
+
+    // Development mode: redirect static assets to Vite dev server
+    if (process.env.NODE_ENV !== 'production') {
+      if (url.pathname.startsWith('/assets/') ||
+          url.pathname.endsWith('.js') ||
+          url.pathname.endsWith('.css') ||
+          url.pathname.startsWith('/@') ||  // Vite virtual modules
+          url.pathname.includes('/node_modules/')) {
+
+        // Redirect to Vite dev server (assuming it runs on port 5173)
+        const viteUrl = `http://localhost:5173${url.pathname}`;
+        return Response.redirect(viteUrl, 302);
+      }
+
+      // For root route in development, fetch from Vite dev server
+      if (url.pathname === '/' || url.pathname === '/index.html') {
+        try {
+          // Try to fetch from Vite dev server first
+          const viteResponse = await fetch(`http://localhost:5173${url.pathname}`);
+          if (viteResponse.ok) {
+            return viteResponse;
+          }
+        } catch (error) {
+          console.log(`Failed to fetch from Vite dev server: ${error.message}`);
+        }
+      }
+    }
+
+    // Production mode: serve from dist directory
     if (url.pathname === '/' || url.pathname === '/index.html') {
       // Return the main HTML file
       return new Response(Bun.file('./dist/index.html'), {
         headers: { 'Content-Type': 'text/html' }
       });
     }
-    
-    // Handle other static files
+
+    // Handle other static files in production
     if (url.pathname.startsWith('/assets/') || url.pathname.endsWith('.js') || url.pathname.endsWith('.css')) {
       return new Response(Bun.file(`.${url.pathname}`));
     }
-    
+
     // Catch-all handler for SPA - serve index.html for any unmatched request
     if (!url.pathname.startsWith('/api')) {
       return new Response(Bun.file('./dist/index.html'), {
         headers: { 'Content-Type': 'text/html' }
       });
     }
-    
+
     // 404 for unknown routes
     return new Response('Not Found', { status: 404 });
   }

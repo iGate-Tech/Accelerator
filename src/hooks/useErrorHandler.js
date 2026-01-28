@@ -1,5 +1,5 @@
-import { createSignal, createEffect } from "solid-js";
-import { errorHandler } from "../components/ui/ErrorHandler";
+import { createSignal, createEffect } from 'solid-js';
+import { errorHandler } from '../components/ui/ErrorHandler';
 
 // Custom hook for error handling in components
 export const useErrorHandler = () => {
@@ -7,7 +7,7 @@ export const useErrorHandler = () => {
 
   // Subscribe to global errors
   createEffect(() => {
-    const unsubscribe = errorHandler.subscribe((errorMap) => {
+    const unsubscribe = errorHandler.subscribe(errorMap => {
       const componentErrors = Array.from(errorMap.values());
       setErrors(componentErrors);
     });
@@ -19,12 +19,12 @@ export const useErrorHandler = () => {
     return await errorHandler.handleError(error, context, options);
   };
 
-  const clearError = (errorId) => {
+  const clearError = errorId => {
     errorHandler.errors.delete(errorId);
     errorHandler.notifyListeners();
   };
 
-  const getErrorsByCategory = (category) => {
+  const getErrorsByCategory = category => {
     return errors().filter(error => error.category === category);
   };
 
@@ -40,13 +40,13 @@ export const useErrorHandler = () => {
     handleError,
     clearError,
     getErrorsByCategory,
-    hasErrors
+    hasErrors,
   };
 };
 
 // Error boundary for SolidJS components
-export const createErrorBoundary = (fallback) => {
-  return (props) => {
+export const createErrorBoundary = fallback => {
+  return props => {
     const [error, setError] = createSignal(null);
 
     // In SolidJS, error boundaries are handled differently
@@ -54,10 +54,16 @@ export const createErrorBoundary = (fallback) => {
     try {
       return props.children;
     } catch (err) {
-      errorHandler.handleError(err, { boundary: true }, { category: 'boundary' });
+      errorHandler.handleError(
+        err,
+        { boundary: true },
+        { category: 'boundary' }
+      );
       setError(err);
-      return fallback ? fallback(err) : (
-        <div class="error-fallback p-4 bg-error/10 border border-error rounded">
+      return fallback ? (
+        fallback(err)
+      ) : (
+        <div class="error-fallback bg-error/10 border-error rounded border p-4">
           <h3 class="text-error font-semibold">Something went wrong</h3>
           <p>Please refresh the page or contact support.</p>
         </div>

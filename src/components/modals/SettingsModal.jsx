@@ -65,29 +65,24 @@ import {
 } from 'lucide-solid';
 
 const tabs = [
-  { id: 'general', label: 'General', icon: Settings },
-  { id: 'profile', label: 'Profile', icon: UserRound },
-  { id: 'notifications', label: 'Notifications', icon: Bell },
-  { id: 'billing', label: 'Plans & Billing', icon: CalendarDays },
-  { id: 'credits', label: 'Buy Credits', icon: CreditCard },
-  { id: 'workspace', label: 'Workspace', icon: PanelTop },
-  { id: 'apps', label: 'Apps & Skills', icon: Puzzle },
-  { id: 'connectors', label: 'Connectors', icon: Cable },
-  { id: 'integrations', label: 'Integrations', icon: Plug },
-  { id: 'data', label: 'Data Control', icon: Database },
-  { id: 'security', label: 'Security', icon: Shield },
-  { id: 'roles', label: 'Roles & Governance', icon: ShieldCheck },
-  { id: 'help', label: 'Help', icon: LifeBuoy },
+  { id: 'general', label: { en: 'General', ar: 'عام' }, icon: Settings },
+  { id: 'profile', label: { en: 'Profile', ar: 'الملف الشخصي' }, icon: UserRound },
+  { id: 'notifications', label: { en: 'Notifications', ar: 'الإشعارات' }, icon: Bell },
+  { id: 'billing', label: { en: 'Plans & Billing', ar: 'الخطط والفوترة' }, icon: CalendarDays },
+  { id: 'credits', label: { en: 'Buy Credits', ar: 'شراء الرصيد' }, icon: CreditCard },
+  { id: 'workspace', label: { en: 'Workspace', ar: 'مساحة العمل' }, icon: PanelTop },
+  { id: 'apps', label: { en: 'Apps & Skills', ar: 'التطبيقات والمهارات' }, icon: Puzzle },
+  { id: 'connectors', label: { en: 'Connectors', ar: 'المتصلات' }, icon: Cable },
+  { id: 'integrations', label: { en: 'Integrations', ar: 'التكاملات' }, icon: Plug },
+  { id: 'data', label: { en: 'Data Control', ar: 'التحكم بالبيانات' }, icon: Database },
+  { id: 'security', label: { en: 'Security', ar: 'الأمن' }, icon: Shield },
+  { id: 'roles', label: { en: 'Roles & Governance', ar: 'الأدوار والحوكمة' }, icon: ShieldCheck },
+  { id: 'help', label: { en: 'Help', ar: 'المساعدة' }, icon: LifeBuoy },
 ];
 
 const languages = [
   { value: 'en', label: 'English' },
-  { value: 'ar', label: 'Arabic' },
-  { value: 'es', label: 'Spanish' },
-  { value: 'fr', label: 'French' },
-  { value: 'de', label: 'German' },
-  { value: 'ja', label: 'Japanese' },
-  { value: 'zh', label: 'Chinese' },
+  { value: 'ar', label: 'العربية' },
 ];
 
 const themes = [

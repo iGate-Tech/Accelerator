@@ -50,7 +50,7 @@ services:
       - 'traefik.http.services.accelerator.loadbalancer.server.port=${PORT:-3001}'
 
       # HTTP Router with redirect to HTTPS
-      - 'traefik.http.routers.accelerator-http.rule=Host(`your-domain.com`)'
+      - 'traefik.http.routers.accelerator-http.rule=Host(`os.igate.sa`) || Host(`www.os.igate.sa`)'
       - 'traefik.http.routers.accelerator-http.entrypoints=http'
       - 'traefik.http.routers.accelerator-http.middlewares=redirect-to-https'
 

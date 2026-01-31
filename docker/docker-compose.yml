@@ -45,6 +45,7 @@ services:
       - 'traefik.http.routers.accelerator-http.entrypoints=http'
       - 'traefik.http.routers.accelerator-http.middlewares=redirect-to-https'
       - 'traefik.http.middlewares.redirect-to-https.redirectscheme.scheme=https'
+      - 'traefik.http.middlewares.redirect-to-https.redirectscheme.permanent=true'
 
 networks:
   accelerator-network:

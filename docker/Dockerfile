@@ -57,7 +57,6 @@ WORKDIR /app
 # Copy the Bun executable from build stage
 COPY --from=build /app/bin/accelerator-server ./accelerator-server
 COPY --from=build /app/dist ./dist
-COPY --from=build /app/public ./public
 COPY .env* ./ 2>/dev/null || true
 
 # Make the executable runnable

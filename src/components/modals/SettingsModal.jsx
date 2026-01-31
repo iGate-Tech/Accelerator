@@ -788,6 +788,7 @@ export default function SettingsModal() {
                     </section>
                   </div>
                 </Show>
+                  <Switch>
                   <Match when={activeTab() === 'billing'}>
                     <div class="space-y-6">
                       <section>

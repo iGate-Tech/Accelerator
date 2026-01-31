@@ -100,8 +100,17 @@ try {
 const AI_MODEL = 'google/gemma-3n-e2b-it:free';
 logger.debug('server.js: AI model configured as:', AI_MODEL);
 
-// Determine port
-const port = process.env.PORT || 3000;
+// Determine port - PORT must be set via environment variable
+const port = parseInt(process.env.PORT);
+if (!port || isNaN(port)) {
+  console.error(
+    'PORT environment variable is required and must be a valid number'
+  );
+  process.exit(1);
+}
+console.log(
+  `[${new Date().toISOString()}] SERVER: Using port ${port} from environment`
+);
 
 // Define routes
 const routes = {

@@ -22,8 +22,8 @@ FROM base AS development
 # Copy source code
 COPY . .
 
-# Expose ports for Vite dev server and Bun server
-EXPOSE 5173 3000
+# Expose ports for Vite dev server and Bun server (configured via environment)
+EXPOSE 5173 ${PORT:-3000}
 
 CMD ["bun", "run", "dev"]
 
@@ -72,8 +72,8 @@ RUN groupadd -g 1001 -r nodejs && \
 RUN chown -R nodeapp:nodejs /app
 USER nodeapp
 
-# Expose ports (HTTP and HTTPS)
-EXPOSE 3000 3443
+# Expose ports (HTTP and HTTPS) - configured via environment
+EXPOSE ${PORT:-3000} 3443
 
 # Run with bun (not compiled binary)
 CMD ["bun", "run", "server.js"]

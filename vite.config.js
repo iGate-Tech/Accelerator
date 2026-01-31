@@ -18,10 +18,10 @@ export default defineConfig({
   },
   define: {
     global: 'globalThis',
-    process: { env: {}, browser: true }
+    process: { env: {}, browser: true },
   },
   worker: {
-    format: 'es'
+    format: 'es',
   },
   plugins: [
     solidPlugin(),
@@ -47,13 +47,13 @@ export default defineConfig({
         categories: ['productivity', 'business'],
         lang: 'en-US',
         dir: 'ltr',
-        icons: []
+        icons: [],
       },
-      devOptions: { enabled: false }
-    })
+      devOptions: { enabled: false },
+    }),
   ],
   optimizeDeps: {
-    exclude: ['@electric-sql/pglite']
+    exclude: ['@electric-sql/pglite'],
   },
   build: {
     target: 'esnext',
@@ -64,30 +64,36 @@ export default defineConfig({
         settings: './settings-modal.html', // Add the settings modal as an entry point
       },
       output: {
-        assetFileNames: (assetInfo) => {
+        assetFileNames: assetInfo => {
           if (assetInfo.name.endsWith('.css')) {
             return 'assets/[name][extname]';
           }
           return 'assets/[name]-[hash][extname]';
-        }
-      }
-    }
+        },
+      },
+    },
   },
   test: {
     globals: true,
     environment: 'jsdom',
-    setupFiles: ['./src/test/setup.ts']
+    setupFiles: ['./src/test/setup.ts'],
   },
   server: {
     headers: {
       'Cross-Origin-Opener-Policy': 'same-origin',
-      'Cross-Origin-Embedder-Policy': 'require-corp'
+      'Cross-Origin-Embedder-Policy': 'require-corp',
     },
     proxy: {
-      '/api': process.env.NODE_ENV === 'production' ? false : {
-        target: process.env.DOCKER_ENV === 'true' ? 'http://backend:3000' : 'http://localhost:3000',
-        changeOrigin: true
-      }
-    }
-  }
+      '/api':
+        process.env.NODE_ENV === 'production'
+          ? false
+          : {
+              target:
+                process.env.DOCKER_ENV === 'true'
+                  ? `http://backend:${process.env.PORT || '3000'}`
+                  : `http://localhost:${process.env.PORT || '3000'}`,
+              changeOrigin: true,
+            },
+    },
+  },
 });

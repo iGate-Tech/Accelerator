@@ -8,11 +8,11 @@ services:
       target: ${BUILD_TARGET:-production}
     container_name: accelerator-${CONTAINER_NAME_SUFFIX:-prod}
     ports:
-      - '${APP_PORT:-3002}:3000'
+      - '${APP_PORT:-3002}:${PORT:-3000}'
     environment:
       - NODE_ENV=production
       - BUN_ENV=production
-      - PORT=3000
+      - PORT=${PORT:-3000}
       - ENVIRONMENT=${ENVIRONMENT:-prod}
       - CONTAINER_NAME_SUFFIX=${CONTAINER_NAME_SUFFIX:-prod}
       - OPENROUTER_API_KEY=${OPENROUTER_API_KEY}
@@ -24,8 +24,7 @@ services:
       - accelerator-network
     restart: unless-stopped
     healthcheck:
-      test:
-        ['CMD', 'wget', '-q', '--spider', 'http://localhost:3000/api/health']
+      test: ['CMD', 'curl', '-f', 'http://localhost:3000/api/health']
       interval: 30s
       timeout: 10s
       retries: 3

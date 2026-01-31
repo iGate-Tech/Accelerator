@@ -6,7 +6,7 @@
     </linearGradient>
     <linearGradient id="purple-blue" x1="0%" y1="0%" x2="0%" y2="100%">
       <stop offset="0" stop-color="#00a7e0"></stop>
-      <stop offset="1" stop-color="#9e28b5"></stop>
+      <stop offset="1" stop-color="#00a7e0"></stop>
     </linearGradient>
     <linearGradient id="gradient-1" bx:pinned="true"></linearGradient>
     <linearGradient id="gradient-2" bx:pinned="true">
@@ -24,7 +24,7 @@
     </linearGradient>
     <linearGradient id="gradient-3" x1="0%" y1="0%" x2="0%" y2="100%">
       <stop offset="0" stop-color="#00a7e0"></stop>
-      <stop offset="1" stop-color="#9e28b5"></stop>
+      <stop offset="1" stop-color="#00a7e0"></stop>
     </linearGradient>
     <linearGradient id="gradient-2-1" href="#gradient-2" gradientUnits="userSpaceOnUse" x1="369.824" y1="258.28" x2="369.824" y2="419.898" gradientTransform="matrix(1.298064, 0.947677, -0.363133, 0.497397, -202.742569, -197.590729)"></linearGradient>
     <linearGradient id="gradient-4" x1="0%" y1="0%" x2="0%" y2="100%" gradientTransform="matrix(0.942709, 0.333618, -0.150908, 0.426427, 0, 0)">

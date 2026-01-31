@@ -1,21 +1,7 @@
-/// <reference types="vitest" />
 import { defineConfig } from 'vite';
 import solidPlugin from 'vite-plugin-solid';
 import { VitePWA } from 'vite-plugin-pwa';
-
-// Plugin to set proper headers for WASM files required by PGLite
-const wasmHeadersPlugin = {
-  name: 'wasm-headers',
-  configureServer(server) {
-    server.middlewares.use((req, res, next) => {
-      if (req.url.endsWith('.wasm')) {
-        res.setHeader('Cross-Origin-Embedder-Policy', 'require-corp');
-        res.setHeader('Cross-Origin-Opener-Policy', 'same-origin');
-      }
-      next();
-    });
-  }
-};
+import { createHtmlPlugin } from 'vite-plugin-html';
 
 export default defineConfig({
   resolve: {
@@ -39,6 +25,13 @@ export default defineConfig({
   },
   plugins: [
     solidPlugin(),
+    createHtmlPlugin({
+      inject: {
+        data: {
+          title: 'Settings Modal Prototype',
+        },
+      },
+    }),
     VitePWA({
       disable: true,
       registerType: 'autoUpdate',
@@ -49,7 +42,7 @@ export default defineConfig({
         start_url: '/',
         display: 'standalone',
         background_color: '#ffffff',
-        theme_color: '#9E28B5',
+        theme_color: '#00a7e0',
         orientation: 'portrait-primary',
         categories: ['productivity', 'business'],
         lang: 'en-US',
@@ -64,7 +57,21 @@ export default defineConfig({
   },
   build: {
     target: 'esnext',
-    commonjsOptions: { transformMixedEsModules: true }
+    commonjsOptions: { transformMixedEsModules: true },
+    rollupOptions: {
+      input: {
+        main: './index.html',
+        settings: './settings-modal.html', // Add the settings modal as an entry point
+      },
+      output: {
+        assetFileNames: (assetInfo) => {
+          if (assetInfo.name.endsWith('.css')) {
+            return 'assets/[name][extname]';
+          }
+          return 'assets/[name]-[hash][extname]';
+        }
+      }
+    }
   },
   test: {
     globals: true,

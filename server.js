@@ -319,6 +319,47 @@ const serveOptions = {
         return Response.redirect(viteUrl, 302);
       }
 
+      // Serve static files from public directory in development
+      if (url.pathname.startsWith('/public/')) {
+        const filePath = `.${url.pathname}`;
+        try {
+          const file = Bun.file(filePath);
+          const fileExists = await file.exists();
+          if (fileExists) {
+            const ext = filePath.split('.').pop();
+            const contentType = {
+              'html': 'text/html',
+              'js': 'text/javascript',
+              'css': 'text/css',
+              'json': 'application/json',
+              'png': 'image/png',
+              'jpg': 'image/jpeg',
+              'jpeg': 'image/jpeg',
+              'gif': 'image/gif',
+              'svg': 'image/svg+xml',
+              'txt': 'text/plain'
+            }[ext] || 'application/octet-stream';
+
+            return new Response(file, {
+              headers: { 'Content-Type': contentType }
+            });
+          }
+        } catch (error) {
+          console.log(`Static file error: ${error.message}`);
+        }
+      }
+
+      // Serve the settings modal from Vite dev server in development
+      if (url.pathname === '/settings-modal.html') {
+        try {
+          // Redirect to Vite dev server (assuming it runs on port 5173)
+          const viteUrl = `http://localhost:5173${url.pathname}`;
+          return Response.redirect(viteUrl, 302);
+        } catch (error) {
+          console.log(`Settings modal redirect error: ${error.message}`);
+        }
+      }
+
       // For root route in development, fetch from Vite dev server
       if (url.pathname === '/' || url.pathname === '/index.html') {
         try {

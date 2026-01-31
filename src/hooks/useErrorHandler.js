@@ -1,5 +1,5 @@
 import { createSignal, createEffect } from 'solid-js';
-import { errorHandler } from '../components/ui/ErrorHandler';
+import { errorHandler } from '@components/utilities/ErrorHandler';
 
 // Custom hook for error handling in components
 export const useErrorHandler = () => {

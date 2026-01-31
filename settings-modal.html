@@ -1,0 +1,1142 @@
+<!DOCTYPE html> <html lang="en" data-theme="light">
+
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Accelerator Settings – General</title>
+
+        <link rel="stylesheet" href="/src/assets/styles/input.css">
+        <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                const popovers = document.querySelectorAll('ul[popover]');
+                
+                popovers.forEach(popover => {
+                    const items = popover.querySelectorAll('.cursor-pointer');
+                    
+                    items.forEach(item => {
+                        item.addEventListener('click', function(e) {
+                            e.preventDefault();
+                            
+                            const popoverId = popover.id;
+                            const button = document.querySelector(`[popovertarget="${popoverId}"]`);
+                            const textSpan = button.querySelector('.dropdown-text');
+                            const hiddenInput = document.getElementById(`${popoverId.replace('popover-', '')}-value`);
+                            
+                            const value = this.getAttribute('data-value');
+                            const text = this.textContent;
+                            
+                            if (textSpan) {
+                                textSpan.textContent = text;
+                            }
+                            
+                            if (hiddenInput) {
+                                hiddenInput.value = value;
+                            }
+                            
+                            items.forEach(i => i.classList.remove('active'));
+                            this.classList.add('active');
+                            
+                            popover.hidePopover();
+                        });
+                    });
+                });
+
+                lucide.createIcons();
+            });
+        </script>
+
+        <style>
+            /* Show content for the checked radio button */
+                #tab_general:checked ~ #general-tab-content,
+                #tab_profile:checked ~ #profile-tab-content,
+                #tab_notifications:checked ~ #notifications-tab-content,
+                #tab_billing:checked ~ #billing-tab-content,
+                #tab_credits:checked ~ #credits-tab-content,
+                #tab_workspace:checked ~ #workspace-tab-content,
+                #tab_apps:checked ~ #apps-tab-content,
+                #tab_connectors:checked ~ #connectors-tab-content,
+                #tab_integrations:checked ~ #integrations-tab-content {
+            display : block;
+        } </style>
+    </head>
+
+    <body class="min-h-screen flex items-center justify-center p-6">
+        <div class="fixed inset-0 bg-black/50 backdrop-blur-xl z-0"></div>
+        <div class=" w-[760px] h-[600px] bg-white rounded-2xl shadow-2xl overflow-hidden border border-gray-200 relative z-10">
+            <div class="flex gap-2 justify-between mx-5 my-3">
+                <div class="">Settings</div>
+                <i data-lucide="x" class="w-5 h-5 text-gray-600 "></i>
+            </div>
+            <!-- DaisyUI Tabs Navigation -->
+            <div class="hover:overflow-x-auto m-2 border-b border-base-300">
+                <div class="tabs tabs-bordered flex-nowrap min-w-max">
+                    <label for="tab_general" class="tab   hover:text-primary">General</label>
+                    <label for="tab_profile" class="tab   hover:text-primary">Profile</label>
+                    <label for="tab_notifications" class="tab  hover:text-primary">Notifications</label>
+                    <label for="tab_billing" class="tab  hover:text-primary">Plans & Billing</label>
+                    <label for="tab_credits" class="tab  hover:text-primary" >Buy Credits</label>
+                    <label for="tab_workspace" class="tab  hover:text-primary">Workspace</label>
+                    <label for="tab_apps" class="tab  hover:text-primary">Apps & Skills</label>
+                    <label for="tab_connectors" class="tab  hover:text-primary">Connectors</label>
+                    <label for="tab_integrations" class="tab  hover:text-primary">Integrations</label>
+                </div>
+            </div>
+
+            <div
+                class="flex ">
+
+                <!-- Sidebar -->
+                <aside class="w-[200px] flex flex-col relative bg-base-100 border-r border-base-300">
+
+
+                    <div class="flex-1 px-3 overflow-y-auto">
+                        <ul class="menu w-full gap-1 space-y-0.5 p-0">
+                            <li>
+                                <a class="active flex gap-2 items-center">
+                                    <i data-lucide="settings" class="w-5 h-5"></i>
+                                    General
+                                </a>
+                            </li>
+                            <li>
+                                <a class="flex gap-2 items-center">
+                                    <i data-lucide="user-round" class="w-5 h-5"></i>
+                                    Profile
+                                </a>
+                            </li>
+                            <li>
+                                <a class="flex gap-2 items-center">
+                                    <i data-lucide="bell" class="w-5 h-5"></i>
+                                    Notifications
+                                </a>
+                            </li>
+                            <li>
+                                <a class="flex gap-2 items-center">
+                                    <i data-lucide="calendar-days" class="w-5 h-5"></i>
+                                    Plans & Billing
+                                </a>
+                            </li>
+                            <li>
+                                <a class="flex gap-2 items-center">
+                                    <i data-lucide="credit-card" class="w-5 h-5"></i>
+                                    Buy Credits
+                                </a>
+                            </li>
+                            <li>
+                                <a class="flex gap-2 items-center">
+                                    <i data-lucide="panel-top" class="w-5 h-5"></i>
+                                    Workspace
+                                </a>
+                            </li>
+                            <li>
+                                <a class="flex gap-2 items-center">
+                                    <i data-lucide="puzzle" class="w-5 h-5"></i>
+                                    Apps & Skills
+                                </a>
+                            </li>
+                            <li>
+                                <a class="flex gap-2 items-center">
+                                    <i data-lucide="cable" class="w-5 h-5"></i>
+                                    Connectors
+                                </a>
+                            </li>
+                            <li>
+                                <a class="flex gap-2 items-center">
+                                    <i data-lucide="plug" class="w-5 h-5"></i>
+                                    Integrations
+                                </a>
+                            </li>
+                            <li>
+                                <a class="flex gap-2 items-center">
+                                    <i data-lucide="life-buoy" class="w-5 h-5"></i>
+                                    Help
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </aside>
+
+                <!-- Main Content – Tab Sections -->
+                <main
+                    class="flex-1 bg-white p-4 overflow-y-auto ">
+
+
+                    <!-- Tab Content with Hidden Radio Buttons -->
+                    <div
+                        class="w-full">
+                        <!-- General Tab -->
+                        <input type="radio" name="settings_tab_group" id="tab_general" class="hidden" checked="checked"/>
+                        <div id="general-tab-content" class="hidden">
+                            <div class=" divide-y divide-gray-200">
+                                <div class="form-control flex flex-row justify-between items-start py-2 border-b border-base-300">
+                                    <div >
+                                        <label class="   text-base text-base-content mb-1">Language</label>
+                                        <p class="text-sm text-base-content/70">Select the language for the interface</p>
+                                    </div>
+                                    <button class="btn btn-ghost font-normal flex gap-2" popovertarget="popover-language" style="anchor-name:--anchor-language">
+                                        <span class="dropdown-text font-normal">English</span>
+                                        <i data-lucide="chevron-down" class="w-4 h-4"></i>
+                                    </button>
+                                    <ul class="dropdown menu w-40 rounded-box bg-base-100 shadow-sm border border-base-300"
+                                      popover id="popover-language" style="position-anchor:--anchor-language">
+                                        <li><a class="cursor-pointer active" data-value="en">English</a></li>
+                                        <li><a class="cursor-pointer" data-value="ar">Arabic</a></li>
+                                        <li><a class="cursor-pointer" data-value="es">Spanish</a></li>
+                                        <li><a class="cursor-pointer" data-value="fr">French</a></li>
+                                        <li><a class="cursor-pointer" data-value="de">German</a></li>
+                                        <li><a class="cursor-pointer" data-value="ja">Japanese</a></li>
+                                        <li><a class="cursor-pointer" data-value="zh">Chinese</a></li>
+                                    </ul>
+                                    <input type="hidden"  id="language-value" value="en">
+                                </div>
+                                <div class="form-control flex flex-row justify-between items-start py-2 border-b border-base-300">
+                                    <div>
+                                        <label class="label  text-base text-base-content mb-1">Theme</label>
+                                        <p class="text-sm text-base-content/70">Choose between light, dark, and system themes</p>
+                                    </div>
+                                    <button class="btn btn-ghost font-normal flex gap-2" popovertarget="popover-theme" style="anchor-name:--anchor-theme">
+                                        <span class="dropdown-text font-normal">System</span>
+                                        <i data-lucide="chevron-down" class="w-4 h-4"></i>
+                                    </button>
+                                    <ul class="dropdown menu w-40 rounded-box bg-base-100 shadow-sm border border-base-300"
+                                      popover id="popover-theme" style="position-anchor:--anchor-theme">
+                                        <li><a class="cursor-pointer" data-value="light">Light</a></li>
+                                        <li><a class="cursor-pointer" data-value="dark">Dark</a></li>
+                                        <li><a class="cursor-pointer active" data-value="system">System</a></li>
+                                    </ul>
+                                    <input type="hidden"  id="theme-value" value="system">
+                                </div>
+                                <div class="form-control flex flex-row justify-between items-start py-2 border-b border-base-300">
+                                    <div>
+                                        <label class="label  text-base text-base-content mb-1">Time Format</label>
+                                        <p class="text-sm text-base-content/70">Select your preferred time format</p>
+                                    </div>
+                                    <button class="btn btn-ghost font-normal flex gap-2" popovertarget="popover-time-format" style="anchor-name:--anchor-time-format">
+                                        <span class="dropdown-text font-normal">12-hour</span>
+                                        <i data-lucide="chevron-down" class="w-4 h-4"></i>
+                                    </button>
+                                    <ul class="dropdown menu w-40 rounded-box bg-base-100 shadow-sm border border-base-300"
+                                      popover id="popover-time-format" style="position-anchor:--anchor-time-format">
+                                        <li><a class="cursor-pointer active" data-value="12-hour">12-hour</a></li>
+                                        <li><a class="cursor-pointer" data-value="24-hour">24-hour</a></li>
+                                    </ul>
+                                    <input type="hidden"  id="time-format-value" value="12-hour">
+                                </div>
+                                <div class="form-control flex flex-row justify-between items-start py-2 border-b border-base-300">
+                                    <div>
+                                        <label class="label  text-base text-base-content mb-1">Date Format</label>
+                                        <p class="text-sm text-base-content/70">Select your preferred date format</p>
+                                    </div>
+                                    <button class="btn btn-ghost font-normal flex gap-2" popovertarget="popover-date-format" style="anchor-name:--anchor-date-format">
+                                        <span class="dropdown-text font-normal">MM/DD/YYYY</span>
+                                        <i data-lucide="chevron-down" class="w-4 h-4"></i>
+                                    </button>
+                                    <ul class="dropdown menu w-40 rounded-box bg-base-100 shadow-sm border border-base-300"
+                                      popover id="popover-date-format" style="position-anchor:--anchor-date-format">
+                                        <li><a class="cursor-pointer active" data-value="MM/DD/YYYY">MM/DD/YYYY</a></li>
+                                        <li><a class="cursor-pointer" data-value="DD/MM/YYYY">DD/MM/YYYY</a></li>
+                                        <li><a class="cursor-pointer" data-value="YYYY-MM-DD">YYYY-MM-DD</a></li>
+                                    </ul>
+                                    <input type="hidden"  id="date-format-value" value="MM/DD/YYYY">
+                                </div>
+                                <div class="flex flex-row justify-between items-start py-4">
+                                    <div>
+                                        <label class="text-base text-base-content">Danger Zone</label>
+                                        <p class="text-sm text-base-content/60 mt-1">Permanently delete your account and all associated data</p>
+                                    </div>
+                                    <button class="btn btn-ghost btn-sm text-error hover:bg-error/5">Delete Account</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Profile Tab -->
+                        <input type="radio" name="settings_tab_group" id="tab_profile" class="hidden"/>
+                        <div id="profile-tab-content" class="hidden">
+                            <div class="space-y-6">
+                                <section>
+                                    <div class="flex items-center py-3 border-b border-base-200">
+                                        <h3 class="text-lg text-base-content">Profile</h3>
+                                    </div>
+                                    <div class="flex items-center justify-between border-b border-base-200 py-3">
+                                        <div class="w-full">
+                                            <div class="flex items-center justify-between gap-4">
+                                                <span class="text-sm text-base-content">Name</span>
+                                                <button class="flex items-center gap-2 text-sm text-base-content/70 hover:text-base-content">
+                                                    <span>Enter your name</span>
+                                                    <i data-lucide="chevron-right" class="w-4 h-4"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center justify-between border-b border-base-200 py-3">
+                                        <div class="w-full">
+                                            <div class="flex items-center justify-between gap-4">
+                                                <span class="text-sm text-base-content">Email</span>
+                                                <button class="flex items-center gap-2 text-sm text-base-content/70 hover:text-base-content">
+                                                    <span>your.email@example.com</span>
+                                                    <i data-lucide="chevron-right" class="w-4 h-4"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center justify-between border-b border-base-200 py-3">
+                                        <div class="w-full">
+                                            <div class="flex items-center justify-between gap-4">
+                                                <div class="flex items-center gap-3">
+                                                    <div class="avatar">
+                                                        <div class="w-12 h-12 rounded-full bg-base-200 flex items-center justify-center">
+                                                            <i data-lucide="user" class="w-6 h-6 text-base-content/40"></i>
+                                                        </div>
+                                                    </div>
+                                                    <div>
+                                                        <span class="text-sm text-base-content">Profile Picture</span>
+                                                        <p class="text-xs text-base-content/60">Upload a custom profile picture</p>
+                                                    </div>
+                                                </div>
+                                                <div class="flex gap-2">
+                                                    <input type="file" id="avatar-upload" class="hidden" accept="image/*">
+                                                    <button class="btn btn-ghost btn-sm" onclick="document.getElementById('avatar-upload').click()">Upload</button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center justify-between py-3">
+                                        <div class="w-full">
+                                            <div class="flex items-center justify-between gap-4">
+                                                <span class="text-sm text-base-content">Bio</span>
+                                                <button class="flex items-center gap-2 text-sm text-base-content/70 hover:text-base-content">
+                                                    <span>Add a bio</span>
+                                                    <i data-lucide="chevron-right" class="w-4 h-4"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </section>
+
+                                <section>
+                                    <div class="flex items-center py-3 border-b border-base-200">
+                                        <h3 class="text-lg text-base-content">Personal Information</h3>
+                                    </div>
+                                    <div class="flex items-center justify-between border-b border-base-200 py-3">
+                                        <div class="w-full">
+                                            <div class="flex items-center justify-between gap-4">
+                                                <span class="text-sm text-base-content">Location</span>
+                                                <button class="flex items-center gap-2 text-sm text-base-content/70 hover:text-base-content">
+                                                    <span>Add your location</span>
+                                                    <i data-lucide="chevron-right" class="w-4 h-4"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center justify-between border-b border-base-200 py-3">
+                                        <div class="w-full">
+                                            <div class="flex items-center justify-between gap-4">
+                                                <span class="text-sm text-base-content">Phone</span>
+                                                <button class="flex items-center gap-2 text-sm text-base-content/70 hover:text-base-content">
+                                                    <span>Add phone number</span>
+                                                    <i data-lucide="chevron-right" class="w-4 h-4"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center justify-between py-3">
+                                        <div class="w-full">
+                                            <div class="flex items-center justify-between gap-4">
+                                                <span class="text-sm text-base-content">Website</span>
+                                                <button class="flex items-center gap-2 text-sm text-base-content/70 hover:text-base-content">
+                                                    <span>Add website</span>
+                                                    <i data-lucide="chevron-right" class="w-4 h-4"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </section>
+
+                                <section>
+                                    <div class="flex items-center py-3 border-b border-base-200">
+                                        <h3 class="text-lg text-base-content">Professional</h3>
+                                    </div>
+                                    <div class="flex items-center justify-between border-b border-base-200 py-3">
+                                        <div class="w-full">
+                                            <div class="flex items-center justify-between gap-4">
+                                                <span class="text-sm text-base-content">Job Title</span>
+                                                <button class="flex items-center gap-2 text-sm text-base-content/70 hover:text-base-content">
+                                                    <span>Add job title</span>
+                                                    <i data-lucide="chevron-right" class="w-4 h-4"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center justify-between border-b border-base-200 py-3">
+                                        <div class="w-full">
+                                            <div class="flex items-center justify-between gap-4">
+                                                <span class="text-sm text-base-content">Company</span>
+                                                <button class="flex items-center gap-2 text-sm text-base-content/70 hover:text-base-content">
+                                                    <span>Add company</span>
+                                                    <i data-lucide="chevron-right" class="w-4 h-4"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center justify-between py-3">
+                                        <div class="w-full">
+                                            <div class="flex items-center justify-between gap-4">
+                                                <div class="flex items-center gap-3">
+                                                    <i data-lucide="linkedin" class="w-5 h-5 text-base-content/60"></i>
+                                                    <span class="text-sm text-base-content">LinkedIn</span>
+                                                </div>
+                                                <button class="btn btn-ghost btn-sm">Add</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </section>
+
+                                <section>
+                                    <div class="flex items-center py-3 border-b border-base-200">
+                                        <h3 class="text-lg text-base-content">Danger Zone</h3>
+                                    </div>
+                                    <div class="flex items-center justify-between py-3">
+                                        <div class="w-full">
+                                            <div class="flex items-center justify-between gap-4">
+                                                <span class="text-sm text-base-content">Delete Account</span>
+                                                <button class="btn btn-outline btn-sm text-error hover:bg-error/5">Delete</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </section>
+                            </div>
+                        </div>
+
+                        <!-- Notifications Tab -->
+                        <input type="radio" name="settings_tab_group" id="tab_notifications" class="hidden"/>
+                        <div id="notifications-tab-content" class="hidden">
+
+                            <!-- Notification Sub-tabs -->
+                            <div class="tabs tabs-bordered">
+                                <a class="tab tab-active" data-tab="all">All</a>
+                                <a class="tab" data-tab="updates">Updates</a>
+                                <a class="tab" data-tab="messages">Messages</a>
+                                <a class="tab" data-tab="settings">Settings</a>
+                            </div>
+
+                            <div
+                                class="mt-4">
+                                <!-- All Notifications Sub-content -->
+                                <div id="notifications-all" class="">
+                                    <div class="divide-y divide-gray-200">
+                                        <div class="form-control flex flex-row justify-between items-start py-2 border-b border-base-300">
+                                            <div>
+                                                <label class="label  text-base text-base-content mb-1">Project Updates</label>
+                                                <p class="text-sm text-base-content/70">Get notified when projects you're involved in have updates</p>
+                                            </div>
+                                            <button class="btn btn-ghost font-normal flex gap-2" popovertarget="popover-project-updates" style="anchor-name:--anchor-project-updates">
+                                                <span class="dropdown-text font-normal">Push, Email</span>
+                                                <i data-lucide="chevron-down" class="w-4 h-4"></i>
+                                            </button>
+                                            <ul class="dropdown menu w-40 rounded-box bg-base-100 shadow-sm border border-base-300"
+                                              popover id="popover-project-updates" style="position-anchor:--anchor-project-updates">
+                                                <li><a class="cursor-pointer active" data-value="push,email">Push, Email</a></li>
+                                                <li><a class="cursor-pointer" data-value="push">Push</a></li>
+                                                <li><a class="cursor-pointer" data-value="email">Email</a></li>
+                                                <li><a class="cursor-pointer" data-value="off">Off</a></li>
+                                            </ul>
+                                            <input type="hidden"  id="project-updates-value" value="push,email">
+                                        </div>
+                                        <div class="form-control flex flex-row justify-between items-start py-2 border-b border-base-300">
+                                            <div>
+                                                <label class="label  text-base text-base-content mb-1">Security Alerts</label>
+                                                <p class="text-sm text-base-content/70">Receive alerts about security events related to your account</p>
+                                            </div>
+                                            <button class="btn btn-ghost font-normal flex gap-2" popovertarget="popover-security-alerts" style="anchor-name:--anchor-security-alerts">
+                                                <span class="dropdown-text font-normal">Push, Email</span>
+                                                <i data-lucide="chevron-down" class="w-4 h-4"></i>
+                                            </button>
+                                            <ul class="dropdown menu w-40 rounded-box bg-base-100 shadow-sm border border-base-300"
+                                              popover id="popover-security-alerts" style="position-anchor:--anchor-security-alerts">
+                                                <li><a class="cursor-pointer active" data-value="push,email">Push, Email</a></li>
+                                                <li><a class="cursor-pointer" data-value="push">Push</a></li>
+                                                <li><a class="cursor-pointer" data-value="email">Email</a></li>
+                                                <li><a class="cursor-pointer" data-value="off">Off</a></li>
+                                            </ul>
+                                            <input type="hidden"  id="security-alerts-value" value="push,email">
+                                        </div>
+                                        <div class="form-control flex flex-row justify-between items-start py-5 border-b-0">
+                                            <div>
+                                                <label class="label  text-base text-base-content mb-1">Feature Announcements</label>
+                                                <p class="text-sm text-base-content/70">Stay informed about new features and capabilities</p>
+                                            </div>
+                                            <button class="btn btn-ghost font-normal flex gap-2" popovertarget="popover-feature-announcements" style="anchor-name:--anchor-feature-announcements">
+                                                <span class="dropdown-text font-normal">Email</span>
+                                                <i data-lucide="chevron-down" class="w-4 h-4"></i>
+                                            </button>
+                                            <ul class="dropdown menu w-40 rounded-box bg-base-100 shadow-sm border border-base-300"
+                                              popover id="popover-feature-announcements" style="position-anchor:--anchor-feature-announcements">
+                                                <li><a class="cursor-pointer active" data-value="email">Email</a></li>
+                                                <li><a class="cursor-pointer" data-value="push">Push</a></li>
+                                                <li><a class="cursor-pointer" data-value="push,email">Push, Email</a></li>
+                                                <li><a class="cursor-pointer" data-value="off">Off</a></li>
+                                            </ul>
+                                            <input type="hidden"  id="feature-announcements-value" value="email">
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Updates Sub-content -->
+                                <div id="notifications-updates" class="hidden">
+                                    <div class="divide-y divide-gray-200">
+                                        <div class="form-control flex flex-row justify-between items-start py-2 border-b border-base-300">
+                                            <div>
+                                                <label class="label  text-base text-base-content mb-1">Project Completion</label>
+                                                <p class="text-sm text-base-content/70">Get notified when projects you've created are completed</p>
+                                            </div>
+                                            <button class="btn btn-ghost font-normal flex gap-2" popovertarget="popover-project-completion" style="anchor-name:--anchor-project-completion">
+                                                <span class="dropdown-text font-normal">Push</span>
+                                                <i data-lucide="chevron-down" class="w-4 h-4"></i>
+                                            </button>
+                                            <ul class="dropdown menu w-40 rounded-box bg-base-100 shadow-sm border border-base-300"
+                                              popover id="popover-project-completion" style="position-anchor:--anchor-project-completion">
+                                                <li><a class="cursor-pointer active" data-value="push">Push</a></li>
+                                                <li><a class="cursor-pointer" data-value="email">Email</a></li>
+                                                <li><a class="cursor-pointer" data-value="push,email">Push, Email</a></li>
+                                                <li><a class="cursor-pointer" data-value="off">Off</a></li>
+                                            </ul>
+                                            <input type="hidden"  id="project-completion-value" value="push">
+                                        </div>
+                                        <div class="form-control flex flex-row justify-between items-start py-2 border-b border-base-300">
+                                            <div>
+                                                <label class="label  text-base text-base-content mb-1">Report Generation</label>
+                                                <p class="text-sm text-base-content/70">Receive notifications when reports are ready</p>
+                                            </div>
+                                            <button class="btn btn-ghost font-normal flex gap-2" popovertarget="popover-report-generation" style="anchor-name:--anchor-report-generation">
+                                                <span class="dropdown-text font-normal">Push, Email</span>
+                                                <i data-lucide="chevron-down" class="w-4 h-4"></i>
+                                            </button>
+                                            <ul class="dropdown menu w-40 rounded-box bg-base-100 shadow-sm border border-base-300"
+                                              popover id="popover-report-generation" style="position-anchor:--anchor-report-generation">
+                                                <li><a class="cursor-pointer active" data-value="push,email">Push, Email</a></li>
+                                                <li><a class="cursor-pointer" data-value="push">Push</a></li>
+                                                <li><a class="cursor-pointer" data-value="email">Email</a></li>
+                                                <li><a class="cursor-pointer" data-value="off">Off</a></li>
+                                            </ul>
+                                            <input type="hidden"  id="report-generation-value" value="push,email">
+                                        </div>
+                                        <div class="form-control flex flex-row justify-between items-start py-5 border-b-0">
+                                            <div>
+                                                <label class="label  text-base text-base-content mb-1">Resource Availability</label>
+                                                <p class="text-sm text-base-content/70">Get alerts when requested resources become available</p>
+                                            </div>
+                                            <button class="btn btn-ghost font-normal flex gap-2" popovertarget="popover-resource-availability" style="anchor-name:--anchor-resource-availability">
+                                                <span class="dropdown-text font-normal">Push</span>
+                                                <i data-lucide="chevron-down" class="w-4 h-4"></i>
+                                            </button>
+                                            <ul class="dropdown menu w-40 rounded-box bg-base-100 shadow-sm border border-base-300"
+                                              popover id="popover-resource-availability" style="position-anchor:--anchor-resource-availability">
+                                                <li><a class="cursor-pointer active" data-value="push">Push</a></li>
+                                                <li><a class="cursor-pointer" data-value="email">Email</a></li>
+                                                <li><a class="cursor-pointer" data-value="push,email">Push, Email</a></li>
+                                                <li><a class="cursor-pointer" data-value="off">Off</a></li>
+                                            </ul>
+                                            <input type="hidden"  id="resource-availability-value" value="push">
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Messages Sub-content -->
+                                <div id="notifications-messages" class="hidden">
+                                    <div class="divide-y divide-gray-200">
+                                        <div class="form-control flex flex-row justify-between items-start py-2 border-b border-base-300">
+                                            <div>
+                                                <label class="label  text-base text-base-content mb-1">Team Communications</label>
+                                                <p class="text-sm text-base-content/70">Receive notifications for team messages</p>
+                                            </div>
+                                            <button class="btn btn-ghost font-normal flex gap-2" popovertarget="popover-team-communications" style="anchor-name:--anchor-team-communications">
+                                                <span class="dropdown-text font-normal">Push</span>
+                                                <i data-lucide="chevron-down" class="w-4 h-4"></i>
+                                            </button>
+                                            <ul class="dropdown menu w-40 rounded-box bg-base-100 shadow-sm border border-base-300"
+                                              popover id="popover-team-communications" style="position-anchor:--anchor-team-communications">
+                                                <li><a class="cursor-pointer active" data-value="push">Push</a></li>
+                                                <li><a class="cursor-pointer" data-value="email">Email</a></li>
+                                                <li><a class="cursor-pointer" data-value="push,email">Push, Email</a></li>
+                                                <li><a class="cursor-pointer" data-value="off">Off</a></li>
+                                            </ul>
+                                            <input type="hidden"  id="team-communications-value" value="push">
+                                        </div>
+                                        <div class="form-control flex flex-row justify-between items-start py-2 border-b border-base-300">
+                                            <div>
+                                                <label class="label  text-base text-base-content mb-1">Direct Messages</label>
+                                                <p class="text-sm text-base-content/70">Get notified when you receive direct messages</p>
+                                            </div>
+                                            <button class="btn btn-ghost font-normal flex gap-2" popovertarget="popover-direct-messages" style="anchor-name:--anchor-direct-messages">
+                                                <span class="dropdown-text font-normal">Push</span>
+                                                <i data-lucide="chevron-down" class="w-4 h-4"></i>
+                                            </button>
+                                            <ul class="dropdown menu w-40 rounded-box bg-base-100 shadow-sm border border-base-300"
+                                              popover id="popover-direct-messages" style="position-anchor:--anchor-direct-messages">
+                                                <li><a class="cursor-pointer active" data-value="push">Push</a></li>
+                                                <li><a class="cursor-pointer" data-value="email">Email</a></li>
+                                                <li><a class="cursor-pointer" data-value="push,email">Push, Email</a></li>
+                                                <li><a class="cursor-pointer" data-value="off">Off</a></li>
+                                            </ul>
+                                            <input type="hidden"  id="direct-messages-value" value="push">
+                                        </div>
+                                        <div class="form-control flex flex-row justify-between items-start py-5 border-b-0">
+                                            <div>
+                                                <label class="label  text-base text-base-content mb-1">Mentions</label>
+                                                <p class="text-sm text-base-content/70">Receive notifications when you're mentioned in discussions</p>
+                                            </div>
+                                            <button class="btn btn-ghost font-normal flex gap-2" popovertarget="popover-mentions" style="anchor-name:--anchor-mentions">
+                                                <span class="dropdown-text font-normal">Push</span>
+                                                <i data-lucide="chevron-down" class="w-4 h-4"></i>
+                                            </button>
+                                            <ul class="dropdown menu w-40 rounded-box bg-base-100 shadow-sm border border-base-300"
+                                              popover id="popover-mentions" style="position-anchor:--anchor-mentions">
+                                                <li><a class="cursor-pointer active" data-value="push">Push</a></li>
+                                                <li><a class="cursor-pointer" data-value="email">Email</a></li>
+                                                <li><a class="cursor-pointer" data-value="push,email">Push, Email</a></li>
+                                                <li><a class="cursor-pointer" data-value="off">Off</a></li>
+                                            </ul>
+                                            <input type="hidden"  id="mentions-value" value="push">
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Settings Sub-content -->
+                                <div id="notifications-settings" class="hidden">
+                                    <div class="divide-y divide-gray-200">
+                                        <div class="form-control flex flex-row justify-between items-start py-2 border-b border-base-300">
+                                            <div>
+                                                <label class="label  text-base text-base-content mb-1">Quiet Hours</label>
+                                                <p class="text-sm text-base-content/70">Schedule when notifications are silenced</p>
+                                            </div>
+                                            <div class="flex items-center gap-3">
+                                                <span>From</span>
+                                                <input type="time" class="input input-bordered w-24" value="22:00">
+                                                <span>To</span>
+                                                <input type="time" class="input input-bordered w-24" value="07:00">
+                                                <label class="swap swap-rotate">
+                                                    <input type="checkbox"/>
+                                                    <svg class="swap-on fill-current w-6 h-6" xmlns="http://www.w3.org/2000/svg" viewbox="0 0 24 24">
+                                                        <path d="M21,7L9,19L3.5,13.5L4.91,12.09L9,16.17L19.59,5.59L21,7Z"/>
+                                                    </svg>
+                                                    <svg class="swap-off fill-current w-6 h-6" xmlns="http://www.w3.org/2000/svg" viewbox="0 0 24 24">
+                                                        <path d="M19,6.41L17.59,5L12,10.59L6.41,5L5,6.41L10.59,12L5,17.59L6.41,19L12,13.41L17.59,19L19,17.59L13.41,12L19,6.41Z"/>
+                                                    </svg>
+                                                </label>
+                                            </div>
+                                        </div>
+                                        <div class="form-control flex flex-row justify-between items-start py-2 border-b border-base-300">
+                                            <div>
+                                                <label class="label  text-base text-base-content mb-1">Do Not Disturb</label>
+                                                <p class="text-sm text-base-content/70">Temporarily disable all notifications</p>
+                                            </div>
+                                            <label class="swap swap-rotate">
+                                                <input type="checkbox"/>
+                                                <svg class="swap-on fill-current w-6 h-6" xmlns="http://www.w3.org/2000/svg" viewbox="0 0 24 24">
+                                                    <path d="M21,7L9,19L3.5,13.5L4.91,12.09L9,16.17L19.59,5.59L21,7Z"/>
+                                                </svg>
+                                                <svg class="swap-off fill-current w-6 h-6" xmlns="http://www.w3.org/2000/svg" viewbox="0 0 24 24">
+                                                    <path d="M19,6.41L17.59,5L12,10.59L6.41,5L5,6.41L10.59,12L5,17.59L6.41,19L12,13.41L17.59,19L19,17.59L13.41,12L19,6.41Z"/>
+                                                </svg>
+                                            </label>
+                                        </div>
+                                        <div class="form-control flex flex-row justify-between items-start py-2 border-b border-base-300">
+                                            <div>
+                                                <label class="label  text-base text-base-content mb-1">Email Notifications</label>
+                                                <p class="text-sm text-base-content/70">Enable or disable email notifications</p>
+                                            </div>
+                                            <label class="swap swap-rotate">
+                                                <input type="checkbox" checked/>
+                                                <svg class="swap-on fill-current w-6 h-6" xmlns="http://www.w3.org/2000/svg" viewbox="0 0 24 24">
+                                                    <path d="M21,7L9,19L3.5,13.5L4.91,12.09L9,16.17L19.59,5.59L21,7Z"/>
+                                                </svg>
+                                                <svg class="swap-off fill-current w-6 h-6" xmlns="http://www.w3.org/2000/svg" viewbox="0 0 24 24">
+                                                    <path d="M19,6.41L17.59,5L12,10.59L6.41,5L5,6.41L10.59,12L5,17.59L6.41,19L12,13.41L17.59,19L19,17.59L13.41,12L19,6.41Z"/>
+                                                </svg>
+                                            </label>
+                                        </div>
+                                        <div class="form-control flex flex-row justify-between items-start py-5 border-b-0">
+                                            <div>
+                                                <label class="label  text-base text-base-content mb-1">Browser Notifications</label>
+                                                <p class="text-sm text-base-content/70">Enable or disable browser notifications</p>
+                                            </div>
+                                            <label class="swap swap-rotate">
+                                                <input type="checkbox" checked/>
+                                                <svg class="swap-on fill-current w-6 h-6" xmlns="http://www.w3.org/2000/svg" viewbox="0 0 24 24">
+                                                    <path d="M21,7L9,19L3.5,13.5L4.91,12.09L9,16.17L19.59,5.59L21,7Z"/>
+                                                </svg>
+                                                <svg class="swap-off fill-current w-6 h-6" xmlns="http://www.w3.org/2000/svg" viewbox="0 0 24 24">
+                                                    <path d="M19,6.41L17.59,5L12,10.59L6.41,5L5,6.41L10.59,12L5,17.59L6.41,19L12,13.41L17.59,19L19,17.59L13.41,12L19,6.41Z"/>
+                                                </svg>
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Billing Tab -->
+                        <input type="radio" name="settings_tab_group" id="tab_billing" class="hidden"/>
+                        <div id="billing-tab-content" class="hidden">
+                            <div class="space-y-6">
+                                <section>
+                                    <div class="flex items-center py-3 border-b border-base-200">
+                                        <h3 class="text-lg text-base-content">Plan</h3>
+                                    </div>
+                                    <div class="flex items-center justify-between border-b border-base-200 py-3">
+                                        <div class="w-full">
+                                            <div class="flex items-center justify-between gap-4">
+                                                <span class="text-sm text-base-content">Current Plan</span>
+                                                <button class="flex items-center gap-2 text-sm text-base-content">
+                                                    <span>Professional Plan</span>
+                                                    <span class="text-base-content/60">$29/month</span>
+                                                    <i data-lucide="chevron-right" class="w-4 h-4"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center justify-between border-b border-base-200 py-3">
+                                        <div class="w-full">
+                                            <div class="flex items-center justify-between gap-4">
+                                                <span class="text-sm text-base-content">Payment Method</span>
+                                                <button class="flex items-center gap-2 text-sm text-base-content/70 hover:text-base-content">
+                                                    <span>Visa ending in 4242</span>
+                                                    <i data-lucide="chevron-right" class="w-4 h-4"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center justify-between border-b border-base-200 py-3">
+                                        <div class="w-full">
+                                            <div class="flex items-center justify-between gap-4">
+                                                <span class="text-sm text-base-content">Next Billing Date</span>
+                                                <span class="text-sm text-base-content/70">February 1, 2026</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center justify-between py-3">
+                                        <div class="w-full">
+                                            <div class="flex items-center justify-between gap-4">
+                                                <span class="text-sm text-base-content">Billing Cycle</span>
+                                                <button class="flex items-center gap-2 text-sm text-base-content/70 hover:text-base-content">
+                                                    <span>Monthly</span>
+                                                    <i data-lucide="chevron-right" class="w-4 h-4"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </section>
+
+                                <section>
+                                    <div class="flex items-center py-3 border-b border-base-200">
+                                        <h3 class="text-lg text-base-content">Usage</h3>
+                                    </div>
+                                    <div class="border-b border-base-200 py-3">
+                                        <div class="flex justify-between mb-2">
+                                            <span class="text-sm text-base-content">Storage Used</span>
+                                            <span class="text-sm text-base-content/60">2.3 TB of 5 TB</span>
+                                        </div>
+                                        <progress class="progress progress-primary w-full" value="46" max="100"></progress>
+                                    </div>
+                                    <div class="border-b border-base-200 py-3">
+                                        <div class="flex justify-between mb-2">
+                                            <span class="text-sm text-base-content">Credits Used</span>
+                                            <span class="text-sm text-base-content/60">1,200 of 2,000</span>
+                                        </div>
+                                        <progress class="progress progress-secondary w-full" value="60" max="100"></progress>
+                                    </div>
+                                    <div class="py-3">
+                                        <div class="flex justify-between mb-2">
+                                            <span class="text-sm text-base-content">API Calls</span>
+                                            <span class="text-sm text-base-content/60">45,000 of 50,000</span>
+                                        </div>
+                                        <progress class="progress progress-accent w-full" value="90" max="100"></progress>
+                                    </div>
+                                </section>
+
+                                <section>
+                                    <div class="flex items-center py-3 border-b border-base-200">
+                                        <h3 class="text-lg text-base-content">Management</h3>
+                                    </div>
+                                    <div class="flex items-center justify-between border-b border-base-200 py-3">
+                                        <div class="w-full">
+                                            <div class="flex items-center justify-between gap-4">
+                                                <span class="text-sm text-base-content">Invoices</span>
+                                                <button class="flex items-center gap-2 text-sm text-base-content/70 hover:text-base-content">
+                                                    <span>View invoices</span>
+                                                    <i data-lucide="chevron-right" class="w-4 h-4"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center justify-between py-3">
+                                        <div class="w-full">
+                                            <div class="flex items-center justify-between gap-4">
+                                                <span class="text-sm text-base-content">Payment Method</span>
+                                                <button class="flex items-center gap-2 text-sm text-base-content/70 hover:text-base-content">
+                                                    <span>Update payment method</span>
+                                                    <i data-lucide="chevron-right" class="w-4 h-4"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                    </section>
+                            </div>
+                        </div>
+                        <!-- Credits Tab -->
+            <input type="radio" name="settings_tab_group" id="tab_credits" class="hidden"/>
+            <div id="credits-tab-content" class="hidden">
+                <div class="space-y-6">
+                    <section>
+                        <div class="flex items-center py-3 border-b border-base-200">
+                            <h3 class="text-lg text-base-content">Balance</h3>
+                        </div>
+                        <div class="border-b border-base-200 py-3">
+                            <div class="flex items-center justify-between gap-4">
+                                <span class="text-sm text-base-content">Current Balance</span>
+                                <span class="text-lg text-primary">1,200</span>
+                            </div>
+                            <p class="text-xs text-base-content/60 mt-1">credits remaining</p>
+                        </div>
+                        <div class="border-b border-base-200 py-3">
+                            <div class="flex items-center justify-between gap-4">
+                                <span class="text-sm text-base-content">Used This Month</span>
+                                <span class="text-lg">800</span>
+                            </div>
+                            <p class="text-xs text-base-content/60 mt-1">of 2,000 allocated</p>
+                        </div>
+                        <div class="py-3">
+                            <div class="flex items-center justify-between gap-4">
+                                <span class="text-sm text-base-content">Monthly Allocation</span>
+                                <span class="text-lg">2,000</span>
+                            </div>
+                            <p class="text-xs text-base-content/60 mt-1">renews Feb 1</p>
+                        </div>
+                    </section>
+
+                    <section>
+                        <div class="flex items-center py-3 border-b border-base-200">
+                            <h3 class="text-lg text-base-content">Purchase Credits</h3>
+                        </div>
+                        <div class="border-b border-base-200 py-3">
+                            <button class="w-full flex items-center justify-between">
+                                <div class="flex items-center gap-4">
+                                    <div class="w-4 h-4 rounded-full border border-base-300"></div>
+                                    <div>
+                                        <div class="text-sm text-base-content">1,000 credits</div>
+                                        <div class="text-xs text-base-content/60">$10 • One-time purchase • No expiration</div>
+                                    </div>
+                                </div>
+                                <span class="text-sm text-base-content/60">$10</span>
+                            </button>
+                        </div>
+                        <div class="border-b border-base-200 py-3">
+                            <button class="w-full flex items-center justify-between">
+                                <div class="flex items-center gap-4">
+                                    <div class="w-4 h-4 rounded-full border-2 border-blue-500"></div>
+                                    <div>
+                                        <div class="text-sm text-base-content">5,000 credits</div>
+                                        <div class="text-xs text-base-content/60">$45 • 10% discount • Premium processing</div>
+                                    </div>
+                                </div>
+                                <span class="text-sm text-base-content">$45</span>
+                            </button>
+                        </div>
+                        <div class="py-3">
+                            <button class="w-full flex items-center justify-between">
+                                <div class="flex items-center gap-4">
+                                    <div class="w-4 h-4 rounded-full border border-base-300"></div>
+                                    <div>
+                                        <div class="text-sm text-base-content">10,000 credits</div>
+                                        <div class="text-xs text-base-content/60">$80 • 20% discount • Priority processing</div>
+                                    </div>
+                                </div>
+                                <span class="text-sm text-base-content/60">$80</span>
+                            </button>
+                        </div>
+                        <div class="mt-4">
+                            <button class="btn btn-primary w-full">Purchase Selected Package</button>
+                        </div>
+                    </section>
+
+                    <section>
+                        <div class="flex items-center py-3 border-b border-base-200">
+                            <h3 class="text-lg text-base-content">Recent Transactions</h3>
+                        </div>
+                        <div class="border-b border-base-200 py-3">
+                            <div class="flex items-center justify-between gap-4">
+                                <div class="flex-1">
+                                    <div class="text-sm text-base-content">Monthly allocation</div>
+                                    <div class="text-xs text-base-content/60">Jan 25, 2026</div>
+                                </div>
+                                <div class="text-sm text-green-600">+2,000</div>
+                            </div>
+                        </div>
+                        <div class="border-b border-base-200 py-3">
+                            <div class="flex items-center justify-between gap-4">
+                                <div class="flex-1">
+                                    <div class="text-sm text-base-content">Package purchase</div>
+                                    <div class="text-xs text-base-content/60">Jan 20, 2026</div>
+                                </div>
+                                <div class="text-sm text-base-content">-5,000</div>
+                            </div>
+                        </div>
+                        <div class="border-b border-base-200 py-3">
+                            <div class="flex items-center justify-between gap-4">
+                                <div class="flex-1">
+                                    <div class="text-sm text-base-content">Project completion</div>
+                                    <div class="text-xs text-base-content/60">Jan 15, 2026</div>
+                                </div>
+                                <div class="text-sm text-base-content">-120</div>
+                            </div>
+                        </div>
+                        <div class="py-3">
+                            <div class="flex items-center justify-between gap-4">
+                                <div class="flex-1">
+                                    <div class="text-sm text-base-content">Monthly allocation</div>
+                                    <div class="text-xs text-base-content/60">Jan 10, 2026</div>
+                                </div>
+                                <div class="text-sm text-green-600">+2,000</div>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+            </div>
+
+            <!-- Workspace Tab -->
+            <input type="radio" name="settings_tab_group" id="tab_workspace" class="hidden"/>
+            <div id="workspace-tab-content" class="hidden">
+
+            </div>
+
+            <!-- Apps & Skills Tab -->
+            <input type="radio" name="settings_tab_group" id="tab_apps" class="hidden"/>
+            <div id="apps-tab-content" class="hidden">
+
+            </div>
+
+            <!-- Connectors Tab -->
+            <input type="radio" name="settings_tab_group" id="tab_connectors" class="hidden"/>
+            <div id="connectors-tab-content" class="hidden">
+
+            </div>
+
+            <!-- Integrations Tab -->
+            <input type="radio" name="settings_tab_group" id="tab_integrations" class="hidden"/>
+            <div id="integrations-tab-content" class="hidden">
+
+            </div>
+        </main>
+        </div>
+        </div>
+        </div>
+
+    <script>
+
+// Tab switching functionality - connects sidebar items to DaisyUI-style tabs
+document.addEventListener('DOMContentLoaded', function () { // Define tab mapping - Maps tab names to radio button IDs
+    const tabMap = {
+        'General': 'tab_general',
+        'Profile': 'tab_profile',
+        'Notifications': 'tab_notifications',
+        'Plans & Billing': 'tab_billing',
+        'Buy Credits': 'tab_credits',
+        'Workspace': 'tab_workspace',
+        'Apps & Skills': 'tab_apps',
+        'Connectors': 'tab_connectors',
+        'Integrations': 'tab_integrations'
+    };
+
+    // Get all sidebar items
+    const sidebarItems = document.querySelectorAll('.menu li a');
+
+    // Function to switch tabs
+    function switchTab(tabName) { // Find the corresponding radio button ID
+        let radioButtonId = null;
+        for (const [key, value] of Object.entries(tabMap)) {
+            if (key === tabName) {
+                radioButtonId = value;
+                break;
+            }
+        }
+
+        // If a matching radio button was found, check it
+        if (radioButtonId) {
+            const radioButton = document.getElementById(radioButtonId);
+            if (radioButton) {
+                radioButton.checked = true;
+            }
+
+            // Update active state of sidebar items
+            sidebarItems.forEach(menuItem => {
+                menuItem.classList.remove('active');
+            });
+
+            // Find and activate the corresponding sidebar item
+            sidebarItems.forEach(menuItem => { // Extract text content without icon for comparison
+                const iconElement = menuItem.querySelector('[data-lucide]');
+                let menuItemText = menuItem.textContent;
+
+                if (iconElement) {
+                    menuItemText = menuItemText.replace(iconElement.textContent, '').trim();
+                } else {
+                    menuItemText = menuItemText.trim();
+                } menuItemText = menuItemText.replace(/\s+/g, ' ');
+
+                if (menuItemText === tabName) {
+                    menuItem.classList.add('active');
+                }
+            });
+        }
+    }
+
+    // Add click event to each sidebar item
+    sidebarItems.forEach(item => {
+        item.addEventListener('click', function (e) { // Extract just the text content without the icon
+            const iconElement = this.querySelector('[data-lucide]');
+            let tabName = this.textContent;
+
+            if (iconElement) { // Remove the icon's text content from the overall text
+                tabName = tabName.replace(iconElement.textContent, '').trim();
+            } else {
+                tabName = tabName.trim();
+            }
+
+            // Clean up any extra whitespace
+            tabName = tabName.replace(/\s+/g, ' ');
+            switchTab(tabName);
+        });
+    });
+
+    // Initialize with the active tab (the one that's initially marked as active)
+    // Find the active sidebar item (the one with 'active' class) and trigger its tab
+    const activeItem = document.querySelector('.menu li a.active');
+    if (activeItem) { // Extract just the text content without the icon for the active item too
+        const iconElement = activeItem.querySelector('[data-lucide]');
+        let activeTabName = activeItem.textContent;
+
+        if (iconElement) {
+            activeTabName = activeTabName.replace(iconElement.textContent, '').trim();
+        } else {
+            activeTabName = activeTabName.trim();
+        } activeTabName = activeTabName.replace(/\s+/g, ' ');
+        switchTab(activeTabName);
+    }
+
+    // Notification sub-tabs functionality
+    const notificationTabs = document.querySelectorAll('.tabs .tab[data-tab]');
+    const notificationSubContents = document.querySelectorAll('#notifications-tab-content > div > div');
+
+    notificationTabs.forEach(tab => {
+        tab.addEventListener('click', function () {
+            const tabName = this.getAttribute('data-tab');
+
+            // Remove active class from all tabs and contents
+            notificationTabs.forEach(t => t.classList.remove('tab-active'));
+            notificationSubContents.forEach(c => c.classList.add('hidden'));
+
+            // Add active class to clicked tab and corresponding content
+            this.classList.add('tab-active');
+            document.getElementById(`notifications-${tabName}`).classList.remove('hidden');
+        });
+    });
+
+    // Credit package selection
+    const creditPackages = document.querySelectorAll('[data-package]');
+
+    creditPackages.forEach(pkg => {
+        pkg.addEventListener('click', function () { // Remove border-blue-500 from all packages
+            creditPackages.forEach(p => {
+                p.classList.remove('border-blue-500');
+                p.classList.add('border-base-300');
+            });
+
+            // Add border-blue-500 to clicked package
+            this.classList.remove('border-base-300');
+            this.classList.add('border-blue-500');
+        });
+    });
+
+    // Update sidebar when tabs change (since DaisyUI tabs change radio button states)
+    function updateSidebarForTabs() {
+        const tabIds = [
+            'tab_general',
+            'tab_profile',
+            'tab_notifications',
+            'tab_billing',
+            'tab_credits',
+            'tab_workspace',
+            'tab_apps',
+            'tab_connectors',
+            'tab_integrations'
+        ];
+
+        tabIds.forEach(tabId => {
+            const radioButton = document.getElementById(tabId);
+            if (radioButton && radioButton.checked) { // Determine which tab is active based on radio button ID
+                const tabName = tabId.replace('tab_', '');
+                const sidebarItems = document.querySelectorAll('.menu li a');
+
+                sidebarItems.forEach(item => {
+                    item.classList.remove('active');
+
+                    // Check if this sidebar item corresponds to the active tab
+                    const iconElement = item.querySelector('[data-lucide]');
+                    let itemText = item.textContent;
+
+                    if (iconElement) {
+                        itemText = itemText.replace(iconElement.textContent, '').trim();
+                    } else {
+                        itemText = itemText.trim();
+                    } itemText = itemText.replace(/\s+/g, ' ');
+
+                    // Match based on the tab name
+                    if (itemText.toLowerCase().includes(tabName)) {
+                        item.classList.add('active');
+                    }
+                });
+            }
+        });
+    }
+
+    // Add event listeners to radio buttons to update sidebar
+    const tabRadioButtons = document.querySelectorAll('input[name="settings_tab_group"]');
+    tabRadioButtons.forEach(radio => {
+        radio.addEventListener('change', updateSidebarForTabs);
+    });
+
+    // Call once on load to set initial state
+    updateSidebarForTabs();
+});
+
+// Toggle API key visibility
+function toggleApiKeyVisibility() {
+    const apiKeyInput = document.getElementById('api-key-input');
+    const button = event.target;
+
+    if (apiKeyInput.type === 'password') {
+        apiKeyInput.type = 'text';
+        button.textContent = 'Hide';
+    } else {
+        apiKeyInput.type = 'password';
+        button.textContent = 'Show';
+    }
+}
+
+// Copy API key to clipboard
+function copyApiKey() {
+    const apiKeyInput = document.getElementById('api-key-input');
+    apiKeyInput.select();
+    document.execCommand('copy');
+
+    // Show temporary feedback
+    const originalText = event.target.textContent;
+    event.target.textContent = 'Copied!';
+    setTimeout(() => {
+        event.target.textContent = originalText;
+    }, 2000);
+    }
+</script>
+</body>
+</html>

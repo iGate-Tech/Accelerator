@@ -7,6 +7,20 @@ export async function createSchema() {
   }
 
   try {
+    // Check if schema already exists by checking for the db_version table
+    const result = await dbInstance.query(`
+      SELECT EXISTS (
+        SELECT FROM information_schema.tables
+        WHERE table_schema = 'public'
+        AND table_name = 'db_version'
+      ) AS table_exists;
+    `);
+
+    if (result.rows[0]?.table_exists) {
+      console.log('Database schema already exists, skipping creation');
+      return true;
+    }
+
     console.log('Creating database schema...');
 
     await dbInstance.exec(`
@@ -114,7 +128,7 @@ export async function createSchema() {
         name TEXT NOT NULL,
         description TEXT,
         icon TEXT DEFAULT 'folder',
-        color TEXT DEFAULT '#9E28B5',
+        color TEXT DEFAULT '#00a7e0',
         created_at TEXT,
         synced_at TEXT,
         last_modified TEXT,

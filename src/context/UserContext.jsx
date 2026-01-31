@@ -13,7 +13,7 @@ import { initDatabase } from '@lib/database/core.js';
 import { toastManager } from '@lib/ui/feedback.js';
 import { activityLogger } from '@lib/business.js';
 import { logger } from '@lib/core';
-import { confirmLogout } from '../components';
+import { confirmLogout } from '@components';
 import { createAuthToken } from '@lib/auth/data.js';
 import { secureLocalStorage } from '@lib/auth/security.js';
 

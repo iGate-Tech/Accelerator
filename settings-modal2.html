@@ -1,0 +1,1101 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Accelerator Settings – General</title>
+
+  <link rel="stylesheet" href="/src/assets/styles/input.css">
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+
+  <style>
+    body {
+      background: #f6f7f8;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+    .sidebar {
+      background: white;
+      border-right: 1px solid #e5e7eb;
+    }
+    .sidebar-item {
+      padding: 10px 16px;
+      font-size: 15px;
+      line-height: 20px;
+      color: #0f172a;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      border-radius: 8px;
+      transition: background 0.12s;
+      cursor: pointer;
+    }
+    .sidebar-item:hover {
+      background: #f1f5f9;
+    }
+    .sidebar-item.active {
+      background: #e0f2fe;
+      color: #0369a1;
+      font-weight: 500;
+    }
+    .close-btn {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+    }
+    .setting-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      padding: 20px 0;
+      border-bottom: 1px solid #e5e7eb;
+    }
+    .setting-row:last-child {
+      border-bottom: none;
+      padding-bottom: 0;
+    }
+    .setting-title {
+      font-size: 15px;
+      font-weight: 600;
+      color: #111827;
+      margin-bottom: 4px;
+    }
+    .setting-desc {
+      font-size: 13px;
+      color: #6b7280;
+      line-height: 1.45;
+      max-width: 420px;
+    }
+    .select {
+      font-size: 14px;
+      height: 36px;
+      min-width: 120px;
+      border-radius: 6px;
+      border: 1px solid #d1d5db;
+    }
+    .link {
+      color: #2563eb;
+      font-size: 13px;
+      text-decoration: underline;
+      cursor: pointer;
+    }
+    .link:hover {
+      color: #1d4ed8;
+    }
+    .content-title {
+      font-size: 24px;
+      font-weight: 600;
+      color: #111827;
+      margin-bottom: 8px;
+    }
+    .hidden {
+      display: none !important;
+    }
+
+    /* DaisyUI-style tab radio button functionality */
+    .tab-radio {
+      display: none;
+    }
+
+    /* Hide all tab content by default */
+    .tab-content {
+      display: none;
+    }
+
+    /* Show content for the checked radio button */
+    #tab_general:checked ~ #general-tab-content,
+    #tab_profile:checked ~ #profile-tab-content,
+    #tab_notifications:checked ~ #notifications-tab-content,
+    #tab_billing:checked ~ #billing-tab-content,
+    #tab_credits:checked ~ #credits-tab-content,
+    #tab_workspace:checked ~ #workspace-tab-content,
+    #tab_apps:checked ~ #apps-tab-content,
+    #tab_connectors:checked ~ #connectors-tab-content,
+    #tab_integrations:checked ~ #integrations-tab-content {
+      display: block;
+    }
+
+    /* Profile Picture Upload Styles */
+    .avatar-upload {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .avatar-preview {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      background-color: #e5e7eb;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+
+    .avatar-preview img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    /* Notification Sub-tabs */
+    .notification-tabs {
+      display: flex;
+      gap: 16px;
+      margin-bottom: 20px;
+      border-bottom: 1px solid #e5e7eb;
+      padding-bottom: 12px;
+    }
+
+    .notification-tab {
+      padding: 8px 16px;
+      font-size: 14px;
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+    }
+
+    .notification-tab.active {
+      border-bottom: 2px solid #0369a1;
+      color: #0369a1;
+      font-weight: 500;
+    }
+
+    .notification-sub-content {
+      display: none;
+    }
+
+    .notification-sub-content.active {
+      display: block;
+    }
+
+    /* Billing Plan Cards */
+    .plan-card {
+      border: 1px solid #e5e7eb;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 16px;
+    }
+
+    .plan-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+
+    .plan-name {
+      font-size: 18px;
+      font-weight: 600;
+    }
+
+    .plan-price {
+      font-size: 24px;
+      font-weight: 700;
+    }
+
+    .plan-features {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    .plan-features li {
+      padding: 6px 0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* Credit Package Cards */
+    .credit-package {
+      border: 1px solid #e5e7eb;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 16px;
+      cursor: pointer;
+      transition: border-color 0.2s;
+    }
+
+    .credit-package:hover {
+      border-color: #0369a1;
+    }
+
+    .credit-package.selected {
+      border-color: #0369a1;
+      background-color: #f0f9ff;
+    }
+
+    .credit-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+
+    .credit-amount {
+      font-size: 18px;
+      font-weight: 600;
+    }
+
+    .credit-price {
+      font-size: 20px;
+      font-weight: 700;
+    }
+
+    .credit-features {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    .credit-features li {
+      padding: 4px 0;
+      font-size: 14px;
+      color: #6b7280;
+    }
+  </style>
+</head>
+
+<body class="min-h-screen flex items-center justify-center p-6">
+
+  <div class="w-[960px] h-[720px] bg-white rounded-2xl shadow-2xl overflow-hidden flex border border-gray-200">
+
+    <!-- Sidebar -->
+    <aside class="sidebar w-[240px] flex flex-col relative">
+      <button class="btn btn-ghost btn-circle close-btn">
+        <i data-lucide="x" class="w-5 h-5 text-gray-600"></i>
+      </button>
+
+      <div class="flex-1 pt-14 px-3 overflow-y-auto">
+        <ul class="space-y-0.5">
+          <li><div class="sidebar-item active"><i data-lucide="settings" class="w-5 h-5"></i> General</div></li>
+          <li><div class="sidebar-item"><i data-lucide="user-round" class="w-5 h-5"></i> Profile</div></li>
+          <li><div class="sidebar-item"><i data-lucide="bell" class="w-5 h-5"></i> Notifications</div></li>
+          <li><div class="sidebar-item"><i data-lucide="calendar-days" class="w-5 h-5"></i> Plans & Billing</div></li>
+          <li><div class="sidebar-item"><i data-lucide="credit-card" class="w-5 h-5"></i> Buy Credits</div></li>
+          <li><div class="sidebar-item"><i data-lucide="panel-top" class="w-5 h-5"></i> Workspace</div></li>
+          <li><div class="sidebar-item"><i data-lucide="puzzle" class="w-5 h-5"></i> Apps & Skills</div></li>
+          <li><div class="sidebar-item"><i data-lucide="cable" class="w-5 h-5"></i> Connectors</div></li>
+          <li><div class="sidebar-item"><i data-lucide="plug" class="w-5 h-5"></i> Integrations</div></li>
+        </ul>
+      </div>
+    </aside>
+
+    <!-- Main Content – Tab Sections -->
+    <main class="flex-1 bg-white p-10 overflow-y-auto">
+      <!-- DaisyUI Tabs System -->
+      <div class="w-full">
+        <!-- General Tab -->
+        <input type="radio" name="settings_tab_group" id="tab_general" class="tab-radio" checked="checked" />
+        <div id="general-tab-content" class="tab-content">
+          <h1 class="content-title">General</h1>
+          <div class="mt-8 divide-y divide-gray-200">
+            <div class="setting-row">
+              <div>
+                <div class="setting-title">Language</div>
+                <p class="setting-desc">Select the language for the interface</p>
+              </div>
+              <select class="select" id="language-select">
+                <option value="en" selected>English</option>
+                <option value="ar">Arabic</option>
+                <option value="es">Spanish</option>
+                <option value="fr">French</option>
+                <option value="de">German</option>
+                <option value="ja">Japanese</option>
+                <option value="zh">Chinese</option>
+              </select>
+            </div>
+            <div class="setting-row">
+              <div>
+                <div class="setting-title">Theme</div>
+                <p class="setting-desc">Choose between light, dark, and system themes</p>
+              </div>
+              <select class="select" id="theme-select">
+                <option value="light">Light</option>
+                <option value="dark">Dark</option>
+                <option value="system" selected>System</option>
+              </select>
+            </div>
+            <div class="setting-row">
+              <div>
+                <div class="setting-title">Time Format</div>
+                <p class="setting-desc">Select your preferred time format</p>
+              </div>
+              <select class="select">
+                <option selected>12-hour</option>
+                <option>24-hour</option>
+              </select>
+            </div>
+            <div class="setting-row">
+              <div>
+                <div class="setting-title">Date Format</div>
+                <p class="setting-desc">Select your preferred date format</p>
+              </div>
+              <select class="select">
+                <option selected>MM/DD/YYYY</option>
+                <option>DD/MM/YYYY</option>
+                <option>YYYY-MM-DD</option>
+              </select>
+            </div>
+            <div class="setting-row">
+              <div>
+                <div class="setting-title">Danger Zone</div>
+                <p class="setting-desc">Permanently delete your account and all associated data</p>
+              </div>
+              <button class="btn btn-error">Delete Account</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Profile Tab -->
+        <input type="radio" name="settings_tab_group" id="tab_profile" class="tab-radio" />
+        <div id="profile-tab-content" class="tab-content">
+          <h1 class="content-title">Profile</h1>
+          <div class="mt-8 divide-y divide-gray-200">
+            <div class="setting-row">
+              <div>
+                <div class="setting-title">Profile Picture</div>
+                <p class="setting-desc">Upload a custom profile picture</p>
+              </div>
+              <div class="avatar-upload">
+                <div class="avatar-preview">
+                  <img src="https://placehold.co/80x80?text=U" alt="Profile Picture Preview" id="avatar-preview-img">
+                </div>
+                <div class="flex gap-2">
+                  <input type="file" id="avatar-upload" class="hidden" accept="image/*">
+                  <button class="btn btn-outline" onclick="document.getElementById('avatar-upload').click()">Upload</button>
+                  <button class="btn btn-outline">Remove</button>
+                </div>
+              </div>
+            </div>
+            <div class="setting-row">
+              <div>
+                <div class="setting-title">Personal Information</div>
+                <p class="setting-desc">Update your personal details</p>
+              </div>
+              <div class="flex flex-col gap-3 w-64">
+                <input type="text" class="input input-bordered" placeholder="First Name" value="John">
+                <input type="text" class="input input-bordered" placeholder="Last Name" value="Doe">
+                <input type="email" class="input input-bordered" placeholder="Email" value="john.doe@example.com">
+                <input type="tel" class="input input-bordered" placeholder="Phone Number" value="+1 (555) 123-4567">
+              </div>
+            </div>
+            <div class="setting-row">
+              <div>
+                <div class="setting-title">Bio</div>
+                <p class="setting-desc">Tell others about yourself</p>
+              </div>
+              <textarea class="textarea textarea-bordered w-64 h-24" placeholder="Write a short bio...">Software developer passionate about AI and UX</textarea>
+            </div>
+            <div class="setting-row">
+              <div>
+                <div class="setting-title">Location</div>
+                <p class="setting-desc">Your geographic location</p>
+              </div>
+              <input type="text" class="input input-bordered w-64" placeholder="City, Country" value="San Francisco, CA">
+            </div>
+            <div class="setting-row">
+              <div>
+                <div class="setting-title">Professional Details</div>
+                <p class="setting-desc">Your job title and company</p>
+              </div>
+              <div class="flex flex-col gap-3 w-64">
+                <input type="text" class="input input-bordered" placeholder="Job Title" value="Senior Developer">
+                <input type="text" class="input input-bordered" placeholder="Company" value="Tech Corp">
+              </div>
+            </div>
+            <div class="setting-row">
+              <div>
+                <div class="setting-title">Social Links</div>
+                <p class="setting-desc">Connect your social media accounts</p>
+              </div>
+              <div class="flex flex-col gap-3 w-64">
+                <input type="url" class="input input-bordered" placeholder="Website URL" value="https://johndoe.dev">
+                <input type="url" class="input input-bordered" placeholder="LinkedIn Profile" value="https://linkedin.com/in/johndoe">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Notifications Tab -->
+        <input type="radio" name="settings_tab_group" id="tab_notifications" class="tab-radio" />
+        <div id="notifications-tab-content" class="tab-content">
+          <h1 class="content-title">Notifications</h1>
+
+          <!-- Notification Sub-tabs -->
+          <div class="notification-tabs">
+            <div class="notification-tab active" data-tab="all">All</div>
+            <div class="notification-tab" data-tab="updates">Updates</div>
+            <div class="notification-tab" data-tab="messages">Messages</div>
+            <div class="notification-tab" data-tab="settings">Settings</div>
+          </div>
+
+          <div class="mt-4">
+            <!-- All Notifications Sub-content -->
+            <div id="notifications-all" class="notification-sub-content active">
+              <div class="divide-y divide-gray-200">
+                <div class="setting-row">
+                  <div>
+                    <div class="setting-title">Project Updates</div>
+                    <p class="setting-desc">Get notified when projects you're involved in have updates</p>
+                  </div>
+                  <select class="select">
+                    <option selected>Push, Email</option>
+                    <option>Push</option>
+                    <option>Email</option>
+                    <option>Off</option>
+                  </select>
+                </div>
+                <div class="setting-row">
+                  <div>
+                    <div class="setting-title">Security Alerts</div>
+                    <p class="setting-desc">Receive alerts about security events related to your account</p>
+                  </div>
+                  <select class="select">
+                    <option selected>Push, Email</option>
+                    <option>Push</option>
+                    <option>Email</option>
+                    <option>Off</option>
+                  </select>
+                </div>
+                <div class="setting-row">
+                  <div>
+                    <div class="setting-title">Feature Announcements</div>
+                    <p class="setting-desc">Stay informed about new features and capabilities</p>
+                  </div>
+                  <select class="select">
+                    <option selected>Email</option>
+                    <option>Push</option>
+                    <option>Push, Email</option>
+                    <option>Off</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <!-- Updates Sub-content -->
+            <div id="notifications-updates" class="notification-sub-content">
+              <div class="divide-y divide-gray-200">
+                <div class="setting-row">
+                  <div>
+                    <div class="setting-title">Project Completion</div>
+                    <p class="setting-desc">Get notified when projects you've created are completed</p>
+                  </div>
+                  <select class="select">
+                    <option selected>Push</option>
+                    <option>Email</option>
+                    <option>Push, Email</option>
+                    <option>Off</option>
+                  </select>
+                </div>
+                <div class="setting-row">
+                  <div>
+                    <div class="setting-title">Report Generation</div>
+                    <p class="setting-desc">Receive notifications when reports are ready</p>
+                  </div>
+                  <select class="select">
+                    <option selected>Push, Email</option>
+                    <option>Push</option>
+                    <option>Email</option>
+                    <option>Off</option>
+                  </select>
+                </div>
+                <div class="setting-row">
+                  <div>
+                    <div class="setting-title">Resource Availability</div>
+                    <p class="setting-desc">Get alerts when requested resources become available</p>
+                  </div>
+                  <select class="select">
+                    <option selected>Push</option>
+                    <option>Email</option>
+                    <option>Push, Email</option>
+                    <option>Off</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <!-- Messages Sub-content -->
+            <div id="notifications-messages" class="notification-sub-content">
+              <div class="divide-y divide-gray-200">
+                <div class="setting-row">
+                  <div>
+                    <div class="setting-title">Team Communications</div>
+                    <p class="setting-desc">Receive notifications for team messages</p>
+                  </div>
+                  <select class="select">
+                    <option selected>Push</option>
+                    <option>Email</option>
+                    <option>Push, Email</option>
+                    <option>Off</option>
+                  </select>
+                </div>
+                <div class="setting-row">
+                  <div>
+                    <div class="setting-title">Direct Messages</div>
+                    <p class="setting-desc">Get notified when you receive direct messages</p>
+                  </div>
+                  <select class="select">
+                    <option selected>Push</option>
+                    <option>Email</option>
+                    <option>Push, Email</option>
+                    <option>Off</option>
+                  </select>
+                </div>
+                <div class="setting-row">
+                  <div>
+                    <div class="setting-title">Mentions</div>
+                    <p class="setting-desc">Receive notifications when you're mentioned in discussions</p>
+                  </div>
+                  <select class="select">
+                    <option selected>Push</option>
+                    <option>Email</option>
+                    <option>Push, Email</option>
+                    <option>Off</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <!-- Settings Sub-content -->
+            <div id="notifications-settings" class="notification-sub-content">
+              <div class="divide-y divide-gray-200">
+                <div class="setting-row">
+                  <div>
+                    <div class="setting-title">Quiet Hours</div>
+                    <p class="setting-desc">Schedule when notifications are silenced</p>
+                  </div>
+                  <div class="flex items-center gap-3">
+                    <span>From</span>
+                    <input type="time" class="input input-bordered w-24" value="22:00">
+                    <span>To</span>
+                    <input type="time" class="input input-bordered w-24" value="07:00">
+                    <label class="swap swap-rotate">
+                      <input type="checkbox" />
+                      <svg class="swap-on fill-current w-6 h-6" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                        <path d="M21,7L9,19L3.5,13.5L4.91,12.09L9,16.17L19.59,5.59L21,7Z" />
+                      </svg>
+                      <svg class="swap-off fill-current w-6 h-6" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                        <path d="M19,6.41L17.59,5L12,10.59L6.41,5L5,6.41L10.59,12L5,17.59L6.41,19L12,13.41L17.59,19L19,17.59L13.41,12L19,6.41Z" />
+                      </svg>
+                    </label>
+                  </div>
+                </div>
+                <div class="setting-row">
+                  <div>
+                    <div class="setting-title">Do Not Disturb</div>
+                    <p class="setting-desc">Temporarily disable all notifications</p>
+                  </div>
+                  <label class="swap swap-rotate">
+                    <input type="checkbox" />
+                    <svg class="swap-on fill-current w-6 h-6" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                      <path d="M21,7L9,19L3.5,13.5L4.91,12.09L9,16.17L19.59,5.59L21,7Z" />
+                    </svg>
+                    <svg class="swap-off fill-current w-6 h-6" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                      <path d="M19,6.41L17.59,5L12,10.59L6.41,5L5,6.41L10.59,12L5,17.59L6.41,19L12,13.41L17.59,19L19,17.59L13.41,12L19,6.41Z" />
+                    </svg>
+                  </label>
+                </div>
+                <div class="setting-row">
+                  <div>
+                    <div class="setting-title">Email Notifications</div>
+                    <p class="setting-desc">Enable or disable email notifications</p>
+                  </div>
+                  <label class="swap swap-rotate">
+                    <input type="checkbox" checked />
+                    <svg class="swap-on fill-current w-6 h-6" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                      <path d="M21,7L9,19L3.5,13.5L4.91,12.09L9,16.17L19.59,5.59L21,7Z" />
+                    </svg>
+                    <svg class="swap-off fill-current w-6 h-6" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                      <path d="M19,6.41L17.59,5L12,10.59L6.41,5L5,6.41L10.59,12L5,17.59L6.41,19L12,13.41L17.59,19L19,17.59L13.41,12L19,6.41Z" />
+                    </svg>
+                  </label>
+                </div>
+                <div class="setting-row">
+                  <div>
+                    <div class="setting-title">Browser Notifications</div>
+                    <p class="setting-desc">Enable or disable browser notifications</p>
+                  </div>
+                  <label class="swap swap-rotate">
+                    <input type="checkbox" checked />
+                    <svg class="swap-on fill-current w-6 h-6" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                      <path d="M21,7L9,19L3.5,13.5L4.91,12.09L9,16.17L19.59,5.59L21,7Z" />
+                    </svg>
+                    <svg class="swap-off fill-current w-6 h-6" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                      <path d="M19,6.41L17.59,5L12,10.59L6.41,5L5,6.41L10.59,12L5,17.59L6.41,19L12,13.41L17.59,19L19,17.59L13.41,12L19,6.41Z" />
+                    </svg>
+                  </label>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Billing Tab -->
+        <input type="radio" name="settings_tab_group" id="tab_billing" class="tab-radio" />
+        <div id="billing-tab-content" class="tab-content">
+          <h1 class="content-title">Plans & Billing</h1>
+          <div class="mt-8">
+            <div class="mb-8">
+              <h2 class="text-xl font-semibold mb-4">Current Plan</h2>
+              <div class="plan-card">
+                <div class="plan-header">
+                  <div class="plan-name">Professional Plan</div>
+                  <div class="plan-price">$29/month</div>
+                </div>
+                <ul class="plan-features">
+                  <li><i data-lucide="check" class="w-4 h-4 text-green-500"></i> Unlimited projects</li>
+                  <li><i data-lucide="check" class="w-4 h-4 text-green-500"></i> 5TB storage</li>
+                  <li><i data-lucide="check" class="w-4 h-4 text-green-500"></i> Priority support</li>
+                  <li><i data-lucide="check" class="w-4 h-4 text-green-500"></i> Advanced analytics</li>
+                </ul>
+              </div>
+
+              <div class="mt-6">
+                <h3 class="font-medium mb-2">Billing Details</h3>
+                <div class="grid grid-cols-2 gap-4">
+                  <div>
+                    <p class="text-sm text-gray-600">Payment Method</p>
+                    <p class="font-medium">Visa ending in 4242</p>
+                  </div>
+                  <div>
+                    <p class="text-sm text-gray-600">Next Billing Date</p>
+                    <p class="font-medium">February 1, 2026</p>
+                  </div>
+                  <div>
+                    <p class="text-sm text-gray-600">Billing Cycle</p>
+                    <p class="font-medium">Monthly</p>
+                  </div>
+                  <div>
+                    <p class="text-sm text-gray-600">Status</p>
+                    <p class="font-medium text-green-600">Active</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <h2 class="text-xl font-semibold mb-4">Usage Statistics</h2>
+              <div class="mb-4">
+                <div class="flex justify-between mb-1">
+                  <span>Storage Used</span>
+                  <span>2.3 TB of 5 TB</span>
+                </div>
+                <progress class="progress progress-primary w-full" value="46" max="100"></progress>
+              </div>
+              <div class="mb-4">
+                <div class="flex justify-between mb-1">
+                  <span>Credits Used</span>
+                  <span>1,200 of 2,000</span>
+                </div>
+                <progress class="progress progress-secondary w-full" value="60" max="100"></progress>
+              </div>
+              <div class="mb-6">
+                <div class="flex justify-between mb-1">
+                  <span>API Calls</span>
+                  <span>45,000 of 50,000</span>
+                </div>
+                <progress class="progress progress-accent w-full" value="90" max="100"></progress>
+              </div>
+
+              <h2 class="text-xl font-semibold mb-4">Subscription Options</h2>
+              <div class="grid grid-cols-3 gap-4">
+                <div class="plan-card">
+                  <div class="plan-header">
+                    <div class="plan-name">Starter</div>
+                    <div class="plan-price">$9/month</div>
+                  </div>
+                  <ul class="plan-features">
+                    <li><i data-lucide="check" class="w-4 h-4 text-gray-400"></i> 5 projects</li>
+                    <li><i data-lucide="check" class="w-4 h-4 text-gray-400"></i> 1TB storage</li>
+                    <li><i data-lucide="check" class="w-4 h-4 text-gray-400"></i> Basic support</li>
+                    <li><i data-lucide="x" class="w-4 h-4 text-gray-400"></i> Limited analytics</li>
+                  </ul>
+                  <button class="btn btn-outline w-full mt-4">Downgrade</button>
+                </div>
+
+                <div class="plan-card border-2 border-blue-500">
+                  <div class="plan-header">
+                    <div class="plan-name">Professional</div>
+                    <div class="plan-price">$29/month</div>
+                  </div>
+                  <ul class="plan-features">
+                    <li><i data-lucide="check" class="w-4 h-4 text-green-500"></i> Unlimited projects</li>
+                    <li><i data-lucide="check" class="w-4 h-4 text-green-500"></i> 5TB storage</li>
+                    <li><i data-lucide="check" class="w-4 h-4 text-green-500"></i> Priority support</li>
+                    <li><i data-lucide="check" class="w-4 h-4 text-green-500"></i> Advanced analytics</li>
+                  </ul>
+                  <button class="btn btn-primary w-full mt-4">Current Plan</button>
+                </div>
+
+                <div class="plan-card">
+                  <div class="plan-header">
+                    <div class="plan-name">Enterprise</div>
+                    <div class="plan-price">$99/month</div>
+                  </div>
+                  <ul class="plan-features">
+                    <li><i data-lucide="check" class="w-4 h-4 text-green-500"></i> Unlimited projects</li>
+                    <li><i data-lucide="check" class="w-4 h-4 text-green-500"></i> 10TB storage</li>
+                    <li><i data-lucide="check" class="w-4 h-4 text-green-500"></i> 24/7 support</li>
+                    <li><i data-lucide="check" class="w-4 h-4 text-green-500"></i> Custom integrations</li>
+                  </ul>
+                  <button class="btn btn-outline w-full mt-4">Upgrade</button>
+                </div>
+              </div>
+
+              <div class="mt-6 flex gap-3">
+                <button class="btn btn-outline">View Invoices</button>
+                <button class="btn btn-outline">Update Payment Method</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Credits Tab -->
+        <input type="radio" name="settings_tab_group" id="tab_credits" class="tab-radio" />
+        <div id="credits-tab-content" class="tab-content">
+          <h1 class="content-title">Buy Credits</h1>
+          <div class="mt-8">
+            <div class="mb-8">
+              <h2 class="text-xl font-semibold mb-2">Balance Overview</h2>
+              <div class="stats stats-vertical lg:stats-horizontal shadow">
+                <div class="stat">
+                  <div class="stat-title">Current Balance</div>
+                  <div class="stat-value text-primary">1,200</div>
+                  <div class="stat-desc">credits remaining</div>
+                </div>
+
+                <div class="stat">
+                  <div class="stat-title">Used This Month</div>
+                  <div class="stat-value">800</div>
+                  <div class="stat-desc">of 2,000 allocated</div>
+                </div>
+
+                <div class="stat">
+                  <div class="stat-title">Monthly Allocation</div>
+                  <div class="stat-value">2,000</div>
+                  <div class="stat-desc">renews Feb 1</div>
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <h2 class="text-xl font-semibold mb-4">Credit Packages</h2>
+              <div class="grid grid-cols-3 gap-4">
+                <div class="credit-package" data-package="basic">
+                  <div class="credit-header">
+                    <div class="credit-amount">1,000 credits</div>
+                    <div class="credit-price">$10</div>
+                  </div>
+                  <ul class="credit-features">
+                    <li>One-time purchase</li>
+                    <li>No expiration</li>
+                    <li>Standard processing</li>
+                  </ul>
+                </div>
+
+                <div class="credit-package selected" data-package="standard">
+                  <div class="credit-header">
+                    <div class="credit-amount">5,000 credits</div>
+                    <div class="credit-price">$45</div>
+                  </div>
+                  <ul class="credit-features">
+                    <li>Best value: 10% discount</li>
+                    <li>No expiration</li>
+                    <li>Premium processing</li>
+                  </ul>
+                </div>
+
+                <div class="credit-package" data-package="premium">
+                  <div class="credit-header">
+                    <div class="credit-amount">10,000 credits</div>
+                    <div class="credit-price">$80</div>
+                  </div>
+                  <ul class="credit-features">
+                    <li>Best value: 20% discount</li>
+                    <li>No expiration</li>
+                    <li>Priority processing</li>
+                    <li>Dedicated support</li>
+                  </ul>
+                </div>
+              </div>
+
+              <div class="mt-6">
+                <button class="btn btn-primary w-full py-4 text-lg">Purchase Selected Package</button>
+              </div>
+            </div>
+
+            <div class="mt-8">
+              <h2 class="text-xl font-semibold mb-4">Transaction History</h2>
+              <div class="overflow-x-auto">
+                <table class="table table-zebra">
+                  <thead>
+                    <tr>
+                      <th>Date</th>
+                      <th>Description</th>
+                      <th>Type</th>
+                      <th>Amount</th>
+                      <th>Status</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td>Jan 25, 2026</td>
+                      <td>Monthly allocation</td>
+                      <td>Allocation</td>
+                      <td>+2,000</td>
+                      <td><span class="badge badge-success">Completed</span></td>
+                    </tr>
+                    <tr>
+                      <td>Jan 20, 2026</td>
+                      <td>Package purchase</td>
+                      <td>Purchase</td>
+                      <td>-5,000</td>
+                      <td><span class="badge badge-success">Completed</span></td>
+                    </tr>
+                    <tr>
+                      <td>Jan 15, 2026</td>
+                      <td>Project completion</td>
+                      <td>Usage</td>
+                      <td>-120</td>
+                      <td><span class="badge badge-neutral">Completed</span></td>
+                    </tr>
+                    <tr>
+                      <td>Jan 10, 2026</td>
+                      <td>Monthly allocation</td>
+                      <td>Allocation</td>
+                      <td>+2,000</td>
+                      <td><span class="badge badge-success">Completed</span></td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+
+          </div>
+        </div>
+
+        <!-- Workspace Tab -->
+        <input type="radio" name="settings_tab_group" id="tab_workspace" class="tab-radio" />
+        <div id="workspace-tab-content" class="tab-content">
+          <h1 class="content-title">Workspace</h1>
+         
+        </div>
+
+        <!-- Apps & Skills Tab -->
+        <input type="radio" name="settings_tab_group" id="tab_apps" class="tab-radio" />
+        <div id="apps-tab-content" class="tab-content">
+          <h1 class="content-title">Apps & Skills</h1>
+ 
+        </div>
+
+        <!-- Connectors Tab -->
+        <input type="radio" name="settings_tab_group" id="tab_connectors" class="tab-radio" />
+        <div id="connectors-tab-content" class="tab-content">
+          <h1 class="content-title">Connectors</h1>
+
+        </div>
+
+        <!-- Integrations Tab -->
+        <input type="radio" name="settings_tab_group" id="tab_integrations" class="tab-radio" />
+        <div id="integrations-tab-content" class="tab-content">
+          <h1 class="content-title">Integrations</h1>
+
+        </div>
+      </div>
+    </main>
+
+  </div>
+
+  <script>
+    // Initialize Lucide icons
+    lucide.createIcons();
+
+    // Tab switching functionality - connects sidebar items to DaisyUI-style tabs
+    document.addEventListener('DOMContentLoaded', function() {
+      // Define tab mapping - Maps tab names to radio button IDs
+      const tabMap = {
+        'General': 'tab_general',
+        'Profile': 'tab_profile',
+        'Notifications': 'tab_notifications',
+        'Plans & Billing': 'tab_billing',
+        'Buy Credits': 'tab_credits',
+        'Workspace': 'tab_workspace',
+        'Apps & Skills': 'tab_apps',
+        'Connectors': 'tab_connectors',
+        'Integrations': 'tab_integrations'
+      };
+
+      // Get all sidebar items
+      const sidebarItems = document.querySelectorAll('.sidebar-item');
+
+      // Function to switch tabs
+      function switchTab(tabName) {
+        // Find the corresponding radio button ID
+        let radioButtonId = null;
+        for (const [key, value] of Object.entries(tabMap)) {
+          if (key === tabName) {
+            radioButtonId = value;
+            break;
+          }
+        }
+
+        // If a matching radio button was found, check it
+        if (radioButtonId) {
+          const radioButton = document.getElementById(radioButtonId);
+          if (radioButton) {
+            radioButton.checked = true;
+          }
+
+          // Update active state of sidebar items
+          sidebarItems.forEach(sidebarItem => {
+            sidebarItem.classList.remove('active');
+          });
+
+          // Find and activate the corresponding sidebar item
+          sidebarItems.forEach(sidebarItem => {
+            // Extract text content without icon for comparison
+            const iconElement = sidebarItem.querySelector('[data-lucide]');
+            let sidebarText = sidebarItem.textContent;
+
+            if (iconElement) {
+              sidebarText = sidebarText.replace(iconElement.textContent, '').trim();
+            } else {
+              sidebarText = sidebarText.trim();
+            }
+
+            sidebarText = sidebarText.replace(/\s+/g, ' ');
+
+            if (sidebarText === tabName) {
+              sidebarItem.classList.add('active');
+            }
+          });
+        }
+      }
+
+      // Add click event to each sidebar item
+      sidebarItems.forEach(item => {
+        item.addEventListener('click', function(e) {
+          // Extract just the text content without the icon
+          const iconElement = this.querySelector('[data-lucide]');
+          let tabName = this.textContent;
+
+          if (iconElement) {
+            // Remove the icon's text content from the overall text
+            tabName = tabName.replace(iconElement.textContent, '').trim();
+          } else {
+            tabName = tabName.trim();
+          }
+
+          // Clean up any extra whitespace
+          tabName = tabName.replace(/\s+/g, ' ');
+          switchTab(tabName);
+        });
+      });
+
+      // Initialize with the active tab (the one that's initially marked as active)
+      // Find the active sidebar item (the one with 'active' class) and trigger its tab
+      const activeItem = document.querySelector('.sidebar-item.active');
+      if (activeItem) {
+        // Extract just the text content without the icon for the active item too
+        const iconElement = activeItem.querySelector('[data-lucide]');
+        let activeTabName = activeItem.textContent;
+
+        if (iconElement) {
+          activeTabName = activeTabName.replace(iconElement.textContent, '').trim();
+        } else {
+          activeTabName = activeTabName.trim();
+        }
+
+        activeTabName = activeTabName.replace(/\s+/g, ' ');
+        switchTab(activeTabName);
+      }
+
+      // Close button functionality
+      const closeBtn = document.querySelector('.close-btn');
+      closeBtn.addEventListener('click', function() {
+        // In a real implementation, this would close the modal
+        // For now, we'll just log to console
+        console.log('Close button clicked');
+      });
+
+      // Notification sub-tabs functionality
+      const notificationTabs = document.querySelectorAll('.notification-tab');
+      const notificationSubContents = document.querySelectorAll('.notification-sub-content');
+
+      notificationTabs.forEach(tab => {
+        tab.addEventListener('click', function() {
+          const tabName = this.getAttribute('data-tab');
+
+          // Remove active class from all tabs and contents
+          notificationTabs.forEach(t => t.classList.remove('active'));
+          notificationSubContents.forEach(c => c.classList.remove('active'));
+
+          // Add active class to clicked tab and corresponding content
+          this.classList.add('active');
+          document.getElementById(`notifications-${tabName}`).classList.add('active');
+        });
+      });
+
+      // Credit package selection
+      const creditPackages = document.querySelectorAll('.credit-package');
+
+      creditPackages.forEach(pkg => {
+        pkg.addEventListener('click', function() {
+          // Remove selected class from all packages
+          creditPackages.forEach(p => p.classList.remove('selected'));
+
+          // Add selected class to clicked package
+          this.classList.add('selected');
+        });
+      });
+
+      // Language change handler
+      const languageSelect = document.getElementById('language-select');
+      languageSelect.addEventListener('change', function() {
+        // In a real implementation, this would update the UI language
+        console.log('Language changed to:', this.value);
+      });
+
+      // Theme change handler
+      const themeSelect = document.getElementById('theme-select');
+      themeSelect.addEventListener('change', function() {
+        // In a real implementation, this would update the theme
+        document.documentElement.setAttribute('data-theme', this.value);
+        console.log('Theme changed to:', this.value);
+      });
+    });
+
+    // Toggle API key visibility
+    function toggleApiKeyVisibility() {
+      const apiKeyInput = document.getElementById('api-key-input');
+      const button = event.target;
+
+      if (apiKeyInput.type === 'password') {
+        apiKeyInput.type = 'text';
+        button.textContent = 'Hide';
+      } else {
+        apiKeyInput.type = 'password';
+        button.textContent = 'Show';
+      }
+    }
+
+    // Copy API key to clipboard
+    function copyApiKey() {
+      const apiKeyInput = document.getElementById('api-key-input');
+      apiKeyInput.select();
+      document.execCommand('copy');
+
+      // Show temporary feedback
+      const originalText = event.target.textContent;
+      event.target.textContent = 'Copied!';
+      setTimeout(() => {
+        event.target.textContent = originalText;
+      }, 2000);
+    }
+  </script>
+</body>
+</html>

@@ -2,8 +2,10 @@
 export const termsTranslations = {
   en: {
     termsService: 'Terms of Service',
+    updated: 'Updated',
     lastUpdated: 'Last updated: January 2026',
     acceptanceOfTerms: '1. Acceptance of Terms',
+    to: 'to',
     acceptanceOfTermsDesc:
       'By accessing and using the iGate Startup Accelerator ("the Service"), you accept and agree to be bound by the terms and provision of this agreement.',
     descriptionOfService: '2. Description of Service',
@@ -42,8 +44,10 @@ export const termsTranslations = {
   },
   ar: {
     termsService: 'شروط الخدمة',
+    updated: 'محدث',
     lastUpdated: 'آخر تحديث: يناير 2026',
     acceptanceOfTerms: '1. قبول الشروط',
+    to: 'إلى',
     acceptanceOfTermsDesc:
       'بالوصول إلى واستخدام iGate Startup Accelerator ("الخدمة")، فإنك تقبل وتوافق على الالتزام بشروط وأحكام هذه الاتفاقية.',
     descriptionOfService: '2. وصف الخدمة',

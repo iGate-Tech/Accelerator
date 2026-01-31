@@ -3,7 +3,7 @@
   <defs>
     <linearGradient id="gradient-20" x1="0%" y1="0%" x2="0%" y2="100%">
       <stop offset="0" stop-color="#00a7e0"/>
-      <stop offset="1" stop-color="#9e28b5"/>
+      <stop offset="1" stop-color="#00a7e0"/>
     </linearGradient>
     <linearGradient id="gradient-21" x1="0%" y1="0%" x2="0%" y2="100%" gradientTransform="matrix(0.942709, 0.333618, -0.150908, 0.426427, 0, 0)">
       <stop offset="0" stop-color="#6cd14d"/>
@@ -11,7 +11,7 @@
     </linearGradient>
     <linearGradient id="gradient-22" x1="0%" y1="0%" x2="0%" y2="100%">
       <stop offset="0" stop-color="#00a7e0"/>
-      <stop offset="1" stop-color="#9e28b5"/>
+      <stop offset="1" stop-color="#00a7e0"/>
     </linearGradient>
     <linearGradient id="gradient-23" x1="0%" y1="0%" x2="0%" y2="100%" gradientTransform="matrix(0.942709, 0.333618, -0.150908, 0.426427, 0, 0)">
       <stop offset="0" stop-color="#6cd14d"/>

@@ -22,7 +22,7 @@ export async function _seedSampleNotifications({ userId }) {
     const sampleNotifications = [
       {
         type: 'system',
-        title: 'Welcome to Accelerator Platform',
+        title: 'Welcome to iGate OS',
         message:
           'Your account has been successfully created. Complete your profile to unlock all features.',
         created_at: new Date(

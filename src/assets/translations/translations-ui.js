@@ -72,6 +72,21 @@ export const uiTranslations = {
     time: 'Time',
     credits: 'Credits',
     consumedCredits: '{consumed} / {total}',
+
+    // Task card specific
+    expand: 'Expand',
+    collapse: 'Collapse',
+    selected: 'Selected',
+    streaming: 'Streaming',
+    generatingResponse: 'Generating response...',
+    waitingResponse: 'Waiting for response...',
+    editContent: 'Edit Content',
+    highPriority: 'High Priority',
+    mediumPriority: 'Medium',
+    lowPriority: 'Low',
+    done: 'Done',
+    instruct: 'Instruct',
+    regenerate: 'Regenerate',
   },
   ar: {
     // Progress Accordion
@@ -145,5 +160,20 @@ export const uiTranslations = {
     time: 'الوقت',
     credits: 'الاعتمادات',
     consumedCredits: '{consumed} / {total}',
+
+    // Task card specific
+    expand: 'توسيع',
+    collapse: 'طي',
+    selected: 'محدد',
+    streaming: 'جاري البث',
+    generatingResponse: 'جارٍ إنشاء الاستجابة...',
+    waitingResponse: 'في انتظار الاستجابة...',
+    editContent: 'تعديل المحتوى',
+    highPriority: 'أولوية عالية',
+    mediumPriority: 'متوسط',
+    lowPriority: 'منخفض',
+    done: 'تم',
+    instruct: 'إعطاء تعليمات',
+    regenerate: 'إعادة إنشاء',
   },
 };

@@ -1,8 +1,8 @@
-// import { toastManager } from '../ui/feedback';
+// import { toastManager } from '@lib/ui/feedback';
 
 import { PGlite } from '@electric-sql/pglite';
 import { v4 as uuidv4 } from 'uuid';
-import { logger } from '../core';
+import { logger } from '@lib/core';
 import {
   dbInstance,
   dbReady,
@@ -1544,7 +1544,7 @@ export async function seedSampleNotifications({ userId }) {
     const sampleNotifications = [
       {
         type: 'system',
-        title: 'Welcome to Accelerator Platform',
+        title: 'Welcome to iGate OS',
         message:
           'Your account has been successfully created. Complete your profile to unlock all features.',
         created_at: new Date(

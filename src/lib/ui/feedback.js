@@ -1,5 +1,5 @@
 import { createStore } from 'solid-js/store';
-import { logger } from '../core';
+import { logger } from '@lib/core';
 
 const [toasts, setToasts] = createStore([]);
 

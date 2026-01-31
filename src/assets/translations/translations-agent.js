@@ -33,6 +33,7 @@ export const agentTranslations = {
     agentPaused: 'Agent is paused. Click Resume to continue.',
     processingError: 'Processing error:',
     unknownError: 'Unknown error occurred',
+    error: 'Error',
 
     // Placeholder
     agentPlaceholder: 'Enter your problem statement here...',
@@ -77,6 +78,7 @@ export const agentTranslations = {
     agentPaused: 'الوكيل متوقف مؤقتاً. انقر استئناف للمتابعة.',
     processingError: 'خطأ في المعالجة:',
     unknownError: 'حدث خطأ غير معروف',
+    error: 'خطأ',
 
     // Placeholder
     agentPlaceholder: 'أدخل بيان المشكلة هنا...',

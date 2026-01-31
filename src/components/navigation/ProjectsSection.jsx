@@ -1,0 +1,747 @@
+import {
+  useContext,
+  createSignal,
+  createEffect,
+  createMemo,
+  onMount,
+  onCleanup,
+  For,
+  Show,
+} from 'solid-js';
+import { useNavigate, useLocation } from '@solidjs/router';
+import { LangContext } from '@context/LangContext';
+import { useUser } from '@context/UserContext';
+import { useLanguage } from '@hooks/useLanguage';
+import { confirmDelete } from '@components';
+import {
+  getProjects,
+  updateProject,
+  deleteProject,
+  deleteAllProjects,
+  exportAllProjects,
+  exportAllData,
+  exportProject,
+  exportReports,
+} from '@lib/database';
+import { addProject } from '@lib/db';
+import { toastManager } from '@lib/ui/feedback';
+import { logger } from '@lib/core';
+import { useActivityLogger } from '@lib/business.js';
+import { MoreVertical, Plus, Download, Archive, Upload, Trash, Search, Folder, Edit, FileText } from 'lucide-solid';
+import {
+  projectsStore,
+  setProjectsStore,
+  setPendingProjectId,
+} from '@stores/projectsStore';
+
+const ProjectsSection = props => {
+  const { lang } = useContext(LangContext);
+  const { user } = useUser();
+  const activityLogger = useActivityLogger();
+  const { t, setLang } = useLanguage();
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  // Determine if a project is active based on URL path
+  const isProjectActive = projectId => {
+    // Check if the current path matches the opened-project route with this project ID
+    return location.pathname === `/opened-project/${projectId}`;
+  };
+
+  const [projectsOpen, setProjectsOpen] = createSignal(true);
+  const [editingProjectId, setEditingProjectId] = createSignal(null);
+  const navbarT = t;
+  const downloadJSON = (data, filename) => {
+    // Ensure data is not null or undefined
+    if (data === null || data === undefined) {
+      console.error('downloadJSON: data is null or undefined');
+      toastManager.error('Export failed: No data to export');
+      return;
+    }
+    const blob = new Blob([JSON.stringify(data, null, 2)], {
+      type: 'application/json',
+    });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+  const filteredProjects = createMemo(() => {
+    const projs = projectsStore.projects;
+    const query = projectsStore.searchQuery.toLowerCase().trim();
+
+    // Ensure we work with an array
+    let projectsArray = [];
+    if (Array.isArray(projs)) {
+      projectsArray = projs;
+    } else if (projs != null) {
+      try {
+        projectsArray = Array.from(projs);
+      } catch (e) {
+        projectsArray = [];
+      }
+    }
+
+    let filtered = projectsArray;
+    if (query) {
+      filtered = projectsArray.filter(project => {
+        if (!project || typeof project !== 'object') return false;
+
+        if (!project.name || typeof project.name !== 'string') return false;
+
+        return project.name.toLowerCase().includes(query);
+      });
+    }
+
+    // Ensure we always return an array
+    return Array.isArray(filtered) ? filtered : [];
+  });
+
+  const loadProjects = async () => {
+    try {
+      setProjectsStore('loading', true);
+      logger.debug('Loading projects...');
+
+      // Check if user is authenticated before loading projects
+      const currentUser = user();
+      if (!currentUser?.id) {
+        logger.debug('No authenticated user, skipping project load');
+        setProjectsStore('projects', []);
+        setProjectsStore('count', 0);
+        return;
+      }
+
+      const userProjects = await getProjects(currentUser.id);
+      logger.debug('getProjects returned:', userProjects);
+
+      // Ensure we always set an array, even if getProjects returns undefined or null
+      const projectsArray = Array.isArray(userProjects)
+        ? [...userProjects]
+        : [];
+      logger.debug('Processed projects array:', projectsArray.length);
+
+      setProjectsStore('projects', []);
+      setProjectsStore('projects', projectsArray);
+      setProjectsStore('count', projectsArray.length);
+
+      // Log the first few projects for debugging
+      if (projectsArray.length > 0) {
+        logger.debug('First project:', projectsArray[0]);
+      }
+    } catch (error) {
+      logger.error('Failed to load projects:', error);
+      setProjectsStore('projects', []);
+      setProjectsStore('count', 0);
+    } finally {
+      setProjectsStore('loading', false);
+    }
+  };
+
+  const handleProjectAction = async (action, projectId, newName = null) => {
+    const project = projectsStore.projects.find(p => p.id === projectId);
+    if (!project) return;
+
+    switch (action) {
+      case 'rename':
+        if (newName && newName.trim()) {
+          try {
+            // Update the project in the database
+            await updateProject(projectId, { name: newName.trim() });
+
+            // Update the store directly for better performance
+            setProjectsStore('projects', projects =>
+              projects.map(p =>
+                p.id === projectId
+                  ? {
+                      ...p,
+                      name: newName.trim(),
+                    }
+                  : p
+              )
+            );
+
+            toastManager.success(t().rename + ' ' + t().successful);
+          } catch (error) {
+            logger.error('Failed to rename project:', error);
+            toastManager.error('Failed to rename project');
+            // Reload projects if direct update failed
+            await loadProjects();
+          }
+        }
+        break;
+      case 'delete': {
+        const confirmed = await confirmDelete(project.name);
+        if (confirmed) {
+          try {
+            // Audit logging before deletion
+            logger.info('Project deletion initiated', {
+              projectId,
+              projectName: project.name,
+              userId: user()?.id,
+              timestamp: new Date().toISOString(),
+            });
+
+            await deleteProject(projectId);
+
+            // Remove the project from the store directly for better performance
+            setProjectsStore('projects', projects =>
+              projects.filter(p => p.id !== projectId)
+            );
+
+            // Update the count
+            setProjectsStore('count', prevCount => Math.max(0, prevCount - 1));
+
+            // Additional audit logging after successful deletion
+            logger.info('Project deletion completed', {
+              projectId,
+              projectName: project.name,
+              userId: user()?.id,
+              timestamp: new Date().toISOString(),
+            });
+
+            toastManager.success(t().delete + ' ' + t().successful);
+          } catch (error) {
+            logger.error('Failed to delete project:', error);
+            toastManager.error('Failed to delete project');
+            // Reload projects if direct update failed
+            await loadProjects();
+          }
+        }
+        break;
+      }
+      case 'open':
+        setProjectsStore('currentProjectId', projectId);
+        navigate(`/opened-project/${projectId}`);
+        break;
+      default:
+        logger.debug('Unknown action:', action);
+    }
+  };
+  const handleDeleteAllProjects = async () => {
+    const confirmed = await confirmDelete(
+      t().allProjects,
+      'All projects will be permanently deleted.'
+    );
+    if (confirmed) {
+      try {
+        const currentUser = user();
+        if (!currentUser?.id) {
+          toastManager.error('User not authenticated');
+          return;
+        }
+
+        await deleteAllProjects(currentUser.id);
+
+        // Update the store directly for better performance
+        setProjectsStore('projects', []);
+        setProjectsStore('count', 0);
+
+        toastManager.success(t().deleteAllProjects + ' ' + t().successful);
+      } catch (error) {
+        console.log('Caught error in delete all projects:', error.message);
+        toastManager.error('Failed to delete all projects: ' + error.message);
+        // Reload projects if direct update failed
+        await loadProjects();
+      }
+    }
+  };
+  const handleExportAllProjects = async () => {
+    const currentUser = user();
+    if (!currentUser) return;
+
+    try {
+      const data = await exportAllProjects(currentUser.id);
+      if (data) {
+        const blob = new Blob([JSON.stringify(data, null, 2)], {
+          type: 'application/json',
+        });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `projects-export-${
+          new Date().toISOString().split('T')[0]
+        }.json`;
+        a.click();
+        URL.revokeObjectURL(url);
+        toastManager.success(t().exportSuccessful);
+      }
+    } catch (error) {
+      console.log('Caught error in export all projects:', error.message);
+      toastManager.error(t().exportFailed + ': ' + error.message);
+    }
+  };
+
+  const handleBackupAllData = async () => {
+    const currentUser = user();
+    if (!currentUser) return;
+
+    try {
+      const blob = await exportAllData(currentUser.id);
+      if (blob) {
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `backup-${new Date().toISOString().split('T')[0]}.json`;
+        a.click();
+        URL.revokeObjectURL(url);
+        toastManager.success(t().backupSuccessful);
+      }
+    } catch (error) {
+      console.log('Caught error in backup all data:', error.message);
+      toastManager.error(t().backupFailed + ': ' + error.message);
+    }
+  };
+  const handleCreateProject = async () => {
+    const currentUser = user();
+    if (!currentUser) {
+      toastManager.error('You must be logged in to create a project');
+      return;
+    }
+
+    try {
+      // Ensure database is initialized
+      const { initDb } = await import('../../lib/database');
+      await initDb();
+
+      // Create the project in the database
+      const projectId = await addProject(
+        {
+          name: 'New Project',
+        },
+        currentUser.id
+      );
+
+      // Create a new project object to add to the store
+      const newProject = {
+        id: projectId,
+        name: 'New Project',
+        userId: currentUser.id,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
+
+      // Add the new project directly to the store for better performance
+      setProjectsStore('projects', projects => [newProject, ...projects]);
+      setProjectsStore('count', prevCount => prevCount + 1);
+
+      toastManager.success(t().newProject + ' ' + t().successful);
+
+      // Automatically open the newly created project
+      if (projectId) {
+        setPendingProjectId(projectId);
+      }
+    } catch (error) {
+      logger.error('Failed to create project:', error);
+      toastManager.error(t().newProject + ' ' + t().failed);
+      // Reload projects if direct update failed
+      await loadProjects();
+    }
+  };
+
+  onMount(async () => {
+    // Initialize database first before loading any data
+    try {
+      const { initDb } = await import('../../lib/database');
+      await initDb();
+    } catch (error) {
+      logger.warn('Failed to initialize database:', error.message);
+    }
+
+    // Load projects if user is authenticated
+    const currentUser = user();
+    if (currentUser?.id) {
+      setProjectsStore('loading', true);
+      await loadProjects();
+    }
+
+  });
+
+
+  createEffect(() => {
+    const newLang = lang();
+    setLang(newLang);
+  });
+
+  // Track the user ID to only reload when it actually changes
+  const [trackedUserId, setTrackedUserId] = createSignal(user()?.id || null);
+
+  createEffect(() => {
+    const currentUser = user();
+    const currentUserId = currentUser?.id;
+
+    // Update the tracked user ID
+    const previousUserId = trackedUserId();
+    setTrackedUserId(currentUserId);
+
+    // Only reload if the user ID has changed and is valid
+    if (currentUserId && currentUserId !== previousUserId) {
+      setProjectsStore('loading', true);
+      loadProjects();
+    }
+  });
+  createEffect(() => {
+    projectsStore.projects;
+
+  });
+
+  return (
+    <Show when={!props.isCollapsed}>
+      <ul class="w-full gap-1 px-2">
+        <li>
+          <details
+            open={projectsOpen()}
+            onToggle={e => setProjectsOpen(e.target.open)}
+          >
+            <summary
+              style={{ 'line-height': 'normal' }}
+              class="text-base-content/50 flex cursor-pointer items-center rounded-lg px-4 py-2.5 text-xs transition-colors ltr:justify-between rtl:justify-between"
+            >
+              <div class="flex w-full items-center gap-3">
+                <span class="">{t().allProjects}</span>
+                <span
+                  class="badge badge-xs badge-accent flex-shrink-0 border-none ltr:ml-auto rtl:mr-auto"
+                  style={{ 'background-color': '#00a7e0' }}
+                >
+                  {filteredProjects().length}
+                </span>
+              </div>
+              <button
+                class="btn btn-ghost btn-xs btn-circle opacity-60 hover:opacity-100"
+                popovertarget="popover-all-projects"
+                style={{ 'anchor-name': '--anchor-all-projects' }}
+              >
+                <MoreVertical class="h-3 w-3" />
+              </button>
+            </summary>
+            <div
+              class="dropdown menu rounded-box bg-base-100 mt-1 shadow-lg"
+              popover
+              id="popover-all-projects"
+              style={{ 'position-anchor': '--anchor-all-projects' }}
+            >
+              <li>
+                <button
+                  onClick={handleCreateProject}
+                  class="flex w-full items-center gap-2 text-left"
+                >
+                  <Plus class="h-4 w-4" />
+                  {t().newProject}{' '}
+                </button>
+              </li>
+              <li>
+                <a
+                  onClick={handleExportAllProjects}
+                  class="flex items-center gap-2"
+                >
+                  <Download class="h-4 w-4" />
+                  {t().exportAllProjects}{' '}
+                </a>
+              </li>
+              <li>
+                <a
+                  onClick={async () => {
+                    try {
+                      const data = await exportAllData(user()?.id);
+                      downloadJSON(data, 'all_data_backup.json');
+                      await activityLogger.logData('exported', 'all_data', {
+                        format: 'json',
+                      });
+                      toastManager.success(
+                        t().backupAllData + ' ' + t().successful
+                      );
+                    } catch (error) {
+                      await activityLogger.logError(
+                        'data_export_failed',
+                        error,
+                        { dataType: 'all_data' }
+                      );
+                      toastManager.error(t().backupAllData + ' ' + t().failed);
+                    }
+                  }}
+                  class="flex items-center gap-2"
+                >
+                  <Archive class="h-4 w-4" />
+                  {t().backupAllData}{' '}
+                </a>
+              </li>
+              <li>
+                <input
+                  type="file"
+                  id="importFileInput"
+                  accept=".json"
+                  style={{ display: 'none' }}
+                  onChange={async e => {
+                    const file = e.target.files?.[0];
+                    if (!file) return;
+
+                    try {
+                      const text = await file.text();
+                      const data = JSON.parse(text);
+
+                      if (!user()?.id) {
+                        toastManager.error('Please log in to import data');
+                        return;
+                      }
+
+                      const { importAllData } = await import('../../lib/database');
+                      const result = await importAllData(data, user()?.id);
+
+                      let message = `Imported ${
+                        result.projectsImported
+                      } projects, ${result.tasksImported} tasks`;
+                      if (result.profileImported) {
+                        message += ', profile imported';
+                      }
+                      if (result.errors.length > 0) {
+                        message += ` (${result.errors.length} errors)`;
+                      }
+
+                      toastManager.success(message);
+                      await loadProjects();
+                    } catch (error) {
+                      console.error('Import error:', error);
+                      toastManager.error('Import failed: ' + error.message);
+                    }
+
+                    e.target.value = '';
+                  }}
+                />
+                <button
+                  onClick={() =>
+                    document.getElementById('importFileInput')?.click()
+                  }
+                  class="flex w-full items-center gap-2 text-left"
+                >
+                  <Upload class="h-4 w-4" />
+                  Import Data
+                </button>
+              </li>
+              <div class="divider my-1" />
+              <li>
+                <a
+                  onClick={handleDeleteAllProjects}
+                  class="text-error flex items-center gap-2"
+                >
+                  <Trash class="h-4 w-4" />
+                  {t().deleteAllProjects}{' '}
+                </a>
+              </li>
+            </div>
+            <div class="py-2 pr-6 pl-4">
+              <div class="relative">
+                <input
+                  type="text"
+                  placeholder={t().sidebarSearch}
+                  class="input input-bordered input-sm w-full pe-8"
+                  value={projectsStore.searchQuery}
+                  onInput={e => setProjectsStore('searchQuery', e.target.value)}
+                />
+                <Search
+                  class="text-base-content/40 absolute end-2 top-1/2 h-4 w-4 -translate-y-1/2"
+                />
+              </div>
+            </div>
+            <ul class="mt-1 space-y-1">
+              <Show when={!projectsStore.loading}>
+                <For each={filteredProjects()} key={project => project.id}>
+                  {project => (
+                    <li>
+                      <div
+                        class={`group flex cursor-pointer items-center justify-between rounded-lg px-4 py-2 transition-colors ltr:justify-between rtl:justify-between ${
+                          isProjectActive(project.id) ? 'menu-active' : ''
+                        }`}
+                      >
+                        <span
+                          onClick={() => {
+                            logger.debug('Opening project:', project.id);
+                            navigate(`/opened-project/${project.id}`);
+                          }}
+                          class="flex w-full items-center gap-2"
+                        >
+                          <div class="flex-shrink-0 rounded">
+                            <Folder
+                              class={`h-4 w-4 ${
+                                isProjectActive(project.id)
+                                  ? 'text-primary'
+                                  : 'text-base-content/60'
+                              }`}
+                            />
+                          </div>
+                          <span
+                            class="min-w-0 flex-1 truncate ltr:ms-2 rtl:me-2"
+                            data-project-id={project.id}
+                            contentEditable={editingProjectId() === project.id}
+                            onBlur={e => {
+                              if (editingProjectId() === project.id) {
+                                const newName = e.target.textContent.trim();
+                                if (newName && newName !== project.name) {
+                                  handleProjectAction(
+                                    'rename',
+                                    project.id,
+                                    newName.trim()
+                                  );
+                                }
+                                setEditingProjectId(null);
+                              }
+                            }}
+                            onKeyDown={e => {
+                              if (e.key === 'Enter') {
+                                e.preventDefault();
+                                e.target.blur();
+                              }
+                              if (e.key === 'Escape') {
+                                e.target.textContent = project.name;
+                                setEditingProjectId(null);
+                              }
+                            }}
+                          >
+                            {project.name}{' '}
+                          </span>
+                        </span>
+                        <div class="opacity-0 transition-opacity group-hover:opacity-100">
+                          <button
+                            class="btn btn-ghost btn-xs"
+                            popovertarget={`popover-project-${project.id}`}
+                            style={`anchor-name: --anchor-project-${
+                              project.id
+                            }`}
+                            aria-label="Project options"
+                          >
+                            <MoreVertical class="h-4 w-4" />
+                          </button>
+                        </div>
+                      </div>
+                      <ul
+                        class="dropdown menu rounded-box w-52 shadow-sm"
+                        popover
+                        id={`popover-project-${project.id}`}
+                        style={`position-anchor: --anchor-project-${
+                          project.id
+                        }`}
+                      >
+                        <li>
+                          <a
+                            onClick={() => {
+                              setEditingProjectId(project.id);
+                              // Use requestAnimationFrame to ensure DOM is updated before focusing
+                              requestAnimationFrame(() => {
+                                const span = document.querySelector(
+                                  `[data-project-id="${project.id}"]`
+                                );
+                                if (span) {
+                                  span.focus();
+                                  const range = document.createRange();
+                                  range.selectNodeContents(span);
+                                  const sel = window.getSelection();
+                                  sel.removeAllRanges();
+                                  sel.addRange(range);
+                                }
+                              });
+                            }}
+                          >
+                            <Edit class="h-4 w-4" />
+                            {t().rename || 'Rename'}{' '}
+                          </a>
+                        </li>
+                        <li>
+                          <a
+                            onClick={() =>
+                              handleProjectAction('delete', project.id)
+                            }
+                          >
+                            <Trash class="h-4 w-4" />
+                            {t().delete}{' '}
+                          </a>
+                        </li>
+                        <li>
+                          <a
+                            onClick={async () => {
+                              try {
+                                const data = await exportProject(project.id);
+                                downloadJSON(
+                                  data,
+                                  `${project.name}-project.json`
+                                );
+                                await activityLogger.logData(
+                                  'exported',
+                                  'project',
+                                  {
+                                    projectId: project.id,
+                                    projectName: project.name,
+                                    format: 'json',
+                                  }
+                                );
+                                toastManager.success(
+                                  t().exportProject + ' ' + t().successful
+                                );
+                              } catch (error) {
+                                await activityLogger.logError(
+                                  'project_export_failed',
+                                  error,
+                                  { projectId: project.id }
+                                );
+                                toastManager.error(
+                                  t().backupAllData + ' ' + t().failed
+                                );
+                              }
+                            }}
+                          >
+                            <Download class="h-4 w-4" />
+                            {t().exportProject}{' '}
+                          </a>
+                        </li>
+                        <li>
+                          <a
+                            onClick={async () => {
+                              try {
+                                const data = await exportReports(project.id);
+                                downloadJSON(
+                                  data,
+                                  `${project.name}-report.json`
+                                );
+                                await activityLogger.logData(
+                                  'exported',
+                                  'reports',
+                                  {
+                                    projectId: project.id,
+                                    projectName: project.name,
+                                    format: 'json',
+                                  }
+                                );
+                                toastManager.success(
+                                  t().exportReports + ' ' + t().successful
+                                );
+                              } catch (error) {
+                                await activityLogger.logError(
+                                  'reports_export_failed',
+                                  error,
+                                  { projectId: project.id }
+                                );
+                                toastManager.error(
+                                  t().exportReports + ' ' + t().failed
+                                );
+                              }
+                            }}
+                          >
+                            <FileText class="h-4 w-4" />
+                            {t().exportReports}{' '}
+                          </a>
+                        </li>
+                      </ul>
+                    </li>
+                  )}
+                </For>
+              </Show>
+            </ul>
+          </details>
+        </li>
+      </ul>
+    </Show>
+  );
+};
+
+export default ProjectsSection;

@@ -49,6 +49,9 @@ export const sidebarTranslations = {
     // File names
     allProjectsFilename: 'all_projects.json',
 
+    // Rename
+    renamePromptSuffix: ':',
+
     // Additional navigation
     apps: 'Apps',
     collaborate: 'Collaborate',

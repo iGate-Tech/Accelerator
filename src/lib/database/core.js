@@ -216,8 +216,10 @@ async function _initialize({ force }) {
       if (idbAvailable) {
         console.log('[DB] Creating PGLite with IndexedDB...');
         try {
-          // Create PGLite with IndexedDB - simplest approach for browser
-          dbInstance = await PGlite.create({
+          // Create PGLite with IndexedDB - specify the database name for persistence
+          dbInstance = await PGlite.create(DATABASE_CONFIG.name, {
+            // Use the database name from constants for consistent persistence
+            ...DATABASE_CONFIG.pglite,
             // Use relaxed durability for better IndexedDB performance
             relaxedDurability: true,
             // Minimal debugging to reduce overhead
@@ -249,7 +251,8 @@ async function _initialize({ force }) {
 
             // Try a more minimal configuration for WASM issues, still attempting IndexedDB
             try {
-              dbInstance = await PGlite.create({
+              dbInstance = await PGlite.create(DATABASE_CONFIG.name, {
+                ...DATABASE_CONFIG.pglite,
                 relaxedDurability: true,
                 debug: 0, // Minimal debugging to reduce overhead
               });

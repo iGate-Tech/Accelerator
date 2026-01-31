@@ -4,7 +4,7 @@ import { updateEntity } from './operations.js';
 import {
   extractHighlightedText,
   generateContextString,
-} from '../ui/llm-template.js';
+} from '@lib/ui/llm-template.js';
 
 // Project management functions
 export async function _createProject({ project, userId }) {

@@ -2,7 +2,10 @@
 export const privacyTranslations = {
   en: {
     privacyPolicy: 'Privacy Policy',
+    updated: 'Updated',
     lastUpdated: 'Last updated: January 2026',
+    includes: 'Includes',
+    to: 'to',
     infoWeCollect: '1. Information We Collect',
     infoWeCollectDesc:
       'We collect information you provide directly to us, such as when you create an account, submit project descriptions, or contact us for support. This includes:',
@@ -39,7 +42,10 @@ export const privacyTranslations = {
   },
   ar: {
     privacyPolicy: 'سياسة الخصوصية',
+    updated: 'محدث',
     lastUpdated: 'آخر تحديث: يناير 2026',
+    includes: 'يشمل',
+    to: 'إلى',
     infoWeCollect: '1. المعلومات التي نجمعها',
     infoWeCollectDesc:
       'نقوم بجمع المعلومات التي تقدمها لنا مباشرة، مثل عند إنشاء حساب، إرسال وصف المشروع، أو الاتصال بنا للدعم. يشمل ذلك:',

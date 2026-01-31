@@ -7,31 +7,27 @@ import {
   ConsentBanner,
   GlobalErrorDisplay,
   SupportModal,
+} from './components';
+import {
   MainLayout,
   AuthLayout,
-} from './components';
+} from './layouts';
 
-const Home = lazy(() => import('./pages/Home'));
-const OpenedProject = lazy(() => import('./pages/OpenedProject'));
-const Dashboard = lazy(() => import('./pages/Dashboard'));
-const Explore = lazy(() => import('./pages/Explore'));
-const Portfolio = lazy(() => import('./pages/Portfolio'));
-const Help = lazy(() => import('./pages/Help'));
-const Settings = lazy(() => import('./pages/Settings'));
-const Profile = lazy(() => import('./pages/Profile'));
-const Packages = lazy(() => import('./pages/Packages'));
-const Credits = lazy(() => import('./pages/Credits'));
-const Billing = lazy(() => import('./pages/Billing'));
-const Login = lazy(() => import('./pages/Login'));
-const Signup = lazy(() => import('./pages/Signup'));
-const ForgotPassword = lazy(() => import('./pages/ForgotPassword'));
-const ResetPassword = lazy(() => import('./pages/ResetPassword'));
-const PrivacyPolicy = lazy(() => import('./components/PrivacyPolicy'));
-const TermsOfService = lazy(() => import('./components/TermsOfService'));
-const StatusPage = lazy(() => import('./components/StatusPage'));
-const Changelog = lazy(() => import('./components/Changelog'));
-const Notifications = lazy(() => import('./components/Notifications'));
-const Invitations = lazy(() => import('./pages/Invitations'));
+const Home = lazy(() => import('./pages/main/Home'));
+const OpenedProject = lazy(() => import('./pages/main/OpenedProject'));
+const Dashboard = lazy(() => import('./pages/main/Dashboard'));
+const Explore = lazy(() => import('./pages/main/Explore'));
+const Portfolio = lazy(() => import('./pages/main/Portfolio'));
+const Help = lazy(() => import('./pages/info/Help'));
+const Login = lazy(() => import('./pages/auth/Login'));
+const Signup = lazy(() => import('./pages/auth/Signup'));
+const ForgotPassword = lazy(() => import('./pages/auth/ForgotPassword'));
+const ResetPassword = lazy(() => import('./pages/auth/ResetPassword'));
+const PrivacyPolicy = lazy(() => import('./pages/info/PrivacyPolicy'));
+const TermsOfService = lazy(() => import('./pages/info/TermsOfService'));
+const StatusPage = lazy(() => import('./pages/info/StatusPage'));
+const Changelog = lazy(() => import('./pages/info/Changelog'));
+const Invitations = lazy(() => import('./pages/user/Invitations'));
 
 const ProtectedRoute = props => {
   const { isAuthenticated } = useUser();
@@ -61,26 +57,6 @@ function ExplorePage() {
 
 function PortfolioPage() {
   return <Portfolio />;
-}
-
-function ProfilePage() {
-  return <Profile />;
-}
-
-function SettingsPage() {
-  return <Settings />;
-}
-
-function PackagesPage() {
-  return <Packages />;
-}
-
-function CreditsPage() {
-  return <Credits />;
-}
-
-function BillingPage() {
-  return <Billing />;
 }
 
 function InvitationsPage() {
@@ -166,27 +142,10 @@ const AppContent = () => {
           <Route path="/help" component={MainLayout}>
             <Route path="" component={Help} />
           </Route>
-          <Route path="/profile" component={MainLayout}>
-            <Route path="" component={ProfilePage} />
-          </Route>
-          <Route path="/settings" component={MainLayout}>
-            <Route path="" component={SettingsPage} />
-          </Route>
-          <Route path="/packages" component={MainLayout}>
-            <Route path="" component={PackagesPage} />
-          </Route>
-          <Route path="/credits" component={MainLayout}>
-            <Route path="" component={CreditsPage} />
-          </Route>
-          <Route path="/billing" component={MainLayout}>
-            <Route path="" component={BillingPage} />
-          </Route>
           <Route path="/invitations" component={MainLayout}>
             <Route path="" component={InvitationsPage} />
           </Route>
-          <Route path="/notifications" component={MainLayout}>
-            <Route path="" component={Notifications} />
-          </Route>
+
           <Route path="/privacy-policy" component={PrivacyPolicy} />
           <Route path="/terms-of-service" component={TermsOfService} />
           <Route path="/status" component={StatusPage} />

@@ -81,25 +81,25 @@ const tabs = [
 ];
 
 const languages = [
-  { value: 'en', label: 'English' },
-  { value: 'ar', label: 'العربية' },
+  { value: 'en', label: { en: 'English', ar: 'الإنجليزية' } },
+  { value: 'ar', label: { en: 'Arabic', ar: 'العربية' } },
 ];
 
 const themes = [
-  { value: 'light', label: 'Light' },
-  { value: 'dark', label: 'Dark' },
-  { value: 'system', label: 'System' },
+  { value: 'light', label: { en: 'Light', ar: 'فاتح' } },
+  { value: 'dark', label: { en: 'Dark', ar: 'داكن' } },
+  { value: 'system', label: { en: 'System', ar: 'النظام' } },
 ];
 
 const timeFormats = [
-  { value: '12-hour', label: '12-hour' },
-  { value: '24-hour', label: '24-hour' },
+  { value: '12-hour', label: { en: '12-hour', ar: '12 ساعة' } },
+  { value: '24-hour', label: { en: '24-hour', ar: '24 ساعة' } },
 ];
 
 const dateFormats = [
-  { value: 'MM/DD/YYYY', label: 'MM/DD/YYYY' },
-  { value: 'DD/MM/YYYY', label: 'DD/MM/YYYY' },
-  { value: 'YYYY-MM-DD', label: 'YYYY-MM-DD' },
+  { value: 'MM/DD/YYYY', label: { en: 'MM/DD/YYYY', ar: 'شهر/يوم/سنة' } },
+  { value: 'DD/MM/YYYY', label: { en: 'DD/MM/YYYY', ar: 'يوم/شهر/سنة' } },
+  { value: 'YYYY-MM-DD', label: { en: 'YYYY-MM-DD', ar: 'سنة-شهر-يوم' } },
 ];
 
 function DropdownButton(props) {
@@ -221,20 +221,34 @@ export default function SettingsModal() {
 
   const getLanguageLabel = value => {
     const lang = languages.find(l => l.value === value);
-    if (lang) {
-      if (typeof lang.label === 'object') {
-        return lang.label[language()] || lang.label.en;
-      }
-      return lang.label;
+    if (lang && typeof lang.label === 'object') {
+      return lang.label[language()] || lang.label.en;
     }
-    return language() === 'ar' ? 'الإنجليزية' : 'English';
+    return lang?.label || (language() === 'ar' ? 'الإنجليزية' : 'English');
   };
-  const getThemeLabel = value =>
-    themes.find(t => t.value === value)?.label || 'System';
-  const getTimeFormatLabel = value =>
-    timeFormats.find(t => t.value === value)?.label || '12-hour';
-  const getDateFormatLabel = value =>
-    dateFormats.find(d => d.value === value)?.label || 'MM/DD/YYYY';
+  const getThemeLabel = value => {
+    const theme = themes.find(t => t.value === value);
+    if (theme && typeof theme.label === 'object') {
+      return theme.label[language()] || theme.label.en;
+    }
+    return theme?.label || 'System';
+  };
+
+  const getTimeFormatLabel = value => {
+    const format = timeFormats.find(t => t.value === value);
+    if (format && typeof format.label === 'object') {
+      return format.label[language()] || format.label.en;
+    }
+    return format?.label || '12-hour';
+  };
+
+  const getDateFormatLabel = value => {
+    const format = dateFormats.find(d => d.value === value);
+    if (format && typeof format.label === 'object') {
+      return format.label[language()] || format.label.en;
+    }
+    return format?.label || 'MM/DD/YYYY';
+  };
 
   const closeAllDropdowns = () => {
     setLanguageOpen(false);
@@ -585,92 +599,972 @@ export default function SettingsModal() {
                   </div>
                 </Show>
 
-                {/* Placeholder for other tabs */}
-                <Switch>
-                  <Match when={activeTab() === 'notifications'}>
-                    <div class="p-4">
-                      <h2 class="text-base-content mb-4 text-xl font-semibold">
-                        {language() === 'ar' ? 'إعدادات الإشعارات' : 'Notifications Settings'}
-                      </h2>
-                      <p class="text-base-content">{language() === 'ar' ? 'سيظهر إعدادات الإشعارات هنا.' : 'Notifications settings would appear here.'}</p>
-                    </div>
-                  </Match>
+                {/* Notifications Tab Content */}
+                <Show when={activeTab() === 'notifications'}>
+                  <div class="space-y-6">
+                    <section>
+                      <div class="border-base-300 flex items-center border-b py-3">
+                        <h3 class="text-base-content text-lg">
+                          {language() === 'ar' ? 'إعدادات الإشعارات' : 'Notification Settings'}
+                        </h3>
+                      </div>
+
+                      <div class="border-base-300 flex items-center justify-between border-b py-3">
+                        <div class="w-full">
+                          <div class="flex items-center justify-between gap-4">
+                            <div>
+                              <span class="text-base-content text-sm">
+                                {language() === 'ar' ? 'إشعارات البريد الإلكتروني' : 'Email Notifications'}
+                              </span>
+                              <p class="text-base-content/70 text-xs">
+                                {language() === 'ar' ? 'تلقي الإشعارات عبر البريد الإلكتروني' : 'Receive notifications via email'}
+                              </p>
+                            </div>
+                            <Toggle
+                              checked={true}
+                              onChange={(checked) => {}}
+                            />
+                          </div>
+                        </div>
+                      </div>
+
+                      <div class="border-base-300 flex items-center justify-between border-b py-3">
+                        <div class="w-full">
+                          <div class="flex items-center justify-between gap-4">
+                            <div>
+                              <span class="text-base-content text-sm">
+                                {language() === 'ar' ? 'إشعارات الدفع' : 'Push Notifications'}
+                              </span>
+                              <p class="text-base-content/70 text-xs">
+                                {language() === 'ar' ? 'تلقي إشعارات الدفع في المتصفح' : 'Receive push notifications in browser'}
+                              </p>
+                            </div>
+                            <Toggle
+                              checked={true}
+                              onChange={(checked) => {}}
+                            />
+                          </div>
+                        </div>
+                      </div>
+
+                      <div class="border-base-300 flex items-center justify-between border-b py-3">
+                        <div class="w-full">
+                          <div class="flex items-center justify-between gap-4">
+                            <div>
+                              <span class="text-base-content text-sm">
+                                {language() === 'ar' ? 'إشعارات الرسائل القصيرة' : 'SMS Notifications'}
+                              </span>
+                              <p class="text-base-content/70 text-xs">
+                                {language() === 'ar' ? 'تلقي الإشعارات عبر الرسائل القصيرة' : 'Receive notifications via SMS'}
+                              </p>
+                            </div>
+                            <Toggle
+                              checked={false}
+                              onChange={(checked) => {}}
+                            />
+                          </div>
+                        </div>
+                      </div>
+
+                      <div class="flex items-center justify-between py-3">
+                        <div class="w-full">
+                          <div class="flex items-center justify-between gap-4">
+                            <div>
+                              <span class="text-base-content text-sm">
+                                {language() === 'ar' ? 'صوت الإشعار' : 'Notification Sound'}
+                              </span>
+                              <p class="text-base-content/70 text-xs">
+                                {language() === 'ar' ? 'تشغيل الصوت للإشعارات الجديدة' : 'Play sound for new notifications'}
+                              </p>
+                            </div>
+                            <Toggle
+                              checked={true}
+                              onChange={(checked) => {}}
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    </section>
+
+                    <section>
+                      <div class="border-base-300 flex items-center border-b py-3">
+                        <h3 class="text-base-content text-lg">
+                          {language() === 'ar' ? 'فئات الإشعارات' : 'Notification Categories'}
+                        </h3>
+                      </div>
+
+                      <div class="border-base-300 flex items-center justify-between border-b py-3">
+                        <div class="w-full">
+                          <div class="flex items-center justify-between gap-4">
+                            <div>
+                              <span class="text-base-content text-sm">
+                                {language() === 'ar' ? 'تحديثات المشروع' : 'Project Updates'}
+                              </span>
+                              <p class="text-base-content/70 text-xs">
+                                {language() === 'ar' ? 'الإنشاءات، والنشر، وأحداث المشروع' : 'Builds, deployments, and project events'}
+                              </p>
+                            </div>
+                            <div class="dropdown-container relative">
+                              <DropdownButton
+                                selectedLabel={language() === 'ar' ? 'مهم فقط' : 'Important only'}
+                                onToggle={() => {}}
+                              />
+                              <DropdownMenu
+                                options={[
+                                  { value: 'all', label: { en: 'All', ar: 'الكل' } },
+                                  { value: 'important', label: { en: 'Important only', ar: 'مهم فقط' } },
+                                  { value: 'none', label: { en: 'None', ar: 'لا شيء' } },
+                                ]}
+                                selectedValue={'important'}
+                                isOpen={false}
+                                onSelect={() => {}}
+                              />
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div class="border-base-300 flex items-center justify-between border-b py-3">
+                        <div class="w-full">
+                          <div class="flex items-center justify-between gap-4">
+                            <div>
+                              <span class="text-base-content text-sm">
+                                {language() === 'ar' ? 'الرسائل المباشرة' : 'Direct Messages'}
+                              </span>
+                              <p class="text-base-content/70 text-xs">
+                                {language() === 'ar' ? 'عندما يرسل لك أحد رسالة' : 'When someone sends you a message'}
+                              </p>
+                            </div>
+                            <div class="dropdown-container relative">
+                              <DropdownButton
+                                selectedLabel={language() === 'ar' ? 'الكل' : 'All'}
+                                onToggle={() => {}}
+                              />
+                              <DropdownMenu
+                                options={[
+                                  { value: 'all', label: { en: 'All', ar: 'الكل' } },
+                                  { value: 'important', label: { en: 'Important only', ar: 'مهم فقط' } },
+                                  { value: 'none', label: { en: 'None', ar: 'لا شيء' } },
+                                ]}
+                                selectedValue={'all'}
+                                isOpen={false}
+                                onSelect={() => {}}
+                              />
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div class="flex items-center justify-between py-3">
+                        <div class="w-full">
+                          <div class="flex items-center justify-between gap-4">
+                            <div>
+                              <span class="text-base-content text-sm">
+                                {language() === 'ar' ? 'الإشارات' : 'Mentions'}
+                              </span>
+                              <p class="text-base-content/70 text-xs">
+                                {language() === 'ar' ? 'عندما يشير إليك أحد' : 'When someone mentions you'}
+                              </p>
+                            </div>
+                            <div class="dropdown-container relative">
+                              <DropdownButton
+                                selectedLabel={language() === 'ar' ? 'الكل' : 'All'}
+                                onToggle={() => {}}
+                              />
+                              <DropdownMenu
+                                options={[
+                                  { value: 'all', label: { en: 'All', ar: 'الكل' } },
+                                  { value: 'important', label: { en: 'Important only', ar: 'مهم فقط' } },
+                                  { value: 'none', label: { en: 'None', ar: 'لا شيء' } },
+                                ]}
+                                selectedValue={'all'}
+                                isOpen={false}
+                                onSelect={() => {}}
+                              />
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </Show>
                   <Match when={activeTab() === 'billing'}>
-                    <div class="p-4">
-                      <h2 class="text-base-content mb-4 text-xl font-semibold">
-                        {language() === 'ar' ? 'إعدادات الفوترة' : 'Billing Settings'}
-                      </h2>
-                      <p class="text-base-content">{language() === 'ar' ? 'سيظهر إعدادات الفوترة هنا.' : 'Billing settings would appear here.'}</p>
+                    <div class="space-y-6">
+                      <section>
+                        <div class="border-base-300 flex items-center border-b py-3">
+                          <h3 class="text-base-content text-lg">
+                            {language() === 'ar' ? 'إعدادات الفوترة' : 'Billing Settings'}
+                          </h3>
+                        </div>
+
+                        <div class="border-base-300 flex items-center justify-between border-b py-3">
+                          <div class="w-full">
+                            <div class="flex items-center justify-between gap-4">
+                              <span class="text-base-content text-sm">
+                                {language() === 'ar' ? 'خطة الحساب' : 'Account Plan'}
+                              </span>
+                              <button class="text-base-content/70 hover:text-base-content flex items-center gap-2 text-sm">
+                                <span>{language() === 'ar' ? 'الخطة الأساسية' : 'Basic Plan'}</span>
+                                <ChevronRight class="h-4 w-4" />
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div class="border-base-300 flex items-center justify-between border-b py-3">
+                          <div class="w-full">
+                            <div class="flex items-center justify-between gap-4">
+                              <span class="text-base-content text-sm">
+                                {language() === 'ar' ? 'الفواتير' : 'Invoices'}
+                              </span>
+                              <button class="text-base-content/70 hover:text-base-content flex items-center gap-2 text-sm">
+                                <span>{language() === 'ar' ? 'عرض الفواتير' : 'View invoices'}</span>
+                                <ChevronRight class="h-4 w-4" />
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div class="border-base-300 flex items-center justify-between border-b py-3">
+                          <div class="w-full">
+                            <div class="flex items-center justify-between gap-4">
+                              <span class="text-base-content text-sm">
+                                {language() === 'ar' ? 'طريقة الدفع' : 'Payment Method'}
+                              </span>
+                              <button class="text-base-content/70 hover:text-base-content flex items-center gap-2 text-sm">
+                                <span>{language() === 'ar' ? 'Visa ending in 1234' : 'Visa ending in 1234'}</span>
+                                <ChevronRight class="h-4 w-4" />
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div class="flex items-center justify-between py-3">
+                          <div class="w-full">
+                            <div class="flex items-center justify-between gap-4">
+                              <span class="text-base-content text-sm">
+                                {language() === 'ar' ? 'تفاصيل الفوترة' : 'Billing Details'}
+                              </span>
+                              <button class="text-base-content/70 hover:text-base-content flex items-center gap-2 text-sm">
+                                <span>{language() === 'ar' ? 'تعديل' : 'Edit'}</span>
+                                <ChevronRight class="h-4 w-4" />
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      </section>
                     </div>
                   </Match>
+
                   <Match when={activeTab() === 'credits'}>
-                    <div class="p-4">
-                      <h2 class="text-base-content mb-4 text-xl font-semibold">
-                        {language() === 'ar' ? 'إعدادات الرصيد' : 'Credits Settings'}
-                      </h2>
-                      <p class="text-base-content">{language() === 'ar' ? 'سيظهر إعدادات الرصيد هنا.' : 'Credits settings would appear here.'}</p>
+                    <div class="space-y-6">
+                      <section>
+                        <div class="border-base-300 flex items-center border-b py-3">
+                          <h3 class="text-base-content text-lg">
+                            {language() === 'ar' ? 'إدارة الرصيد' : 'Credit Management'}
+                          </h3>
+                        </div>
+
+                        <div class="border-base-300 flex items-center justify-between border-b py-3">
+                          <div class="w-full">
+                            <div class="flex items-center justify-between gap-4">
+                              <span class="text-base-content text-sm">
+                                {language() === 'ar' ? 'الرصيد الحالي' : 'Current Balance'}
+                              </span>
+                              <span class="text-base-content text-sm font-medium">1,250 {language() === 'ar' ? 'ائتمان' : 'credits'}</span>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div class="border-base-300 flex items-center justify-between border-b py-3">
+                          <div class="w-full">
+                            <div class="flex items-center justify-between gap-4">
+                              <span class="text-base-content text-sm">
+                                {language() === 'ar' ? 'استخدام الرصيد' : 'Credit Usage'}
+                              </span>
+                              <button class="text-base-content/70 hover:text-base-content flex items-center gap-2 text-sm">
+                                <span>{language() === 'ar' ? 'عرض التفاصيل' : 'View details'}</span>
+                                <ChevronRight class="h-4 w-4" />
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div class="flex items-center justify-between py-3">
+                          <div class="w-full">
+                            <div class="flex items-center justify-between gap-4">
+                              <span class="text-base-content text-sm">
+                                {language() === 'ar' ? 'شراء رصيد إضافي' : 'Purchase Additional Credits'}
+                              </span>
+                              <button class="btn btn-primary btn-sm">
+                                {language() === 'ar' ? 'شراء الآن' : 'Buy Now'}
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      </section>
                     </div>
                   </Match>
+
                   <Match when={activeTab() === 'workspace'}>
-                    <div class="p-4">
-                      <h2 class="text-base-content mb-4 text-xl font-semibold">
-                        {language() === 'ar' ? 'إعدادات مساحة العمل' : 'Workspace Settings'}
-                      </h2>
-                      <p class="text-base-content">{language() === 'ar' ? 'سيظهر إعدادات مساحة العمل هنا.' : 'Workspace settings would appear here.'}</p>
+                    <div class="space-y-6">
+                      <section>
+                        <div class="border-base-300 flex items-center border-b py-3">
+                          <h3 class="text-base-content text-lg">
+                            {language() === 'ar' ? 'إعدادات مساحة العمل' : 'Workspace Settings'}
+                          </h3>
+                        </div>
+
+                        <div class="border-base-300 flex items-center justify-between border-b py-3">
+                          <div class="w-full">
+                            <div class="flex items-center justify-between gap-4">
+                              <span class="text-base-content text-sm">
+                                {language() === 'ar' ? 'اسم مساحة العمل' : 'Workspace Name'}
+                              </span>
+                              <input
+                                type="text"
+                                placeholder={language() === 'ar' ? 'اسم مساحة العمل' : 'Workspace name'}
+                                class="input input-bordered w-40 text-right"
+                                value={language() === 'ar' ? 'مساحتي' : 'My Workspace'}
+                              />
+                            </div>
+                          </div>
+                        </div>
+
+                        <div class="border-base-300 flex items-center justify-between border-b py-3">
+                          <div class="w-full">
+                            <div class="flex items-center justify-between gap-4">
+                              <span class="text-base-content text-sm">
+                                {language() === 'ar' ? 'رابط مساحة العمل' : 'Workspace URL'}
+                              </span>
+                              <input
+                                type="text"
+                                placeholder={language() === 'ar' ? 'رابط مساحة العمل' : 'Workspace URL'}
+                                class="input input-bordered w-40 text-right"
+                                value="my-workspace.accelerator.io"
+                              />
+                            </div>
+                          </div>
+                        </div>
+
+                        <div class="border-base-300 flex items-center justify-between border-b py-3">
+                          <div class="w-full">
+                            <div class="flex items-center justify-between gap-4">
+                              <div class="flex items-center gap-3">
+                                <div class="avatar">
+                                  <div class="w-12 h-12 rounded-lg bg-base-200 flex items-center justify-center">
+                                    <Image class="w-6 h-6 text-base-content/40" />
+                                  </div>
+                                </div>
+                                <div>
+                                  <span class="text-base-content text-sm">
+                                    {language() === 'ar' ? 'شعار مساحة العمل' : 'Workspace Logo'}
+                                  </span>
+                                  <p class="text-base-content/60 text-xs">
+                                    {language() === 'ar' ? 'تحميل شعار مخصص لمساحة العمل' : 'Upload a custom logo for your workspace'}
+                                  </p>
+                                </div>
+                              </div>
+                              <div class="flex gap-2">
+                                <input type="file" id="workspace-logo-upload" class="hidden" accept="image/*" />
+                                <button class="btn btn-ghost btn-sm" onClick={() => document.getElementById('workspace-logo-upload').click()}>
+                                  {language() === 'ar' ? 'تحميل' : 'Upload'}
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div class="flex items-center justify-between py-3">
+                          <div class="w-full">
+                            <div class="flex items-center justify-between gap-4">
+                              <span class="text-base-content text-sm">
+                                {language() === 'ar' ? 'الوصف' : 'Description'}
+                              </span>
+                              <textarea
+                                placeholder={language() === 'ar' ? 'وصف مساحة العمل' : 'Workspace description'}
+                                class="textarea textarea-bordered w-40 h-16 text-right"
+                              >
+                                {language() === 'ar' ? 'مساحة عمل تعاونية للمشاريع المبتكرة.' : 'A collaborative workspace for innovative projects.'}
+                              </textarea>
+                            </div>
+                          </div>
+                        </div>
+                      </section>
+
+                      <section>
+                        <div class="border-base-300 flex items-center border-b py-3">
+                          <h3 class="text-base-content text-lg">
+                            {language() === 'ar' ? 'التفضيلات' : 'Preferences'}
+                          </h3>
+                        </div>
+
+                        <div class="border-base-300 flex items-center justify-between border-b py-3">
+                          <div class="w-full">
+                            <div class="flex items-center justify-between gap-4">
+                              <span class="text-base-content text-sm">
+                                {language() === 'ar' ? 'عرض المشاريع الافتراضي' : 'Default Project View'}
+                              </span>
+                              <div class="dropdown-container relative">
+                                <DropdownButton
+                                  selectedLabel={language() === 'ar' ? 'شبكة' : 'Grid'}
+                                  onToggle={() => {}}
+                                />
+                                <DropdownMenu
+                                  options={[
+                                    { value: 'grid', label: { en: 'Grid', ar: 'شبكة' } },
+                                    { value: 'list', label: { en: 'List', ar: 'قائمة' } },
+                                    { value: 'kanban', label: { en: 'Kanban', ar: 'كانبان' } },
+                                  ]}
+                                  selectedValue={'grid'}
+                                  isOpen={false}
+                                  onSelect={() => {}}
+                                />
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div class="border-base-300 flex items-center justify-between border-b py-3">
+                          <div class="w-full">
+                            <div class="flex items-center justify-between gap-4">
+                              <span class="text-base-content text-sm">
+                                {language() === 'ar' ? 'فرز المهام' : 'Task Sorting'}
+                              </span>
+                              <div class="dropdown-container relative">
+                                <DropdownButton
+                                  selectedLabel={language() === 'ar' ? 'تاريخ الإنشاء' : 'Date Created'}
+                                  onToggle={() => {}}
+                                />
+                                <DropdownMenu
+                                  options={[
+                                    { value: 'priority', label: { en: 'Priority', ar: 'الأولوية' } },
+                                    { value: 'due-date', label: { en: 'Due Date', ar: 'تاريخ الاستحقاق' } },
+                                    { value: 'created', label: { en: 'Date Created', ar: 'تاريخ الإنشاء' } },
+                                  ]}
+                                  selectedValue={'created'}
+                                  isOpen={false}
+                                  onSelect={() => {}}
+                                />
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div class="flex items-center justify-between py-3">
+                          <div class="w-full">
+                            <div class="flex items-center justify-between gap-4">
+                              <div>
+                                <span class="text-base-content text-sm">
+                                  {language() === 'ar' ? 'حفظ تلقائي' : 'Auto-save'}
+                                </span>
+                                <p class="text-base-content/70 text-xs">
+                                  {language() === 'ar' ? 'حفظ التغييرات تلقائيًا' : 'Automatically save changes'}
+                                </p>
+                              </div>
+                              <Toggle
+                                checked={true}
+                                onChange={(checked) => {}}
+                              />
+                            </div>
+                          </div>
+                        </div>
+                      </section>
                     </div>
                   </Match>
+
                   <Match when={activeTab() === 'apps'}>
-                    <div class="p-4">
-                      <h2 class="text-base-content mb-4 text-xl font-semibold">
-                        {language() === 'ar' ? 'إعدادات التطبيقات والمهارات' : 'Apps & Skills Settings'}
-                      </h2>
-                      <p class="text-base-content">{language() === 'ar' ? 'سيظهر إعدادات التطبيقات والمهارات هنا.' : 'Apps & Skills settings would appear here.'}</p>
+                    <div class="space-y-6">
+                      <section>
+                        <div class="border-base-300 flex items-center border-b py-3">
+                          <h3 class="text-base-content text-lg">
+                            {language() === 'ar' ? 'التطبيقات والمهارات' : 'Apps & Skills'}
+                          </h3>
+                        </div>
+
+                        <div class="border-base-300 flex items-center justify-between border-b py-3">
+                          <div class="w-full">
+                            <div class="flex items-center justify-between gap-4">
+                              <span class="text-base-content text-sm">
+                                {language() === 'ar' ? 'التطبيقات المثبتة' : 'Installed Apps'}
+                              </span>
+                              <button class="text-base-content/70 hover:text-base-content flex items-center gap-2 text-sm">
+                                <span>{language() === 'ar' ? 'عرض التطبيقات' : 'View apps'}</span>
+                                <ChevronRight class="h-4 w-4" />
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div class="border-base-300 flex items-center justify-between border-b py-3">
+                          <div class="w-full">
+                            <div class="flex items-center justify-between gap-4">
+                              <span class="text-base-content text-sm">
+                                {language() === 'ar' ? 'المهارات المخصصة' : 'Custom Skills'}
+                              </span>
+                              <button class="text-base-content/70 hover:text-base-content flex items-center gap-2 text-sm">
+                                <span>{language() === 'ar' ? 'إدارة المهارات' : 'Manage skills'}</span>
+                                <ChevronRight class="h-4 w-4" />
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div class="flex items-center justify-between py-3">
+                          <div class="w-full">
+                            <div class="flex items-center justify-between gap-4">
+                              <span class="text-base-content text-sm">
+                                {language() === 'ar' ? 'متجر التطبيقات' : 'App Store'}
+                              </span>
+                              <button class="btn btn-outline btn-sm">
+                                {language() === 'ar' ? 'تصفح' : 'Browse'}
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      </section>
                     </div>
                   </Match>
+
                   <Match when={activeTab() === 'connectors'}>
-                    <div class="p-4">
-                      <h2 class="text-base-content mb-4 text-xl font-semibold">
-                        {language() === 'ar' ? 'إعدادات المتصلات' : 'Connectors Settings'}
-                      </h2>
-                      <p class="text-base-content">{language() === 'ar' ? 'سيظهر إعدادات المتصلات هنا.' : 'Connectors settings would appear here.'}</p>
+                    <div class="space-y-6">
+                      <section>
+                        <div class="border-base-300 flex items-center border-b py-3">
+                          <h3 class="text-base-content text-lg">
+                            {language() === 'ar' ? 'المتصلات' : 'Connectors'}
+                          </h3>
+                        </div>
+
+                        <div class="border-base-300 flex items-center justify-between border-b py-3">
+                          <div class="w-full">
+                            <div class="flex items-center justify-between gap-4">
+                              <span class="text-base-content text-sm">
+                                {language() === 'ar' ? 'المتصلات النشطة' : 'Active Connectors'}
+                              </span>
+                              <button class="text-base-content/70 hover:text-base-content flex items-center gap-2 text-sm">
+                                <span>5 {language() === 'ar' ? 'متصل' : 'connectors'}</span>
+                                <ChevronRight class="h-4 w-4" />
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div class="border-base-300 flex items-center justify-between border-b py-3">
+                          <div class="w-full">
+                            <div class="flex items-center justify-between gap-4">
+                              <span class="text-base-content text-sm">
+                                {language() === 'ar' ? 'متصلات جديدة' : 'New Connectors'}
+                              </span>
+                              <button class="text-base-content/70 hover:text-base-content flex items-center gap-2 text-sm">
+                                <span>{language() === 'ar' ? 'إضافة متصل' : 'Add connector'}</span>
+                                <ChevronRight class="h-4 w-4" />
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div class="flex items-center justify-between py-3">
+                          <div class="w-full">
+                            <div class="flex items-center justify-between gap-4">
+                              <span class="text-base-content text-sm">
+                                {language() === 'ar' ? 'متصلات مخصصة' : 'Custom Connectors'}
+                              </span>
+                              <button class="btn btn-outline btn-sm">
+                                {language() === 'ar' ? 'إنشاء' : 'Create'}
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      </section>
                     </div>
                   </Match>
+
                   <Match when={activeTab() === 'integrations'}>
-                    <div class="p-4">
-                      <h2 class="text-base-content mb-4 text-xl font-semibold">
-                        {language() === 'ar' ? 'إعدادات التكاملات' : 'Integrations Settings'}
-                      </h2>
-                      <p class="text-base-content">{language() === 'ar' ? 'سيظهر إعدادات التكاملات هنا.' : 'Integrations settings would appear here.'}</p>
+                    <div class="space-y-6">
+                      <section>
+                        <div class="border-base-300 flex items-center border-b py-3">
+                          <h3 class="text-base-content text-lg">
+                            {language() === 'ar' ? 'التكاملات' : 'Integrations'}
+                          </h3>
+                        </div>
+
+                        <div class="border-base-300 flex items-center justify-between border-b py-3">
+                          <div class="w-full">
+                            <div class="flex items-center justify-between gap-4">
+                              <span class="text-base-content text-sm">
+                                {language() === 'ar' ? 'التكاملات النشطة' : 'Active Integrations'}
+                              </span>
+                              <button class="text-base-content/70 hover:text-base-content flex items-center gap-2 text-sm">
+                                <span>8 {language() === 'ar' ? 'تكامل' : 'integrations'}</span>
+                                <ChevronRight class="h-4 w-4" />
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div class="border-base-300 flex items-center justify-between border-b py-3">
+                          <div class="w-full">
+                            <div class="flex items-center justify-between gap-4">
+                              <span class="text-base-content text-sm">
+                                {language() === 'ar' ? 'مكتبة التكامل' : 'Integration Library'}
+                              </span>
+                              <button class="text-base-content/70 hover:text-base-content flex items-center gap-2 text-sm">
+                                <span>{language() === 'ar' ? 'تصفح' : 'Browse'}</span>
+                                <ChevronRight class="h-4 w-4" />
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div class="flex items-center justify-between py-3">
+                          <div class="w-full">
+                            <div class="flex items-center justify-between gap-4">
+                              <span class="text-base-content text-sm">
+                                {language() === 'ar' ? 'تكامل مخصص' : 'Custom Integration'}
+                              </span>
+                              <button class="btn btn-outline btn-sm">
+                                {language() === 'ar' ? 'تكوين' : 'Configure'}
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      </section>
                     </div>
                   </Match>
+
                   <Match when={activeTab() === 'data'}>
-                    <div class="p-4">
-                      <h2 class="text-base-content mb-4 text-xl font-semibold">
-                        {language() === 'ar' ? 'إعدادات التحكم بالبيانات' : 'Data Control Settings'}
-                      </h2>
-                      <p class="text-base-content">{language() === 'ar' ? 'سيظهر إعدادات التحكم بالبيانات هنا.' : 'Data Control settings would appear here.'}</p>
+                    <div class="space-y-6">
+                      <section>
+                        <div class="border-base-300 flex items-center border-b py-3">
+                          <h3 class="text-base-content text-lg">
+                            {language() === 'ar' ? 'التحكم بالبيانات' : 'Data Control'}
+                          </h3>
+                        </div>
+
+                        <div class="border-base-300 flex items-center justify-between border-b py-3">
+                          <div class="w-full">
+                            <div class="flex items-center justify-between gap-4">
+                              <span class="text-base-content text-sm">
+                                {language() === 'ar' ? 'النسخ الاحتياطي' : 'Backup'}
+                              </span>
+                              <button class="text-base-content/70 hover:text-base-content flex items-center gap-2 text-sm">
+                                <span>{language() === 'ar' ? 'النسخ الاحتياطي الآن' : 'Backup now'}</span>
+                                <ChevronRight class="h-4 w-4" />
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div class="border-base-300 flex items-center justify-between border-b py-3">
+                          <div class="w-full">
+                            <div class="flex items-center justify-between gap-4">
+                              <span class="text-base-content text-sm">
+                                {language() === 'ar' ? 'الاستعادة' : 'Restore'}
+                              </span>
+                              <button class="text-base-content/70 hover:text-base-content flex items-center gap-2 text-sm">
+                                <span>{language() === 'ar' ? 'استعادة البيانات' : 'Restore data'}</span>
+                                <ChevronRight class="h-4 w-4" />
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div class="border-base-300 flex items-center justify-between border-b py-3">
+                          <div class="w-full">
+                            <div class="flex items-center justify-between gap-4">
+                              <span class="text-base-content text-sm">
+                                {language() === 'ar' ? 'تصدير البيانات' : 'Export Data'}
+                              </span>
+                              <button class="text-base-content/70 hover:text-base-content flex items-center gap-2 text-sm">
+                                <span>{language() === 'ar' ? 'تصدير' : 'Export'}</span>
+                                <ChevronRight class="h-4 w-4" />
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div class="flex items-center justify-between py-3">
+                          <div class="w-full">
+                            <div class="flex items-center justify-between gap-4">
+                              <span class="text-base-content text-sm">
+                                {language() === 'ar' ? 'الاحتفاظ بالبيانات' : 'Data Retention'}
+                              </span>
+                              <button class="text-base-content/70 hover:text-base-content flex items-center gap-2 text-sm">
+                                <span>{language() === 'ar' ? 'الإعدادات' : 'Settings'}</span>
+                                <ChevronRight class="h-4 w-4" />
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      </section>
                     </div>
                   </Match>
+
                   <Match when={activeTab() === 'security'}>
-                    <div class="p-4">
-                      <h2 class="text-base-content mb-4 text-xl font-semibold">
-                        {language() === 'ar' ? 'إعدادات الأمان' : 'Security Settings'}
-                      </h2>
-                      <p class="text-base-content">{language() === 'ar' ? 'سيظهر إعدادات الأمان هنا.' : 'Security settings would appear here.'}</p>
+                    <div class="space-y-6">
+                      <section>
+                        <div class="border-base-300 flex items-center border-b py-3">
+                          <h3 class="text-base-content text-lg">
+                            {language() === 'ar' ? 'إعدادات الأمان' : 'Security Settings'}
+                          </h3>
+                        </div>
+
+                        <div class="border-base-300 flex items-center justify-between border-b py-3">
+                          <div class="w-full">
+                            <div class="flex items-center justify-between gap-4">
+                              <div>
+                                <span class="text-base-content text-sm">
+                                  {language() === 'ar' ? 'المصادقة الثنائية' : 'Two-Factor Authentication'}
+                                </span>
+                                <p class="text-base-content/70 text-xs">
+                                  {language() === 'ar' ? 'إضافة أمان إضافي لحسابك' : 'Add extra security to your account'}
+                                </p>
+                              </div>
+                              <Toggle
+                                checked={false}
+                                onChange={(checked) => {}}
+                              />
+                            </div>
+                          </div>
+                        </div>
+
+                        <div class="border-base-300 flex items-center justify-between border-b py-3">
+                          <div class="w-full">
+                            <div class="flex items-center justify-between gap-4">
+                              <span class="text-base-content text-sm">
+                                {language() === 'ar' ? 'كلمة المرور' : 'Password'}
+                              </span>
+                              <button class="btn btn-ghost btn-sm">
+                                {language() === 'ar' ? 'تغيير كلمة المرور' : 'Change Password'}
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div class="border-base-300 flex items-center justify-between border-b py-3">
+                          <div class="w-full">
+                            <div class="flex items-center justify-between gap-4">
+                              <span class="text-base-content text-sm">
+                                {language() === 'ar' ? 'إدارة الجلسات' : 'Session Management'}
+                              </span>
+                              <button class="btn btn-ghost btn-sm">
+                                {language() === 'ar' ? 'عرض الجلسات' : 'View Sessions'}
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div class="flex items-center justify-between py-3">
+                          <div class="w-full">
+                            <div class="flex items-center justify-between gap-4">
+                              <span class="text-base-content text-sm">
+                                {language() === 'ar' ? 'تسجيل الدخول الموحّد' : 'Single Sign-On'}
+                              </span>
+                              <button class="btn btn-ghost btn-sm">
+                                {language() === 'ar' ? 'تكوين SSO' : 'Configure SSO'}
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      </section>
+
+                      <section>
+                        <div class="border-base-300 flex items-center border-b py-3">
+                          <h3 class="text-base-content text-lg">
+                            {language() === 'ar' ? 'إعدادات الخصوصية' : 'Privacy Settings'}
+                          </h3>
+                        </div>
+
+                        <div class="border-base-300 flex items-center justify-between border-b py-3">
+                          <div class="w-full">
+                            <div class="flex items-center justify-between gap-4">
+                              <div>
+                                <span class="text-base-content text-sm">
+                                  {language() === 'ar' ? 'مشاركة التحليلات' : 'Share Analytics'}
+                                </span>
+                                <p class="text-base-content/70 text-xs">
+                                  {language() === 'ar' ? 'المساعدة في تحسين خدمتنا من خلال مشاركة بيانات الاستخدام' : 'Help improve our service by sharing usage data'}
+                                </p>
+                              </div>
+                              <Toggle
+                                checked={true}
+                                onChange={(checked) => {}}
+                              />
+                            </div>
+                          </div>
+                        </div>
+
+                        <div class="flex items-center justify-between py-3">
+                          <div class="w-full">
+                            <div class="flex items-center justify-between gap-4">
+                              <div>
+                                <span class="text-base-content text-sm">
+                                  {language() === 'ar' ? 'القياس' : 'Telemetry'}
+                                </span>
+                                <p class="text-base-content/70 text-xs">
+                                  {language() === 'ar' ? 'السماح بجمع بيانات التشخيص' : 'Allow collection of diagnostic data'}
+                                </p>
+                              </div>
+                              <Toggle
+                                checked={false}
+                                onChange={(checked) => {}}
+                              />
+                            </div>
+                          </div>
+                        </div>
+                      </section>
                     </div>
                   </Match>
+
                   <Match when={activeTab() === 'roles'}>
-                    <div class="p-4">
-                      <h2 class="text-base-content mb-4 text-xl font-semibold">
-                        {language() === 'ar' ? 'إعدادات الأدوار والحوكمة' : 'Roles & Governance Settings'}
-                      </h2>
-                      <p class="text-base-content">{language() === 'ar' ? 'سيظهر إعدادات الأدوار والحوكمة هنا.' : 'Roles & Governance settings would appear here.'}</p>
+                    <div class="space-y-6">
+                      <section>
+                        <div class="border-base-300 flex items-center border-b py-3">
+                          <h3 class="text-base-content text-lg">
+                            {language() === 'ar' ? 'الأدوار والحوكمة' : 'Roles & Governance'}
+                          </h3>
+                        </div>
+
+                        <div class="border-base-300 flex items-center justify-between border-b py-3">
+                          <div class="w-full">
+                            <div class="flex items-center justify-between gap-4">
+                              <span class="text-base-content text-sm">
+                                {language() === 'ar' ? 'أدوار المستخدمين' : 'User Roles'}
+                              </span>
+                              <button class="text-base-content/70 hover:text-base-content flex items-center gap-2 text-sm">
+                                <span>{language() === 'ar' ? 'إدارة الأدوار' : 'Manage roles'}</span>
+                                <ChevronRight class="h-4 w-4" />
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div class="border-base-300 flex items-center justify-between border-b py-3">
+                          <div class="w-full">
+                            <div class="flex items-center justify-between gap-4">
+                              <span class="text-base-content text-sm">
+                                {language() === 'ar' ? 'صلاحيات الوصول' : 'Access Permissions'}
+                              </span>
+                              <button class="text-base-content/70 hover:text-base-content flex items-center gap-2 text-sm">
+                                <span>{language() === 'ar' ? 'عرض الصلاحيات' : 'View permissions'}</span>
+                                <ChevronRight class="h-4 w-4" />
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div class="flex items-center justify-between py-3">
+                          <div class="w-full">
+                            <div class="flex items-center justify-between gap-4">
+                              <span class="text-base-content text-sm">
+                                {language() === 'ar' ? 'سجلات الحوكمة' : 'Governance Logs'}
+                              </span>
+                              <button class="text-base-content/70 hover:text-base-content flex items-center gap-2 text-sm">
+                                <span>{language() === 'ar' ? 'عرض السجلات' : 'View logs'}</span>
+                                <ChevronRight class="h-4 w-4" />
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      </section>
                     </div>
                   </Match>
+
                   <Match when={activeTab() === 'help'}>
-                    <div class="p-4">
-                      <h2 class="text-base-content mb-4 text-xl font-semibold">{language() === 'ar' ? 'إعدادات المساعدة' : 'Help Settings'}</h2>
-                      <p class="text-base-content">{language() === 'ar' ? 'سيظهر إعدادات المساعدة هنا.' : 'Help settings would appear here.'}</p>
+                    <div class="space-y-6">
+                      <section>
+                        <div class="border-base-300 flex items-center border-b py-3">
+                          <h3 class="text-base-content text-lg">
+                            {language() === 'ar' ? 'المساعدة والدعم' : 'Help & Support'}
+                          </h3>
+                        </div>
+
+                        <div class="border-base-300 flex items-center justify-between border-b py-3">
+                          <div class="w-full">
+                            <div class="flex items-center justify-between gap-4">
+                              <span class="text-base-content text-sm">
+                                {language() === 'ar' ? 'الوثائق' : 'Documentation'}
+                              </span>
+                              <button class="btn btn-ghost btn-sm">
+                                {language() === 'ar' ? 'عرض الوثائق' : 'View Docs'}
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div class="border-base-300 flex items-center justify-between border-b py-3">
+                          <div class="w-full">
+                            <div class="flex items-center justify-between gap-4">
+                              <span class="text-base-content text-sm">
+                                {language() === 'ar' ? 'الدورات التعليمية' : 'Tutorials'}
+                              </span>
+                              <button class="btn btn-ghost btn-sm">
+                                {language() === 'ar' ? 'مشاهدة الدورات' : 'Watch Tutorials'}
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div class="border-base-300 flex items-center justify-between border-b py-3">
+                          <div class="w-full">
+                            <div class="flex items-center justify-between gap-4">
+                              <span class="text-base-content text-sm">
+                                {language() === 'ar' ? 'الاتصال بالدعم' : 'Contact Support'}
+                              </span>
+                              <button class="btn btn-ghost btn-sm">
+                                {language() === 'ar' ? 'اتصال بالدعم' : 'Contact Support'}
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div class="flex items-center justify-between py-3">
+                          <div class="w-full">
+                            <div class="flex items-center justify-between gap-4">
+                              <span class="text-base-content text-sm">
+                                {language() === 'ar' ? 'منتدى المجتمع' : 'Community Forum'}
+                              </span>
+                              <button class="btn btn-ghost btn-sm">
+                                {language() === 'ar' ? 'زيارة المنتدى' : 'Visit Forum'}
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      </section>
+
+                      <section>
+                        <div class="border-base-300 flex items-center border-b py-3">
+                          <h3 class="text-base-content text-lg">
+                            {language() === 'ar' ? 'الملاحظات' : 'Feedback'}
+                          </h3>
+                        </div>
+
+                        <div class="border-base-300 flex items-center justify-between border-b py-3">
+                          <div class="w-full">
+                            <div class="flex items-center justify-between gap-4">
+                              <span class="text-base-content text-sm">
+                                {language() === 'ar' ? 'الإبلاغ عن خطأ' : 'Report a Bug'}
+                              </span>
+                              <button class="btn btn-ghost btn-sm">
+                                {language() === 'ar' ? 'الإبلاغ' : 'Report'}
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div class="flex items-center justify-between py-3">
+                          <div class="w-full">
+                            <div class="flex items-center justify-between gap-4">
+                              <span class="text-base-content text-sm">
+                                {language() === 'ar' ? 'طلب ميزة' : 'Feature Request'}
+                              </span>
+                              <button class="btn btn-ghost btn-sm">
+                                {language() === 'ar' ? 'طلب' : 'Request'}
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      </section>
                     </div>
                   </Match>
                 </Switch>

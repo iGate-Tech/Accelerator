@@ -1,0 +1,723 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Accelerator Settings – Static UI</title>
+    
+    <!-- Tailwind CSS and DaisyUI -->
+    <link href="https://cdn.jsdelivr.net/npm/daisyui@4.7.2/dist/full.min.css" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+
+    <style>
+        /* Custom styles for the settings modal */
+        .settings-modal {
+            max-width: 760px;
+            max-height: 600px;
+        }
+        
+        .tab-content {
+            max-height: calc(600px - 140px);
+            overflow-y: auto;
+        }
+        
+        .sidebar {
+            width: 200px;
+        }
+        
+        .active-tab {
+            color: hsl(var(--p));
+            border-bottom-color: hsl(var(--p)) !important;
+            border-bottom-width: 2px;
+        }
+        
+        .active-sidebar-item {
+            background-color: hsl(var(--b2)) !important;
+            color: hsl(var(--p)) !important;
+        }
+        
+        /* Scrollbar styling */
+        .tab-content::-webkit-scrollbar,
+        .sidebar::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        .tab-content::-webkit-scrollbar-track,
+        .sidebar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        
+        .tab-content::-webkit-scrollbar-thumb,
+        .sidebar::-webkit-scrollbar-thumb {
+            background: hsl(var(--bc) / 0.2);
+            border-radius: 3px;
+        }
+        
+        .tab-content::-webkit-scrollbar-thumb:hover,
+        .sidebar::-webkit-scrollbar-thumb:hover {
+            background: hsl(var(--bc) / 0.3);
+        }
+    </style>
+</head>
+
+<body class="bg-base-200 min-h-screen flex items-center justify-center p-4">
+    <div class="fixed inset-0 bg-black/50 backdrop-blur-sm z-0"></div>
+    
+    <div class="settings-modal bg-base-100 rounded-2xl shadow-2xl overflow-hidden border border-base-300 relative z-10 w-full max-w-4xl max-h-[600px] flex flex-col">
+        <!-- Header -->
+        <div class="flex justify-between items-center p-4 border-b border-base-300">
+            <h1 class="text-xl font-semibold text-base-content">Settings</h1>
+            <button id="close-modal" class="btn btn-ghost btn-circle btn-sm">
+                <i data-lucide="x" class="w-5 h-5"></i>
+            </button>
+        </div>
+        
+        <div class="flex flex-1 overflow-hidden">
+            <!-- Sidebar Navigation -->
+            <aside class="sidebar bg-base-100 border-r border-base-300 hidden md:flex flex-col overflow-y-auto">
+                <ul class="menu w-full p-3 gap-1">
+                    <li>
+                        <a href="#" class="flex items-center gap-2 active-sidebar-item" data-tab="general">
+                            <i data-lucide="settings" class="w-5 h-5"></i>
+                            <span>General</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" class="flex items-center gap-2" data-tab="profile">
+                            <i data-lucide="user-round" class="w-5 h-5"></i>
+                            <span>Profile</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" class="flex items-center gap-2" data-tab="notifications">
+                            <i data-lucide="bell" class="w-5 h-5"></i>
+                            <span>Notifications</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" class="flex items-center gap-2" data-tab="billing">
+                            <i data-lucide="calendar-days" class="w-5 h-5"></i>
+                            <span>Plans & Billing</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" class="flex items-center gap-2" data-tab="credits">
+                            <i data-lucide="credit-card" class="w-5 h-5"></i>
+                            <span>Buy Credits</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" class="flex items-center gap-2" data-tab="workspace">
+                            <i data-lucide="panel-top" class="w-5 h-5"></i>
+                            <span>Workspace</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" class="flex items-center gap-2" data-tab="apps">
+                            <i data-lucide="puzzle" class="w-5 h-5"></i>
+                            <span>Apps & Skills</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" class="flex items-center gap-2" data-tab="connectors">
+                            <i data-lucide="cable" class="w-5 h-5"></i>
+                            <span>Connectors</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" class="flex items-center gap-2" data-tab="integrations">
+                            <i data-lucide="plug" class="w-5 h-5"></i>
+                            <span>Integrations</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" class="flex items-center gap-2" data-tab="data">
+                            <i data-lucide="database" class="w-5 h-5"></i>
+                            <span>Data Control</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" class="flex items-center gap-2" data-tab="security">
+                            <i data-lucide="shield" class="w-5 h-5"></i>
+                            <span>Security</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" class="flex items-center gap-2" data-tab="roles">
+                            <i data-lucide="shield-check" class="w-5 h-5"></i>
+                            <span>Roles & Governance</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" class="flex items-center gap-2" data-tab="help">
+                            <i data-lucide="life-buoy" class="w-5 h-5"></i>
+                            <span>Help</span>
+                        </a>
+                    </li>
+                </ul>
+            </aside>
+            
+            <!-- Main Content Area -->
+            <main class="flex-1 overflow-y-auto p-4 bg-base-100">
+                
+                <!-- General Tab Content -->
+                <div id="general-content" class="tab-content">
+                    <div class="space-y-6">
+                        <section>
+                            <h2 class="text-lg font-semibold text-base-content mb-4">General Settings</h2>
+                            
+                            <div class="form-control border border-base-300 rounded-lg p-4 mb-4">
+                                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                                    <div>
+                                        <label class="text-base-content font-medium block mb-1">Language</label>
+                                        <p class="text-sm text-base-content/70">Select the language for the interface</p>
+                                    </div>
+                                    <div class="w-full sm:w-auto">
+                                        <select class="select select-bordered w-full sm:w-40">
+                                            <option value="en">English</option>
+                                            <option value="ar">العربية</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="form-control border border-base-300 rounded-lg p-4 mb-4">
+                                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                                    <div>
+                                        <label class="text-base-content font-medium block mb-1">Theme</label>
+                                        <p class="text-sm text-base-content/70">Choose between light, dark, and system themes</p>
+                                    </div>
+                                    <div class="w-full sm:w-auto">
+                                        <select class="select select-bordered w-full sm:w-40">
+                                            <option value="light">Light</option>
+                                            <option value="dark">Dark</option>
+                                            <option value="system" selected>System</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="form-control border border-base-300 rounded-lg p-4 mb-4">
+                                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                                    <div>
+                                        <label class="text-base-content font-medium block mb-1">Time Format</label>
+                                        <p class="text-sm text-base-content/70">Select your preferred time format</p>
+                                    </div>
+                                    <div class="w-full sm:w-auto">
+                                        <select class="select select-bordered w-full sm:w-40">
+                                            <option value="12-hour" selected>12-hour</option>
+                                            <option value="24-hour">24-hour</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="form-control border border-base-300 rounded-lg p-4 mb-4">
+                                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                                    <div>
+                                        <label class="text-base-content font-medium block mb-1">Date Format</label>
+                                        <p class="text-sm text-base-content/70">Select your preferred date format</p>
+                                    </div>
+                                    <div class="w-full sm:w-auto">
+                                        <select class="select select-bordered w-full sm:w-40">
+                                            <option value="MM/DD/YYYY" selected>MM/DD/YYYY</option>
+                                            <option value="DD/MM/YYYY">DD/MM/YYYY</option>
+                                            <option value="YYYY-MM-DD">YYYY-MM-DD</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="border border-base-300 rounded-lg p-4">
+                                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                                    <div>
+                                        <label class="text-base-content font-medium block mb-1">Danger Zone</label>
+                                        <p class="text-sm text-base-content/60">Permanently delete your account and all associated data</p>
+                                    </div>
+                                    <button class="btn btn-error btn-sm">Delete Account</button>
+                                </div>
+                            </div>
+                        </section>
+                    </div>
+                </div>
+                
+                <!-- Profile Tab Content -->
+                <div id="profile-content" class="tab-content hidden">
+                    <div class="space-y-6">
+                        <section>
+                            <h2 class="text-lg font-semibold text-base-content mb-4">Profile Settings</h2>
+                            
+                            <div class="border border-base-300 rounded-lg p-4 mb-4">
+                                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                                    <div>
+                                        <label class="text-base-content font-medium block mb-1">Name</label>
+                                        <p class="text-sm text-base-content/70">Enter your full name</p>
+                                    </div>
+                                    <input type="text" placeholder="Enter your name" class="input input-bordered w-full sm:w-64" value="John Doe" />
+                                </div>
+                            </div>
+                            
+                            <div class="border border-base-300 rounded-lg p-4 mb-4">
+                                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                                    <div>
+                                        <label class="text-base-content font-medium block mb-1">Email</label>
+                                        <p class="text-sm text-base-content/70">Your primary email address</p>
+                                    </div>
+                                    <input type="email" placeholder="your.email@example.com" class="input input-bordered w-full sm:w-64" value="john.doe@example.com" />
+                                </div>
+                            </div>
+                            
+                            <div class="border border-base-300 rounded-lg p-4 mb-4">
+                                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                                    <div>
+                                        <label class="text-base-content font-medium block mb-1">Profile Picture</label>
+                                        <p class="text-sm text-base-content/70">Upload a custom profile picture</p>
+                                    </div>
+                                    <div class="flex flex-col items-center">
+                                        <div class="avatar mb-2">
+                                            <div class="w-16 h-16 rounded-full bg-base-200 flex items-center justify-center">
+                                                <i data-lucide="user" class="w-8 h-8 text-base-content/40"></i>
+                                            </div>
+                                        </div>
+                                        <button class="btn btn-sm">Upload Image</button>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="border border-base-300 rounded-lg p-4">
+                                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                                    <div>
+                                        <label class="text-base-content font-medium block mb-1">Bio</label>
+                                        <p class="text-sm text-base-content/70">Tell us about yourself</p>
+                                    </div>
+                                    <textarea placeholder="Write a short bio..." class="textarea textarea-bordered w-full sm:w-64 h-24">Software engineer passionate about building great products.</textarea>
+                                </div>
+                            </div>
+                        </section>
+                        
+                        <section>
+                            <h3 class="text-md font-semibold text-base-content mb-3">Personal Information</h3>
+                            
+                            <div class="border border-base-300 rounded-lg p-4 mb-4">
+                                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                                    <div>
+                                        <label class="text-base-content font-medium block mb-1">Phone Number</label>
+                                        <p class="text-sm text-base-content/70">Your contact number</p>
+                                    </div>
+                                    <input type="tel" placeholder="+1 (555) 123-4567" class="input input-bordered w-full sm:w-64" value="+1 (555) 123-4567" />
+                                </div>
+                            </div>
+                            
+                            <div class="border border-base-300 rounded-lg p-4 mb-4">
+                                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                                    <div>
+                                        <label class="text-base-content font-medium block mb-1">Location</label>
+                                        <p class="text-sm text-base-content/70">Your city and country</p>
+                                    </div>
+                                    <input type="text" placeholder="City, Country" class="input input-bordered w-full sm:w-64" value="San Francisco, USA" />
+                                </div>
+                            </div>
+                            
+                            <div class="border border-base-300 rounded-lg p-4">
+                                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                                    <div>
+                                        <label class="text-base-content font-medium block mb-1">Website</label>
+                                        <p class="text-sm text-base-content/70">Your personal website or blog</p>
+                                    </div>
+                                    <input type="url" placeholder="https://example.com" class="input input-bordered w-full sm:w-64" value="https://johndoe.dev" />
+                                </div>
+                            </div>
+                        </section>
+                    </div>
+                </div>
+                
+                <!-- Notifications Tab Content -->
+                <div id="notifications-content" class="tab-content hidden">
+                    <div class="space-y-6">
+                        <section>
+                            <h2 class="text-lg font-semibold text-base-content mb-4">Notification Settings</h2>
+                            
+                            <div class="border border-base-300 rounded-lg p-4 mb-4">
+                                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                                    <div>
+                                        <label class="text-base-content font-medium block mb-1">Email Notifications</label>
+                                        <p class="text-sm text-base-content/70">Receive notifications via email</p>
+                                    </div>
+                                    <input type="checkbox" class="toggle toggle-primary" checked />
+                                </div>
+                            </div>
+                            
+                            <div class="border border-base-300 rounded-lg p-4 mb-4">
+                                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                                    <div>
+                                        <label class="text-base-content font-medium block mb-1">Push Notifications</label>
+                                        <p class="text-sm text-base-content/70">Receive push notifications in browser</p>
+                                    </div>
+                                    <input type="checkbox" class="toggle toggle-primary" checked />
+                                </div>
+                            </div>
+                            
+                            <div class="border border-base-300 rounded-lg p-4 mb-4">
+                                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                                    <div>
+                                        <label class="text-base-content font-medium block mb-1">SMS Notifications</label>
+                                        <p class="text-sm text-base-content/70">Receive notifications via SMS</p>
+                                    </div>
+                                    <input type="checkbox" class="toggle toggle-primary" />
+                                </div>
+                            </div>
+                            
+                            <div class="border border-base-300 rounded-lg p-4">
+                                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                                    <div>
+                                        <label class="text-base-content font-medium block mb-1">Notification Sound</label>
+                                        <p class="text-sm text-base-content/70">Play sound for new notifications</p>
+                                    </div>
+                                    <input type="checkbox" class="toggle toggle-primary" checked />
+                                </div>
+                            </div>
+                        </section>
+                        
+                        <section>
+                            <h3 class="text-md font-semibold text-base-content mb-3">Notification Categories</h3>
+                            
+                            <div class="border border-base-300 rounded-lg p-4 mb-4">
+                                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                                    <div>
+                                        <label class="text-base-content font-medium block mb-1">Project Updates</label>
+                                        <p class="text-sm text-base-content/70">Builds, deployments, and project events</p>
+                                    </div>
+                                    <select class="select select-bordered w-full sm:w-40">
+                                        <option value="all">All</option>
+                                        <option value="important" selected>Important only</option>
+                                        <option value="none">None</option>
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <div class="border border-base-300 rounded-lg p-4 mb-4">
+                                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                                    <div>
+                                        <label class="text-base-content font-medium block mb-1">Direct Messages</label>
+                                        <p class="text-sm text-base-content/70">When someone sends you a message</p>
+                                    </div>
+                                    <select class="select select-bordered w-full sm:w-40">
+                                        <option value="all" selected>All</option>
+                                        <option value="important">Important only</option>
+                                        <option value="none">None</option>
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <div class="border border-base-300 rounded-lg p-4">
+                                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                                    <div>
+                                        <label class="text-base-content font-medium block mb-1">Mentions</label>
+                                        <p class="text-sm text-base-content/70">When someone mentions you</p>
+                                    </div>
+                                    <select class="select select-bordered w-full sm:w-40">
+                                        <option value="all" selected>All</option>
+                                        <option value="important">Important only</option>
+                                        <option value="none">None</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </section>
+                    </div>
+                </div>
+                
+                <!-- Workspace Tab Content -->
+                <div id="workspace-content" class="tab-content hidden">
+                    <div class="space-y-6">
+                        <section>
+                            <h2 class="text-lg font-semibold text-base-content mb-4">Workspace Settings</h2>
+                            
+                            <div class="border border-base-300 rounded-lg p-4 mb-4">
+                                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                                    <div>
+                                        <label class="text-base-content font-medium block mb-1">Workspace Name</label>
+                                        <p class="text-sm text-base-content/70">Name of your workspace</p>
+                                    </div>
+                                    <input type="text" placeholder="Workspace name" class="input input-bordered w-full sm:w-64" value="My Workspace" />
+                                </div>
+                            </div>
+                            
+                            <div class="border border-base-300 rounded-lg p-4 mb-4">
+                                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                                    <div>
+                                        <label class="text-base-content font-medium block mb-1">Workspace URL</label>
+                                        <p class="text-sm text-base-content/70">URL for your workspace</p>
+                                    </div>
+                                    <input type="text" placeholder="Workspace URL" class="input input-bordered w-full sm:w-64" value="my-workspace.accelerator.io" />
+                                </div>
+                            </div>
+                            
+                            <div class="border border-base-300 rounded-lg p-4 mb-4">
+                                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                                    <div>
+                                        <label class="text-base-content font-medium block mb-1">Description</label>
+                                        <p class="text-sm text-base-content/70">Brief description of your workspace</p>
+                                    </div>
+                                    <textarea placeholder="Workspace description" class="textarea textarea-bordered w-full sm:w-64 h-20">A collaborative workspace for innovative projects.</textarea>
+                                </div>
+                            </div>
+                            
+                            <div class="border border-base-300 rounded-lg p-4">
+                                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                                    <div>
+                                        <label class="text-base-content font-medium block mb-1">Workspace Logo</label>
+                                        <p class="text-sm text-base-content/70">Upload a custom logo for your workspace</p>
+                                    </div>
+                                    <div class="flex flex-col items-center">
+                                        <div class="avatar mb-2">
+                                            <div class="w-16 h-16 rounded-lg bg-base-200 flex items-center justify-center">
+                                                <i data-lucide="image" class="w-8 h-8 text-base-content/40"></i>
+                                            </div>
+                                        </div>
+                                        <button class="btn btn-sm">Upload Logo</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
+                        
+                        <section>
+                            <h3 class="text-md font-semibold text-base-content mb-3">Preferences</h3>
+                            
+                            <div class="border border-base-300 rounded-lg p-4 mb-4">
+                                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                                    <div>
+                                        <label class="text-base-content font-medium block mb-1">Default Project View</label>
+                                        <p class="text-sm text-base-content/70">How projects are displayed by default</p>
+                                    </div>
+                                    <select class="select select-bordered w-full sm:w-40">
+                                        <option value="grid" selected>Grid</option>
+                                        <option value="list">List</option>
+                                        <option value="kanban">Kanban</option>
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <div class="border border-base-300 rounded-lg p-4 mb-4">
+                                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                                    <div>
+                                        <label class="text-base-content font-medium block mb-1">Task Sorting</label>
+                                        <p class="text-sm text-base-content/70">Default order for tasks</p>
+                                    </div>
+                                    <select class="select select-bordered w-full sm:w-40">
+                                        <option value="priority">Priority</option>
+                                        <option value="due-date">Due Date</option>
+                                        <option value="created" selected>Date Created</option>
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <div class="border border-base-300 rounded-lg p-4">
+                                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                                    <div>
+                                        <label class="text-base-content font-medium block mb-1">Auto-save</label>
+                                        <p class="text-sm text-base-content/70">Automatically save changes</p>
+                                    </div>
+                                    <input type="checkbox" class="toggle toggle-primary" checked />
+                                </div>
+                            </div>
+                        </section>
+                    </div>
+                </div>
+                
+                <!-- Security Tab Content -->
+                <div id="security-content" class="tab-content hidden">
+                    <div class="space-y-6">
+                        <section>
+                            <h2 class="text-lg font-semibold text-base-content mb-4">Security Settings</h2>
+                            
+                            <div class="border border-base-300 rounded-lg p-4 mb-4">
+                                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                                    <div>
+                                        <label class="text-base-content font-medium block mb-1">Two-Factor Authentication</label>
+                                        <p class="text-sm text-base-content/70">Add extra security to your account</p>
+                                    </div>
+                                    <input type="checkbox" class="toggle toggle-primary" />
+                                </div>
+                            </div>
+                            
+                            <div class="border border-base-300 rounded-lg p-4 mb-4">
+                                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                                    <div>
+                                        <label class="text-base-content font-medium block mb-1">Password</label>
+                                        <p class="text-sm text-base-content/70">Update your account password</p>
+                                    </div>
+                                    <button class="btn btn-sm">Change Password</button>
+                                </div>
+                            </div>
+                            
+                            <div class="border border-base-300 rounded-lg p-4 mb-4">
+                                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                                    <div>
+                                        <label class="text-base-content font-medium block mb-1">Session Management</label>
+                                        <p class="text-sm text-base-content/70">View and manage active sessions</p>
+                                    </div>
+                                    <button class="btn btn-sm">View Sessions</button>
+                                </div>
+                            </div>
+                            
+                            <div class="border border-base-300 rounded-lg p-4">
+                                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                                    <div>
+                                        <label class="text-base-content font-medium block mb-1">Single Sign-On</label>
+                                        <p class="text-sm text-base-content/70">Configure SSO for your organization</p>
+                                    </div>
+                                    <button class="btn btn-sm">Configure SSO</button>
+                                </div>
+                            </div>
+                        </section>
+                        
+                        <section>
+                            <h3 class="text-md font-semibold text-base-content mb-3">Privacy Settings</h3>
+                            
+                            <div class="border border-base-300 rounded-lg p-4 mb-4">
+                                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                                    <div>
+                                        <label class="text-base-content font-medium block mb-1">Share Analytics</label>
+                                        <p class="text-sm text-base-content/70">Help improve our service by sharing usage data</p>
+                                    </div>
+                                    <input type="checkbox" class="toggle toggle-primary" checked />
+                                </div>
+                            </div>
+                            
+                            <div class="border border-base-300 rounded-lg p-4">
+                                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                                    <div>
+                                        <label class="text-base-content font-medium block mb-1">Telemetry</label>
+                                        <p class="text-sm text-base-content/70">Allow collection of diagnostic data</p>
+                                    </div>
+                                    <input type="checkbox" class="toggle toggle-primary" />
+                                </div>
+                            </div>
+                        </section>
+                    </div>
+                </div>
+                
+                <!-- Help Tab Content -->
+                <div id="help-content" class="tab-content hidden">
+                    <div class="space-y-6">
+                        <section>
+                            <h2 class="text-lg font-semibold text-base-content mb-4">Help & Support</h2>
+                            
+                            <div class="border border-base-300 rounded-lg p-4 mb-4">
+                                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                                    <div>
+                                        <label class="text-base-content font-medium block mb-1">Documentation</label>
+                                        <p class="text-sm text-base-content/70">Access our comprehensive documentation</p>
+                                    </div>
+                                    <button class="btn btn-sm">View Docs</button>
+                                </div>
+                            </div>
+                            
+                            <div class="border border-base-300 rounded-lg p-4 mb-4">
+                                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                                    <div>
+                                        <label class="text-base-content font-medium block mb-1">Tutorials</label>
+                                        <p class="text-sm text-base-content/70">Watch video tutorials to get started</p>
+                                    </div>
+                                    <button class="btn btn-sm">Watch Tutorials</button>
+                                </div>
+                            </div>
+                            
+                            <div class="border border-base-300 rounded-lg p-4 mb-4">
+                                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                                    <div>
+                                        <label class="text-base-content font-medium block mb-1">Contact Support</label>
+                                        <p class="text-sm text-base-content/70">Get help from our support team</p>
+                                    </div>
+                                    <button class="btn btn-sm">Contact Support</button>
+                                </div>
+                            </div>
+                            
+                            <div class="border border-base-300 rounded-lg p-4">
+                                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                                    <div>
+                                        <label class="text-base-content font-medium block mb-1">Community Forum</label>
+                                        <p class="text-sm text-base-content/70">Connect with other users</p>
+                                    </div>
+                                    <button class="btn btn-sm">Visit Forum</button>
+                                </div>
+                            </div>
+                        </section>
+                        
+                        <section>
+                            <h3 class="text-md font-semibold text-base-content mb-3">Feedback</h3>
+                            
+                            <div class="border border-base-300 rounded-lg p-4 mb-4">
+                                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                                    <div>
+                                        <label class="text-base-content font-medium block mb-1">Report a Bug</label>
+                                        <p class="text-sm text-base-content/70">Report any issues you encounter</p>
+                                    </div>
+                                    <button class="btn btn-sm">Report Bug</button>
+                                </div>
+                            </div>
+                            
+                            <div class="border border-base-300 rounded-lg p-4">
+                                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                                    <div>
+                                        <label class="text-base-content font-medium block mb-1">Feature Request</label>
+                                        <p class="text-sm text-base-content/70">Suggest new features or improvements</p>
+                                    </div>
+                                    <button class="btn btn-sm">Request Feature</button>
+                                </div>
+                            </div>
+                        </section>
+                    </div>
+                </div>
+                
+                <!-- Additional tabs would go here -->
+            </main>
+        </div>
+    </div>
+
+    <script>
+        // Initialize Lucide icons
+        lucide.createIcons();
+        
+        // Tab switching functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const sidebarLinks = document.querySelectorAll('.menu a[data-tab]');
+            const tabContents = document.querySelectorAll('.tab-content');
+            
+            // Set initial active tab
+            document.getElementById('general-content').classList.remove('hidden');
+            
+            // Add click event to sidebar links
+            sidebarLinks.forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    
+                    // Get target tab
+                    const targetTab = this.getAttribute('data-tab');
+                    
+                    // Update active sidebar item
+                    sidebarLinks.forEach(item => {
+                        item.classList.remove('active-sidebar-item');
+                    });
+                    this.classList.add('active-sidebar-item');
+                    
+                    // Hide all tab contents
+                    tabContents.forEach(content => {
+                        content.classList.add('hidden');
+                    });
+                    
+                    // Show target tab content
+                    document.getElementById(targetTab + '-content').classList.remove('hidden');
+                });
+            });
+            
+            // Close modal functionality
+            document.getElementById('close-modal').addEventListener('click', function() {
+                // In a real app, this would close the modal
+                console.log('Close modal clicked');
+            });
+        });
+    </script>
+</body>
+</html>

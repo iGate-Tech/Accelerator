@@ -495,257 +495,449 @@
                                 <a class="tab" data-tab="settings">Settings</a>
                             </div>
 
-                            <div
-                                class="mt-4">
-                                <!-- All Notifications Sub-content -->
+                            <div class="mt-4">
+                                <!-- All Notifications Feed -->
                                 <div id="notifications-all" class="">
-                                    <div class="divide-y divide-gray-200">
-                                        <div class="form-control flex flex-row justify-between items-start py-2 border-b border-base-300">
-                                            <div>
-                                                <label class="label  text-base text-base-content mb-1">Project Updates</label>
-                                                <p class="text-sm text-base-content/70">Get notified when projects you're involved in have updates</p>
+                                    <div class="space-y-2">
+                                        <!-- Unread Notification -->
+                                        <div class="flex items-start gap-3 p-3 bg-primary/5 border border-primary/20 rounded-lg cursor-pointer hover:bg-primary/10 transition-colors">
+                                            <div class="avatar">
+                                                <div class="w-10 h-10 rounded-lg bg-primary flex items-center justify-center">
+                                                    <i data-lucide="git-pull-request" class="w-5 h-5 text-primary-content"></i>
+                                                </div>
                                             </div>
-                                            <button class="btn btn-ghost font-normal flex gap-2" popovertarget="popover-project-updates" style="anchor-name:--anchor-project-updates">
-                                                <span class="dropdown-text font-normal">Push, Email</span>
-                                                <i data-lucide="chevron-down" class="w-4 h-4"></i>
-                                            </button>
-                                            <ul class="dropdown menu w-40 rounded-box bg-base-100 shadow-sm border border-base-300"
-                                              popover id="popover-project-updates" style="position-anchor:--anchor-project-updates">
-                                                <li><a class="cursor-pointer active" data-value="push,email">Push, Email</a></li>
-                                                <li><a class="cursor-pointer" data-value="push">Push</a></li>
-                                                <li><a class="cursor-pointer" data-value="email">Email</a></li>
-                                                <li><a class="cursor-pointer" data-value="off">Off</a></li>
-                                            </ul>
-                                            <input type="hidden"  id="project-updates-value" value="push,email">
-                                        </div>
-                                        <div class="form-control flex flex-row justify-between items-start py-2 border-b border-base-300">
-                                            <div>
-                                                <label class="label  text-base text-base-content mb-1">Security Alerts</label>
-                                                <p class="text-sm text-base-content/70">Receive alerts about security events related to your account</p>
+                                            <div class="flex-1 min-w-0">
+                                                <div class="flex items-start justify-between gap-2">
+                                                    <div>
+                                                        <p class="text-sm font-medium text-base-content">Pull request approved</p>
+                                                        <p class="text-xs text-base-content/70 mt-0.5">Alice Smith approved your PR "Fix login bug" in Project Alpha</p>
+                                                    </div>
+                                                    <span class="badge badge-primary badge-xs shrink-0">New</span>
+                                                </div>
+                                                <div class="flex items-center gap-3 mt-2 text-xs text-base-content/50">
+                                                    <span>2 minutes ago</span>
+                                                    <button class="hover:text-primary">Mark as read</button>
+                                                </div>
                                             </div>
-                                            <button class="btn btn-ghost font-normal flex gap-2" popovertarget="popover-security-alerts" style="anchor-name:--anchor-security-alerts">
-                                                <span class="dropdown-text font-normal">Push, Email</span>
-                                                <i data-lucide="chevron-down" class="w-4 h-4"></i>
-                                            </button>
-                                            <ul class="dropdown menu w-40 rounded-box bg-base-100 shadow-sm border border-base-300"
-                                              popover id="popover-security-alerts" style="position-anchor:--anchor-security-alerts">
-                                                <li><a class="cursor-pointer active" data-value="push,email">Push, Email</a></li>
-                                                <li><a class="cursor-pointer" data-value="push">Push</a></li>
-                                                <li><a class="cursor-pointer" data-value="email">Email</a></li>
-                                                <li><a class="cursor-pointer" data-value="off">Off</a></li>
-                                            </ul>
-                                            <input type="hidden"  id="security-alerts-value" value="push,email">
                                         </div>
-                                        <div class="form-control flex flex-row justify-between items-start py-5 border-b-0">
-                                            <div>
-                                                <label class="label  text-base text-base-content mb-1">Feature Announcements</label>
-                                                <p class="text-sm text-base-content/70">Stay informed about new features and capabilities</p>
+
+                                        <!-- Another Unread -->
+                                        <div class="flex items-start gap-3 p-3 bg-primary/5 border border-primary/20 rounded-lg cursor-pointer hover:bg-primary/10 transition-colors">
+                                            <div class="avatar">
+                                                <div class="w-10 h-10 rounded-lg bg-blue-500 flex items-center justify-center">
+                                                    <i data-lucide="message-circle" class="w-5 h-5 text-white"></i>
+                                                </div>
                                             </div>
-                                            <button class="btn btn-ghost font-normal flex gap-2" popovertarget="popover-feature-announcements" style="anchor-name:--anchor-feature-announcements">
-                                                <span class="dropdown-text font-normal">Email</span>
-                                                <i data-lucide="chevron-down" class="w-4 h-4"></i>
-                                            </button>
-                                            <ul class="dropdown menu w-40 rounded-box bg-base-100 shadow-sm border border-base-300"
-                                              popover id="popover-feature-announcements" style="position-anchor:--anchor-feature-announcements">
-                                                <li><a class="cursor-pointer active" data-value="email">Email</a></li>
-                                                <li><a class="cursor-pointer" data-value="push">Push</a></li>
-                                                <li><a class="cursor-pointer" data-value="push,email">Push, Email</a></li>
-                                                <li><a class="cursor-pointer" data-value="off">Off</a></li>
-                                            </ul>
-                                            <input type="hidden"  id="feature-announcements-value" value="email">
+                                            <div class="flex-1 min-w-0">
+                                                <div class="flex items-start justify-between gap-2">
+                                                    <div>
+                                                        <p class="text-sm font-medium text-base-content">New direct message</p>
+                                                        <p class="text-xs text-base-content/70 mt-0.5">Bob Johnson: "Hey, can you review the latest design?"</p>
+                                                    </div>
+                                                    <span class="badge badge-primary badge-xs shrink-0">New</span>
+                                                </div>
+                                                <div class="flex items-center gap-3 mt-2 text-xs text-base-content/50">
+                                                    <span>15 minutes ago</span>
+                                                    <button class="hover:text-primary">Mark as read</button>
+                                                </div>
+                                            </div>
                                         </div>
+
+                                        <!-- Read Notification -->
+                                        <div class="flex items-start gap-3 p-3 bg-base-100 border border-base-200 rounded-lg cursor-pointer hover:bg-base-200/50 transition-colors">
+                                            <div class="avatar">
+                                                <div class="w-10 h-10 rounded-lg bg-success/20 flex items-center justify-center">
+                                                    <i data-lucide="check-circle" class="w-5 h-5 text-success"></i>
+                                                </div>
+                                            </div>
+                                            <div class="flex-1 min-w-0">
+                                                <p class="text-sm font-medium text-base-content">Deployment successful</p>
+                                                <p class="text-xs text-base-content/70 mt-0.5">Project Beta v2.4.1 has been deployed to production</p>
+                                                <div class="flex items-center gap-3 mt-2 text-xs text-base-content/50">
+                                                    <span>2 hours ago</span>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Read Mention -->
+                                        <div class="flex items-start gap-3 p-3 bg-base-100 border border-base-200 rounded-lg cursor-pointer hover:bg-base-200/50 transition-colors">
+                                            <div class="avatar">
+                                                <div class="w-10 h-10 rounded-lg bg-warning/20 flex items-center justify-center">
+                                                    <i data-lucide="at-sign" class="w-5 h-5 text-warning"></i>
+                                                </div>
+                                            </div>
+                                            <div class="flex-1 min-w-0">
+                                                <p class="text-sm font-medium text-base-content">You were mentioned</p>
+                                                <p class="text-xs text-base-content/70 mt-0.5">Carol Lee mentioned you in "Q1 Planning Discussion"</p>
+                                                <div class="flex items-center gap-3 mt-2 text-xs text-base-content/50">
+                                                    <span>5 hours ago</span>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- System Alert -->
+                                        <div class="flex items-start gap-3 p-3 bg-base-100 border border-base-200 rounded-lg cursor-pointer hover:bg-base-200/50 transition-colors">
+                                            <div class="avatar">
+                                                <div class="w-10 h-10 rounded-lg bg-error/20 flex items-center justify-center">
+                                                    <i data-lucide="alert-triangle" class="w-5 h-5 text-error"></i>
+                                                </div>
+                                            </div>
+                                            <div class="flex-1 min-w-0">
+                                                <p class="text-sm font-medium text-base-content">Storage limit warning</p>
+                                                <p class="text-xs text-base-content/70 mt-0.5">You've used 90% of your storage quota (4.5 TB of 5 TB)</p>
+                                                <div class="flex items-center gap-3 mt-2 text-xs text-base-content/50">
+                                                    <span>Yesterday</span>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Older Notification -->
+                                        <div class="flex items-start gap-3 p-3 bg-base-100 border border-base-200 rounded-lg cursor-pointer hover:bg-base-200/50 transition-colors opacity-70">
+                                            <div class="avatar">
+                                                <div class="w-10 h-10 rounded-lg bg-info/20 flex items-center justify-center">
+                                                    <i data-lucide="info" class="w-5 h-5 text-info"></i>
+                                                </div>
+                                            </div>
+                                            <div class="flex-1 min-w-0">
+                                                <p class="text-sm font-medium text-base-content">New feature available</p>
+                                                <p class="text-xs text-base-content/70 mt-0.5">AI-powered code review is now available for your workspace</p>
+                                                <div class="flex items-center gap-3 mt-2 text-xs text-base-content/50">
+                                                    <span>3 days ago</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Load More -->
+                                    <div class="mt-4 text-center">
+                                        <button class="btn btn-ghost btn-sm">Load more notifications</button>
                                     </div>
                                 </div>
 
-                                <!-- Updates Sub-content -->
+                                <!-- Updates Feed (Project/System Updates only) -->
                                 <div id="notifications-updates" class="hidden">
-                                    <div class="divide-y divide-gray-200">
-                                        <div class="form-control flex flex-row justify-between items-start py-2 border-b border-base-300">
-                                            <div>
-                                                <label class="label  text-base text-base-content mb-1">Project Completion</label>
-                                                <p class="text-sm text-base-content/70">Get notified when projects you've created are completed</p>
+                                    <div class="space-y-2">
+                                        <!-- Deployment Update -->
+                                        <div class="flex items-start gap-3 p-3 bg-primary/5 border border-primary/20 rounded-lg cursor-pointer hover:bg-primary/10 transition-colors">
+                                            <div class="avatar">
+                                                <div class="w-10 h-10 rounded-lg bg-success flex items-center justify-center">
+                                                    <i data-lucide="rocket" class="w-5 h-5 text-success-content"></i>
+                                                </div>
                                             </div>
-                                            <button class="btn btn-ghost font-normal flex gap-2" popovertarget="popover-project-completion" style="anchor-name:--anchor-project-completion">
-                                                <span class="dropdown-text font-normal">Push</span>
-                                                <i data-lucide="chevron-down" class="w-4 h-4"></i>
-                                            </button>
-                                            <ul class="dropdown menu w-40 rounded-box bg-base-100 shadow-sm border border-base-300"
-                                              popover id="popover-project-completion" style="position-anchor:--anchor-project-completion">
-                                                <li><a class="cursor-pointer active" data-value="push">Push</a></li>
-                                                <li><a class="cursor-pointer" data-value="email">Email</a></li>
-                                                <li><a class="cursor-pointer" data-value="push,email">Push, Email</a></li>
-                                                <li><a class="cursor-pointer" data-value="off">Off</a></li>
-                                            </ul>
-                                            <input type="hidden"  id="project-completion-value" value="push">
+                                            <div class="flex-1 min-w-0">
+                                                <div class="flex items-start justify-between gap-2">
+                                                    <div>
+                                                        <p class="text-sm font-medium text-base-content">Production deployment completed</p>
+                                                        <p class="text-xs text-base-content/70 mt-0.5">Project Gamma v3.0.0 is now live in production</p>
+                                                    </div>
+                                                    <span class="badge badge-primary badge-xs shrink-0">New</span>
+                                                </div>
+                                                <div class="flex items-center gap-3 mt-2 text-xs text-base-content/50">
+                                                    <span>30 minutes ago</span>
+                                                    <button class="hover:text-primary">Mark as read</button>
+                                                </div>
+                                            </div>
                                         </div>
-                                        <div class="form-control flex flex-row justify-between items-start py-2 border-b border-base-300">
-                                            <div>
-                                                <label class="label  text-base text-base-content mb-1">Report Generation</label>
-                                                <p class="text-sm text-base-content/70">Receive notifications when reports are ready</p>
+
+                                        <!-- Build Failed -->
+                                        <div class="flex items-start gap-3 p-3 bg-primary/5 border border-primary/20 rounded-lg cursor-pointer hover:bg-primary/10 transition-colors">
+                                            <div class="avatar">
+                                                <div class="w-10 h-10 rounded-lg bg-error flex items-center justify-center">
+                                                    <i data-lucide="x-circle" class="w-5 h-5 text-error-content"></i>
+                                                </div>
                                             </div>
-                                            <button class="btn btn-ghost font-normal flex gap-2" popovertarget="popover-report-generation" style="anchor-name:--anchor-report-generation">
-                                                <span class="dropdown-text font-normal">Push, Email</span>
-                                                <i data-lucide="chevron-down" class="w-4 h-4"></i>
-                                            </button>
-                                            <ul class="dropdown menu w-40 rounded-box bg-base-100 shadow-sm border border-base-300"
-                                              popover id="popover-report-generation" style="position-anchor:--anchor-report-generation">
-                                                <li><a class="cursor-pointer active" data-value="push,email">Push, Email</a></li>
-                                                <li><a class="cursor-pointer" data-value="push">Push</a></li>
-                                                <li><a class="cursor-pointer" data-value="email">Email</a></li>
-                                                <li><a class="cursor-pointer" data-value="off">Off</a></li>
-                                            </ul>
-                                            <input type="hidden"  id="report-generation-value" value="push,email">
+                                            <div class="flex-1 min-w-0">
+                                                <div class="flex items-start justify-between gap-2">
+                                                    <div>
+                                                        <p class="text-sm font-medium text-base-content">Build failed</p>
+                                                        <p class="text-xs text-base-content/70 mt-0.5">Build #1247 failed for Project Alpha - 3 test failures</p>
+                                                    </div>
+                                                    <span class="badge badge-primary badge-xs shrink-0">New</span>
+                                                </div>
+                                                <div class="flex items-center gap-3 mt-2 text-xs text-base-content/50">
+                                                    <span>1 hour ago</span>
+                                                    <button class="hover:text-primary">Mark as read</button>
+                                                </div>
+                                            </div>
                                         </div>
-                                        <div class="form-control flex flex-row justify-between items-start py-5 border-b-0">
-                                            <div>
-                                                <label class="label  text-base text-base-content mb-1">Resource Availability</label>
-                                                <p class="text-sm text-base-content/70">Get alerts when requested resources become available</p>
+
+                                        <!-- Previous Deployment -->
+                                        <div class="flex items-start gap-3 p-3 bg-base-100 border border-base-200 rounded-lg cursor-pointer hover:bg-base-200/50 transition-colors">
+                                            <div class="avatar">
+                                                <div class="w-10 h-10 rounded-lg bg-success/20 flex items-center justify-center">
+                                                    <i data-lucide="check-circle" class="w-5 h-5 text-success"></i>
+                                                </div>
                                             </div>
-                                            <button class="btn btn-ghost font-normal flex gap-2" popovertarget="popover-resource-availability" style="anchor-name:--anchor-resource-availability">
-                                                <span class="dropdown-text font-normal">Push</span>
-                                                <i data-lucide="chevron-down" class="w-4 h-4"></i>
-                                            </button>
-                                            <ul class="dropdown menu w-40 rounded-box bg-base-100 shadow-sm border border-base-300"
-                                              popover id="popover-resource-availability" style="position-anchor:--anchor-resource-availability">
-                                                <li><a class="cursor-pointer active" data-value="push">Push</a></li>
-                                                <li><a class="cursor-pointer" data-value="email">Email</a></li>
-                                                <li><a class="cursor-pointer" data-value="push,email">Push, Email</a></li>
-                                                <li><a class="cursor-pointer" data-value="off">Off</a></li>
-                                            </ul>
-                                            <input type="hidden"  id="resource-availability-value" value="push">
+                                            <div class="flex-1 min-w-0">
+                                                <p class="text-sm font-medium text-base-content">Staging deployment successful</p>
+                                                <p class="text-xs text-base-content/70 mt-0.5">Project Beta v2.4.1 has been deployed to staging</p>
+                                                <div class="flex items-center gap-3 mt-2 text-xs text-base-content/50">
+                                                    <span>Yesterday</span>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Report Ready -->
+                                        <div class="flex items-start gap-3 p-3 bg-base-100 border border-base-200 rounded-lg cursor-pointer hover:bg-base-200/50 transition-colors">
+                                            <div class="avatar">
+                                                <div class="w-10 h-10 rounded-lg bg-info/20 flex items-center justify-center">
+                                                    <i data-lucide="file-text" class="w-5 h-5 text-info"></i>
+                                                </div>
+                                            </div>
+                                            <div class="flex-1 min-w-0">
+                                                <p class="text-sm font-medium text-base-content">Monthly report generated</p>
+                                                <p class="text-xs text-base-content/70 mt-0.5">Your January analytics report is ready for download</p>
+                                                <div class="flex items-center gap-3 mt-2 text-xs text-base-content/50">
+                                                    <span>2 days ago</span>
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
 
-                                <!-- Messages Sub-content -->
+                                <!-- Messages Feed (Direct messages/mentions only) -->
                                 <div id="notifications-messages" class="hidden">
-                                    <div class="divide-y divide-gray-200">
-                                        <div class="form-control flex flex-row justify-between items-start py-2 border-b border-base-300">
-                                            <div>
-                                                <label class="label  text-base text-base-content mb-1">Team Communications</label>
-                                                <p class="text-sm text-base-content/70">Receive notifications for team messages</p>
+                                    <div class="space-y-2">
+                                        <!-- New Message -->
+                                        <div class="flex items-start gap-3 p-3 bg-primary/5 border border-primary/20 rounded-lg cursor-pointer hover:bg-primary/10 transition-colors">
+                                            <div class="avatar">
+                                                <div class="w-10 h-10 rounded-full bg-blue-500 flex items-center justify-center text-white text-sm font-bold">BJ</div>
                                             </div>
-                                            <button class="btn btn-ghost font-normal flex gap-2" popovertarget="popover-team-communications" style="anchor-name:--anchor-team-communications">
-                                                <span class="dropdown-text font-normal">Push</span>
-                                                <i data-lucide="chevron-down" class="w-4 h-4"></i>
-                                            </button>
-                                            <ul class="dropdown menu w-40 rounded-box bg-base-100 shadow-sm border border-base-300"
-                                              popover id="popover-team-communications" style="position-anchor:--anchor-team-communications">
-                                                <li><a class="cursor-pointer active" data-value="push">Push</a></li>
-                                                <li><a class="cursor-pointer" data-value="email">Email</a></li>
-                                                <li><a class="cursor-pointer" data-value="push,email">Push, Email</a></li>
-                                                <li><a class="cursor-pointer" data-value="off">Off</a></li>
-                                            </ul>
-                                            <input type="hidden"  id="team-communications-value" value="push">
+                                            <div class="flex-1 min-w-0">
+                                                <div class="flex items-start justify-between gap-2">
+                                                    <div>
+                                                        <p class="text-sm font-medium text-base-content">Bob Johnson</p>
+                                                        <p class="text-xs text-base-content/70 mt-0.5">"Can we schedule a meeting to discuss the new feature requirements?"</p>
+                                                    </div>
+                                                    <span class="badge badge-primary badge-xs shrink-0">New</span>
+                                                </div>
+                                                <div class="flex items-center gap-3 mt-2 text-xs text-base-content/50">
+                                                    <span>15 minutes ago</span>
+                                                    <button class="hover:text-primary">Mark as read</button>
+                                                </div>
+                                            </div>
                                         </div>
-                                        <div class="form-control flex flex-row justify-between items-start py-2 border-b border-base-300">
-                                            <div>
-                                                <label class="label  text-base text-base-content mb-1">Direct Messages</label>
-                                                <p class="text-sm text-base-content/70">Get notified when you receive direct messages</p>
+
+                                        <!-- Mention -->
+                                        <div class="flex items-start gap-3 p-3 bg-primary/5 border border-primary/20 rounded-lg cursor-pointer hover:bg-primary/10 transition-colors">
+                                            <div class="avatar">
+                                                <div class="w-10 h-10 rounded-full bg-purple-500 flex items-center justify-center text-white text-sm font-bold">CL</div>
                                             </div>
-                                            <button class="btn btn-ghost font-normal flex gap-2" popovertarget="popover-direct-messages" style="anchor-name:--anchor-direct-messages">
-                                                <span class="dropdown-text font-normal">Push</span>
-                                                <i data-lucide="chevron-down" class="w-4 h-4"></i>
-                                            </button>
-                                            <ul class="dropdown menu w-40 rounded-box bg-base-100 shadow-sm border border-base-300"
-                                              popover id="popover-direct-messages" style="position-anchor:--anchor-direct-messages">
-                                                <li><a class="cursor-pointer active" data-value="push">Push</a></li>
-                                                <li><a class="cursor-pointer" data-value="email">Email</a></li>
-                                                <li><a class="cursor-pointer" data-value="push,email">Push, Email</a></li>
-                                                <li><a class="cursor-pointer" data-value="off">Off</a></li>
-                                            </ul>
-                                            <input type="hidden"  id="direct-messages-value" value="push">
+                                            <div class="flex-1 min-w-0">
+                                                <div class="flex items-start justify-between gap-2">
+                                                    <div>
+                                                        <p class="text-sm font-medium text-base-content">Carol Lee mentioned you</p>
+                                                        <p class="text-xs text-base-content/70 mt-0.5">In #design-team: "@john what do you think about the new color palette?"</p>
+                                                    </div>
+                                                    <span class="badge badge-primary badge-xs shrink-0">New</span>
+                                                </div>
+                                                <div class="flex items-center gap-3 mt-2 text-xs text-base-content/50">
+                                                    <span>1 hour ago</span>
+                                                    <button class="hover:text-primary">Mark as read</button>
+                                                </div>
+                                            </div>
                                         </div>
-                                        <div class="form-control flex flex-row justify-between items-start py-5 border-b-0">
-                                            <div>
-                                                <label class="label  text-base text-base-content mb-1">Mentions</label>
-                                                <p class="text-sm text-base-content/70">Receive notifications when you're mentioned in discussions</p>
+
+                                        <!-- Team Message -->
+                                        <div class="flex items-start gap-3 p-3 bg-base-100 border border-base-200 rounded-lg cursor-pointer hover:bg-base-200/50 transition-colors">
+                                            <div class="avatar">
+                                                <div class="w-10 h-10 rounded-full bg-green-500 flex items-center justify-center text-white text-sm font-bold">AS</div>
                                             </div>
-                                            <button class="btn btn-ghost font-normal flex gap-2" popovertarget="popover-mentions" style="anchor-name:--anchor-mentions">
-                                                <span class="dropdown-text font-normal">Push</span>
-                                                <i data-lucide="chevron-down" class="w-4 h-4"></i>
-                                            </button>
-                                            <ul class="dropdown menu w-40 rounded-box bg-base-100 shadow-sm border border-base-300"
-                                              popover id="popover-mentions" style="position-anchor:--anchor-mentions">
-                                                <li><a class="cursor-pointer active" data-value="push">Push</a></li>
-                                                <li><a class="cursor-pointer" data-value="email">Email</a></li>
-                                                <li><a class="cursor-pointer" data-value="push,email">Push, Email</a></li>
-                                                <li><a class="cursor-pointer" data-value="off">Off</a></li>
-                                            </ul>
-                                            <input type="hidden"  id="mentions-value" value="push">
+                                            <div class="flex-1 min-w-0">
+                                                <p class="text-sm font-medium text-base-content">Alice Smith</p>
+                                                <p class="text-xs text-base-content/70 mt-0.5">"Great work on the presentation yesterday! The client was very impressed."</p>
+                                                <div class="flex items-center gap-3 mt-2 text-xs text-base-content/50">
+                                                    <span>Yesterday</span>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Older Message -->
+                                        <div class="flex items-start gap-3 p-3 bg-base-100 border border-base-200 rounded-lg cursor-pointer hover:bg-base-200/50 transition-colors opacity-70">
+                                            <div class="avatar">
+                                                <div class="w-10 h-10 rounded-full bg-orange-500 flex items-center justify-center text-white text-sm font-bold">DK</div>
+                                            </div>
+                                            <div class="flex-1 min-w-0">
+                                                <p class="text-sm font-medium text-base-content">David Kim</p>
+                                                <p class="text-xs text-base-content/70 mt-0.5">"I've updated the documentation with the latest API changes."</p>
+                                                <div class="flex items-center gap-3 mt-2 text-xs text-base-content/50">
+                                                    <span>3 days ago</span>
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
 
-                                <!-- Settings Sub-content -->
+                                <!-- Settings Sub-content (Notification Preferences) -->
                                 <div id="notifications-settings" class="hidden">
-                                    <div class="divide-y divide-gray-200">
-                                        <div class="form-control flex flex-row justify-between items-start py-2 border-b border-base-300">
-                                            <div>
-                                                <label class="label  text-base text-base-content mb-1">Quiet Hours</label>
-                                                <p class="text-sm text-base-content/70">Schedule when notifications are silenced</p>
+                                    <div class="space-y-6">
+                                        <!-- General Settings -->
+                                        <section>
+                                            <div class="flex items-center py-2 border-b border-base-200">
+                                                <h3 class="text-base text-base-content font-medium">General Settings</h3>
                                             </div>
-                                            <div class="flex items-center gap-3">
-                                                <span>From</span>
-                                                <input type="time" class="input input-bordered w-24" value="22:00">
-                                                <span>To</span>
-                                                <input type="time" class="input input-bordered w-24" value="07:00">
-                                                <label class="swap swap-rotate">
-                                                    <input type="checkbox"/>
-                                                    <svg class="swap-on fill-current w-6 h-6" xmlns="http://www.w3.org/2000/svg" viewbox="0 0 24 24">
-                                                        <path d="M21,7L9,19L3.5,13.5L4.91,12.09L9,16.17L19.59,5.59L21,7Z"/>
-                                                    </svg>
-                                                    <svg class="swap-off fill-current w-6 h-6" xmlns="http://www.w3.org/2000/svg" viewbox="0 0 24 24">
-                                                        <path d="M19,6.41L17.59,5L12,10.59L6.41,5L5,6.41L10.59,12L5,17.59L6.41,19L12,13.41L17.59,19L19,17.59L13.41,12L19,6.41Z"/>
-                                                    </svg>
-                                                </label>
+                                            <div class="mt-3 space-y-3">
+                                                <div class="form-control flex flex-row justify-between items-start py-2 border-b border-base-200">
+                                                    <div>
+                                                        <label class="label text-base text-base-content mb-1">Quiet Hours</label>
+                                                        <p class="text-sm text-base-content/70">Schedule when notifications are silenced</p>
+                                                    </div>
+                                                    <div class="flex items-center gap-2">
+                                                        <input type="time" class="input input-bordered input-sm w-20" value="22:00">
+                                                        <span class="text-sm">to</span>
+                                                        <input type="time" class="input input-bordered input-sm w-20" value="07:00">
+                                                        <label class="toggle toggle-sm">
+                                                            <input type="checkbox"/>
+                                                            <span class="toggle-mark"></span>
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                                <div class="form-control flex flex-row justify-between items-center py-2 border-b border-base-200">
+                                                    <div>
+                                                        <label class="label text-base text-base-content mb-1">Do Not Disturb</label>
+                                                        <p class="text-sm text-base-content/70">Temporarily disable all notifications</p>
+                                                    </div>
+                                                    <label class="toggle">
+                                                        <input type="checkbox"/>
+                                                        <span class="toggle-mark"></span>
+                                                    </label>
+                                                </div>
+                                                <div class="form-control flex flex-row justify-between items-center py-2 border-b border-base-200">
+                                                    <div>
+                                                        <label class="label text-base text-base-content mb-1">Email Notifications</label>
+                                                        <p class="text-sm text-base-content/70">Receive notifications via email</p>
+                                                    </div>
+                                                    <label class="toggle">
+                                                        <input type="checkbox" checked/>
+                                                        <span class="toggle-mark"></span>
+                                                    </label>
+                                                </div>
+                                                <div class="form-control flex flex-row justify-between items-center py-2">
+                                                    <div>
+                                                        <label class="label text-base text-base-content mb-1">Browser Notifications</label>
+                                                        <p class="text-sm text-base-content/70">Receive push notifications in browser</p>
+                                                    </div>
+                                                    <label class="toggle">
+                                                        <input type="checkbox" checked/>
+                                                        <span class="toggle-mark"></span>
+                                                    </label>
+                                                </div>
                                             </div>
-                                        </div>
-                                        <div class="form-control flex flex-row justify-between items-start py-2 border-b border-base-300">
-                                            <div>
-                                                <label class="label  text-base text-base-content mb-1">Do Not Disturb</label>
-                                                <p class="text-sm text-base-content/70">Temporarily disable all notifications</p>
+                                        </section>
+
+                                        <!-- Notification Types -->
+                                        <section>
+                                            <div class="flex items-center py-2 border-b border-base-200">
+                                                <h3 class="text-base text-base-content font-medium">Notification Types</h3>
                                             </div>
-                                            <label class="swap swap-rotate">
-                                                <input type="checkbox"/>
-                                                <svg class="swap-on fill-current w-6 h-6" xmlns="http://www.w3.org/2000/svg" viewbox="0 0 24 24">
-                                                    <path d="M21,7L9,19L3.5,13.5L4.91,12.09L9,16.17L19.59,5.59L21,7Z"/>
-                                                </svg>
-                                                <svg class="swap-off fill-current w-6 h-6" xmlns="http://www.w3.org/2000/svg" viewbox="0 0 24 24">
-                                                    <path d="M19,6.41L17.59,5L12,10.59L6.41,5L5,6.41L10.59,12L5,17.59L6.41,19L12,13.41L17.59,19L19,17.59L13.41,12L19,6.41Z"/>
-                                                </svg>
-                                            </label>
-                                        </div>
-                                        <div class="form-control flex flex-row justify-between items-start py-2 border-b border-base-300">
-                                            <div>
-                                                <label class="label  text-base text-base-content mb-1">Email Notifications</label>
-                                                <p class="text-sm text-base-content/70">Enable or disable email notifications</p>
+                                            <div class="mt-3 space-y-3">
+                                                <div class="form-control flex flex-row justify-between items-center py-2 border-b border-base-200">
+                                                    <div>
+                                                        <label class="label text-base text-base-content mb-1">Project Updates</label>
+                                                        <p class="text-sm text-base-content/70">Builds, deployments, and project events</p>
+                                                    </div>
+                                                    <button class="btn btn-ghost btn-sm font-normal flex gap-2" popovertarget="popover-project-updates" style="anchor-name:--anchor-project-updates">
+                                                        <span class="dropdown-text font-normal">Push, Email</span>
+                                                        <i data-lucide="chevron-down" class="w-4 h-4"></i>
+                                                    </button>
+                                                    <ul class="dropdown menu w-40 rounded-box bg-base-100 shadow-sm border border-base-300"
+                                                      popover id="popover-project-updates" style="position-anchor:--anchor-project-updates">
+                                                        <li><a class="cursor-pointer active" data-value="push,email">Push, Email</a></li>
+                                                        <li><a class="cursor-pointer" data-value="push">Push</a></li>
+                                                        <li><a class="cursor-pointer" data-value="email">Email</a></li>
+                                                        <li><a class="cursor-pointer" data-value="off">Off</a></li>
+                                                    </ul>
+                                                    <input type="hidden" id="project-updates-value" value="push,email">
+                                                </div>
+                                                <div class="form-control flex flex-row justify-between items-center py-2 border-b border-base-200">
+                                                    <div>
+                                                        <label class="label text-base text-base-content mb-1">Direct Messages</label>
+                                                        <p class="text-sm text-base-content/70">When someone sends you a message</p>
+                                                    </div>
+                                                    <button class="btn btn-ghost btn-sm font-normal flex gap-2" popovertarget="popover-dm-settings" style="anchor-name:--anchor-dm-settings">
+                                                        <span class="dropdown-text font-normal">Push</span>
+                                                        <i data-lucide="chevron-down" class="w-4 h-4"></i>
+                                                    </button>
+                                                    <ul class="dropdown menu w-40 rounded-box bg-base-100 shadow-sm border border-base-300"
+                                                      popover id="popover-dm-settings" style="position-anchor:--anchor-dm-settings">
+                                                        <li><a class="cursor-pointer active" data-value="push">Push</a></li>
+                                                        <li><a class="cursor-pointer" data-value="email">Email</a></li>
+                                                        <li><a class="cursor-pointer" data-value="push,email">Push, Email</a></li>
+                                                        <li><a class="cursor-pointer" data-value="off">Off</a></li>
+                                                    </ul>
+                                                    <input type="hidden" id="dm-settings-value" value="push">
+                                                </div>
+                                                <div class="form-control flex flex-row justify-between items-center py-2 border-b border-base-200">
+                                                    <div>
+                                                        <label class="label text-base text-base-content mb-1">Mentions</label>
+                                                        <p class="text-sm text-base-content/70">When someone mentions you</p>
+                                                    </div>
+                                                    <button class="btn btn-ghost btn-sm font-normal flex gap-2" popovertarget="popover-mentions-settings" style="anchor-name:--anchor-mentions-settings">
+                                                        <span class="dropdown-text font-normal">Push</span>
+                                                        <i data-lucide="chevron-down" class="w-4 h-4"></i>
+                                                    </button>
+                                                    <ul class="dropdown menu w-40 rounded-box bg-base-100 shadow-sm border border-base-300"
+                                                      popover id="popover-mentions-settings" style="position-anchor:--anchor-mentions-settings">
+                                                        <li><a class="cursor-pointer active" data-value="push">Push</a></li>
+                                                        <li><a class="cursor-pointer" data-value="email">Email</a></li>
+                                                        <li><a class="cursor-pointer" data-value="push,email">Push, Email</a></li>
+                                                        <li><a class="cursor-pointer" data-value="off">Off</a></li>
+                                                    </ul>
+                                                    <input type="hidden" id="mentions-settings-value" value="push">
+                                                </div>
+                                                <div class="form-control flex flex-row justify-between items-center py-2">
+                                                    <div>
+                                                        <label class="label text-base text-base-content mb-1">Security Alerts</label>
+                                                        <p class="text-sm text-base-content/70">Important security notifications</p>
+                                                    </div>
+                                                    <button class="btn btn-ghost btn-sm font-normal flex gap-2" popovertarget="popover-security-settings" style="anchor-name:--anchor-security-settings">
+                                                        <span class="dropdown-text font-normal">Push, Email</span>
+                                                        <i data-lucide="chevron-down" class="w-4 h-4"></i>
+                                                    </button>
+                                                    <ul class="dropdown menu w-40 rounded-box bg-base-100 shadow-sm border border-base-300"
+                                                      popover id="popover-security-settings" style="position-anchor:--anchor-security-settings">
+                                                        <li><a class="cursor-pointer active" data-value="push,email">Push, Email</a></li>
+                                                        <li><a class="cursor-pointer" data-value="push">Push</a></li>
+                                                        <li><a class="cursor-pointer" data-value="email">Email</a></li>
+                                                        <li><a class="cursor-pointer" data-value="off">Off</a></li>
+                                                    </ul>
+                                                    <input type="hidden" id="security-settings-value" value="push,email">
+                                                </div>
                                             </div>
-                                            <label class="swap swap-rotate">
-                                                <input type="checkbox" checked/>
-                                                <svg class="swap-on fill-current w-6 h-6" xmlns="http://www.w3.org/2000/svg" viewbox="0 0 24 24">
-                                                    <path d="M21,7L9,19L3.5,13.5L4.91,12.09L9,16.17L19.59,5.59L21,7Z"/>
-                                                </svg>
-                                                <svg class="swap-off fill-current w-6 h-6" xmlns="http://www.w3.org/2000/svg" viewbox="0 0 24 24">
-                                                    <path d="M19,6.41L17.59,5L12,10.59L6.41,5L5,6.41L10.59,12L5,17.59L6.41,19L12,13.41L17.59,19L19,17.59L13.41,12L19,6.41Z"/>
-                                                </svg>
-                                            </label>
-                                        </div>
-                                        <div class="form-control flex flex-row justify-between items-start py-5 border-b-0">
-                                            <div>
-                                                <label class="label  text-base text-base-content mb-1">Browser Notifications</label>
-                                                <p class="text-sm text-base-content/70">Enable or disable browser notifications</p>
+                                        </section>
+
+                                        <!-- Advanced Settings -->
+                                        <section>
+                                            <div class="flex items-center py-2 border-b border-base-200">
+                                                <h3 class="text-base text-base-content font-medium">Advanced</h3>
                                             </div>
-                                            <label class="swap swap-rotate">
-                                                <input type="checkbox" checked/>
-                                                <svg class="swap-on fill-current w-6 h-6" xmlns="http://www.w3.org/2000/svg" viewbox="0 0 24 24">
-                                                    <path d="M21,7L9,19L3.5,13.5L4.91,12.09L9,16.17L19.59,5.59L21,7Z"/>
-                                                </svg>
-                                                <svg class="swap-off fill-current w-6 h-6" xmlns="http://www.w3.org/2000/svg" viewbox="0 0 24 24">
-                                                    <path d="M19,6.41L17.59,5L12,10.59L6.41,5L5,6.41L10.59,12L5,17.59L6.41,19L12,13.41L17.59,19L19,17.59L13.41,12L19,6.41Z"/>
-                                                </svg>
-                                            </label>
-                                        </div>
+                                            <div class="mt-3 space-y-3">
+                                                <div class="form-control flex flex-row justify-between items-center py-2 border-b border-base-200">
+                                                    <div>
+                                                        <label class="label text-base text-base-content mb-1">Sound Effects</label>
+                                                        <p class="text-sm text-base-content/70">Play sound for new notifications</p>
+                                                    </div>
+                                                    <label class="toggle">
+                                                        <input type="checkbox" checked/>
+                                                        <span class="toggle-mark"></span>
+                                                    </label>
+                                                </div>
+                                                <div class="form-control flex flex-row justify-between items-center py-2 border-b border-base-200">
+                                                    <div>
+                                                        <label class="label text-base text-base-content mb-1">Unread Badge</label>
+                                                        <p class="text-sm text-base-content/70">Show count of unread notifications</p>
+                                                    </div>
+                                                    <label class="toggle">
+                                                        <input type="checkbox" checked/>
+                                                        <span class="toggle-mark"></span>
+                                                    </label>
+                                                </div>
+                                                <div class="flex items-center justify-between py-2">
+                                                    <span class="text-sm text-base-content">Mark all as read shortcut</span>
+                                                    <kbd class="kbd kbd-sm">Shift + Esc</kbd>
+                                                </div>
+                                            </div>
+                                        </section>
                                     </div>
                                 </div>
                             </div>

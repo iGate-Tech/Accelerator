@@ -306,8 +306,9 @@ const serveOptions = {
       return routes[url.pathname](request);
     }
 
-    // Development mode: redirect static assets to Vite dev server
-    if (process.env.NODE_ENV !== 'production') {
+    // Check if we're in development mode (only when explicitly set)
+    if (process.env.NODE_ENV === 'development') {
+      // Development mode: redirect static assets to Vite dev server
       if (url.pathname.startsWith('/assets/') ||
           url.pathname.endsWith('.js') ||
           url.pathname.endsWith('.css') ||
@@ -374,7 +375,8 @@ const serveOptions = {
       }
     }
 
-    // Production mode: serve from dist directory
+    // Default to production mode (when NODE_ENV is not 'development')
+    // This includes when NODE_ENV='production' or is undefined
     if (url.pathname === '/' || url.pathname === '/index.html') {
       // Return the main HTML file
       return new Response(Bun.file('./dist/index.html'), {

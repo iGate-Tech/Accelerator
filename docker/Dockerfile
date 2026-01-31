@@ -44,7 +44,9 @@ RUN mkdir -p bin && bun build --compile server.js --outfile bin/accelerator-serv
 # ============================================
 # PRODUCTION STAGE
 # ============================================
-FROM debian:bookworm-slim AS production
+FROM oven/bun:latest AS production
+
+WORKDIR /app
 
 # Install minimal dependencies
 RUN apt-get update && apt-get install -y \
@@ -52,15 +54,12 @@ RUN apt-get update && apt-get install -y \
     curl \
     && rm -rf /var/lib/apt/lists/*
 
-WORKDIR /app
-
-# Copy the Bun executable from build stage
-COPY --from=build /app/bin/accelerator-server ./accelerator-server
+# Copy built files from build stage
 COPY --from=build /app/dist ./dist
+COPY --from=build /app/node_modules ./node_modules
+COPY --from=build /app/package.json ./
+COPY --from=build /app/server.js ./
 COPY .env* ./
-
-# Make the executable runnable
-RUN chmod +x ./accelerator-server
 
 # Create SSL certificate directory
 RUN mkdir -p /app/ssl
@@ -76,5 +75,5 @@ USER nodeapp
 # Expose ports (HTTP and HTTPS)
 EXPOSE 3000 3443
 
-# Run the executable directly
-CMD ["./accelerator-server"]
+# Run with bun (not compiled binary)
+CMD ["bun", "run", "server.js"]

@@ -384,7 +384,16 @@ const serveOptions = {
 
     // Handle other static files in production
     if (url.pathname.startsWith('/assets/') || url.pathname.endsWith('.js') || url.pathname.endsWith('.css')) {
-      return new Response(Bun.file(`.${url.pathname}`));
+      const filePath = `./dist${url.pathname}`;
+      try {
+        const file = Bun.file(filePath);
+        const fileExists = await file.exists();
+        if (fileExists) {
+          return new Response(file);
+        }
+      } catch (error) {
+        console.log(`Static file error: ${error.message}`);
+      }
     }
 
     // Catch-all handler for SPA - serve index.html for any unmatched request

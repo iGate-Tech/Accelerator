@@ -27,7 +27,9 @@ class RateLimiter {
 
     const userRequests = this.requests.get(key);
     // Remove old requests outside the window
-    const validRequests = userRequests.filter(timestamp => timestamp > windowStart);
+    const validRequests = userRequests.filter(
+      timestamp => timestamp > windowStart
+    );
 
     if (validRequests.length >= this.maxRequests) {
       return { allowed: false, resetTime: validRequests[0] + this.windowMs };
@@ -70,8 +72,14 @@ let openai = null;
 logger.trace('server.js: Initializing OpenAI client');
 try {
   if (process.env.OPENROUTER_API_KEY) {
-    logger.info('server.js: OPENROUTER_API_KEY found, length:', process.env.OPENROUTER_API_KEY.length);
-    logger.debug('server.js: API key starts with:', process.env.OPENROUTER_API_KEY.substring(0, 10) + '...');
+    logger.info(
+      'server.js: OPENROUTER_API_KEY found, length:',
+      process.env.OPENROUTER_API_KEY.length
+    );
+    logger.debug(
+      'server.js: API key starts with:',
+      process.env.OPENROUTER_API_KEY.substring(0, 10) + '...'
+    );
     openai = new OpenAI({
       baseURL: 'https://openrouter.ai/api/v1',
       apiKey: process.env.OPENROUTER_API_KEY,
@@ -81,7 +89,11 @@ try {
     logger.warn('server.js: OPENROUTER_API_KEY not found, LLM calls will fail');
   }
 } catch (error) {
-  logger.error('server.js: Failed to initialize OpenAI client:', error.message, error.stack);
+  logger.error(
+    'server.js: Failed to initialize OpenAI client:',
+    error.message,
+    error.stack
+  );
 }
 
 // Model configuration
@@ -93,15 +105,17 @@ const port = process.env.PORT || 3000;
 
 // Define routes
 const routes = {
-  '/api/health': async (request) => {
-    console.log(`[${new Date().toISOString()}] SERVER: Health check requested from IP: ${request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'unknown'}`);
+  '/api/health': async request => {
+    console.log(
+      `[${new Date().toISOString()}] SERVER: Health check requested from IP: ${request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'unknown'}`
+    );
 
     const health = {
       status: 'ok',
       timestamp: new Date().toISOString(),
       uptime: process.uptime(),
       version: '1.0.0',
-      services: {}
+      services: {},
     };
 
     try {
@@ -125,55 +139,83 @@ const routes = {
       health.memory = process.memoryUsage ? process.memoryUsage() : {};
 
       return new Response(JSON.stringify(health), {
-        headers: { 'Content-Type': 'application/json' }
+        headers: { 'Content-Type': 'application/json' },
       });
     } catch (error) {
       logger.error('Health check error:', error);
-      return new Response(JSON.stringify({
-        status: 'error',
-        message: error.message,
-        timestamp: new Date().toISOString()
-      }), {
-        status: 500,
-        headers: { 'Content-Type': 'application/json' }
-      });
+      return new Response(
+        JSON.stringify({
+          status: 'error',
+          message: error.message,
+          timestamp: new Date().toISOString(),
+        }),
+        {
+          status: 500,
+          headers: { 'Content-Type': 'application/json' },
+        }
+      );
     }
   },
 
-  '/api/llm': async (request) => {
+  '/api/llm': async request => {
     if (request.method !== 'POST') {
       return new Response('Method not allowed', { status: 405 });
     }
 
-    const { prompt, stream = true, quick = false, language = 'en' } = await request.json() || {};
+    const {
+      prompt,
+      stream = true,
+      quick = false,
+      language = 'en',
+    } = (await request.json()) || {};
     const userPrompt = prompt || 'Hello';
     const startTime = Date.now();
 
-    console.log(`[${new Date().toISOString()}] SERVER: === UNIFIED LLM API CALL ===`);
-    console.log(`[${new Date().toISOString()}] SERVER: Request from IP: ${request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'unknown'}, stream: ${stream}, quick: ${quick}`);
-    console.log(`[${new Date().toISOString()}] SERVER: Prompt length: ${userPrompt.length}, first 100 chars: "${userPrompt.substring(0, 1000)}..."`);
+    console.log(
+      `[${new Date().toISOString()}] SERVER: === UNIFIED LLM API CALL ===`
+    );
+    console.log(
+      `[${new Date().toISOString()}] SERVER: Request from IP: ${request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'unknown'}, stream: ${stream}, quick: ${quick}`
+    );
+    console.log(
+      `[${new Date().toISOString()}] SERVER: Prompt length: ${userPrompt.length}, first 100 chars: "${userPrompt.substring(0, 1000)}..."`
+    );
 
     // Rate limiting
-    const clientIP = request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'unknown';
+    const clientIP =
+      request.headers.get('x-forwarded-for') ||
+      request.headers.get('x-real-ip') ||
+      'unknown';
     const rateLimitResult = llmRateLimiter.checkLimit(clientIP);
     if (!rateLimitResult.allowed) {
-      console.log(`[${new Date().toISOString()}] SERVER: RATE LIMIT EXCEEDED for IP: ${clientIP}`);
-      return new Response(JSON.stringify({
-        error: 'Rate limit exceeded',
-        retryAfter: Math.ceil((rateLimitResult.resetTime - Date.now()) / 1000)
-      }), {
-        status: 429,
-        headers: { 'Content-Type': 'application/json' }
-      });
+      console.log(
+        `[${new Date().toISOString()}] SERVER: RATE LIMIT EXCEEDED for IP: ${clientIP}`
+      );
+      return new Response(
+        JSON.stringify({
+          error: 'Rate limit exceeded',
+          retryAfter: Math.ceil(
+            (rateLimitResult.resetTime - Date.now()) / 1000
+          ),
+        }),
+        {
+          status: 429,
+          headers: { 'Content-Type': 'application/json' },
+        }
+      );
     }
 
     if (!openai) {
-      console.log(`[${new Date().toISOString()}] SERVER: ERROR - OpenAI client not initialized`);
+      console.log(
+        `[${new Date().toISOString()}] SERVER: ERROR - OpenAI client not initialized`
+      );
       return new Response('OpenAI client not configured', { status: 500 });
     }
 
     // Use the user's prompt directly without system prompt
-    console.log(`[${new Date().toISOString()}] SERVER: Processing user prompt, length: ${userPrompt.length}`);
+    console.log(
+      `[${new Date().toISOString()}] SERVER: Processing user prompt, length: ${userPrompt.length}`
+    );
 
     // Retry logic with exponential backoff
     const maxRetries = 3;
@@ -182,18 +224,20 @@ const routes = {
 
     while (retries <= maxRetries) {
       try {
-        console.log(`[${new Date().toISOString()}] SERVER: Creating OpenAI stream (attempt ${retries + 1}/${maxRetries + 1})`);
+        console.log(
+          `[${new Date().toISOString()}] SERVER: Creating OpenAI stream (attempt ${retries + 1}/${maxRetries + 1})`
+        );
 
         const openaiStartTime = Date.now();
         const stream = await openai.chat.completions.create({
           model: AI_MODEL,
-          messages: [
-            { role: 'user', content: userPrompt }
-          ],
+          messages: [{ role: 'user', content: userPrompt }],
           stream: true,
         });
         const openaiInitTime = Date.now() - openaiStartTime;
-        console.log(`[${new Date().toISOString()}] SERVER: OpenAI stream created in ${openaiInitTime}ms`);
+        console.log(
+          `[${new Date().toISOString()}] SERVER: OpenAI stream created in ${openaiInitTime}ms`
+        );
 
         // Create a readable stream for the response
         const encoder = new TextEncoder();
@@ -214,64 +258,85 @@ const routes = {
             }
 
             const duration = Date.now() - startTime;
-            console.log(`[${new Date().toISOString()}] SERVER: Stream complete - chunks: ${chunkCount}, bytes: ${totalBytesSent}, duration: ${duration}ms`);
-            
+            console.log(
+              `[${new Date().toISOString()}] SERVER: Stream complete - chunks: ${chunkCount}, bytes: ${totalBytesSent}, duration: ${duration}ms`
+            );
+
             controller.close();
-          }
+          },
         });
 
         return new Response(readableStream, {
           headers: {
             'Content-Type': 'text/plain',
             'Cache-Control': 'no-cache',
-            'Connection': 'close'
-          }
+            Connection: 'close',
+          },
         });
-
       } catch (error) {
         lastError = error;
         const duration = Date.now() - startTime;
-        console.log(`[${new Date().toISOString()}] SERVER: Attempt ${retries + 1}/${maxRetries + 1} failed: ${error.message}`);
+        console.log(
+          `[${new Date().toISOString()}] SERVER: Attempt ${retries + 1}/${maxRetries + 1} failed: ${error.message}`
+        );
         console.error(`[${new Date().toISOString()}] SERVER: Error detail`, {
           name: error?.name,
           code: error?.code,
           status: error?.status || error?.response?.status,
           data: error?.response?.data || error?.data || null,
-          stack: error?.stack
+          stack: error?.stack,
         });
 
-        const isRetryable = error.message.includes('429') ||
-                            error.message.includes('500') ||
-                            error.message.includes('502') ||
-                            error.message.includes('503') ||
-                            error.message.includes('504') ||
-                            error.code === 'ECONNRESET' ||
-                            error.code === 'ETIMEDOUT';
+        const isRetryable =
+          error.message.includes('429') ||
+          error.message.includes('500') ||
+          error.message.includes('502') ||
+          error.message.includes('503') ||
+          error.message.includes('504') ||
+          error.code === 'ECONNRESET' ||
+          error.code === 'ETIMEDOUT';
 
         if (!isRetryable || retries >= maxRetries) {
           break;
         }
 
         const waitTime = Math.pow(2, retries) * 1000;
-        console.log(`[${new Date().toISOString()}] SERVER: Retrying in ${waitTime}ms`);
+        console.log(
+          `[${new Date().toISOString()}] SERVER: Retrying in ${waitTime}ms`
+        );
         await new Promise(resolve => setTimeout(resolve, waitTime));
         retries++;
       }
     }
 
     if (retries > maxRetries && lastError) {
-      console.log(`[${new Date().toISOString()}] SERVER: All retries failed: ${lastError.message}`);
+      console.log(
+        `[${new Date().toISOString()}] SERVER: All retries failed: ${lastError.message}`
+      );
 
       let userMessage = 'An error occurred while processing your request. ';
       let statusCode = 500;
 
-      if (lastError.message.includes('429') || lastError.message.includes('rate limit')) {
-        userMessage += 'The AI service is currently busy. Please try again in a few moments.';
+      if (
+        lastError.message.includes('429') ||
+        lastError.message.includes('rate limit')
+      ) {
+        userMessage +=
+          'The AI service is currently busy. Please try again in a few moments.';
         statusCode = 429;
-      } else if (lastError.message.includes('500') || lastError.message.includes('502') || lastError.message.includes('503') || lastError.message.includes('504')) {
-        userMessage += 'The AI service is temporarily unavailable. Please try again later.';
+      } else if (
+        lastError.message.includes('500') ||
+        lastError.message.includes('502') ||
+        lastError.message.includes('503') ||
+        lastError.message.includes('504')
+      ) {
+        userMessage +=
+          'The AI service is temporarily unavailable. Please try again later.';
         statusCode = 503;
-      } else if (lastError.code === 'ECONNRESET' || lastError.code === 'ETIMEDOUT') {
+      } else if (
+        lastError.code === 'ECONNRESET' ||
+        lastError.code === 'ETIMEDOUT'
+      ) {
         userMessage += 'Connection to the AI service was interrupted.';
         statusCode = 503;
       }
@@ -283,17 +348,23 @@ const routes = {
           code: lastError?.code,
           status: lastError?.status || lastError?.response?.status,
           message: lastError?.message,
-          data: lastError?.response?.data || lastError?.data || null
-        }
+          data: lastError?.response?.data || lastError?.data || null,
+        },
       };
 
       return new Response(JSON.stringify(errorPayload), {
         status: statusCode,
-        headers: { 'Content-Type': 'application/json' }
+        headers: { 'Content-Type': 'application/json' },
       });
     }
-  }
+  },
 };
+
+// Get the base directory for file serving (use process.cwd() for compiled binary)
+const BASE_DIR = process.cwd();
+console.log(
+  `[${new Date().toISOString()}] SERVER: Base directory: ${BASE_DIR}`
+);
 
 // Bun.serve options
 const serveOptions = {
@@ -310,12 +381,13 @@ const serveOptions = {
     // Check if we're in development mode (only when explicitly set)
     if (process.env.NODE_ENV === 'development') {
       // Development mode: redirect static assets to Vite dev server
-      if (url.pathname.startsWith('/assets/') ||
-          url.pathname.endsWith('.js') ||
-          url.pathname.endsWith('.css') ||
-          url.pathname.startsWith('/@') ||  // Vite virtual modules
-          url.pathname.includes('/node_modules/')) {
-
+      if (
+        url.pathname.startsWith('/assets/') ||
+        url.pathname.endsWith('.js') ||
+        url.pathname.endsWith('.css') ||
+        url.pathname.startsWith('/@') || // Vite virtual modules
+        url.pathname.includes('/node_modules/')
+      ) {
         // Redirect to Vite dev server (assuming it runs on port 5173)
         const viteUrl = `http://localhost:5173${url.pathname}`;
         return Response.redirect(viteUrl, 302);
@@ -323,27 +395,28 @@ const serveOptions = {
 
       // Serve static files from public directory in development
       if (url.pathname.startsWith('/public/')) {
-        const filePath = `.${url.pathname}`;
+        const filePath = `${BASE_DIR}${url.pathname}`;
         try {
           const file = Bun.file(filePath);
           const fileExists = await file.exists();
           if (fileExists) {
             const ext = filePath.split('.').pop();
-            const contentType = {
-              'html': 'text/html',
-              'js': 'text/javascript',
-              'css': 'text/css',
-              'json': 'application/json',
-              'png': 'image/png',
-              'jpg': 'image/jpeg',
-              'jpeg': 'image/jpeg',
-              'gif': 'image/gif',
-              'svg': 'image/svg+xml',
-              'txt': 'text/plain'
-            }[ext] || 'application/octet-stream';
+            const contentType =
+              {
+                html: 'text/html',
+                js: 'text/javascript',
+                css: 'text/css',
+                json: 'application/json',
+                png: 'image/png',
+                jpg: 'image/jpeg',
+                jpeg: 'image/jpeg',
+                gif: 'image/gif',
+                svg: 'image/svg+xml',
+                txt: 'text/plain',
+              }[ext] || 'application/octet-stream';
 
             return new Response(file, {
-              headers: { 'Content-Type': contentType }
+              headers: { 'Content-Type': contentType },
             });
           }
         } catch (error) {
@@ -366,7 +439,9 @@ const serveOptions = {
       if (url.pathname === '/' || url.pathname === '/index.html') {
         try {
           // Try to fetch from Vite dev server first
-          const viteResponse = await fetch(`http://localhost:5173${url.pathname}`);
+          const viteResponse = await fetch(
+            `http://localhost:5173${url.pathname}`
+          );
           if (viteResponse.ok) {
             return viteResponse;
           }
@@ -380,13 +455,13 @@ const serveOptions = {
     // This includes when NODE_ENV='production' or is undefined
     if (url.pathname === '/' || url.pathname === '/index.html') {
       // Return the main HTML file
-      const indexPath = './dist/index.html';
+      const indexPath = `${BASE_DIR}/dist/index.html`;
       try {
         const file = Bun.file(indexPath);
         const fileExists = await file.exists();
         if (fileExists) {
           return new Response(file, {
-            headers: { 'Content-Type': 'text/html' }
+            headers: { 'Content-Type': 'text/html' },
           });
         } else {
           console.log(`Index file not found at: ${indexPath}`);
@@ -399,8 +474,12 @@ const serveOptions = {
     }
 
     // Handle other static files in production
-    if (url.pathname.startsWith('/assets/') || url.pathname.endsWith('.js') || url.pathname.endsWith('.css')) {
-      const filePath = `./dist${url.pathname}`;
+    if (
+      url.pathname.startsWith('/assets/') ||
+      url.pathname.endsWith('.js') ||
+      url.pathname.endsWith('.css')
+    ) {
+      const filePath = `${BASE_DIR}/dist${url.pathname}`;
       try {
         const file = Bun.file(filePath);
         const fileExists = await file.exists();
@@ -418,13 +497,13 @@ const serveOptions = {
 
     // Catch-all handler for SPA - serve index.html for any unmatched request
     if (!url.pathname.startsWith('/api')) {
-      const indexPath = './dist/index.html';
+      const indexPath = `${BASE_DIR}/dist/index.html`;
       try {
         const file = Bun.file(indexPath);
         const fileExists = await file.exists();
         if (fileExists) {
           return new Response(file, {
-            headers: { 'Content-Type': 'text/html' }
+            headers: { 'Content-Type': 'text/html' },
           });
         } else {
           console.log(`SPA fallback index file not found at: ${indexPath}`);
@@ -438,16 +517,51 @@ const serveOptions = {
 
     // 404 for unknown routes
     return new Response('Not Found', { status: 404 });
-  }
+  },
 };
 
-console.log(`[${new Date().toISOString()}] SERVER: === BUN SERVER STARTING ===`);
+console.log(
+  `[${new Date().toISOString()}] SERVER: === BUN SERVER STARTING ===`
+);
 console.log(`[${new Date().toISOString()}] SERVER: Listening on port ${port}`);
-console.log(`[${new Date().toISOString()}] SERVER: Environment: ${process.env.NODE_ENV || 'development'}`);
-console.log(`[${new Date().toISOString()}] SERVER: OpenRouter API configured: ${!!process.env.OPENROUTER_API_KEY}`);
+console.log(
+  `[${new Date().toISOString()}] SERVER: Environment: ${process.env.NODE_ENV || 'development'}`
+);
+console.log(
+  `[${new Date().toISOString()}] SERVER: OpenRouter API configured: ${!!process.env.OPENROUTER_API_KEY}`
+);
+console.log(
+  `[${new Date().toISOString()}] SERVER: Base directory: ${BASE_DIR}`
+);
+
+// Check if dist folder exists
+const distPath = `${BASE_DIR}/dist`;
+const indexPath = `${BASE_DIR}/dist/index.html`;
+console.log(
+  `[${new Date().toISOString()}] SERVER: Checking dist folder: ${distPath}`
+);
+console.log(
+  `[${new Date().toISOString()}] SERVER: Checking index.html: ${indexPath}`
+);
+
+try {
+  const indexFile = Bun.file(indexPath);
+  const indexExists = await indexFile.exists();
+  console.log(
+    `[${new Date().toISOString()}] SERVER: index.html exists: ${indexExists}`
+  );
+} catch (e) {
+  console.log(
+    `[${new Date().toISOString()}] SERVER: Error checking files: ${e.message}`
+  );
+}
 
 // Start the server
 const server = Bun.serve(serveOptions);
 
-console.log(`[${new Date().toISOString()}] SERVER: === BUN SERVER STARTED SUCCESSFULLY ===`);
-console.log(`[${new Date().toISOString()}] SERVER: Server URL: http://localhost:${port}`);
+console.log(
+  `[${new Date().toISOString()}] SERVER: === BUN SERVER STARTED SUCCESSFULLY ===`
+);
+console.log(
+  `[${new Date().toISOString()}] SERVER: Server URL: http://localhost:${port}`
+);

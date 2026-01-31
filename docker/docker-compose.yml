@@ -10,8 +10,8 @@ services:
     ports:
       - '${APP_PORT:-3002}:3000'
     environment:
-      - NODE_ENV=${NODE_ENV:-production}
-      - BUN_ENV=${NODE_ENV:-production}
+      - NODE_ENV=production
+      - BUN_ENV=production
       - PORT=3000
       - ENVIRONMENT=${ENVIRONMENT:-prod}
       - CONTAINER_NAME_SUFFIX=${CONTAINER_NAME_SUFFIX:-prod}
@@ -19,7 +19,6 @@ services:
       - SSL_KEY_PATH=${SSL_KEY_PATH:-/app/ssl/key.pem}
       - SSL_CERT_PATH=${SSL_CERT_PATH:-/app/ssl/cert.pem}
     volumes:
-      - ./.env:/app/.env:ro
       - ./ssl:/app/ssl:ro
     networks:
       - accelerator-network

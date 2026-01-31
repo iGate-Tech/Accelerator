@@ -618,7 +618,7 @@ const Portfolio = () => {
           <div class="bg-base-100 rounded-box border-base-200 mt-10 border p-6 shadow-sm">
             <h3 class="mb-4 flex items-center gap-2 text-xl font-semibold">
               <FolderMinus class="h-5 w-5" />
-              {t().ungroupedProjects}
+              {(t() && t().ungroupedProjects) || 'Ungrouped Projects'}
             </h3>
 
             <div
@@ -636,7 +636,7 @@ const Portfolio = () => {
                 fallback={
                   <div class="text-base-content/50 py-8 text-center">
                     <FolderX class="mx-auto mb-2 h-12 w-12" />
-                    <p>{t().noUngroupedProjects}</p>
+                    <p>{(t() && t().noUngroupedProjects) || 'No ungrouped projects. All projects are organized!'}</p>
                   </div>
                 }
               >

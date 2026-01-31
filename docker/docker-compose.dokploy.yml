@@ -8,7 +8,7 @@ services:
       target: ${BUILD_TARGET:-production}
     container_name: accelerator-${CONTAINER_NAME_SUFFIX:-prod}
     ports:
-      - '${APP_PORT:-3002}:${PORT:-3001}'
+      - '${APP_PORT:-3001}:${PORT:-3001}'
     environment:
       - NODE_ENV=production
       - BUN_ENV=production
@@ -31,16 +31,28 @@ services:
       retries: 3
       start_period: 10s
     labels:
+      # Enable Traefik
       - 'traefik.enable=true'
+
+      # Network configuration
       - 'traefik.docker.network=dokploy-network'
+
+      # HTTPS Router - Replace your-domain.com with your actual domain
       - 'traefik.http.routers.accelerator.rule=Host(`your-domain.com`)'
       - 'traefik.http.routers.accelerator.entrypoints=https'
       - 'traefik.http.routers.accelerator.tls.certresolver=letsencrypt'
+
+      # Service configuration - Container port must match PORT env var
       - 'traefik.http.services.accelerator.loadbalancer.server.port=${PORT:-3001}'
+
+      # HTTP Router with redirect to HTTPS
       - 'traefik.http.routers.accelerator-http.rule=Host(`your-domain.com`)'
       - 'traefik.http.routers.accelerator-http.entrypoints=http'
       - 'traefik.http.routers.accelerator-http.middlewares=redirect-to-https'
+
+      # HTTPS Redirect Middleware
       - 'traefik.http.middlewares.redirect-to-https.redirectscheme.scheme=https'
+      - 'traefik.http.middlewares.redirect-to-https.redirectscheme.permanent=true'
 
 networks:
   accelerator-network:

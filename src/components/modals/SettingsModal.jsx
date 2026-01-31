@@ -110,7 +110,7 @@ const dateFormats = [
 function DropdownButton(props) {
   return (
     <button
-      class="btn btn-ghost flex gap-2 font-normal"
+      class="btn btn-ghost text-base-content flex gap-2 font-normal"
       onClick={e => {
         e.stopPropagation();
         props.onToggle?.();
@@ -125,14 +125,14 @@ function DropdownButton(props) {
 function DropdownMenu(props) {
   return (
     <ul
-      class="dropdown menu rounded-box bg-base-100 border-base-300 absolute z-10 w-40 border shadow-sm"
+      class="dropdown menu rounded-box bg-base-100 text-base-content border-base-300 absolute z-10 w-40 border shadow-sm"
       classList={{ hidden: !props.isOpen }}
     >
       <For each={props.options}>
         {option => (
           <li>
             <a
-              class="cursor-pointer"
+              class="cursor-pointer hover:bg-base-200"
               classList={{ active: props.selectedValue === option.value }}
               onClick={e => {
                 e.stopPropagation();
@@ -164,7 +164,7 @@ function Toggle(props) {
         <path d="M21,7L9,19L3.5,13.5L4.91,12.09L9,16.17L19.59,5.59L21,7Z" />
       </svg>
       <svg
-        class="swap-off h-6 w-6 fill-current"
+        class="swap-off text-base-content h-6 w-6 fill-current"
         xmlns="http://www.w3.org/2000/svg"
         viewbox="0 0 24 24"
       >
@@ -260,7 +260,7 @@ export default function SettingsModal() {
         />
 
         {/* Modal Content */}
-        <div class="bg-base-100 animate-in fade-in zoom-in-95 relative z-10 max-h-[85vh] w-full max-w-[760px] overflow-hidden rounded-2xl shadow-2xl duration-200">
+        <div class="bg-base-100 text-base-content animate-in fade-in zoom-in-95 relative z-10 max-h-[85vh] w-full max-w-[760px] overflow-hidden rounded-2xl shadow-2xl duration-200">
           <div class="mx-5 my-3 flex items-center justify-between gap-2">
             <div class="text-lg font-medium">Settings</div>
             <button
@@ -276,7 +276,7 @@ export default function SettingsModal() {
               <For each={tabs}>
                 {tab => (
                   <label
-                    class={`tab hover:text-primary ${activeTab() === tab.id ? 'active' : ''}`}
+                    class={`tab ${activeTab() === tab.id ? 'tab-active' : ''}`}
                     onClick={() => setActiveTab(tab.id)}
                   >
                     {tab.label}
@@ -287,7 +287,7 @@ export default function SettingsModal() {
           </div>
 
           <div class="flex h-[calc(600px-80px)] flex-1 overflow-hidden">
-            <aside class="bg-base-100 border-base-300 relative flex hidden min-h-0 w-[200px] flex-col overflow-hidden border-r md:flex">
+            <aside class="bg-base-100 text-base-content border-base-300 relative flex hidden min-h-0 w-[200px] flex-col overflow-hidden border-r md:flex">
               <div class="h-full flex-1 overflow-y-auto px-3">
                 <ul class="menu w-full gap-1 space-y-0.5 p-0">
                   <For each={tabs}>
@@ -307,11 +307,11 @@ export default function SettingsModal() {
               </div>
             </aside>
 
-            <main class="h-full min-h-0 flex-1 overflow-y-auto bg-white p-4">
+            <main class="h-full min-h-0 flex-1 overflow-y-auto bg-base-100 p-4">
               <div class="h-full w-full">
                 {/* General Tab Content */}
                 <Show when={activeTab() === 'general'}>
-                  <div class="divide-y divide-gray-200">
+                  <div class="divide-y divide-base-300">
                     <div class="form-control border-base-300 flex flex-row items-start justify-between border-b py-2">
                       <div>
                         <label class="text-base-content mb-1 text-base">
@@ -427,7 +427,7 @@ export default function SettingsModal() {
                         </p>
                       </div>
                       <button
-                        class="btn btn-ghost btn-sm text-error hover:bg-error/5"
+                        class="btn btn-ghost btn-sm text-error hover:bg-error hover:bg-opacity-10"
                         onClick={() =>
                           confirmDanger(
                             'Delete Account',
@@ -451,10 +451,10 @@ export default function SettingsModal() {
                 <Show when={activeTab() === 'profile'}>
                   <div class="space-y-6">
                     <section>
-                      <div class="border-base-200 flex items-center border-b py-3">
+                      <div class="border-base-300 flex items-center border-b py-3">
                         <h3 class="text-base-content text-lg">Profile</h3>
                       </div>
-                      <div class="border-base-200 flex items-center justify-between border-b py-3">
+                      <div class="border-base-300 flex items-center justify-between border-b py-3">
                         <div class="w-full">
                           <div class="flex items-center justify-between gap-4">
                             <span class="text-base-content text-sm">Name</span>
@@ -465,7 +465,7 @@ export default function SettingsModal() {
                           </div>
                         </div>
                       </div>
-                      <div class="border-base-200 flex items-center justify-between border-b py-3">
+                      <div class="border-base-300 flex items-center justify-between border-b py-3">
                         <div class="w-full">
                           <div class="flex items-center justify-between gap-4">
                             <span class="text-base-content text-sm">Email</span>
@@ -478,7 +478,7 @@ export default function SettingsModal() {
                           </div>
                         </div>
                       </div>
-                      <div class="border-base-200 flex items-center justify-between border-b py-3">
+                      <div class="border-base-300 flex items-center justify-between border-b py-3">
                         <div class="w-full">
                           <div class="flex items-center justify-between gap-4">
                             <div class="flex items-center gap-3">
@@ -531,12 +531,12 @@ export default function SettingsModal() {
                     </section>
 
                     <section>
-                      <div class="border-base-200 flex items-center border-b py-3">
+                      <div class="border-base-300 flex items-center border-b py-3">
                         <h3 class="text-base-content text-lg">
                           Personal Information
                         </h3>
                       </div>
-                      <div class="border-base-200 flex items-center justify-between border-b py-3">
+                      <div class="border-base-300 flex items-center justify-between border-b py-3">
                         <div class="w-full">
                           <div class="flex items-center justify-between gap-4">
                             <span class="text-base-content text-sm">
@@ -549,7 +549,7 @@ export default function SettingsModal() {
                           </div>
                         </div>
                       </div>
-                      <div class="border-base-200 flex items-center justify-between border-b py-3">
+                      <div class="border-base-300 flex items-center justify-between border-b py-3">
                         <div class="w-full">
                           <div class="flex items-center justify-between gap-4">
                             <span class="text-base-content text-sm">
@@ -583,88 +583,88 @@ export default function SettingsModal() {
                 <Switch>
                   <Match when={activeTab() === 'notifications'}>
                     <div class="p-4">
-                      <h2 class="mb-4 text-xl font-semibold">
+                      <h2 class="text-base-content mb-4 text-xl font-semibold">
                         Notifications Settings
                       </h2>
-                      <p>Notifications settings would appear here.</p>
+                      <p class="text-base-content">Notifications settings would appear here.</p>
                     </div>
                   </Match>
                   <Match when={activeTab() === 'billing'}>
                     <div class="p-4">
-                      <h2 class="mb-4 text-xl font-semibold">
+                      <h2 class="text-base-content mb-4 text-xl font-semibold">
                         Billing Settings
                       </h2>
-                      <p>Billing settings would appear here.</p>
+                      <p class="text-base-content">Billing settings would appear here.</p>
                     </div>
                   </Match>
                   <Match when={activeTab() === 'credits'}>
                     <div class="p-4">
-                      <h2 class="mb-4 text-xl font-semibold">
+                      <h2 class="text-base-content mb-4 text-xl font-semibold">
                         Credits Settings
                       </h2>
-                      <p>Credits settings would appear here.</p>
+                      <p class="text-base-content">Credits settings would appear here.</p>
                     </div>
                   </Match>
                   <Match when={activeTab() === 'workspace'}>
                     <div class="p-4">
-                      <h2 class="mb-4 text-xl font-semibold">
+                      <h2 class="text-base-content mb-4 text-xl font-semibold">
                         Workspace Settings
                       </h2>
-                      <p>Workspace settings would appear here.</p>
+                      <p class="text-base-content">Workspace settings would appear here.</p>
                     </div>
                   </Match>
                   <Match when={activeTab() === 'apps'}>
                     <div class="p-4">
-                      <h2 class="mb-4 text-xl font-semibold">
+                      <h2 class="text-base-content mb-4 text-xl font-semibold">
                         Apps & Skills Settings
                       </h2>
-                      <p>Apps & Skills settings would appear here.</p>
+                      <p class="text-base-content">Apps & Skills settings would appear here.</p>
                     </div>
                   </Match>
                   <Match when={activeTab() === 'connectors'}>
                     <div class="p-4">
-                      <h2 class="mb-4 text-xl font-semibold">
+                      <h2 class="text-base-content mb-4 text-xl font-semibold">
                         Connectors Settings
                       </h2>
-                      <p>Connectors settings would appear here.</p>
+                      <p class="text-base-content">Connectors settings would appear here.</p>
                     </div>
                   </Match>
                   <Match when={activeTab() === 'integrations'}>
                     <div class="p-4">
-                      <h2 class="mb-4 text-xl font-semibold">
+                      <h2 class="text-base-content mb-4 text-xl font-semibold">
                         Integrations Settings
                       </h2>
-                      <p>Integrations settings would appear here.</p>
+                      <p class="text-base-content">Integrations settings would appear here.</p>
                     </div>
                   </Match>
                   <Match when={activeTab() === 'data'}>
                     <div class="p-4">
-                      <h2 class="mb-4 text-xl font-semibold">
+                      <h2 class="text-base-content mb-4 text-xl font-semibold">
                         Data Control Settings
                       </h2>
-                      <p>Data Control settings would appear here.</p>
+                      <p class="text-base-content">Data Control settings would appear here.</p>
                     </div>
                   </Match>
                   <Match when={activeTab() === 'security'}>
                     <div class="p-4">
-                      <h2 class="mb-4 text-xl font-semibold">
+                      <h2 class="text-base-content mb-4 text-xl font-semibold">
                         Security Settings
                       </h2>
-                      <p>Security settings would appear here.</p>
+                      <p class="text-base-content">Security settings would appear here.</p>
                     </div>
                   </Match>
                   <Match when={activeTab() === 'roles'}>
                     <div class="p-4">
-                      <h2 class="mb-4 text-xl font-semibold">
+                      <h2 class="text-base-content mb-4 text-xl font-semibold">
                         Roles & Governance Settings
                       </h2>
-                      <p>Roles & Governance settings would appear here.</p>
+                      <p class="text-base-content">Roles & Governance settings would appear here.</p>
                     </div>
                   </Match>
                   <Match when={activeTab() === 'help'}>
                     <div class="p-4">
-                      <h2 class="mb-4 text-xl font-semibold">Help Settings</h2>
-                      <p>Help settings would appear here.</p>
+                      <h2 class="text-base-content mb-4 text-xl font-semibold">Help Settings</h2>
+                      <p class="text-base-content">Help settings would appear here.</p>
                     </div>
                   </Match>
                 </Switch>

@@ -107,9 +107,9 @@ const Invitations = () => {
                 class="text-base-content/30 mx-auto mb-4 h-16 w-16"
               />
               <h3 class="text-base-content/70 mb-2 text-xl font-semibold">
-                {t().noInvitations}
+                {(t() && t().noInvitations) || 'No pending invitations'}
               </h3>
-              <p class="text-base-content/50">{t().noInvitationsDesc}</p>
+              <p class="text-base-content/50">{(t() && t().noInvitationsDesc) || 'You currently have no pending portfolio invitations.'}</p>
             </div>
           }
         >

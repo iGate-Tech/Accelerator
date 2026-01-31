@@ -106,7 +106,6 @@ const ResponseSection = props => {
     collapsedGroups();
 
     onCleanup(() => {
-      cancelAnimationFrame(rafId);
       setExpandedTaskId(null);
     });
   });

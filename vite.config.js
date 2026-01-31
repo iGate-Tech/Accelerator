@@ -79,6 +79,8 @@ export default defineConfig({
     setupFiles: ['./src/test/setup.ts'],
   },
   server: {
+    port: 5173,
+    host: '0.0.0.0',
     headers: {
       'Cross-Origin-Opener-Policy': 'same-origin',
       'Cross-Origin-Embedder-Policy': 'require-corp',
@@ -90,8 +92,8 @@ export default defineConfig({
           : {
               target:
                 process.env.DOCKER_ENV === 'true'
-                  ? `http://backend:${process.env.PORT || '3000'}`
-                  : `http://localhost:${process.env.PORT || '3000'}`,
+                  ? `http://backend:${process.env.PORT || '3001'}`
+                  : `http://localhost:${process.env.PORT || '3001'}`,
               changeOrigin: true,
             },
     },

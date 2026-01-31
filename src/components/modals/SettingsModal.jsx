@@ -120,7 +120,7 @@ function DropdownButton(props) {
 function DropdownMenu(props) {
   return (
     <ul
-      class="dropdown menu rounded-box bg-base-100 text-base-content border-base-300 absolute z-10 w-40 border shadow-sm"
+      class={`dropdown menu rounded-box bg-base-100 text-base-content border-base-300 absolute z-10 w-40 border shadow-sm ${language() === 'ar' ? 'right-0 left-auto' : 'left-0 right-auto'}`}
       classList={{ hidden: !props.isOpen }}
     >
       <For each={props.options}>
@@ -134,7 +134,7 @@ function DropdownMenu(props) {
                 props.onSelect?.(option);
               }}
             >
-              {option.label}
+              {typeof option.label === 'object' ? option.label[language()] || option.label.en : option.label}
             </a>
           </li>
         )}
@@ -219,8 +219,16 @@ export default function SettingsModal() {
     setDateFormatOpen(false);
   };
 
-  const getLanguageLabel = value =>
-    languages.find(l => l.value === value)?.label || 'English';
+  const getLanguageLabel = value => {
+    const lang = languages.find(l => l.value === value);
+    if (lang) {
+      if (typeof lang.label === 'object') {
+        return lang.label[language()] || lang.label.en;
+      }
+      return lang.label;
+    }
+    return language() === 'ar' ? 'الإنجليزية' : 'English';
+  };
   const getThemeLabel = value =>
     themes.find(t => t.value === value)?.label || 'System';
   const getTimeFormatLabel = value =>
@@ -247,7 +255,7 @@ export default function SettingsModal() {
 
   return (
     <Show when={settingsModalState().isOpen}>
-      <div class="fixed inset-0 z-50 flex items-center justify-center">
+      <div class={`fixed inset-0 z-50 flex items-center justify-center ${language() === 'ar' ? 'rtl' : 'ltr'}`}>
         {/* Backdrop */}
         <div
           class="absolute inset-0 bg-black/50 backdrop-blur-sm transition-opacity duration-300"
@@ -255,9 +263,9 @@ export default function SettingsModal() {
         />
 
         {/* Modal Content */}
-        <div class="bg-base-100 text-base-content animate-in fade-in zoom-in-95 relative z-10 max-h-[85vh] w-full max-w-[760px] overflow-hidden rounded-2xl shadow-2xl duration-200">
+        <div class={`bg-base-100 text-base-content animate-in fade-in zoom-in-95 relative z-10 max-h-[85vh] w-full max-w-[760px] overflow-hidden rounded-2xl shadow-2xl duration-200 ${language() === 'ar' ? 'rtl' : 'ltr'}`}>
           <div class="mx-5 my-3 flex items-center justify-between gap-2">
-            <div class="text-lg font-medium">Settings</div>
+            <div class="text-lg font-medium">{language() === 'ar' ? 'الإعدادات' : 'Settings'}</div>
             <button
               class="btn btn-ghost btn-circle btn-sm"
               onClick={() => setSettingsModalState({ isOpen: false })}
@@ -274,7 +282,7 @@ export default function SettingsModal() {
                     class={`tab ${activeTab() === tab.id ? 'tab-active' : ''}`}
                     onClick={() => setActiveTab(tab.id)}
                   >
-                    {tab.label}
+                    {typeof tab.label === 'object' ? tab.label[language()] || tab.label.en : tab.label}
                   </label>
                 )}
               </For>
@@ -293,7 +301,7 @@ export default function SettingsModal() {
                           onClick={() => setActiveTab(tab.id)}
                         >
                           <tab.icon class="h-5 w-5" />
-                          {tab.label}
+                          {typeof tab.label === 'object' ? tab.label[language()] || tab.label.en : tab.label}
                         </a>
                       </li>
                     )}
@@ -310,10 +318,10 @@ export default function SettingsModal() {
                     <div class="form-control border-base-300 flex flex-row items-start justify-between border-b py-2">
                       <div>
                         <label class="text-base-content mb-1 text-base">
-                          Language
+                          {language() === 'ar' ? 'اللغة' : 'Language'}
                         </label>
                         <p class="text-base-content/70 text-sm">
-                          Select the language for the interface
+                          {language() === 'ar' ? 'اختر اللغة للواجهة' : 'Select the language for the interface'}
                         </p>
                       </div>
                       <div class="dropdown-container relative">
@@ -335,10 +343,10 @@ export default function SettingsModal() {
                     <div class="form-control border-base-300 flex flex-row items-start justify-between border-b py-2">
                       <div>
                         <label class="label text-base-content mb-1 text-base">
-                          Theme
+                          {language() === 'ar' ? 'السمة' : 'Theme'}
                         </label>
                         <p class="text-base-content/70 text-sm">
-                          Choose between light, dark, and system themes
+                          {language() === 'ar' ? 'اختر بين السمة الفاتحة والداكنة والنظام' : 'Choose between light, dark, and system themes'}
                         </p>
                       </div>
                       <div class="dropdown-container relative">
@@ -360,10 +368,10 @@ export default function SettingsModal() {
                     <div class="form-control border-base-300 flex flex-row items-start justify-between border-b py-2">
                       <div>
                         <label class="label text-base-content mb-1 text-base">
-                          Time Format
+                          {language() === 'ar' ? 'تنسيق الوقت' : 'Time Format'}
                         </label>
                         <p class="text-base-content/70 text-sm">
-                          Select your preferred time format
+                          {language() === 'ar' ? 'اختر تنسيق الوقت المفضل لديك' : 'Select your preferred time format'}
                         </p>
                       </div>
                       <div class="dropdown-container relative">
@@ -387,10 +395,10 @@ export default function SettingsModal() {
                     <div class="form-control border-base-300 flex flex-row items-start justify-between border-b py-2">
                       <div>
                         <label class="label text-base-content mb-1 text-base">
-                          Date Format
+                          {language() === 'ar' ? 'تنسيق التاريخ' : 'Date Format'}
                         </label>
                         <p class="text-base-content/70 text-sm">
-                          Select your preferred date format
+                          {language() === 'ar' ? 'اختر تنسيق التاريخ المفضل لديك' : 'Select your preferred date format'}
                         </p>
                       </div>
                       <div class="dropdown-container relative">
@@ -414,29 +422,32 @@ export default function SettingsModal() {
                     <div class="flex flex-row items-start justify-between py-4">
                       <div>
                         <label class="text-base-content text-base">
-                          Danger Zone
+                          {language() === 'ar' ? 'منطقة الخطر' : 'Danger Zone'}
                         </label>
                         <p class="text-base-content/60 mt-1 text-sm">
-                          Permanently delete your account and all associated
-                          data
+                          {language() === 'ar' ? 'احذف حسابك وجميع البيانات المرتبطة به بشكل دائم' : 'Permanently delete your account and all associated data'}
                         </p>
                       </div>
                       <button
                         class="btn btn-ghost btn-sm text-error hover:bg-error hover:bg-opacity-10"
                         onClick={() =>
                           confirmDanger(
-                            'Delete Account',
-                            'Are you sure you want to delete your account? This action cannot be undone.',
+                            language() === 'ar' ? 'حذف الحساب' : 'Delete Account',
+                            language() === 'ar'
+                              ? 'هل أنت متأكد أنك تريد حذف حسابك؟ لا يمكن التراجع عن هذا الإجراء.'
+                              : 'Are you sure you want to delete your account? This action cannot be undone.',
                             async () => {
                               // Handle account deletion
                               toastManager.info(
-                                'Account deletion is not implemented in this demo'
+                                language() === 'ar'
+                                  ? 'حذف الحساب غير مُنفّذ في هذا العرض التوضيحي'
+                                  : 'Account deletion is not implemented in this demo'
                               );
                             }
                           )
                         }
                       >
-                        Delete Account
+                        {language() === 'ar' ? 'حذف الحساب' : 'Delete Account'}
                       </button>
                     </div>
                   </div>
@@ -447,14 +458,14 @@ export default function SettingsModal() {
                   <div class="space-y-6">
                     <section>
                       <div class="border-base-300 flex items-center border-b py-3">
-                        <h3 class="text-base-content text-lg">Profile</h3>
+                        <h3 class="text-base-content text-lg">{language() === 'ar' ? 'الملف الشخصي' : 'Profile'}</h3>
                       </div>
                       <div class="border-base-300 flex items-center justify-between border-b py-3">
                         <div class="w-full">
                           <div class="flex items-center justify-between gap-4">
-                            <span class="text-base-content text-sm">Name</span>
+                            <span class="text-base-content text-sm">{language() === 'ar' ? 'الاسم' : 'Name'}</span>
                             <button class="text-base-content/70 hover:text-base-content flex items-center gap-2 text-sm">
-                              <span>{user()?.name || 'Enter your name'}</span>
+                              <span>{user()?.name || (language() === 'ar' ? 'أدخل اسمك' : 'Enter your name')}</span>
                               <ChevronRight class="h-4 w-4" />
                             </button>
                           </div>
@@ -463,10 +474,10 @@ export default function SettingsModal() {
                       <div class="border-base-300 flex items-center justify-between border-b py-3">
                         <div class="w-full">
                           <div class="flex items-center justify-between gap-4">
-                            <span class="text-base-content text-sm">Email</span>
+                            <span class="text-base-content text-sm">{language() === 'ar' ? 'البريد الإلكتروني' : 'Email'}</span>
                             <button class="text-base-content/70 hover:text-base-content flex items-center gap-2 text-sm">
                               <span>
-                                {user()?.email || 'your.email@example.com'}
+                                {user()?.email || (language() === 'ar' ? 'بريدك.الإلكتروني@مثال.com' : 'your.email@example.com')}
                               </span>
                               <ChevronRight class="h-4 w-4" />
                             </button>
@@ -484,10 +495,10 @@ export default function SettingsModal() {
                               </div>
                               <div>
                                 <span class="text-base-content text-sm">
-                                  Profile Picture
+                                  {language() === 'ar' ? 'صورة الملف الشخصي' : 'Profile Picture'}
                                 </span>
                                 <p class="text-base-content/60 text-xs">
-                                  Upload a custom profile picture
+                                  {language() === 'ar' ? 'قم بتحميل صورة ملف شخصية مخصصة' : 'Upload a custom profile picture'}
                                 </p>
                               </div>
                             </div>
@@ -506,7 +517,7 @@ export default function SettingsModal() {
                                     .click()
                                 }
                               >
-                                Upload
+                                {language() === 'ar' ? 'تحميل' : 'Upload'}
                               </button>
                             </div>
                           </div>
@@ -515,9 +526,9 @@ export default function SettingsModal() {
                       <div class="flex items-center justify-between py-3">
                         <div class="w-full">
                           <div class="flex items-center justify-between gap-4">
-                            <span class="text-base-content text-sm">Bio</span>
+                            <span class="text-base-content text-sm">{language() === 'ar' ? 'السيرة الذاتية' : 'Bio'}</span>
                             <button class="text-base-content/70 hover:text-base-content flex items-center gap-2 text-sm">
-                              <span>Add a bio</span>
+                              <span>{language() === 'ar' ? 'أضف سيرة ذاتية' : 'Add a bio'}</span>
                               <ChevronRight class="h-4 w-4" />
                             </button>
                           </div>
@@ -528,17 +539,17 @@ export default function SettingsModal() {
                     <section>
                       <div class="border-base-300 flex items-center border-b py-3">
                         <h3 class="text-base-content text-lg">
-                          Personal Information
+                          {language() === 'ar' ? 'المعلومات الشخصية' : 'Personal Information'}
                         </h3>
                       </div>
                       <div class="border-base-300 flex items-center justify-between border-b py-3">
                         <div class="w-full">
                           <div class="flex items-center justify-between gap-4">
                             <span class="text-base-content text-sm">
-                              Phone Number
+                              {language() === 'ar' ? 'رقم الهاتف' : 'Phone Number'}
                             </span>
                             <button class="text-base-content/70 hover:text-base-content flex items-center gap-2 text-sm">
-                              <span>Add phone number</span>
+                              <span>{language() === 'ar' ? 'أضف رقم هاتف' : 'Add phone number'}</span>
                               <ChevronRight class="h-4 w-4" />
                             </button>
                           </div>
@@ -548,10 +559,10 @@ export default function SettingsModal() {
                         <div class="w-full">
                           <div class="flex items-center justify-between gap-4">
                             <span class="text-base-content text-sm">
-                              Location
+                              {language() === 'ar' ? 'الموقع' : 'Location'}
                             </span>
                             <button class="text-base-content/70 hover:text-base-content flex items-center gap-2 text-sm">
-                              <span>Add location</span>
+                              <span>{language() === 'ar' ? 'أضف موقعًا' : 'Add location'}</span>
                               <ChevronRight class="h-4 w-4" />
                             </button>
                           </div>
@@ -561,10 +572,10 @@ export default function SettingsModal() {
                         <div class="w-full">
                           <div class="flex items-center justify-between gap-4">
                             <span class="text-base-content text-sm">
-                              Website
+                              {language() === 'ar' ? 'الموقع الإلكتروني' : 'Website'}
                             </span>
                             <button class="text-base-content/70 hover:text-base-content flex items-center gap-2 text-sm">
-                              <span>Add website</span>
+                              <span>{language() === 'ar' ? 'أضف موقعًا إلكترونيًا' : 'Add website'}</span>
                               <ChevronRight class="h-4 w-4" />
                             </button>
                           </div>
@@ -579,87 +590,87 @@ export default function SettingsModal() {
                   <Match when={activeTab() === 'notifications'}>
                     <div class="p-4">
                       <h2 class="text-base-content mb-4 text-xl font-semibold">
-                        Notifications Settings
+                        {language() === 'ar' ? 'إعدادات الإشعارات' : 'Notifications Settings'}
                       </h2>
-                      <p class="text-base-content">Notifications settings would appear here.</p>
+                      <p class="text-base-content">{language() === 'ar' ? 'سيظهر إعدادات الإشعارات هنا.' : 'Notifications settings would appear here.'}</p>
                     </div>
                   </Match>
                   <Match when={activeTab() === 'billing'}>
                     <div class="p-4">
                       <h2 class="text-base-content mb-4 text-xl font-semibold">
-                        Billing Settings
+                        {language() === 'ar' ? 'إعدادات الفوترة' : 'Billing Settings'}
                       </h2>
-                      <p class="text-base-content">Billing settings would appear here.</p>
+                      <p class="text-base-content">{language() === 'ar' ? 'سيظهر إعدادات الفوترة هنا.' : 'Billing settings would appear here.'}</p>
                     </div>
                   </Match>
                   <Match when={activeTab() === 'credits'}>
                     <div class="p-4">
                       <h2 class="text-base-content mb-4 text-xl font-semibold">
-                        Credits Settings
+                        {language() === 'ar' ? 'إعدادات الرصيد' : 'Credits Settings'}
                       </h2>
-                      <p class="text-base-content">Credits settings would appear here.</p>
+                      <p class="text-base-content">{language() === 'ar' ? 'سيظهر إعدادات الرصيد هنا.' : 'Credits settings would appear here.'}</p>
                     </div>
                   </Match>
                   <Match when={activeTab() === 'workspace'}>
                     <div class="p-4">
                       <h2 class="text-base-content mb-4 text-xl font-semibold">
-                        Workspace Settings
+                        {language() === 'ar' ? 'إعدادات مساحة العمل' : 'Workspace Settings'}
                       </h2>
-                      <p class="text-base-content">Workspace settings would appear here.</p>
+                      <p class="text-base-content">{language() === 'ar' ? 'سيظهر إعدادات مساحة العمل هنا.' : 'Workspace settings would appear here.'}</p>
                     </div>
                   </Match>
                   <Match when={activeTab() === 'apps'}>
                     <div class="p-4">
                       <h2 class="text-base-content mb-4 text-xl font-semibold">
-                        Apps & Skills Settings
+                        {language() === 'ar' ? 'إعدادات التطبيقات والمهارات' : 'Apps & Skills Settings'}
                       </h2>
-                      <p class="text-base-content">Apps & Skills settings would appear here.</p>
+                      <p class="text-base-content">{language() === 'ar' ? 'سيظهر إعدادات التطبيقات والمهارات هنا.' : 'Apps & Skills settings would appear here.'}</p>
                     </div>
                   </Match>
                   <Match when={activeTab() === 'connectors'}>
                     <div class="p-4">
                       <h2 class="text-base-content mb-4 text-xl font-semibold">
-                        Connectors Settings
+                        {language() === 'ar' ? 'إعدادات المتصلات' : 'Connectors Settings'}
                       </h2>
-                      <p class="text-base-content">Connectors settings would appear here.</p>
+                      <p class="text-base-content">{language() === 'ar' ? 'سيظهر إعدادات المتصلات هنا.' : 'Connectors settings would appear here.'}</p>
                     </div>
                   </Match>
                   <Match when={activeTab() === 'integrations'}>
                     <div class="p-4">
                       <h2 class="text-base-content mb-4 text-xl font-semibold">
-                        Integrations Settings
+                        {language() === 'ar' ? 'إعدادات التكاملات' : 'Integrations Settings'}
                       </h2>
-                      <p class="text-base-content">Integrations settings would appear here.</p>
+                      <p class="text-base-content">{language() === 'ar' ? 'سيظهر إعدادات التكاملات هنا.' : 'Integrations settings would appear here.'}</p>
                     </div>
                   </Match>
                   <Match when={activeTab() === 'data'}>
                     <div class="p-4">
                       <h2 class="text-base-content mb-4 text-xl font-semibold">
-                        Data Control Settings
+                        {language() === 'ar' ? 'إعدادات التحكم بالبيانات' : 'Data Control Settings'}
                       </h2>
-                      <p class="text-base-content">Data Control settings would appear here.</p>
+                      <p class="text-base-content">{language() === 'ar' ? 'سيظهر إعدادات التحكم بالبيانات هنا.' : 'Data Control settings would appear here.'}</p>
                     </div>
                   </Match>
                   <Match when={activeTab() === 'security'}>
                     <div class="p-4">
                       <h2 class="text-base-content mb-4 text-xl font-semibold">
-                        Security Settings
+                        {language() === 'ar' ? 'إعدادات الأمان' : 'Security Settings'}
                       </h2>
-                      <p class="text-base-content">Security settings would appear here.</p>
+                      <p class="text-base-content">{language() === 'ar' ? 'سيظهر إعدادات الأمان هنا.' : 'Security settings would appear here.'}</p>
                     </div>
                   </Match>
                   <Match when={activeTab() === 'roles'}>
                     <div class="p-4">
                       <h2 class="text-base-content mb-4 text-xl font-semibold">
-                        Roles & Governance Settings
+                        {language() === 'ar' ? 'إعدادات الأدوار والحوكمة' : 'Roles & Governance Settings'}
                       </h2>
-                      <p class="text-base-content">Roles & Governance settings would appear here.</p>
+                      <p class="text-base-content">{language() === 'ar' ? 'سيظهر إعدادات الأدوار والحوكمة هنا.' : 'Roles & Governance settings would appear here.'}</p>
                     </div>
                   </Match>
                   <Match when={activeTab() === 'help'}>
                     <div class="p-4">
-                      <h2 class="text-base-content mb-4 text-xl font-semibold">Help Settings</h2>
-                      <p class="text-base-content">Help settings would appear here.</p>
+                      <h2 class="text-base-content mb-4 text-xl font-semibold">{language() === 'ar' ? 'إعدادات المساعدة' : 'Help Settings'}</h2>
+                      <p class="text-base-content">{language() === 'ar' ? 'سيظهر إعدادات المساعدة هنا.' : 'Help settings would appear here.'}</p>
                     </div>
                   </Match>
                 </Switch>

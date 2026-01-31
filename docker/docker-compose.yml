@@ -25,19 +25,23 @@ services:
       - dokploy-network
     restart: unless-stopped
     healthcheck:
-      test: ['CMD', 'curl', '-f', 'http://localhost:${PORT:-3001}/api/health']
+      test:
+        [
+          'CMD-SHELL',
+          'curl -f http://localhost:${PORT:-3001}/api/health || exit 1',
+        ]
       interval: 30s
       timeout: 10s
       retries: 3
-      start_period: 10s
+      start_period: 40s
     labels:
       - 'traefik.enable=true'
       - 'traefik.docker.network=dokploy-network'
-      - 'traefik.http.routers.accelerator.rule=Host(`your-domain.com`)'
+      - 'traefik.http.routers.accelerator.rule=Host(`os.igate.sa`) || Host(`www.os.igate.sa`)'
       - 'traefik.http.routers.accelerator.entrypoints=https'
       - 'traefik.http.routers.accelerator.tls.certresolver=letsencrypt'
       - 'traefik.http.services.accelerator.loadbalancer.server.port=${PORT:-3001}'
-      - 'traefik.http.routers.accelerator-http.rule=Host(`your-domain.com`)'
+      - 'traefik.http.routers.accelerator-http.rule=Host(`os.igate.sa`) || Host(`www.os.igate.sa`)'
       - 'traefik.http.routers.accelerator-http.entrypoints=http'
       - 'traefik.http.routers.accelerator-http.middlewares=redirect-to-https'
       - 'traefik.http.middlewares.redirect-to-https.redirectscheme.scheme=https'

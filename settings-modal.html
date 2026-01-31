@@ -777,50 +777,46 @@
                                                 <h3 class="text-base text-base-content font-medium">General Settings</h3>
                                             </div>
                                             <div class="mt-3 space-y-3">
-                                                <div class="form-control flex flex-row justify-between items-start py-2 border-b border-base-200">
-                                                    <div>
-                                                        <label class="label text-base text-base-content mb-1">Quiet Hours</label>
-                                                        <p class="text-sm text-base-content/70">Schedule when notifications are silenced</p>
+                                                <div class="py-3 border-b border-base-200">
+                                                    <div class="flex items-center justify-between mb-3">
+                                                        <div>
+                                                            <label class="text-base font-medium text-base-content">Quiet Hours</label>
+                                                            <p class="text-sm text-base-content/70 mt-0.5">Schedule when notifications are silenced</p>
+                                                        </div>
+                                                        <input type="checkbox" class="toggle toggle-primary toggle-sm" checked>
                                                     </div>
-                                                    <div class="flex items-center gap-2">
-                                                        <input type="time" class="input input-bordered input-sm w-20" value="22:00">
-                                                        <span class="text-sm">to</span>
-                                                        <input type="time" class="input input-bordered input-sm w-20" value="07:00">
-                                                        <label class="toggle toggle-sm">
-                                                            <input type="checkbox"/>
-                                                            <span class="toggle-mark"></span>
-                                                        </label>
+                                                    <div class="flex items-center gap-3 ml-0">
+                                                        <div class="flex items-center gap-2 bg-base-200/50 px-3 py-2 rounded-lg">
+                                                            <i data-lucide="moon" class="w-4 h-4 text-base-content/50"></i>
+                                                            <input type="time" class="input input-bordered input-sm w-24 text-center" value="22:00">
+                                                        </div>
+                                                        <span class="text-sm text-base-content/60">to</span>
+                                                        <div class="flex items-center gap-2 bg-base-200/50 px-3 py-2 rounded-lg">
+                                                            <i data-lucide="sun" class="w-4 h-4 text-base-content/50"></i>
+                                                            <input type="time" class="input input-bordered input-sm w-24 text-center" value="07:00">
+                                                        </div>
                                                     </div>
                                                 </div>
-                                                <div class="form-control flex flex-row justify-between items-center py-2 border-b border-base-200">
+                                                <div class="flex items-center justify-between py-3 border-b border-base-200">
                                                     <div>
-                                                        <label class="label text-base text-base-content mb-1">Do Not Disturb</label>
-                                                        <p class="text-sm text-base-content/70">Temporarily disable all notifications</p>
+                                                        <label class="text-base font-medium text-base-content">Do Not Disturb</label>
+                                                        <p class="text-sm text-base-content/70 mt-0.5">Temporarily disable all notifications</p>
                                                     </div>
-                                                    <label class="toggle">
-                                                        <input type="checkbox"/>
-                                                        <span class="toggle-mark"></span>
-                                                    </label>
+                                                    <input type="checkbox" class="toggle toggle-error">
                                                 </div>
-                                                <div class="form-control flex flex-row justify-between items-center py-2 border-b border-base-200">
+                                                <div class="flex items-center justify-between py-3 border-b border-base-200">
                                                     <div>
-                                                        <label class="label text-base text-base-content mb-1">Email Notifications</label>
-                                                        <p class="text-sm text-base-content/70">Receive notifications via email</p>
+                                                        <label class="text-base font-medium text-base-content">Email Notifications</label>
+                                                        <p class="text-sm text-base-content/70 mt-0.5">Receive notifications via email</p>
                                                     </div>
-                                                    <label class="toggle">
-                                                        <input type="checkbox" checked/>
-                                                        <span class="toggle-mark"></span>
-                                                    </label>
+                                                    <input type="checkbox" class="toggle toggle-primary" checked>
                                                 </div>
-                                                <div class="form-control flex flex-row justify-between items-center py-2">
+                                                <div class="flex items-center justify-between py-3">
                                                     <div>
-                                                        <label class="label text-base text-base-content mb-1">Browser Notifications</label>
-                                                        <p class="text-sm text-base-content/70">Receive push notifications in browser</p>
+                                                        <label class="text-base font-medium text-base-content">Browser Notifications</label>
+                                                        <p class="text-sm text-base-content/70 mt-0.5">Receive push notifications in browser</p>
                                                     </div>
-                                                    <label class="toggle">
-                                                        <input type="checkbox" checked/>
-                                                        <span class="toggle-mark"></span>
-                                                    </label>
+                                                    <input type="checkbox" class="toggle toggle-primary" checked>
                                                 </div>
                                             </div>
                                         </section>
@@ -831,10 +827,10 @@
                                                 <h3 class="text-base text-base-content font-medium">Notification Types</h3>
                                             </div>
                                             <div class="mt-3 space-y-3">
-                                                <div class="form-control flex flex-row justify-between items-center py-2 border-b border-base-200">
+                                                <div class="flex items-center justify-between py-3 border-b border-base-200">
                                                     <div>
-                                                        <label class="label text-base text-base-content mb-1">Project Updates</label>
-                                                        <p class="text-sm text-base-content/70">Builds, deployments, and project events</p>
+                                                        <label class="text-base font-medium text-base-content">Project Updates</label>
+                                                        <p class="text-sm text-base-content/70 mt-0.5">Builds, deployments, and project events</p>
                                                     </div>
                                                     <button class="btn btn-ghost btn-sm font-normal flex gap-2" popovertarget="popover-project-updates" style="anchor-name:--anchor-project-updates">
                                                         <span class="dropdown-text font-normal">Push, Email</span>
@@ -849,10 +845,10 @@
                                                     </ul>
                                                     <input type="hidden" id="project-updates-value" value="push,email">
                                                 </div>
-                                                <div class="form-control flex flex-row justify-between items-center py-2 border-b border-base-200">
+                                                <div class="flex items-center justify-between py-3 border-b border-base-200">
                                                     <div>
-                                                        <label class="label text-base text-base-content mb-1">Direct Messages</label>
-                                                        <p class="text-sm text-base-content/70">When someone sends you a message</p>
+                                                        <label class="text-base font-medium text-base-content">Direct Messages</label>
+                                                        <p class="text-sm text-base-content/70 mt-0.5">When someone sends you a message</p>
                                                     </div>
                                                     <button class="btn btn-ghost btn-sm font-normal flex gap-2" popovertarget="popover-dm-settings" style="anchor-name:--anchor-dm-settings">
                                                         <span class="dropdown-text font-normal">Push</span>
@@ -867,10 +863,10 @@
                                                     </ul>
                                                     <input type="hidden" id="dm-settings-value" value="push">
                                                 </div>
-                                                <div class="form-control flex flex-row justify-between items-center py-2 border-b border-base-200">
+                                                <div class="flex items-center justify-between py-3 border-b border-base-200">
                                                     <div>
-                                                        <label class="label text-base text-base-content mb-1">Mentions</label>
-                                                        <p class="text-sm text-base-content/70">When someone mentions you</p>
+                                                        <label class="text-base font-medium text-base-content">Mentions</label>
+                                                        <p class="text-sm text-base-content/70 mt-0.5">When someone mentions you</p>
                                                     </div>
                                                     <button class="btn btn-ghost btn-sm font-normal flex gap-2" popovertarget="popover-mentions-settings" style="anchor-name:--anchor-mentions-settings">
                                                         <span class="dropdown-text font-normal">Push</span>
@@ -885,10 +881,10 @@
                                                     </ul>
                                                     <input type="hidden" id="mentions-settings-value" value="push">
                                                 </div>
-                                                <div class="form-control flex flex-row justify-between items-center py-2">
+                                                <div class="flex items-center justify-between py-3">
                                                     <div>
-                                                        <label class="label text-base text-base-content mb-1">Security Alerts</label>
-                                                        <p class="text-sm text-base-content/70">Important security notifications</p>
+                                                        <label class="text-base font-medium text-base-content">Security Alerts</label>
+                                                        <p class="text-sm text-base-content/70 mt-0.5">Important security notifications</p>
                                                     </div>
                                                     <button class="btn btn-ghost btn-sm font-normal flex gap-2" popovertarget="popover-security-settings" style="anchor-name:--anchor-security-settings">
                                                         <span class="dropdown-text font-normal">Push, Email</span>
@@ -912,29 +908,23 @@
                                                 <h3 class="text-base text-base-content font-medium">Advanced</h3>
                                             </div>
                                             <div class="mt-3 space-y-3">
-                                                <div class="form-control flex flex-row justify-between items-center py-2 border-b border-base-200">
+                                                <div class="flex items-center justify-between py-3 border-b border-base-200">
                                                     <div>
-                                                        <label class="label text-base text-base-content mb-1">Sound Effects</label>
-                                                        <p class="text-sm text-base-content/70">Play sound for new notifications</p>
+                                                        <label class="text-base font-medium text-base-content">Sound Effects</label>
+                                                        <p class="text-sm text-base-content/70 mt-0.5">Play sound for new notifications</p>
                                                     </div>
-                                                    <label class="toggle">
-                                                        <input type="checkbox" checked/>
-                                                        <span class="toggle-mark"></span>
-                                                    </label>
+                                                    <input type="checkbox" class="toggle toggle-primary" checked>
                                                 </div>
-                                                <div class="form-control flex flex-row justify-between items-center py-2 border-b border-base-200">
+                                                <div class="flex items-center justify-between py-3 border-b border-base-200">
                                                     <div>
-                                                        <label class="label text-base text-base-content mb-1">Unread Badge</label>
-                                                        <p class="text-sm text-base-content/70">Show count of unread notifications</p>
+                                                        <label class="text-base font-medium text-base-content">Unread Badge</label>
+                                                        <p class="text-sm text-base-content/70 mt-0.5">Show count of unread notifications</p>
                                                     </div>
-                                                    <label class="toggle">
-                                                        <input type="checkbox" checked/>
-                                                        <span class="toggle-mark"></span>
-                                                    </label>
+                                                    <input type="checkbox" class="toggle toggle-primary" checked>
                                                 </div>
-                                                <div class="flex items-center justify-between py-2">
-                                                    <span class="text-sm text-base-content">Mark all as read shortcut</span>
-                                                    <kbd class="kbd kbd-sm">Shift + Esc</kbd>
+                                                <div class="flex items-center justify-between py-3">
+                                                    <span class="text-base font-medium text-base-content">Mark all as read shortcut</span>
+                                                    <kbd class="kbd kbd-sm bg-base-200">Shift + Esc</kbd>
                                                 </div>
                                             </div>
                                         </section>

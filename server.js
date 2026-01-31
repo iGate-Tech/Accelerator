@@ -298,6 +298,7 @@ const routes = {
 // Bun.serve options
 const serveOptions = {
   port,
+  hostname: '0.0.0.0', // Bind to all interfaces to be accessible from outside the container
   async fetch(request) {
     const url = new URL(request.url);
 
@@ -379,9 +380,22 @@ const serveOptions = {
     // This includes when NODE_ENV='production' or is undefined
     if (url.pathname === '/' || url.pathname === '/index.html') {
       // Return the main HTML file
-      return new Response(Bun.file('./dist/index.html'), {
-        headers: { 'Content-Type': 'text/html' }
-      });
+      const indexPath = './dist/index.html';
+      try {
+        const file = Bun.file(indexPath);
+        const fileExists = await file.exists();
+        if (fileExists) {
+          return new Response(file, {
+            headers: { 'Content-Type': 'text/html' }
+          });
+        } else {
+          console.log(`Index file not found at: ${indexPath}`);
+          return new Response('Index file not found', { status: 404 });
+        }
+      } catch (error) {
+        console.log(`Error serving index file: ${error.message}`);
+        return new Response('Server error', { status: 500 });
+      }
     }
 
     // Handle other static files in production
@@ -392,17 +406,34 @@ const serveOptions = {
         const fileExists = await file.exists();
         if (fileExists) {
           return new Response(file);
+        } else {
+          console.log(`Static file not found: ${filePath}`);
+          return new Response('File not found', { status: 404 });
         }
       } catch (error) {
-        console.log(`Static file error: ${error.message}`);
+        console.log(`Error serving static file: ${error.message}`);
+        return new Response('Server error', { status: 500 });
       }
     }
 
     // Catch-all handler for SPA - serve index.html for any unmatched request
     if (!url.pathname.startsWith('/api')) {
-      return new Response(Bun.file('./dist/index.html'), {
-        headers: { 'Content-Type': 'text/html' }
-      });
+      const indexPath = './dist/index.html';
+      try {
+        const file = Bun.file(indexPath);
+        const fileExists = await file.exists();
+        if (fileExists) {
+          return new Response(file, {
+            headers: { 'Content-Type': 'text/html' }
+          });
+        } else {
+          console.log(`SPA fallback index file not found at: ${indexPath}`);
+          return new Response('Index file not found', { status: 404 });
+        }
+      } catch (error) {
+        console.log(`Error serving SPA fallback: ${error.message}`);
+        return new Response('Server error', { status: 500 });
+      }
     }
 
     // 404 for unknown routes

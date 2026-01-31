@@ -12,7 +12,7 @@ export {
   getDbStatus,
 } from './core.js';
 export { updateEntity, getEntities, createSchema } from './operations.js';
-import { dbInstance } from './core.js';
+import { getDbInstance } from './core.js';
 
 // Simple exports for commonly used functions
 export const getProjects = async (userId = null) => {
@@ -534,7 +534,8 @@ export const updateTask = async (id, updates) => {
 };
 
 export const deleteTask = async id => {
-  await dbInstance.query(`DELETE FROM tasks WHERE id = $1`, [id]);
+  const db = await getDbInstance();
+  await db.query(`DELETE FROM tasks WHERE id = $1`, [id]);
 };
 
 // ============================================================================

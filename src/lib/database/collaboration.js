@@ -1,5 +1,5 @@
 import { v4 as uuidv4 } from 'uuid';
-import { dbInstance } from './core.js';
+import { getDbInstance } from './core.js';
 import { updateEntity } from './operations.js';
 
 // Collaboration and portfolio management functions
@@ -10,8 +10,10 @@ export async function _inviteCollaborator({
   message = '',
 }) {
   try {
+    const db = await getDbInstance();
+
     // Check if user exists
-    const existingUser = await dbInstance.query(
+    const existingUser = await db.query(
       'SELECT id FROM users WHERE email = $1',
       [inviteeEmail]
     );
@@ -22,7 +24,7 @@ export async function _inviteCollaborator({
     const inviteeId = existingUser.rows[0].id;
 
     // Check if invitation already exists
-    const existingInvitation = await dbInstance.query(
+    const existingInvitation = await db.query(
       'SELECT id FROM portfolio_invitations WHERE portfolio_id = $1 AND invitee_email = $2 AND status = $3',
       [portfolioId, inviteeEmail, 'pending']
     );
@@ -32,7 +34,7 @@ export async function _inviteCollaborator({
     }
 
     // Check if user is already a collaborator
-    const existingCollaborator = await dbInstance.query(
+    const existingCollaborator = await db.query(
       'SELECT id FROM portfolio_collaborators WHERE portfolio_id = $1 AND user_id = $2',
       [portfolioId, inviteeId]
     );
@@ -46,7 +48,7 @@ export async function _inviteCollaborator({
       Date.now() + 7 * 24 * 60 * 60 * 1000
     ).toISOString(); // 7 days
 
-    await dbInstance.query(
+    await db.query(
       'INSERT INTO portfolio_invitations (id, portfolio_id, invitee_email, role, status, message, sent_at, synced_at, last_modified, sync_status, deleted_at, version) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)',
       [
         id,
@@ -73,7 +75,8 @@ export async function _inviteCollaborator({
 
 export async function _getPortfolioInvitations({ portfolioId }) {
   try {
-    const res = await dbInstance.query(
+    const db = await getDbInstance();
+    const res = await db.query(
       'SELECT * FROM portfolio_invitations WHERE portfolio_id = $1 ORDER BY sent_at DESC',
       [portfolioId]
     );
@@ -86,7 +89,8 @@ export async function _getPortfolioInvitations({ portfolioId }) {
 
 export async function _getUserInvitations({ userEmail }) {
   try {
-    const res = await dbInstance.query(
+    const db = await getDbInstance();
+    const res = await db.query(
       'SELECT pi.*, p.name as portfolio_name FROM portfolio_invitations pi LEFT JOIN projects p ON pi.portfolio_id = p.id WHERE pi.invitee_email = $1 AND pi.status = $2 ORDER BY pi.sent_at DESC',
       [userEmail, 'pending']
     );
@@ -99,12 +103,14 @@ export async function _getUserInvitations({ userEmail }) {
 
 export async function _respondToInvitation({ invitationId, status }) {
   try {
+    const db = await getDbInstance();
+
     if (!['accepted', 'rejected'].includes(status)) {
       throw new Error('Invalid status. Must be "accepted" or "rejected"');
     }
 
     // Get invitation details
-    const invitation = await dbInstance.query(
+    const invitation = await db.query(
       'SELECT * FROM portfolio_invitations WHERE id = $1',
       [invitationId]
     );
@@ -120,14 +126,14 @@ export async function _respondToInvitation({ invitationId, status }) {
     }
 
     // Update invitation status
-    await dbInstance.query(
+    await db.query(
       'UPDATE portfolio_invitations SET status = $1, responded_at = $2, last_modified = $3 WHERE id = $4',
       [status, new Date().toISOString(), new Date().toISOString(), invitationId]
     );
 
     // If accepted, add as collaborator
     if (status === 'accepted') {
-      const user = await dbInstance.query(
+      const user = await db.query(
         'SELECT id FROM users WHERE email = $1',
         [inv.invitee_email]
       );
@@ -150,7 +156,8 @@ export async function _respondToInvitation({ invitationId, status }) {
 
 export async function _getPortfolioCollaborators({ portfolioId }) {
   try {
-    const res = await dbInstance.query(
+    const db = await getDbInstance();
+    const res = await db.query(
       `
       SELECT pc.*, u.email, u.avatar
       FROM portfolio_collaborators pc
@@ -169,7 +176,8 @@ export async function _getPortfolioCollaborators({ portfolioId }) {
 
 export async function _removeCollaborator({ portfolioId, userId }) {
   try {
-    await dbInstance.query(
+    const db = await getDbInstance();
+    await db.query(
       'DELETE FROM portfolio_collaborators WHERE portfolio_id = $1 AND user_id = $2',
       [portfolioId, userId]
     );
@@ -201,15 +209,17 @@ export async function _addPortfolioCollaborator({
   role = 'editor',
 }) {
   try {
+    const db = await getDbInstance();
+
     // Check if already exists
-    const existing = await dbInstance.query(
+    const existing = await db.query(
       'SELECT id FROM portfolio_collaborators WHERE portfolio_id = $1 AND user_id = $2',
       [portfolioId, userId]
     );
 
     if (existing.rows.length > 0) {
       // Update role if different
-      await dbInstance.query(
+      await db.query(
         'UPDATE portfolio_collaborators SET role = $1, last_modified = $2 WHERE portfolio_id = $3 AND user_id = $4',
         [role, new Date().toISOString(), portfolioId, userId]
       );
@@ -218,7 +228,7 @@ export async function _addPortfolioCollaborator({
 
     // Add new collaborator
     const id = uuidv4();
-    await dbInstance.query(
+    await db.query(
       'INSERT INTO portfolio_collaborators (id, portfolio_id, user_id, role, joined_at, synced_at, last_modified, sync_status, deleted_at, version) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)',
       [
         id,

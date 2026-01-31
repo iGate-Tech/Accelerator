@@ -1,5 +1,5 @@
 import { v4 as uuidv4 } from 'uuid';
-import { dbInstance } from './core.js';
+import { getDbInstance } from './core.js';
 import { updateEntity } from './operations.js';
 import {
   extractHighlightedText,
@@ -9,6 +9,8 @@ import {
 // Project management functions
 export async function _createProject({ project, userId }) {
   try {
+    const db = await getDbInstance();
+
     // Import security functions dynamically to avoid circular dependencies
     const { validateAndSanitizeDbInput } = await import('../auth/security.js');
 
@@ -52,7 +54,7 @@ export async function _createProject({ project, userId }) {
       project.context || '',
     ];
 
-    const res = await dbInstance.query(
+    const res = await db.query(
       `
       INSERT INTO projects (
         id, name, description, user_id, status, created_at, last_modified, public, context

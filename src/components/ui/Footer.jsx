@@ -3,43 +3,38 @@ import { openSettings } from '@components/modals/SettingsModal';
 import { Show } from 'solid-js';
 import { User } from 'lucide-solid'; // ← make sure lucide-solid is installed
 
-const Footer = (props) => {
+const Footer = props => {
   const { user } = useUser();
 
   const displayName = () => user()?.profile?.name || user()?.name || 'User';
   const hasCustomAvatar = () =>
-    user()?.avatar && !user()?.avatar.startsWith('/default') && user()?.avatar.trim() !== '';
+    user()?.avatar &&
+    !user()?.avatar.startsWith('/default') &&
+    user()?.avatar.trim() !== '';
 
   return (
-    <footer class="border-t border-base-200 bg-base-100 flex-shrink-0">
+    <footer class="border-base-200/80 bg-base-100 flex-shrink-0 border-t">
       <button
         type="button"
         onClick={openSettings}
-        class="
-          group w-full px-4 py-3.5
-          flex items-center gap-3.5
-          hover:bg-base-200/70 active:bg-base-200/90
-          transition-colors duration-150
-          focus:outline-none focus:ring-2 focus:ring-primary/50 focus:ring-offset-2 focus:ring-offset-base-100
-          cursor-pointer
-        "
+        class="group hover:bg-base-200/50 active:bg-base-200/80 focus:ring-primary/40 focus:ring-offset-base-100 flex w-full cursor-pointer items-center gap-4 px-5 py-4 transition-colors duration-200 ease-out focus:ring-2 focus:ring-offset-2 focus:outline-none"
         aria-label="Open profile and settings"
       >
         {/* Avatar */}
         <div class="avatar flex-shrink-0">
-          <div class="w-10 h-10 rounded-full  bg-base-300 ring-1 ring-base-300/60">
+          <div class="bg-base-300/50 ring-base-200/60 h-10 w-10 overflow-hidden rounded-full ring-1">
             <Show
               when={hasCustomAvatar()}
               fallback={
-                <div class="w-full h-full flex items-center justify-center bg-base-300">
-                  <User size={22} class="text-base-content/70" />
+                <div class="flex h-full w-full items-center justify-center">
+                  <User size={20} class="text-base-content/50" />
                 </div>
               }
             >
               <img
                 src={user()?.avatar}
                 alt={displayName()}
-                class="w-full h-full object-cover"
+                class="h-full w-full object-cover"
                 referrerpolicy="no-referrer"
                 loading="lazy"
               />
@@ -50,23 +45,18 @@ const Footer = (props) => {
         {/* Only show name and status if sidebar is not collapsed */}
         <Show when={!(props.isCollapsed ? props.isCollapsed() : false)}>
           {/* Name & status */}
-          <div class="flex-1 min-w-0 text-left leading-tight">
-            <div class="font-medium truncate text-base-content text-[15px]">
+          <div class="min-w-0 flex-1 text-left leading-snug">
+            <div class="text-base-content truncate text-[14px] font-semibold tracking-tight">
               {displayName()}
             </div>
-<div class="
-  text-xs text-base-content/60
-  flex items-center gap-1.5
-   whitespace-nowrap
-">
-  <span class="font-medium">Free</span>
-  <span class="opacity-60">•</span>
-  <span class="truncate min-w-0">
-    {user()?.email || 'No email'}
-  </span>
-</div>
+            <div class="text-base-content/50 flex items-center gap-2 text-xs font-medium whitespace-nowrap">
+              <span>Free</span>
+              <span class="text-base-content/30">·</span>
+              <span class="min-w-0 truncate">
+                {user()?.email || 'No email'}
+              </span>
+            </div>
           </div>
-
         </Show>
       </button>
     </footer>

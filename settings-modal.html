@@ -57,22 +57,76 @@
                 #tab_workspace:checked ~ #workspace-tab-content,
                 #tab_apps:checked ~ #apps-tab-content,
                 #tab_connectors:checked ~ #connectors-tab-content,
-                #tab_integrations:checked ~ #integrations-tab-content {
+                #tab_integrations:checked ~ #integrations-tab-content,
+                #tab_data:checked ~ #data-tab-content,
+                #tab_security:checked ~ #security-tab-content,
+                #tab_roles:checked ~ #roles-tab-content,
+                #tab_help:checked ~ #help-tab-content {
             display : block;
-        } </style>
+        }
+        /* Make tab content scrollable */
+            .tab-content {
+                max-height: calc(600px - 140px);
+                overflow-y: auto;
+                overflow-x: hidden;
+            }
+        /* Make notification sub-content scrollable */
+            #notifications-tab-content > div > div {
+                max-height: calc(600px - 180px);
+                overflow-y: auto;
+                overflow-x: hidden;
+            }
+        /* Top tabs active state */
+            .tab.active {
+                color: hsl(var(--p));
+                border-bottom-color: hsl(var(--p)) !important;
+                border-bottom-width: 2px;
+            }
+        /* Sidebar active state */
+            .menu li a.active {
+                background-color: hsl(var(--b2)) !important;
+                color: hsl(var(--p)) !important;
+            }
+        /* Thin scrollbar */
+            .tab-content::-webkit-scrollbar,
+            #notifications-tab-content > div > div::-webkit-scrollbar,
+            .menu::-webkit-scrollbar,
+            .tabs-bordered::-webkit-scrollbar {
+                width: 2px !important;
+                height: 2px !important;
+            }
+            .tab-content::-webkit-scrollbar-track,
+            #notifications-tab-content > div > div::-webkit-scrollbar-track,
+            .menu::-webkit-scrollbar-track,
+            .tabs-bordered::-webkit-scrollbar-track {
+                background: transparent !important;
+            }
+            .tab-content::-webkit-scrollbar-thumb,
+            #notifications-tab-content > div > div::-webkit-scrollbar-thumb,
+            .menu::-webkit-scrollbar-thumb,
+            .tabs-bordered::-webkit-scrollbar-thumb {
+                background: hsl(var(--bc) / 0.2) !important;
+                border-radius: 2px !important;
+            }
+            .tab-content::-webkit-scrollbar-thumb:hover,
+            #notifications-tab-content > div > div::-webkit-scrollbar-thumb:hover,
+            .menu::-webkit-scrollbar-thumb:hover,
+            .tabs-bordered::-webkit-scrollbar-thumb:hover {
+                background: hsl(var(--bc) / 0.3) !important;
+            } </style>
     </head>
 
-    <body class="min-h-screen flex items-center justify-center p-6">
+    <body class="min-h-screen flex items-center justify-center p-2 md:p-6">
         <div class="fixed inset-0 bg-black/50 backdrop-blur-xl z-0"></div>
-        <div class=" w-[760px] h-[600px] bg-white rounded-2xl shadow-2xl overflow-hidden border border-gray-200 relative z-10">
+        <div class=" w-full h-full md:w-[760px] md:h-[600px] bg-white rounded-2xl shadow-2xl overflow-hidden border border-gray-200 relative z-10">
             <div class="flex gap-2 justify-between mx-5 my-3">
                 <div class="">Settings</div>
                 <i data-lucide="x" class="w-5 h-5 text-gray-600 "></i>
             </div>
             <!-- DaisyUI Tabs Navigation -->
-            <div class="hover:overflow-x-auto m-2 border-b border-base-300">
+            <div class="hover:overflow-x-auto m-2 border-b border-base-300 md:hidden">
                 <div class="tabs tabs-bordered flex-nowrap min-w-max">
-                    <label for="tab_general" class="tab   hover:text-primary">General</label>
+                    <label for="tab_general" class="tab active hover:text-primary">General</label>
                     <label for="tab_profile" class="tab   hover:text-primary">Profile</label>
                     <label for="tab_notifications" class="tab  hover:text-primary">Notifications</label>
                     <label for="tab_billing" class="tab  hover:text-primary">Plans & Billing</label>
@@ -81,17 +135,20 @@
                     <label for="tab_apps" class="tab  hover:text-primary">Apps & Skills</label>
                     <label for="tab_connectors" class="tab  hover:text-primary">Connectors</label>
                     <label for="tab_integrations" class="tab  hover:text-primary">Integrations</label>
+                    <label for="tab_data" class="tab  hover:text-primary">Data Control</label>
+                    <label for="tab_security" class="tab  hover:text-primary">Security</label>
+                    <label for="tab_roles" class="tab  hover:text-primary">Roles & Governance</label>
+                    <label for="tab_help" class="tab  hover:text-primary">Help</label>
                 </div>
             </div>
 
             <div
-                class="flex ">
+                class="flex flex-1 overflow-hidden">
 
                 <!-- Sidebar -->
-                <aside class="w-[200px] flex flex-col relative bg-base-100 border-r border-base-300">
+                <aside class="hidden md:flex w-[200px] flex flex-col relative bg-base-100 border-r border-base-300 min-h-0 overflow-hidden">
 
-
-                    <div class="flex-1 px-3 overflow-y-auto">
+                    <div class="flex-1 px-3 overflow-y-auto h-full">
                         <ul class="menu w-full gap-1 space-y-0.5 p-0">
                             <li>
                                 <a class="active flex gap-2 items-center">
@@ -149,6 +206,24 @@
                             </li>
                             <li>
                                 <a class="flex gap-2 items-center">
+                                    <i data-lucide="database" class="w-5 h-5"></i>
+                                    Data Control
+                                </a>
+                            </li>
+                            <li>
+                                <a class="flex gap-2 items-center">
+                                    <i data-lucide="shield" class="w-5 h-5"></i>
+                                    Security
+                                </a>
+                            </li>
+                            <li>
+                                <a class="flex gap-2 items-center">
+                                    <i data-lucide="shield-check" class="w-5 h-5"></i>
+                                    Roles & Governance
+                                </a>
+                            </li>
+                            <li>
+                                <a class="flex gap-2 items-center">
                                     <i data-lucide="life-buoy" class="w-5 h-5"></i>
                                     Help
                                 </a>
@@ -159,15 +234,15 @@
 
                 <!-- Main Content – Tab Sections -->
                 <main
-                    class="flex-1 bg-white p-4 overflow-y-auto ">
+                    class="flex-1 bg-white p-4 overflow-y-auto h-full min-h-0">
 
 
                     <!-- Tab Content with Hidden Radio Buttons -->
                     <div
-                        class="w-full">
+                        class="w-full h-full">
                         <!-- General Tab -->
                         <input type="radio" name="settings_tab_group" id="tab_general" class="hidden" checked="checked"/>
-                        <div id="general-tab-content" class="hidden">
+                        <div id="general-tab-content" class="hidden tab-content">
                             <div class=" divide-y divide-gray-200">
                                 <div class="form-control flex flex-row justify-between items-start py-2 border-b border-base-300">
                                     <div >
@@ -252,7 +327,7 @@
 
                         <!-- Profile Tab -->
                         <input type="radio" name="settings_tab_group" id="tab_profile" class="hidden"/>
-                        <div id="profile-tab-content" class="hidden">
+                        <div id="profile-tab-content" class="hidden tab-content">
                             <div class="space-y-6">
                                 <section>
                                     <div class="flex items-center py-3 border-b border-base-200">
@@ -410,7 +485,7 @@
 
                         <!-- Notifications Tab -->
                         <input type="radio" name="settings_tab_group" id="tab_notifications" class="hidden"/>
-                        <div id="notifications-tab-content" class="hidden">
+                        <div id="notifications-tab-content" class="hidden tab-content">
 
                             <!-- Notification Sub-tabs -->
                             <div class="tabs tabs-bordered">
@@ -678,7 +753,7 @@
 
                         <!-- Billing Tab -->
                         <input type="radio" name="settings_tab_group" id="tab_billing" class="hidden"/>
-                        <div id="billing-tab-content" class="hidden">
+                        <div id="billing-tab-content" class="hidden tab-content">
                             <div class="space-y-6">
                                 <section>
                                     <div class="flex items-center py-3 border-b border-base-200">
@@ -785,8 +860,8 @@
                             </div>
                         </div>
                         <!-- Credits Tab -->
-            <input type="radio" name="settings_tab_group" id="tab_credits" class="hidden"/>
-            <div id="credits-tab-content" class="hidden">
+                        <input type="radio" name="settings_tab_group" id="tab_credits" class="hidden"/>
+                        <div id="credits-tab-content" class="hidden tab-content">
                 <div class="space-y-6">
                     <section>
                         <div class="flex items-center py-3 border-b border-base-200">
@@ -906,26 +981,1403 @@
 
             <!-- Workspace Tab -->
             <input type="radio" name="settings_tab_group" id="tab_workspace" class="hidden"/>
-            <div id="workspace-tab-content" class="hidden">
+            <div id="workspace-tab-content" class="hidden tab-content">
+                <div class="space-y-6">
+                    <section>
+                        <div class="flex items-center py-3 border-b border-base-200">
+                            <h3 class="text-lg text-base-content">Workspace Settings</h3>
+                        </div>
+                        <div class="flex items-center justify-between border-b border-base-200 py-3">
+                            <div class="w-full">
+                                <div class="flex items-center justify-between gap-4">
+                                    <span class="text-sm text-base-content">Workspace Name</span>
+                                    <button class="flex items-center gap-2 text-sm text-base-content/70 hover:text-base-content">
+                                        <span>My Workspace</span>
+                                        <i data-lucide="chevron-right" class="w-4 h-4"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-between border-b border-base-200 py-3">
+                            <div class="w-full">
+                                <div class="flex items-center justify-between gap-4">
+                                    <span class="text-sm text-base-content">Workspace URL</span>
+                                    <button class="flex items-center gap-2 text-sm text-base-content/70 hover:text-base-content">
+                                        <span>https://app.accelerator.io/my-workspace</span>
+                                        <i data-lucide="chevron-right" class="w-4 h-4"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-between border-b border-base-200 py-3">
+                            <div class="w-full">
+                                <div class="flex items-center justify-between gap-4">
+                                    <span class="text-sm text-base-content">Description</span>
+                                    <button class="flex items-center gap-2 text-sm text-base-content/70 hover:text-base-content">
+                                        <span>Add description</span>
+                                        <i data-lucide="chevron-right" class="w-4 h-4"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-between py-3">
+                            <div class="w-full">
+                                <div class="flex items-center justify-between gap-4">
+                                    <div class="flex items-center gap-3">
+                                        <div class="avatar">
+                                            <div class="w-12 h-12 rounded-xl bg-base-200 flex items-center justify-center">
+                                                <i data-lucide="image" class="w-6 h-6 text-base-content/40"></i>
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <span class="text-sm text-base-content">Workspace Logo</span>
+                                            <p class="text-xs text-base-content/60">Upload a custom logo for your workspace</p>
+                                        </div>
+                                    </div>
+                                    <div class="flex gap-2">
+                                        <input type="file" id="logo-upload" class="hidden" accept="image/*">
+                                        <button class="btn btn-ghost btn-sm" onclick="document.getElementById('logo-upload').click()">Upload</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
 
+                    <section>
+                        <div class="flex items-center py-3 border-b border-base-200">
+                            <h3 class="text-lg text-base-content">Members</h3>
+                        </div>
+                        <div class="flex items-center justify-between border-b border-base-200 py-3">
+                            <div class="w-full">
+                                <div class="flex items-center justify-between gap-4">
+                                    <span class="text-sm text-base-content">Team Size</span>
+                                    <button class="flex items-center gap-2 text-sm text-base-content/70 hover:text-base-content">
+                                        <span>5 members</span>
+                                        <i data-lucide="chevron-right" class="w-4 h-4"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-between border-b border-base-200 py-3">
+                            <div class="w-full">
+                                <div class="flex items-center justify-between gap-4">
+                                    <span class="text-sm text-base-content">Invite Link</span>
+                                    <button class="flex items-center gap-2 text-sm text-base-content/70 hover:text-base-content">
+                                        <span>Generate link</span>
+                                        <i data-lucide="chevron-right" class="w-4 h-4"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-between py-3">
+                            <div class="w-full">
+                                <div class="flex items-center justify-between gap-4">
+                                    <span class="text-sm text-base-content">Member Roles</span>
+                                    <button class="flex items-center gap-2 text-sm text-base-content/70 hover:text-base-content">
+                                        <span>Manage roles</span>
+                                        <i data-lucide="chevron-right" class="w-4 h-4"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section>
+                        <div class="flex items-center py-3 border-b border-base-200">
+                            <h3 class="text-lg text-base-content">Preferences</h3>
+                        </div>
+                        <div class="flex items-center justify-between border-b border-base-200 py-3">
+                            <div class="w-full">
+                                <div class="flex items-center justify-between gap-4">
+                                    <span class="text-sm text-base-content">Default Project View</span>
+                                    <button class="flex items-center gap-2 text-sm text-base-content/70 hover:text-base-content">
+                                        <span>Grid</span>
+                                        <i data-lucide="chevron-right" class="w-4 h-4"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-between border-b border-base-200 py-3">
+                            <div class="w-full">
+                                <div class="flex items-center justify-between gap-4">
+                                    <span class="text-sm text-base-content">Task Priority</span>
+                                    <button class="flex items-center gap-2 text-sm text-base-content/70 hover:text-base-content">
+                                        <span>High priority first</span>
+                                        <i data-lucide="chevron-right" class="w-4 h-4"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-between py-3">
+                            <div class="w-full">
+                                <div class="flex items-center justify-between gap-4">
+                                    <span class="text-sm text-base-content">Auto-save</span>
+                                    <label class="swap swap-rotate">
+                                        <input type="checkbox" checked/>
+                                        <svg class="swap-on fill-current w-6 h-6" xmlns="http://www.w3.org/2000/svg" viewbox="0 0 24 24">
+                                            <path d="M21,7L9,19L3.5,13.5L4.91,12.09L9,16.17L19.59,5.59L21,7Z"/>
+                                        </svg>
+                                        <svg class="swap-off fill-current w-6 h-6" xmlns="http://www.w3.org/2000/svg" viewbox="0 0 24 24">
+                                            <path d="M19,6.41L17.59,5L12,10.59L6.41,5L5,6.41L10.59,12L5,17.59L6.41,19L12,13.41L17.59,19L19,17.59L13.41,12L19,6.41Z"/>
+                                        </svg>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+                </div>
             </div>
 
             <!-- Apps & Skills Tab -->
             <input type="radio" name="settings_tab_group" id="tab_apps" class="hidden"/>
-            <div id="apps-tab-content" class="hidden">
+            <div id="apps-tab-content" class="hidden tab-content">
+                <div class="space-y-6">
+                    <section>
+                        <div class="flex items-center py-3 border-b border-base-200">
+                            <h3 class="text-lg text-base-content">Installed Apps</h3>
+                        </div>
+                        <div class="flex items-center justify-between border-b border-base-200 py-3">
+                            <div class="w-full">
+                                <div class="flex items-center justify-between gap-4">
+                                    <div class="flex items-center gap-3">
+                                        <div class="avatar">
+                                            <div class="w-10 h-10 rounded-lg bg-base-200 flex items-center justify-center">
+                                                <i data-lucide="bot" class="w-5 h-5 text-base-content/60"></i>
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <span class="text-sm text-base-content">AI Assistant</span>
+                                            <p class="text-xs text-base-content/60">Intelligent task automation</p>
+                                        </div>
+                                    </div>
+                                    <button class="btn btn-ghost btn-sm">Configure</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-between border-b border-base-200 py-3">
+                            <div class="w-full">
+                                <div class="flex items-center justify-between gap-4">
+                                    <div class="flex items-center gap-3">
+                                        <div class="avatar">
+                                            <div class="w-10 h-10 rounded-lg bg-base-200 flex items-center justify-center">
+                                                <i data-lucide="bar-chart-2" class="w-5 h-5 text-base-content/60"></i>
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <span class="text-sm text-base-content">Analytics Dashboard</span>
+                                            <p class="text-xs text-base-content/60">Real-time project insights</p>
+                                        </div>
+                                    </div>
+                                    <button class="btn btn-ghost btn-sm">Configure</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-between py-3">
+                            <div class="w-full">
+                                <div class="flex items-center justify-between gap-4">
+                                    <div class="flex items-center gap-3">
+                                        <div class="avatar">
+                                            <div class="w-10 h-10 rounded-lg bg-base-200 flex items-center justify-center">
+                                                <i data-lucide="file-text" class="w-5 h-5 text-base-content/60"></i>
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <span class="text-sm text-base-content">Document Parser</span>
+                                            <p class="text-xs text-base-content/60">Extract data from files</p>
+                                        </div>
+                                    </div>
+                                    <button class="btn btn-ghost btn-sm">Configure</button>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
 
+                    <section>
+                        <div class="flex items-center py-3 border-b border-base-200">
+                            <h3 class="text-lg text-base-content">Available Skills</h3>
+                        </div>
+                        <div class="flex items-center justify-between border-b border-base-200 py-3">
+                            <div class="w-full">
+                                <div class="flex items-center justify-between gap-4">
+                                    <div class="flex items-center gap-3">
+                                        <div class="avatar">
+                                            <div class="w-10 h-10 rounded-lg bg-base-200 flex items-center justify-center">
+                                                <i data-lucide="code-2" class="w-5 h-5 text-base-content/60"></i>
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <span class="text-sm text-base-content">Code Generation</span>
+                                            <p class="text-xs text-base-content/60">Generate code snippets</p>
+                                        </div>
+                                    </div>
+                                    <button class="btn btn-ghost btn-sm">Add</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-between border-b border-base-200 py-3">
+                            <div class="w-full">
+                                <div class="flex items-center justify-between gap-4">
+                                    <div class="flex items-center gap-3">
+                                        <div class="avatar">
+                                            <div class="w-10 h-10 rounded-lg bg-base-200 flex items-center justify-center">
+                                                <i data-lucide="message-square" class="w-5 h-5 text-base-content/60"></i>
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <span class="text-sm text-base-content">Chat Interface</span>
+                                            <p class="text-xs text-base-content/60">Interactive conversation</p>
+                                        </div>
+                                    </div>
+                                    <button class="btn btn-ghost btn-sm">Add</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-between border-b border-base-200 py-3">
+                            <div class="w-full">
+                                <div class="flex items-center justify-between gap-4">
+                                    <div class="flex items-center gap-3">
+                                        <div class="avatar">
+                                            <div class="w-10 h-10 rounded-lg bg-base-200 flex items-center justify-center">
+                                                <i data-lucide="image" class="w-5 h-5 text-base-content/60"></i>
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <span class="text-sm text-base-content">Image Recognition</span>
+                                            <p class="text-xs text-base-content/60">Analyze and tag images</p>
+                                        </div>
+                                    </div>
+                                    <button class="btn btn-ghost btn-sm">Add</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-between py-3">
+                            <div class="w-full">
+                                <div class="flex items-center justify-between gap-4">
+                                    <div class="flex items-center gap-3">
+                                        <div class="avatar">
+                                            <div class="w-10 h-10 rounded-lg bg-base-200 flex items-center justify-center">
+                                                <i data-lucide="translate" class="w-5 h-5 text-base-content/60"></i>
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <span class="text-sm text-base-content">Translation</span>
+                                            <p class="text-xs text-base-content/60">Multi-language support</p>
+                                        </div>
+                                    </div>
+                                    <button class="btn btn-ghost btn-sm">Add</button>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section>
+                        <div class="flex items-center py-3 border-b border-base-200">
+                            <h3 class="text-lg text-base-content">Skill Marketplace</h3>
+                        </div>
+                        <div class="flex items-center justify-between border-b border-base-200 py-3">
+                            <div class="w-full">
+                                <div class="flex items-center justify-between gap-4">
+                                    <span class="text-sm text-base-content">Browse Marketplace</span>
+                                    <button class="flex items-center gap-2 text-sm text-base-content/70 hover:text-base-content">
+                                        <span>Explore 50+ skills</span>
+                                        <i data-lucide="chevron-right" class="w-4 h-4"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-between py-3">
+                            <div class="w-full">
+                                <div class="flex items-center justify-between gap-4">
+                                    <span class="text-sm text-base-content">Submit Custom Skill</span>
+                                    <button class="btn btn-ghost btn-sm">Create</button>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+                </div>
             </div>
 
             <!-- Connectors Tab -->
             <input type="radio" name="settings_tab_group" id="tab_connectors" class="hidden"/>
-            <div id="connectors-tab-content" class="hidden">
+            <div id="connectors-tab-content" class="hidden tab-content">
+                <div class="space-y-6">
+                    <section>
+                        <div class="flex items-center py-3 border-b border-base-200">
+                            <h3 class="text-lg text-base-content">Data Sources</h3>
+                        </div>
+                        <div class="flex items-center justify-between border-b border-base-200 py-3">
+                            <div class="w-full">
+                                <div class="flex items-center justify-between gap-4">
+                                    <div class="flex items-center gap-3">
+                                        <div class="avatar">
+                                            <div class="w-10 h-10 rounded-lg bg-base-200 flex items-center justify-center">
+                                                <i data-lucide="database" class="w-5 h-5 text-base-content/60"></i>
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <span class="text-sm text-base-content">PostgreSQL</span>
+                                            <p class="text-xs text-base-content/60">Connected</p>
+                                        </div>
+                                    </div>
+                                    <button class="btn btn-ghost btn-sm">Manage</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-between border-b border-base-200 py-3">
+                            <div class="w-full">
+                                <div class="flex items-center justify-between gap-4">
+                                    <div class="flex items-center gap-3">
+                                        <div class="avatar">
+                                            <div class="w-10 h-10 rounded-lg bg-base-200 flex items-center justify-center">
+                                                <i data-lucide="table" class="w-5 h-5 text-base-content/60"></i>
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <span class="text-sm text-base-content">MySQL</span>
+                                            <p class="text-xs text-base-content/60">Not connected</p>
+                                        </div>
+                                    </div>
+                                    <button class="btn btn-ghost btn-sm">Connect</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-between border-b border-base-200 py-3">
+                            <div class="w-full">
+                                <div class="flex items-center justify-between gap-4">
+                                    <div class="flex items-center gap-3">
+                                        <div class="avatar">
+                                            <div class="w-10 h-10 rounded-lg bg-base-200 flex items-center justify-center">
+                                                <i data-lucide="layers" class="w-5 h-5 text-base-content/60"></i>
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <span class="text-sm text-base-content">MongoDB</span>
+                                            <p class="text-xs text-base-content/60">Not connected</p>
+                                        </div>
+                                    </div>
+                                    <button class="btn btn-ghost btn-sm">Connect</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-between py-3">
+                            <div class="w-full">
+                                <div class="flex items-center justify-between gap-4">
+                                    <div class="flex items-center gap-3">
+                                        <div class="avatar">
+                                            <div class="w-10 h-10 rounded-lg bg-base-200 flex items-center justify-center">
+                                                <i data-lucide="hard-drive" class="w-5 h-5 text-base-content/60"></i>
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <span class="text-sm text-base-content">Redis</span>
+                                            <p class="text-xs text-base-content/60">Not connected</p>
+                                        </div>
+                                    </div>
+                                    <button class="btn btn-ghost btn-sm">Connect</button>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
 
+                    <section>
+                        <div class="flex items-center py-3 border-b border-base-200">
+                            <h3 class="text-lg text-base-content">File Storage</h3>
+                        </div>
+                        <div class="flex items-center justify-between border-b border-base-200 py-3">
+                            <div class="w-full">
+                                <div class="flex items-center justify-between gap-4">
+                                    <div class="flex items-center gap-3">
+                                        <div class="avatar">
+                                            <div class="w-10 h-10 rounded-lg bg-base-200 flex items-center justify-center">
+                                                <i data-lucide="cloud" class="w-5 h-5 text-base-content/60"></i>
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <span class="text-sm text-base-content">Amazon S3</span>
+                                            <p class="text-xs text-base-content/60">Not connected</p>
+                                        </div>
+                                    </div>
+                                    <button class="btn btn-ghost btn-sm">Connect</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-between border-b border-base-200 py-3">
+                            <div class="w-full">
+                                <div class="flex items-center justify-between gap-4">
+                                    <div class="flex items-center gap-3">
+                                        <div class="avatar">
+                                            <div class="w-10 h-10 rounded-lg bg-base-200 flex items-center justify-center">
+                                                <i data-lucide="folder" class="w-5 h-5 text-base-content/60"></i>
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <span class="text-sm text-base-content">Google Drive</span>
+                                            <p class="text-xs text-base-content/60">Connected</p>
+                                        </div>
+                                    </div>
+                                    <button class="btn btn-ghost btn-sm">Manage</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-between py-3">
+                            <div class="w-full">
+                                <div class="flex items-center justify-between gap-4">
+                                    <div class="flex items-center gap-3">
+                                        <div class="avatar">
+                                            <div class="w-10 h-10 rounded-lg bg-base-200 flex items-center justify-center">
+                                                <i data-lucide="upload-cloud" class="w-5 h-5 text-base-content/60"></i>
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <span class="text-sm text-base-content">Dropbox</span>
+                                            <p class="text-xs text-base-content/60">Not connected</p>
+                                        </div>
+                                    </div>
+                                    <button class="btn btn-ghost btn-sm">Connect</button>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section>
+                        <div class="flex items-center py-3 border-b border-base-200">
+                            <h3 class="text-lg text-base-content">API Endpoints</h3>
+                        </div>
+                        <div class="flex items-center justify-between border-b border-base-200 py-3">
+                            <div class="w-full">
+                                <div class="flex items-center justify-between gap-4">
+                                    <span class="text-sm text-base-content">Custom API</span>
+                                    <button class="flex items-center gap-2 text-sm text-base-content/70 hover:text-base-content">
+                                        <span>Add endpoint</span>
+                                        <i data-lucide="chevron-right" class="w-4 h-4"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-between border-b border-base-200 py-3">
+                            <div class="w-full">
+                                <div class="flex items-center justify-between gap-4">
+                                    <span class="text-sm text-base-content">Webhooks</span>
+                                    <button class="flex items-center gap-2 text-sm text-base-content/70 hover:text-base-content">
+                                        <span>Configure webhooks</span>
+                                        <i data-lucide="chevron-right" class="w-4 h-4"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-between py-3">
+                            <div class="w-full">
+                                <div class="flex items-center justify-between gap-4">
+                                    <span class="text-sm text-base-content">API Keys</span>
+                                    <button class="flex items-center gap-2 text-sm text-base-content/70 hover:text-base-content">
+                                        <span>Manage keys</span>
+                                        <i data-lucide="chevron-right" class="w-4 h-4"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+                </div>
             </div>
 
             <!-- Integrations Tab -->
             <input type="radio" name="settings_tab_group" id="tab_integrations" class="hidden"/>
-            <div id="integrations-tab-content" class="hidden">
+            <div id="integrations-tab-content" class="hidden tab-content">
+                <div class="space-y-6">
+                    <section>
+                        <div class="flex items-center py-3 border-b border-base-200">
+                            <h3 class="text-lg text-base-content">Communication</h3>
+                        </div>
+                        <div class="flex items-center justify-between border-b border-base-200 py-3">
+                            <div class="w-full">
+                                <div class="flex items-center justify-between gap-4">
+                                    <div class="flex items-center gap-3">
+                                        <div class="avatar">
+                                            <div class="w-10 h-10 rounded-lg bg-base-200 flex items-center justify-center">
+                                                <i data-lucide="mail" class="w-5 h-5 text-base-content/60"></i>
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <span class="text-sm text-base-content">Gmail</span>
+                                            <p class="text-xs text-base-content/60">Not connected</p>
+                                        </div>
+                                    </div>
+                                    <button class="btn btn-ghost btn-sm">Connect</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-between border-b border-base-200 py-3">
+                            <div class="w-full">
+                                <div class="flex items-center justify-between gap-4">
+                                    <div class="flex items-center gap-3">
+                                        <div class="avatar">
+                                            <div class="w-10 h-10 rounded-lg bg-base-200 flex items-center justify-center">
+                                                <i data-lucide="message-circle" class="w-5 h-5 text-base-content/60"></i>
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <span class="text-sm text-base-content">Slack</span>
+                                            <p class="text-xs text-base-content/60">Connected</p>
+                                        </div>
+                                    </div>
+                                    <button class="btn btn-ghost btn-sm">Manage</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-between border-b border-base-200 py-3">
+                            <div class="w-full">
+                                <div class="flex items-center justify-between gap-4">
+                                    <div class="flex items-center gap-3">
+                                        <div class="avatar">
+                                            <div class="w-10 h-10 rounded-lg bg-base-200 flex items-center justify-center">
+                                                <i data-lucide="video" class="w-5 h-5 text-base-content/60"></i>
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <span class="text-sm text-base-content">Zoom</span>
+                                            <p class="text-xs text-base-content/60">Not connected</p>
+                                        </div>
+                                    </div>
+                                    <button class="btn btn-ghost btn-sm">Connect</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-between py-3">
+                            <div class="w-full">
+                                <div class="flex items-center justify-between gap-4">
+                                    <div class="flex items-center gap-3">
+                                        <div class="avatar">
+                                            <div class="w-10 h-10 rounded-lg bg-base-200 flex items-center justify-center">
+                                                <i data-lucide="mic" class="w-5 h-5 text-base-content/60"></i>
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <span class="text-sm text-base-content">Microsoft Teams</span>
+                                            <p class="text-xs text-base-content/60">Not connected</p>
+                                        </div>
+                                    </div>
+                                    <button class="btn btn-ghost btn-sm">Connect</button>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
 
+                    <section>
+                        <div class="flex items-center py-3 border-b border-base-200">
+                            <h3 class="text-lg text-base-content">Project Management</h3>
+                        </div>
+                        <div class="flex items-center justify-between border-b border-base-200 py-3">
+                            <div class="w-full">
+                                <div class="flex items-center justify-between gap-4">
+                                    <div class="flex items-center gap-3">
+                                        <div class="avatar">
+                                            <div class="w-10 h-10 rounded-lg bg-base-200 flex items-center justify-center">
+                                                <i data-lucide="trello" class="w-5 h-5 text-base-content/60"></i>
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <span class="text-sm text-base-content">Jira</span>
+                                            <p class="text-xs text-base-content/60">Connected</p>
+                                        </div>
+                                    </div>
+                                    <button class="btn btn-ghost btn-sm">Manage</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-between border-b border-base-200 py-3">
+                            <div class="w-full">
+                                <div class="flex items-center justify-between gap-4">
+                                    <div class="flex items-center gap-3">
+                                        <div class="avatar">
+                                            <div class="w-10 h-10 rounded-lg bg-base-200 flex items-center justify-center">
+                                                <i data-lucide="layout" class="w-5 h-5 text-base-content/60"></i>
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <span class="text-sm text-base-content">Trello</span>
+                                            <p class="text-xs text-base-content/60">Not connected</p>
+                                        </div>
+                                    </div>
+                                    <button class="btn btn-ghost btn-sm">Connect</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-between border-b border-base-200 py-3">
+                            <div class="w-full">
+                                <div class="flex items-center justify-between gap-4">
+                                    <div class="flex items-center gap-3">
+                                        <div class="avatar">
+                                            <div class="w-10 h-10 rounded-lg bg-base-200 flex items-center justify-center">
+                                                <i data-lucide="list-checks" class="w-5 h-5 text-base-content/60"></i>
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <span class="text-sm text-base-content">Asana</span>
+                                            <p class="text-xs text-base-content/60">Not connected</p>
+                                        </div>
+                                    </div>
+                                    <button class="btn btn-ghost btn-sm">Connect</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-between py-3">
+                            <div class="w-full">
+                                <div class="flex items-center justify-between gap-4">
+                                    <div class="flex items-center gap-3">
+                                        <div class="avatar">
+                                            <div class="w-10 h-10 rounded-lg bg-base-200 flex items-center justify-center">
+                                                <i data-lucide="git-branch" class="w-5 h-5 text-base-content/60"></i>
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <span class="text-sm text-base-content">GitHub</span>
+                                            <p class="text-xs text-base-content/60">Connected</p>
+                                        </div>
+                                    </div>
+                                    <button class="btn btn-ghost btn-sm">Manage</button>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section>
+                        <div class="flex items-center py-3 border-b border-base-200">
+                            <h3 class="text-lg text-base-content">CRM & Marketing</h3>
+                        </div>
+                        <div class="flex items-center justify-between border-b border-base-200 py-3">
+                            <div class="w-full">
+                                <div class="flex items-center justify-between gap-4">
+                                    <div class="flex items-center gap-3">
+                                        <div class="avatar">
+                                            <div class="w-10 h-10 rounded-lg bg-base-200 flex items-center justify-center">
+                                                <i data-lucide="users" class="w-5 h-5 text-base-content/60"></i>
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <span class="text-sm text-base-content">Salesforce</span>
+                                            <p class="text-xs text-base-content/60">Not connected</p>
+                                        </div>
+                                    </div>
+                                    <button class="btn btn-ghost btn-sm">Connect</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-between border-b border-base-200 py-3">
+                            <div class="w-full">
+                                <div class="flex items-center justify-between gap-4">
+                                    <div class="flex items-center gap-3">
+                                        <div class="avatar">
+                                            <div class="w-10 h-10 rounded-lg bg-base-200 flex items-center justify-center">
+                                                <i data-lucide="send" class="w-5 h-5 text-base-content/60"></i>
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <span class="text-sm text-base-content">HubSpot</span>
+                                            <p class="text-xs text-base-content/60">Not connected</p>
+                                        </div>
+                                    </div>
+                                    <button class="btn btn-ghost btn-sm">Connect</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-between py-3">
+                            <div class="w-full">
+                                <div class="flex items-center justify-between gap-4">
+                                    <div class="flex items-center gap-3">
+                                        <div class="avatar">
+                                            <div class="w-10 h-10 rounded-lg bg-base-200 flex items-center justify-center">
+                                                <i data-lucide="mail-open" class="w-5 h-5 text-base-content/60"></i>
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <span class="text-sm text-base-content">Mailchimp</span>
+                                            <p class="text-xs text-base-content/60">Not connected</p>
+                                        </div>
+                                    </div>
+                                    <button class="btn btn-ghost btn-sm">Connect</button>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section>
+                        <div class="flex items-center py-3 border-b border-base-200">
+                            <h3 class="text-lg text-base-content">Development Tools</h3>
+                        </div>
+                        <div class="flex items-center justify-between border-b border-base-200 py-3">
+                            <div class="w-full">
+                                <div class="flex items-center justify-between gap-4">
+                                    <span class="text-sm text-base-content">Custom Integration</span>
+                                    <button class="btn btn-ghost btn-sm">Create</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-between py-3">
+                            <div class="w-full">
+                                <div class="flex items-center justify-between gap-4">
+                                    <span class="text-sm text-base-content">Integration Documentation</span>
+                                    <button class="flex items-center gap-2 text-sm text-base-content/70 hover:text-base-content">
+                                        <span>View docs</span>
+                                        <i data-lucide="chevron-right" class="w-4 h-4"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+            </div>
+
+            <!-- Help Tab -->
+            <input type="radio" name="settings_tab_group" id="tab_help" class="hidden"/>
+            <div id="help-tab-content" class="hidden tab-content">
+                <div class="space-y-6">
+                    <section>
+                        <div class="flex items-center py-3 border-b border-base-200">
+                            <h3 class="text-lg text-base-content">Getting Started</h3>
+                        </div>
+                        <div class="flex items-center justify-between border-b border-base-200 py-3">
+                            <div class="w-full">
+                                <div class="flex items-center justify-between gap-4">
+                                    <div class="flex items-center gap-3">
+                                        <i data-lucide="book-open" class="w-5 h-5 text-base-content/60"></i>
+                                        <div>
+                                            <span class="text-sm text-base-content">Quick Start Guide</span>
+                                            <p class="text-xs text-base-content/60">Learn the basics in 5 minutes</p>
+                                        </div>
+                                    </div>
+                                    <button class="btn btn-ghost btn-sm">View</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-between border-b border-base-200 py-3">
+                            <div class="w-full">
+                                <div class="flex items-center justify-between gap-4">
+                                    <div class="flex items-center gap-3">
+                                        <i data-lucide="play-circle" class="w-5 h-5 text-base-content/60"></i>
+                                        <div>
+                                            <span class="text-sm text-base-content">Video Tutorials</span>
+                                            <p class="text-xs text-base-content/60">Watch step-by-step guides</p>
+                                        </div>
+                                    </div>
+                                    <button class="btn btn-ghost btn-sm">Watch</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-between py-3">
+                            <div class="w-full">
+                                <div class="flex items-center justify-between gap-4">
+                                    <div class="flex items-center gap-3">
+                                        <i data-lucide="layout" class="w-5 h-5 text-base-content/60"></i>
+                                        <div>
+                                            <span class="text-sm text-base-content">Product Tours</span>
+                                            <p class="text-xs text-base-content/60">Interactive walkthroughs</p>
+                                        </div>
+                                    </div>
+                                    <button class="btn btn-ghost btn-sm">Start Tour</button>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section>
+                        <div class="flex items-center py-3 border-b border-base-200">
+                            <h3 class="text-lg text-base-content">Documentation</h3>
+                        </div>
+                        <div class="flex items-center justify-between border-b border-base-200 py-3">
+                            <div class="w-full">
+                                <div class="flex items-center justify-between gap-4">
+                                    <div class="flex items-center gap-3">
+                                        <i data-lucide="file-code" class="w-5 h-5 text-base-content/60"></i>
+                                        <div>
+                                            <span class="text-sm text-base-content">API Documentation</span>
+                                            <p class="text-xs text-base-content/60">Developer resources and endpoints</p>
+                                        </div>
+                                    </div>
+                                    <button class="btn btn-ghost btn-sm">View Docs</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-between border-b border-base-200 py-3">
+                            <div class="w-full">
+                                <div class="flex items-center justify-between gap-4">
+                                    <div class="flex items-center gap-3">
+                                        <i data-lucide="database" class="w-5 h-5 text-base-content/60"></i>
+                                        <div>
+                                            <span class="text-sm text-base-content">Integration Guides</span>
+                                            <p class="text-xs text-base-content/60">Connect with other tools</p>
+                                        </div>
+                                    </div>
+                                    <button class="btn btn-ghost btn-sm">View Guides</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-between border-b border-base-200 py-3">
+                            <div class="w-full">
+                                <div class="flex items-center justify-between gap-4">
+                                    <div class="flex items-center gap-3">
+                                        <i data-lucide="scroll-text" class="w-5 h-5 text-base-content/60"></i>
+                                        <div>
+                                            <span class="text-sm text-base-content">User Guides</span>
+                                            <p class="text-xs text-base-content/60">Detailed feature explanations</p>
+                                        </div>
+                                    </div>
+                                    <button class="btn btn-ghost btn-sm">Read Guides</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-between py-3">
+                            <div class="w-full">
+                                <div class="flex items-center justify-between gap-4">
+                                    <div class="flex items-center gap-3">
+                                        <i data-lucide="key" class="w-5 h-5 text-base-content/60"></i>
+                                        <div>
+                                            <span class="text-sm text-base-content">Best Practices</span>
+                                            <p class="text-xs text-base-content/60">Tips and recommendations</p>
+                                        </div>
+                                    </div>
+                                    <button class="btn btn-ghost btn-sm">Learn More</button>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section>
+                        <div class="flex items-center py-3 border-b border-base-200">
+                            <h3 class="text-lg text-base-content">Support</h3>
+                        </div>
+                        <div class="flex items-center justify-between border-b border-base-200 py-3">
+                            <div class="w-full">
+                                <div class="flex items-center justify-between gap-4">
+                                    <div class="flex items-center gap-3">
+                                        <i data-lucide="message-circle" class="w-5 h-5 text-base-content/60"></i>
+                                        <div>
+                                            <span class="text-sm text-base-content">Live Chat</span>
+                                            <p class="text-xs text-base-content/60">Talk to our support team</p>
+                                        </div>
+                                    </div>
+                                    <button class="btn btn-ghost btn-sm">Start Chat</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-between border-b border-base-200 py-3">
+                            <div class="w-full">
+                                <div class="flex items-center justify-between gap-4">
+                                    <div class="flex items-center gap-3">
+                                        <i data-lucide="mail" class="w-5 h-5 text-base-content/60"></i>
+                                        <div>
+                                            <span class="text-sm text-base-content">Email Support</span>
+                                            <p class="text-xs text-base-content/60">support@accelerator.io</p>
+                                        </div>
+                                    </div>
+                                    <button class="btn btn-ghost btn-sm">Send Email</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-between border-b border-base-200 py-3">
+                            <div class="w-full">
+                                <div class="flex items-center justify-between gap-4">
+                                    <div class="flex items-center gap-3">
+                                        <i data-lucide="help-circle" class="w-5 h-5 text-base-content/60"></i>
+                                        <div>
+                                            <span class="text-sm text-base-content">FAQ</span>
+                                            <p class="text-xs text-base-content/60">Frequently asked questions</p>
+                                        </div>
+                                    </div>
+                                    <button class="btn btn-ghost btn-sm">View FAQ</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-between py-3">
+                            <div class="w-full">
+                                <div class="flex items-center justify-between gap-4">
+                                    <div class="flex items-center gap-3">
+                                        <i data-lucide="users" class="w-5 h-5 text-base-content/60"></i>
+                                        <div>
+                                            <span class="text-sm text-base-content">Community Forum</span>
+                                            <p class="text-xs text-base-content/60">Connect with other users</p>
+                                        </div>
+                                    </div>
+                                    <button class="btn btn-ghost btn-sm">Join Forum</button>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section>
+                        <div class="flex items-center py-3 border-b border-base-200">
+                            <h3 class="text-lg text-base-content">Feedback</h3>
+                        </div>
+                        <div class="flex items-center justify-between border-b border-base-200 py-3">
+                            <div class="w-full">
+                                <div class="flex items-center justify-between gap-4">
+                                    <span class="text-sm text-base-content">Report a Bug</span>
+                                    <button class="btn btn-ghost btn-sm">Report</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-between border-b border-base-200 py-3">
+                            <div class="w-full">
+                                <div class="flex items-center justify-between gap-4">
+                                    <span class="text-sm text-base-content">Feature Request</span>
+                                    <button class="btn btn-ghost btn-sm">Request</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-between py-3">
+                            <div class="w-full">
+                                <div class="flex items-center justify-between gap-4">
+                                    <span class="text-sm text-base-content">Rate Our Service</span>
+                                    <button class="btn btn-ghost btn-sm">Rate</button>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section>
+                        <div class="flex items-center py-3 border-b border-base-200">
+                            <h3 class="text-lg text-base-content">About</h3>
+                        </div>
+                        <div class="flex items-center justify-between border-b border-base-200 py-3">
+                            <div class="w-full">
+                                <div class="flex items-center justify-between gap-4">
+                                    <span class="text-sm text-base-content">Version</span>
+                                    <button class="flex items-center gap-2 text-sm text-base-content/70 hover:text-base-content">
+                                        <span>2.4.1</span>
+                                        <i data-lucide="chevron-right" class="w-4 h-4"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-between border-b border-base-200 py-3">
+                            <div class="w-full">
+                                <div class="flex items-center justify-between gap-4">
+                                    <span class="text-sm text-base-content">Privacy Policy</span>
+                                    <button class="flex items-center gap-2 text-sm text-base-content/70 hover:text-base-content">
+                                        <span>View policy</span>
+                                        <i data-lucide="chevron-right" class="w-4 h-4"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-between py-3">
+                            <div class="w-full">
+                                <div class="flex items-center justify-between gap-4">
+                                    <span class="text-sm text-base-content">Terms of Service</span>
+                                    <button class="flex items-center gap-2 text-sm text-base-content/70 hover:text-base-content">
+                                        <span>View terms</span>
+                                        <i data-lucide="chevron-right" class="w-4 h-4"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+            </div>
+
+            <!-- Data Control Tab -->
+            <input type="radio" name="settings_tab_group" id="tab_data" class="hidden"/>
+            <div id="data-tab-content" class="hidden tab-content">
+                <div class="space-y-6">
+                    <section>
+                        <div class="flex items-center py-3 border-b border-base-200">
+                            <h3 class="text-lg text-base-content">Data Management</h3>
+                        </div>
+                        <div class="flex items-center justify-between border-b border-base-200 py-3">
+                            <div class="w-full">
+                                <div class="flex items-center justify-between gap-4">
+                                    <span class="text-sm text-base-content">Data Retention</span>
+                                    <button class="flex items-center gap-2 text-sm text-base-content/70 hover:text-base-content">
+                                        <span>Configure retention policy</span>
+                                        <i data-lucide="chevron-right" class="w-4 h-4"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-between border-b border-base-200 py-3">
+                            <div class="w-full">
+                                <div class="flex items-center justify-between gap-4">
+                                    <span class="text-sm text-base-content">Data Export</span>
+                                    <button class="flex items-center gap-2 text-sm text-base-content/70 hover:text-base-content">
+                                        <span>Export your data</span>
+                                        <i data-lucide="chevron-right" class="w-4 h-4"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-between py-3">
+                            <div class="w-full">
+                                <div class="flex items-center justify-between gap-4">
+                                    <span class="text-sm text-base-content">Data Deletion</span>
+                                    <button class="btn btn-ghost btn-sm text-error hover:bg-error/5">Delete All Data</button>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section>
+                        <div class="flex items-center py-3 border-b border-base-200">
+                            <h3 class="text-lg text-base-content">Privacy Settings</h3>
+                        </div>
+                        <div class="flex items-center justify-between border-b border-base-200 py-3">
+                            <div class="w-full">
+                                <div class="flex items-center justify-between gap-4">
+                                    <span class="text-sm text-base-content">Analytics Sharing</span>
+                                    <label class="swap swap-rotate">
+                                        <input type="checkbox" checked/>
+                                        <svg class="swap-on fill-current w-6 h-6" xmlns="http://www.w3.org/2000/svg" viewbox="0 0 24 24">
+                                            <path d="M21,7L9,19L3.5,13.5L4.91,12.09L9,16.17L19.59,5.59L21,7Z"/>
+                                        </svg>
+                                        <svg class="swap-off fill-current w-6 h-6" xmlns="http://www.w3.org/2000/svg" viewbox="0 0 24 24">
+                                            <path d="M19,6.41L17.59,5L12,10.59L6.41,5L5,6.41L10.59,12L5,17.59L6.41,19L12,13.41L17.59,19L19,17.59L13.41,12L19,6.41Z"/>
+                                        </svg>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-between border-b border-base-200 py-3">
+                            <div class="w-full">
+                                <div class="flex items-center justify-between gap-4">
+                                    <span class="text-sm text-base-content">Telemetry</span>
+                                    <label class="swap swap-rotate">
+                                        <input type="checkbox"/>
+                                        <svg class="swap-on fill-current w-6 h-6" xmlns="http://www.w3.org/2000/svg" viewbox="0 0 24 24">
+                                            <path d="M21,7L9,19L3.5,13.5L4.91,12.09L9,16.17L19.59,5.59L21,7Z"/>
+                                        </svg>
+                                        <svg class="swap-off fill-current w-6 h-6" xmlns="http://www.w3.org/2000/svg" viewbox="0 0 24 24">
+                                            <path d="M19,6.41L17.59,5L12,10.59L6.41,5L5,6.41L10.59,12L5,17.59L6.41,19L12,13.41L17.59,19L19,17.59L13.41,12L19,6.41Z"/>
+                                        </svg>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-between py-3">
+                            <div class="w-full">
+                                <div class="flex items-center justify-between gap-4">
+                                    <span class="text-sm text-base-content">Third-party Access</span>
+                                    <button class="flex items-center gap-2 text-sm text-base-content/70 hover:text-base-content">
+                                        <span>Manage access</span>
+                                        <i data-lucide="chevron-right" class="w-4 h-4"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section>
+                        <div class="flex items-center py-3 border-b border-base-200">
+                            <h3 class="text-lg text-base-content">Compliance</h3>
+                        </div>
+                        <div class="flex items-center justify-between border-b border-base-200 py-3">
+                            <div class="w-full">
+                                <div class="flex items-center justify-between gap-4">
+                                    <span class="text-sm text-base-content">GDPR Compliance</span>
+                                    <span class="text-sm text-green-600">Compliant</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-between border-b border-base-200 py-3">
+                            <div class="w-full">
+                                <div class="flex items-center justify-between gap-4">
+                                    <span class="text-sm text-base-content">SOC 2 Report</span>
+                                    <button class="flex items-center gap-2 text-sm text-base-content/70 hover:text-base-content">
+                                        <span>View report</span>
+                                        <i data-lucide="chevron-right" class="w-4 h-4"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-between py-3">
+                            <div class="w-full">
+                                <div class="flex items-center justify-between gap-4">
+                                    <span class="text-sm text-base-content">Data Residency</span>
+                                    <button class="flex items-center gap-2 text-sm text-base-content/70 hover:text-base-content">
+                                        <span>US-East</span>
+                                        <i data-lucide="chevron-right" class="w-4 h-4"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+            </div>
+
+            <!-- Security Tab -->
+            <input type="radio" name="settings_tab_group" id="tab_security" class="hidden"/>
+            <div id="security-tab-content" class="hidden tab-content">
+                <div class="space-y-6">
+                    <section>
+                        <div class="flex items-center py-3 border-b border-base-200">
+                            <h3 class="text-lg text-base-content">Authentication</h3>
+                        </div>
+                        <div class="flex items-center justify-between border-b border-base-200 py-3">
+                            <div class="w-full">
+                                <div class="flex items-center justify-between gap-4">
+                                    <span class="text-sm text-base-content">Two-Factor Authentication</span>
+                                    <button class="btn btn-ghost btn-sm">Enable</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-between border-b border-base-200 py-3">
+                            <div class="w-full">
+                                <div class="flex items-center justify-between gap-4">
+                                    <span class="text-sm text-base-content">Password</span>
+                                    <button class="btn btn-ghost btn-sm">Change Password</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-between border-b border-base-200 py-3">
+                            <div class="w-full">
+                                <div class="flex items-center justify-between gap-4">
+                                    <span class="text-sm text-base-content">Login Sessions</span>
+                                    <button class="flex items-center gap-2 text-sm text-base-content/70 hover:text-base-content">
+                                        <span>View active sessions</span>
+                                        <i data-lucide="chevron-right" class="w-4 h-4"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-between py-3">
+                            <div class="w-full">
+                                <div class="flex items-center justify-between gap-4">
+                                    <span class="text-sm text-base-content">SSO Configuration</span>
+                                    <button class="flex items-center gap-2 text-sm text-base-content/70 hover:text-base-content">
+                                        <span>Configure SSO</span>
+                                        <i data-lucide="chevron-right" class="w-4 h-4"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section>
+                        <div class="flex items-center py-3 border-b border-base-200">
+                            <h3 class="text-lg text-base-content">Access Logs</h3>
+                        </div>
+                        <div class="flex items-center justify-between border-b border-base-200 py-3">
+                            <div class="w-full">
+                                <div class="flex items-center justify-between gap-4">
+                                    <span class="text-sm text-base-content">Recent Activity</span>
+                                    <button class="flex items-center gap-2 text-sm text-base-content/70 hover:text-base-content">
+                                        <span>View all activity</span>
+                                        <i data-lucide="chevron-right" class="w-4 h-4"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-between border-b border-base-200 py-3">
+                            <div class="w-full">
+                                <div class="flex items-center justify-between gap-4">
+                                    <span class="text-sm text-base-content">Failed Login Attempts</span>
+                                    <span class="text-sm text-base-content/70">0 in last 30 days</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-between py-3">
+                            <div class="w-full">
+                                <div class="flex items-center justify-between gap-4">
+                                    <span class="text-sm text-base-content">Export Logs</span>
+                                    <button class="btn btn-ghost btn-sm">Download CSV</button>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section>
+                        <div class="flex items-center py-3 border-b border-base-200">
+                            <h3 class="text-lg text-base-content">Security Settings</h3>
+                        </div>
+                        <div class="flex items-center justify-between border-b border-base-200 py-3">
+                            <div class="w-full">
+                                <div class="flex items-center justify-between gap-4">
+                                    <span class="text-sm text-base-content">Session Timeout</span>
+                                    <button class="flex items-center gap-2 text-sm text-base-content/70 hover:text-base-content">
+                                        <span>30 minutes</span>
+                                        <i data-lucide="chevron-right" class="w-4 h-4"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-between border-b border-base-200 py-3">
+                            <div class="w-full">
+                                <div class="flex items-center justify-between gap-4">
+                                    <span class="text-sm text-base-content">IP Whitelist</span>
+                                    <button class="flex items-center gap-2 text-sm text-base-content/70 hover:text-base-content">
+                                        <span>Manage whitelist</span>
+                                        <i data-lucide="chevron-right" class="w-4 h-4"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-between py-3">
+                            <div class="w-full">
+                                <div class="flex items-center justify-between gap-4">
+                                    <span class="text-sm text-base-content">Security Alerts</span>
+                                    <label class="swap swap-rotate">
+                                        <input type="checkbox" checked/>
+                                        <svg class="swap-on fill-current w-6 h-6" xmlns="http://www.w3.org/2000/svg" viewbox="0 0 24 24">
+                                            <path d="M21,7L9,19L3.5,13.5L4.91,12.09L9,16.17L19.59,5.59L21,7Z"/>
+                                        </svg>
+                                        <svg class="swap-off fill-current w-6 h-6" xmlns="http://www.w3.org/2000/svg" viewbox="0 0 24 24">
+                                            <path d="M19,6.41L17.59,5L12,10.59L6.41,5L5,6.41L10.59,12L5,17.59L6.41,19L12,13.41L17.59,19L19,17.59L13.41,12L19,6.41Z"/>
+                                        </svg>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+            </div>
+
+            <!-- Roles & Governance Tab -->
+            <input type="radio" name="settings_tab_group" id="tab_roles" class="hidden"/>
+            <div id="roles-tab-content" class="hidden tab-content">
+                <div class="space-y-6">
+                    <section>
+                        <div class="flex items-center py-3 border-b border-base-200">
+                            <h3 class="text-lg text-base-content">Roles</h3>
+                        </div>
+                        <div class="flex items-center justify-between border-b border-base-200 py-3">
+                            <div class="w-full">
+                                <div class="flex items-center justify-between gap-4">
+                                    <div class="flex items-center gap-3">
+                                        <div class="avatar">
+                                            <div class="w-10 h-10 rounded-lg bg-base-200 flex items-center justify-center">
+                                                <i data-lucide="crown" class="w-5 h-5 text-base-content/60"></i>
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <span class="text-sm text-base-content">Admin</span>
+                                            <p class="text-xs text-base-content/60">Full access</p>
+                                        </div>
+                                    </div>
+                                    <button class="btn btn-ghost btn-sm">Manage</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-between border-b border-base-200 py-3">
+                            <div class="w-full">
+                                <div class="flex items-center justify-between gap-4">
+                                    <div class="flex items-center gap-3">
+                                        <div class="avatar">
+                                            <div class="w-10 h-10 rounded-lg bg-base-200 flex items-center justify-center">
+                                                <i data-lucide="user" class="w-5 h-5 text-base-content/60"></i>
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <span class="text-sm text-base-content">Editor</span>
+                                            <p class="text-xs text-base-content/60">Can edit content</p>
+                                        </div>
+                                    </div>
+                                    <button class="btn btn-ghost btn-sm">Manage</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-between border-b border-base-200 py-3">
+                            <div class="w-full">
+                                <div class="flex items-center justify-between gap-4">
+                                    <div class="flex items-center gap-3">
+                                        <div class="avatar">
+                                            <div class="w-10 h-10 rounded-lg bg-base-200 flex items-center justify-center">
+                                                <i data-lucide="eye" class="w-5 h-5 text-base-content/60"></i>
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <span class="text-sm text-base-content">Viewer</span>
+                                            <p class="text-xs text-base-content/60">Read-only access</p>
+                                        </div>
+                                    </div>
+                                    <button class="btn btn-ghost btn-sm">Manage</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-between py-3">
+                            <div class="w-full">
+                                <div class="flex items-center justify-between gap-4">
+                                    <span class="text-sm text-base-content">Create Custom Role</span>
+                                    <button class="btn btn-ghost btn-sm">Add Role</button>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section>
+                        <div class="flex items-center py-3 border-b border-base-200">
+                            <h3 class="text-lg text-base-content">Permissions</h3>
+                        </div>
+                        <div class="flex items-center justify-between border-b border-base-200 py-3">
+                            <div class="w-full">
+                                <div class="flex items-center justify-between gap-4">
+                                    <span class="text-sm text-base-content">Resource Access</span>
+                                    <button class="flex items-center gap-2 text-sm text-base-content/70 hover:text-base-content">
+                                        <span>Configure access</span>
+                                        <i data-lucide="chevron-right" class="w-4 h-4"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-between border-b border-base-200 py-3">
+                            <div class="w-full">
+                                <div class="flex items-center justify-between gap-4">
+                                    <span class="text-sm text-base-content">API Permissions</span>
+                                    <button class="flex items-center gap-2 text-sm text-base-content/70 hover:text-base-content">
+                                        <span>Manage API scopes</span>
+                                        <i data-lucide="chevron-right" class="w-4 h-4"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-between py-3">
+                            <div class="w-full">
+                                <div class="flex items-center justify-between gap-4">
+                                    <span class="text-sm text-base-content">Permission Templates</span>
+                                    <button class="flex items-center gap-2 text-sm text-base-content/70 hover:text-base-content">
+                                        <span>View templates</span>
+                                        <i data-lucide="chevron-right" class="w-4 h-4"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section>
+                        <div class="flex items-center py-3 border-b border-base-200">
+                            <h3 class="text-lg text-base-content">Audit Trail</h3>
+                        </div>
+                        <div class="flex items-center justify-between border-b border-base-200 py-3">
+                            <div class="w-full">
+                                <div class="flex items-center justify-between gap-4">
+                                    <span class="text-sm text-base-content">Activity History</span>
+                                    <button class="flex items-center gap-2 text-sm text-base-content/70 hover:text-base-content">
+                                        <span>View history</span>
+                                        <i data-lucide="chevron-right" class="w-4 h-4"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-between border-b border-base-200 py-3">
+                            <div class="w-full">
+                                <div class="flex items-center justify-between gap-4">
+                                    <span class="text-sm text-base-content">Change Requests</span>
+                                    <button class="flex items-center gap-2 text-sm text-base-content/70 hover:text-base-content">
+                                        <span>Pending approvals</span>
+                                        <i data-lucide="chevron-right" class="w-4 h-4"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-between py-3">
+                            <div class="w-full">
+                                <div class="flex items-center justify-between gap-4">
+                                    <span class="text-sm text-base-content">Compliance Reports</span>
+                                    <button class="flex items-center gap-2 text-sm text-base-content/70 hover:text-base-content">
+                                        <span>Generate reports</span>
+                                        <i data-lucide="chevron-right" class="w-4 h-4"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+                </div>
             </div>
         </main>
         </div>
@@ -945,7 +2397,11 @@ document.addEventListener('DOMContentLoaded', function () { // Define tab mappin
         'Workspace': 'tab_workspace',
         'Apps & Skills': 'tab_apps',
         'Connectors': 'tab_connectors',
-        'Integrations': 'tab_integrations'
+        'Integrations': 'tab_integrations',
+        'Data Control': 'tab_data',
+        'Security': 'tab_security',
+        'Roles & Governance': 'tab_roles',
+        'Help': 'tab_help'
     };
 
     // Get all sidebar items
@@ -961,50 +2417,29 @@ document.addEventListener('DOMContentLoaded', function () { // Define tab mappin
             }
         }
 
-        // If a matching radio button was found, check it
+        // If a matching radio button was found, check it and update navigation
         if (radioButtonId) {
             const radioButton = document.getElementById(radioButtonId);
             if (radioButton) {
                 radioButton.checked = true;
+                // Update both sidebar and top tabs
+                updateNavigationForTabs();
             }
-
-            // Update active state of sidebar items
-            sidebarItems.forEach(menuItem => {
-                menuItem.classList.remove('active');
-            });
-
-            // Find and activate the corresponding sidebar item
-            sidebarItems.forEach(menuItem => { // Extract text content without icon for comparison
-                const iconElement = menuItem.querySelector('[data-lucide]');
-                let menuItemText = menuItem.textContent;
-
-                if (iconElement) {
-                    menuItemText = menuItemText.replace(iconElement.textContent, '').trim();
-                } else {
-                    menuItemText = menuItemText.trim();
-                } menuItemText = menuItemText.replace(/\s+/g, ' ');
-
-                if (menuItemText === tabName) {
-                    menuItem.classList.add('active');
-                }
-            });
         }
     }
 
     // Add click event to each sidebar item
     sidebarItems.forEach(item => {
-        item.addEventListener('click', function (e) { // Extract just the text content without the icon
-            const iconElement = this.querySelector('[data-lucide]');
-            let tabName = this.textContent;
-
-            if (iconElement) { // Remove the icon's text content from the overall text
-                tabName = tabName.replace(iconElement.textContent, '').trim();
-            } else {
-                tabName = tabName.trim();
+        item.addEventListener('click', function (e) {
+            // Extract just the text content without the icon
+            let tabName = '';
+            for (const child of this.childNodes) {
+                if (child.nodeType === Node.TEXT_NODE && child.textContent.trim()) {
+                    tabName = child.textContent.trim();
+                    break;
+                }
             }
 
-            // Clean up any extra whitespace
-            tabName = tabName.replace(/\s+/g, ' ');
             switchTab(tabName);
         });
     });
@@ -1012,15 +2447,16 @@ document.addEventListener('DOMContentLoaded', function () { // Define tab mappin
     // Initialize with the active tab (the one that's initially marked as active)
     // Find the active sidebar item (the one with 'active' class) and trigger its tab
     const activeItem = document.querySelector('.menu li a.active');
-    if (activeItem) { // Extract just the text content without the icon for the active item too
-        const iconElement = activeItem.querySelector('[data-lucide]');
-        let activeTabName = activeItem.textContent;
+    if (activeItem) {
+        // Extract just the text content without the icon for the active item too
+        let activeTabName = '';
+        for (const child of activeItem.childNodes) {
+            if (child.nodeType === Node.TEXT_NODE && child.textContent.trim()) {
+                activeTabName = child.textContent.trim();
+                break;
+            }
+        }
 
-        if (iconElement) {
-            activeTabName = activeTabName.replace(iconElement.textContent, '').trim();
-        } else {
-            activeTabName = activeTabName.trim();
-        } activeTabName = activeTabName.replace(/\s+/g, ' ');
         switchTab(activeTabName);
     }
 
@@ -1058,8 +2494,24 @@ document.addEventListener('DOMContentLoaded', function () { // Define tab mappin
         });
     });
 
-    // Update sidebar when tabs change (since DaisyUI tabs change radio button states)
-    function updateSidebarForTabs() {
+    // Update both sidebar and top tabs when tabs change (since DaisyUI tabs change radio button states)
+    function updateNavigationForTabs() {
+        const tabMap = {
+            'tab_general': 'General',
+            'tab_profile': 'Profile',
+            'tab_notifications': 'Notifications',
+            'tab_billing': 'Plans & Billing',
+            'tab_credits': 'Buy Credits',
+            'tab_workspace': 'Workspace',
+            'tab_apps': 'Apps & Skills',
+            'tab_connectors': 'Connectors',
+            'tab_integrations': 'Integrations',
+            'tab_data': 'Data Control',
+            'tab_security': 'Security',
+            'tab_roles': 'Roles & Governance',
+            'tab_help': 'Help'
+        };
+
         const tabIds = [
             'tab_general',
             'tab_profile',
@@ -1069,38 +2521,68 @@ document.addEventListener('DOMContentLoaded', function () { // Define tab mappin
             'tab_workspace',
             'tab_apps',
             'tab_connectors',
-            'tab_integrations'
+            'tab_integrations',
+            'tab_data',
+            'tab_security',
+            'tab_roles',
+            'tab_help'
         ];
+
+        // Get all top tabs
+        const topTabs = document.querySelectorAll('.tabs-bordered .tab');
 
         tabIds.forEach(tabId => {
             const radioButton = document.getElementById(tabId);
-            if (radioButton && radioButton.checked) { // Determine which tab is active based on radio button ID
-                const tabName = tabId.replace('tab_', '');
+            if (radioButton && radioButton.checked) {
+                const tabName = tabMap[tabId];
                 const sidebarItems = document.querySelectorAll('.menu li a');
 
+                // Update sidebar
                 sidebarItems.forEach(item => {
                     item.classList.remove('active');
 
                     // Check if this sidebar item corresponds to the active tab
-                    const iconElement = item.querySelector('[data-lucide]');
-                    let itemText = item.textContent;
+                    // Get text content after the icon (last child is the text node)
+                    let itemText = '';
+                    for (const child of item.childNodes) {
+                        if (child.nodeType === Node.TEXT_NODE && child.textContent.trim()) {
+                            itemText = child.textContent.trim();
+                            break;
+                        }
+                    }
 
-                    if (iconElement) {
-                        itemText = itemText.replace(iconElement.textContent, '').trim();
-                    } else {
-                        itemText = itemText.trim();
-                    } itemText = itemText.replace(/\s+/g, ' ');
-
-                    // Match based on the tab name
-                    if (itemText.toLowerCase().includes(tabName)) {
+                    // Match based on the exact tab name from tabMap
+                    if (itemText === tabName) {
                         item.classList.add('active');
+                    }
+                });
+
+                // Update top tabs
+                topTabs.forEach(topTab => {
+                    topTab.classList.remove('active');
+                    if (topTab.getAttribute('for') === tabId) {
+                        topTab.classList.add('active');
                     }
                 });
             }
         });
     }
 
-    // Add event listeners to radio buttons to update sidebar
+    // Add click event to top tabs to sync with sidebar
+    const topTabs = document.querySelectorAll('.tabs-bordered .tab');
+    topTabs.forEach(tab => {
+        tab.addEventListener('click', function() {
+            const radioButtonId = this.getAttribute('for');
+            updateNavigationForTabs();
+        });
+    });
+
+    // Update sidebar and top tabs when tabs change
+    function updateSidebarForTabs() {
+        updateNavigationForTabs();
+    }
+
+    // Add event listeners to radio buttons to update sidebar and top tabs
     const tabRadioButtons = document.querySelectorAll('input[name="settings_tab_group"]');
     tabRadioButtons.forEach(radio => {
         radio.addEventListener('change', updateSidebarForTabs);

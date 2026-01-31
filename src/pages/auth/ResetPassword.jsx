@@ -49,7 +49,7 @@ const ResetPassword = () => {
       setToken(urlToken);
       // Validate token on mount
       try {
-        const { validatePasswordResetToken } = await import('../lib/database');
+        const { validatePasswordResetToken } = await import('../../lib/database');
         const validation = await validatePasswordResetToken(urlToken);
         setTokenValid(validation.valid);
         if (!validation.valid) {

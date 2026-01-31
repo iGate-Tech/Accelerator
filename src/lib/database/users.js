@@ -1,5 +1,5 @@
 import { v4 as uuidv4 } from 'uuid';
-import { dbInstance } from './core.js';
+import { getDbInstance } from './core.js';
 import { updateEntity } from './operations.js';
 
 // User management functions
@@ -46,7 +46,8 @@ export async function _createUser({
       null,
       1,
     ];
-    const res = await dbInstance.query(query, params);
+    const db = await getDbInstance();
+    const res = await db.query(query, params);
     return { id, email };
   } catch (err) {
     console.debug('Error creating user:', err.message);
@@ -55,12 +56,12 @@ export async function _createUser({
 }
 
 export async function _getUserById({ id }) {
-  if (!dbInstance) return null;
   if (!id) {
     return null;
   }
   try {
-    const res = await dbInstance.query('SELECT * FROM users WHERE id = $1', [
+    const db = await getDbInstance();
+    const res = await db.query('SELECT * FROM users WHERE id = $1', [
       id,
     ]);
     return res.rows[0];

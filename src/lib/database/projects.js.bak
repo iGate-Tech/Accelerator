@@ -90,9 +90,12 @@ export async function _getProjectById({ id }) {
 }
 
 export async function _updateProject({ id, updates }) {
-  try {
-    const db = await getDbInstance();
+  if (!dbInstance) {
+    console.warn('Database not initialized, skipping project update');
+    return { success: false, error: 'Database not initialized' };
+  }
 
+  try {
     // Import security functions dynamically to avoid circular dependencies
     const { validateAndSanitizeDbInput } = await import('../auth/security.js');
 
@@ -114,7 +117,7 @@ export async function _updateProject({ id, updates }) {
     let currentProject = null;
     if (updates.content || updates.context) {
       try {
-        const result = await db.query(
+        const result = await dbInstance.query(
           'SELECT context FROM projects WHERE id = $1',
           [id]
         );
@@ -199,7 +202,7 @@ export async function _updateProject({ id, updates }) {
     values.push(now);
     values.push(id);
 
-    await db.query(
+    await dbInstance.query(
       `UPDATE projects SET ${setClauses.join(', ')}, last_modified = $${paramIndex} WHERE id = $${paramIndex + 1}`,
       values
     );
@@ -213,22 +216,20 @@ export async function _updateProject({ id, updates }) {
 
 export async function _deleteProject({ id }) {
   try {
-    const db = await getDbInstance();
-
     // Start a transaction to ensure data consistency
-    await db.query('BEGIN');
+    await dbInstance.query('BEGIN');
 
     // Delete all tasks associated with the project
-    await db.query('DELETE FROM tasks WHERE project_id = $1', [id]);
+    await dbInstance.query('DELETE FROM tasks WHERE project_id = $1', [id]);
 
     // Delete step_data associated with the project
-    await db.query('DELETE FROM step_data WHERE project_id = $1', [id]);
+    await dbInstance.query('DELETE FROM step_data WHERE project_id = $1', [id]);
 
     // Delete the project itself
-    await db.query('DELETE FROM projects WHERE id = $1', [id]);
+    await dbInstance.query('DELETE FROM projects WHERE id = $1', [id]);
 
     // Commit the transaction
-    await db.query('COMMIT');
+    await dbInstance.query('COMMIT');
 
     // Log the deletion for audit purposes
     console.log(`Project ${id} and all associated data deleted successfully`);
@@ -236,7 +237,7 @@ export async function _deleteProject({ id }) {
     return { success: true };
   } catch (err) {
     // Rollback on error
-    await db.query('ROLLBACK');
+    await dbInstance.query('ROLLBACK');
     console.error('Error deleting project:', err);
     throw err;
   }
@@ -244,28 +245,26 @@ export async function _deleteProject({ id }) {
 
 export async function _deleteAllProjects({ userId }) {
   try {
-    const db = await getDbInstance();
-
     // First, delete all tasks associated with the user's projects
-    await db.query(
+    await dbInstance.query(
       `
-      DELETE FROM tasks
+      DELETE FROM tasks 
       WHERE project_id IN (SELECT id FROM projects WHERE user_id = $1)
     `,
       [userId]
     );
 
     // Delete step_data associated with the projects
-    await db.query(
+    await dbInstance.query(
       `
-      DELETE FROM step_data
+      DELETE FROM step_data 
       WHERE project_id IN (SELECT id FROM projects WHERE user_id = $1)
     `,
       [userId]
     );
 
     // Then delete all projects
-    await db.query('DELETE FROM projects WHERE user_id = $1', [userId]);
+    await dbInstance.query('DELETE FROM projects WHERE user_id = $1', [userId]);
 
     return { success: true };
   } catch (err) {
@@ -276,8 +275,7 @@ export async function _deleteAllProjects({ userId }) {
 
 export async function _toggleProjectPublic({ id }) {
   try {
-    const db = await getDbInstance();
-    const result = await db.query(
+    const result = await dbInstance.query(
       'UPDATE projects SET public = NOT public, last_modified = CURRENT_TIMESTAMP WHERE id = $1 RETURNING *',
       [id]
     );
@@ -290,8 +288,7 @@ export async function _toggleProjectPublic({ id }) {
 
 export async function _archiveProject({ id }) {
   try {
-    const db = await getDbInstance();
-    const result = await db.query(
+    const result = await dbInstance.query(
       'UPDATE projects SET archived = 1, archived_at = CURRENT_TIMESTAMP, last_modified = CURRENT_TIMESTAMP WHERE id = $1 RETURNING *',
       [id]
     );
@@ -304,8 +301,7 @@ export async function _archiveProject({ id }) {
 
 export async function _unarchiveProject({ id }) {
   try {
-    const db = await getDbInstance();
-    const result = await db.query(
+    const result = await dbInstance.query(
       'UPDATE projects SET archived = 0, archived_at = NULL, last_modified = CURRENT_TIMESTAMP WHERE id = $1 RETURNING *',
       [id]
     );
@@ -331,9 +327,21 @@ export async function _getArchivedProjects(db, { userId }) {
 }
 
 export async function _getTasks({ projectId }) {
+  // Ensure database is initialized
+  if (!dbInstance) {
+    try {
+      const { ensureDatabaseReady } = await import('./core.js');
+      await ensureDatabaseReady();
+    } catch (e) {
+      console.warn('Database not initialized, skipping tasks fetch');
+      return [];
+    }
+  }
+
+  if (!dbInstance) return [];
+
   try {
-    const db = await getDbInstance();
-    const result = await db.query(
+    const result = await dbInstance.query(
       'SELECT * FROM tasks WHERE project_id = $1 AND deleted_at IS NULL ORDER BY created_at ASC',
       [projectId]
     );
@@ -346,9 +354,8 @@ export async function _getTasks({ projectId }) {
 
 export async function _addTask({ task }) {
   try {
-    const db = await getDbInstance();
     const id = uuidv4();
-    await db.query(
+    await dbInstance.query(
       `
       INSERT INTO tasks (id, user_id, project_id, title, content, prompt, llm_response, model, section, step_name, created_at, last_modified, synced_at, sync_status, deleted_at, version)
       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)
@@ -548,14 +555,15 @@ export async function checkProjectCompletion(projectId) {
 
     // Update project status in database
     try {
-      const db = await getDbInstance();
-      const now = new Date().toISOString();
-      await db.query(
-        `UPDATE projects SET
+      if (dbInstance) {
+        const now = new Date().toISOString();
+        await dbInstance.query(
+          `UPDATE projects SET
             last_modified = $1
           WHERE id = $2`,
-        [now, projectId]
-      );
+          [now, projectId]
+        );
+      }
     } catch (updateError) {
       console.warn('Could not update project status:', updateError.message);
     }
